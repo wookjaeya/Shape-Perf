@@ -1,0 +1,49 @@
+# D2 feasibility facts (M1, 2026-10-08T06:26:59Z); nothing changed: the only write is the identical current value
+## /proc/sys/fs/mqueue/msg_max
+mode=644 (-rw-r--r--) owner=root:root
+fs.mqueue.msg_max=10
+fs.mqueue.msgsize_max=8192
+fs.mqueue.queues_max=256
+fs.mqueue.msg_default=10
+fs.mqueue.msgsize_default=8192
+## write-back test as root (euid 0), identical value only
+before=10
+write of '10' returned success
+after=10
+## root capabilities of this session (capsh --print, first lines)
+Current: =ep cap_sys_resource-ep
+Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,c
+Current IAB: !cap_sys_resource
+CapEff:	000001fffeffffff
+CapBnd:	000001fffeffffff
+## namespaces
+self: ipc:[4026531839] user:[4026531837] pid:[4026531836] mnt:[4026531832]
+pid 1: comm=process_api uid=0; readlink /proc/1/ns/ipc -> 
+run user's processes during a run share the launching session's namespaces (setpriv does not unshare).
+## RLIMIT_MSGQUEUE
+root session: 819200 (ulimit -q, bytes)
+ubuntu via setpriv (as run_cfs.sh): 819200 soft, 819200 hard
+core-cpu1 (m1_A1 .meta): Max msgqueue size         819200               819200               bytes     
+pid 1 ns check (ls -l): ls: cannot read symbolic link '/proc/1/ns/ipc': Permission denied
+pid 1 ns links (ls -l /proc/1/ns/, as root):
+  ls: cannot read symbolic link '/proc/1/ns/net': Permission denied
+  ls: cannot read symbolic link '/proc/1/ns/uts': Permission denied
+  ls: cannot read symbolic link '/proc/1/ns/ipc': Permission denied
+  ls: cannot read symbolic link '/proc/1/ns/pid': Permission denied
+  ls: cannot read symbolic link '/proc/1/ns/pid_for_children': Permission denied
+  ls: cannot read symbolic link '/proc/1/ns/user': Permission denied
+  ls: cannot read symbolic link '/proc/1/ns/mnt': Permission denied
+  ls: cannot read symbolic link '/proc/1/ns/cgroup': Permission denied
+  ls: cannot read symbolic link '/proc/1/ns/time': Permission denied
+  ls: cannot read symbolic link '/proc/1/ns/time_for_children': Permission denied
+  total 0
+  lrwxrwxrwx 1 root root 0 Oct  8 06:15 cgroup
+  lrwxrwxrwx 1 root root 0 Oct  8 06:04 ipc
+  lrwxrwxrwx 1 root root 0 Oct  8 06:15 mnt
+  lrwxrwxrwx 1 root root 0 Oct  8 06:15 net
+  lrwxrwxrwx 1 root root 0 Oct  8 06:15 pid
+  lrwxrwxrwx 1 root root 0 Oct  8 06:15 pid_for_children
+  lrwxrwxrwx 1 root root 0 Oct  8 06:15 time
+  lrwxrwxrwx 1 root root 0 Oct  8 06:15 time_for_children
+  lrwxrwxrwx 1 root root 0 Oct  8 06:15 user
+  lrwxrwxrwx 1 root root 0 Oct  8 06:15 uts

@@ -1,0 +1,32 @@
+# Resolve OSAL commit from nasa/cFS main bundle, 2026-10-08T01:38:34Z
+$ git ls-remote https://github.com/nasa/cFS.git HEAD refs/heads/main refs/heads/dev refs/tags/v7.0.1 refs/tags/v7.0.1^{}
+01e8416ca001fbbfff8beadb988d628c8bbc88b3	HEAD
+01e8416ca001fbbfff8beadb988d628c8bbc88b3	refs/heads/dev
+088b2fa828db9ff7e00733f1908e0eeb59f66ce3	refs/heads/main
+088b2fa828db9ff7e00733f1908e0eeb59f66ce3	refs/tags/v7.0.1
+$ gh api repos/nasa/cFS/contents/osal?ref=main ; gh api repos/nasa/cFS/commits/main
+gh: GitHub access to this repository is not enabled for this session. (HTTP 403)  [both calls; not used further]
+$ git ls-remote https://github.com/nasa/osal.git HEAD refs/heads/main refs/heads/dev "refs/tags/v7.0.*"
+dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1	HEAD
+dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1	refs/heads/dev
+d2d877a69cff47452bcca274b309147d48e6c16f	refs/heads/main
+24c864161a7ab2d6ffbd1e0bc2f75df5f1c43057	refs/tags/v7.0.0
+d2d877a69cff47452bcca274b309147d48e6c16f	refs/tags/v7.0.1
+$ (local pinned clone) git -c safe.directory=* -C /home/user/work/procrace/cfs_ref/cFS rev-parse HEAD; ls-tree HEAD osal
+088b2fa828db9ff7e00733f1908e0eeb59f66ce3
+160000 commit d2d877a69cff47452bcca274b309147d48e6c16f	osal
+$ .gitmodules osal entry at that commit
+4:[submodule "osal"]
+5:	path = osal
+6:	url = https://github.com/nasa/osal.git
+7-[submodule "psp"]
+8-	path = psp
+9-	url = https://github.com/nasa/PSP.git
+$ git clone --depth 1 --branch main --filter=blob:none --no-checkout https://github.com/nasa/cFS.git cfs_main_tree   (independent remote check of the gitlink, no blobs)
+Cloning into '/home/user/work/procrace/baselines/osal-visibility/cfs_main_tree'...
+$ git -C cfs_main_tree log -1 --format="%H %cI %s"
+088b2fa828db9ff7e00733f1908e0eeb59f66ce3 2026-05-13T08:34:06-04:00 Merge pull request #1018 from nasa/ic-latest-main
+$ git -C cfs_main_tree ls-tree HEAD osal cfe psp
+160000 commit c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd	cfe
+160000 commit d2d877a69cff47452bcca274b309147d48e6c16f	osal
+160000 commit c4b3b0b65b119e106481ad8e20976ae4d7f554e3	psp

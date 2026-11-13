@@ -1,0 +1,21 @@
+# poll_timeout -- the other branch of the core serialization: the poll times out and the
+# main actor panics.
+#
+# Unit-test values only.  The poll returns the timeout code (not its exit outcome), no
+# observation edge is derived, the next call of the actor is the terminal operation, and the
+# terminal point ends the process.
+const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
+owner T_SB 2
+
+T0 CFE_ES_CreateObjects call
+T0 core_phase2_begin pt
+T0 CFE_ES_CreateObjects.reserve_core pt lp.slot=2
+T0 OS_TaskCreate call
+T_SB OS_TaskEntryPoint call arg.task_id=12
+T0 OS_TaskCreate ret out.task_id=12 result=0
+T0 CFE_ES_CreateObjects.publish_core pt lp.slot=2 lp.pending_id=0x110002
+T0 core_sync_call pt
+T0 CFE_ES_MainTaskSyncDelay call arg.AppStateId=3 arg.TimeOutMilliseconds=30000
+T0 CFE_ES_MainTaskSyncDelay ret result=0xc4000027
+T0 CFE_PSP_Panic call arg.ErrorCode=1
+T0 CFE_PSP_Panic.terminal pt

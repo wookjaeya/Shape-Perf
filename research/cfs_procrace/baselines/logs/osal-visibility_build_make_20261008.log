@@ -1,0 +1,741 @@
+# OSAL README build, step make (README L29, serial as written), 2026-10-08T01:42:18Z
+$ runuser -u ubuntu -- build_osal_readme.sh osal make
++ make
+[  0%] Building C object generic-linux_impl/CMakeFiles/osal_generic-linux_impl.dir/src/bsp_start.c.o
+[  0%] Building C object generic-linux_impl/CMakeFiles/osal_generic-linux_impl.dir/src/bsp_console.c.o
+[  0%] Built target osal_generic-linux_impl
+[  0%] Building C object CMakeFiles/osal_bsp.dir/src/bsp/shared/src/osapi-bsp.c.o
+[  0%] Building C object CMakeFiles/osal_bsp.dir/src/bsp/shared/src/bsp_default_app_run.c.o
+[  0%] Building C object CMakeFiles/osal_bsp.dir/src/bsp/shared/src/bsp_default_app_startup.c.o
+[  1%] Building C object CMakeFiles/osal_bsp.dir/src/bsp/shared/src/bsp_default_symtab.c.o
+[  1%] Building C object CMakeFiles/osal_bsp.dir/src/bsp/shared/src/bsp_default_resourcecfg.c.o
+[  1%] Linking C static library libosal_bsp.a
+[  1%] Built target osal_bsp
+[  2%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-binsem.c.o
+[  2%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-common.c.o
+[  2%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-console.c.o
+[  2%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-condvar.c.o
+[  2%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-countsem.c.o
+[  2%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-dirs.c.o
+[  3%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-errors.c.o
+[  3%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-files.c.o
+[  3%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-filesys.c.o
+[  3%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-heap.c.o
+[  3%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-idmap.c.o
+[  4%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-mutex.c.o
+[  4%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-queues.c.o
+[  4%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-tasks.c.o
+[  4%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-timebase.c.o
+[  4%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-gettime.c.o
+[  4%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-gettime-monotonic.c.o
+[  5%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-console-bsp.c.o
+[  5%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-bsd-select.c.o
+[  5%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-io.c.o
+[  5%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-files.c.o
+[  5%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-file-allocate.c.o
+[  5%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-dirs.c.o
+[  6%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-no-shell.c.o
+[  6%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-loader.c.o
+[  6%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-dl-loader.c.o
+[  6%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-dl-symtab.c.o
+[  6%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-bsd-sockets.c.o
+[  7%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-network-gethostname.c.o
+[  7%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-posix-network-gethostid.c.o
+[  7%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/__/portable/os-impl-bsd-sockets-no-dns.c.o
+[  7%] Building C object posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-rwlock.c.o
+[  7%] Built target osal_posix_impl
+[  7%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-binsem.c.o
+[  7%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-clock.c.o
+[  7%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-common.c.o
+[  7%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-condvar.c.o
+[  8%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-countsem.c.o
+[  8%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-dir.c.o
+[  8%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-errors.c.o
+[  8%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-file.c.o
+[  8%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-filesys.c.o
+[  9%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-heap.c.o
+[  9%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-idmap.c.o
+[  9%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-module.c.o
+[  9%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-mutex.c.o
+[  9%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-network.c.o
+[  9%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-printf.c.o
+[ 10%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-queue.c.o
+[ 10%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-rwlock.c.o
+[ 10%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-select.c.o
+[ 10%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-shell.c.o
+[ 10%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-sockets.c.o
+[ 10%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-task.c.o
+[ 11%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-timebase.c.o
+[ 11%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-time.c.o
+[ 11%] Building C object CMakeFiles/osal.dir/src/os/shared/src/osapi-version.c.o
+[ 11%] Linking C static library libosal.a
+[ 11%] Built target osal
+[ 11%] Building C object ut_assert/CMakeFiles/ut_assert.dir/src/utassert.c.o
+[ 11%] Building C object ut_assert/CMakeFiles/ut_assert.dir/src/utlist.c.o
+[ 11%] Building C object ut_assert/CMakeFiles/ut_assert.dir/src/utstubs.c.o
+[ 12%] Building C object ut_assert/CMakeFiles/ut_assert.dir/src/uttest.c.o
+[ 12%] Building C object ut_assert/CMakeFiles/ut_assert.dir/src/uttools.c.o
+[ 12%] Building C object ut_assert/CMakeFiles/ut_assert.dir/src/utbsp.c.o
+[ 12%] Linking C static library libut_assert.a
+[ 12%] Built target ut_assert
+[ 13%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/utstub-helpers.c.o
+[ 13%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-binsem-stubs.c.o
+[ 13%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-binsem-handlers.c.o
+[ 13%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-clock-stubs.c.o
+[ 13%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-clock-handlers.c.o
+[ 13%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-common-stubs.c.o
+[ 14%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-common-handlers.c.o
+[ 14%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-condvar-stubs.c.o
+[ 14%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-countsem-stubs.c.o
+[ 14%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-countsem-handlers.c.o
+[ 14%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-dir-stubs.c.o
+[ 15%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-dir-handlers.c.o
+[ 15%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-error-stubs.c.o
+[ 15%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-error-handlers.c.o
+[ 15%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-file-stubs.c.o
+[ 15%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-file-handlers.c.o
+[ 15%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-filesys-stubs.c.o
+[ 16%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-filesys-handlers.c.o
+[ 16%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-heap-stubs.c.o
+[ 16%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-heap-handlers.c.o
+[ 16%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-idmap-stubs.c.o
+[ 16%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-idmap-handlers.c.o
+[ 16%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-module-stubs.c.o
+[ 17%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-module-handlers.c.o
+[ 17%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-mutex-stubs.c.o
+[ 17%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-mutex-handlers.c.o
+[ 17%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-network-stubs.c.o
+[ 17%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-network-handlers.c.o
+[ 18%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-printf-stubs.c.o
+[ 18%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-printf-handlers.c.o
+[ 18%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-queue-stubs.c.o
+[ 18%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-queue-handlers.c.o
+[ 18%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-rwlock-stubs.c.o
+[ 18%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-rwlock-handlers.c.o
+[ 19%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-select-stubs.c.o
+[ 19%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-shell-stubs.c.o
+[ 19%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-sockets-stubs.c.o
+[ 19%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-sockets-handlers.c.o
+[ 19%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-task-stubs.c.o
+[ 19%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-task-handlers.c.o
+[ 20%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-timer-stubs.c.o
+[ 20%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-timer-handlers.c.o
+[ 20%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-timebase-stubs.c.o
+[ 20%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-timebase-handlers.c.o
+[ 20%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-version-stubs.c.o
+[ 21%] Building C object ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-version-handlers.c.o
+[ 21%] Linking C static library libut_osapi_stubs.a
+[ 21%] Built target ut_osapi_stubs
+[ 21%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-binsem.dir/__/__/os/vxworks/src/os-impl-binsem.c.o
+[ 21%] Built target utobj_coverage-vxworks-binsem
+[ 22%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-binsem.c.o
+[ 22%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-common.c.o
+[ 22%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-console.c.o
+[ 22%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-countsem.c.o
+[ 22%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-dirs.c.o
+[ 22%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-dirtable-stub.c.o
+[ 23%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-files.c.o
+[ 23%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-filesys.c.o
+[ 23%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-idmap.c.o
+[ 23%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-loader.c.o
+[ 23%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-mutex.c.o
+[ 23%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-queues.c.o
+[ 24%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-filetable-stub.c.o
+[ 24%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-sockets.c.o
+[ 24%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-symtab.c.o
+[ 24%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-tasks.c.o
+[ 24%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/src/ut-adaptor-timebase.c.o
+[ 25%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/__/__/portable/adaptors/src/ut-adaptor-portable-posix-io.c.o
+[ 25%] Building C object unit-test-coverage/vxworks/adaptors/CMakeFiles/ut-adaptor-vxworks.dir/__/__/portable/adaptors/src/ut-adaptor-portable-posix-files.c.o
+[ 25%] Linking C static library libut-adaptor-vxworks.a
+[ 25%] Built target ut-adaptor-vxworks
+[ 26%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/arpa-inet-stubs.c.o
+[ 26%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/libc-ctype-stubs.c.o
+[ 26%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/libc-stdio-stubs.c.o
+[ 26%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/libc-stdlib-stubs.c.o
+[ 26%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/libc-string-stubs.c.o
+[ 26%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/netinet-in-stubs.c.o
+[ 27%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-dirent-stubs.c.o
+[ 27%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-dlfcn-stubs.c.o
+[ 27%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-errno-stubs.c.o
+[ 27%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-fcntl-stubs.c.o
+[ 27%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-ioctl-stubs.c.o
+[ 27%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-mqueue-stubs.c.o
+[ 28%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-netdb-stubs.c.o
+[ 28%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-pthread-stubs.c.o
+[ 28%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-sched-stubs.c.o
+[ 28%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-semaphore-stubs.c.o
+[ 28%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-signal-stubs.c.o
+[ 29%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-stat-stubs.c.o
+[ 29%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-time-stubs.c.o
+[ 29%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/posix-unistd-stubs.c.o
+[ 29%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/sys-socket-stubs.c.o
+[ 29%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/sys-select-stubs.c.o
+[ 29%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-ataDrv-stubs.c.o
+[ 30%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-dosFsLib-stubs.c.o
+[ 30%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-errnoLib-stubs.c.o
+[ 30%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-hostLib-stubs.c.o
+[ 30%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-intLib-stubs.c.o
+[ 30%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-loadLib-stubs.c.o
+[ 31%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-memPartLib-stubs.c.o
+[ 31%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-moduleLib-stubs.c.o
+[ 31%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-msgQLib-stubs.c.o
+[ 31%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-ramDrv-stubs.c.o
+[ 31%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-semLib-stubs.c.o
+[ 31%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-shellLib-stubs.c.o
+[ 32%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-symLib-stubs.c.o
+[ 32%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-sysLib-stubs.c.o
+[ 32%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-taskLib-stubs.c.o
+[ 32%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-taskVarLib-stubs.c.o
+[ 32%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_libc_stubs.dir/src/vxworks-xbdBlkDev-stubs.c.o
+[ 32%] Linking C static library libut_libc_stubs.a
+[ 32%] Built target ut_libc_stubs
+[ 33%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-binsem-impl-stubs.c.o
+[ 33%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-clock-impl-handlers.c.o
+[ 33%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-clock-impl-stubs.c.o
+[ 33%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-common-impl-stubs.c.o
+[ 33%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-condvar-impl-stubs.c.o
+[ 34%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-condvar-init-stubs.c.o
+[ 34%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-console-impl-stubs.c.o
+[ 34%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-countsem-impl-stubs.c.o
+[ 34%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-dir-impl-stubs.c.o
+[ 34%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-file-impl-handlers.c.o
+[ 34%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-file-impl-stubs.c.o
+[ 35%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-filesys-impl-handlers.c.o
+[ 35%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-filesys-impl-stubs.c.o
+[ 35%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-heap-impl-stubs.c.o
+[ 35%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-idmap-impl-stubs.c.o
+[ 35%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-module-impl-stubs.c.o
+[ 35%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-mutex-impl-stubs.c.o
+[ 36%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-network-impl-handlers.c.o
+[ 36%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-network-impl-stubs.c.o
+[ 36%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-printf-impl-stubs.c.o
+[ 36%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-queue-impl-stubs.c.o
+[ 36%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-rwlock-impl-stubs.c.o
+[ 37%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-select-impl-stubs.c.o
+[ 37%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-shell-impl-stubs.c.o
+[ 37%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-sockets-impl-handlers.c.o
+[ 37%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-sockets-impl-stubs.c.o
+[ 37%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-task-impl-stubs.c.o
+[ 37%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_impl_stubs.dir/src/os-shared-timebase-impl-stubs.c.o
+[ 38%] Linking C static library libut_osapi_impl_stubs.a
+[ 38%] Built target ut_osapi_impl_stubs
+[ 38%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-binsem-init-stubs.c.o
+[ 38%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-common-init-stubs.c.o
+[ 38%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-console-init-stubs.c.o
+[ 38%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-countsem-init-stubs.c.o
+[ 38%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-dir-init-stubs.c.o
+[ 39%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-file-init-stubs.c.o
+[ 39%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-filesys-init-stubs.c.o
+[ 39%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-module-init-stubs.c.o
+[ 39%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-mutex-init-stubs.c.o
+[ 39%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-network-init-stubs.c.o
+[ 40%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-queue-init-stubs.c.o
+[ 40%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-sockets-init-stubs.c.o
+[ 40%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-task-init-stubs.c.o
+[ 40%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-timebase-init-stubs.c.o
+[ 40%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_init_stubs.dir/src/os-shared-time-init-stubs.c.o
+[ 40%] Linking C static library libut_osapi_init_stubs.a
+[ 40%] Built target ut_osapi_init_stubs
+[ 41%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-common-stubs.c.o
+[ 41%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-file-stubs.c.o
+[ 41%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-filesys-stubs.c.o
+[ 41%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-globaldefs-stubs.c.o
+[ 41%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-idmap-handlers.c.o
+[ 42%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-idmap-stubs.c.o
+[ 42%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-module-stubs.c.o
+[ 42%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-sockets-stubs.c.o
+[ 42%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-task-stubs.c.o
+[ 42%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_shared_stubs.dir/src/os-shared-timebase-stubs.c.o
+[ 42%] Linking C static library libut_osapi_shared_stubs.a
+[ 42%] Built target ut_osapi_shared_stubs
+[ 42%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-binsem-table-stubs.c.o
+[ 42%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-console-table-stubs.c.o
+[ 42%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-common-stubs.c.o
+[ 42%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-countsem-table-stubs.c.o
+[ 43%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-error-impl-table-stubs.c.o
+[ 43%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-dir-table-stubs.c.o
+[ 43%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-filesys-table-stubs.c.o
+[ 43%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-idmap-table-stubs.c.o
+[ 43%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-module-table-stubs.c.o
+[ 43%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-mutex-table-stubs.c.o
+[ 44%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-queue-table-stubs.c.o
+[ 44%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-rwlock-table-stubs.c.o
+[ 44%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-stream-table-stubs.c.o
+[ 44%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-task-table-stubs.c.o
+[ 44%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-timebase-table-stubs.c.o
+[ 45%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_osapi_table_stubs.dir/src/osapi-shared-timecb-table-stubs.c.o
+[ 45%] Linking C static library libut_osapi_table_stubs.a
+[ 45%] Built target ut_osapi_table_stubs
+[ 45%] Building C object unit-test-coverage/ut-stubs/CMakeFiles/ut_bsp_impl_stubs.dir/src/bsp-console-impl-stubs.c.o
+[ 45%] Linking C static library libut_bsp_impl_stubs.a
+[ 45%] Built target ut_bsp_impl_stubs
+[ 45%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-binsem-stubs.c.o
+[ 45%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-common-stubs.c.o
+[ 45%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-countsem-stubs.c.o
+[ 45%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-dir-stubs.c.o
+[ 46%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-file-stubs.c.o
+[ 46%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-idmap-stubs.c.o
+[ 46%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-module-stubs.c.o
+[ 46%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-mutex-stubs.c.o
+[ 46%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-queue-stubs.c.o
+[ 47%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-sockets-stubs.c.o
+[ 47%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-task-stubs.c.o
+[ 47%] Building C object unit-test-coverage/vxworks/ut-stubs/CMakeFiles/ut_vxworks_impl_stubs.dir/src/vxworks-os-impl-timer-stubs.c.o
+[ 47%] Linking C static library libut_vxworks_impl_stubs.a
+[ 47%] Built target ut_vxworks_impl_stubs
+[ 47%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-binsem-testrunner.dir/src/coveragetest-binsem.c.o
+[ 47%] Linking C executable coverage-vxworks-binsem-testrunner
+[ 47%] Built target coverage-vxworks-binsem-testrunner
+[ 47%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-common.dir/__/__/os/vxworks/src/os-impl-common.c.o
+[ 47%] Built target utobj_coverage-vxworks-common
+[ 47%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-common-testrunner.dir/src/coveragetest-common.c.o
+[ 47%] Linking C executable coverage-vxworks-common-testrunner
+[ 47%] Built target coverage-vxworks-common-testrunner
+[ 47%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-console.dir/__/__/os/vxworks/src/os-impl-console.c.o
+[ 47%] Built target utobj_coverage-vxworks-console
+[ 48%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-console-testrunner.dir/src/coveragetest-console.c.o
+[ 48%] Linking C executable coverage-vxworks-console-testrunner
+[ 48%] Built target coverage-vxworks-console-testrunner
+[ 48%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-countsem.dir/__/__/os/vxworks/src/os-impl-countsem.c.o
+[ 48%] Built target utobj_coverage-vxworks-countsem
+[ 48%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-countsem-testrunner.dir/src/coveragetest-countsem.c.o
+[ 48%] Linking C executable coverage-vxworks-countsem-testrunner
+[ 48%] Built target coverage-vxworks-countsem-testrunner
+[ 48%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-dirs-globals.dir/__/__/os/vxworks/src/os-impl-dirs-globals.c.o
+[ 48%] Built target utobj_coverage-vxworks-dirs-globals
+[ 48%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-dirs-globals-testrunner.dir/src/coveragetest-dirs-globals.c.o
+[ 48%] Linking C executable coverage-vxworks-dirs-globals-testrunner
+[ 48%] Built target coverage-vxworks-dirs-globals-testrunner
+[ 48%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-files.dir/__/__/os/vxworks/src/os-impl-files.c.o
+[ 48%] Built target utobj_coverage-vxworks-files
+[ 50%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-files-testrunner.dir/src/coveragetest-files.c.o
+[ 50%] Linking C executable coverage-vxworks-files-testrunner
+[ 50%] Built target coverage-vxworks-files-testrunner
+[ 50%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-filesys.dir/__/__/os/vxworks/src/os-impl-filesys.c.o
+[ 50%] Built target utobj_coverage-vxworks-filesys
+[ 50%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-filesys-testrunner.dir/src/coveragetest-filesys.c.o
+[ 50%] Linking C executable coverage-vxworks-filesys-testrunner
+[ 50%] Built target coverage-vxworks-filesys-testrunner
+[ 51%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-idmap.dir/__/__/os/vxworks/src/os-impl-idmap.c.o
+[ 51%] Built target utobj_coverage-vxworks-idmap
+[ 52%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-idmap-testrunner.dir/src/coveragetest-idmap.c.o
+[ 52%] Linking C executable coverage-vxworks-idmap-testrunner
+[ 52%] Built target coverage-vxworks-idmap-testrunner
+[ 52%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-heap.dir/__/__/os/vxworks/src/os-impl-heap.c.o
+[ 52%] Built target utobj_coverage-vxworks-heap
+[ 52%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-heap-testrunner.dir/src/coveragetest-heap.c.o
+[ 52%] Linking C executable coverage-vxworks-heap-testrunner
+[ 52%] Built target coverage-vxworks-heap-testrunner
+[ 52%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-loader.dir/__/__/os/vxworks/src/os-impl-loader.c.o
+[ 52%] Built target utobj_coverage-vxworks-loader
+[ 52%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-loader-testrunner.dir/src/coveragetest-loader.c.o
+[ 52%] Linking C executable coverage-vxworks-loader-testrunner
+[ 52%] Built target coverage-vxworks-loader-testrunner
+[ 52%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-mutex.dir/__/__/os/vxworks/src/os-impl-mutex.c.o
+[ 52%] Built target utobj_coverage-vxworks-mutex
+[ 52%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-mutex-testrunner.dir/src/coveragetest-mutex.c.o
+[ 53%] Linking C executable coverage-vxworks-mutex-testrunner
+[ 53%] Built target coverage-vxworks-mutex-testrunner
+[ 53%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-network.dir/__/__/os/vxworks/src/os-impl-network.c.o
+[ 53%] Built target utobj_coverage-vxworks-network
+[ 53%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-network-testrunner.dir/src/coveragetest-network.c.o
+[ 53%] Linking C executable coverage-vxworks-network-testrunner
+[ 53%] Built target coverage-vxworks-network-testrunner
+[ 54%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-queues.dir/__/__/os/vxworks/src/os-impl-queues.c.o
+[ 54%] Built target utobj_coverage-vxworks-queues
+[ 54%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-queues-testrunner.dir/src/coveragetest-queues.c.o
+[ 54%] Linking C executable coverage-vxworks-queues-testrunner
+[ 54%] Built target coverage-vxworks-queues-testrunner
+[ 54%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-shell.dir/__/__/os/vxworks/src/os-impl-shell.c.o
+[ 54%] Built target utobj_coverage-vxworks-shell
+[ 54%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-shell-testrunner.dir/src/coveragetest-shell.c.o
+[ 54%] Linking C executable coverage-vxworks-shell-testrunner
+[ 54%] Built target coverage-vxworks-shell-testrunner
+[ 54%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-sockets.dir/__/__/os/vxworks/src/os-impl-sockets.c.o
+[ 54%] Built target utobj_coverage-vxworks-sockets
+[ 54%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-sockets-testrunner.dir/src/coveragetest-sockets.c.o
+[ 55%] Linking C executable coverage-vxworks-sockets-testrunner
+[ 55%] Built target coverage-vxworks-sockets-testrunner
+[ 55%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-symtab.dir/__/__/os/vxworks/src/os-impl-symtab.c.o
+[ 55%] Built target utobj_coverage-vxworks-symtab
+[ 55%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-symtab-testrunner.dir/src/coveragetest-symtab.c.o
+[ 55%] Linking C executable coverage-vxworks-symtab-testrunner
+[ 55%] Built target coverage-vxworks-symtab-testrunner
+[ 55%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-tasks.dir/__/__/os/vxworks/src/os-impl-tasks.c.o
+[ 55%] Built target utobj_coverage-vxworks-tasks
+[ 55%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-tasks-testrunner.dir/src/coveragetest-tasks.c.o
+[ 55%] Linking C executable coverage-vxworks-tasks-testrunner
+[ 55%] Built target coverage-vxworks-tasks-testrunner
+[ 56%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-timebase.dir/__/__/os/vxworks/src/os-impl-timebase.c.o
+[ 56%] Built target utobj_coverage-vxworks-timebase
+[ 56%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-timebase-testrunner.dir/src/coveragetest-timebase.c.o
+[ 57%] Linking C executable coverage-vxworks-timebase-testrunner
+[ 57%] Built target coverage-vxworks-timebase-testrunner
+[ 57%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-posix-gettime.dir/__/__/os/portable/os-impl-posix-gettime.c.o
+[ 57%] Built target utobj_coverage-vxworks-posix-gettime
+[ 57%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-posix-gettime-testrunner.dir/__/portable/src/coveragetest-posix-gettime.c.o
+[ 57%] Linking C executable coverage-vxworks-posix-gettime-testrunner
+[ 57%] Built target coverage-vxworks-posix-gettime-testrunner
+[ 57%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-posix-io.dir/__/__/os/portable/os-impl-posix-io.c.o
+[ 57%] Built target utobj_coverage-vxworks-posix-io
+[ 57%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-posix-io-testrunner.dir/__/portable/src/coveragetest-posix-io.c.o
+[ 58%] Linking C executable coverage-vxworks-posix-io-testrunner
+[ 58%] Built target coverage-vxworks-posix-io-testrunner
+[ 58%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-posix-files.dir/__/__/os/portable/os-impl-posix-files.c.o
+[ 58%] Built target utobj_coverage-vxworks-posix-files
+[ 59%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-posix-files-testrunner.dir/__/portable/src/coveragetest-posix-files.c.o
+[ 59%] Linking C executable coverage-vxworks-posix-files-testrunner
+[ 59%] Built target coverage-vxworks-posix-files-testrunner
+[ 59%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-posix-file-allocate.dir/__/__/os/portable/os-impl-posix-file-allocate.c.o
+[ 59%] Built target utobj_coverage-vxworks-posix-file-allocate
+[ 59%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-posix-file-allocate-testrunner.dir/__/portable/src/coveragetest-posix-file-allocate.c.o
+[ 59%] Linking C executable coverage-vxworks-posix-file-allocate-testrunner
+[ 59%] Built target coverage-vxworks-posix-file-allocate-testrunner
+[ 59%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-posix-dirs.dir/__/__/os/portable/os-impl-posix-dirs.c.o
+[ 59%] Built target utobj_coverage-vxworks-posix-dirs
+[ 59%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-posix-dirs-testrunner.dir/__/portable/src/coveragetest-posix-dirs.c.o
+[ 59%] Linking C executable coverage-vxworks-posix-dirs-testrunner
+[ 59%] Built target coverage-vxworks-posix-dirs-testrunner
+[ 60%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-console-bsp.dir/__/__/os/portable/os-impl-console-bsp.c.o
+[ 60%] Built target utobj_coverage-vxworks-console-bsp
+[ 60%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-console-bsp-testrunner.dir/__/portable/src/coveragetest-console-bsp.c.o
+[ 60%] Linking C executable coverage-vxworks-console-bsp-testrunner
+[ 60%] Built target coverage-vxworks-console-bsp-testrunner
+[ 60%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-bsd-select.dir/__/__/os/portable/os-impl-bsd-select.c.o
+[ 60%] Built target utobj_coverage-vxworks-bsd-select
+[ 60%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-bsd-select-testrunner.dir/__/portable/src/coveragetest-bsd-select.c.o
+[ 61%] Linking C executable coverage-vxworks-bsd-select-testrunner
+[ 61%] Built target coverage-vxworks-bsd-select-testrunner
+[ 62%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-bsd-sockets.dir/__/__/os/portable/os-impl-bsd-sockets.c.o
+[ 62%] Built target utobj_coverage-vxworks-bsd-sockets
+[ 62%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-bsd-sockets-testrunner.dir/__/portable/src/coveragetest-bsd-sockets.c.o
+[ 63%] Linking C executable coverage-vxworks-bsd-sockets-testrunner
+[ 63%] Built target coverage-vxworks-bsd-sockets-testrunner
+[ 63%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-bsd-sockets-dns.dir/__/__/os/portable/os-impl-bsd-sockets-dns.c.o
+[ 63%] Built target utobj_coverage-vxworks-bsd-sockets-dns
+[ 63%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-bsd-sockets-dns-testrunner.dir/__/portable/src/coveragetest-bsd-sockets-dns.c.o
+[ 63%] Linking C executable coverage-vxworks-bsd-sockets-dns-testrunner
+[ 63%] Built target coverage-vxworks-bsd-sockets-dns-testrunner
+[ 63%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-bsd-sockets-no-dns.dir/__/__/os/portable/os-impl-bsd-sockets-no-dns.c.o
+[ 63%] Built target utobj_coverage-vxworks-bsd-sockets-no-dns
+[ 63%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-bsd-sockets-no-dns-testrunner.dir/__/portable/src/coveragetest-bsd-sockets-no-dns.c.o
+[ 63%] Linking C executable coverage-vxworks-bsd-sockets-no-dns-testrunner
+[ 63%] Built target coverage-vxworks-bsd-sockets-no-dns-testrunner
+[ 64%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-no-loader.dir/__/__/os/portable/os-impl-no-loader.c.o
+[ 64%] Built target utobj_coverage-vxworks-no-loader
+[ 64%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-no-loader-testrunner.dir/__/portable/src/coveragetest-no-loader.c.o
+[ 64%] Linking C executable coverage-vxworks-no-loader-testrunner
+[ 64%] Built target coverage-vxworks-no-loader-testrunner
+[ 64%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-no-shell.dir/__/__/os/portable/os-impl-no-shell.c.o
+[ 64%] Built target utobj_coverage-vxworks-no-shell
+[ 64%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-no-shell-testrunner.dir/__/portable/src/coveragetest-no-shell.c.o
+[ 64%] Linking C executable coverage-vxworks-no-shell-testrunner
+[ 64%] Built target coverage-vxworks-no-shell-testrunner
+[ 65%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-no-symtab.dir/__/__/os/portable/os-impl-no-symtab.c.o
+[ 65%] Built target utobj_coverage-vxworks-no-symtab
+[ 66%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-no-symtab-testrunner.dir/__/portable/src/coveragetest-no-symtab.c.o
+[ 66%] Linking C executable coverage-vxworks-no-symtab-testrunner
+[ 66%] Built target coverage-vxworks-no-symtab-testrunner
+[ 66%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-no-network-gethostname.dir/__/__/os/portable/os-impl-no-network-gethostname.c.o
+[ 66%] Built target utobj_coverage-vxworks-no-network-gethostname
+[ 67%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-no-network-gethostname-testrunner.dir/__/portable/src/coveragetest-no-network-gethostname.c.o
+[ 67%] Linking C executable coverage-vxworks-no-network-gethostname-testrunner
+[ 67%] Built target coverage-vxworks-no-network-gethostname-testrunner
+[ 67%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-no-network-gethostid.dir/__/__/os/portable/os-impl-no-network-gethostid.c.o
+[ 67%] Built target utobj_coverage-vxworks-no-network-gethostid
+[ 67%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-no-network-gethostid-testrunner.dir/__/portable/src/coveragetest-no-network-gethostid.c.o
+[ 67%] Linking C executable coverage-vxworks-no-network-gethostid-testrunner
+[ 67%] Built target coverage-vxworks-no-network-gethostid-testrunner
+[ 67%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-no-sockets.dir/__/__/os/portable/os-impl-no-sockets.c.o
+[ 67%] Built target utobj_coverage-vxworks-no-sockets
+[ 67%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-no-sockets-testrunner.dir/__/portable/src/coveragetest-no-sockets.c.o
+[ 67%] Linking C executable coverage-vxworks-no-sockets-testrunner
+[ 67%] Built target coverage-vxworks-no-sockets-testrunner
+[ 67%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-no-condvar.dir/__/__/os/portable/os-impl-no-condvar.c.o
+[ 67%] Built target utobj_coverage-vxworks-no-condvar
+[ 67%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-no-condvar-testrunner.dir/__/portable/src/coveragetest-no-condvar.c.o
+[ 67%] Linking C executable coverage-vxworks-no-condvar-testrunner
+[ 67%] Built target coverage-vxworks-no-condvar-testrunner
+[ 67%] Building C object unit-test-coverage/vxworks/CMakeFiles/utobj_coverage-vxworks-no-file-allocate.dir/__/__/os/portable/os-impl-no-file-allocate.c.o
+[ 67%] Built target utobj_coverage-vxworks-no-file-allocate
+[ 67%] Building C object unit-test-coverage/vxworks/CMakeFiles/coverage-vxworks-no-file-allocate-testrunner.dir/__/portable/src/coveragetest-no-file-allocate.c.o
+[ 68%] Linking C executable coverage-vxworks-no-file-allocate-testrunner
+[ 68%] Built target coverage-vxworks-no-file-allocate-testrunner
+[ 69%] Building C object unit-test-coverage/shared/CMakeFiles/os-shared-coverage-support.dir/src/os-shared-coverage-support.c.o
+[ 69%] Linking C static library libos-shared-coverage-support.a
+[ 69%] Built target os-shared-coverage-support
+[ 69%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-binsem.dir/__/__/os/shared/src/osapi-binsem.c.o
+[ 69%] Built target utobj_coverage-shared-binsem
+[ 69%] Building C object unit-test-coverage/shared/adaptors/CMakeFiles/ut-adaptor-shared.dir/src/ut-adaptor-module.c.o
+[ 69%] Linking C static library libut-adaptor-shared.a
+[ 69%] Built target ut-adaptor-shared
+[ 69%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-binsem-testrunner.dir/src/coveragetest-binsem.c.o
+[ 69%] Linking C executable coverage-shared-binsem-testrunner
+[ 69%] Built target coverage-shared-binsem-testrunner
+[ 69%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-clock.dir/__/__/os/shared/src/osapi-clock.c.o
+[ 69%] Built target utobj_coverage-shared-clock
+[ 69%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-clock-testrunner.dir/src/coveragetest-clock.c.o
+[ 69%] Linking C executable coverage-shared-clock-testrunner
+[ 69%] Built target coverage-shared-clock-testrunner
+[ 70%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-common.dir/__/__/os/shared/src/osapi-common.c.o
+[ 70%] Built target utobj_coverage-shared-common
+[ 71%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-common-testrunner.dir/src/coveragetest-common.c.o
+[ 71%] Linking C executable coverage-shared-common-testrunner
+[ 71%] Built target coverage-shared-common-testrunner
+[ 71%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-condvar.dir/__/__/os/shared/src/osapi-condvar.c.o
+[ 71%] Built target utobj_coverage-shared-condvar
+[ 71%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-condvar-testrunner.dir/src/coveragetest-condvar.c.o
+[ 71%] Linking C executable coverage-shared-condvar-testrunner
+[ 71%] Built target coverage-shared-condvar-testrunner
+[ 71%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-countsem.dir/__/__/os/shared/src/osapi-countsem.c.o
+[ 71%] Built target utobj_coverage-shared-countsem
+[ 71%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-countsem-testrunner.dir/src/coveragetest-countsem.c.o
+[ 71%] Linking C executable coverage-shared-countsem-testrunner
+[ 71%] Built target coverage-shared-countsem-testrunner
+[ 71%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-dir.dir/__/__/os/shared/src/osapi-dir.c.o
+[ 71%] Built target utobj_coverage-shared-dir
+[ 72%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-dir-testrunner.dir/src/coveragetest-dir.c.o
+[ 72%] Linking C executable coverage-shared-dir-testrunner
+[ 72%] Built target coverage-shared-dir-testrunner
+[ 72%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-errors.dir/__/__/os/shared/src/osapi-errors.c.o
+[ 72%] Built target utobj_coverage-shared-errors
+[ 72%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-errors-testrunner.dir/src/coveragetest-errors.c.o
+[ 72%] Linking C executable coverage-shared-errors-testrunner
+[ 72%] Built target coverage-shared-errors-testrunner
+[ 72%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-file.dir/__/__/os/shared/src/osapi-file.c.o
+[ 72%] Built target utobj_coverage-shared-file
+[ 72%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-file-testrunner.dir/src/coveragetest-file.c.o
+[ 73%] Linking C executable coverage-shared-file-testrunner
+[ 73%] Built target coverage-shared-file-testrunner
+[ 74%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-filesys.dir/__/__/os/shared/src/osapi-filesys.c.o
+[ 74%] Built target utobj_coverage-shared-filesys
+[ 74%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-filesys-testrunner.dir/src/coveragetest-filesys.c.o
+[ 74%] Linking C executable coverage-shared-filesys-testrunner
+[ 74%] Built target coverage-shared-filesys-testrunner
+[ 74%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-heap.dir/__/__/os/shared/src/osapi-heap.c.o
+[ 74%] Built target utobj_coverage-shared-heap
+[ 74%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-heap-testrunner.dir/src/coveragetest-heap.c.o
+[ 74%] Linking C executable coverage-shared-heap-testrunner
+[ 74%] Built target coverage-shared-heap-testrunner
+[ 74%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-idmap.dir/__/__/os/shared/src/osapi-idmap.c.o
+[ 74%] Built target utobj_coverage-shared-idmap
+[ 74%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-idmap-testrunner.dir/src/coveragetest-idmap.c.o
+[ 75%] Linking C executable coverage-shared-idmap-testrunner
+[ 75%] Built target coverage-shared-idmap-testrunner
+[ 75%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-module.dir/__/__/os/shared/src/osapi-module.c.o
+[ 75%] Built target utobj_coverage-shared-module
+[ 75%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-module-testrunner.dir/src/coveragetest-module.c.o
+[ 75%] Linking C executable coverage-shared-module-testrunner
+[ 75%] Built target coverage-shared-module-testrunner
+[ 75%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-mutex.dir/__/__/os/shared/src/osapi-mutex.c.o
+[ 75%] Built target utobj_coverage-shared-mutex
+[ 75%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-mutex-testrunner.dir/src/coveragetest-mutex.c.o
+[ 75%] Linking C executable coverage-shared-mutex-testrunner
+[ 75%] Built target coverage-shared-mutex-testrunner
+[ 76%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-network.dir/__/__/os/shared/src/osapi-network.c.o
+[ 76%] Built target utobj_coverage-shared-network
+[ 77%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-network-testrunner.dir/src/coveragetest-network.c.o
+[ 77%] Linking C executable coverage-shared-network-testrunner
+[ 77%] Built target coverage-shared-network-testrunner
+[ 77%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-printf.dir/__/__/os/shared/src/osapi-printf.c.o
+[ 77%] Built target utobj_coverage-shared-printf
+[ 77%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-printf-testrunner.dir/src/coveragetest-printf.c.o
+[ 77%] Linking C executable coverage-shared-printf-testrunner
+[ 77%] Built target coverage-shared-printf-testrunner
+[ 77%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-queue.dir/__/__/os/shared/src/osapi-queue.c.o
+[ 77%] Built target utobj_coverage-shared-queue
+[ 77%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-queue-testrunner.dir/src/coveragetest-queue.c.o
+[ 77%] Linking C executable coverage-shared-queue-testrunner
+[ 77%] Built target coverage-shared-queue-testrunner
+[ 77%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-rwlock.dir/__/__/os/shared/src/osapi-rwlock.c.o
+[ 77%] Built target utobj_coverage-shared-rwlock
+[ 78%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-rwlock-testrunner.dir/src/coveragetest-rwlock.c.o
+[ 78%] Linking C executable coverage-shared-rwlock-testrunner
+[ 78%] Built target coverage-shared-rwlock-testrunner
+[ 78%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-select.dir/__/__/os/shared/src/osapi-select.c.o
+[ 78%] Built target utobj_coverage-shared-select
+[ 78%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-select-testrunner.dir/src/coveragetest-select.c.o
+[ 78%] Linking C executable coverage-shared-select-testrunner
+[ 78%] Built target coverage-shared-select-testrunner
+[ 78%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-sockets.dir/__/__/os/shared/src/osapi-sockets.c.o
+[ 78%] Built target utobj_coverage-shared-sockets
+[ 78%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-sockets-testrunner.dir/src/coveragetest-sockets.c.o
+[ 78%] Linking C executable coverage-shared-sockets-testrunner
+[ 78%] Built target coverage-shared-sockets-testrunner
+[ 79%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-task.dir/__/__/os/shared/src/osapi-task.c.o
+[ 79%] Built target utobj_coverage-shared-task
+[ 80%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-task-testrunner.dir/src/coveragetest-task.c.o
+[ 80%] Linking C executable coverage-shared-task-testrunner
+[ 80%] Built target coverage-shared-task-testrunner
+[ 80%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-timebase.dir/__/__/os/shared/src/osapi-timebase.c.o
+[ 80%] Built target utobj_coverage-shared-timebase
+[ 80%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-timebase-testrunner.dir/src/coveragetest-timebase.c.o
+[ 81%] Linking C executable coverage-shared-timebase-testrunner
+[ 81%] Built target coverage-shared-timebase-testrunner
+[ 81%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-time.dir/__/__/os/shared/src/osapi-time.c.o
+[ 81%] Built target utobj_coverage-shared-time
+[ 81%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-time-testrunner.dir/src/coveragetest-time.c.o
+[ 81%] Linking C executable coverage-shared-time-testrunner
+[ 81%] Built target coverage-shared-time-testrunner
+[ 81%] Building C object unit-test-coverage/shared/CMakeFiles/utobj_coverage-shared-version.dir/__/__/os/shared/src/osapi-version.c.o
+[ 81%] Built target utobj_coverage-shared-version
+[ 81%] Building C object unit-test-coverage/shared/CMakeFiles/coverage-shared-version-testrunner.dir/src/coveragetest-version.c.o
+[ 81%] Linking C executable coverage-shared-version-testrunner
+[ 81%] Built target coverage-shared-version-testrunner
+[ 81%] Building C object tests/CMakeFiles/bin-sem-test.dir/bin-sem-test/bin-sem-test.c.o
+[ 81%] Linking C executable bin-sem-test
+[ 81%] Built target bin-sem-test
+[ 81%] Building C object tests/CMakeFiles/bin-sem-timeout-test.dir/bin-sem-timeout-test/bin-sem-timeout-test.c.o
+[ 82%] Linking C executable bin-sem-timeout-test
+[ 82%] Built target bin-sem-timeout-test
+[ 82%] Building C object tests/CMakeFiles/condvar-test.dir/condvar-test/condvar-test.c.o
+[ 82%] Linking C executable condvar-test
+[ 82%] Built target condvar-test
+[ 82%] Building C object tests/CMakeFiles/count-sem-test.dir/count-sem-test/count-sem-test.c.o
+[ 82%] Linking C executable count-sem-test
+[ 82%] Built target count-sem-test
+[ 83%] Building C object tests/CMakeFiles/count-sem-timeout-test.dir/count-sem-timeout-test/count-sem-timeout-test.c.o
+[ 83%] Linking C executable count-sem-timeout-test
+[ 83%] Built target count-sem-timeout-test
+[ 83%] Building C object tests/CMakeFiles/file-api-test.dir/file-api-test/file-api-test.c.o
+[ 83%] Linking C executable file-api-test
+[ 83%] Built target file-api-test
+[ 83%] Building C object tests/CMakeFiles/file-sys-add-fixed-map-api-test.dir/file-sys-add-fixed-map-api-test/file-sys-add-fixed-map-api-test.c.o
+[ 83%] Linking C executable file-sys-add-fixed-map-api-test
+[ 83%] Built target file-sys-add-fixed-map-api-test
+[ 84%] Building C object tests/CMakeFiles/idmap-api-test.dir/idmap-api-test/idmap-api-test.c.o
+[ 84%] Linking C executable idmap-api-test
+[ 84%] Built target idmap-api-test
+[ 84%] Building C object tests/CMakeFiles/mutex-test.dir/mutex-test/mutex-test.c.o
+[ 84%] Linking C executable mutex-test
+[ 84%] Built target mutex-test
+[ 84%] Building C object tests/CMakeFiles/network-api-test.dir/network-api-test/network-api-test.c.o
+[ 84%] Linking C executable network-api-test
+[ 84%] Built target network-api-test
+[ 84%] Building C object tests/CMakeFiles/osal-core-test.dir/osal-core-test/osal-core-test.c.o
+[ 84%] Linking C executable osal-core-test
+[ 84%] Built target osal-core-test
+[ 84%] Building C object tests/CMakeFiles/queue-test.dir/queue-test/queue-test.c.o
+[ 84%] Linking C executable queue-test
+[ 84%] Built target queue-test
+[ 84%] Building C object tests/CMakeFiles/rwlock-test.dir/rwlock-test/rwlock-test.c.o
+[ 85%] Linking C executable rwlock-test
+[ 85%] Built target rwlock-test
+[ 85%] Building C object tests/CMakeFiles/select-test.dir/select-test/select-test.c.o
+[ 85%] Linking C executable select-test
+[ 85%] Built target select-test
+[ 85%] Building C object tests/CMakeFiles/sem-speed-test.dir/sem-speed-test/sem-speed-test.c.o
+[ 85%] Linking C executable sem-speed-test
+[ 85%] Built target sem-speed-test
+[ 85%] Building C object tests/CMakeFiles/shell-test.dir/shell-test/shell-test.c.o
+[ 86%] Linking C executable shell-test
+[ 86%] Built target shell-test
+[ 86%] Building C object tests/CMakeFiles/symbol-api-test.dir/symbol-api-test/symbol-api-test.c.o
+[ 86%] Linking C executable symbol-api-test
+[ 86%] Built target symbol-api-test
+[ 86%] Building C object tests/CMakeFiles/time-base-api-test.dir/time-base-api-test/time-base-api-test.c.o
+[ 86%] Linking C executable time-base-api-test
+[ 86%] Built target time-base-api-test
+[ 86%] Building C object tests/CMakeFiles/timer-add-api-test.dir/timer-add-api-test/timer-add-api-test.c.o
+[ 87%] Linking C executable timer-add-api-test
+[ 87%] Built target timer-add-api-test
+[ 87%] Building C object tests/CMakeFiles/timer-test.dir/timer-test/timer-test.c.o
+[ 87%] Linking C executable timer-test
+[ 87%] Built target timer-test
+[ 87%] Building C object unit-tests/oscore-test/CMakeFiles/osal_core_UT.dir/ut_oscore_binsem_test.c.o
+[ 87%] Building C object unit-tests/oscore-test/CMakeFiles/osal_core_UT.dir/ut_oscore_misc_test.c.o
+[ 88%] Building C object unit-tests/oscore-test/CMakeFiles/osal_core_UT.dir/ut_oscore_queue_test.c.o
+[ 88%] Building C object unit-tests/oscore-test/CMakeFiles/osal_core_UT.dir/ut_oscore_select_test.c.o
+[ 88%] Building C object unit-tests/oscore-test/CMakeFiles/osal_core_UT.dir/ut_oscore_countsem_test.c.o
+[ 88%] Building C object unit-tests/oscore-test/CMakeFiles/osal_core_UT.dir/ut_oscore_mutex_test.c.o
+[ 88%] Building C object unit-tests/oscore-test/CMakeFiles/osal_core_UT.dir/ut_oscore_task_test.c.o
+[ 88%] Building C object unit-tests/oscore-test/CMakeFiles/osal_core_UT.dir/ut_oscore_test.c.o
+[ 89%] Linking C executable osal_core_UT
+[ 89%] Built target osal_core_UT
+[ 89%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE0.dir/ut_module.c.o
+[ 89%] Linking C shared library utmod/MODULE0.so
+[ 89%] Built target MODULE0
+[ 89%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE20.dir/ut_module.c.o
+[ 89%] Linking C shared library utmod/MODULE20.so
+[ 89%] Built target MODULE20
+[ 90%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE19.dir/ut_module.c.o
+[ 90%] Linking C shared library utmod/MODULE19.so
+[ 90%] Built target MODULE19
+[ 90%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE18.dir/ut_module.c.o
+[ 90%] Linking C shared library utmod/MODULE18.so
+[ 90%] Built target MODULE18
+[ 90%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE17.dir/ut_module.c.o
+[ 90%] Linking C shared library utmod/MODULE17.so
+[ 90%] Built target MODULE17
+[ 91%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE16.dir/ut_module.c.o
+[ 91%] Linking C shared library utmod/MODULE16.so
+[ 91%] Built target MODULE16
+[ 91%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE15.dir/ut_module.c.o
+[ 91%] Linking C shared library utmod/MODULE15.so
+[ 91%] Built target MODULE15
+[ 91%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE14.dir/ut_module.c.o
+[ 91%] Linking C shared library utmod/MODULE14.so
+[ 91%] Built target MODULE14
+[ 91%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE13.dir/ut_module.c.o
+[ 92%] Linking C shared library utmod/MODULE13.so
+[ 92%] Built target MODULE13
+[ 92%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE12.dir/ut_module.c.o
+[ 92%] Linking C shared library utmod/MODULE12.so
+[ 92%] Built target MODULE12
+[ 92%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE11.dir/ut_module.c.o
+[ 92%] Linking C shared library utmod/MODULE11.so
+[ 92%] Built target MODULE11
+[ 92%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE10.dir/ut_module.c.o
+[ 93%] Linking C shared library utmod/MODULE10.so
+[ 93%] Built target MODULE10
+[ 93%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE9.dir/ut_module.c.o
+[ 93%] Linking C shared library utmod/MODULE9.so
+[ 93%] Built target MODULE9
+[ 93%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE8.dir/ut_module.c.o
+[ 94%] Linking C shared library utmod/MODULE8.so
+[ 94%] Built target MODULE8
+[ 94%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE7.dir/ut_module.c.o
+[ 94%] Linking C shared library utmod/MODULE7.so
+[ 94%] Built target MODULE7
+[ 94%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE6.dir/ut_module.c.o
+[ 94%] Linking C shared library utmod/MODULE6.so
+[ 94%] Built target MODULE6
+[ 94%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE5.dir/ut_module.c.o
+[ 95%] Linking C shared library utmod/MODULE5.so
+[ 95%] Built target MODULE5
+[ 95%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE4.dir/ut_module.c.o
+[ 95%] Linking C shared library utmod/MODULE4.so
+[ 95%] Built target MODULE4
+[ 96%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE3.dir/ut_module.c.o
+[ 96%] Linking C shared library utmod/MODULE3.so
+[ 96%] Built target MODULE3
+[ 96%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE2.dir/ut_module.c.o
+[ 96%] Linking C shared library utmod/MODULE2.so
+[ 96%] Built target MODULE2
+[ 96%] Building C object unit-tests/osloader-test/CMakeFiles/MODULE1.dir/ut_module.c.o
+[ 96%] Linking C shared library utmod/MODULE1.so
+[ 96%] Built target MODULE1
+[ 96%] Building C object unit-tests/osloader-test/CMakeFiles/osal_loader_UT.dir/ut_osloader_module_test.c.o
+[ 97%] Building C object unit-tests/osloader-test/CMakeFiles/osal_loader_UT.dir/ut_osloader_symtable_test.c.o
+[ 97%] Building C object unit-tests/osloader-test/CMakeFiles/osal_loader_UT.dir/ut_osloader_test.c.o
+[ 97%] Linking C executable osal_loader_UT
+[ 97%] Built target osal_loader_UT
+[ 97%] Building C object unit-tests/osfilesys-test/CMakeFiles/osal_filesys_UT.dir/ut_osfilesys_diskio_test.c.o
+[ 98%] Building C object unit-tests/osfilesys-test/CMakeFiles/osal_filesys_UT.dir/ut_osfilesys_test.c.o
+[ 98%] Linking C executable osal_filesys_UT
+[ 98%] Built target osal_filesys_UT
+[ 98%] Building C object unit-tests/osfile-test/CMakeFiles/osal_file_UT.dir/ut_osfile_fileio_test.c.o
+[ 98%] Building C object unit-tests/osfile-test/CMakeFiles/osal_file_UT.dir/ut_osfile_dirio_test.c.o
+[ 98%] Building C object unit-tests/osfile-test/CMakeFiles/osal_file_UT.dir/ut_osfile_test.c.o
+[ 98%] Linking C executable osal_file_UT
+[ 98%] Built target osal_file_UT
+[ 98%] Building C object unit-tests/osnetwork-test/CMakeFiles/osal_network_UT.dir/ut_osnetwork_misc_test.c.o
+[ 98%] Building C object unit-tests/osnetwork-test/CMakeFiles/osal_network_UT.dir/ut_osnetwork_test.c.o
+[ 98%] Linking C executable osal_network_UT
+[ 98%] Built target osal_network_UT
+[ 98%] Building C object unit-tests/ostimer-test/CMakeFiles/osal_timer_UT.dir/ut_ostimer_timerio_test.c.o
+[100%] Building C object unit-tests/ostimer-test/CMakeFiles/osal_timer_UT.dir/ut_ostimer_test.c.o
+[100%] Linking C executable osal_timer_UT
+[100%] Built target osal_timer_UT
+# exit=0 wall=26.833095426 s

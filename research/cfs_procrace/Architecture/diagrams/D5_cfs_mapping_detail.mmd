@@ -1,0 +1,48 @@
+flowchart LR
+    %% D5 detail - example code sites (pinned v7.0.1 tree) and the Φ entries they become.
+    %% Source: spec §12 D5 (edge examples); §1.3, §1.4, §3.2, §3.3, §3.5, §3.6, §3.9, App. A.1.
+    %% Paths are relative to the pinned cFS tree; ":n" = line in the file named above it.
+
+    subgraph CODE["cFS code sites"]
+        C835["cfe_es_start.c:835 MainTaskSyncDelay<br/>+ panic branch :838-846"]
+        C803["cfe_es_start.c:803 reserve (RESERVED)<br/>:818 publish, :823 failure clear"]
+        C821["cfe_es_apps.c:821 reserve, :869 publish,<br/>:893 free (script apps)"]
+        C138["cfe_sb_task.c:138<br/>CFE_ES_GetAppID(#38;CFE_SB_Global.AppId)"]
+        CEVS["cfe_evs.c:56 memset slot, :106 REG store;<br/>:185-194 SendEventWithAppID checks"]
+        CPUT["cfe_sb_priv.c:1178 OS_QueuePut per destination<br/>(queue full → PipeOverflowErrorCounter, :1193)"]
+        CML["cfe_sb_priv.c:1058-1064<br/>MsgLim check at route snapshot"]
+        CIDM["osapi-idmap.c:384-385 (lock released on failure)<br/>vs :401-404 (by-name RESERVED: early return)"]
+        CPSP["cfe_psp_support.c:87 ShutdownReq = true<br/>cfe_psp_start.c:507 OS_DeleteAllObjects"]
+        CTERM["cfe_psp_support.c:116-121 CFE_PSP_Panic → abort();<br/>:60-107 CFE_PSP_Restart: delay, then abort"]
+    end
+
+    subgraph PHI["Φ_cFS entries"]
+        R19["R19 CORE-SERIAL<br/>stratum S, obs-fatal,<br/>predicate extracted from code"]
+        EAPP["es.app: RESERVED → LIVE / clear<br/>+ allocation record ρ(n)"]
+        KSELF["K-SELF.es (seven call sites)<br/>App-record windows"]
+        CELL["cell(CFE_SB_Global.AppId)<br/>+ K-ID capture point (derives)"]
+        KID["evs.reg(slot) D entry (memset) and REG;<br/>K-ID: value + registry conjuncts"]
+        KCAP["K-CAP: depth #60; cap_B(p) at put"]
+        KCAPM["K-CAP.msglim: BuffCount #60; MsgLim<br/>at route_lookup"]
+        KLB["K-LOCKBAL (M_impl, by-name token)"]
+        ESH["es.shutdown: SHUTDOWN_REQ, TEARDOWN<br/>SR rule; SCOPE; K-TEARDOWN"]
+        TT["terminal ops (T-TERM):<br/>no successor edge"]
+    end
+
+    C835 --> R19
+    C803 --> EAPP
+    C821 --> EAPP
+    C803 --> KSELF
+    C821 --> KSELF
+    C138 --> CELL
+    CEVS --> KID
+    CPUT --> KCAP
+    CML --> KCAPM
+    CIDM --> KLB
+    CPSP --> ESH
+    CTERM --> TT
+
+    classDef cfs fill:#eaf6ea,stroke:#2e7d32,color:#111
+    classDef phi fill:#e9e4f5,stroke:#5b3f99,color:#111
+    class C835,C803,C821,C138,CEVS,CPUT,CML,CIDM,CPSP,CTERM cfs
+    class R19,EAPP,KSELF,CELL,KID,KCAP,KCAPM,KLB,ESH,TT phi

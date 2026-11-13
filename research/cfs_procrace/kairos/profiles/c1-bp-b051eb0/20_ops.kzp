@@ -1,0 +1,140 @@
+# 20_ops.kzp -- operations of profile c1-bp-b051eb0.
+phi 1;
+
+# The lookup.  Its readiness precondition is that a semaphore of that name exists (plan/C1_basis_plan.md
+# 1.2: the definition is the object at the lookup's linearization point, the table search).  The returned
+# codes are the documented ones: OS_ERR_NAME_NOT_FOUND is the not-ready outcome.  OS_ERR_INCORRECT_OBJ_STATE
+# (the RESERVED window, A5) and OS_ERROR are not documented for this API and are not mapped.  The name is
+# a string in memory: the observation plan reads it with a probe-event fetch argument (a string slot named
+# like the parameter; observe/sites-*.kzp, 2026-10-24).
+op OS_CountSemGetIdByName(out sem_id, key sem_name: Str) {
+  bind symbol "OS_CountSemGetIdByName";
+  conjunct exists: state(osal.countsem(arg.sem_name)) = LIVE lp at fn("OS_CountSemGetIdByName").call("OS_ObjectIdFindByName") prov osal_countsem_getidbyname_def, osal_find_by_name;
+  # The applicability conditions of the two mappings that may fix `exists` (P1, adopted conditionally 2026-10-25,
+  # PI_DECISIONS_RESOLVED_20261025.md; review section 5.2, N02 L962-984).  Read at both OSAL revisions of the bundle
+  # candidates (the cited files are byte-identical in them).  The codes come from one code path only when the name is
+  # a string: OS_CHECK_POINTER(sem_name) returns OS_INVALID_POINTER for NULL (osapi-countsem.c L210), but it is a
+  # BUGCHECK that a build may compile out (osapi-macros.h L35-L43, OSAL_CONFIG_BUGCHECK_DISABLE), and then a NULL name
+  # reaches OS_ObjectIdFindByName, whose ARGCHECK(name) returns OS_ERR_NAME_NOT_FOUND without a search (L971).  So the
+  # record must carry the name as a text (the kernel read a string at the call: not NULL), and it must be shorter
+  # than OS_MAX_API_NAME (LENGTHCHECK, L972: a longer name gives OS_ERR_NAME_TOO_LONG, so a code of the search with
+  # such a name contradicts the code and fixes nothing).  The object type is fixed by the API (LOCAL_OBJID_TYPE =
+  # OS_OBJECT_TYPE_OS_COUNTSEM, osapi-countsem.c L53-L57, L212); the search runs under the type's global lock
+  # (OS_LOCK_MODE_GLOBAL, L974), so the state the code implies is that at the search, inside the call, never after
+  # its return.  The implication is the API's own: it does not depend on the caller (context any).  The name is the
+  # text the call received at its entry; the record does not observe the caller's string during the call (the CF
+  # field that holds it is not a condition of the judgement, PI decision P9).
+  outcome OS_SUCCESS: ready narrow {
+    api "OS_CountSemGetIdByName";
+    source osal rev "b44f4ce74a309ff93c985539ee8816a2fe92ed23", "f34759d6d6f7087e81afda94eccf7554e013cbe6";
+    branch "both pointers not NULL; OS_ObjectIdFindByName: ARGCHECK and LENGTHCHECK passed, OS_ObjectIdGetByName under the global lock: OS_ObjectIdFindNextMatch found a counting semaphore record with a defined active_id and the name, and OS_ObjectIdConvertToken accepted it (a valid id equal to the record's)";
+    context any;
+    captured sem_name text length < OS_MAX_API_NAME;
+    holds_at return;
+    prov osal_countsem_getidbyname_def, osal_countsem_type, osal_find_by_name, osal_find_by_name_checks, osal_get_by_name, osal_get_by_search, osal_find_next_match, osal_name_match, osal_id_defined, osal_convert_token_valid, osal_convert_token_global, osal_argcheck_macros;
+  };
+  outcome OS_ERR_NAME_NOT_FOUND: not_ready(exists) documented "retval OS_ERR_NAME_NOT_FOUND of OS_CountSemGetIdByName: the name was not found in the table" prov osal_countsem_h_getidbyname
+    narrow {
+      api "OS_CountSemGetIdByName";
+      source osal rev "b44f4ce74a309ff93c985539ee8816a2fe92ed23", "f34759d6d6f7087e81afda94eccf7554e013cbe6";
+      branch "name not NULL (so not the ARGCHECK of a NULL name, which returns the same code without a search) and shorter than OS_MAX_API_NAME; OS_ObjectIdFindNextMatch over the counting semaphore records found none with a defined active_id and the name";
+      context any;
+      captured sem_name text length < OS_MAX_API_NAME;
+      holds_at return;
+      prov osal_countsem_getidbyname_def, osal_countsem_type, osal_check_pointer, osal_bugcheck_off, osal_find_by_name, osal_find_by_name_checks, osal_argcheck_macros, osal_get_by_name, osal_get_by_search, osal_find_next_match, osal_name_match, osal_id_defined;
+    };
+  outcome OS_INVALID_POINTER: error documented "retval OS_INVALID_POINTER of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
+  outcome OS_ERR_NAME_TOO_LONG: error documented "retval OS_ERR_NAME_TOO_LONG of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
+  prov osal_countsem_getidbyname_def, osal_countsem_h_getidbyname;
+}
+
+# The creation.  The semaphore is LIVE when OS_ObjectIdFinalizeNew is called with a successful status
+# (the record becomes active and the out-parameter gets the id).
+op OS_CountSemCreate(out sem_id, sem_name: Str, sem_initial_value, options) {
+  bind symbol "OS_CountSemCreate";
+  effect publish: lifecycle osal.countsem(arg.sem_name) -> LIVE filter lp.operation_status = OS_SUCCESS lp at fn("OS_CountSemCreate").call("OS_ObjectIdFinalizeNew") values operation_status: Int prov osal_countsem_finalize, osal_countsem_create_def;
+  outcome OS_SUCCESS: ready;
+  outcome OS_INVALID_POINTER: error documented "retval OS_INVALID_POINTER of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_ERR_NAME_TOO_LONG: error documented "retval OS_ERR_NAME_TOO_LONG of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_ERR_NO_FREE_IDS: error documented "retval OS_ERR_NO_FREE_IDS of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_ERR_NAME_TAKEN: error documented "retval OS_ERR_NAME_TAKEN of OS_CountSemCreate: already the name of a counting semaphore" prov osal_countsem_h_create;
+  outcome OS_INVALID_SEM_VALUE: error documented "retval OS_INVALID_SEM_VALUE of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_SEM_FAILURE: error documented "retval OS_SEM_FAILURE of OS_CountSemCreate" prov osal_countsem_h_create;
+  prov osal_countsem_create_def, osal_countsem_h_create;
+}
+
+# The functions of CF and BP that frame the lookup (plan/C1_basis_plan.md 9.1: C-0/C-6, P-0/P-5) and the
+# exit of an application (C-7, P-E): events only, no effect.
+op CF_CFDP_InitEngine() {
+  bind symbol "CF_CFDP_InitEngine";
+  prov cf_app_init_engine_call, cf_cfdp_initengine_return;
+}
+
+op CF_Init() {
+  bind symbol "CF_Init";
+  prov cf_app_init_status;
+}
+
+op BP_FlowInit(AppName) {
+  bind symbol "BP_FlowInit";
+  prov bp_flowinit_calls_throttle;
+}
+
+# The exit of an application (C-7, P-E).  For an external application (CF, BP: the start script's applications) the
+# call does not return (es_exitapp_external): a terminal operation, an exit of the exit monitor (SPEC 1.6 "Horizon
+# monitors", exit(code, src); its code is the one parameter, ExitStatus).  The core-application branch, which may
+# return, is not modelled.
+op CFE_ES_ExitApp(ExitStatus) {
+  bind symbol "CFE_ES_ExitApp";
+  terminal;
+  prov es_exitapp_sig, cf_app_exit, bp_app_main_exit, es_exitapp_external;
+}
+
+# ---- the start state, the end of a lifetime, the scope (2026-10-24, C1 state-based) ----------------------------
+# OS_API_Init clears the whole object table once, before any object exists (OS_ObjectIdInit), and then the name
+# storage of the counting semaphores (OS_CountSemAPI_Init): from either point no name is the name of a counting
+# semaphore (a record counts only with a defined id and a matching name).  Observed, they are the start state of
+# osal.countsem (IN-03: the initialization code), not an assumption.
+op OS_ObjectIdInit() {
+  bind symbol "OS_ObjectIdInit";
+  effect clear_table: lifecycle all osal.countsem -> ABSENT lp at fn("OS_ObjectIdInit").memset(OS_common_record_t) prov osal_objectid_init, osal_api_init_call, osal_find_next_match, osal_name_match, osal_id_defined, osal_countsem_slice;
+  prov osal_objectid_init, osal_api_init_call;
+}
+
+op OS_CountSemAPI_Init() {
+  bind symbol "OS_CountSemAPI_Init";
+  effect clear_names: lifecycle all osal.countsem -> ABSENT lp at fn("OS_CountSemAPI_Init").memset(OS_count_sem_internal_record_t) prov osal_countsem_api_init, osal_api_init_countsem;
+  prov osal_countsem_api_init, osal_api_init_countsem;
+}
+
+# The delete (the cleanup of an application's resources, the teardown).  The record does not give the name of the
+# deleted semaphore (the id is the argument): the effect's resource is then not fixed and the kind is open from that
+# event on.
+op OS_CountSemDelete(sem_id) {
+  bind symbol "OS_CountSemDelete";
+  effect retire: lifecycle osal.countsem(lp.sem_name) -> ABSENT filter lp.operation_status = OS_SUCCESS lp at fn("OS_CountSemDelete").call("OS_ObjectIdFinalizeDelete") values sem_name: Str, operation_status: Int prov osal_countsem_delete_def, osal_finalize_delete;
+  prov osal_countsem_delete_def, osal_cleanup_object, es_cleanup_object_cb, osal_delete_all;
+}
+
+op CFE_PSP_Restart(reset_type) {
+  bind symbol "CFE_PSP_Restart";
+  effect request_shutdown: lifecycle psp.shutdown() -> SHUTDOWN_REQ lp at fn("CFE_PSP_Restart").store(CFE_PSP_IdleTaskState_t.ShutdownReq) prov psp_restart_req;
+  prov psp_restart_fn, psp_restart_req;
+}
+
+op OS_Application_Run() {
+  bind symbol "OS_Application_Run";
+  effect teardown: lifecycle psp.shutdown() -> TEARDOWN lp at fn("OS_Application_Run").call("OS_DeleteAllObjects") prov psp_teardown;
+  prov psp_app_run_fn, psp_teardown, osal_delete_all;
+}
+
+# Task creation (R2-P-TASK): the child's first event is the OSAL entry point.
+op OS_TaskCreate(out task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags) {
+  bind symbol "OS_TaskCreate";
+  prov osal_task_create_def;
+}
+
+op OS_TaskEntryPoint(task_id) {
+  bind symbol "OS_TaskEntryPoint";
+  prov osal_task_entry_def, osal_pthread_entry;
+}

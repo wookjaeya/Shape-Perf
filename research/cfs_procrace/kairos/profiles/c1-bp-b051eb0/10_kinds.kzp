@@ -1,0 +1,102 @@
+# 10_kinds.kzp -- kinds, the owner context, the named call sites and the roles of the call contexts.
+phi 1;
+
+# The actor that executes an operation belongs to an ES App record (app_owner, schema revision 2): only
+# the identity space and the table are needed to map an owner to its record key.
+context {
+  owner_kind es.app;
+  # The initial thread of the process (P10, 2026-10-25): main() runs OS_Application_Startup and then
+  # OS_Application_Run on it; every OSAL task is a new thread (pthread_create) that registers itself in its own
+  # context (OS_TaskEntryPoint, OS_TaskPrepare), and the initial thread never does: it has no OSAL task record, so it
+  # is no application's task (SPEC 1.2 T_raw, "the PSP main thread").  The record adapter states it for the thread
+  # whose id is the process id; no application name is given to it.
+  initial_thread not_app prov osal_bsp_main, osal_task_entry_def, osal_task_register, osal_pthread_entry, osal_pthread_create;
+  prov es_start_table_loop;
+}
+
+kind es.app(rec: Int) {
+  states FREE < RESERVED < LIVE;
+  initial FREE;
+  scope process;
+  table CFE_PLATFORM_ES_MAX_APPLICATIONS;
+  ids {
+    undefined CFE_RESOURCEID_UNDEFINED;
+    reserved CFE_RESOURCEID_RESERVED;
+    base CFE_ES_APPID_BASE;
+    serial_max CFE_RESOURCEID_MAX;
+  }
+  prov es_start_table_loop, resid_undefined_def, resid_reserved_def, resid_max_def, resid_appid_base;
+}
+
+# The throttle semaphore, by name (BP0_tsem, BP1_tsem as built, 05_consts.kzp).  Created by the provider
+# (BP, OS_CountSemCreate from initialize_throttling), looked up by CF (dependent use) and by BP (existence
+# check before its own create), deleted by no application of the closure (only OS_DeleteAllObjects at
+# teardown).  r_countsem_by_name says what is not modelled.
+kind osal.countsem(name: Str) {
+  states ABSENT < LIVE;
+  initial ABSENT;
+  scope process;
+  transition ABSENT -> LIVE on create;
+  transition LIVE -> ABSENT on delete;
+  prov osal_countsem_create_def, osal_countsem_finalize, osal_countsem_getidbyname_def, osal_find_by_name, osal_delete_all, bp_flow_throttle_init, bp_semcfg_table, r_countsem_by_name,
+       osal_objectid_init, osal_name_match, osal_find_next_match, osal_id_defined, osal_countsem_slice;
+}
+
+# The record fields of the counting semaphores (2026-10-24, C1 state-based): the name a lookup compares and the id
+# that makes a record count are the state of osal.countsem; the static closure (plan/C1_build_manifest.md 8.5) gives
+# their writers.  The fields are shared by every OSAL object type: `via` names the four functions inside which a write
+# changes a counting semaphore (r_countsem_type_slices); the adapter covers a writer through the observed effect of
+# those operations and separates the writers of other types (kz/trace/static_closure.hpp).
+bind field "OS_common_record_t" "active_id" as state(osal.countsem(name)) via "OS_ObjectIdInit", "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete" prov osal_find_next_match, osal_id_defined, osal_countsem_slice, r_countsem_type_slices;
+bind field "OS_common_record_t" "name_entry" as state(osal.countsem(name)) via "OS_ObjectIdInit", "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete" prov osal_name_match, osal_countsem_slice, r_countsem_type_slices;
+bind field "OS_count_sem_internal_record_t" "obj_name" as state(osal.countsem(name)) via "OS_ObjectIdInit", "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete" prov osal_countsem_api_init, osal_countsem_create_def, r_countsem_type_slices;
+
+# The shutdown of the process (2026-10-24): the default scope of the readiness specification ends at the shutdown
+# request (SPEC 1.6); the teardown deletes every OSAL object on the main thread after the request is observed
+# (SPEC 3.16 row SR).
+scope {
+  kind psp.shutdown;
+  request SHUTDOWN_REQ;
+  teardown TEARDOWN;
+  prov psp_restart_req, psp_teardown;
+}
+
+kind psp.shutdown() {
+  states RUN < SHUTDOWN_REQ < TEARDOWN;
+  initial RUN;
+  scope process;
+  transition RUN -> SHUTDOWN_REQ on request;
+  transition SHUTDOWN_REQ -> TEARDOWN on teardown;
+  prov psp_restart_req, psp_teardown;
+}
+
+# ---- named call sites (the source binding of the roles; the observation plan binds them to the binaries)
+site cf_lookup_call = fn("CF_CFDP_InitEngine").call("OS_CountSemGetIdByName") prov cf_cfdp_lookup_call;
+site bp_existence_probe_call = fn("initialize_throttling").call("OS_CountSemGetIdByName") prov bp_flow_lookup_call;
+site bp_create_call = fn("initialize_throttling").call("OS_CountSemCreate") prov bp_flow_create_call;
+
+# ---- roles of the call contexts of OS_CountSemGetIdByName (SPEC rev 1.3 amendment, 1.6 "Call contexts";
+# plan/C1_basis_plan.md 9.7 (a), (b)).  Both are chosen by what the sources say the call is for, never by
+# the name of the application.
+#
+# CF: a dependent use.  CF's documentation says CF assumes the semaphore is provided by another
+# application and terminates if it is expected and not found; issue #184 says CF expects it to be created
+# before CF starts; the event that reports the failure says it needs to exist before the engine is
+# initialized.  The readiness specification applies.
+role cf-dependent-lookup {
+  op OS_CountSemGetIdByName;
+  site cf_lookup_call;
+  purpose dependent_use;
+  prov cf_dox_flow_control, issue_184_body, cf_events_sem_eid, cf_cfdp_lookup, r_role_binding;
+}
+
+# BP: an existence probe.  The not-found outcome of this lookup is the condition under which BP creates
+# the same name itself (the else-if of the calling code), and the provider's comment says BP provides the
+# semaphore for CF.  No source says that BP needs the semaphore to exist before this call, so no readiness
+# precondition attaches; the call and its result stay as facts.
+role bp-existence-probe {
+  op OS_CountSemGetIdByName;
+  site bp_existence_probe_call;
+  purpose existence_probe;
+  prov bp_flow_throttle_init, bp_flow_lookup_call, bp_flow_create_call, bp_semcfg_purpose, r_role_binding;
+}

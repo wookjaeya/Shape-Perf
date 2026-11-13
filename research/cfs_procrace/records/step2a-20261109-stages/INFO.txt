@@ -1,0 +1,15 @@
+bundle=step2a-20261109-stages
+created_utc=2026-11-09T10:22:11.576Z
+repo_commit=2cd36d137aeff1238325ed0be0153226a554763d
+kernel=6.18.44-fc-v310
+source=/home/user/work/redesign/step2a/s1 files=151 bytes=109521828
+source=/home/user/work/redesign/step2a/s2 files=190 bytes=219344917
+source=/home/user/work/redesign/step2a/s3 files=246 bytes=150680128
+source=/home/user/work/redesign/step2a/s4 files=262 bytes=218040785
+source=/home/user/work/redesign/step2a/s5dev files=20 bytes=124392055
+tar_xz_bytes=27846816 parts=1 tar_xz_sha256=4362b735bb2d28995f630d03bbbed074f2ae79361655cffa33333bac6ee9a8d0
+location=/home/user/work/preserve/bundles-20261109/step2a-20261109-stages (local, not in the repository, not pushed)
+made_with=bundle_local.sh (tar --sort=name --owner=0 --group=0 --numeric-owner | xz -9 -T4 | split -b 45M), started 2026-11-09T10:20:56.806Z
+df_free_before=1151959040 df_free_after_create=1123631104
+credential_pattern_hits=none
+note=2a stage outputs s1-s4 and s5dev (RV3A 6.1 P2, stages); local only, not pushed (public repository; preservation location waits for the PI, RV4 analysis 7.3)

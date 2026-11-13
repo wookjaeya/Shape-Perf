@@ -1,0 +1,28 @@
+# hold-cf281a941.kzh -- the control plan of C1 stage C (controlled: researcher intervention, outside
+# P-C1HOLD, per PI_DECISIONS_RESOLVED_20261025 section 2 C) on the pre-fix 281a941 builds (format
+# kzp-hold 1).  It is read with the observation profile sites-cf281a941.kzp and its per-file bases.
+#
+# This is NOT P-C1HOLD: P-C1HOLD holds the provider on the failure path; here the CONSUMER (CF) is
+# held so that the provider can run ahead and create the semaphore, to see whether the pre-fix
+# single lookup then succeeds (READY) in the same binary and configuration -- a controlled normal
+# path (the "controlled A2" that plan section 9.2.1 keeps out of P-C1HOLD).  Label every run
+# controlled (researcher intervention); never mix with natural or P-C1HOLD counts.
+#
+# Gate: CF's thread is held at the entry of OS_CountSemGetIdByName when the caller is in cf.so (the
+# dependent lookup, bp_flow.c's existence probe in bp.so is not held -- caller-in discriminates by
+# module).  occurrence first = CF's first lookup (channel 0, BP0_tsem).  The pre-fix CF does a single
+# lookup per channel (cf_cfdp.c L993 @281a941), so holding it before the lookup lets the provider
+# create the semaphore first.
+#
+# Release: when BP enters OS_CountSemCreate for "BP1_tsem".  BP creates BP0_tsem fully (the call
+# returns) before it calls create for BP1_tsem in the same loop (bp_flow.c L124-142), so BP's entry
+# into the BP1_tsem creation is observed evidence that BP0_tsem has been created and the creating
+# call has returned -- the event the task names ("release when BP's OS_CountSemCreate for that name
+# returns"), expressed at a name-filterable point.  CF is then resumed and its held lookup of
+# BP0_tsem runs against a table in which BP0_tsem now exists.
+#
+# No value, application logic or resource name is changed.  If the release never fires, the harness
+# timeout (a pilot safeguard, researcher choice) ends the run and it is INCONCLUSIVE.
+kzp-hold 1
+gate G_cf_lookup site=osal.countsem_lookup.entry when caller-in cf.so occurrence first
+release R_bp0_done site=osal.countsem_create.entry releases G_cf_lookup when name sem_name "BP1_tsem" occurrence first

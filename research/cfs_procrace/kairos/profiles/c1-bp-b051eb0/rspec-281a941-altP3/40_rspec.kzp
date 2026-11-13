@@ -1,0 +1,33 @@
+# 40_rspec.kzp -- NOT THE CURRENT READING.  The alternative of the open PI decision P3 (Q-12) at CF 281a941:
+# cfs_cf.dox L212-L214 ("If a semaphore is expected and not found, the application will terminate during
+# initialization") bound as a caller record that accepts the exit.  Why the references do not decide it:
+# the sentence describes the termination and does not say it is accepted, it predates the fix (v3.0.0
+# 2ca7f97) and the fix did not change it; issue #184 says the same exit "shouldn't be a hard error"
+# (plan/C1_basis_plan.md 9.7 item 1, 9.8 G5, G7).  Selected only by giving this directory instead of
+# ../rspec-281a941/.  With the document alone the not-ready attempt would be judged by the exit entry; with
+# the issue bound as well the two conflict (QT-5) -- that sub-alternative is reported, not encoded.
+phi 1;
+
+prov cf_dox_terminate {
+  tier contract-backed;
+  kind api_doc;
+  side caller;
+  file "cf/docs/dox_src/cfs_cf.dox";
+  lines 212 214;
+  sha256 "cbb00c82e0aa992e65640128a2b781f598c2f3a6b3fc62c49dfe074d785c7a32";
+  note "P3 alternative only: the sentence read as a caller record that accepts the exit (exit(APP_ERROR)). The current reading does not bind it (plan/C1_basis_plan.md 9.7, 9.8 G5).";
+}
+
+rspec K-REG.osal-countsem-lookup {
+  use op OS_CountSemGetIdByName;
+  key osal.countsem(arg.sem_name);
+  requires state(osal.countsem(arg.sem_name)) = LIVE;
+  oracle fns "OS_ObjectIdFindByName", "OS_ObjectNameMatch";
+  appreq unspecified_by_reference;
+  allowed {
+    exit CFE_ES_RunStatus_APP_ERROR "cfs_cf.dox L212-L214" prov cf_dox_terminate;
+  }
+  harm app_error_exit;
+  authored "2026-10-24, C1 profile, P3 alternative (not current), from plan/C1_basis_plan.md 9.7 item 1 and 9.8; cases inspected: C1";
+  prov cf_dox_flow_control, issue_184_body, cf_events_sem_eid, osal_countsem_h_getidbyname, cf_cfdp_lookup, cf_app_init_status, cf_app_exit;
+}

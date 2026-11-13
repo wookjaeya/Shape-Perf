@@ -1,0 +1,375 @@
+--- a/post/src/bp/fsw/src/bp_flow.c
++++ b/post/src/bp/fsw/src/bp_flow.c
+@@ -118,18 +118,36 @@
+ /*-----------------------------------------------
+  * initialize_throttling
+  *-----------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++/* kz-instr-clang call-site wrapper: OS_CountSemGetIdByName called by initialize_throttling at bp_flow.c:126:13; binds 196609/196610 */
++static inline int32 kz_w196609(osal_id_t *kz_p0, const char *kz_p1)
++{
++    uint32_t kz_e = kz_rt_obs_str(20u, 196609u, 0u, 0x3u, (uint64_t)(uintptr_t)(kz_p0), (uint64_t)(uintptr_t)(kz_p1), 0u, 0u, 1u, 20u);
++    int32 kz_r = OS_CountSemGetIdByName(kz_p0, kz_p1);
++    (void)kz_rt_obs(21u, 196610u, kz_e, (0x1u | ((kz_p0 != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (kz_p0 != 0 ? (uint64_t)(uint32_t)(*kz_p0) : 0u), 0u, 0u);
++    return kz_r;
++}
++/* kz-instr-clang call-site wrapper: OS_CountSemCreate called by initialize_throttling at bp_flow.c:132:18; binds 196611/196612 */
++static inline int32 kz_w196611(osal_id_t *kz_p0, const char *kz_p1, uint32 kz_p2, uint32 kz_p3)
++{
++    uint32_t kz_e = kz_rt_obs_str(22u, 196611u, 0u, 0x7u, (uint64_t)(uintptr_t)(kz_p0), (uint64_t)(uintptr_t)(kz_p1), (uint64_t)(uint32_t)(kz_p2), 0u, 1u, 20u);
++    int32 kz_r = OS_CountSemCreate(kz_p0, kz_p1, kz_p2, kz_p3);
++    (void)kz_rt_obs(23u, 196612u, kz_e, (0x1u | ((kz_p0 != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (kz_p0 != 0 ? (uint64_t)(uint32_t)(*kz_p0) : 0u), 0u, 0u);
++    return kz_r;
++}
++#line 121
+ static void initialize_throttling(void)
+ {
+     int index = 0;
+     for (index = 0; index < BP_NUM_SEM_THROTTLES; index++)
+     {
+-        if (OS_CountSemGetIdByName(&BP_GlobalData.Throttles[index].Sem, BP_GlobalData.Throttles[index].Name) ==
++        if (kz_w196609(&BP_GlobalData.Throttles[index].Sem, BP_GlobalData.Throttles[index].Name) ==
+             CFE_SUCCESS)
+         {
+             CFE_EVS_SendEvent(BP_SEM_INFO_EID, CFE_EVS_EventType_INFORMATION, "Found semaphore: %s",
+                               BP_GlobalData.Throttles[index].Name);
+         }
+-        else if (OS_CountSemCreate(&BP_GlobalData.Throttles[index].Sem, BP_GlobalData.Throttles[index].Name,
++        else if (kz_w196611(&BP_GlobalData.Throttles[index].Sem, BP_GlobalData.Throttles[index].Name,
+                                    BP_GlobalData.Throttles[index].Max, 0) == CFE_SUCCESS)
+         {
+             CFE_EVS_SendEvent(BP_SEM_INFO_EID, CFE_EVS_EventType_INFORMATION, "Created semaphore: %s",
+@@ -517,7 +535,7 @@
+  * BP_FlowInit
+  *-----------------------------------------------*/
+ int32 BP_FlowInit(const char *AppName)
+-{
++{ const uint32_t kz_e196613 = 0u;
+     int32 cfe_status;
+ 
+     /* Initialize Throttling */
+@@ -533,13 +551,13 @@
+     {
+         CFE_EVS_SendEvent(BP_TBL_LOAD_ERR_EID, CFE_EVS_EventType_ERROR, "Failed (%d) to register flow table %s",
+                           (int)cfe_status, BP_FLOW_TBL_NAME);
+-        return BP_TBL_LOAD_ERR_EID;
++        { int32 kz_r = ( BP_TBL_LOAD_ERR_EID); (void)kz_rt_obs(24u, 196613u, kz_e196613, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_r), 0u, 0u, 0u); return kz_r; }
+     }
+ 
+     snprintf(BP_GlobalData.ConfigTableName, sizeof(BP_GlobalData.ConfigTableName), "%s.%s", BP_GlobalData.AppName,
+              BP_FLOW_TBL_NAME);
+ 
+-    return CFE_SUCCESS;
++    { int32 kz_r = ( CFE_SUCCESS); (void)kz_rt_obs(24u, 196613u, kz_e196613, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_r), 0u, 0u, 0u); return kz_r; }
+ }
+ 
+ /*-----------------------------------------------
+@@ -1362,3 +1380,10 @@
+         }
+     }
+ }
++
++/* kz-instr-clang: registration of module 3 */
++static void kz_module_3(void) __attribute__((constructor));
++static void kz_module_3(void)
++{
++    kz_rt_module(3u, 0);
++}
+--- a/post/src/cf/fsw/src/cf_app.c
++++ b/post/src/cf/fsw/src/cf_app.c
+@@ -203,8 +203,10 @@
+  * See description in cf_app.h for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++#line 206
+ int32 CF_Init(void)
+-{
++{ const uint32_t kz_e131073 = 0u;
+     int32                            status       = CFE_SUCCESS;
+     static const CFE_SB_MsgId_Atom_t MID_VALUES[] = {CF_CMD_MID, CF_SEND_HK_MID, CF_WAKE_UP_MID};
+     uint32                           i;
+@@ -263,7 +265,7 @@
+         }
+     }
+ 
+-    return status;
++    { int32 kz_r = ( status); (void)kz_rt_obs(14u, 131073u, kz_e131073, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_r), 0u, 0u, 0u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------
+@@ -320,6 +322,14 @@
+  * See description in cf_app.h for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
++/* kz-instr-clang call-site wrapper: CFE_ES_ExitApp called by CF_AppMain at cf_app.c:366:5; binds 131074/- */
++static inline void kz_w131074(uint32 kz_p0)
++{
++    uint32_t kz_e = kz_rt_obs(15u, 131074u, 0u, 0x1u, (uint64_t)(uint32_t)(kz_p0), 0u, 0u, 0u);
++    CFE_ES_ExitApp(kz_p0);
++    (void)kz_e;
++}
++#line 323
+ void CF_AppMain(void)
+ {
+     int32            status;
+@@ -363,5 +373,12 @@
+     }
+ 
+     CFE_ES_PerfLogExit(CF_PERF_ID_APPMAIN);
+-    CFE_ES_ExitApp(CF_AppData.run_status);
++    kz_w131074(CF_AppData.run_status);
++}
++
++/* kz-instr-clang: registration of module 2 */
++static void kz_module_2(void) __attribute__((constructor));
++static void kz_module_2(void)
++{
++    kz_rt_module(2u, 0);
+ }
+--- a/post/src/cf/fsw/src/cf_cfdp.c
++++ b/post/src/cf/fsw/src/cf_cfdp.c
+@@ -949,8 +949,25 @@
+  * See description in cf_cfdp.h for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
+-int32 CF_CFDP_InitEngine(void)
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++/* kz-instr-clang call-site wrapper: OS_CountSemGetIdByName called by CF_CFDP_InitEngine at cf_cfdp.c:1003:23; binds 131075/131076 */
++static inline int32 kz_w131075(osal_id_t *kz_p0, const char *kz_p1)
++{
++    uint32_t kz_e = kz_rt_obs_str(10u, 131075u, 0u, 0x3u, (uint64_t)(uintptr_t)(kz_p0), (uint64_t)(uintptr_t)(kz_p1), 0u, 0u, 1u, 20u);
++    int32 kz_r = OS_CountSemGetIdByName(kz_p0, kz_p1);
++    (void)kz_rt_obs(11u, 131076u, kz_e, (0x1u | ((kz_p0 != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (kz_p0 != 0 ? (uint64_t)(uint32_t)(*kz_p0) : 0u), 0u, 0u);
++    return kz_r;
++}
++/* kz-instr-clang call-site wrapper: OS_TaskDelay called by CF_CFDP_InitEngine at cf_cfdp.c:1011:17; binds -/131077 */
++static inline int32 kz_w131077(uint32 kz_p0)
+ {
++    int32 kz_r = OS_TaskDelay(kz_p0);
++    (void)kz_rt_obs(12u, 131077u, 0u, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_r), 0u, 0u, 0u);
++    return kz_r;
++}
++#line 952
++int32 CF_CFDP_InitEngine(void)
++{ const uint32_t kz_e131078 = 0u;
+     /* initialize all transaction nodes */
+     int                i;
+     int                j;
+@@ -1000,7 +1017,7 @@
+             ret = OS_ERR_NAME_NOT_FOUND;
+             for (j = 0; j < CF_STARTUP_SEM_MAX_RETRIES; ++j)
+             {
+-                ret = OS_CountSemGetIdByName(&CF_AppData.engine.channels[i].sem_id,
++                ret = kz_w131075(&CF_AppData.engine.channels[i].sem_id,
+                                              CF_AppData.config_table->chan[i].sem_name);
+ 
+                 if (ret != OS_ERR_NAME_NOT_FOUND)
+@@ -1008,7 +1025,7 @@
+                     break;
+                 }
+ 
+-                OS_TaskDelay(CF_STARTUP_SEM_TASK_DELAY);
++                kz_w131077(CF_STARTUP_SEM_TASK_DELAY);
+             }
+ 
+             if (ret != OS_SUCCESS)
+@@ -1050,7 +1067,7 @@
+         CF_AppData.engine.enabled = 1;
+     }
+ 
+-    return ret;
++    { int32 kz_r = ( ret); (void)kz_rt_obs(13u, 131078u, kz_e131078, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_r), 0u, 0u, 0u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------
+--- a/bundle_1df262a/cfe/modules/es/fsw/src/cfe_es_api.c
++++ b/bundle_1df262a/cfe/modules/es/fsw/src/cfe_es_api.c
+@@ -337,8 +337,10 @@
+  * See description in header file for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++#line 340
+ void CFE_ES_ExitApp(uint32 ExitStatus)
+-{
++{ (void)kz_rt_obs(40u, 65537u, 0u, 0x1u, (uint64_t)(uint32_t)(ExitStatus), 0u, 0u, 0u);
+     int32               ReturnCode;
+     CFE_ES_AppRecord_t *AppRecPtr;
+ 
+@@ -1247,7 +1249,7 @@
+ CFE_Status_t CFE_ES_CreateChildTask(CFE_ES_TaskId_t *TaskIdPtr, const char *TaskName,
+                                     CFE_ES_ChildTaskMainFuncPtr_t FunctionPtr, CFE_ES_StackPointer_t StackPtr,
+                                     size_t StackSize, CFE_ES_TaskPriority_Atom_t Priority, uint32 Flags)
+-{
++{ uint32_t kz_e65538 = kz_rt_obs(43u, 65538u, 0u, 0x3u, (uint64_t)(uintptr_t)(TaskName), (uint64_t)(uintptr_t)(FunctionPtr), 0u, 0u);
+     int32                    ReturnCode;
+     CFE_ES_AppRecord_t *     AppRecPtr;
+     CFE_ES_AppId_t           ParentAppId;
+@@ -1329,7 +1331,7 @@
+         ReturnCode = CFE_ES_StartAppTask(TaskIdPtr, TaskName, FunctionPtr, &Params, ParentAppId);
+     }
+ 
+-    return ReturnCode;
++    { CFE_Status_t kz_r = ( ReturnCode); (void)kz_rt_obs(44u, 65539u, kz_e65538, (0x1u | ((TaskIdPtr != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (TaskIdPtr != 0 ? (uint64_t)(uint32_t)(*TaskIdPtr) : 0u), 0u, 0u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------
+@@ -2210,3 +2212,10 @@
+     }
+     return string;
+ }
++
++/* kz-instr-clang: registration of module 1 */
++static void kz_module_1(void) __attribute__((constructor));
++static void kz_module_1(void)
++{
++    kz_rt_module(1u, 0);
++}
+--- a/bundle_1df262a/cfe/modules/es/fsw/src/cfe_es_apps.c
++++ b/bundle_1df262a/cfe/modules/es/fsw/src/cfe_es_apps.c
+@@ -573,9 +573,11 @@
+  * See description in header file for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++#line 576
+ int32 CFE_ES_StartAppTask(CFE_ES_TaskId_t *TaskIdPtr, const char *TaskName, CFE_ES_TaskEntryFuncPtr_t EntryFunc,
+                           const CFE_ES_TaskStartParams_t *Params, CFE_ES_AppId_t ParentAppId)
+-{
++{ uint32_t kz_e65540 = kz_rt_obs(41u, 65540u, 0u, 0x7u, (uint64_t)(uintptr_t)(TaskName), (uint64_t)(uintptr_t)(EntryFunc), (uint64_t)(uint32_t)(ParentAppId), 0u);
+     CFE_ES_TaskRecord_t *TaskRecPtr;
+     osal_id_t            OsalTaskId = OS_OBJECT_ID_UNDEFINED;
+     CFE_ES_TaskId_t      LocalTaskId;
+@@ -642,7 +644,7 @@
+ 
+     CFE_ES_UnlockSharedData(__func__, __LINE__);
+ 
+-    return ReturnCode;
++    { int32 kz_r = ( ReturnCode); (void)kz_rt_obs(42u, 65541u, kz_e65540, (0x1u | ((TaskIdPtr != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (TaskIdPtr != 0 ? (uint64_t)(uint32_t)(*TaskIdPtr) : 0u), 0u, 0u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------
+--- a/bundle_1df262a/osal/src/os/shared/src/osapi-countsem.c
++++ b/bundle_1df262a/osal/src/os/shared/src/osapi-countsem.c
+@@ -80,8 +80,18 @@
+  *           See description in API and header file for detail
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++/* kz-instr-clang call-site wrapper: OS_ObjectIdFinalizeNew called by OS_CountSemCreate at osapi-countsem.c:106:23; binds 65548/65549 */
++static inline int32 kz_w65548(int32 kz_p0, OS_object_token_t *kz_p1, osal_id_t *kz_p2)
++{
++    uint32_t kz_e = kz_rt_obs(37u, 65548u, 0u, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_p0), 0u, 0u, 0u);
++    int32 kz_r = OS_ObjectIdFinalizeNew(kz_p0, kz_p1, kz_p2);
++    (void)kz_rt_obs(38u, 65549u, kz_e, (0x1u | ((kz_p2 != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (kz_p2 != 0 ? (uint64_t)(uint32_t)(*kz_p2) : 0u), 0u, 0u);
++    return kz_r;
++}
++#line 83
+ int32 OS_CountSemCreate(osal_id_t *sem_id, const char *sem_name, uint32 sem_initial_value, uint32 options)
+-{
++{ uint32_t kz_e65546 = kz_rt_obs(35u, 65546u, 0u, 0xdu, (uint64_t)(uintptr_t)(sem_id), 0u, (uint64_t)(uintptr_t)(sem_name), (uint64_t)(uint32_t)(sem_initial_value));
+     int32                           return_code;
+     OS_object_token_t               token;
+     OS_count_sem_internal_record_t *countsem;
+@@ -103,10 +113,10 @@
+         return_code = OS_CountSemCreate_Impl(&token, sem_initial_value, options);
+ 
+         /* Check result, finalize record, and unlock global table. */
+-        return_code = OS_ObjectIdFinalizeNew(return_code, &token, sem_id);
++        return_code = kz_w65548(return_code, &token, sem_id);
+     }
+ 
+-    return return_code;
++    { int32 kz_r = ( return_code); (void)kz_rt_obs(36u, 65547u, kz_e65546, (0x1u | ((sem_id != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (sem_id != 0 ? (uint64_t)(uint32_t)(*sem_id) : 0u), 0u, 0u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------
+@@ -201,17 +211,26 @@
+  *           See description in API and header file for detail
+  *
+  *-----------------------------------------------------------------*/
+-int32 OS_CountSemGetIdByName(osal_id_t *sem_id, const char *sem_name)
++/* kz-instr-clang call-site wrapper: OS_ObjectIdFindByName called by OS_CountSemGetIdByName at osapi-countsem.c:212:19; binds 65544/65545 */
++static inline int32 kz_w65544(osal_objtype_t kz_p0, const char *kz_p1, osal_id_t *kz_p2)
+ {
++    uint32_t kz_e = kz_rt_obs_str(32u, 65544u, 0u, 0x3u, (uint64_t)(uint32_t)(kz_p0), (uint64_t)(uintptr_t)(kz_p1), 0u, 0u, 1u, 20u);
++    int32 kz_r = OS_ObjectIdFindByName(kz_p0, kz_p1, kz_p2);
++    (void)kz_rt_obs(33u, 65545u, kz_e, (0x1u | ((kz_p2 != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (kz_p2 != 0 ? (uint64_t)(uint32_t)(*kz_p2) : 0u), 0u, 0u);
++    return kz_r;
++}
++#line 204
++int32 OS_CountSemGetIdByName(osal_id_t *sem_id, const char *sem_name)
++{ uint32_t kz_e65542 = kz_rt_obs(30u, 65542u, 0u, 0x5u, (uint64_t)(uintptr_t)(sem_id), 0u, (uint64_t)(uintptr_t)(sem_name), 0u);
+     int32 return_code;
+ 
+     /* Check parameters */
+     OS_CHECK_POINTER(sem_id);
+     OS_CHECK_POINTER(sem_name);
+ 
+-    return_code = OS_ObjectIdFindByName(LOCAL_OBJID_TYPE, sem_name, sem_id);
++    return_code = kz_w65544(LOCAL_OBJID_TYPE, sem_name, sem_id);
+ 
+-    return return_code;
++    { int32 kz_r = ( return_code); (void)kz_rt_obs(31u, 65543u, kz_e65542, (0x1u | ((sem_id != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (sem_id != 0 ? (uint64_t)(uint32_t)(*sem_id) : 0u), 0u, 0u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------
+--- a/bundle_1df262a/osal/src/os/shared/src/osapi-idmap.c
++++ b/bundle_1df262a/osal/src/os/shared/src/osapi-idmap.c
+@@ -959,6 +959,14 @@
+  *  returns: OS_ERR_NAME_NOT_FOUND if not found, OS_SUCCESS if match is found
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++/* kz-instr-clang store tap: OS_ObjectIdFindByName at osapi-idmap.c:978:20; bind 65550 */
++static inline osal_id_t kz_s65550(osal_id_t kz_v)
++{
++    (void)kz_rt_obs(34u, 65550u, 0u, 0x1u, (uint64_t)(uint32_t)(kz_v), 0u, 0u, 0u);
++    return kz_v;
++}
++#line 962
+ int32 OS_ObjectIdFindByName(osal_objtype_t idtype, const char *name, osal_id_t *object_id)
+ {
+     int32             return_code;
+@@ -975,7 +983,7 @@
+     return_code = OS_ObjectIdGetByName(OS_LOCK_MODE_GLOBAL, idtype, name, &token);
+     if (return_code == OS_SUCCESS)
+     {
+-        *object_id = token.obj_id;
++        *object_id = kz_s65550((token.obj_id));
+ 
+         OS_ObjectIdRelease(&token);
+     }
+--- a/bundle_1df262a/osal/src/os/shared/src/osapi-task.c
++++ b/bundle_1df262a/osal/src/os/shared/src/osapi-task.c
+@@ -121,8 +121,10 @@
+  *           call the user's intended entry point function.
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++#line 124
+ void OS_TaskEntryPoint(osal_id_t task_id)
+-{
++{ (void)kz_rt_obs(47u, 65553u, 0u, 0x1u, (uint64_t)(uint32_t)(task_id), 0u, 0u, 0u);
+     osal_task_entry task_entry;
+ 
+     if (OS_TaskPrepare(task_id, &task_entry) == OS_SUCCESS)
+@@ -163,7 +165,7 @@
+  *-----------------------------------------------------------------*/
+ int32 OS_TaskCreate(osal_id_t *task_id, const char *task_name, osal_task_entry function_pointer,
+                     osal_stackptr_t stack_pointer, size_t stack_size, osal_priority_t priority, uint32 flags)
+-{
++{ uint32_t kz_e65551 = kz_rt_obs(45u, 65551u, 0u, 0x7u, (uint64_t)(uintptr_t)(task_name), (uint64_t)(uintptr_t)(function_pointer), (uint64_t)(uint8_t)(priority), 0u);
+     int32                      return_code;
+     OS_object_token_t          token;
+     OS_task_internal_record_t *task;
+@@ -199,7 +201,7 @@
+         return_code = OS_ObjectIdFinalizeNew(return_code, &token, task_id);
+     }
+ 
+-    return return_code;
++    { int32 kz_r = ( return_code); (void)kz_rt_obs_str(46u, 65552u, kz_e65551, (0x5u | ((task_id != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (task_id != 0 ? (uint64_t)(uint32_t)(*task_id) : 0u), (uint64_t)(uintptr_t)(task_name), 0u, 2u, 20u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------

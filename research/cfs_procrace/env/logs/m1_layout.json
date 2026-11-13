@@ -1,0 +1,493 @@
+{
+ "objects": {
+  "core": {
+   "file": "core-cpu1",
+   "sha256": "0edb1ae28780160ebee95adf8861fc76fe7119a30434e9cd8698cb505bc97799"
+  },
+  "hs": {
+   "file": "cf/hs.so",
+   "sha256": "4c5b0a2f9f77883fe69474f81eb344ffd47a69421df02b56d9fb4027d6b4c071"
+  }
+ },
+ "tables": {
+  "es_app": {
+   "addr": 542352,
+   "count": 32,
+   "fields": {
+    "AppId": {
+     "kind": "int",
+     "off": 0,
+     "size": 4
+    },
+    "AppName": {
+     "kind": "str",
+     "off": 4,
+     "size": 20
+    },
+    "AppState": {
+     "kind": "int",
+     "off": 24,
+     "size": 4
+    },
+    "MainTaskId": {
+     "kind": "int",
+     "off": 176,
+     "size": 4
+    },
+    "Type": {
+     "kind": "int",
+     "off": 28,
+     "size": 1
+    }
+   },
+   "object": "core",
+   "stride": 184
+  },
+  "es_state": {
+   "addr": 537696,
+   "count": 1,
+   "fields": {
+    "SystemState": {
+     "kind": "sint",
+     "off": 24,
+     "size": 4
+    }
+   },
+   "object": "core",
+   "stride": 57400
+  },
+  "es_task": {
+   "addr": 537728,
+   "count": 64,
+   "fields": {
+    "AppId": {
+     "kind": "int",
+     "off": 24,
+     "size": 4
+    },
+    "ExecutionCounter": {
+     "kind": "int",
+     "off": 64,
+     "size": 4
+    },
+    "StartParams.Priority": {
+     "kind": "int",
+     "off": 48,
+     "size": 2
+    },
+    "StartParams.StackSize": {
+     "kind": "int",
+     "off": 32,
+     "size": 8
+    },
+    "TaskId": {
+     "kind": "int",
+     "off": 0,
+     "size": 4
+    },
+    "TaskName": {
+     "kind": "str",
+     "off": 4,
+     "size": 20
+    }
+   },
+   "object": "core",
+   "stride": 72
+  },
+  "evs_app": {
+   "addr": 595872,
+   "count": 32,
+   "fields": {
+    "ActiveFlag": {
+     "kind": "int",
+     "off": 72,
+     "size": 1
+    },
+    "AppID": {
+     "kind": "int",
+     "off": 0,
+     "size": 4
+    },
+    "BinFilters": {
+     "kind": "raw",
+     "off": 8,
+     "size": 64
+    },
+    "EventCount": {
+     "kind": "int",
+     "off": 78,
+     "size": 2
+    },
+    "SquelchTokens": {
+     "kind": "sint",
+     "off": 88,
+     "size": 4
+    },
+    "SquelchedCount": {
+     "kind": "int",
+     "off": 92,
+     "size": 1
+    }
+   },
+   "object": "core",
+   "stride": 96
+  },
+  "evs_hk": {
+   "addr": 598968,
+   "count": 1,
+   "fields": {
+    "LogFullFlag": {
+     "kind": "int",
+     "off": 6,
+     "size": 1
+    },
+    "LogOverflowCounter": {
+     "kind": "int",
+     "off": 10,
+     "size": 2
+    },
+    "MessageSendCounter": {
+     "kind": "int",
+     "off": 8,
+     "size": 2
+    },
+    "MessageTruncCounter": {
+     "kind": "int",
+     "off": 3,
+     "size": 1
+    },
+    "UnregisteredAppCounter": {
+     "kind": "int",
+     "off": 4,
+     "size": 1
+    }
+   },
+   "object": "core",
+   "stride": 144
+  },
+  "hs": {
+   "addr": 49952,
+   "count": 1,
+   "fields": {
+    "AlivenessCounter": {
+     "kind": "int",
+     "off": 244,
+     "size": 4
+    },
+    "AppMonLoaded": {
+     "kind": "int",
+     "off": 19,
+     "size": 1
+    },
+    "CDSState": {
+     "kind": "int",
+     "off": 18,
+     "size": 1
+    },
+    "CmdCount": {
+     "kind": "int",
+     "off": 25,
+     "size": 1
+    },
+    "CmdErrCount": {
+     "kind": "int",
+     "off": 26,
+     "size": 1
+    },
+    "CurrentAlivenessState": {
+     "kind": "int",
+     "off": 15,
+     "size": 1
+    },
+    "CurrentAppMonState": {
+     "kind": "int",
+     "off": 13,
+     "size": 1
+    },
+    "CurrentCPUHogState": {
+     "kind": "int",
+     "off": 21,
+     "size": 1
+    },
+    "CurrentCPUUtilIndex": {
+     "kind": "int",
+     "off": 276,
+     "size": 4
+    },
+    "CurrentEventMonState": {
+     "kind": "int",
+     "off": 14,
+     "size": 1
+    },
+    "EventMonLoaded": {
+     "kind": "int",
+     "off": 20,
+     "size": 1
+    },
+    "EventsMonitoredCount": {
+     "kind": "int",
+     "off": 28,
+     "size": 4
+    },
+    "MsgActExec": {
+     "kind": "int",
+     "off": 248,
+     "size": 4
+    },
+    "RunStatus": {
+     "kind": "int",
+     "off": 252,
+     "size": 4
+    },
+    "ServiceWatchdogFlag": {
+     "kind": "int",
+     "off": 12,
+     "size": 1
+    },
+    "SysMonPspModuleId": {
+     "kind": "int",
+     "off": 256,
+     "size": 4
+    },
+    "SysMonSubchannelId": {
+     "kind": "int",
+     "off": 262,
+     "size": 2
+    },
+    "SysMonSubsystemId": {
+     "kind": "int",
+     "off": 260,
+     "size": 2
+    },
+    "UtilCpuAvg": {
+     "kind": "int",
+     "off": 536,
+     "size": 4
+    },
+    "UtilCpuPeak": {
+     "kind": "int",
+     "off": 540,
+     "size": 4
+    },
+    "UtilizationCycleCounter": {
+     "kind": "int",
+     "off": 264,
+     "size": 4
+    }
+   },
+   "object": "hs",
+   "stride": 776
+  },
+  "os_queue": {
+   "addr": 1758240,
+   "count": 64,
+   "fields": {
+    "max_depth": {
+     "kind": "int",
+     "off": 32,
+     "size": 8
+    },
+    "max_size": {
+     "kind": "int",
+     "off": 24,
+     "size": 8
+    },
+    "queue_name": {
+     "kind": "str",
+     "off": 0,
+     "size": 20
+    }
+   },
+   "object": "core",
+   "stride": 40
+  },
+  "os_queue_common": {
+   "addr": 1731296,
+   "count": 64,
+   "fields": {
+    "active_id": {
+     "kind": "int",
+     "off": 8,
+     "size": 4
+    },
+    "creator": {
+     "kind": "int",
+     "off": 12,
+     "size": 4
+    }
+   },
+   "object": "core",
+   "stride": 24
+  },
+  "os_queue_impl": {
+   "addr": 1773536,
+   "count": 64,
+   "fields": {
+    "id": {
+     "kind": "sint",
+     "off": 0,
+     "size": 4
+    }
+   },
+   "object": "core",
+   "stride": 4
+  },
+  "os_task": {
+   "addr": 1761280,
+   "count": 64,
+   "fields": {
+    "priority": {
+     "kind": "int",
+     "off": 32,
+     "size": 1
+    },
+    "stack_size": {
+     "kind": "int",
+     "off": 24,
+     "size": 8
+    },
+    "task_name": {
+     "kind": "str",
+     "off": 0,
+     "size": 20
+    }
+   },
+   "object": "core",
+   "stride": 72
+  },
+  "os_task_common": {
+   "addr": 1729760,
+   "count": 64,
+   "fields": {
+    "active_id": {
+     "kind": "int",
+     "off": 8,
+     "size": 4
+    },
+    "creator": {
+     "kind": "int",
+     "off": 12,
+     "size": 4
+    }
+   },
+   "object": "core",
+   "stride": 24
+  },
+  "sb_hk": {
+   "addr": 601728,
+   "count": 1,
+   "fields": {
+    "CommandCounter": {
+     "kind": "int",
+     "off": 0,
+     "size": 1
+    },
+    "CommandErrorCounter": {
+     "kind": "int",
+     "off": 1,
+     "size": 1
+    },
+    "CreatePipeErrorCounter": {
+     "kind": "int",
+     "off": 6,
+     "size": 1
+    },
+    "DuplicateSubscriptionsCounter": {
+     "kind": "int",
+     "off": 9,
+     "size": 1
+    },
+    "InternalErrorCounter": {
+     "kind": "int",
+     "off": 5,
+     "size": 1
+    },
+    "MemInUse": {
+     "kind": "int",
+     "off": 20,
+     "size": 4
+    },
+    "MsgLimitErrorCounter": {
+     "kind": "int",
+     "off": 14,
+     "size": 2
+    },
+    "MsgReceiveErrorCounter": {
+     "kind": "int",
+     "off": 4,
+     "size": 1
+    },
+    "MsgSendErrorCounter": {
+     "kind": "int",
+     "off": 3,
+     "size": 1
+    },
+    "NoSubscribersCounter": {
+     "kind": "int",
+     "off": 2,
+     "size": 1
+    },
+    "PipeOverflowErrorCounter": {
+     "kind": "int",
+     "off": 12,
+     "size": 2
+    },
+    "SubscribeErrorCounter": {
+     "kind": "int",
+     "off": 7,
+     "size": 1
+    }
+   },
+   "object": "core",
+   "stride": 28
+  },
+  "sb_pipe": {
+   "addr": 599664,
+   "count": 64,
+   "fields": {
+    "AppId": {
+     "kind": "int",
+     "off": 4,
+     "size": 4
+    },
+    "CurrentQueueDepth": {
+     "kind": "int",
+     "off": 18,
+     "size": 2
+    },
+    "MaxQueueDepth": {
+     "kind": "int",
+     "off": 16,
+     "size": 2
+    },
+    "Opts": {
+     "kind": "int",
+     "off": 12,
+     "size": 1
+    },
+    "PeakQueueDepth": {
+     "kind": "int",
+     "off": 20,
+     "size": 2
+    },
+    "PipeId": {
+     "kind": "int",
+     "off": 0,
+     "size": 4
+    },
+    "SendErrors": {
+     "kind": "int",
+     "off": 14,
+     "size": 2
+    },
+    "SysQueueId": {
+     "kind": "int",
+     "off": 8,
+     "size": 4
+    }
+   },
+   "object": "core",
+   "stride": 32
+  }
+ }
+}

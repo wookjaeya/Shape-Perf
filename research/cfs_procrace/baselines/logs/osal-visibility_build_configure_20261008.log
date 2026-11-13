@@ -1,0 +1,51 @@
+# OSAL README build, step configure, 2026-10-08T01:42:12Z
+# script: /home/user/work/procrace/baselines/osal-visibility/scripts/build_osal_readme.sh
+# | #!/bin/bash
+# | # Build OSAL exactly as osal/README.md L24-30 (d2d877a69cff47452bcca274b309147d48e6c16f) says:
+# | #   mkdir build_osal_test
+# | #   cd build_osal_test
+# | #   cmake -DENABLE_UNIT_TESTS=true -DOSAL_SYSTEM_BSPTYPE=generic-linux -DOSAL_CONFIG_DEBUG_PERMISSIVE_MODE=TRUE ..
+# | #   make
+# | #   make test
+# | # Run as the normal user (permissive mode is "for debugging as a normal/non-root user",
+# | # docs/OSAL-Configuration-Guide.md L170; default_config.cmake L169-177).
+# | # Usage: build_osal_readme.sh <osal-source-dir> <step: configure|make|test>
+# | set -u
+# | SRC="$1"; STEP="$2"
+# | cd "$SRC" || exit 2
+# | case "$STEP" in
+# |   configure)
+# |     mkdir build_osal_test || exit 3
+# |     cd build_osal_test || exit 3
+# |     echo "+ cmake -DENABLE_UNIT_TESTS=true -DOSAL_SYSTEM_BSPTYPE=generic-linux -DOSAL_CONFIG_DEBUG_PERMISSIVE_MODE=TRUE .."
+# |     cmake -DENABLE_UNIT_TESTS=true -DOSAL_SYSTEM_BSPTYPE=generic-linux -DOSAL_CONFIG_DEBUG_PERMISSIVE_MODE=TRUE ..
+# |     ;;
+# |   make)
+# |     cd build_osal_test || exit 3
+# |     echo "+ make"
+# |     make
+# |     ;;
+# |   test)
+# |     cd build_osal_test || exit 3
+# |     echo "+ make test"
+# |     make test
+# |     ;;
+# |   *) echo "unknown step"; exit 4;;
+# | esac
+# chown -R ubuntu:ubuntu osal (clone handed to the normal user, as ENV D-1)
+$ runuser -u ubuntu -- build_osal_readme.sh osal configure
++ cmake -DENABLE_UNIT_TESTS=true -DOSAL_SYSTEM_BSPTYPE=generic-linux -DOSAL_CONFIG_DEBUG_PERMISSIVE_MODE=TRUE ..
+-- The C compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- BSP Selection: generic-linux at /home/user/work/procrace/baselines/osal-visibility/osal/src/bsp/generic-linux
+-- OSAL Selection: posix at /home/user/work/procrace/baselines/osal-visibility/osal/src/os/posix
+-- OSAL Compile Definitions: _XOPEN_SOURCE=600;_POSIX_OS_
+-- Coverage Test Target OS: vxworks;shared
+-- Configuring done (0.2s)
+-- Generating done (0.2s)
+-- Build files have been written to: /home/user/work/procrace/baselines/osal-visibility/osal/build_osal_test
+# exit=0 wall=.515694083 s

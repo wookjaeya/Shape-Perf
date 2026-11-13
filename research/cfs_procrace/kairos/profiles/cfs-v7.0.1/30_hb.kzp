@@ -1,0 +1,65 @@
+# 30_hb.kzp -- happens-before rules (SPEC 1.9 and 3.16).
+#
+# A rule has a stratum (S structural, O observed, C schedule constraint), a robustness tag, a
+# template that says how it matches a trace, and a citation.  The templates are generic; this
+# file only gives them their parameters.
+#
+#   program_order  consecutive events of one actor (and, with `looper yes`, no edge between two
+#                  handlers of one actor)
+#   spawn          the create call -> the first event of the child it created
+#   phase          every event of a site -> the first event of every actor the same actor spawns later
+#   observe        a polling loop's successful exit is ordered after the write that made the
+#                  awaited predicate true (S, obs_fatal when the other branch is terminal)
+phi 1;
+
+hb R1 {
+  title "program order";
+  stratum S;
+  robust unconditional;
+  template program_order {
+    looper yes;
+  }
+  prov r_axiom_program_order;
+}
+
+# A task starts after the call that created it.
+hb R2-P-TASK {
+  title "task creation: the creating call precedes the first event of the child";
+  stratum S;
+  robust unconditional;
+  template spawn {
+    create OS_TaskCreate out task_id;
+    entry OS_TaskEntryPoint;
+  }
+  prov osal_entrypoint, osal_pthread_create, es_apps_startapptask_create;
+}
+
+# EarlyInit of all core modules ends before any core task is created.
+hb R18 {
+  title "EarlyInit precedes every task";
+  stratum S;
+  robust unconditional;
+  template phase {
+    from core_phase2_begin phase point;
+  }
+  note "anchored at the first LockSharedData of the second loop: the EarlyInit calls are indirect calls the pattern language cannot name";
+  prov es_start_earlyinit_loop, es_start_taskmain_loop, r_phase_anchor;
+}
+
+# Core serialization: ES creates a core task, then polls until every used App record has reached
+# RUNNING, and panics on a timeout.  So each core task is initialized before the next is created.
+hb R19 {
+  title "CORE-SERIAL";
+  stratum S;
+  robust obs_fatal;
+  template observe {
+    poll "CFE_ES_MainTaskSyncDelay" called_at fn("CFE_ES_CreateObjects").call("CFE_ES_MainTaskSyncDelay");
+    exit_outcome CFE_SUCCESS;
+    predicate from_code;
+    else_terminal "CFE_PSP_Panic";
+    watch es.app, es.appstate;
+  }
+  guard cfe >= "6.4.2";
+  note "the predicate is extracted from the loop at cfe_es_start.c:878-890: no used record has AppState below the awaited state; the guard is the SPEC's, not re-verified";
+  prov es_start_taskmain_loop, es_start_sync_call, es_start_syncdelay_fn, es_start_table_loop, es_start_panic, r_guard_core_serial;
+}

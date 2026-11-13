@@ -1,0 +1,7 @@
+bundle=rebuild-20261029-records
+created_utc=2026-10-29T04:49:26.674Z
+repo_commit=a3c1443f33003195abd21369af6e41903474badf
+kernel=6.18.44-fc-v185
+source=/home/user/work/rebuild/bundle/rebuild-20261029-records files=297 bytes=26950440
+tar_xz_bytes=1211592 parts=1
+note=small records of the 2026-10-29 environment rebuild (env/REBUILD_20261029.md): logs, build records, binding lists, object and target binary hashes, C1 static closures; no object trees, no LLVM build

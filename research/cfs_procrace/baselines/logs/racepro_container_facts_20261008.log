@@ -1,0 +1,56 @@
+# date: 2026-10-08T01:16:08Z
+## uname -a
+Linux vm 6.18.44-fc-v80 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+## /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+VERSION_ID="24.04"
+## arch / CPUs / mem / disk
+x86_64
+4
+model name	: Intel(R) Xeon(R) Processor @ 2.10GHz
+4
+               total        used        free      shared  buff/cache   available
+Mem:           16094         877        7413          13        8131       15217
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G   34G  3.3G  92% /
+/dev/vda        252G   34G  3.3G  92% /
+## /proc/modules
+ls: cannot access '/proc/modules': No such file or directory
+## /proc/config.gz MODULES / KVM / KPROBES
+CONFIG_X86_64=y
+CONFIG_IA32_EMULATION=y
+CONFIG_KVM=y
+# CONFIG_KPROBES is not set
+CONFIG_UPROBES=y
+CONFIG_SECCOMP=y
+CONFIG_COMPAT_32BIT_TIME=y
+# CONFIG_MODULES is not set
+CONFIG_FTRACE=y
+## capabilities
+CapEff:	000001fffeffffff
+CapBnd:	000001fffeffffff
+CAP_SYS_MODULE(16)= True CAP_SYS_ADMIN(21)= True CAP_SYS_PTRACE(19)= True CAP_SYS_BOOT(22)= True
+## finit_module probe (python ctypes, fd of /dev/null, no module loaded)
+finit_module ret -1 errno Function not implemented
+## kexec_load probe (x86_64 nr 246, nr_segments=0 -> query only)
+kexec_load ret -1 errno Function not implemented
+## /dev/kvm, /dev/scribe
+ls: cannot access '/dev/kvm': No such file or directory
+ls: cannot access '/dev/scribe': No such file or directory
+## kallsyms scribe symbols (excluding subscribe/describe)
+0
+## i386 binary execution (IA32 emulation): compile+run -m32 hello
+m32 ok 4
+## ptrace
+/usr/bin/gdb
+/usr/bin/strace
++++ exited with 0 +++
+strace exit=0
+## python2 / cython / qemu availability
+# --- annotation appended 2026-10-08T02:10:35Z (review pass; the lines above are unchanged) ---
+# The '## python2 / cython / qemu availability' section above is empty: its output was not captured,
+# so this log alone does not show whether nothing was found or the command did not run.
+# Re-run 2026-10-08T02:10:35Z (full output in racepro_review_recheck_20261008.log, section [F13]): none found.
+#   command -v python2 python2.7 cython cython3 qemu-system-i386 -> none for each
+#   /usr/bin/python* -> python3.10, 3.11, 3.12, 3.13 only (/usr/bin/python -> python3.11); /root/.local/bin/uv exists
+#   apt-cache policy python2 python-dev cython -> 'Candidate: (none)' for each; python2.7 -> no entry

@@ -1,0 +1,136 @@
+# snapshot S2b  pid=9446  utc=2026-10-08T06:25:29Z  duration_ms=6.4
+autogroup: /autogroup-150 nice 0   module_bases: {'core': '0x5613aea88000', 'hs': '0x7fd71bd0e000'}
+## threads (/proc/<pid>/task/<tid>/stat: policy field 41, rt_priority 40, nice 19, priority 18, cpu 39)
+tid     comm             state policy      rtprio nice prio cpu  utime  stime   volctx  nvolctx syscall/wchan
+9446    core-cpu1        S     SCHED_OTHER      0    0   20   2      0      1       14        1 128/do_sigtimedwait.isra.0
+9450    core-cpu1        S     SCHED_OTHER      0    0   20   3      0      0       83       26 202/futex_do_wait
+9451    core-cpu1        S     SCHED_OTHER      0    0   20   3     10      0     3051        6 128/do_sigtimedwait.isra.0
+9511    CFE_ES           S     SCHED_OTHER      0    0   20   0      0      0       19        0 243/wq_sleep
+9544    ES_BG_TASK       S     SCHED_OTHER      0    0   20   0      0      0       38        0 202/futex_do_wait
+9579    CFE_EVS          S     SCHED_OTHER      0    0   20   0      0      0       19        3 243/wq_sleep
+9582    CFE_SB           S     SCHED_OTHER      0    0   20   0      0      0       19        1 243/wq_sleep
+9584    CFE_TBL          S     SCHED_OTHER      0    0   20   0      0      0       11        0 243/wq_sleep
+9594    CFE_TIME         S     SCHED_OTHER      0    0   20   0      0      0       79       26 243/wq_sleep
+9595    TIME_TONE_TASK   S     SCHED_OTHER      0    0   20   0      0      0       50       34 202/futex_do_wait
+9596    TIME_ONEHZ_TASK  S     SCHED_OTHER      0    0   20   0      0      0       35        8 202/futex_do_wait
+9601    SCH_LAB          S     SCHED_OTHER      0    0   20   3      1      0      283        0 202/futex_do_wait
+9603    CI_LAB           S     SCHED_OTHER      0    0   20   3      0      0       74        1 243/wq_sleep
+9604    TO_LAB           S     SCHED_OTHER      0    0   20   3      4      4      684        0 243/wq_sleep
+9606    SAMPLE_APP       S     SCHED_OTHER      0    0   20   0      0      0        7        0 243/wq_sleep
+9607    LC               S     SCHED_OTHER      0    0   20   0      0      0       43        1 243/wq_sleep
+9608    CF               S     SCHED_OTHER      0    0   20   3      2      0      585        1 243/wq_sleep
+9609    DS               S     SCHED_OTHER      0    0   20   0      0      0      126        1 243/wq_sleep
+9611    FM               S     SCHED_OTHER      0    0   20   1      0      0       50        0 243/wq_sleep
+9612    HK               S     SCHED_OTHER      0    0   20   2      0      0       58        2 243/wq_sleep
+9613    HS               S     SCHED_OTHER      0    0   20   3      0      0       26        2 243/wq_sleep
+9614    MM               S     SCHED_OTHER      0    0   20   0      0      0       32        0 243/wq_sleep
+9615    SC               S     SCHED_OTHER      0    0   20   1      0      0       81        2 243/wq_sleep
+9617    MD               S     SCHED_OTHER      0    0   20   2      0      0       47        9 243/wq_sleep
+9618    CS               S     SCHED_OTHER      0    0   20   2      1      0       93        2 243/wq_sleep
+9619    SBN              S     SCHED_OTHER      0    0   20   2      0      1      315       11 243/wq_sleep
+9666    FM_CHILD_TASK    S     SCHED_OTHER      0    0   20   0      0      0        4        0 202/futex_do_wait
+## mq_probe rc=0 : 26 queues (fd name maxmsg msgsize curmsgs)
+  3 /9446.ES_CMD_PIPE (deleted) 10 8 0
+  4 /9446.EVS_CMD_PIPE (deleted) 10 8 0
+  5 /9446.SB_CMD_PIPE (deleted) 10 8 0
+  6 /9446.TBL_CMD_PIPE (deleted) 10 8 0
+  7 /9446.TIME_CMD_PIPE (deleted) 10 8 0
+  8 /9446.SCH_LAB_CMD_PIPE (deleted) 8 8 0
+  9 /9446.CI_LAB_CMD_PIPE (deleted) 10 8 0
+  12 /9446.TO_LAB_CMD_PIPE (deleted) 8 8 0
+  13 /9446.TO_LAB_TLM_PIPE (deleted) 10 8 0
+  14 /9446.SAMPLE_APP_CMD_PIPE (deleted) 10 8 0
+  15 /9446.LC_CMD_PIPE (deleted) 10 8 0
+  16 /9446.DS_CMD_PIPE (deleted) 10 8 0
+  17 /9446.CF_CMD_PIPE (deleted) 10 8 0
+  18 /9446.CF_CHAN_0 (deleted) 10 8 0
+  19 /9446.CF_CHAN_1 (deleted) 10 8 0
+  20 /9446.HK_CMD_PIPE (deleted) 10 8 0
+  21 /9446.HS_CMD_PIPE (deleted) 10 8 0
+  22 /9446.HS_EVENT_PIPE (deleted) 10 8 0
+  23 /9446.HS_WAKEUP_PIPE (deleted) 1 8 0
+  24 /9446.MM_CMD_PIPE (deleted) 10 8 0
+  25 /9446.SC_CMD_PIPE (deleted) 10 8 0
+  26 /9446.MD_CMD_PIPE (deleted) 10 8 0
+  27 /9446.CS_CMD_PIPE (deleted) 10 8 0
+  28 /9446.SBNCmdPipe (deleted) 10 8 0
+  29 /9446.FM_CMD_PIPE (deleted) 10 8 0
+  30 /9446.SBNSubPipe (deleted) 10 8 0
+## SB pipes: SB requested depth / OSAL record depth / kernel mq_maxmsg; SB counters (mem read)
+pipe                 app          SBreq  OSAL   kmax kmsgsz   kcur  SBcur SBpeak SBsErr   fd
+ES_CMD_PIPE          CFE_ES          12    12     10      8      0      0      1      0    3
+EVS_CMD_PIPE         CFE_EVS         32    32     10      8      0      0      1      0    4
+SB_CMD_PIPE          CFE_SB          32    32     10      8      0      0      1      0    5
+TBL_CMD_PIPE         CFE_TBL         12    12     10      8      0      0      1      0    6
+TIME_CMD_PIPE        CFE_TIME        12    12     10      8      0      0      2      0    7
+SCH_LAB_CMD_PIPE     SCH_LAB          8     8      8      8      0      0      1      0    8
+CI_LAB_CMD_PIPE      CI_LAB          32    32     10      8      0      0      1      0    9
+TO_LAB_CMD_PIPE      TO_LAB           8     8      8      8      0      0      1      0   12
+TO_LAB_TLM_PIPE      TO_LAB          50    50     10      8      0      0     11      0   13
+SAMPLE_APP_CMD_PIPE  SAMPLE_APP      32    32     10      8      0      0      1      0   14
+LC_CMD_PIPE          LC              12    12     10      8      0      0      1      0   15
+DS_CMD_PIPE          DS              45    45     10      8      0      0     12      0   16
+CF_CMD_PIPE          CF              32    32     10      8      0      0      2      0   17
+CF_CHAN_0            CF              16    16     10      8      0      0      0      0   18
+CF_CHAN_1            CF              16    16     10      8      0      0      0      0   19
+HK_CMD_PIPE          HK              40    40     10      8      0      0      2      0   20
+HS_CMD_PIPE          HS              12    12     10      8      0      0      1      0   21
+HS_EVENT_PIPE        HS              32    32     10      8      0      0      0      0   22
+HS_WAKEUP_PIPE       HS               1     1      1      8      0      0      0      0   23
+MM_CMD_PIPE          MM              12    12     10      8      0      0      1      0   24
+SC_CMD_PIPE          SC              12    12     10      8      0      0      1      0   25
+MD_CMD_PIPE          MD              50    50     10      8      0      0      1      0   26
+CS_CMD_PIPE          CS              12    12     10      8      0      0      1      0   27
+SBNCmdPipe           SBN             20    20     10      8      0      0      2      0   28
+FM_CMD_PIPE          FM              10    10     10      8      0      0      1      0   29
+SBNSubPipe           SBN             32    32     10      8      0      0     11      0   30
+## SB HK counters: {'_index': 0, 'CommandCounter': 1, 'CommandErrorCounter': 0, 'CreatePipeErrorCounter': 0, 'DuplicateSubscriptionsCounter': 0, 'InternalErrorCounter': 0, 'MemInUse': 4600, 'MsgLimitErrorCounter': 0, 'MsgReceiveErrorCounter': 0, 'MsgSendErrorCounter': 40, 'NoSubscribersCounter': 16, 'PipeOverflowErrorCounter': 49, 'SubscribeErrorCounter': 0}
+## EVS HK counters: {'_index': 0, 'LogFullFlag': 1, 'LogOverflowCounter': 103, 'MessageSendCounter': 125, 'MessageTruncCounter': 0, 'UnregisteredAppCounter': 0}
+## ES system state: OPERATIONAL
+## ES apps: CFE_ES=RUNNING, CFE_EVS=RUNNING, CFE_SB=RUNNING, CFE_TBL=RUNNING, CFE_TIME=RUNNING, SCH_LAB=RUNNING, CI_LAB=RUNNING, TO_LAB=RUNNING, SAMPLE_APP=RUNNING, LC=RUNNING, CF=RUNNING, DS=RUNNING, FM=RUNNING, HK=RUNNING, HS=RUNNING, MM=RUNNING, SC=RUNNING, MD=RUNNING, CS=RUNNING, SBN=RUNNING
+## tasks: ES requested priority / OSAL record priority / kernel policy,rtprio,nice / ExecutionCounter
+CFE_ES           CFE_ES     req=68   osal=255  kernel=SCHED_OTHER,0,0 tid=9511 exec=8 ctx=19/0 cpu=0+0
+ES_BG_TASK       CFE_ES     req=200  osal=255  kernel=SCHED_OTHER,0,0 tid=9544 exec=0 ctx=38/0 cpu=0+0
+CFE_EVS          CFE_EVS    req=61   osal=255  kernel=SCHED_OTHER,0,0 tid=9579 exec=7 ctx=19/3 cpu=0+0
+CFE_SB           CFE_SB     req=64   osal=255  kernel=SCHED_OTHER,0,0 tid=9582 exec=10 ctx=19/1 cpu=0+0
+CFE_TBL          CFE_TBL    req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9584 exec=6 ctx=11/0 cpu=0+0
+CFE_TIME         CFE_TIME   req=60   osal=255  kernel=SCHED_OTHER,0,0 tid=9594 exec=117 ctx=79/26 cpu=0+0
+TIME_TONE_TASK   CFE_TIME   req=25   osal=255  kernel=SCHED_OTHER,0,0 tid=9595 exec=28 ctx=50/34 cpu=0+0
+TIME_ONEHZ_TASK  CFE_TIME   req=25   osal=255  kernel=SCHED_OTHER,0,0 tid=9596 exec=30 ctx=35/8 cpu=0+0
+SCH_LAB          SCH_LAB    req=35   osal=255  kernel=SCHED_OTHER,0,0 tid=9601 exec=281 ctx=283/0 cpu=1+0
+CI_LAB           CI_LAB     req=40   osal=255  kernel=SCHED_OTHER,0,0 tid=9603 exec=63 ctx=74/1 cpu=0+0
+TO_LAB           TO_LAB     req=45   osal=255  kernel=SCHED_OTHER,0,0 tid=9604 exec=577 ctx=684/0 cpu=4+4
+SAMPLE_APP       SAMPLE_APP req=50   osal=255  kernel=SCHED_OTHER,0,0 tid=9606 exec=6 ctx=7/0 cpu=0+0
+LC               LC         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9607 exec=33 ctx=43/1 cpu=0+0
+CF               CF         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9608 exec=575 ctx=585/1 cpu=2+0
+DS               DS         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9609 exec=169 ctx=126/1 cpu=0+0
+FM               FM         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9611 exec=31 ctx=50/0 cpu=0+0
+HK               HK         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9612 exec=48 ctx=58/2 cpu=0+0
+HS               HS         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9613 exec=25 ctx=26/2 cpu=0+0
+MM               MM         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9614 exec=31 ctx=32/0 cpu=0+0
+SC               SC         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9615 exec=64 ctx=81/2 cpu=0+0
+MD               MD         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9617 exec=30 ctx=47/9 cpu=0+0
+CS               CS         req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9618 exec=61 ctx=93/2 cpu=1+0
+SBN              SBN        req=70   osal=255  kernel=SCHED_OTHER,0,0 tid=9619 exec=291 ctx=315/11 cpu=0+1
+FM_CHILD_TASK    FM         req=205  osal=255  kernel=SCHED_OTHER,0,0 tid=9666 exec=0 ctx=4/0 cpu=0+0
+## EVS per app: SquelchedCount / SquelchTokens / binary filter counts
+CFE_ES       squelched=0   tokens=15000  events=17    filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+CFE_EVS      squelched=0   tokens=32000  events=2     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+CFE_SB       squelched=0   tokens=16000  events=21    filters=14:0xfffc:12;7:0xfffc:0;17:0xfff0:0;25:0xfff0:40;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+CFE_TBL      squelched=0   tokens=31000  events=1     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+CFE_TIME     squelched=0   tokens=31000  events=4     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+CI_LAB       squelched=0   tokens=31000  events=1     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+TO_LAB       squelched=0   tokens=31000  events=2     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+SAMPLE_APP   squelched=0   tokens=31000  events=1     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+LC           squelched=0   tokens=28000  events=4     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+CF           squelched=0   tokens=31000  events=1     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+DS           squelched=0   tokens=29000  events=3     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+FM           squelched=0   tokens=29000  events=3     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+HK           squelched=0   tokens=31000  events=1     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+HS           squelched=0   tokens=27000  events=5     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+MM           squelched=0   tokens=31000  events=1     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+SC           squelched=0   tokens=30000  events=11    filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+MD           squelched=0   tokens=26000  events=6     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+CS           squelched=0   tokens=23000  events=9     filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+SBN          squelched=17  tokens=-4235  events=32    filters=65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0;65535:0x0000:0
+## HS_AppData: {'_index': 0, 'AlivenessCounter': 4, 'AppMonLoaded': 1, 'CDSState': 1, 'CmdCount': 0, 'CmdErrCount': 0, 'CurrentAlivenessState': 1, 'CurrentAppMonState': 1, 'CurrentCPUHogState': 1, 'CurrentCPUUtilIndex': 1, 'CurrentEventMonState': 0, 'EventMonLoaded': 1, 'EventsMonitoredCount': 0, 'MsgActExec': 0, 'RunStatus': 1, 'ServiceWatchdogFlag': 1, 'SysMonPspModuleId': 17891077, 'SysMonSubchannelId': 0, 'SysMonSubsystemId': 0, 'UtilCpuAvg': 4294967295, 'UtilCpuPeak': 4294967295, 'UtilizationCycleCounter': 6}

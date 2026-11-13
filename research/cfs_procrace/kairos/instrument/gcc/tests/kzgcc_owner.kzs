@@ -1,0 +1,20 @@
+# kzgcc_owner.kzs -- unit-test manifest (kzs-sites 3) of kzgcc_owner.c: the owner-publish and owner-check stores of
+# create_app name the record of the function's entry (the app-request) as their link; an owner-check bound at a call is
+# declared unsupported (the plugin links these readers only at a store).  Unit-test values only.
+kzs-sites 3
+source unit rev=0000000000000000000000000000000000000000 ref="kairos/instrument/gcc/tests/kzgcc_owner.c"
+module 1 name=kzgcc_owner source=unit
+site 1 label=app.entry op=app phase=before tu=kzgcc_owner.c func=create_app
+site 2 label=app.ret op=app phase=after tu=kzgcc_owner.c func=create_app
+value 2 0 role=status from=ret type=s32
+site 3 label=app.out op=app phase=point place=store line=18 tu=kzgcc_owner.c func=create_app
+value 3 0 role=app_id from=operand0 type=u32
+site 4 label=app.table op=pub phase=point place=store line=17 tu=kzgcc_owner.c func=create_app
+value 4 0 role=app_id from=operand0 type=u32
+site 5 label=app.call op=app phase=point place=after-call callee=create_app line=24 tu=kzgcc_owner.c func=main
+value 5 0 role=status from=ret type=s32
+identity 1 decoder=app-request
+identity 2 decoder=request-return status=0 ok=0
+identity 3 decoder=owner-publish owner=0
+identity 4 decoder=owner-check owner=0
+identity 5 decoder=owner-check owner=0

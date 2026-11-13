@@ -1,0 +1,44 @@
+kz-dump 1
+container abi=1 kind=facts size=2216
+basis_sha256=7220aaba79daeb87adc748a0136a7f509f6831f7ecdb7e048d39e53d8138079b
+profile_sha256=bbe16d93cbd718e54d5ebc3948f76224b983dfa8496c471eb69558e60b8ef6e5
+tool_sha256=2cbe633db216021c4d50a539314d4976889624a10d6bb7c27c984b0aec183a1d
+parents=0
+sections=12
+section STRINGS type=1 version=1 record=kz_byte record_size=1 count=300 crc32=0x6b1bfb23
+section BASIS type=2 version=1 record=kz_basis_item record_size=28 count=3 crc32=0x661075f5
+  BASIS[0] name="compiler" value="example-cc 1.0" policy=unit-test-value prov=none deviation=none
+  BASIS[1] name="run count" value="3" policy=deviation prov=none deviation=0
+  BASIS[2] name="api constant" value="(silent)" policy=unspecified_by_reference prov=0 deviation=none
+section FILE_HASHES type=3 version=1 record=kz_file_hash record_size=56 count=1 crc32=0xfceaedc
+  FILE_HASHES[0] path="example/src/producer.c" sha256=f8f4e2caed7ac20f48bcb995433b7fb658c7833d723da6db0cb7f5de908a48cf size=1234 prov=none
+section PROVENANCE type=4 version=1 record=kz_prov record_size=68 count=3 crc32=0x33bfb91d
+  PROVENANCE[0] tier=contract-backed kind=api_doc side=caller line_from=10 line_to=12 file="example/inc/example_api.h" cite="" authored="unit test" text_sha256=1d7986d2916b6dec830d0f9361b43323577154bf261a19600492c8503f38885f
+  PROVENANCE[1] tier=researcher kind=researcher side=n/a line_from=0 line_to=0 file="" cite="note 1" authored="" text_sha256=0000000000000000000000000000000000000000000000000000000000000000
+  PROVENANCE[2] tier=unreferenced kind=none side=n/a line_from=0 line_to=0 file="" cite="" authored="" text_sha256=0000000000000000000000000000000000000000000000000000000000000000
+section DEVIATIONS type=5 version=1 record=kz_deviation record_size=48 count=1 crc32=0xa9c8a8ca
+  DEVIATIONS[0] subject="number of runs N" reference_value="" used_value="3" reason="same count as the reference runs" effect="no frequency or overhead claim" avoidable=no prov=none
+section FACTS type=10 version=2 record=kz_fact_call record_size=76 count=2 crc32=0xb653d000
+  FACTS[0] site=0 tu=0 file="example/src/producer.c" caller="example_producer_main" callee="example_publish" line=40 col=5 first_arg=0 nargs=2 flags={result-used} loop_depth=0 caller_fn=0 callee_fn=0 fh=0 loop=0 kind=none
+  FACTS[1] site=1 tu=0 file="example/src/producer.c" caller="example_producer_main" callee="example_consume" line=52 col=5 first_arg=2 nargs=1 flags={result-tested,in-loop} loop_depth=1 caller_fn=0 callee_fn=0 fh=0 loop=0 kind=none
+section FACT_ARGS type=11 version=2 record=kz_fact_arg record_size=56 count=3 crc32=0xde8b7152
+  FACT_ARGS[0] site=0 index=0 kind=const role=none value=-1 symbol="" loc_type="" loc_field="" fn=0
+  FACT_ARGS[1] site=0 index=1 kind=symbolic role=key value=0 symbol="example_state.ready" loc_type="" loc_field="" fn=0
+  FACT_ARGS[2] site=1 index=0 kind=top role=none value=0 symbol="" loc_type="" loc_field="" fn=0
+section WRITERS type=18 version=2 record=kz_fact_writer record_size=112 count=2 crc32=0x7dffc1c8
+  WRITERS[0] loc_type="example_state" loc_field="ready" file="example/src/producer.c" func="example_producer_main" line=38 col=3 site=10 kind=assign value_kind=const tstatus=COMPUTED kstatus=MUST_KEY wd={W,W_must} guard_root=none key="" value=1 value_text="" via_file="" fh=0 fn=0 via_line=0 via_fn=0 flags={}
+  WRITERS[1] loc_type="example_state" loc_field="ready" file="example/src/producer.c" func="example_producer_main" line=12 col=3 site=11 kind=memset value_kind=const tstatus=DECLARED_TRUSTED kstatus=MAY_KEY wd={D} guard_root=none key="" value=0 value_text="" via_file="" fh=0 fn=0 via_line=0 via_fn=0 flags={}
+section SKEL_CERT type=23 version=1 record=kz_skel_node record_size=28 count=4 crc32=0xb729f4d4
+  SKEL_CERT[0] actor=0 kind=entry view=VIEW_CERT flags={} site=none context=0 profile_entry=none conjunct=0 region=none
+  SKEL_CERT[1] actor=0 kind=effect view=VIEW_CERT flags={once} site=10 context=0 profile_entry=none conjunct=0 region=none
+  SKEL_CERT[2] actor=0 kind=store view=VIEW_CERT flags={} site=11 context=0 profile_entry=none conjunct=0 region=none
+  SKEL_CERT[3] actor=0 kind=exit view=VIEW_CERT flags={} site=none context=0 profile_entry=none conjunct=0 region=none
+section SKEL_CERT_EDGES type=24 version=1 record=kz_skel_edge record_size=16 count=3 crc32=0x833c7db1
+  SKEL_CERT_EDGES[0] from=0 to=1 kind=po label=none
+  SKEL_CERT_EDGES[1] from=1 to=2 kind=po label=none
+  SKEL_CERT_EDGES[2] from=2 to=3 kind=po label=none
+section ONCE type=26 version=1 record=kz_skel_once record_size=48 count=1 crc32=0x8d547048
+  ONCE[0] subject_kind=actor rule=actor-once subject=0 derivation=self/ACTORS#0
+section ACTORS type=28 version=1 record=kz_actor record_size=24 count=1 crc32=0x98f6407e
+  ACTORS[0] actor=0 kind=static-entry once=1 entry_node=0 generation=0 name="example_producer_main"
+artifact_sha256=82909c480b46ffde51faedd60c0d298125ec8e4751728b1f4004d8ba476aaac4

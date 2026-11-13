@@ -1,0 +1,176 @@
+# T/sha256.txt files: {'same': 118, 'DIFF': 7, 'MISSING': 0}; files outside the 125-file list of T/sha256.txt: 24 (12 are sha256.txt files that T/ also has: the 11 per-build ones byte-identical, the top one differs; 12 are new: NP2/facts.kz 5, NP2/relations.log 5, status.txt, twice_detail.txt). Header reworded 2026-11-09 (fix stage); compare.py printed 'files only in the new run: 24'
+same	dde35d0a8a8eb76a	dde35d0a8a8eb76a	377	c1_post_tx/NP/args.txt
+same	e427aaf2a642d16a	e427aaf2a642d16a	125640	c1_post_tx/NP/basis.kz
+same	768033c29458f9b8	768033c29458f9b8	17338	c1_post_tx/NP/basis.txt
+same	b2485f6e087c8369	b2485f6e087c8369	71246	c1_post_tx/NP/extract.txt
+same	20e2a73f6c650f7e	20e2a73f6c650f7e	10983384	c1_post_tx/NP/facts.kz
+same	dbf67e4355f9b5d3	dbf67e4355f9b5d3	26312952	c1_post_tx/NP/facts.txt
+same	e3b0c44298fc1c14	e3b0c44298fc1c14	0	c1_post_tx/NP/relations.log
+same	78552970ab09ec58	78552970ab09ec58	1765256	c1_post_tx/NP/relations.txt
+same	b2485f6e087c8369	b2485f6e087c8369	71246	c1_post_tx/NP2/extract.txt
+same	78552970ab09ec58	78552970ab09ec58	1765256	c1_post_tx/NP2/relations.txt
+same	eb8f7c003b94272c	eb8f7c003b94272c	374	c1_pre_tx/NP/args.txt
+same	a1717478f0099180	a1717478f0099180	125176	c1_pre_tx/NP/basis.kz
+same	2c83185096f79080	2c83185096f79080	17294	c1_pre_tx/NP/basis.txt
+same	7b8386071a377dd6	7b8386071a377dd6	71246	c1_pre_tx/NP/extract.txt
+same	a26d580fd54406ad	a26d580fd54406ad	10980536	c1_pre_tx/NP/facts.kz
+same	4d0b4422ded3f7e9	4d0b4422ded3f7e9	26251653	c1_pre_tx/NP/facts.txt
+same	e3b0c44298fc1c14	e3b0c44298fc1c14	0	c1_pre_tx/NP/relations.log
+same	32fe9b341c4b6768	32fe9b341c4b6768	1764902	c1_pre_tx/NP/relations.txt
+same	7b8386071a377dd6	7b8386071a377dd6	71246	c1_pre_tx/NP2/extract.txt
+same	32fe9b341c4b6768	32fe9b341c4b6768	1764902	c1_pre_tx/NP2/relations.txt
+same	85b52dad08d81871	85b52dad08d81871	374	c5_641/NP/args.txt
+same	dc6d70fa8b498b7c	dc6d70fa8b498b7c	43368	c5_641/NP/basis.kz
+same	dca6db73d1360605	dca6db73d1360605	13557	c5_641/NP/basis.txt
+same	fba28abb36bf0376	fba28abb36bf0376	53518	c5_641/NP/extract.txt
+same	1b4f794a0cd33897	1b4f794a0cd33897	4823032	c5_641/NP/facts.kz
+same	cf351425b71a8af4	cf351425b71a8af4	10512688	c5_641/NP/facts.txt
+same	e3b0c44298fc1c14	e3b0c44298fc1c14	0	c5_641/NP/relations.log
+same	db98c85f118a13af	db98c85f118a13af	594532	c5_641/NP/relations.txt
+same	fba28abb36bf0376	fba28abb36bf0376	53518	c5_641/NP2/extract.txt
+same	db98c85f118a13af	db98c85f118a13af	594532	c5_641/NP2/relations.txt
+same	d1c0617d206d978a	d1c0617d206d978a	408	c5_642/NP/args.txt
+same	1086270e1c6e68b9	1086270e1c6e68b9	43376	c5_642/NP/basis.kz
+same	102caf8402d9eff6	102caf8402d9eff6	13561	c5_642/NP/basis.txt
+same	8fed59d0270fe525	8fed59d0270fe525	53906	c5_642/NP/extract.txt
+same	c7bb3c096e46033c	c7bb3c096e46033c	4831544	c5_642/NP/facts.kz
+same	f09abc9554685c9a	f09abc9554685c9a	10537750	c5_642/NP/facts.txt
+same	e3b0c44298fc1c14	e3b0c44298fc1c14	0	c5_642/NP/relations.log
+same	44ad5c55c46678f0	44ad5c55c46678f0	616258	c5_642/NP/relations.txt
+same	8fed59d0270fe525	8fed59d0270fe525	53906	c5_642/NP2/extract.txt
+same	44ad5c55c46678f0	44ad5c55c46678f0	616258	c5_642/NP2/relations.txt
+same	a506bc467682a64d	a506bc467682a64d	418	count/against_fix1.tsv
+same	751ab660994f571f	751ab660994f571f	418	count/against_fix2.tsv
+same	e769ca3983ba77ee	e769ca3983ba77ee	418	count/against_fix3.tsv
+same	5f196bdaf0071f41	5f196bdaf0071f41	424	count/against_s5.tsv
+same	a94a28e126037dfa	a94a28e126037dfa	360	count/burden.tsv
+same	98c7047558515c02	98c7047558515c02	105	count/summary.tsv
+same	16f0ec253fce6e07	16f0ec253fce6e07	236259	count/summary.txt
+same	32287e8115e2c892	32287e8115e2c892	474	count/targets_rule.tsv
+DIFF	4bd6de18c0b4555a	f15a6d25518e71f3	21139	fix2same/fix2same.txt
+DIFF	510d688a700f9af8	f115d7cdb1de5eb0	17971	fix3same/fix3same.txt
+DIFF	4a268424fb5f4b3d	0b1d136147423193	23230	fixsame/fixsame.txt
+same	6d65e2aa84fde0fb	6d65e2aa84fde0fb	401	identity/c1_pre_tx/V0/args.txt
+same	ceae3f34ca5bc680	ceae3f34ca5bc680	766	identity/c1_pre_tx/V0/basis.dump.diff
+same	d233b3920d430362	d233b3920d430362	125016	identity/c1_pre_tx/V0/basis.kz
+same	34cda83564efa58e	34cda83564efa58e	17143	identity/c1_pre_tx/V0/basis.txt
+same	1d9bd01f2a348e64	1d9bd01f2a348e64	1016	identity/c1_pre_tx/V0/extract.txt
+same	8242df79cf38e479	8242df79cf38e479	1372	identity/c1_pre_tx/V0/facts.dump.diff
+same	e034be6513d289ea	e034be6513d289ea	2239536	identity/c1_pre_tx/V0/facts.kz
+same	df25b4e8042cc481	df25b4e8042cc481	2998918	identity/c1_pre_tx/V0/facts.txt
+same	a5f74506b42d860a	a5f74506b42d860a	124	identity/c1_pre_tx/V0/show.diff
+same	b93fa68fae6213a4	b93fa68fae6213a4	1085	identity/c1_pre_tx/V2/args.txt
+same	9b8df5c9d4335ff6	9b8df5c9d4335ff6	765	identity/c1_pre_tx/V2/basis.dump.diff
+same	f3daeaee0d0339a4	f3daeaee0d0339a4	126936	identity/c1_pre_tx/V2/basis.kz
+same	46a2dcec33dee591	46a2dcec33dee591	18698	identity/c1_pre_tx/V2/basis.txt
+same	173d82e9f420b46c	173d82e9f420b46c	2638	identity/c1_pre_tx/V2/extract.txt
+same	f9ffdcf9b9a5a76f	f9ffdcf9b9a5a76f	1372	identity/c1_pre_tx/V2/facts.dump.diff
+same	87cbdb9c219a12bd	87cbdb9c219a12bd	2280424	identity/c1_pre_tx/V2/facts.kz
+same	3140850f1a83a788	3140850f1a83a788	3071342	identity/c1_pre_tx/V2/facts.txt
+same	4d7414d5df929e15	4d7414d5df929e15	124	identity/c1_pre_tx/V2/show.diff
+same	24381bf87c98fb8b	24381bf87c98fb8b	401	identity/c5_641/V0/args.txt
+same	f5cdae047f144582	f5cdae047f144582	766	identity/c5_641/V0/basis.dump.diff
+same	33de0e1f01bc781c	33de0e1f01bc781c	43200	identity/c5_641/V0/basis.kz
+same	a90429cd088b2bb1	a90429cd088b2bb1	13406	identity/c5_641/V0/basis.txt
+same	e2b6272f0d76ad98	e2b6272f0d76ad98	1010	identity/c5_641/V0/extract.txt
+same	206e5f68c764d2e4	206e5f68c764d2e4	1371	identity/c5_641/V0/facts.dump.diff
+same	b4a5ab86c048704a	b4a5ab86c048704a	958888	identity/c5_641/V0/facts.kz
+same	8789c2359ed8a107	8789c2359ed8a107	1082095	identity/c5_641/V0/facts.txt
+same	c0a82d84c59c1f41	c0a82d84c59c1f41	124	identity/c5_641/V0/show.diff
+same	570be7c7a58fefd6	570be7c7a58fefd6	638	identity/c5_641/V2/args.txt
+same	79f48edb02a9762a	79f48edb02a9762a	766	identity/c5_641/V2/basis.dump.diff
+same	fef008e12c1c7317	fef008e12c1c7317	43880	identity/c5_641/V2/basis.kz
+same	df98cfcc75dee801	df98cfcc75dee801	14547	identity/c5_641/V2/basis.txt
+same	49156a5116f250d4	49156a5116f250d4	1729	identity/c5_641/V2/extract.txt
+same	d3a2d5684b062618	d3a2d5684b062618	1372	identity/c5_641/V2/facts.dump.diff
+same	e2da6643c538b2cc	e2da6643c538b2cc	967704	identity/c5_641/V2/facts.kz
+same	9af3094346a4e5ea	9af3094346a4e5ea	1090853	identity/c5_641/V2/facts.txt
+same	2174e132672f0b7a	2174e132672f0b7a	124	identity/c5_641/V2/show.diff
+DIFF	f4d6b1f6a9cbe951	50d0609393ca4edc	22183	identity/identity.txt
+same	eb4c9542daa07e25	eb4c9542daa07e25	400	identity/r2_core/V0/args.txt
+same	250b4c17730023f1	250b4c17730023f1	766	identity/r2_core/V0/basis.dump.diff
+same	d4e74dbea8589182	d4e74dbea8589182	85624	identity/r2_core/V0/basis.kz
+same	afa5fb87b401d0dd	afa5fb87b401d0dd	5234	identity/r2_core/V0/basis.txt
+same	d2d07666972d5af0	d2d07666972d5af0	1014	identity/r2_core/V0/extract.txt
+same	32414a44fbcd006e	32414a44fbcd006e	1372	identity/r2_core/V0/facts.dump.diff
+same	20134bd091a74cfa	20134bd091a74cfa	1631296	identity/r2_core/V0/facts.kz
+same	902c820e9c8deb49	902c820e9c8deb49	1966726	identity/r2_core/V0/facts.txt
+same	7354bdcf2f126a87	7354bdcf2f126a87	124	identity/r2_core/V0/show.diff
+same	7cce39b48195b70f	7cce39b48195b70f	543	identity/r2_core/V2/args.txt
+same	96e4b10319bca241	96e4b10319bca241	766	identity/r2_core/V2/basis.dump.diff
+same	efa325b26be1232d	efa325b26be1232d	93832	identity/r2_core/V2/basis.kz
+same	5361453979b39386	5361453979b39386	11729	identity/r2_core/V2/basis.txt
+same	98f7fe4628adb45f	98f7fe4628adb45f	2231	identity/r2_core/V2/extract.txt
+same	3a49c124cd0d5778	3a49c124cd0d5778	1372	identity/r2_core/V2/facts.dump.diff
+same	f0136baef1fc7292	f0136baef1fc7292	1652600	identity/r2_core/V2/facts.kz
+same	c2d6f4cc0933aabc	c2d6f4cc0933aabc	2002846	identity/r2_core/V2/facts.txt
+same	17c40488efdd4884	17c40488efdd4884	124	identity/r2_core/V2/show.diff
+same	adde224fdb3cbf09	adde224fdb3cbf09	1719	npsame/c1_post_tx/extract.txt
+same	ae1b2f79861f1355	ae1b2f79861f1355	1719	npsame/c1_pre_tx/extract.txt
+same	bae81a721839eb0b	bae81a721839eb0b	1708	npsame/c5_641/extract.txt
+same	64f4935c14165291	64f4935c14165291	1708	npsame/c5_642/extract.txt
+DIFF	74d58060f1df2f43	c7e29ec3f8786bcc	24764	npsame/npsame.txt
+same	86137fceb273d120	86137fceb273d120	1718	npsame/r2_core/extract.txt
+same	2ecdf845063d3a12	2ecdf845063d3a12	373	r2_core/NP/args.txt
+same	70d6e14a387f5886	70d6e14a387f5886	85800	r2_core/NP/basis.kz
+same	850d9378e0ee78e6	850d9378e0ee78e6	5385	r2_core/NP/basis.txt
+same	c50540adbbf61daf	c50540adbbf61daf	51357	r2_core/NP/extract.txt
+same	55021411c8d8b14b	55021411c8d8b14b	7188576	r2_core/NP/facts.kz
+same	0e455ce4cc2a84d3	0e455ce4cc2a84d3	15351574	r2_core/NP/facts.txt
+same	e3b0c44298fc1c14	e3b0c44298fc1c14	0	r2_core/NP/relations.log
+same	75e6565df9d3123b	75e6565df9d3123b	987788	r2_core/NP/relations.txt
+same	c50540adbbf61daf	c50540adbbf61daf	51357	r2_core/NP2/extract.txt
+same	75e6565df9d3123b	75e6565df9d3123b	987788	r2_core/NP2/relations.txt
+DIFF	d066d6af8b6627b7	51d84f4cda949e0e	2807	run.log
+DIFF	8fc84f494da723ed	8684c84146e05227	25032	s5same/s5same.txt
+same	2d935f4c0beefe8f	2d935f4c0beefe8f	438	twice.txt
+NEW	-	6296404bbdec5e8e	564	c1_post_tx/NP/sha256.txt
+NEW	-	20e2a73f6c650f7e	10983384	c1_post_tx/NP2/facts.kz
+NEW	-	e3b0c44298fc1c14	0	c1_post_tx/NP2/relations.log
+NEW	-	81469b88a77a9283	562	c1_pre_tx/NP/sha256.txt
+NEW	-	a26d580fd54406ad	10980536	c1_pre_tx/NP2/facts.kz
+NEW	-	e3b0c44298fc1c14	0	c1_pre_tx/NP2/relations.log
+NEW	-	52be5a555fb9677e	530	c5_641/NP/sha256.txt
+NEW	-	1b4f794a0cd33897	4823032	c5_641/NP2/facts.kz
+NEW	-	e3b0c44298fc1c14	0	c5_641/NP2/relations.log
+NEW	-	7c1eb339abb5d535	564	c5_642/NP/sha256.txt
+NEW	-	c7bb3c096e46033c	4831544	c5_642/NP2/facts.kz
+NEW	-	e3b0c44298fc1c14	0	c5_642/NP2/relations.log
+NEW	-	bc7e5a2d4ec67708	562	identity/c1_pre_tx/V0/sha256.txt
+NEW	-	65baf28af63c8492	562	identity/c1_pre_tx/V2/sha256.txt
+NEW	-	4e213b1029da8ce7	530	identity/c5_641/V0/sha256.txt
+NEW	-	5069992238c3529b	530	identity/c5_641/V2/sha256.txt
+NEW	-	bda8ecbd8636f22b	571	identity/r2_core/V0/sha256.txt
+NEW	-	64944d4910900091	572	identity/r2_core/V2/sha256.txt
+NEW	-	c558a6b393e46760	571	r2_core/NP/sha256.txt
+NEW	-	55021411c8d8b14b	7188576	r2_core/NP2/facts.kz
+NEW	-	e3b0c44298fc1c14	0	r2_core/NP2/relations.log
+NEW	-	4ce6b46d97318c0d	12809	sha256.txt
+NEW	-	f2ecf6e05730e49c	3624	status.txt
+NEW	-	f8b9602bdcabd1af	1603	twice_detail.txt
+# first two lines per build of the comparison texts (earlier driver lines)
+same	npsame	c1_post_tx
+same	npsame	c1_pre_tx
+same	npsame	c5_641
+same	npsame	c5_642
+same	npsame	r2_core
+same	s5same	c1_post_tx
+same	s5same	c1_pre_tx
+same	s5same	c5_641
+same	s5same	c5_642
+same	s5same	r2_core
+same	fixsame	c1_post_tx
+same	fixsame	c1_pre_tx
+same	fixsame	c5_641
+same	fixsame	c5_642
+same	fixsame	r2_core
+same	fix2same	c1_post_tx
+same	fix2same	c1_pre_tx
+same	fix2same	c5_641
+same	fix2same	c5_642
+same	fix2same	r2_core
+same	fix3same	c1_post_tx
+same	fix3same	c1_pre_tx
+same	fix3same	c5_641
+same	fix3same	c5_642
+same	fix3same	r2_core

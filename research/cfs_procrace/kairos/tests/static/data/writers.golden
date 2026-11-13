@@ -1,0 +1,79 @@
+extract
+  translation units          1
+  functions                  11 (bodies read 10, in system headers skipped 0)
+  call sites                 1
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                0 (entry resolved 0)
+  loops                      0 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Cell.id   writers 10 (direct 9, data function 1, out-pointer 0, initial values 5), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        12 (built-in data-function table 12, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+facts-view 1
+[files] 1
+  0 writers.c b04c0d0b55c3 1229
+[functions] 11
+  fn 0 bump writers.c:27-27 params=0 {defined}
+  fn 1 copy_all writers.c:29-29 params=1 {defined}
+  fn 2 guarded writers.c:31-36 params=1 {defined}
+  fn 3 memset writers.c:5 params=3 {builtin}
+  fn 4 read_only writers.c:38-38 params=0 {defined}
+  fn 5 reset writers.c:28-28 params=0 {defined}
+  fn 6 set_array writers.c:26-26 params=1 {defined}
+  fn 7 set_const writers.c:22-22 params=0 {defined}
+  fn 8 set_nested writers.c:25-25 params=1 {defined}
+  fn 9 set_param writers.c:23-23 params=1 {defined}
+  fn 10 set_via_pointer writers.c:24-24 params=2 {defined}
+[calls] 1
+  site 6 writers.c:28:20 reset -> memset direct {data-fn}
+      arg 0:addr-of-object g_cell
+      arg 1:const 0 0
+      arg 2:const 8 sizeof g_cell
+[derives] 0
+[loops] 0
+[iters] 0
+[order] 0
+[init] 5
+  Cell.id in g_cell zero-initialized value=0 defined at writers.c:17:6
+  Cell.id in g_holder static-initializer value=3 defined at writers.c:19:8
+  Cell.id in g_seeded static-initializer value=7 defined at writers.c:18:6
+  Cell.id in g_table static-initializer value=11 defined at writers.c:20:13
+  Cell.id in g_table static-initializer value=12 defined at writers.c:20:13
+[consts] 0
+[writers] 10
+  Cell.id assign at writers.c:22:24 in set_const value=const 5 [5] key=g_cell {} n/a
+  Cell.id assign at writers.c:23:25 in set_param value=symbolic [v] key=g_cell {} n/a
+  Cell.id assign at writers.c:24:40 in set_via_pointer value=top [v + 1] key=c {} n/a
+  Cell.id assign at writers.c:25:30 in set_nested value=const 9 [9] key=h->inner {} n/a
+  Cell.id assign at writers.c:26:25 in set_array value=const 8 [8] key=g_table[i] {} n/a
+  Cell.id inc-dec at writers.c:27:19 in bump value=top [g_cell.id++] key=g_cell {} n/a
+  Cell.id memset at writers.c:28:20 in reset value=const 0 [fill 0] key=&g_cell {covers-more-than-the-field} n/a
+  Cell.id aggregate-assign at writers.c:29:34 in copy_all value=top [*src] key=g_cell {covers-more-than-the-field} n/a
+  Cell.id assign at writers.c:33:5 in guarded value=const 1 [1] key=g_cell guard=(gt param:x#0 0) {} n/a
+  Cell.id assign at writers.c:35:5 in guarded value=const 2 [2] key=g_cell guard=(not (gt param:x#0 0)) {} n/a
+[atype] 0
+[locs] 1
+  Cell.id writer-set-complete writers=10 (direct 9, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=5 unresolved-indirect=0
+[targets] 0
+[spawnparams] 0
+[image] 0
+[terminals] 0
+[outcalls] 0
+[fwrites] 13
+  bump field Cell.id at writers.c:27
+  copy_all field <global>.g_cell at writers.c:29
+  copy_all record Cell.* at writers.c:29
+  guarded field Cell.id at writers.c:33
+  reset field <global>.g_cell at writers.c:28
+  reset address-argument <global>.g_cell at writers.c:28
+  reset record Cell.* at writers.c:28
+  set_array field Cell.id at writers.c:26
+  set_const field Cell.id at writers.c:22
+  set_nested field Cell.id at writers.c:25
+  set_nested field Holder.inner at writers.c:25
+  set_param field Cell.id at writers.c:23
+  set_via_pointer field Cell.id at writers.c:24

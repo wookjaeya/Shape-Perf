@@ -1,0 +1,72 @@
+# r2_v701.kzs -- logical sites of case R2 for the stage C compiler-binding fitness check (kzs-sites 1,
+# kairos/docs/event_semantics.md section 3).  Configuration: the ENV tree, cFS bundle v7.0.1 (088b2fa8,
+# env/build_cfs.sh), build native_std.  The same logical sites for the three candidates; labels are those of
+# the F0 plan kairos/profiles/cfs-v7.0.1/observe/sites.kzp where the meaning is the same.
+#
+# What R2 needs (cases/R2.md section 5, plan/proof_status_R2.md section 12): the AppID actually passed at the
+# three SB call sites of CFE_EVS_SendEventWithAppID that pass CFE_SB_Global.AppId, the SB task's store of its
+# own id (cfe_sb_task.c:138, through CFE_ES_GetAppID's out parameter), the send function's entry for every
+# caller, and the creation-side identity.  Values are the operands the original code uses; no string is
+# copied.  Nothing here is a research condition.
+kzs-sites 1
+source cfs-bundle rev=088b2fa828db9ff7e00733f1908e0eeb59f66ce3 ref="env/build_cfs.sh BUNDLE_COMMIT (tag v7.0.1)"
+source cfe rev=c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd ref="env/build_cfs.sh PINNED_SUBMODULES"
+source osal rev=d2d877a69cff47452bcca274b309147d48e6c16f ref="env/build_cfs.sh PINNED_SUBMODULES"
+module 1 name=core-cpu1 source=cfs-bundle
+
+# ---- the AppID passed at the SB call sites (F0 labels CFE_EVS_SendEventWithAppID.id_valid@...) -------------
+site 40 label=CFE_EVS_SendEventWithAppID.id_valid@sb_api_275 op=evs.send phase=before tu=cfe/modules/sb/fsw/src/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=275 ref="cfe/modules/sb/fsw/src/cfe_sb_api.c:275-277"
+value 40 0 role=event_id from=arg0 type=u16
+value 40 1 role=event_type from=arg1 type=u16
+value 40 2 role=app_id from=arg2 type=u32 ref="the argument is CFE_SB_Global.AppId (cfe_sb_api.c:277), loaded in the same statement"
+site 41 label=CFE_EVS_SendEventWithAppID.id_valid@sb_api_1183 op=evs.send phase=before tu=cfe/modules/sb/fsw/src/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=1183 ref="cfe/modules/sb/fsw/src/cfe_sb_api.c:1183-1185"
+value 41 0 role=event_id from=arg0 type=u16
+value 41 1 role=event_type from=arg1 type=u16
+value 41 2 role=app_id from=arg2 type=u32 ref="cfe_sb_api.c:1185 CFE_SB_Global.AppId"
+site 42 label=CFE_EVS_SendEventWithAppID.id_valid@sb_priv_786 op=evs.send phase=before tu=cfe/modules/sb/fsw/src/cfe_sb_priv.c func=CFE_SB_MessageTxn_ReportSingleEvent callee=CFE_EVS_SendEventWithAppID line=786 ref="cfe/modules/sb/fsw/src/cfe_sb_priv.c:786"
+value 42 0 role=event_id from=arg0 type=u16
+value 42 1 role=event_type from=arg1 type=u16
+value 42 2 role=app_id from=arg2 type=u32 ref="cfe_sb_priv.c:786 CFE_SB_Global.AppId"
+
+# ---- the SB task's store of its own id ------------------------------------------------------------------
+# F0 site sb_publication (after the call, status only).  Here: the call's status and the id read right after
+# the call by the same thread (out0), and the store itself inside CFE_ES_GetAppID (both branches, L754, L759).
+site 43 label=sb_publication op=sb.publish_id phase=after tu=cfe/modules/sb/fsw/src/cfe_sb_task.c func=CFE_SB_AppInit callee=CFE_ES_GetAppID line=138 ref="cfe/modules/sb/fsw/src/cfe_sb_task.c:138"
+value 43 0 role=status from=ret type=s32
+value 43 1 role=app_id from=out0 type=u32 ref="CFE_SB_Global.AppId (cfe_sb_task.c:138), read by the SB task right after the call"
+site 44 label=CFE_ES_GetAppID.store op=es.get_app_id phase=effect tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_GetAppID ref="cfe/modules/es/fsw/src/cfe_es_api.c:738-763 (*AppIdPtr = ... at L754 and L759)"
+value 44 0 role=app_id from=operand0 type=u32 ref="the stored value: CFE_ES_AppRecordGetID(AppRecPtr) (L754) or CFE_ES_APPID_UNDEFINED (L759)"
+value 44 1 role=app_id_ptr from=operand1 type=ptr
+
+# ---- the send function, every caller (F0 sites evs.send.entry / evs.send.ret) ------------------------------
+site 45 label=evs.send.entry op=evs.send phase=before tu=cfe/modules/evs/fsw/src/cfe_evs.c func=CFE_EVS_SendEventWithAppID line=169 ref="cfe/modules/evs/fsw/src/cfe_evs.c:169-214"
+value 45 0 role=event_id from=arg0 type=u16
+value 45 1 role=event_type from=arg1 type=u16
+value 45 2 role=app_id from=arg2 type=u32
+site 46 label=evs.send.ret op=evs.send phase=after tu=cfe/modules/evs/fsw/src/cfe_evs.c func=CFE_EVS_SendEventWithAppID ref="cfe/modules/evs/fsw/src/cfe_evs.c:169-214"
+value 46 0 role=status from=ret type=s32
+
+# ---- creation-side identity (F0 sites 21-25) --------------------------------------------------------------
+site 1 label=es.start_task.entry op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_StartAppTask line=649 ref="cfe/modules/es/fsw/src/cfe_es_apps.c:649-670"
+value 1 0 role=name_ptr from=arg1 type=ptr
+value 1 1 role=entry_fn from=arg2 type=ptr
+value 1 2 role=owner_id from=arg4 type=u32 ref="cfe_es_apps.c:696 TaskRecPtr->AppId = ParentAppId"
+site 2 label=es.start_task.ret op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_apps.c:649"
+value 2 0 role=status from=ret type=s32
+site 3 label=es.child_task.entry op=es.child_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask line=1202 ref="cfe/modules/es/fsw/src/cfe_es_api.c:1202-1208, owner 1255-1290"
+value 3 0 role=name_ptr from=arg1 type=ptr
+value 3 1 role=entry_fn from=arg2 type=ptr
+site 4 label=es.child_task.ret op=es.child_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask ref="cfe/modules/es/fsw/src/cfe_es_api.c:1202"
+value 4 0 role=status from=ret type=s32
+site 5 label=osal.task_create.entry op=osal.task_create phase=before tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskCreate line=164 ref="osal/src/os/shared/src/osapi-task.c:164-170"
+value 5 0 role=name_ptr from=arg1 type=ptr
+value 5 1 role=entry_fn from=arg2 type=ptr
+value 5 2 role=priority from=arg5 type=u8 ref="osal/src/os/inc/osapi-task.h:44 typedef uint8_t osal_priority_t"
+site 6 label=osal.task_create.ret op=osal.task_create phase=after tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskCreate ref="osal/src/os/shared/src/osapi-task.c:164"
+value 6 0 role=status from=ret type=s32
+site 7 label=osal.task_entry op=osal.task_entry phase=before tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskEntryPoint line=124 ref="osal/src/os/shared/src/osapi-task.c:124-138"
+value 7 0 role=task_id from=arg0 type=u32
+# In this OSAL revision entry_arg is the 6th argument (F0: r9).
+site 8 label=osal.task_create.id op=osal.task_create phase=before tu=osal/src/os/posix/src/os-impl-tasks.c func=OS_Posix_InternalTaskCreate_Impl line=457 ref="osal/src/os/posix/src/os-impl-tasks.c:457-462, 596-625"
+value 8 0 role=task_id from=arg5 type=u32 ref="osal/src/os/shared/inc/os-shared-globaldefs.h:77 OS_VoidPtrValueWrapper_t (osal_id_t id, low 4 bytes on this little-endian target)"
+value 8 1 role=entry_fn from=arg4 type=ptr

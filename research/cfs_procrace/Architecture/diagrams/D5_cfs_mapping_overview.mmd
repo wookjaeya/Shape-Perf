@@ -1,0 +1,44 @@
+flowchart LR
+    %% D5 overview - which cFS layer becomes which Φ_cFS entries. Source: spec §12 D5; §1.3, §3.1-3.16.
+    %% Detail with code sites: D5_cfs_mapping_detail.mmd.
+
+    subgraph CFS["cFS v7.0.1 (pinned tree)"]
+        PSP["PSP<br/>main thread → OS_Application_Run, soft_timebase / cFS-Master,<br/>reset decision + boot record, persistence areas,<br/>CFE_PSP_Panic, CFE_PSP_Restart, exception ring"]
+        OSAL["OSAL<br/>idmap (by-ID / by-name tokens, timed waits), tasks,<br/>mutex (PI), binsem, countsem, queues (msg_max, euid),<br/>timebase / timers, modules / symbols with scope, files"]
+        ES["cFE ES<br/>startup thread, CreateObjects, script selection,<br/>AppCreate, trampoline, App / Task / Lib records,<br/>SystemState, WaitForSystemState, MainTaskSyncDelay,<br/>background task, CleanUpApp"]
+        EVS["cFE EVS<br/>register with memset, SendEventWithAppID<br/>(two conjuncts), own-ID guard"]
+        SB["cFE SB<br/>pipes, routes, route_lookup + puts, MsgLim, receive,<br/>subscription reporting in SB's task, header MsgIds,<br/>recursion guard"]
+        TBL["cFE TBL<br/>register, share, GetAddress, load paths"]
+        TIME["cFE TIME<br/>1 Hz chain, seqlock, synch slots by index"]
+        FSCDS["FS background, CDS"]
+        APPS["apps (15) with tables<br/>+ the selected startup script"]
+    end
+
+    subgraph PHI["Φ_cFS (profile, data not code)"]
+        KPSP["es.shutdown; terminal ops Panic, Restart (T-TERM);<br/>SR rule; K-TEARDOWN; persistent-scope resources"]
+        KOSAL["osal.obj#60;T#62;, loader.sym, queue cap_B (msg_max, euid);<br/>P-* rules (P-TASK, P-TASK-JOIN, P-MUT, P-BIN, P-CNT,<br/>P-Q, P-TB, P-MOD);<br/>M_api / M_impl; K-REG.osal, K-SPAWN.osal, K-LOCKBAL"]
+        KES["es.app / es.task / es.lib, es.self, es.phase, es.appstate;<br/>R3, R5, R6, R15, R18, R19;<br/>K-SELF.es, K-SPAWN, K-PHASE, K-REG.es,<br/>K-LIFE, K-GEN, K-LOCK.cancel"]
+        KEVS["evs.reg(slot); K-ID (value + registry conjuncts);<br/>own-ID guard = documented_drop"]
+        KSB["sb.pipe, sb.route, sb.queue, sb.msglim,<br/>sb.mode.subreport; R7, R8 (state, not edge);<br/>K-ROUTE, K-CAP, K-CAP.msglim, K-MODE,<br/>K-REG.sb-pipe-name, K-LIFE.sb-buffer"]
+        KTBL["tbl.table; R11, R12, R13;<br/>K-TBL.share, K-TBL.getaddr, K-ATOM.tbl-load"]
+        KTIME["time.synchcb; R14; K-LIFE.callback, K-ATOM.synchcb"]
+        KFS["es.cds (persistent); R16; K-PERSIST"]
+        KAPP["actor classes T_osal / T_raw / T_env;<br/>K-HANDOFF; app-profile layer (optional)"]
+        KX["cross-cutting: per-conjunct LPs + capture points,<br/>cell(loc), R1 program order (looper rule), RF rule,<br/>P_sched profiles (σ_R1)"]
+    end
+
+    PSP --> KPSP
+    OSAL --> KOSAL
+    ES --> KES
+    EVS --> KEVS
+    SB --> KSB
+    TBL --> KTBL
+    TIME --> KTIME
+    FSCDS --> KFS
+    APPS --> KAPP
+    OSAL --> KX
+
+    classDef cfs fill:#eaf6ea,stroke:#2e7d32,color:#111
+    classDef phi fill:#e9e4f5,stroke:#5b3f99,color:#111
+    class PSP,OSAL,ES,EVS,SB,TBL,TIME,FSCDS,APPS cfs
+    class KPSP,KOSAL,KES,KEVS,KSB,KTBL,KTIME,KFS,KAPP,KX phi

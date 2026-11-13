@@ -1,0 +1,10 @@
+# 00_source.kzp -- the pre-fix release cFE 6.4.1 (cases/C5.md D2, A1; 6.4.2 VDD section 1.1: the startup races were
+# "found in cFE build 6.4.1"; cfe_es_apps.c is byte-identical in 6.4.0).
+#
+# cFE-6.4.1-OSS-release.tar.gz sha256 ec26e33b4ab40b9616ccdbc984c5a00a790a7d05b260f2628c3335a29c23e98f
+# (cases/C5.md section 15, plan/c5_execution_basis_20261028.md 1.2).  The revision is the first 40 digits of that
+# hash, not a commit (../00_profile.kzp).  The root is the whole release tree: cfe/, psp/, apps/ and build/ belong to
+# it; osal/ belongs to the OSAL source of ../00_profile.kzp.
+phi 1;
+
+source cfe root "" rev "ec26e33b4ab40b9616ccdbc984c5a00a790a7d05";

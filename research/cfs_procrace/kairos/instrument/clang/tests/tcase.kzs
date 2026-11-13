@@ -1,0 +1,32 @@
+# tcase.kzs -- logical sites of the kz-instr-clang test program tcase.c (kzs-sites 1).  Generic names and
+# test values; not a cFS manifest and not a research condition.
+kzs-sites 1
+source tcase rev=0000000000000000000000000000000000000000 ref="instrument/clang/tests/tcase.c"
+module 1 name=tcase source=tcase
+
+# a call site whose arguments have side effects (call-site wrapper)
+site 1 label=t.lookup.call.before op=t.lookup phase=before tu=tcase.c func=main callee=api_lookup line=56 ref="tcase.c:56"
+value 1 0 role=out_ptr from=arg0 type=ptr
+value 1 1 role=name from=arg1 type=ptr string=validated bound=8 ref="tcase.c:16 g_names is char[3][8]"
+site 2 label=t.lookup.call.after op=t.lookup phase=after tu=tcase.c func=main callee=api_lookup line=56 ref="tcase.c:56"
+value 2 0 role=status from=ret type=s32
+value 2 1 role=id from=out0 type=u32
+# the same callee called from a macro body (not edited: unsupported)
+site 3 label=t.lookup.macro.before op=t.lookup phase=before tu=tcase.c func=main callee=api_lookup line=57 ref="tcase.c:57"
+value 3 0 role=out_ptr from=arg0 type=ptr
+# the callee's entry and its return paths (two returns are inside CHECK_PTR)
+site 4 label=t.lookup.entry op=t.lookup phase=before tu=tcase.c func=api_lookup ref="tcase.c:22"
+value 4 0 role=out_ptr from=arg0 type=ptr
+value 4 1 role=name_ptr from=arg1 type=ptr
+site 5 label=t.lookup.ret op=t.lookup phase=after tu=tcase.c func=api_lookup ref="tcase.c:22"
+value 5 0 role=status from=ret type=s32
+value 5 1 role=id from=out0 type=u32
+# the store of the found id
+site 6 label=t.lookup.store op=t.lookup phase=effect tu=tcase.c func=api_lookup line=28 ref="tcase.c:28"
+value 6 0 role=id from=operand0 type=u32
+# a variadic callee (argument taps)
+site 7 label=t.event.before op=t.event phase=before tu=tcase.c func=main callee=note_event line=58 ref="tcase.c:58"
+value 7 0 role=id from=arg0 type=s32
+value 7 2 role=app from=arg1 type=u32
+site 8 label=t.event.after op=t.event phase=after tu=tcase.c func=main callee=note_event line=58 ref="tcase.c:58"
+value 8 0 role=status from=ret type=s32

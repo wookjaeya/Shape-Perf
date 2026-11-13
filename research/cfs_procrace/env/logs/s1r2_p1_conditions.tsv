@@ -1,0 +1,16 @@
+# conditions of s1r2_p1: declared by the caller of kz observe
+item	cfs.mode	operational (env/run_cfs.sh: stop when the console shows CFE_ES_Main entering OPERATIONAL state)	from-reference
+item	cfs.stop	ci-es-restart-poweron (the bundle CI's ES restart command, RestartType 2; PI decision D3 on the stop method is open)	from-reference
+item	cfs.user	ubuntu (run_cfs.sh drops to it with setpriv; README: run as a normal user)	from-reference
+item	cfs.binary	build-native_std/exe/cpu1/core-cpu1, unmodified	from-reference
+item	cfs.working_directory	/home/user/work/procrace/cfs_ref/cFS/build-native_std/exe/cpu1 (README L111)	from-reference
+item	observer.user	root (PI decision D1: the observer runs as root, cFS as the normal user)	from-reference
+item	observer.method	kz observe, perf-sample backend, fidelity F0 (uprobes by file and offset; the file on disk is not modified)	deviation
+item	run.count	1	deviation
+item	run.stratum	cold: the first cFS run since the VM boot at 2026-10-15 08:07:13 UTC (declared, not detected)	declared-assumption
+item	persist.before	s1r2_p1_persist_before.txt sha256 cd0fa10509b935d94589ed9f2c76470975d8d9e7cfda72b35883a2ab963131ae	unset
+item	host.kernel_vs_reference	6.18.44-fc-v114 (reference runs: 6.18.44-fc-v80, env/logs/r2_g1_gdb_operational_esrestart.log.meta)	deviation
+deviation	observer.method	gdb -batch breakpoints under RUN_CFS_WRAP, all-stop (env/run_r2_gdb.sh)	kz observe perf-sample uprobes, no stop of the process	this run exercises the new observer (sub-gate S1-R2 smoke run)	the two methods perturb the run differently (gdb stops the process at every hit, uprobes do not); no equivalence of the two observations is claimed	no
+deviation	run.count	3 (r2_g1, r2_g2, r2_g3)	1	the task is one smoke run; N per purpose is decided at S1 from a pilot (PI decision D14)	no frequency, spread or comparison with the three reference runs can be claimed from one run	no
+deviation	host.kernel_vs_reference	6.18.44-fc-v80 (reference runs, 2026-10-08)	6.18.44-fc-v114	the VM kernel changed since the reference runs; group A is not re-measured yet (PI decision D11)	timing and scheduling may differ from the reference runs; not quantified	no
+deviation	run.stratum	cold = file cache not warmed since the VM boot (env/BASELINE_MEASURE.md)	cold by the first-run criterion; the cache state was neither measured nor controlled: core-cpu1 was read by sha256sum, objdump and kz anchor before the run	the cache of the executable is warm; reading the apps' .so files before the run was not done by this procedure, other readers since the boot are unknown	the label cold is not a measurement; the startup order and duration may differ from a cold boot	yes

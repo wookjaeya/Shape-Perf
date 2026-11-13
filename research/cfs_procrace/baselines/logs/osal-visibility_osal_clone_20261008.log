@@ -1,0 +1,14 @@
+# OSAL clone at bundle pointer, 2026-10-08T01:38:54Z
+$ cd /home/user/work/procrace/baselines/osal-visibility
+$ git clone https://github.com/nasa/osal.git osal
+Cloning into '/home/user/work/procrace/baselines/osal-visibility/osal'...
+$ git -C osal checkout --detach d2d877a69cff47452bcca274b309147d48e6c16f
+HEAD is now at d2d877a6 Merge pull request #1538 from nasa/dev
+$ git -C osal log -1 --format="%H %cI %s"; git -C osal describe --tags; git -C osal status --short | wc -l
+d2d877a69cff47452bcca274b309147d48e6c16f 2026-05-12T16:38:10-04:00 Merge pull request #1538 from nasa/dev
+v7.0.1
+0
+$ git -C osal submodule status (nested submodules?)
+ls: cannot access '/home/user/work/procrace/baselines/osal-visibility/osal/.gitmodules': No such file or directory
+$ du -sh osal
+21M	/home/user/work/procrace/baselines/osal-visibility/osal

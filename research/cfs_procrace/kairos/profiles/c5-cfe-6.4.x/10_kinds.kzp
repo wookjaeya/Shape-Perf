@@ -1,0 +1,36 @@
+# 10_kinds.kzp -- the kind, the named sites (their names are the labels of the site manifests instr/sites-64*.draft.kzs,
+# so that the replay maps them) and the role of a call context.
+#
+# No context: an owner kind needs an identifier space (ids undefined, reserved, base, serial_max), and the 6.4.x AppId
+# is the AppTable index (AppId = i, cfe_es_apps.c) with no undefined or reserved value in these releases
+# (unspecified_by_reference).  The owning application that E-ID1 reads (plan/c5_execution_basis_20261028.md 10.4) stays
+# in the record's identity, not in a resource key here.  No scope: the shutdown paths of 6.4.x (CFE_PSP_Restart,
+# the SIGINT handler) are not modelled in this subset.
+phi 1;
+
+kind es.task(t: Int) {
+  states FREE < LIVE;
+  initial FREE;
+  scope process;
+  transition FREE -> LIVE on register;
+  transition LIVE -> FREE on release;
+  prov es_global_tasktable, es_taskrecord_struct, es_getappid_fn, es_appcreate_registration, es_main_tasktable_init, r_es_task_kind;
+}
+
+# ---- named sites: the points of the readiness preconditions and of the registration, and a role site ----------------
+site es.get_app_id.task = fn("CFE_ES_GetAppID").call("OS_TaskGetId") prov es_getappid_task, es_getappid_fn;
+site es.get_app_id_int.task = fn("CFE_ES_GetAppIDInternal").call("OS_TaskGetId") prov es_getappidint_task, es_getappidint_fn;
+site es.app_create.pub_taskid = fn("CFE_ES_AppCreate").store(CFE_ES_TaskRecord_t.TaskId) prov es_appcreate_taskid_store, es_appcreate_registration;
+site sb.create_pipe.get_app_id = fn("CFE_SB_CreatePipe").call("CFE_ES_GetAppID") prov sb_createpipe_getappid, sb_createpipe_fn;
+
+# ---- the role of a call context of CFE_ES_GetAppID (SPEC rev 1.3 amendment 1.6 "Call contexts";
+# plan/c5_execution_basis_20261028.md 10.1).  CFE_SB_CreatePipe uses the AppId it gets for the pipe it creates: it reads
+# no status and stores the value (cases/C5.md section 5).  The issue names the lookups that tasks make early in their
+# initialization.  A dependent use: the readiness specification applies, as it does to every other call context.  The
+# victim candidate sample_app is not the reporter's application (cases/C5.md A4); no application is named here.
+role sb-create-pipe-dependent-lookup {
+  op CFE_ES_GetAppID;
+  site sb.create_pipe.get_app_id;
+  purpose dependent_use;
+  prov sb_createpipe_fn, issue_72_body, r_role_binding;
+}

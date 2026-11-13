@@ -1,0 +1,36 @@
+# root capability probe, 2026-10-08T02:13:24Z (CONDITIONS.md D-4)
+## capsh --print (session root)
+Current: =ep cap_sys_resource-ep
+Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,cap_audit_read,cap_perfmon,cap_bpf,cap_checkpoint_restore
+Ambient set =
+Current IAB: !cap_sys_resource
+Securebits: 00/0x0/1'b0 (no-new-privs=0)
+ secure-noroot: no (unlocked)
+ secure-no-suid-fixup: no (unlocked)
+ secure-keep-caps: no (unlocked)
+ secure-no-ambient-raise: no (unlocked)
+uid=0(root) euid=0(root)
+gid=0(root)
+groups=
+Guessed mode: HYBRID (4)
+## /proc/self/status (session root)
+CapInh:	0000000000000000
+CapPrm:	000001fffeffffff
+CapEff:	000001fffeffffff
+CapBnd:	000001fffeffffff
+CapAmb:	0000000000000000
+CAP_SYS_RESOURCE (bit 24) in CapEff: False
+CAP_SYS_NICE (bit 23) in CapEff: True
+## fs.mqueue sysctls
+msg_max=10
+msgsize_max=8192
+queues_max=256
+msg_default=10
+## rlimits of root
+Max msgqueue size         819200               819200               bytes     
+Max realtime priority     0                    0                    
+Max realtime timeout      unlimited            unlimited            us        
+## non-reference attempt run as root (cfs_nonref_attempt/runs/run01_root_plain.log)
+7:OS_Posix_TaskAPI_Impl_Init():401:Selected policy 2 for RT tasks, root task = 99
+41:OS_QueueCreate_Impl():119:OS_QueueCreate Error. errno = 22 (Invalid argument)
+49:OS_QueueCreate_Impl():119:OS_QueueCreate Error. errno = 22 (Invalid argument)

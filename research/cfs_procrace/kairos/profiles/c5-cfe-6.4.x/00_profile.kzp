@@ -1,0 +1,46 @@
+# 00_profile.kzp -- profile c5-cfe-6.4.x (Kairos): case C5, nasa/cFE #72 (Trac #41), "Race condition within
+# CFE_ES_AppCreate", on the SourceForge release tarballs cFE 6.4.1 (pre-fix) and cFE 6.4.2 (fixed) with OSAL 4.1.1
+# (posix) and the pc-linux PSP 1.2.0.0 they carry (research/cfs_procrace/cases/C5.md section 3, row 1-4 and 19 of
+# section 10; plan/c5_execution_basis_20261028.md sections 1, 4, 5 and 10).
+#
+# A profile instance is this directory plus one release directory (kz-phi takes several directories):
+#
+#   cfe-6.4.1/ | cfe-6.4.2/    the source declaration of that release tree and its cFE citations (the ES files
+#                              differ between the releases; the cited lines are read in each tree)
+#
+# e.g.  kz-phi check c5-cfe-6.4.x c5-cfe-6.4.x/cfe-6.4.1
+#       kz-phi verify-prov --root <release tree with OSAL at osal/> c5-cfe-6.4.x c5-cfe-6.4.x/cfe-6.4.1
+#
+# The subdirectories instr/ (the logical site manifests) and basis/ (the kz-static recipe and the header-only profile
+# of E-ST) are other inputs; kz-phi reads the *.kzp files of the directories it is given and does not descend.
+#
+# What the profile states (plan/c5_execution_basis_20261028.md 4, 5.2, 6 and 10.1):
+#   kind        es.task: the ES task-registration entry CFE_ES_Global.TaskTable[t], keyed by the OSAL task id t
+#   operations  CFE_ES_GetAppID and CFE_ES_GetAppIDInternal (the lookups, with the readiness precondition "the
+#               calling task's entry is registered" and the outcome mappings that fix it, P1), CFE_ES_AppCreate (the
+#               registration of an application's main task), the other writers of the entry (the start of
+#               CFE_ES_Main, CFE_ES_CreateObjects, CFE_ES_CreateChildTask, the releases) and OS_TaskCreate
+#   roles       CFE_SB_CreatePipe's lookup is a dependent use
+#   rspec       K-SELF.es-task (CFE_ES_GetAppID), K-SELF.es-task-internal (CFE_ES_GetAppIDInternal)
+#
+# The judgement unit is the order violation (PI_DECISIONS_RESOLVED_20261028.md section 2 item 6): the new task's
+# lock-protected read of its own entry before the creator registered it.  CFE_ES_ERR_APPID, a CFE_SUCCESS with
+# another task's AppId and the consumption of the result (EVS registration skipped, an SB pipe with AppId 0xFFFFFFFF,
+# CFE_ES_RunLoop FALSE) are reported apart from it and are not modelled here.
+#
+# Source revisions.  A `source` declaration takes a revision of 7 to 40 lower-case hexadecimal digits, and
+# kz-phi verify-prov checks it against the git metadata of the tree.  The C5 trees are release tarballs without
+# version-control metadata and no git revision holds the pre-fix code (cases/C5.md 4.3).  The revision written here
+# is the first 40 hexadecimal digits of the sha256 of the release tarball the tree was unpacked from
+# (cases/C5.md section 15; plan/c5_execution_basis_20261028.md 1.2).  It is not a commit; verify-prov reports it
+# unverifiable, and the cited lines are checked by their own hashes.  The full tarball hashes are written next to
+# each declaration.
+#
+# Nothing here was derived by running cFS.  Line numbers are those of the files in the tarballs.
+phi 1;
+
+profile "c5-cfe-6.4.x" revision "cFE 6.4.1 / 6.4.2 release tarballs with OSAL 4.1.1 (posix) and PSP pc-linux 1.2.0.0; per release directory";
+
+# osal-4.1.1-release.tar.gz sha256 8f0f2b23d8226256fdb8543bf9fcb560b38434411dc12cb4f7f35b9c19e61d46, moved to osal/
+# of the release tree (plan/c5_execution_basis_20261028.md 2.1, DV-1).  The same OSAL in both releases.
+source osal root "osal" rev "8f0f2b23d8226256fdb8543bf9fcb560b3843441";

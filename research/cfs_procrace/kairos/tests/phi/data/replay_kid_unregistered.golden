@@ -1,0 +1,42 @@
+# trace kid_unregistered.trace, predicate supplied, cfe version 7.0.1
+replay profile "cfs-v7.0.1"
+events 10
+terminated no
+shutdown_request no
+
+event table
+  #0 T0 CFE_ES_CreateObjects.reserve_core pt
+  #1 T0 CFE_ES_CreateObjects.publish_core pt
+  #2 T_SB CFE_ES_GetAppID call
+  #3 T_SB CFE_ES_GetAppID.self_live pt
+  #4 T_SB CFE_ES_GetAppID.store_ok pt
+  #5 T_SB CFE_ES_GetAppID ret
+  #6 T_SB CFE_EVS_SendEventWithAppID.id_valid pt
+  #7 T_SB CFE_EVS_SendEventWithAppID call
+  #8 T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+  #9 T_SB CFE_EVS_SendEventWithAppID ret
+
+edges 8
+edge R1 S unconditional #0 -> #1
+edge R1 S unconditional #2 -> #3
+edge R1 S unconditional #3 -> #4
+edge R1 S unconditional #4 -> #5
+edge R1 S unconditional #5 -> #6
+edge R1 S unconditional #6 -> #7
+edge R1 S unconditional #7 -> #8
+edge R1 S unconditional #8 -> #9
+
+occurrences 1
+occurrence K-ID.send-with-appid actor T_SB ordinal 1 key [0x110002] call #7 return #9
+  status VIOLATING decided at point #8 scope default
+  conjunct id_valid capture #6 holds
+  conjunct slot_registered point #8 fails
+  result 0xc2000002 outcome agrees
+
+findings 0
+
+guard failures 0
+
+final state
+  es.app[2] = LIVE id 0x110002
+  loc CFE_SB_Global.AppId = 0x110002

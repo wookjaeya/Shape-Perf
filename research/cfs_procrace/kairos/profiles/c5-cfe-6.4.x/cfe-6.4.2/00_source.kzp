@@ -1,0 +1,10 @@
+# 00_source.kzp -- the fixed release cFE 6.4.2 (cases/C5.md section 8; 6.4.2 VDD Table 1.2-2 item 2, Trac #41).  Its
+# diff from 6.4.1 also carries Trac #40 and #42: a whole-release comparison is marked "several fixes mixed"
+# (plan/c5_execution_basis_20261028.md section 4).
+#
+# cFE-6.4.2-OSS-release.tar.gz sha256 c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f
+# (cases/C5.md section 15, plan/c5_execution_basis_20261028.md 1.2).  The revision is the first 40 digits of that
+# hash, not a commit (../00_profile.kzp).  The root is the whole release tree; osal/ belongs to the OSAL source.
+phi 1;
+
+source cfe root "" rev "c64ed2aac910e79a641f49279dfdff3b7b49374e";

@@ -1,0 +1,83 @@
+# descry: does each of the five cases provide DESCRY's documented inputs? 2026-10-08T01:33:23Z
+# DESCRY inputs (paper p1 r1.txt:75-76, 96-97; p4 r4.txt:58, 98-99): (a) source code of the processes under debugging, (b) DEFAULT LOG MESSAGES of the failed execution,
+#   (c) the set of running processes P_all (p5 r5.txt:3-4: captured by e.g. Linux auditd). Failure point = 'a program statement that prints a failure message' (p3 r3.txt:149-150).
+# Issue bodies retrieved 2026-10-08 via GitHub MCP search_issues (fields number,title,body,html_url,created_at). Comment bodies were NOT retrievable
+#   (issue_read: 'Access denied: repository "nasa/cfe" is not configured for this session').
+
+## C1 nasa/CF#184 (created 2022-01-13). Body text saved earlier at /home/user/work/procrace/src/C1/retrieved_20261008/CF_184_body.md
+13:Its a race condition, so not readily reproducible.
+14:Start CF _before_ the app that creates the sem (still not guaranteed, but increases the chance the race will be lost)
+24:**Code snips**
+25:https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/fsw/src/cf_cfdp.c#L1014-L1015
+28:Ubuntu 21.10
+#  -> no console/log output in the body. Pre-fix source has a logging point at the failure (CF commit 2a024d8e, fsw/src/cf_cfdp.c):
+  1014	            ret = OS_CountSemGetIdByName(&CF_AppData.engine.channels[i].sem_id,
+  1015	                                         CF_AppData.config_table->chan[i].sem_name);
+  1016	            if (ret != OS_SUCCESS)
+  1017	            {
+  1018	                CFE_EVS_SendEvent(CF_EID_ERR_INIT_SEM, CFE_EVS_EventType_ERROR,
+  1019	                                  "CF: failed to get sem id for name %s, error=0x%08x",
+  1020	                                  CF_AppData.config_table->chan[i].sem_name, ret);
+  1021	                goto err_out;
+  1022	            }
+#  pinned reference CF 15a871e6 (post-fix, retry loop) apps/cf/fsw/src/cf_cfdp.c:
+  1280	            for (j = 0; j < CF_STARTUP_SEM_MAX_RETRIES; ++j)
+  1281	            {
+  1282	                ret = OS_CountSemGetIdByName(&CF_AppData.engine.channels[i].sem_id,
+  1283	                                             CF_AppData.config_table->chan[i].sem_name);
+  1284	
+  1285	                if (ret != OS_ERR_NAME_NOT_FOUND)
+  1286	                {
+  1287	                    break;
+  1288	                }
+  1289	
+  1290	                OS_TaskDelay(CF_STARTUP_SEM_TASK_DELAY);
+  1291	            }
+  1292	
+  1293	            if (ret != OS_SUCCESS)
+  1294	            {
+  1295	                CFE_EVS_SendEvent(CF_INIT_SEM_ERR_EID,
+  1296	                                  CFE_EVS_EventType_ERROR,
+  1297	                                  "CF: failed to get sem id for name %s, error=%ld",
+  1298	                                  CF_AppData.config_table->chan[i].sem_name,
+  1299	                                  (long)ret);
+
+## C2 nasa/cFE#198 (created 2019-09-30). Quote:
+#  'This race condition was observed in the EVA CWS project where one app needed to wait for other apps to be fully loaded before completing its initialization, so it was using CFE_ES_WaitForStartupSync() before doing its late-phase init.  But other applications (also using the same sync call) were calling other functions before the late-phase init had completed.'
+#  -> no log, no app/function names; EVA CWS application source is not public.
+
+## C3 nasa/cFE#73 (created 2019-09-30). Quotes:
+#  'details of the specific sequence of events discovered when debugging application startup on the Microblaze processor used by the EVA team at GRC'
+#  '7. This appID value is not range-checked by EVS_IsFiltered and ultimately segfaults and crashes CFE core.'
+#  -> no log in the body; the failure is a segfault (no program statement prints a failure message).
+
+## C5 nasa/cFE#72 (created 2019-09-30). Quote:
+#  'This unlock-relock opens up an opportunity for the child thread to read the shared table data before it is fully populated.  This can cause many problems.  One specific one is that CFE_ES_GetAppID() (which many tasks call very early in their init procedures) will fail, which can have a serious snowball effect.'
+#  -> code-review style report; no log; 'child thread' (not process).
+
+## R2 nasa/cFE#2663 (created 2025-08-06). Quotes:
+#  'CFE_EVS_SendEventWithAppID() then returns a CFE_EVS_APP_ILLEGAL_APP_ID presumably because CFE_SB has not been registered with event services.  This might have gone unnoticed because there is no event outputted nor is the return code set to any variable.'
+#  'To Reproduce ... 4. Place a breakpoint here - https://github.com/nasa/cFE/blob/main/modules/evs/fsw/src/cfe_evs.c#L185  5. Run the gdb and see it stopped at the breakpoint.'
+#  pinned reference cFE c5fb2b4d modules/evs/fsw/src/cfe_evs.c (illegal-AppID branch prints nothing):
+   184	
+   185	    AppDataPtr = EVS_GetAppDataByID(AppID);
+   186	    if (AppDataPtr == NULL)
+   187	    {
+   188	        Status = CFE_EVS_APP_ILLEGAL_APP_ID;
+   189	    }
+   190	    else if (!EVS_AppDataIsMatch(AppDataPtr, AppID))
+   191	    {
+   192	        /* Handler for events from apps not registered with EVS */
+   193	        Status = EVS_NotRegistered(AppDataPtr, AppID);
+   194	    }
+
+## Default console log of the reference cFS run exists (ES syslog + 'EVS Port1' event lines), e.g. first lines of
+## /home/user/Shape-Perf/research/cfs_procrace/env/logs/run01_operational.log :
+30:1980-001-00:24:28.22792 CFE_ES_Main: CFE_ES_Main in EARLY_INIT state
+32:1980-001-00:24:28.22834 CFE_ES_Main: CFE_ES_Main entering CORE_STARTUP state
+42:EVS Port1 1980-012-14:03:20.05288 66/1/CFE_ES 1: cFE ES Initialized: CFE_ES v7.0.1+dev0 (Draco) v7.0.1 Official Release, EDS disabled
+43:EVS Port1 1980-012-14:03:20.05291 66/1/CFE_ES 2: cFS Versions: cfe v7.0.1+dev0, osal v7.0.1+dev0, psp v7.0.1+dev0. cFE chksm 63092
+44:EVS Port1 1980-012-14:03:20.05293 66/1/CFE_ES 91: Version Info: Mission SampleMission, version git:v7.0.1
+## process structure of that run: one process 'core-cpu1' (run01_operational.log.meta 'command=./core-cpu1'); OSAL tasks are pthreads (osal/src/os/posix/src/os-impl-tasks.c:568)
+568:    return_code = pthread_create(pthr, &custom_attr, entry, entry_arg);
+# note: numbered blocks regenerated with every line numbered (an earlier nl call skipped blank lines).

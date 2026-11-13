@@ -1,0 +1,52 @@
+# step2a-20261110-8b: commands, rc and free space (df -B1 /, bytes available)
+# <scratch> is this session's scratchpad directory (8b/); the scripts there are described here, not copied
+
+## 1. before touching MC (pre_mc.txt)
+sha256sum MC/tools/kz-static/kz-static MC/tools/kz/kz MC/tools/kz-dump/kz-dump MC/runtime/kz-rt-dump    -> db172b74 b254483e 05623054 4390d4f1
+  each equal to its PV entry (ORIGINAL_SHA256, ADDED_ORIGINAL_SHA256; path merge-check/kz-llvm/...)     -> 4 OK
+MC/tools/kz-static/kz-static --identity                                                                     -> tool_source 1ccee6ce (commit 76bcf6d), core f6e3c7b4
+git -C R rev-parse HEAD -> 114f33b; git diff -- kairos | wc -l -> 0; git diff --stat 76bcf6d HEAD -- kairos/{lib,tools,include,cmake,CMakeLists.txt} -> empty
+
+## 2. code, docs, tests (git diff --stat -- kairos: 9 files, +229/-13; new tests/static/fixtures/imgbudget.c)
+AR 15.0 written before the build; copy with time: declared_before_run.txt (07:10Z)
+
+## 3. unit checks of the driver (no build needed)
+TMPDIR=<scratch>/unit/tmp bash env/redesign/step2a_tests_unit.sh   -> unit.txt, 6 of 6, rc 0 (driver 6e78820c, unit a02e56a8, count 7d2ab6a8)
+
+## 4. rebuild in place in MC (07:11:18Z-07:14:56Z)
+cd MC && make -j4 kz-static static_golden test_static_cli test_static_expr test_static_flow test_static_recipe test_static_gitrev \
+  test_static_unroll test_static_wrappers test_static_link test_static_elf32 kz_lint                 -> rc 0 (make.log; CMake re-ran: tests/static/CMakeLists.txt and the identity paths changed)
+free: before 1161084928 (07:11:18Z), lowest 1068523520 (07:12:43Z), after 1163042816 (07:14:55Z); df_build.log (watcher stops the build below 330000000; did not trigger)
+post_mc.txt: kz-static 7ef1a28c; kz, kz-dump, kz-rt-dump, kz-phi unchanged; MC 3553803254 B
+
+## 5. full ctest (07:15Z)
+cd MC && ctest -j4 --output-on-failure   -> ctest_full.log: 238 tests, 0 failed, 1 skipped (test_probe_anchor_reached, exit 77), rc 0
+ctest -N | grep -c 'Test *#' -> 238; names phi_* -> 47; ctest -N -L legacy-case -> 0 tests (no label yet, RV3A O8 is 8c)
+git status -- kairos/tests/static/data kairos/tests/golden -> no change (no golden rewritten)
+
+## 6. the fixture with the 2a tool and the new one (fixture_old_new.txt)
+xz -dc PV/kz-static.db172b74.xz > <scratch>/oldtool/kz-static (sha256 db172b74 checked); free 1164156928 -> 987504640
+<tool> extract --no-profile --image-budget 4 --source tests/static/fixtures/imgbudget.c --root tests/static/fixtures -o X -- -std=c99 -pedantic; <tool> show X --section gimages --section basis
+rm <scratch>/oldtool/kz-static (re-creatable from PV) -> free 1164128256
+
+## 7. the driver (07:16:44Z-07:21:42Z)
+env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools \
+  bash R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8b                  -> rc 0, result all: PASS (status.txt)
+free: before 1164120064 (07:16:44Z), lowest 938950656 (07:20:13Z), after 961011712 (07:21:41Z); df_run.log
+du -sb tests_8b -> 202207238; find -type f | wc -l -> 150; sha256.txt 137 lines (sha256 737c062e...)
+
+## 8. checks after the run
+(cd T/ && sha256sum -c --quiet sha256.txt) -> rc 0; (cd tests_rv4 && ...) -> rc 0; (cd tests_8b && ...) -> rc 0
+python3 -I compare_8b.py MC/tools/kz-dump/kz-dump compare_8b.tsv tests_8b T/ tests_rv4 -> same 82, same-but-declared 56, DIFF 76 (AR 15.6 reads every DIFF line)
+diff T/count/summary.txt tests_8b/count/summary.txt -> 5 lines (the quote of the count.walk_bounds_hit line, one per build)
+  corrected in the 8b fix stage (AR 15.10, finding 7): the diff gives 10 changed lines in 6 hunks, not 5: the five quotes of the count.walk_bounds_hit line (381, 396, 411, 426, 441) and the five T7 lines (487-491, the facts and relations hashes); tests_rv4 gives the same 10
+diff tests_rv4/identity/<b>/<V>/{facts.dump.diff,show.diff} tests_8b/... -> only the basis hash, the STRINGS crc32 and the units_from value
+
+## 9. per-object counts (counters.txt)
+for b in five: kz-static extract --no-profile --basis tests_8b/<b>/NP/basis.kz --targets-rule R-T1,R-T2 --verbose -o <scratch>/verbose/<b>.kz 2> <b>.err
+  -> rc 0, 'static image of' lines 0, cmp with tests_8b/<b>/NP/facts.kz: same (5); the copies removed
+for the six identity cases: kz-static extract <EB profile args> --basis tests_8b/identity/<b>/<V>/basis.kz <EB extract args> --verbose -o ...
+  -> rc 0, 'static image of' lines 0, cmp with tests_8b/identity/<b>/<V>/facts.kz: same (6); the copies removed
+free after: 960143360
+free at the end (before the second commit): 959553536 (2026-11-10T07:29:23Z)
+  note (8b fix stage, finding 11): the 8b report gave 1,161,089,024 at the start and 959,332,352 at the end; neither is recorded here or in df_build.log / df_run.log; the recorded values are 1161084928 before the build (07:11:18Z), 1161076736 the watcher's first entry, 961011712 after the run (07:21:41Z) and 959553536 at the end

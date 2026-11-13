@@ -1,0 +1,40 @@
+# MC tools after the 8c fix rebuild (recorded 2026-11-10T09:54:54Z)
+0024f192980dfbd93e4a662666239c3b4082fcb65f3bd5d25a19fbbfc06d2431  tools/kz-static/kz-static
+931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248  tools/kz/kz
+05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43  tools/kz-dump/kz-dump
+4390d4f13b5bcae3145ddd4b3decb089790d18d6ebbdc3104de99beb66e5063a  runtime/kz-rt-dump
+7d34e6e20934c62b91f006c20712b7a096692b231d318257b096eb22dc68075f  tools/kz-phi/kz-phi
+b0f0d6a55153c8c76edb0f6592e1963c593c2b8298fc87ffca44e935d5c9650a  tests/lint/kz_lint
+28db40172dbdb06faa0e607b9a494805b19768ca888e865d0a5c3859dab8bcaf  instrument/clang/kz-instr-clang
+2026-11-10 09:51:22.831248785 +0000 176674872 tools/kz-static/kz-static
+2026-11-10 08:49:17.931027366 +0000 75503864 tools/kz/kz
+2026-10-30 16:41:39.341084223 +0000 2514528 tools/kz-dump/kz-dump
+2026-10-29 07:31:59.427491407 +0000 3350272 runtime/kz-rt-dump
+2026-10-30 16:41:44.817084098 +0000 28644248 tools/kz-phi/kz-phi
+2026-11-10 09:50:03.823244088 +0000 4029080 tests/lint/kz_lint
+2026-11-10 08:48:55.159026012 +0000 97195536 instrument/clang/kz-instr-clang
+# kz-static --identity (after)
+tool=kz-static
+tool_sha256=3b7de5b7d595d3c0f0042ea8e264d7865835dfa7cbc0524fcdcb2323ede43269
+tool_source=bbd484360f2a56ad44a2aead276e4c4c9be1066994aee087a9fc08767ac19aab
+core_source=f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+# tool identity defines (flags.make, after the configure step of the build)
+kz KZ_TOOL_SOURCE_SHA256=\"caf58235d6b9d032685e0f5df7eb4c5f8cfcdaadd0e37457c897664fa4911141\"
+kz-phi KZ_TOOL_SOURCE_SHA256=\"7fc3ed73d83e5977112ef6c7a0d75c86de4f2871be72d299260a18b5c56713f8\"
+kz-static KZ_TOOL_SOURCE_SHA256=\"bbd484360f2a56ad44a2aead276e4c4c9be1066994aee087a9fc08767ac19aab\"
+kz-dump KZ_TOOL_SOURCE_SHA256=\"cc51ff352881eb7fd56ec3c1d56cb53ff946c86ff51af310436e3850fce2ba2a\"
+# configure: libkz-core source identity (make.log)
+-- libkz-core source identity f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+# the binaries linked by the rebuild (make.log, make2.log)
+[ 28%] Linking CXX executable kz_lint
+[ 89%] Linking CXX static library libkz-llvm.a
+[ 92%] Linking CXX executable test_static_expr
+[ 94%] Linking CXX executable test_static_recipe
+[ 95%] Linking CXX executable test_static_gitrev
+[ 96%] Linking CXX executable test_static_flow
+[ 97%] Linking CXX executable test_static_link
+[ 97%] Linking CXX executable kz-static
+[ 98%] Linking CXX executable test_static_elf32
+[100%] Linking CXX executable test_static_unroll
+[100%] Linking CXX executable test_static_wrappers
+[100%] Linking CXX executable test_static_cli

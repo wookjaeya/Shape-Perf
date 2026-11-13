@@ -1,0 +1,38 @@
+== F0
+publication w (first sb_publication point): trace index #111 thread CFE_SB (text line 214)
+occurrences 295 kinds {'K-ID.send-with-appid': 295}
+before w 24
+   by actor {'CFE_ES': 20, 'CFE_EVS': 4}
+   by key (AppID argument) {'0': 24}
+   by result {'0xc2000003': 24}
+   by grade {'fail': 24}
+   by replay status {'VIOLATING': 24}
+after w 271
+   by actor {'TO_LAB': 140, 'DS': 21, 'HK': 11, 'LC': 10, 'CF': 10, 'HS': 10, 'SC': 9, 'CFE_TIME': 8, 'MD': 8, 'CS': 8, 'SBN': 7, 'CFE_SB': 5}
+   by key (AppID argument) {'0x110003': 243, '0x110004': 28}
+   by result {'0': 271}
+   by grade {'ok': 271}
+   by replay status {'READY': 271}
+clause B item 2 (another actor used the site before w, all such occurrences fail): before-w occurrences 24 fail 24 non-fail 0 actors ['CFE_ES', 'CFE_EVS']
+clause B item 3 (after w not empty, none returned the item-2 status): after-w 271 with 0xc2000003 0 with any fail grade 0 without a result line 0
+first/last before-w text lines 2694 3085 ; first after-w text line 3102
+before-w occurrences with a return event (ret index): 24 ; after-w 271
+== GI
+publication w (first sb_publication point): trace index #111 thread a5 (text line 217)
+occurrences 276 kinds {'K-ID.send-with-appid': 276}
+before w 24
+   by actor {'a2': 20, 'a4': 4}
+   by key (AppID argument) {'0': 24}
+   by result {'0xc2000003': 24}
+   by grade {'fail': 24}
+   by replay status {'VIOLATING': 24}
+after w 252
+   by actor {'a12': 111, 'a16': 22, 'a18': 11, 'a19': 11, 'a15': 10, 'a14': 10, 'a21': 10, 'a22': 10, 'a23': 9, 'a7': 8, 'a24': 8, 'a17': 6}
+   by key (AppID argument) {'0x110003': 224, '0x110004': 28}
+   by result {'0': 252}
+   by grade {'ok': 252}
+   by replay status {'READY': 252}
+clause B item 2 (another actor used the site before w, all such occurrences fail): before-w occurrences 24 fail 24 non-fail 0 actors ['a2', 'a4']
+clause B item 3 (after w not empty, none returned the item-2 status): after-w 252 with 0xc2000003 0 with any fail grade 0 without a result line 0
+first/last before-w text lines 2545 2936 ; first after-w text line 2953
+before-w occurrences with a return event (ret index): 24 ; after-w 252

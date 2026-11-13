@@ -1,0 +1,7 @@
+npsame/npsame.txt: old lines 11, in order in new 11; new lines 121; the two earlier lines per build = old file: True
+s5same/s5same.txt: old lines 11, in order in new 11; new lines 121; the two earlier lines per build = old file: True
+fixsame/fixsame.txt: old lines 11, in order in new 11; new lines 101; the two earlier lines per build = old file: True
+fix2same/fix2same.txt: old lines 11, in order in new 11; new lines 96; the two earlier lines per build = old file: True
+fix3same/fix3same.txt: old lines 11, in order in new 11; new lines 91; the two earlier lines per build = old file: True
+identity/identity.txt: old lines 3..74: 72, in order in new 72; new lines 146; head lines 1-2 differ by date and repo commit only: True
+run.log: T lines 5, new lines 11; rc of the T lines equal in new: True; new-only: identity/c1_pre_tx/V0 identity/c1_pre_tx/V2 identity/c5_641/V0 identity/c5_641/V2 identity/r2_core/V0 identity/r2_core/V2

@@ -1,0 +1,22 @@
+# step2a_tests_unit.sh: driver /home/user/Shape-Perf/research/cfs_procrace/env/redesign/step2a_tests.sh (sha256 6e78820c48d2169e)
+check 1 required comparison fails -> step rc 1: control rc 0; fault rc 1 -> PASS
+    bad: FAIL s5same: c5_641: per-record comparison (see <tmp>/w1/bad/s5same/s5same.txt) in a pipeline (rc 1)
+    bad: steps: s5same FAIL 
+check 2 kz-dump rc 3 inside a pipeline -> all rc 1: control rc 0; fault rc 1 -> PASS
+    bad: FAIL fix2same: kz-dump <tmp>/w2/fix2/c5_642/NP/facts.kz (rc 3)
+    bad: steps: identity PASS npsame PASS run PASS s5same PASS fixsame PASS fix2same FAIL fix3same PASS twice PASS count PASS sha PASS 
+check 3 empty dump, kz-dump failure -> step rc 1: control rc 0 0; fault rc 1 1 -> PASS
+    bad: FAIL s5same: the dump of <tmp>/w3/s5/c1_pre_tx/NP/facts.kz has no section (grep rc 1)
+    bad: steps: s5same FAIL 
+    bad2: FAIL fixsame: kz-dump <tmp>/w3/fix1/r2_core/NP/facts.kz (rc 2)
+    bad2: steps: fixsame FAIL 
+check 4 unexpected change inside an allowed section -> step rc 1: control rc 0; fault rc 1 -> PASS
+    bad: FAIL fix3same: c5_641: per-record comparison (see <tmp>/w4/bad/fix3same/fix3same.txt) in a pipeline (rc 1)
+    bad: steps: fix3same FAIL 
+check 5 allowed record changes a field outside its list -> step rc 1: control rc 0; fault rc 1 -> PASS
+    bad: FAIL fix3same: c5_641: per-record comparison (see <tmp>/w5/bad/fix3same/fix3same.txt) in a pipeline (rc 1)
+    bad: steps: fix3same FAIL 
+check 6 no STEP, or OUT holds sha256.txt -> rc 2 (driver does not start): control rc 0; fault rc 2 2 -> PASS
+    bad: (no status.txt; log ends: refusing: <tmp>/w6/bad is T/ or holds a top-leve)
+    nostep: (no status.txt; log ends: usage: step2a_tests.sh identity|npsame|run|s5same|fixsame|fix2same|fix3same|twice|count|sha|all [OUT])
+unit checks: 6 of 6 pass

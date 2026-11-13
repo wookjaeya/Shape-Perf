@@ -1,0 +1,755 @@
+# Verbatim source excerpts cited in osal-visibility.md, 2026-10-08T01:56:14Z
+# OSAL  = nasa/osal d2d877a69cff47452bcca274b309147d48e6c16f (/home/user/work/procrace/baselines/osal-visibility/osal)
+# cFE   = nasa/cFE  c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd (bundle submodule, /home/user/work/procrace/cfs_ref/cFS/cfe; read-only)
+# PSP   = nasa/PSP  c4b3b0b65b119e106481ad8e20976ae4d7f554e3 (bundle submodule, /home/user/work/procrace/cfs_ref/cFS/psp; read-only)
+----- OSAL src/os/shared/inc/os-shared-idmap.h:37,43
+   37  struct OS_common_record
+   38  {
+   39      const char *name_entry;
+   40      osal_id_t   active_id;
+   41      osal_id_t   creator;
+   42      uint16      refcount;
+   43  };
+----- OSAL src/os/shared/inc/os-shared-idmap.h:106,111
+  106  #define OS_OBJECT_INIT(tok, ref, namefield, nameval)                   \
+  107      {                                                                  \
+  108          memset(ref, 0, sizeof(*ref));                                  \
+  109          strncpy(ref->namefield, nameval, sizeof(ref->namefield) - 1);  \
+  110          OS_ObjectIdGlobalFromToken(&tok)->name_entry = ref->namefield; \
+  111      }
+----- OSAL src/os/shared/inc/os-shared-idmap.h:257,260
+  257  static inline osal_objtype_t OS_ObjectIdToType_Impl(osal_id_t id)
+  258  {
+  259      return (OS_ObjectIdToInteger(id) >> OS_OBJECT_TYPE_SHIFT);
+  260  }
+----- OSAL src/os/shared/inc/os-shared-idmap.h:285,289
+  285  static inline bool OS_ObjectIdIsValid(osal_id_t object_id)
+  286  {
+  287      osal_objtype_t objtype = OS_ObjectIdToType_Impl(object_id);
+  288      return (objtype > OS_OBJECT_TYPE_UNDEFINED && objtype < OS_OBJECT_TYPE_USER);
+  289  }
+----- OSAL src/os/shared/inc/os-shared-countsem.h:32,36
+   32  /* other objects that have only an API name and no other data */
+   33  typedef struct
+   34  {
+   35      char obj_name[OS_MAX_API_NAME];
+   36  } OS_count_sem_internal_record_t;
+----- OSAL src/os/shared/src/osapi-countsem.c:83,110
+   83  int32 OS_CountSemCreate(osal_id_t *sem_id, const char *sem_name, uint32 sem_initial_value, uint32 options)
+   84  {
+   85      int32                           return_code;
+   86      OS_object_token_t               token;
+   87      OS_count_sem_internal_record_t *countsem;
+   88  
+   89      /* Check parameters */
+   90      OS_CHECK_POINTER(sem_id);
+   91      OS_CHECK_APINAME(sem_name);
+   92  
+   93      /* Note - the common ObjectIdAllocate routine will lock the object type and leave it locked. */
+   94      return_code = OS_ObjectIdAllocateNew(LOCAL_OBJID_TYPE, sem_name, &token);
+   95      if (return_code == OS_SUCCESS)
+   96      {
+   97          countsem = OS_OBJECT_TABLE_GET(OS_count_sem_table, token);
+   98  
+   99          /* Reset the table entry and save the name */
+  100          OS_OBJECT_INIT(token, countsem, obj_name, sem_name);
+  101  
+  102          /* Now call the OS-specific implementation.  This reads info from the table. */
+  103          return_code = OS_CountSemCreate_Impl(&token, sem_initial_value, options);
+  104  
+  105          /* Check result, finalize record, and unlock global table. */
+  106          return_code = OS_ObjectIdFinalizeNew(return_code, &token, sem_id);
+  107      }
+  108  
+  109      return return_code;
+  110  }
+----- OSAL src/os/shared/src/osapi-countsem.c:204,215
+  204  int32 OS_CountSemGetIdByName(osal_id_t *sem_id, const char *sem_name)
+  205  {
+  206      int32 return_code;
+  207  
+  208      /* Check parameters */
+  209      OS_CHECK_POINTER(sem_id);
+  210      OS_CHECK_POINTER(sem_name);
+  211  
+  212      return_code = OS_ObjectIdFindByName(LOCAL_OBJID_TYPE, sem_name, sem_id);
+  213  
+  214      return return_code;
+  215  }
+----- OSAL src/os/shared/src/osapi-idmap.c:76,76
+   76  static OS_common_record_t OS_common_table[OS_MAX_TOTAL_RECORDS];
+----- OSAL src/os/shared/src/osapi-idmap.c:95,95
+   95  OS_common_record_t *const OS_global_count_sem_table = &OS_common_table[OS_COUNTSEM_BASE];
+----- OSAL src/os/shared/src/osapi-idmap.c:275,278
+  275  bool OS_ObjectNameMatch(void *ref, const OS_object_token_t *token, const OS_common_record_t *obj)
+  276  {
+  277      return (obj->name_entry != NULL && strcmp((const char *)ref, obj->name_entry) == 0);
+  278  }
+----- OSAL src/os/shared/src/osapi-idmap.c:329,332
+  329      if (lock_mode != OS_LOCK_MODE_NONE)
+  330      {
+  331          OS_Lock_Global(token);
+  332      }
+----- OSAL src/os/shared/src/osapi-idmap.c:395,404
+  395      obj         = OS_ObjectIdGlobalFromToken(token);
+  396      expected_id = OS_ObjectIdFromToken(token);
+  397  
+  398      /*
+  399       * Upon entry the ID from the token must be valid
+  400       */
+  401      if (!OS_ObjectIdIsValid(expected_id))
+  402      {
+  403          return OS_ERR_INCORRECT_OBJ_STATE;
+  404      }
+----- OSAL src/os/shared/src/osapi-idmap.c:429,439
+  429              if (token->lock_mode == OS_LOCK_MODE_EXCLUSIVE)
+  430              {
+  431                  /*
+  432                   * For EXCLUSIVE mode, overwrite the ID to be RESERVED now -- this
+  433                   * makes any future ID checks or lock attempts in other tasks fail to match.
+  434                   */
+  435                  if (!OS_ObjectIdEqual(expected_id, OS_OBJECT_ID_RESERVED))
+  436                  {
+  437                      expected_id    = OS_OBJECT_ID_RESERVED;
+  438                      obj->active_id = expected_id;
+  439                  }
+----- OSAL src/os/shared/src/osapi-idmap.c:460,486
+  460          else if (token->lock_mode == OS_LOCK_MODE_NONE || !OS_ObjectIdEqual(obj->active_id, OS_OBJECT_ID_RESERVED))
+  461          {
+  462              /* Not an ID match and not RESERVED - fail out */
+  463              return_code = OS_ERR_INVALID_ID;
+  464              break;
+  465          }
+  466  
+  467          /*
+  468           * If we get this far, it means there is contention for access to the object.
+  469           *  a) we want to some type of lock but the ID is currently RESERVED
+  470           *  b) the refcount is too high - need to wait for release
+  471           *
+  472           * In this case we will UNLOCK the global object again so that the holder
+  473           * can relinquish it.  We'll try again a few times before giving up hope.
+  474           */
+  475          ++attempts;
+  476          if (attempts >= 5)
+  477          {
+  478              return_code = OS_ERR_OBJECT_IN_USE;
+  479              break;
+  480          }
+  481  
+  482          /*
+  483           * Call the impl layer to wait for some sort of change to occur.
+  484           */
+  485          OS_WaitForStateChange(token, attempts);
+  486      }
+----- OSAL src/os/shared/src/osapi-idmap.c:513,516
+  513              if (token->lock_mode == OS_LOCK_MODE_REFCOUNT || token->lock_mode == OS_LOCK_MODE_EXCLUSIVE)
+  514              {
+  515                  OS_Unlock_Global(token);
+  516              }
+----- OSAL src/os/shared/src/osapi-idmap.c:556,573
+  556      while (true)
+  557      {
+  558          ++token->obj_idx;
+  559  
+  560          if (token->obj_idx >= obj_count)
+  561          {
+  562              break;
+  563          }
+  564  
+  565          record = OS_OBJECT_TABLE_GET(base, *token);
+  566  
+  567          if (OS_ObjectIdDefined(record->active_id) && MatchFunc(arg, token, record))
+  568          {
+  569              return_code   = OS_SUCCESS;
+  570              token->obj_id = record->active_id;
+  571              break;
+  572          }
+  573      }
+----- OSAL src/os/shared/src/osapi-idmap.c:639,648
+  639      if (return_code == OS_SUCCESS)
+  640      {
+  641          token->obj_idx = OSAL_INDEX_C(local_id);
+  642          OS_ObjectIdCompose_Impl(token->obj_type, serial, &token->obj_id);
+  643  
+  644          /* Ensure any data in the record has been cleared */
+  645          obj->active_id  = token->obj_id;
+  646          obj->name_entry = NULL;
+  647          obj->creator    = OS_TaskGetId();
+  648          obj->refcount   = 0;
+----- OSAL src/os/shared/src/osapi-idmap.c:684,686
+  684          self_task_id = OS_TaskGetId_Impl();
+  685  
+  686          OS_Lock_Global_Impl(token->obj_type);
+----- OSAL src/os/shared/src/osapi-idmap.c:771,771
+  771          OS_Unlock_Global_Impl(token->obj_type);
+----- OSAL src/os/shared/src/osapi-idmap.c:858,865
+  858      /* Either way we must unlock the object type */
+  859      OS_ObjectIdTransactionFinish(token, &final_id);
+  860  
+  861      /* Give event callback to the application */
+  862      if (operation_status == OS_SUCCESS)
+  863      {
+  864          OS_NotifyEvent(OS_EVENT_RESOURCE_CREATED, token->obj_id, NULL);
+  865      }
+----- OSAL src/os/shared/src/osapi-idmap.c:928,946
+  928      OS_ObjectIdTransactionInit(lock_mode, idtype, token);
+  929  
+  930      return_code = OS_ObjectIdFindNextMatch(MatchFunc, arg, token);
+  931  
+  932      if (return_code == OS_SUCCESS)
+  933      {
+  934          /*
+  935           * The "ConvertToken" routine will return with the global lock
+  936           * in a state appropriate for returning to the caller, as indicated
+  937           * by the "lock_mode" parameter.
+  938           */
+  939          return_code = OS_ObjectIdConvertToken(token);
+  940      }
+  941      else
+  942      {
+  943          OS_ObjectIdTransactionCancel(token);
+  944      }
+  945  
+  946      return return_code;
+----- OSAL src/os/shared/src/osapi-idmap.c:988,996
+  988      return_code = OS_ObjectIdGetByName(OS_LOCK_MODE_GLOBAL, idtype, name, &token);
+  989      if (return_code == OS_SUCCESS)
+  990      {
+  991          *object_id = token.obj_id;
+  992  
+  993          OS_ObjectIdRelease(&token);
+  994      }
+  995  
+  996      return return_code;
+----- OSAL src/os/shared/src/osapi-idmap.c:1071,1105
+ 1071      /* re-acquire global table lock to adjust refcount */
+ 1072      if (token->lock_mode == OS_LOCK_MODE_EXCLUSIVE || token->lock_mode == OS_LOCK_MODE_REFCOUNT)
+ 1073      {
+ 1074          OS_Lock_Global(token);
+ 1075      }
+ 1076  
+ 1077      if (record->refcount > 0)
+ 1078      {
+ 1079          --record->refcount;
+ 1080      }
+ 1081  
+ 1082      /*
+ 1083       * at this point the global mutex is always held, either
+ 1084       * from re-acquiring it above or it is still held from
+ 1085       * the original lock when using OS_LOCK_MODE_GLOBAL.
+ 1086       *
+ 1087       * If an ID update was pending (i.e. for a create/delete op)
+ 1088       * then do the ID update now while holding the mutex.
+ 1089       */
+ 1090      if (final_id != NULL)
+ 1091      {
+ 1092          record->active_id = *final_id;
+ 1093      }
+ 1094      else if (token->lock_mode == OS_LOCK_MODE_EXCLUSIVE)
+ 1095      {
+ 1096          /*
+ 1097           * If the lock type was EXCLUSIVE, it means that the ID in the record
+ 1098           * was reset to OS_OBJECT_ID_RESERVED.  This must restore the original
+ 1099           * object ID from the token.
+ 1100           */
+ 1101          record->active_id = token->obj_id;
+ 1102      }
+ 1103  
+ 1104      /* always unlock (this also covers OS_LOCK_MODE_GLOBAL case) */
+ 1105      OS_Unlock_Global(token);
+----- OSAL src/os/shared/src/osapi-idmap.c:1171,1214
+ 1171      return_code = OS_ObjectIdTransactionInit(OS_LOCK_MODE_EXCLUSIVE, idtype, token);
+ 1172      if (return_code != OS_SUCCESS)
+ 1173      {
+ 1174          return return_code;
+ 1175      }
+ 1176  
+ 1177      /*
+ 1178       * Check if an object of the same name already exists.
+ 1179       * If so, a new object cannot be allocated.
+ 1180       */
+ 1181      if (name != NULL)
+ 1182      {
+ 1183          return_code = OS_ObjectIdFindNextMatch(OS_ObjectNameMatch, (void *)name, token);
+ 1184      }
+ 1185      else
+ 1186      {
+ 1187          return_code = OS_ERR_NAME_NOT_FOUND;
+ 1188      }
+ 1189  
+ 1190      if (return_code == OS_SUCCESS)
+ 1191      {
+ 1192          return_code = OS_ERR_NAME_TAKEN;
+ 1193      }
+ 1194      else
+ 1195      {
+ 1196          return_code = OS_ObjectIdFindNextFree(token);
+ 1197      }
+ 1198  
+ 1199      /* If allocation failed, abort the operation now - no ID was allocated.
+ 1200       * After this point, if a future step fails, the allocated ID must be
+ 1201       * released. */
+ 1202      if (return_code != OS_SUCCESS)
+ 1203      {
+ 1204          OS_ObjectIdTransactionCancel(token);
+ 1205          return return_code;
+ 1206      }
+ 1207      else
+ 1208      {
+ 1209          return_code = OS_NotifyEvent(OS_EVENT_RESOURCE_ALLOCATED, token->obj_id, NULL);
+ 1210      }
+ 1211  
+ 1212      if (return_code == OS_SUCCESS)
+ 1213      {
+ 1214          return_code = OS_ObjectIdConvertToken(token);
+----- OSAL src/os/posix/src/os-impl-idmap.c:83,129
+   83  void OS_Lock_Global_Impl(osal_objtype_t idtype)
+   84  {
+   85      OS_impl_objtype_lock_t *impl;
+   86      int                     ret;
+   87  
+   88      impl = OS_impl_objtype_lock_table[idtype];
+   89  
+   90      if (impl != NULL)
+   91      {
+   92          ret = pthread_mutex_lock(&impl->mutex);
+   93          if (ret != 0)
+   94          {
+   95              OS_DEBUG("pthread_mutex_lock(&impl->mutex): %s", strerror(ret));
+   96          }
+   97      }
+   98  }
+   99  
+  100  /*----------------------------------------------------------------
+  101   *
+  102   *  Purpose: Implemented per internal OSAL API
+  103   *           See prototype for argument/return detail
+  104   *
+  105   *-----------------------------------------------------------------*/
+  106  void OS_Unlock_Global_Impl(osal_objtype_t idtype)
+  107  {
+  108      OS_impl_objtype_lock_t *impl;
+  109      int                     ret;
+  110  
+  111      impl = OS_impl_objtype_lock_table[idtype];
+  112  
+  113      if (impl != NULL)
+  114      {
+  115          /* Notify any waiting threads that the state _may_ have changed */
+  116          ret = pthread_cond_broadcast(&impl->cond);
+  117          if (ret != 0)
+  118          {
+  119              OS_DEBUG("pthread_cond_broadcast(&impl->cond): %s", strerror(ret));
+  120              /* unexpected but keep going (not critical) */
+  121          }
+  122  
+  123          ret = pthread_mutex_unlock(&impl->mutex);
+  124          if (ret != 0)
+  125          {
+  126              OS_DEBUG("pthread_mutex_unlock(&impl->mutex): %s", strerror(ret));
+  127          }
+  128      }
+  129  }
+----- OSAL src/os/posix/src/os-impl-idmap.c:151,169
+  151      clock_gettime(CLOCK_REALTIME, &ts);
+  152  
+  153      if (attempts <= 10)
+  154      {
+  155          /* Wait an increasing amount of time, starting at 10ms */
+  156          ts.tv_nsec += attempts * attempts * 10000000;
+  157          if (ts.tv_nsec >= 1000000000)
+  158          {
+  159              ts.tv_nsec -= 1000000000;
+  160              ++ts.tv_sec;
+  161          }
+  162      }
+  163      else
+  164      {
+  165          /* wait 1 second (max for polling) */
+  166          ++ts.tv_sec;
+  167      }
+  168  
+  169      pthread_cond_timedwait(&impl->cond, &impl->mutex, &ts);
+----- OSAL src/os/posix/src/os-impl-idmap.c:210,210
+  210          ret = pthread_mutexattr_setprotocol(&mutex_attr, PTHREAD_PRIO_INHERIT);
+----- OSAL src/os/posix/inc/os-impl-countsem.h:32,36
+   32  typedef struct
+   33  {
+   34      sem_t id;
+   35  } OS_impl_countsem_internal_record_t;
+   36  
+----- OSAL src/os/posix/src/os-impl-countsem.c:74,91
+   74  int32 OS_CountSemCreate_Impl(const OS_object_token_t *token, uint32 sem_initial_value, uint32 options)
+   75  {
+   76      OS_impl_countsem_internal_record_t *impl;
+   77  
+   78      impl = OS_OBJECT_TABLE_GET(OS_impl_count_sem_table, *token);
+   79  
+   80      if (sem_initial_value > SEM_VALUE_MAX)
+   81      {
+   82          return OS_INVALID_SEM_VALUE;
+   83      }
+   84  
+   85      if (sem_init(&impl->id, 0, sem_initial_value) < 0)
+   86      {
+   87          return OS_SEM_FAILURE;
+   88      }
+   89  
+   90      return OS_SUCCESS;
+   91  }
+----- OSAL src/os/posix/src/os-impl-queues.c:108,116
+  108      ** Construct the queue name:
+  109      ** The name will consist of "/<process_id>.queue_name"
+  110      */
+  111      snprintf(name, sizeof(name), "/%d.%s", (int)getpid(), queue->queue_name);
+  112  
+  113      /*
+  114       ** create message queue
+  115       */
+  116      queueDesc = mq_open(name, O_CREAT | O_RDWR, 0666, &queueAttr);
+----- OSAL src/os/posix/src/os-impl-queues.c:142,142
+  142          if (mq_unlink(name) != 0)
+----- OSAL src/os/shared/src/osapi-task.c:84,103
+   84      return_code = OS_ObjectIdGetById(OS_LOCK_MODE_GLOBAL, OS_OBJECT_TYPE_OS_TASK, task_id, &token);
+   85      if (return_code == OS_SUCCESS)
+   86      {
+   87          task = OS_OBJECT_TABLE_GET(OS_task_table, token);
+   88  
+   89          return_code = OS_TaskMatch_Impl(&token);
+   90          *entrypt    = task->entry_function_pointer;
+   91  
+   92          OS_ObjectIdRelease(&token);
+   93      }
+   94  
+   95      if (return_code == OS_SUCCESS)
+   96      {
+   97          return_code = OS_TaskRegister_Impl(task_id);
+   98      }
+   99  
+  100      if (return_code == OS_SUCCESS)
+  101      {
+  102          /* Give event callback to the application */
+  103          return_code = OS_NotifyEvent(OS_EVENT_TASK_STARTUP, task_id, NULL);
+----- OSAL src/os/shared/src/osapi-task.c:187,207
+  187      return_code = OS_ObjectIdAllocateNew(LOCAL_OBJID_TYPE, task_name, &token);
+  188      if (return_code == OS_SUCCESS)
+  189      {
+  190          task = OS_OBJECT_TABLE_GET(OS_task_table, token);
+  191  
+  192          /* Reset the table entry and save the name */
+  193          OS_OBJECT_INIT(token, task, task_name, task_name);
+  194  
+  195          task->stack_size             = stack_size;
+  196          task->priority               = priority;
+  197          task->entry_function_pointer = function_pointer;
+  198          task->stack_pointer          = stack_pointer;
+  199  
+  200          /* Add default flags */
+  201          flags |= OS_ADD_TASK_FLAGS;
+  202  
+  203          /* Now call the OS-specific implementation.  This reads info from the task table. */
+  204          return_code = OS_TaskCreate_Impl(&token, flags);
+  205  
+  206          /* Check result, finalize record, and unlock global table. */
+  207          return_code = OS_ObjectIdFinalizeNew(return_code, &token, task_id);
+----- OSAL src/os/posix/src/os-impl-tasks.c:568,568
+  568      return_code = pthread_create(pthr, &custom_attr, entry, entry_arg);
+----- OSAL src/os/posix/src/os-impl-tasks.c:603,622
+  603      memset(&arg, 0, sizeof(arg));
+  604  
+  605      /* cppcheck-suppress unreadVariable // intentional use of other union member */
+  606      arg.id = OS_ObjectIdFromToken(token);
+  607  
+  608      task = OS_OBJECT_TABLE_GET(OS_task_table, *token);
+  609      impl = OS_OBJECT_TABLE_GET(OS_impl_task_table, *token);
+  610  
+  611      /* If task priorities are not enabled then override the user-supplied priority value */
+  612      if (!POSIX_GlobalVars.EnableTaskPriorities)
+  613      {
+  614          task->priority = OS_MAX_TASK_PRIORITY;
+  615      }
+  616  
+  617      return_code = OS_Posix_InternalTaskCreate_Impl(&impl->id,
+  618                                                     task->priority,
+  619                                                     task->stack_pointer,
+  620                                                     task->stack_size,
+  621                                                     OS_PthreadTaskEntry,
+  622                                                     arg.opaque_arg);
+----- OSAL src/os/posix/src/os-impl-tasks.c:838,838
+  838      return_code = pthread_setspecific(POSIX_GlobalVars.ThreadKey, arg.opaque_arg);
+----- OSAL src/os/posix/src/os-impl-tasks.c:858,866
+  858  osal_id_t OS_TaskGetId_Impl(void)
+  859  {
+  860      OS_VoidPtrValueWrapper_t self_record;
+  861  
+  862      /* cppcheck-suppress unreadVariable // intentional use of other union member */
+  863      self_record.opaque_arg = pthread_getspecific(POSIX_GlobalVars.ThreadKey);
+  864  
+  865      return self_record.id;
+  866  }
+----- OSAL: grep -rn 'setname|PR_SET_NAME|prctl' src/os/posix src/os/portable src/bsp  -> (no matches)
+0
+----- OSAL src/tests/count-sem-test/count-sem-test.c:30,36
+   30  void Test_CountSem_Task0(void)
+   31  {
+   32      osal_id_t sem_id;
+   33      uint8     i;
+   34  
+   35      UtAssert_INT32_EQ(OS_CountSemGetIdByName(&sem_id, "Test_Sem"), OS_SUCCESS);
+   36  
+----- OSAL src/tests/count-sem-test/count-sem-test.c:104,109
+  104      /* Valid create and name taken */
+  105      UtAssert_INT32_EQ(OS_CountSemCreate(&sem_id[0], "Test_Sem", 0, 0), OS_SUCCESS);
+  106      UtAssert_INT32_EQ(OS_CountSemCreate(&sem_id[1], "Test_Sem", 0, 0), OS_ERR_NAME_TAKEN);
+  107  
+  108      /* Nonzero create */
+  109      UtAssert_INT32_EQ(OS_CountSemCreate(&sem_id[1], "Test_Sem_Nonzero", 2, 0), OS_SUCCESS);
+----- OSAL src/tests/count-sem-test/count-sem-test.c:159,188
+  159      /* Start child task, confirm waiting, delete task, and get sem info to confirm still valid (heritage test) */
+  160      UtAssert_INT32_EQ(
+  161          OS_TaskCreate(&task_id[0], "Task_0", Test_CountSem_Task0, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(100), 0),
+  162          OS_SUCCESS);
+  163      OS_TaskDelay(100);
+  164      UtAssert_INT32_EQ(OS_TaskDelete(task_id[0]), OS_SUCCESS);
+  165      UtAssert_UINT32_EQ(task_counter[0], 0);
+  166  
+  167      if (get_info_implemented)
+  168      {
+  169          UtAssert_INT32_EQ(OS_CountSemGetInfo(sem_id[0], &sem_prop), OS_SUCCESS);
+  170          UtAssert_INT32_EQ(sem_prop.value, 0);
+  171      }
+  172      else
+  173      {
+  174          UtAssert_INT32_EQ(OS_CountSemTimedWait(sem_id[0], 0), OS_SEM_TIMEOUT);
+  175      }
+  176  
+  177      /* Start 3 child tasks, give and confirm highest priority task increments, flush and confirm all three */
+  178      UtAssert_INT32_EQ(
+  179          OS_TaskCreate(&task_id[0], "Task_0", Test_CountSem_Task0, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(200), 0),
+  180          OS_SUCCESS);
+  181      OS_TaskDelay(50);
+  182      UtAssert_INT32_EQ(
+  183          OS_TaskCreate(&task_id[1], "Task_1", Test_CountSem_Task1, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(100), 0),
+  184          OS_SUCCESS);
+  185      UtAssert_INT32_EQ(
+  186          OS_TaskCreate(&task_id[2], "Task_2", Test_CountSem_Task2, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(250), 0),
+  187          OS_SUCCESS);
+  188      OS_TaskDelay(50);
+----- cFE modules/es/fsw/src/cfe_es_apps.c:573,587
+  573      while (true)
+  574      {
+  575          OS_TaskDelay(CFE_PLATFORM_ES_STARTUP_SYNC_POLL_MSEC);
+  576  
+  577          CFE_ES_LockSharedData(__func__, __LINE__);
+  578          TaskRecPtr = CFE_ES_GetTaskRecordByContext();
+  579          if (TaskRecPtr != NULL)
+  580          {
+  581              EntryFunc = TaskRecPtr->EntryFunc;
+  582              if (CFE_RESOURCEID_TEST_DEFINED(TaskRecPtr->AppId) && EntryFunc != 0)
+  583              {
+  584                  ReturnCode = CFE_SUCCESS;
+  585              }
+  586          }
+  587          CFE_ES_UnlockSharedData(__func__, __LINE__);
+----- cFE modules/es/fsw/src/cfe_es_apps.c:664,703
+  664      OsStatus = OS_TaskCreate(&OsalTaskId,           /* task id */
+  665                               TaskName,              /* task name matches app name for main task */
+  666                               CFE_ES_TaskEntryPoint, /* task function pointer */
+  667                               Params->StackPtr,      /* stack pointer (allocate if NULL) */
+  668                               Params->StackSize,     /* stack size */
+  669                               Params->Priority,      /* task priority */
+  670                               OS_FP_ENABLED);        /* task options */
+  671  
+  672      CFE_ES_LockSharedData(__func__, __LINE__);
+  673  
+  674      if (OsStatus == OS_SUCCESS)
+  675      {
+  676          /*
+  677           * As this is a newly-created task, this shouldn't fail.
+  678           * The entry is not (yet) matching the task ID - it will be
+  679           * initialized here.
+  680           */
+  681          LocalTaskId = CFE_ES_TaskId_FromOSAL(OsalTaskId);
+  682          TaskRecPtr  = CFE_ES_LocateTaskRecordByID(LocalTaskId);
+  683          if (CFE_ES_TaskRecordIsUsed(TaskRecPtr))
+  684          {
+  685              CFE_ES_SysLogWrite_Unsync("%s: Error: ES_TaskTable slot for ID %lx in use at task creation!\n",
+  686                                        __func__,
+  687                                        OS_ObjectIdToInteger(OsalTaskId));
+  688          }
+  689  
+  690          /*
+  691           * Clear any other/stale data that might be in the entry,
+  692           * and reset all fields to the correct value.
+  693           */
+  694          memset(TaskRecPtr, 0, sizeof(*TaskRecPtr));
+  695  
+  696          TaskRecPtr->AppId       = ParentAppId;
+  697          TaskRecPtr->EntryFunc   = EntryFunc;
+  698          TaskRecPtr->StartParams = *Params;
+  699  
+  700          strncpy(TaskRecPtr->TaskName, TaskName, sizeof(TaskRecPtr->TaskName) - 1);
+  701          TaskRecPtr->TaskName[sizeof(TaskRecPtr->TaskName) - 1] = 0;
+  702  
+  703          CFE_ES_TaskRecordSetUsed(TaskRecPtr, CFE_RESOURCEID_UNWRAP(LocalTaskId));
+----- cFE modules/es/fsw/src/cfe_es_apps.c:777,827
+  777      AppRecPtr = CFE_ES_LocateAppRecordByName(AppName);
+  778      if (AppRecPtr != NULL)
+  779      {
+  780          CFE_ES_SysLogWrite_Unsync("%s: Duplicate app name '%s'\n", __func__, AppName);
+  781          Status = CFE_ES_ERR_DUPLICATE_NAME;
+  782      }
+  783      else
+  784      {
+  785          /* scan for a free slot */
+  786          PendingResourceId = CFE_ResourceId_FindNext(CFE_ES_Global.LastAppId,
+  787                                                      CFE_PLATFORM_ES_MAX_APPLICATIONS,
+  788                                                      CFE_ES_CheckAppIdSlotUsed);
+  789          AppRecPtr         = CFE_ES_LocateAppRecordByID(CFE_ES_APPID_C(PendingResourceId));
+  790  
+  791          if (AppRecPtr == NULL)
+  792          {
+  793              CFE_ES_SysLogWrite_Unsync("%s: No free application slots available\n", __func__);
+  794              Status = CFE_ES_NO_RESOURCE_IDS_AVAILABLE;
+  795          }
+  796          else
+  797          {
+  798              /* Fully clear the entry, just in case of stale data */
+  799              memset(AppRecPtr, 0, sizeof(*AppRecPtr));
+  800  
+  801              /* Store the app name from passed-in value */
+  802              strncpy(AppRecPtr->AppName, AppName, sizeof(AppRecPtr->AppName) - 1);
+  803  
+  804              AppRecPtr->Type = CFE_ES_AppType_EXTERNAL;
+  805  
+  806              /*
+  807               * Fill out the parameters in the StartParams sub-structure
+  808               *
+  809               * This contains all relevant info, including file name, entry point,
+  810               * main task info, etc. which is required to start the app now
+  811               * or in a future restart/reload request.
+  812               */
+  813              AppRecPtr->StartParams = *Params;
+  814  
+  815              /*
+  816               * Fill out the Task State info
+  817               */
+  818              AppRecPtr->ControlReq.AppControlRequest = CFE_ES_RunStatus_APP_RUN;
+  819              AppRecPtr->ControlReq.AppTimerMsec      = 0;
+  820  
+  821              CFE_ES_AppRecordSetUsed(AppRecPtr, CFE_RESOURCEID_RESERVED);
+  822              CFE_ES_Global.LastAppId = PendingResourceId;
+  823              Status                  = CFE_SUCCESS;
+  824          }
+  825      }
+  826  
+  827      CFE_ES_UnlockSharedData(__func__, __LINE__);
+----- cFE modules/es/fsw/src/cfe_es_apps.c:841,869
+  841      Status = CFE_ES_LoadModule(PendingResourceId, AppName, &AppRecPtr->StartParams.BasicInfo, &AppRecPtr->LoadStatus);
+  842  
+  843      /*
+  844       * If the Load was OK, then complete the initialization
+  845       */
+  846      if (Status == CFE_SUCCESS)
+  847      {
+  848          Status =
+  849              CFE_ES_StartAppTask(&AppRecPtr->MainTaskId, /* Task ID (output) stored in App Record as main task */
+  850                                  AppName,                /* Main Task name matches app name */
+  851                                  (CFE_ES_TaskEntryFuncPtr_t)
+  852                                      AppRecPtr->LoadStatus.InitSymbolAddress, /* Init Symbol is main task entry point */
+  853                                  &AppRecPtr->StartParams.MainTaskInfo,        /* Main task parameters */
+  854                                  CFE_ES_APPID_C(PendingResourceId));          /* Parent App ID */
+  855      }
+  856  
+  857      /*
+  858       * Finalize data in the app table entry, which must be done under lock.
+  859       * This transitions the entry from being RESERVED to the real ID.
+  860       */
+  861      CFE_ES_LockSharedData(__func__, __LINE__);
+  862  
+  863      if (Status == CFE_SUCCESS)
+  864      {
+  865          /*
+  866           * important - set the ID to its proper value
+  867           * which turns this into a real/valid table entry
+  868           */
+  869          CFE_ES_AppRecordSetUsed(AppRecPtr, PendingResourceId);
+----- cFE modules/es/fsw/src/cfe_es_api.c:748,754
+  748      CFE_ES_LockSharedData(__func__, __LINE__);
+  749  
+  750      AppRecPtr = CFE_ES_GetAppRecordByContext();
+  751  
+  752      if (AppRecPtr != NULL)
+  753      {
+  754          *AppIdPtr = CFE_ES_AppRecordGetID(AppRecPtr);
+----- cFE modules/es/fsw/src/cfe_es_api.c:2079,2079
+ 2079      OsStatus = OS_MutSemTake(CFE_ES_Global.SharedDataMutex);
+----- cFE modules/es/fsw/src/cfe_es_resource.c:97,97
+   97          if (CFE_ES_AppRecordIsUsed(AppRecPtr) && strcmp(Name, CFE_ES_AppRecordGetName(AppRecPtr)) == 0)
+----- cFE modules/es/fsw/src/cfe_es_resource.c:285,286
+  285      TaskID     = CFE_ES_TaskId_FromOSAL(OS_TaskGetId());
+  286      TaskRecPtr = CFE_ES_LocateTaskRecordByID(TaskID);
+----- cFE modules/es/fsw/src/cfe_es_resource.h:204,207
+  204  static inline void CFE_ES_AppRecordSetUsed(CFE_ES_AppRecord_t *AppRecPtr, CFE_ResourceId_t PendingId)
+  205  {
+  206      AppRecPtr->AppId = CFE_ES_APPID_C(PendingId);
+  207  }
+----- cFE modules/es/fsw/src/cfe_es_resource.h:453,456
+  453  static inline void CFE_ES_TaskRecordSetUsed(CFE_ES_TaskRecord_t *TaskRecPtr, CFE_ResourceId_t PendingId)
+  454  {
+  455      TaskRecPtr->TaskId = CFE_ES_TASKID_C(PendingId);
+  456  }
+----- cFE modules/sb/fsw/src/cfe_sb_task.c:138,138
+  138      CFE_ES_GetAppID(&CFE_SB_Global.AppId);
+----- cFE modules/sb/fsw/src/cfe_sb_api.c:163,163
+  163          OsStatus = OS_QueueCreate(&SysQueueId, PipeName, Depth, sizeof(CFE_SB_BufferD_t *), 0);
+----- cFE modules/evs/fsw/src/cfe_evs_task.c:312,312
+  312      CFE_EVS_Global.EVS_AppID = AppID;
+----- PSP fsw/pc-linux/src/cfe_psp_start.c:83,83
+   83  #define CFE_PSP_KERNEL_NAME_LENGTH_MAX 16
+----- PSP fsw/pc-linux/src/cfe_psp_start.c:159,201
+  159      switch (event)
+  160      {
+  161          case OS_EVENT_RESOURCE_ALLOCATED:
+  162              /* resource/id is newly allocated but not yet created.  Invoked within locked region. */
+  163              break;
+  164          case OS_EVENT_RESOURCE_CREATED:
+  165              /* resource/id has been fully created/finalized.  Invoked outside locked region. */
+  166              break;
+  167          case OS_EVENT_RESOURCE_DELETED:
+  168              /* resource/id has been deleted.  Invoked outside locked region. */
+  169              break;
+  170          case OS_EVENT_TASK_STARTUP:
+  171          {
+  172              /* New task is starting. Invoked from within the task context. */
+  173              /* Get the name from OSAL and propagate to the pthread/system layer */
+  174              if (OS_GetResourceName(object_id, taskname, sizeof(taskname)) == OS_SUCCESS)
+  175              {
+  176                  /*
+  177                   * Example mechanism for setting thread affinity
+  178                   *
+  179                   * Could assign based on task name, pattern within name (CFE_* on 0,
+  180                   * *_CN where N is desired core), round robin or whatever the requrements are.
+  181                   *
+  182                   * Just assigning all "CFE_*" tasks to core zero and let the rest float.
+  183                   */
+  184                  if (strncmp(taskname, "CFE_", 4) == 0)
+  185                  {
+  186                      CPU_ZERO(&cpuset);
+  187                      CPU_SET(0, &cpuset);
+  188                      pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset);
+  189                  }
+  190  
+  191                  /*
+  192                   * glibc/kernel has an internal limit for this name.
+  193                   * If the OSAL name is longer, just truncate it.
+  194                   * Otherwise the name isn't set at all - this assumes the first
+  195                   * chars of the name is better for debug than none of it.
+  196                   */
+  197                  if (strlen(taskname) >= CFE_PSP_KERNEL_NAME_LENGTH_MAX)
+  198                  {
+  199                      taskname[CFE_PSP_KERNEL_NAME_LENGTH_MAX - 1] = 0;
+  200                  }
+  201                  pthread_setname_np(pthread_self(), taskname);
+----- PSP fsw/pc-linux/src/cfe_psp_start.c:361,361
+  361      OS_RegisterEventHandler(CFE_PSP_OS_EventHandler);

@@ -1,0 +1,7 @@
+bundle=c5-20261029-replays
+created_utc=2026-10-29T08:16:10.121Z
+repo_commit=f4ae15bcd0da47dfc1035c82dd21cabfa565d877
+kernel=6.18.44-fc-v185
+source=/home/user/work/c5run/replay files=68 bytes=7078577
+tar_xz_bytes=369596 parts=1
+note=C5 replays of the two natural boots (bundle c5-20261029-boots: 6.4.1, 6.4.2) with one fixed analysis configuration: merged-tree kz 7c6044bf, kz-static 000ab68b (B' of the derived instrumented builds with the Phi profile, bprime/), Phi profile c5-cfe-6.4.x (38a6db1b 6.4.1, d92989a0 6.4.2); readings cur, p1off, nocode, emit-trace, occ, control cur_estfacts, release occ diff, tables; driver env/c5/replay_c5.sh (f4ae15b); results plan/results_c5_boot_20261029.md; pilot/dev, not main-experiment results

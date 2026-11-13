@@ -1,0 +1,63 @@
+flowchart TD
+    %% D4 detail - evaluation path: freezes, development runs, extended evaluation (held-out, recall, triage), comparison, statistics.
+    %% Source: spec §12 D4 (rev 1.2); §7.2, §7.5, §8.1-8.7 (rev 1.3: §8.2 case roles, §8.3 unrun tools, §8.4 single-element comparisons), [POL].
+    %% Dashed border = later or added only by a decision. Dashed edge = record-keeping or decision-gated path.
+
+    S1["S1 recorder ready"]
+    S3A["S3a closure, writers, census<br/>(certificates: optional route, rev 1.3)"]
+    STG["stages S0-S7 outputs (S8 removed, D6)"]
+    ROLE["case roles (rev 1.3, §8.2):<br/>R2 = baseline validation (V1′), not contribution evidence;<br/>C1 = first case for contribution evidence (V3)"]
+
+    F1{{"freeze F1 (by hash)<br/>evaluation engine and rules: Φ, extractor, engines,<br/>calibration, lints, any re-implementation of a<br/>process-level technique, evaluation criteria,<br/>expectation-sheet hashes (each sheet frozen<br/>before its case's first output)"}}
+    TO["template-only development runs, each case on its own basis<br/>R2, C1 public BP basis (D22), C2 role-reconstructed (P-C2),<br/>C3/C5 at 6.4.1 (D13), App-record windows;<br/>or the reason and the scope limit (P-F1GATE)"]
+    REF["labelled refinements<br/>(oracle refinement; changed verdicts reported apart)"]
+    F2{{"freeze F2 (by hash)<br/>incl. recall protocol: mutation operators,<br/>history query, expected-verdict rule,<br/>equivalent-mutant rule; exposure records"}}
+    EXP[("exposure and freeze record<br/>blind / non-blind / unknown-exposure /<br/>post-freeze-adjusted")]
+    HO["held-out sources (a)-(e), extended evaluation<br/>(a) other cFS revisions, (b) other configurations,<br/>(c) issues from a fixed query, (d) recall items,<br/>(e) unused in-code admissions"]
+    RCL["recall mutants and pre/post-fix pairs<br/>(extended evaluation; variant set only)<br/>labelled synthetic; detected / unknown / missed per layer;<br/>class-correct apart (P-CLASSGT)"]
+    TRI["sampled triage (extended evaluation)<br/>stratified sample, two independent masked raters,<br/>rater exposure recorded (P-TRIAGE)"]
+    ABL["ablations K3 (24, descriptive);<br/>single-element comparisons (rev 1.3): resource and lifetime<br/>correspondence, cFS execution constraints, application<br/>ownership, prediction, selective observation removed one at a time"]
+    BAS["comparison among existing process-level race work<br/>six analysis questions, one result state per (tool, case);<br/>K1 original / K2 re-implementation kept apart;<br/>an unrun original tool: literature-and-code result state only<br/>(2026-10-22 decision D4);<br/>Kairos's report parts: detection / classification / evidence"]
+    PG["perturbation groups A, B, C′, C, D (per plan), W<br/>interleaved; cold and warm strata;<br/>observation-effect check (D1, D11)"]
+    NB["normalization boots<br/>after abnormal exits; excluded from pools"]
+    WG["group W (only if the F1 arm is added; D3 later)"]
+    STAT["descriptive statistics (P-STATS)<br/>N per purpose frozen (D14); caps as deviations;<br/>observed violations, model candidates and confirmed<br/>executions counted separately (OUT-01);<br/>a later quantitative experiment fixes<br/>its unit and procedure first"]
+    CLAIMS[("claims table<br/>(questions Q1-Q4 of rev 1.3;<br/>contribution hypotheses, §1.11)")]
+    DEV[("deviation records ([POL])")]
+
+    S3A --> F1 --> TO --> REF --> F2
+    F2 --> HO
+    F2 --> RCL
+    EXP -.-> F1
+    EXP -.-> F2
+    S1 --> PG
+    PG --> NB
+    PG -.-> WG
+    STG --> ABL
+    STG --> BAS
+    STG --> TRI
+    HO --> TRI
+    TO --> ABL
+    TO --> BAS
+    ROLE --- TO
+    ABL --> STAT
+    BAS --> STAT
+    TRI --> STAT
+    RCL --> STAT
+    PG --> STAT
+    STAT --> CLAIMS
+    STAT -.->|"N, sample sizes, caps"| DEV
+    PG -.->|"interleaving order, host drift"| DEV
+    NOTE["every deviation → deviation record<br/>NOT_RUN is never a miss"]
+    NOTE -.-> DEV
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef frz fill:#e9e4f5,stroke:#5b3f99,color:#111
+    classDef art fill:#fff8e6,stroke:#a07a00,color:#111
+    classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
+    classDef ref fill:#ffffff,stroke:#999,color:#555
+    class TO,REF,HO,RCL,TRI,ABL,BAS,PG,NB,STAT comp
+    class F1,F2 frz
+    class CLAIMS,DEV,EXP art
+    class WG gated
+    class S1,S3A,STG,NOTE,ROLE ref

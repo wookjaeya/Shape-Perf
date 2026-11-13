@@ -1,0 +1,839 @@
+# count-sem-test under the task's exact strace command, run as ubuntu, 2026-10-08 01:46:32.272964717 +0000
+# script: /home/user/work/procrace/baselines/osal-visibility/scripts/strace_countsem.sh <build> <out> run1_exact exact
+# command (cwd /home/user/work/procrace/baselines/osal-visibility/osal/build_osal_test/tests): strace -f -e trace=all -o run1_exact.strace ./count-sem-test   ; exit=0
+# test result: TOTAL::81    PASS::81    FAIL::0
+# ===== strace output (verbatim) =====
+22284 execve("./count-sem-test", ["./count-sem-test"], 0x7fff9947bcc8 /* 152 vars */) = 0
+22284 brk(NULL)                         = 0x561c30047000
+22284 mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fc844ba4000
+22284 access("/etc/ld.so.preload", R_OK) = -1 ENOENT (No such file or directory)
+22284 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+22284 fstat(3, {st_mode=S_IFREG|0644, st_size=50627, ...}) = 0
+22284 mmap(NULL, 50627, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7fc844b97000
+22284 close(3)                          = 0
+22284 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+22284 read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\220\243\2\0\0\0\0\0"..., 832) = 832
+22284 pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0"..., 784, 64) = 784
+22284 fstat(3, {st_mode=S_IFREG|0755, st_size=2129424, ...}) = 0
+22284 pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0"..., 784, 64) = 784
+22284 mmap(NULL, 2174352, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fc844800000
+22284 mmap(0x7fc844828000, 1609728, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x7fc844828000
+22284 mmap(0x7fc8449b1000, 323584, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b1000) = 0x7fc8449b1000
+22284 mmap(0x7fc844a00000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1ff000) = 0x7fc844a00000
+22284 mmap(0x7fc844a06000, 52624, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7fc844a06000
+22284 close(3)                          = 0
+22284 mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fc844b94000
+22284 arch_prctl(ARCH_SET_FS, 0x7fc844b94740) = 0
+22284 set_tid_address(0x7fc844b94a10)   = 22284
+22284 set_robust_list(0x7fc844b94a20, 24) = 0
+22284 rseq(0x7fc844b95060, 0x20, 0, 0x53053053) = 0
+22284 mprotect(0x7fc844a00000, 16384, PROT_READ) = 0
+22284 mprotect(0x561bf3d93000, 4096, PROT_READ) = 0
+22284 mprotect(0x7fc844be4000, 8192, PROT_READ) = 0
+22284 prlimit64(0, RLIMIT_STACK, NULL, {rlim_cur=8192*1024, rlim_max=RLIM64_INFINITY}) = 0
+22284 munmap(0x7fc844b97000, 50627)     = 0
+22284 ioctl(1, TCGETS, 0x7ffc78b95400)  = -1 ENOTTY (Inappropriate ioctl for device)
+22284 geteuid()                         = 1000
+22284 getrandom("\x79\x04\xa2\x29\x0e\x2e\xae\xcb", 8, GRND_NONBLOCK) = 8
+22284 brk(NULL)                         = 0x561c30047000
+22284 brk(0x561c30068000)               = 0x561c30068000
+22284 openat(AT_FDCWD, "/proc/sys/fs/mqueue/msg_max", O_RDONLY) = 3
+22284 fstat(3, {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+22284 read(3, "10\n", 1024)             = 3
+22284 close(3)                          = 0
+22284 futex(0x7ffc78b95404, FUTEX_UNLOCK_PI_PRIVATE) = -1 EPERM (Operation not permitted)
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[BEGIN]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "UNIT TEST", 9)          = 9
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[BEGIN]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01 SETUP", 8)           = 8
+22284 write(1, "\n", 1)                 = 1
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE SEGV RTMIN RT_1], [], 8) = 0
+22284 rt_sigaction(SIGHUP, {sa_handler=0x561bf3d8549b, sa_mask=[], sa_flags=SA_RESTORER|SA_INTERRUPT|SA_NODEFER|SA_RESETHAND|0xffffffff00000000, sa_restorer=0x7fc844845330}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+22284 sched_getparam(22284, [0])        = 0
+22284 sched_getscheduler(22284)         = 0 (SCHED_OTHER)
+22284 sched_get_priority_max(SCHED_FIFO) = 99
+22284 sched_get_priority_min(SCHED_FIFO) = 1
+22284 sched_get_priority_max(SCHED_RR)  = 99
+22284 sched_get_priority_min(SCHED_RR)  = 1
+22284 sched_setscheduler(22284, SCHED_RR, [99]) = -1 EPERM (Operation not permitted)
+22284 geteuid()                         = 1000
+22284 getegid()                         = 1000
+22284 rt_sigaction(SIGRT_1, {sa_handler=0x7fc844899610, sa_mask=[], sa_flags=SA_RESTORER|SA_ONSTACK|SA_RESTART|SA_SIGINFO, sa_restorer=0x7fc844845330}, NULL, 8) = 0
+22284 rt_sigprocmask(SIG_UNBLOCK, [RTMIN RT_1], NULL, 8) = 0
+22284 mmap(NULL, 36864, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fc844b9b000
+22284 mprotect(0x7fc844b9c000, 32768, PROT_READ|PROT_WRITE) = 0
+22284 rt_sigprocmask(SIG_BLOCK, ~[], ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22284 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc844ba3990, parent_tid=0x7fc844ba3990, exit_signal=0, stack=0x7fc844b9b000, stack_size=0x7f80, tls=0x7fc844ba36c0} => {parent_tid=[22285]}, 88) = 22285
+22285 rseq(0x7fc844ba3fe0, 0x20, 0, 0x53053053 <unfinished ...>
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22285 <... rseq resumed>)               = 0
+22284 <... rt_sigprocmask resumed>NULL, 8) = 0
+22285 set_robust_list(0x7fc844ba39a0, 24 <unfinished ...>
+22284 write(1, "[  END]", 7 <unfinished ...>
+22285 <... set_robust_list resumed>)    = 0
+22284 <... write resumed>)              = 7
+22285 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22284 write(1, " ", 1 <unfinished ...>
+22285 <... rt_sigprocmask resumed>NULL, 8) = 0
+22284 <... write resumed>)              = 1
+22285 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 write(1, "No test cases\n", 14)   = 14
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22285 <... futex resumed>)              = 0
+22284 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22285 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE <unfinished ...>
+22284 <... futex resumed>)              = 0
+22285 <... futex resumed>)              = 0
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE <unfinished ...>
+22285 futex(0x561bf3d9ef20, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... futex resumed>)              = 0
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[BEGIN]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01 Test_CountSem", 16)  = 16
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.001 count-sem-test.c:86 - OS_"..., 115) = 115
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.002 count-sem-test.c:87 - OS_"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.003 count-sem-test.c:88 - OS_"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.004 count-sem-test.c:89 - OS_"..., 109) = 109
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.005 count-sem-test.c:90 - OS_"..., 103) = 103
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9ef20, FUTEX_WAKE_PRIVATE, 1) = 1
+22285 <... futex resumed>)              = 0
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22285 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.006 count-sem-test.c:93 - OS_"..., 102) = 102
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22284 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22285 <... futex resumed>)              = 0
+22285 write(1, "\n**BUG** OS_CountSemCreate():90:"..., 88) = 88
+22285 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22284 <... futex resumed>)              = 0
+22285 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22285 <... futex resumed>)              = 0
+22284 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22285 write(1, "\n**BUG** OS_CountSemCreate():91:"..., 90) = 90
+22285 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE <unfinished ...>
+22284 <... futex resumed>)              = 0
+22285 <... futex resumed>)              = 0
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22285 futex(0x561bf3d9ef20, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... write resumed>)              = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.007 count-sem-test.c:94 - OS_"..., 102) = 102
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22284 futex(0x561bf3d9ef20, FUTEX_WAKE_PRIVATE, 1) = 1
+22285 <... futex resumed>)              = 0
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22285 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.008 count-sem-test.c:95 - OS_"..., 96) = 96
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22284 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22285 <... futex resumed>)              = 0
+22285 write(1, "\n**BUG** OS_CountSemGetInfo():23"..., 94) = 94
+22285 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE <unfinished ...>
+22284 <... futex resumed>)              = 0
+22285 <... futex resumed>)              = 0
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE <unfinished ...>
+22285 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... futex resumed>)              = 0
+22285 <... futex resumed>)              = 0
+22284 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22285 write(1, "\n**BUG** OS_CountSemGetIdByName("..., 94) = 94
+22285 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE <unfinished ...>
+22284 <... futex resumed>)              = 0
+22285 <... futex resumed>)              = 0
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22285 futex(0x561bf3d9ef20, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... write resumed>)              = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.009 count-sem-test.c:96 - OS_"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22284 futex(0x561bf3d9ef20, FUTEX_WAKE_PRIVATE, 1) = 1
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22285 <... futex resumed>)              = 0
+22284 <... write resumed>)              = 7
+22284 write(1, " ", 1 <unfinished ...>
+22285 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 write(1, "01.010 count-sem-test.c:97 - OS_"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22285 <... futex resumed>)              = 0
+22284 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22285 write(1, "\n**BUG** OS_CountSemGetIdByName("..., 96) = 96
+22285 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE <unfinished ...>
+22284 <... futex resumed>)              = 0
+22285 <... futex resumed>)              = 0
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE <unfinished ...>
+22285 futex(0x561bf3d9ef20, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... futex resumed>)              = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.011 count-sem-test.c:101 - OS"..., 112) = 112
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.012 count-sem-test.c:102 - OS"..., 111) = 111
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.013 count-sem-test.c:105 - OS"..., 99) = 99
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.014 count-sem-test.c:106 - OS"..., 110) = 110
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.015 count-sem-test.c:109 - OS"..., 107) = 107
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.016 count-sem-test.c:117 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.017 count-sem-test.c:118 - se"..., 57) = 57
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.018 count-sem-test.c:119 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.019 count-sem-test.c:120 - se"..., 57) = 57
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, {tv_sec=1791423991, tv_nsec=27959723}, FUTEX_BITSET_MATCH_ANY) = -1 ETIMEDOUT (Connection timed out)
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.020 count-sem-test.c:124 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, {tv_sec=1791423991, tv_nsec=29306184}, FUTEX_BITSET_MATCH_ANY) = -1 ETIMEDOUT (Connection timed out)
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.021 count-sem-test.c:125 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.022 count-sem-test.c:128 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.023 count-sem-test.c:129 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.024 count-sem-test.c:130 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.025 count-sem-test.c:133 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.026 count-sem-test.c:134 - se"..., 57) = 57
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.027 count-sem-test.c:136 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.028 count-sem-test.c:137 - OS"..., 86) = 86
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.029 count-sem-test.c:138 - OS"..., 86) = 86
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, {tv_sec=1791423991, tv_nsec=31787425}, FUTEX_BITSET_MATCH_ANY) = -1 ETIMEDOUT (Connection timed out)
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.030 count-sem-test.c:139 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.031 count-sem-test.c:142 - OS"..., 86) = 86
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.032 count-sem-test.c:143 - OS"..., 86) = 86
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.033 count-sem-test.c:148 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.034 count-sem-test.c:149 - se"..., 57) = 57
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.035 count-sem-test.c:150 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.036 count-sem-test.c:151 - se"..., 57) = 57
+22284 write(1, "\n", 1)                 = 1
+22284 mmap(NULL, 24576, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fc844b8e000
+22284 mprotect(0x7fc844b8f000, 20480, PROT_READ|PROT_WRITE) = 0
+22284 rt_sigprocmask(SIG_BLOCK, ~[], ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22284 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc844b93990, parent_tid=0x7fc844b93990, exit_signal=0, stack=0x7fc844b8e000, stack_size=0x4f80, tls=0x7fc844b936c0} => {parent_tid=[22286]}, 88) = 22286
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22286 rseq(0x7fc844b93fe0, 0x20, 0, 0x53053053 <unfinished ...>
+22284 <... rt_sigprocmask resumed>NULL, 8) = 0
+22286 <... rseq resumed>)               = 0
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22286 set_robust_list(0x7fc844b939a0, 24 <unfinished ...>
+22284 <... write resumed>)              = 7
+22286 <... set_robust_list resumed>)    = 0
+22284 write(1, " ", 1 <unfinished ...>
+22286 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 write(1, "01.037 count-sem-test.c:160 - OS"..., 157 <unfinished ...>
+22286 <... rt_sigprocmask resumed>NULL, 8) = 0
+22284 <... write resumed>)              = 157
+22284 write(1, "\n", 1 <unfinished ...>
+22286 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22286 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2471, tv_nsec=580136619},  <unfinished ...>
+22286 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22286 write(1, "[ PASS]", 7)            = 7
+22286 write(1, " ", 1)                  = 1
+22286 write(1, "01.038 count-sem-test.c:35 - OS_"..., 94) = 94
+22286 write(1, "\n", 1)                 = 1
+22286 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 rt_sigaction(SIGRTMIN, {sa_handler=0x7fc84489a920, sa_mask=[], sa_flags=SA_RESTORER|SA_RESTART|SA_SIGINFO, sa_restorer=0x7fc844845330}, NULL, 8) = 0
+22284 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+22284 fstat(3, {st_mode=S_IFREG|0644, st_size=50627, ...}) = 0
+22284 mmap(NULL, 50627, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7fc844b81000
+22284 close(3)                          = 0
+22284 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 3
+22284 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0"..., 832) = 832
+22284 fstat(3, {st_mode=S_IFREG|0644, st_size=183024, ...}) = 0
+22284 mmap(NULL, 185256, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fc844b53000
+22284 mmap(0x7fc844b57000, 147456, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x4000) = 0x7fc844b57000
+22284 mmap(0x7fc844b7b000, 16384, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x7fc844b7b000
+22284 mmap(0x7fc844b7f000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2b000) = 0x7fc844b7f000
+22284 close(3)                          = 0
+22284 mprotect(0x7fc844b7f000, 4096, PROT_READ) = 0
+22284 munmap(0x7fc844b81000, 50627)     = 0
+22284 rt_sigprocmask(SIG_BLOCK, ~[], ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22284 getpid()                          = 22284
+22284 tgkill(22284, 22286, SIGRTMIN)    = 0
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], NULL, 8) = 0
+22284 futex(0x7fc844b93990, FUTEX_WAIT_BITSET|FUTEX_CLOCK_REALTIME, 22286, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22286 <... futex resumed>)              = ? ERESTARTSYS (To be restarted if SA_RESTART is set)
+22286 --- SIGRTMIN {si_signo=SIGRTMIN, si_code=SI_TKILL, si_pid=22284, si_uid=1000} ---
+22286 getpid()                          = 22284
+22286 futex(0x7fc844b80230, FUTEX_WAKE_PRIVATE, 2147483647) = 0
+22286 rt_sigprocmask(SIG_BLOCK, ~[RT_1], NULL, 8) = 0
+22286 exit(0)                           = ?
+22286 +++ exited with 0 +++
+22284 <... futex resumed>)              = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.039 count-sem-test.c:164 - OS"..., 77) = 77
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.040 count-sem-test.c:165 - ta"..., 58) = 58
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.041 count-sem-test.c:169 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.042 count-sem-test.c:170 - se"..., 57) = 57
+22284 write(1, "\n", 1)                 = 1
+22284 rt_sigprocmask(SIG_BLOCK, ~[], ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22284 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc844b93990, parent_tid=0x7fc844b93990, exit_signal=0, stack=0x7fc844b8e000, stack_size=0x4f80, tls=0x7fc844b936c0} => {parent_tid=[22287]}, 88) = 22287
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], NULL, 8) = 0
+22287 rseq(0x7fc844b93fe0, 0x20, 0, 0x53053053 <unfinished ...>
+22284 write(1, "[ PASS]", 7)            = 7
+22287 <... rseq resumed>)               = 0
+22284 write(1, " ", 1 <unfinished ...>
+22287 set_robust_list(0x7fc844b939a0, 24 <unfinished ...>
+22284 <... write resumed>)              = 1
+22287 <... set_robust_list resumed>)    = 0
+22284 write(1, "01.043 count-sem-test.c:178 - OS"..., 157 <unfinished ...>
+22287 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22284 <... write resumed>)              = 157
+22287 <... rt_sigprocmask resumed>NULL, 8) = 0
+22284 write(1, "\n", 1 <unfinished ...>
+22287 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22287 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2471, tv_nsec=633673383},  <unfinished ...>
+22287 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22287 write(1, "[ PASS]", 7)            = 7
+22287 write(1, " ", 1)                  = 1
+22287 write(1, "01.044 count-sem-test.c:35 - OS_"..., 94) = 94
+22287 write(1, "\n", 1)                 = 1
+22287 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 mmap(NULL, 24576, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fc844b88000
+22284 mprotect(0x7fc844b89000, 20480, PROT_READ|PROT_WRITE) = 0
+22284 rt_sigprocmask(SIG_BLOCK, ~[], ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22284 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc844b8d990, parent_tid=0x7fc844b8d990, exit_signal=0, stack=0x7fc844b88000, stack_size=0x4f80, tls=0x7fc844b8d6c0} => {parent_tid=[22288]}, 88) = 22288
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], NULL, 8) = 0
+22288 rseq(0x7fc844b8dfe0, 0x20, 0, 0x53053053 <unfinished ...>
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1 <unfinished ...>
+22288 <... rseq resumed>)               = 0
+22284 <... write resumed>)              = 1
+22284 write(1, "01.045 count-sem-test.c:182 - OS"..., 157 <unfinished ...>
+22288 set_robust_list(0x7fc844b8d9a0, 24 <unfinished ...>
+22284 <... write resumed>)              = 157
+22288 <... set_robust_list resumed>)    = 0
+22284 write(1, "\n", 1 <unfinished ...>
+22288 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22284 <... write resumed>)              = 1
+22288 <... rt_sigprocmask resumed>NULL, 8) = 0
+22284 mmap(NULL, 24576, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fc844b82000
+22288 write(1, "[ PASS]", 7 <unfinished ...>
+22284 mprotect(0x7fc844b83000, 20480, PROT_READ|PROT_WRITE <unfinished ...>
+22288 <... write resumed>)              = 7
+22284 <... mprotect resumed>)           = 0
+22288 write(1, " ", 1 <unfinished ...>
+22284 rt_sigprocmask(SIG_BLOCK, ~[],  <unfinished ...>
+22288 <... write resumed>)              = 1
+22284 <... rt_sigprocmask resumed>~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22288 write(1, "01.046 count-sem-test.c:49 - OS_"..., 94 <unfinished ...>
+22284 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc844b87990, parent_tid=0x7fc844b87990, exit_signal=0, stack=0x7fc844b82000, stack_size=0x4f80, tls=0x7fc844b876c0} <unfinished ...>
+22288 <... write resumed>)              = 94
+22288 write(1, "\n", 1 <unfinished ...>
+22284 <... clone3 resumed> => {parent_tid=[22289]}, 88) = 22289
+22288 <... write resumed>)              = 1
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22288 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... rt_sigprocmask resumed>NULL, 8) = 0
+22289 rseq(0x7fc844b87fe0, 0x20, 0, 0x53053053 <unfinished ...>
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22289 <... rseq resumed>)               = 0
+22284 <... write resumed>)              = 7
+22289 set_robust_list(0x7fc844b879a0, 24 <unfinished ...>
+22284 write(1, " ", 1 <unfinished ...>
+22289 <... set_robust_list resumed>)    = 0
+22284 <... write resumed>)              = 1
+22289 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22284 write(1, "01.047 count-sem-test.c:185 - OS"..., 157) = 157
+22289 <... rt_sigprocmask resumed>NULL, 8) = 0
+22284 write(1, "\n", 1 <unfinished ...>
+22289 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22289 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2471, tv_nsec=685640776},  <unfinished ...>
+22289 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22289 write(1, "[ PASS]", 7)            = 7
+22289 write(1, " ", 1)                  = 1
+22289 write(1, "01.048 count-sem-test.c:63 - OS_"..., 94) = 94
+22289 write(1, "\n", 1)                 = 1
+22289 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, {tv_sec=1791423992, tv_nsec=190334989}, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.049 count-sem-test.c:189 - ta"..., 94) = 94
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.050 count-sem-test.c:196 - OS"..., 90) = 90
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ INFO]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "count-sem-test.c:207:Task Priori"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAKE_PRIVATE, 1) = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22287 <... futex resumed>)              = 0
+22284 write(1, " ", 1 <unfinished ...>
+22287 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 write(1, "01.051 count-sem-test.c:214 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22287 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2471, tv_nsec=787126578},  <unfinished ...>
+22287 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22287 write(1, "[ PASS]", 7)            = 7
+22287 write(1, " ", 1)                  = 1
+22287 write(1, "01.052 count-sem-test.c:39 - OS_"..., 74) = 74
+22287 write(1, "\n", 1)                 = 1
+22287 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.053 count-sem-test.c:216 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAKE_PRIVATE, 1) = 1
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22288 <... futex resumed>)              = 0
+22284 <... write resumed>)              = 7
+22284 write(1, " ", 1 <unfinished ...>
+22288 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 write(1, "01.054 count-sem-test.c:214 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22288 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2471, tv_nsec=888334572},  <unfinished ...>
+22288 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22288 write(1, "[ PASS]", 7)            = 7
+22288 write(1, " ", 1)                  = 1
+22288 write(1, "01.055 count-sem-test.c:53 - OS_"..., 74) = 74
+22288 write(1, "\n", 1)                 = 1
+22288 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.056 count-sem-test.c:216 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAKE_PRIVATE, 1) = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22289 <... futex resumed>)              = 0
+22284 write(1, " ", 1)                  = 1
+22289 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 write(1, "01.057 count-sem-test.c:214 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2471, tv_nsec=989396396},  <unfinished ...>
+22289 <... futex resumed>)              = 0
+22289 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22289 write(1, "[ PASS]", 7)            = 7
+22289 write(1, " ", 1)                  = 1
+22289 write(1, "01.058 count-sem-test.c:67 - OS_"..., 85) = 85
+22289 write(1, "\n", 1)                 = 1
+22289 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, {tv_sec=1791423992, tv_nsec=444020634}, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.059 count-sem-test.c:216 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAKE_PRIVATE, 1) = 1
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22287 <... futex resumed>)              = 0
+22284 <... write resumed>)              = 7
+22284 write(1, " ", 1 <unfinished ...>
+22287 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 write(1, "01.060 count-sem-test.c:214 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22287 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=90565775},  <unfinished ...>
+22287 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22287 write(1, "[ PASS]", 7)            = 7
+22287 write(1, " ", 1)                  = 1
+22287 write(1, "01.061 count-sem-test.c:39 - OS_"..., 74) = 74
+22287 write(1, "\n", 1)                 = 1
+22287 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.062 count-sem-test.c:216 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAKE_PRIVATE, 1) = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22288 <... futex resumed>)              = 0
+22284 write(1, " ", 1 <unfinished ...>
+22288 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 write(1, "01.063 count-sem-test.c:214 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22288 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=191979159},  <unfinished ...>
+22288 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22288 write(1, "[ PASS]", 7)            = 7
+22288 write(1, " ", 1)                  = 1
+22288 write(1, "01.064 count-sem-test.c:53 - OS_"..., 74) = 74
+22288 write(1, "\n", 1)                 = 1
+22288 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.065 count-sem-test.c:216 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAKE_PRIVATE, 1) = 1
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22289 <... futex resumed>)              = 0
+22284 <... write resumed>)              = 7
+22284 write(1, " ", 1 <unfinished ...>
+22289 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 write(1, "01.066 count-sem-test.c:214 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22289 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=293039741},  <unfinished ...>
+22289 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22289 write(1, "[ PASS]", 7)            = 7
+22289 write(1, " ", 1)                  = 1
+22289 write(1, "01.067 count-sem-test.c:67 - OS_"..., 85) = 85
+22289 write(1, "\n", 1)                 = 1
+22289 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, {tv_sec=1791423992, tv_nsec=747635203}, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.068 count-sem-test.c:216 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAKE_PRIVATE, 1) = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1 <unfinished ...>
+22287 <... futex resumed>)              = 0
+22284 <... write resumed>)              = 1
+22284 write(1, "01.069 count-sem-test.c:214 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22287 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=393942692},  <unfinished ...>
+22287 <... futex resumed>)              = 0
+22287 write(1, "[ PASS]", 7)            = 7
+22287 write(1, " ", 1)                  = 1
+22287 write(1, "01.070 count-sem-test.c:39 - OS_"..., 74) = 74
+22287 write(1, "\n", 1)                 = 1
+22287 rt_sigprocmask(SIG_BLOCK, ~[RT_1], NULL, 8) = 0
+22287 exit(0)                           = ?
+22287 +++ exited with 0 +++
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.071 count-sem-test.c:216 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAKE_PRIVATE, 1) = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22288 <... futex resumed>)              = 0
+22284 write(1, "01.072 count-sem-test.c:214 - OS"..., 78 <unfinished ...>
+22288 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 78
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=494900661},  <unfinished ...>
+22288 <... futex resumed>)              = 0
+22288 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22288 write(1, "[ PASS]", 7)            = 7
+22288 write(1, " ", 1)                  = 1
+22288 write(1, "01.073 count-sem-test.c:53 - OS_"..., 74) = 74
+22288 write(1, "\n", 1)                 = 1
+22288 rt_sigprocmask(SIG_BLOCK, ~[RT_1], NULL, 8) = 0
+22288 exit(0)                           = ?
+22288 +++ exited with 0 +++
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.074 count-sem-test.c:216 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3d9f0c0, FUTEX_WAKE_PRIVATE, 1) = 1
+22289 <... futex resumed>)              = 0
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22289 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.075 count-sem-test.c:214 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22289 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=595895111},  <unfinished ...>
+22289 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22289 write(1, "[ PASS]", 7)            = 7
+22289 write(1, " ", 1)                  = 1
+22289 write(1, "01.076 count-sem-test.c:67 - OS_"..., 85) = 85
+22289 write(1, "\n", 1)                 = 1
+22289 rt_sigprocmask(SIG_BLOCK, ~[RT_1], NULL, 8) = 0
+22289 exit(0)                           = ?
+22289 +++ exited with 0 +++
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.077 count-sem-test.c:216 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.078 count-sem-test.c:220 - OS"..., 78) = 78
+22284 write(1, "\n", 1)                 = 1
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=696684695}, NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.079 count-sem-test.c:222 - ta"..., 101) = 101
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.080 count-sem-test.c:225 - OS"..., 80) = 80
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.081 count-sem-test.c:226 - OS"..., 80) = 80
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ INFO]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "                       ABORT::0 "..., 82) = 82
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[  END]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01 Test_CountSem        TOTAL::8"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[BEGIN]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "02 Cleanup", 10)        = 10
+22284 write(1, "\n", 1)                 = 1
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=703446996}, NULL) = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=708653112}, NULL) = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=713882502}, NULL) = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2472, tv_nsec=719168759}, NULL) = 0
+22284 getpid()                          = 22284
+22284 kill(22284, SIGHUP)               = 0
+22284 write(1, "[  END]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "No test cases\n", 14)   = 14
+22284 write(1, "COMPLETE: 1 tests Segment(s) exe"..., 39) = 39
+22284 exit_group(0)                     = ?
+22285 <... futex resumed>)              = ?
+22285 +++ exited with 0 +++
+22284 +++ exited with 0 +++
+# ===== program stdout (verbatim) =====
+
+[BEGIN] UNIT TEST
+
+[BEGIN] 01 SETUP
+[  END] No test cases
+
+[BEGIN] 01 Test_CountSem
+[ PASS] 01.001 count-sem-test.c:86 - OS_CountSemGetInfo(OS_OBJECT_ID_UNDEFINED, &sem_prop) (-16) == OS_ERR_INVALID_ID (-16)
+[ PASS] 01.002 count-sem-test.c:87 - OS_CountSemGive(OS_OBJECT_ID_UNDEFINED) (-16) == OS_ERR_INVALID_ID (-16)
+[ PASS] 01.003 count-sem-test.c:88 - OS_CountSemTake(OS_OBJECT_ID_UNDEFINED) (-16) == OS_ERR_INVALID_ID (-16)
+[ PASS] 01.004 count-sem-test.c:89 - OS_CountSemTimedWait(OS_OBJECT_ID_UNDEFINED, 0) (-16) == OS_ERR_INVALID_ID (-16)
+[ PASS] 01.005 count-sem-test.c:90 - OS_CountSemDelete(OS_OBJECT_ID_UNDEFINED) (-16) == OS_ERR_INVALID_ID (-16)
+[ PASS] 01.006 count-sem-test.c:93 - OS_CountSemCreate(NULL, "Test_Sem", 0, 0) (-2) == OS_INVALID_POINTER (-2)
+
+**BUG** OS_CountSemCreate():90:check '(sem_id) != NULL' FAILED --> OS_INVALID_POINTER
+
+
+**BUG** OS_CountSemCreate():91:check '(sem_name) != NULL' FAILED --> OS_INVALID_POINTER
+
+[ PASS] 01.007 count-sem-test.c:94 - OS_CountSemCreate(&sem_id[0], NULL, 0, 0) (-2) == OS_INVALID_POINTER (-2)
+[ PASS] 01.008 count-sem-test.c:95 - OS_CountSemGetInfo(sem_id[0], NULL) (-2) == OS_INVALID_POINTER (-2)
+
+**BUG** OS_CountSemGetInfo():230:check '(count_prop) != NULL' FAILED --> OS_INVALID_POINTER
+
+
+**BUG** OS_CountSemGetIdByName():209:check '(sem_id) != NULL' FAILED --> OS_INVALID_POINTER
+
+[ PASS] 01.009 count-sem-test.c:96 - OS_CountSemGetIdByName(NULL, "Test_Sem") (-2) == OS_INVALID_POINTER (-2)
+[ PASS] 01.010 count-sem-test.c:97 - OS_CountSemGetIdByName(&sem_id[0], NULL) (-2) == OS_INVALID_POINTER (-2)
+
+**BUG** OS_CountSemGetIdByName():210:check '(sem_name) != NULL' FAILED --> OS_INVALID_POINTER
+
+[ PASS] 01.011 count-sem-test.c:101 - OS_CountSemCreate(&sem_id[0], long_name, 0, 0) (-13) == OS_ERR_NAME_TOO_LONG (-13)
+[ PASS] 01.012 count-sem-test.c:102 - OS_CountSemGetIdByName(&sem_id[0], long_name) (-13) == OS_ERR_NAME_TOO_LONG (-13)
+[ PASS] 01.013 count-sem-test.c:105 - OS_CountSemCreate(&sem_id[0], "Test_Sem", 0, 0) (0) == OS_SUCCESS (0)
+[ PASS] 01.014 count-sem-test.c:106 - OS_CountSemCreate(&sem_id[1], "Test_Sem", 0, 0) (-15) == OS_ERR_NAME_TAKEN (-15)
+[ PASS] 01.015 count-sem-test.c:109 - OS_CountSemCreate(&sem_id[1], "Test_Sem_Nonzero", 2, 0) (0) == OS_SUCCESS (0)
+[ PASS] 01.016 count-sem-test.c:117 - OS_CountSemGetInfo(sem_id[0], &sem_prop) (0) == OS_SUCCESS (0)
+[ PASS] 01.017 count-sem-test.c:118 - sem_prop.value (0) == 0 (0)
+[ PASS] 01.018 count-sem-test.c:119 - OS_CountSemGetInfo(sem_id[1], &sem_prop) (0) == OS_SUCCESS (0)
+[ PASS] 01.019 count-sem-test.c:120 - sem_prop.value (2) == 2 (2)
+[ PASS] 01.020 count-sem-test.c:124 - OS_CountSemTimedWait(sem_id[0], 0) (-7) == OS_SEM_TIMEOUT (-7)
+[ PASS] 01.021 count-sem-test.c:125 - OS_CountSemTimedWait(sem_id[0], 1) (-7) == OS_SEM_TIMEOUT (-7)
+[ PASS] 01.022 count-sem-test.c:128 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.023 count-sem-test.c:129 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.024 count-sem-test.c:130 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.025 count-sem-test.c:133 - OS_CountSemGetInfo(sem_id[0], &sem_prop) (0) == OS_SUCCESS (0)
+[ PASS] 01.026 count-sem-test.c:134 - sem_prop.value (3) == 3 (3)
+[ PASS] 01.027 count-sem-test.c:136 - OS_CountSemTake(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.028 count-sem-test.c:137 - OS_CountSemTimedWait(sem_id[0], 0) (0) == OS_SUCCESS (0)
+[ PASS] 01.029 count-sem-test.c:138 - OS_CountSemTimedWait(sem_id[0], 1) (0) == OS_SUCCESS (0)
+[ PASS] 01.030 count-sem-test.c:139 - OS_CountSemTimedWait(sem_id[0], 0) (-7) == OS_SEM_TIMEOUT (-7)
+[ PASS] 01.031 count-sem-test.c:142 - OS_CountSemTimedWait(sem_id[1], 1) (0) == OS_SUCCESS (0)
+[ PASS] 01.032 count-sem-test.c:143 - OS_CountSemTimedWait(sem_id[1], 0) (0) == OS_SUCCESS (0)
+[ PASS] 01.033 count-sem-test.c:148 - OS_CountSemGetInfo(sem_id[0], &sem_prop) (0) == OS_SUCCESS (0)
+[ PASS] 01.034 count-sem-test.c:149 - sem_prop.value (0) == 0 (0)
+[ PASS] 01.035 count-sem-test.c:150 - OS_CountSemGetInfo(sem_id[1], &sem_prop) (0) == OS_SUCCESS (0)
+[ PASS] 01.036 count-sem-test.c:151 - sem_prop.value (0) == 0 (0)
+[ PASS] 01.037 count-sem-test.c:160 - OS_TaskCreate(&task_id[0], "Task_0", Test_CountSem_Task0, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(100), 0) (0) == OS_SUCCESS (0)
+[ PASS] 01.038 count-sem-test.c:35 - OS_CountSemGetIdByName(&sem_id, "Test_Sem") (0) == OS_SUCCESS (0)
+[ PASS] 01.039 count-sem-test.c:164 - OS_TaskDelete(task_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.040 count-sem-test.c:165 - task_counter[0] (0) == 0 (0)
+[ PASS] 01.041 count-sem-test.c:169 - OS_CountSemGetInfo(sem_id[0], &sem_prop) (0) == OS_SUCCESS (0)
+[ PASS] 01.042 count-sem-test.c:170 - sem_prop.value (0) == 0 (0)
+[ PASS] 01.043 count-sem-test.c:178 - OS_TaskCreate(&task_id[0], "Task_0", Test_CountSem_Task0, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(200), 0) (0) == OS_SUCCESS (0)
+[ PASS] 01.044 count-sem-test.c:35 - OS_CountSemGetIdByName(&sem_id, "Test_Sem") (0) == OS_SUCCESS (0)
+[ PASS] 01.045 count-sem-test.c:182 - OS_TaskCreate(&task_id[1], "Task_1", Test_CountSem_Task1, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(100), 0) (0) == OS_SUCCESS (0)
+[ PASS] 01.046 count-sem-test.c:49 - OS_CountSemGetIdByName(&sem_id, "Test_Sem") (0) == OS_SUCCESS (0)
+[ PASS] 01.047 count-sem-test.c:185 - OS_TaskCreate(&task_id[2], "Task_2", Test_CountSem_Task2, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(250), 0) (0) == OS_SUCCESS (0)
+[ PASS] 01.048 count-sem-test.c:63 - OS_CountSemGetIdByName(&sem_id, "Test_Sem") (0) == OS_SUCCESS (0)
+[ PASS] 01.049 count-sem-test.c:189 - task_counter[0] + task_counter[1] + task_counter[2] (0) == 0 (0)
+[ PASS] 01.050 count-sem-test.c:196 - OS_TaskGetInfo(task_id[1], &task_prop) (0) == OS_SUCCESS (0)
+[ INFO] count-sem-test.c:207:Task Priorities not in effect, skipping sem priority test
+[ PASS] 01.051 count-sem-test.c:214 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.052 count-sem-test.c:39 - OS_CountSemTake(sem_id) (0) == OS_SUCCESS (0)
+[ PASS] 01.053 count-sem-test.c:216 - task_counter[0] + task_counter[1] + task_counter[2] (1) == test_val (1)
+[ PASS] 01.054 count-sem-test.c:214 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.055 count-sem-test.c:53 - OS_CountSemTake(sem_id) (0) == OS_SUCCESS (0)
+[ PASS] 01.056 count-sem-test.c:216 - task_counter[0] + task_counter[1] + task_counter[2] (2) == test_val (2)
+[ PASS] 01.057 count-sem-test.c:214 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.058 count-sem-test.c:67 - OS_CountSemTimedWait(sem_id, 1000) (0) == OS_SUCCESS (0)
+[ PASS] 01.059 count-sem-test.c:216 - task_counter[0] + task_counter[1] + task_counter[2] (3) == test_val (3)
+[ PASS] 01.060 count-sem-test.c:214 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.061 count-sem-test.c:39 - OS_CountSemTake(sem_id) (0) == OS_SUCCESS (0)
+[ PASS] 01.062 count-sem-test.c:216 - task_counter[0] + task_counter[1] + task_counter[2] (4) == test_val (4)
+[ PASS] 01.063 count-sem-test.c:214 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.064 count-sem-test.c:53 - OS_CountSemTake(sem_id) (0) == OS_SUCCESS (0)
+[ PASS] 01.065 count-sem-test.c:216 - task_counter[0] + task_counter[1] + task_counter[2] (5) == test_val (5)
+[ PASS] 01.066 count-sem-test.c:214 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.067 count-sem-test.c:67 - OS_CountSemTimedWait(sem_id, 1000) (0) == OS_SUCCESS (0)
+[ PASS] 01.068 count-sem-test.c:216 - task_counter[0] + task_counter[1] + task_counter[2] (6) == test_val (6)
+[ PASS] 01.069 count-sem-test.c:214 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.070 count-sem-test.c:39 - OS_CountSemTake(sem_id) (0) == OS_SUCCESS (0)
+[ PASS] 01.071 count-sem-test.c:216 - task_counter[0] + task_counter[1] + task_counter[2] (7) == test_val (7)
+[ PASS] 01.072 count-sem-test.c:214 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.073 count-sem-test.c:53 - OS_CountSemTake(sem_id) (0) == OS_SUCCESS (0)
+[ PASS] 01.074 count-sem-test.c:216 - task_counter[0] + task_counter[1] + task_counter[2] (8) == test_val (8)
+[ PASS] 01.075 count-sem-test.c:214 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.076 count-sem-test.c:67 - OS_CountSemTimedWait(sem_id, 1000) (0) == OS_SUCCESS (0)
+[ PASS] 01.077 count-sem-test.c:216 - task_counter[0] + task_counter[1] + task_counter[2] (9) == test_val (9)
+[ PASS] 01.078 count-sem-test.c:220 - OS_CountSemGive(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.079 count-sem-test.c:222 - task_counter[0] + task_counter[1] + task_counter[2] (9) == test_val (9)
+[ PASS] 01.080 count-sem-test.c:225 - OS_CountSemDelete(sem_id[0]) (0) == OS_SUCCESS (0)
+[ PASS] 01.081 count-sem-test.c:226 - OS_CountSemDelete(sem_id[1]) (0) == OS_SUCCESS (0)
+[ INFO]                        ABORT::0     WARN::0     FLOW::0     DEBUG::0     N/A::0   
+[  END] 01 Test_CountSem        TOTAL::81    PASS::81    FAIL::0     MIR::0     TSF::0     TTF::0   
+
+[BEGIN] 02 Cleanup
+[  END] No test cases
+COMPLETE: 1 tests Segment(s) executed
+

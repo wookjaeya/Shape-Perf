@@ -1,0 +1,4 @@
+# 10_sites.kzp -- the call site that exists only at 833fdbb: the delay of the retry loop.
+phi 1;
+
+site cf_retry_delay = fn("CF_CFDP_InitEngine").call("OS_TaskDelay") prov cf_cfdp_retry_loop;

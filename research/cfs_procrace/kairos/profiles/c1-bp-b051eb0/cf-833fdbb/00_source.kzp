@@ -1,0 +1,4 @@
+# 00_source.kzp -- CF 833fdbb (D22: the fix of #184, head of PR #342; plan/C1_build_manifest.md 1).
+phi 1;
+
+source cf root "cf" rev "833fdbb27a26f15f2429e79392e7eb73d61abdea";

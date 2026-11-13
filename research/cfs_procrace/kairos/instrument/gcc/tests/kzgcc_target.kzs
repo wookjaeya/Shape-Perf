@@ -1,0 +1,47 @@
+# kzgcc_target.kzs -- logical sites of the kzgcc unit test (kzs-sites 1).  Generic names, unit-test values;
+# not a cFS manifest and not research conditions.
+kzs-sites 1
+source unit rev=0000000000000000000000000000000000000000 ref="instrument/gcc/tests/kzgcc_target.c"
+module 1 name=kzgcc_target source=unit
+
+# the lookup in its caller (CF shape): before with the name, after with the status and the out id
+site 1 label=consumer.lookup.before op=obj.lookup phase=before tu=tests/kzgcc_target.c func=consumer_init callee=obj_lookup
+value 1 0 role=id_ptr from=arg0 type=ptr
+value 1 1 role=name from=arg1 type=ptr string=validated bound=20 ref="struct chan.sem_name is char[20]"
+control 1 ctx=task ref="unit test: a plain thread"
+site 2 label=consumer.lookup op=obj.lookup phase=after tu=tests/kzgcc_target.c func=consumer_init callee=obj_lookup
+value 2 0 role=status from=ret type=s32
+value 2 1 role=sem_id from=out0 type=u32
+site 3 label=consumer.delay op=obj.delay phase=after tu=tests/kzgcc_target.c func=consumer_init callee=obj_delay
+
+# the provider's probe and create inside a static helper called once (BP shape)
+site 4 label=provider.probe.before op=obj.lookup phase=before tu=tests/kzgcc_target.c func=init_throttles callee=obj_lookup
+value 4 1 role=name from=arg1 type=ptr string=validated bound=16 ref="struct throttle.name is char[16]"
+site 5 label=provider.probe op=obj.lookup phase=after tu=tests/kzgcc_target.c func=init_throttles callee=obj_lookup
+value 5 0 role=status from=ret type=s32
+site 6 label=provider.create.before op=obj.create phase=before tu=tests/kzgcc_target.c func=init_throttles callee=obj_create
+value 6 1 role=name from=arg1 type=ptr string=validated bound=16 ref="struct throttle.name is char[16]"
+value 6 2 role=initial from=arg2 type=u32
+control 6 ctx=task ref="unit test: a plain thread"
+site 7 label=provider.create op=obj.create phase=after tu=tests/kzgcc_target.c func=init_throttles callee=obj_create
+value 7 0 role=status from=ret type=s32
+value 7 1 role=sem_id from=out0 type=u32
+
+# stores through a pointer parameter on two branches, and the caller's unused result (SB shape)
+site 8 label=own_id.store op=own.id phase=effect tu=tests/kzgcc_target.c func=get_own_id
+value 8 0 role=id from=operand0 type=u32
+value 8 1 role=out_ptr from=operand1 type=ptr
+site 9 label=own_id.call op=own.id phase=after tu=tests/kzgcc_target.c func=main callee=get_own_id
+value 9 0 role=status from=ret type=s32
+value 9 1 role=id from=out0 type=u32
+
+# identity: the id passed to the new thread, the entry of the task function, entry/return of a function
+site 10 label=task.create.id op=task.create phase=before tu=tests/kzgcc_target.c func=task_create
+value 10 0 role=task_id from=arg2 type=u32
+site 11 label=task.entry op=task.entry phase=before tu=tests/kzgcc_target.c func=task_entry
+value 11 0 role=task_id from=arg0 type=u32
+site 12 label=provider_init.ret op=provider.init phase=after tu=tests/kzgcc_target.c func=provider_init
+value 12 0 role=status from=ret type=s32
+
+# a site the unit does not have: declared as a gap in the binding file
+site 13 label=absent.call op=absent phase=before tu=tests/kzgcc_target.c func=no_such_function callee=obj_lookup

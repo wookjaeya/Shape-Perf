@@ -1,0 +1,6 @@
+# hold_caller.kzh -- caller-in on a function entry (kzp-hold 1 H7) for the cooperative-gate test (run_hold_test.sh):
+# the provider is held at its creation of "OBJ1" -- the point is evaluated at the provider's call of seq_create in
+# module hold_seq_prog (kz rtplan) -- until the consumer reaches seq_consumer_done.  Unit-test values.
+kzp-hold 1
+gate G_cr site=obj.create.entry when name name "OBJ1" when caller-in hold_seq_prog occurrence first
+release R_cr site=consumer.done.entry releases G_cr occurrence first

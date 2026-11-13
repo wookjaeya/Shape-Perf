@@ -1,0 +1,23 @@
+# hold-cf833fdbb.kzh -- the control plan of C1 stage B (E-06, controlled per P-C1HOLD) on the
+# post-fix 833fdbb builds (format kzp-hold 1).  It is read together with the observation profile
+# profiles/c1-bp-b051eb0/observe/sites-cf833fdbb.kzp and its per-file bases (core-tx, cf.so, bp.so);
+# the gate and the release name sites of that profile, and their addresses come from the bases.
+#
+# Gate (P-C1HOLD, plan/C1_basis_plan.md section 9.2 "G(name)"): the provider (BP) thread is held at
+# the entry of OS_CountSemCreate when the name it is about to create is "BP0_tsem".  The name is the
+# second argument (slot sem_name of osal.countsem_create.entry); it is read from the stopped thread's
+# memory by ptrace.  BP creates BP0_tsem before BP1_tsem in the same thread (bp_flow.c L124-142), so
+# holding BP0_tsem's creation keeps both names uncreated, and CF's lookups of both channels find
+# nothing -- the E-06 retry-exhaustion path.  Only BP creates a counting semaphore named "BP0_tsem",
+# so the name condition selects exactly BP's call (other OS_CountSemCreate calls are stepped over).
+# This gate point is before OSAL touches its object table (outside the RESERVED window, section 9.2).
+#
+# Release (R-d, the final-initialization-result / CF exit event, plan section 9.2): when CF gives up
+# after the retries and calls CFE_ES_ExitApp (its caller is CF_AppMain in cf.so), the held provider
+# is resumed.  CFE_ES_ExitApp's entry is in core-tx; the caller-in cf.so condition selects CF's exit
+# (not another app's).  CF's exit implies its final initialization result (C-6, plan section 9.2
+# R-d).  If CF never exits (it should, BP is held), no release fires and the run is ended by the
+# harness timeout (a pilot safeguard, researcher choice) and is INCONCLUSIVE, never a result.
+kzp-hold 1
+gate G_bp0_create site=osal.countsem_create.entry when name sem_name "BP0_tsem" occurrence first
+release R_cf_exit site=es.exit_app.entry releases G_bp0_create when caller-in cf.so occurrence first

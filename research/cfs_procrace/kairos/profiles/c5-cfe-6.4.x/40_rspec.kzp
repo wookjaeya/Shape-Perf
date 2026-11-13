@@ -1,0 +1,42 @@
+# 40_rspec.kzp -- the readiness specifications of profile c5-cfe-6.4.x (the K-SELF.es shape, SPEC App. A.3 / C5 row).
+#
+# The lookup of the calling task's application needs the task's own entry to be registered: the creator must register
+# it before the task's first lock-protected read (cases/C5.md section 7, from the issue, the code, the fix and the
+# 6.4.2 VDD; plan/c5_execution_basis_20261028.md 4).
+#
+# Three judgements, kept apart (SPEC 1.6):
+#   framework  CFE_ES_ERR_APPID is a documented result of CFE_ES_GetAppID (cfe_es.h, es_h_getappid_doc);
+#   caller     no text found in the releases or the issue says what the calling code must achieve with this lookup
+#              or that it accepts the failure: the issue and the VDD describe the framework's defect, cfe_es.h states
+#              the results, and the start-script applications drop the status without a comment (sample_app_init,
+#              sb_createpipe_fn).  So appreq and the caller-level Allowed are unspecified_by_reference and a
+#              not-ready occurrence is NOT_READY_UNJUDGED.  No researcher-authored appreq is added (QT-9); whether a
+#              text should be bound as C5's appreq is a PI item (as D8 was for C1);
+#   observed   the order violation is the judgement unit (PD28 2 item 6) and is reported on its own basis: a lookup
+#              whose code fixes the entry FREE at the read, and the creator's registration of the same TaskId in the
+#              record.  CFE_ES_ERR_APPID, a CFE_SUCCESS with another task's AppId and the consumption of the result
+#              are reported apart (plan/expected_results_C5.md).
+# No oracle function: the test is inline in the lookups (TaskTable[TaskId].RecordUsed == TRUE).
+phi 1;
+
+rspec K-SELF.es-task {
+  use op CFE_ES_GetAppID;
+  key es.task(arg.task_id);
+  requires state(es.task(arg.task_id)) = LIVE;
+  appreq unspecified_by_reference;
+  allowed unspecified_by_reference;
+  harm unspecified_by_reference;
+  authored "2026-10-29, C5 profile (Claude), from SPEC_FINAL rev 1.3 1.6, cases/C5.md 4-7, plan/c5_execution_basis_20261028.md 4, 5, 6, 10.1-10.3; cases inspected for this API: C5, R2";
+  prov issue_72_body, vdd_642_trac41, es_getappid_fn, es_h_getappid_doc, es_appcreate_registration, es_appcreate_task_create, es_appcreate_locking, sb_createpipe_fn, evs_getappid_fn, sample_app_init;
+}
+
+rspec K-SELF.es-task-internal {
+  use op CFE_ES_GetAppIDInternal;
+  key es.task(arg.task_id);
+  requires state(es.task(arg.task_id)) = LIVE;
+  appreq unspecified_by_reference;
+  allowed unspecified_by_reference;
+  harm unspecified_by_reference;
+  authored "2026-10-29, C5 profile (Claude), from SPEC_FINAL rev 1.3 1.6, cases/C5.md F5 and 7, plan/c5_execution_basis_20261028.md 4; cases inspected for this API: C5";
+  prov issue_72_body, es_getappidint_fn, es_runloop_lookup, es_appcreate_registration, es_appcreate_task_create, es_appcreate_locking;
+}

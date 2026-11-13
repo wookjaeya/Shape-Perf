@@ -1,0 +1,11 @@
+bundle=c5-20261109-regen-inputs
+created_utc=2026-11-09T10:25:39.239Z
+repo_commit=7aabae45352093f0831c83f706207e574afcd1fc
+kernel=6.18.44-fc-v310
+source=/home/user/work (list of 78 files, MANIFEST.tsv) bytes=6025309
+tar_xz_bytes=157628 parts=1 tar_xz_sha256=269f81b7001bbc0f3374b0f306c92436037342c2f958b2e7b28cacc46364bc78
+location=/home/user/work/preserve/bundles-20261109/c5-20261109-regen-inputs (local, not in the repository, not pushed)
+made_with=bundle_local.sh (tar --sort=name --owner=0 --group=0 --numeric-owner | xz -9 -T4 | split -b 45M), started 2026-11-09T10:25:38.518Z
+df_free_before=1068118016 df_free_after_create=1067917312
+credential_pattern_hits=none
+note=P4 C5 facts regeneration inputs (RV3A 6.1 P4): the five compile DBs of step2a_tests.sh:63-76 (C1 pre/post, R2, C5 641/642 est), EB inputs/, c5tools/build/64x *.record *.log objects_*.sha256 binds_instr.kzs (keep/, pristine/, b/ trees left out: Q2/Q3), c5/ref/glibc, c5/dl hash lists and fetch log; local only, not pushed

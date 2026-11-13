@@ -1,0 +1,47 @@
+# date: 2026-10-08T01:20:36Z
+# read-only inspection of the reference cFS checkout (built by env/build_cfs.sh); no files modified
+. 088b2fa828db9ff7e00733f1908e0eeb59f66ce3
+osal d2d877a69cff47452bcca274b309147d48e6c16f
+cfe c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd
+apps/cf 15a871e66cad7ec75e1be78989a93075ff142055
+## OSAL POSIX: task = pthread in one process
+568:    return_code = pthread_create(pthr, &custom_attr, entry, entry_arg);
+571:        OS_DEBUG("pthread_create error in OS_TaskCreate: %s\n", strerror(return_code));
+## OSAL POSIX: count semaphore = unnamed process-private sem_t (futex-backed)
+74:int32 OS_CountSemCreate_Impl(const OS_object_token_t *token, uint32 sem_initial_value, uint32 options)
+80:    if (sem_initial_value > SEM_VALUE_MAX)
+85:    if (sem_init(&impl->id, 0, sem_initial_value) < 0)
+125:    if (sem_post(&impl->id) < 0)
+145:    if (sem_wait(&impl->id) < 0)
+172:    if (sem_timedwait(&impl->id, &ts) == 0)
+## OSAL: name lookup = user-space object table search under OS_Lock_Global
+204:int32 OS_CountSemGetIdByName(osal_id_t *sem_id, const char *sem_name)
+212:    return_code = OS_ObjectIdFindByName(LOCAL_OBJID_TYPE, sem_name, sem_id);
+676:void OS_Lock_Global(OS_object_token_t *token)
+975:int32 OS_ObjectIdFindByName(osal_objtype_t idtype, const char *name, osal_id_t *object_id)
+59:OS_count_sem_internal_record_t OS_count_sem_table[LOCAL_NUM_OBJECTS];
+92:        ret = pthread_mutex_lock(&impl->mutex);
+## OSAL POSIX: queues = POSIX mqueue
+116:    queueDesc = mq_open(name, O_CREAT | O_RDWR, 0666, &queueAttr);
+238:            sizeCopied = mq_timedreceive(impl->id, data, size, NULL, &ts);
+305:        result = mq_timedsend(impl->id, data, size, 1, &ts);
+## CF lookup site (C1)
+1282:                ret = OS_CountSemGetIdByName(&CF_AppData.engine.channels[i].sem_id,
+## cFE in-memory state (C3/C5/R2)
+157:    CFE_ES_TaskRecord_t TaskTable[OS_MAX_TASKS];
+165:    CFE_ES_AppRecord_t AppTable[CFE_PLATFORM_ES_MAX_APPLICATIONS];
+227:extern CFE_ES_Global_t CFE_ES_Global;
+typedef struct
+{
+    osal_id_t                    SharedDataMutexId;
+    uint32                       SubscriptionReporting;
+    CFE_ES_AppId_t               AppId;
+} CFE_SB_Global_t;
+40:CFE_SB_Global_t CFE_SB_Global;
+116:    EVS_AppData_t AppData[CFE_PLATFORM_ES_MAX_APPLICATIONS]; /* Application state data and event filters */
+2075:void CFE_ES_LockSharedData(const char *FunctionName, int32 LineNumber)
+2079:    OsStatus = OS_MutSemTake(CFE_ES_Global.SharedDataMutex);
+## Scribe kernel files: ipc/mqueue.c modified? (0=no)
+0
+## Scribe kernel files: kernel/futex.c modified? (1=yes)
+1

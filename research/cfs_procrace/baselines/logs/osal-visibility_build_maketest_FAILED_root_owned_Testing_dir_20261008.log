@@ -1,0 +1,16 @@
+# OSAL README build, step 'make test' (README L30), 2026-10-08T01:42:54Z
+# run user: ubuntu; RLIMIT_RTPRIO=0; fs.mqueue.msg_max=10; fs.mqueue.queues_max=256
+$ runuser -u ubuntu -- build_osal_readme.sh osal test
++ make test
+Running tests...
+Test project /home/user/work/procrace/baselines/osal-visibility/osal/build_osal_test
+CMake Error: Cannot open file for write: /home/user/work/procrace/baselines/osal-visibility/osal/build_osal_test/Testing/Temporary/LastTest.log.tmp
+CMake Error: : System Error: Permission denied
+Problem opening file: /home/user/work/procrace/baselines/osal-visibility/osal/build_osal_test/Testing/Temporary/LastTest.log
+Cannot create log file: LastTest.log
+Errors while running CTest
+Output from these tests are in: /home/user/work/procrace/baselines/osal-visibility/osal/build_osal_test/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+make: *** [Makefile:71: test] Error 8
+# exit=2 wall=.036981538 s
+# NOTE: failed because the agent ran 'ctest --test-dir build_osal_test -N' (test listing) as root just before, which created build_osal_test/Testing/ owned by root. Not an OSAL or container issue. Fix: rm -rf build_osal_test/Testing, then re-run 'make test' as ubuntu (see osal-visibility_build_maketest_20261008.log).

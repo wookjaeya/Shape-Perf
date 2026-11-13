@@ -1,0 +1,34 @@
+kz-dump 1
+container abi=1 kind=basis size=1840
+basis_sha256=0000000000000000000000000000000000000000000000000000000000000000
+profile_sha256=1b92e0e511b97a41704a8c80a7b45b55f670f320189a080f416a7d2450e8c5e8
+tool_sha256=6270daf2ba43960aa8613e2de3454804a903b33cea853e35fc8fa3ccde1f881c
+parents=0
+sections=6
+section STRINGS type=1 version=1 record=kz_byte record_size=1 count=603 crc32=0x79a466e7
+section BASIS type=2 version=1 record=kz_basis_item record_size=28 count=12 crc32=0x939a580f
+  BASIS[0] name="binary.path" value="/synthetic/synthetic.bin" policy=unset prov=none deviation=none
+  BASIS[1] name="binary.sha256" value="da76ef727d5e1b225bc88cbf4716f48be52560b4b9b249af893e97e2f31ee1ea" policy=unset prov=none deviation=none
+  BASIS[2] name="binary.build_id" value="0102030405060708090a0b0c0d0e0f1011121314" policy=unset prov=none deviation=none
+  BASIS[3] name="binary.size" value="4848" policy=unset prov=none deviation=none
+  BASIS[4] name="binary.type" value="position-independent (ET_DYN)" policy=unset prov=none deviation=none
+  BASIS[5] name="binary.arch" value="x86-64" policy=unset prov=none deviation=none
+  BASIS[6] name="profile.binary_name" value="synthetic.bin" policy=unset prov=none deviation=none
+  BASIS[7] name="profile.sites" value="3" policy=unset prov=none deviation=none
+  BASIS[8] name="anchor.line_table" value="DWARF .debug_line, 1 files, 5 rows" policy=unset prov=none deviation=none
+  BASIS[9] name="anchor.reader" value="kz probe/anchor: ELF (elf.h) and DWARF line-table reader, no LLVM" policy=unset prov=none deviation=none
+  BASIS[10] name="anchor.source_root" value="(not given: cited text not hashed)" policy=unset prov=none deviation=none
+  BASIS[11] name="tool.build_identity" value="unit-test build identity" policy=unset prov=none deviation=none
+section FILE_HASHES type=3 version=1 record=kz_file_hash record_size=56 count=1 crc32=0xe5881dde
+  FILE_HASHES[0] path="/synthetic/synthetic.bin" sha256=da76ef727d5e1b225bc88cbf4716f48be52560b4b9b249af893e97e2f31ee1ea size=4848 prov=none
+section PROVENANCE type=4 version=1 record=kz_prov record_size=68 count=1 crc32=0x117acb12
+  PROVENANCE[0] tier=researcher kind=researcher side=n/a line_from=1 line_to=2 file="x.c" cite="the sites of the golden test" authored="K2" text_sha256=0000000000000000000000000000000000000000000000000000000000000000
+section SYMBOLS type=54 version=1 record=kz_symbol record_size=40 count=2 crc32=0x60f07936
+  SYMBOLS[0] vaddr=0x1000 size=16 file_offset=0x1000 name="f" bind=global
+  SYMBOLS[1] vaddr=0x1010 size=10 file_offset=0x1010 name="g" bind=global
+section TARGETS type=55 version=1 record=kz_target record_size=80 count=3 crc32=0x37434170
+  TARGETS[0] id=0 kind=func-entry insn_class=emulated vaddr=0x1004 file_offset=0x1004 func_vaddr=0x1000 delta=4 line=10 col=0 prov=0 insn=554889e5e8030000 func="f" file="/w/x.c" label="f.entry"
+  TARGETS[1] id=1 kind=func-entry insn_class=emulated vaddr=0x1004 file_offset=0x1004 func_vaddr=0x1000 delta=4 line=10 col=0 prov=0 insn=554889e5e8030000 func="f" file="/w/x.c" label="f.ret"
+  TARGETS[2] id=2 kind=after-call insn_class=unknown vaddr=0x100d file_offset=0x100d func_vaddr=0x1000 delta=13 line=11 col=0 prov=0 insn=905dc3f30f1efa55 func="f" file="/w/x.c" label="f.after"
+artifact_sha256=63698f33925b5648fad4a57af3deba6dc79d1699a499f09c1c96f08bdd704945
+artifact_sha256 63698f33925b5648fad4a57af3deba6dc79d1699a499f09c1c96f08bdd704945

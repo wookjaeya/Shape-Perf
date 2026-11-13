@@ -1,0 +1,56 @@
+extract
+  translation units          1
+  functions                  2 (bodies read 1, in system headers skipped 0)
+  call sites                 5
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                0 (entry resolved 0)
+  loops                      0 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 1, control-flow graphs 1, call-graph components 1 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 0 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+facts-view 1
+[functions] 2
+  fn 0 img_main imgbudget.c:69-87 params=0 {defined}
+  fn 1 img_use imgbudget.c:6 params=1 {}
+[argflow] 5
+  arg 0 of site 0 imgbudget.c:72:8 [&img_wide] <- address <global>.img_wide root=img_wide base=global object=img_wide hops=0 {pointer-conversion} chain=(addr global:img_wide)
+  arg 0 of site 1 imgbudget.c:75:8 [&img_union] <- address <global>.img_union root=img_union base=global object=img_union hops=0 {pointer-conversion} chain=(addr global:img_union)
+  arg 0 of site 2 imgbudget.c:78:8 [&img_points[0]] <- address <global>.img_points root=img_points base=global-array-element object=img_points hops=0 {pointer-conversion} index=[0] chain=(addr (index global:img_points 0))
+  arg 0 of site 3 imgbudget.c:81:8 [&img_exact] <- address <global>.img_exact root=img_exact base=global object=img_exact hops=0 {pointer-conversion} chain=(addr global:img_exact)
+  arg 0 of site 4 imgbudget.c:84:8 [&img_small] <- address <global>.img_small root=img_small base=global object=img_small hops=0 {pointer-conversion} chain=(addr global:img_small)
+[paramflow] 0
+[ptrfields] 0
+[gimages] 23
+  img_exact.a int 1 at imgbudget.c:56:35 {object-written} reach={argument} field=ImgExact.a
+  img_exact.b int 2 at imgbudget.c:56:43 {object-written} reach={argument} field=ImgExact.b
+  img_exact.c int 3 at imgbudget.c:56:51 {object-written} reach={argument} field=ImgExact.c
+  img_exact.d int 4 at imgbudget.c:56:59 {object-written} reach={argument} field=ImgExact.d
+  img_points[0].x int 1 at imgbudget.c:43:35 {image-truncated} reach={argument} field=ImgPoint.x
+  img_points[0].y int 2 at imgbudget.c:43:38 {image-truncated} reach={argument} field=ImgPoint.y
+  img_points[0].z int 3 at imgbudget.c:43:41 {image-truncated} reach={argument} field=ImgPoint.z
+  img_points[1].x int 4 at imgbudget.c:43:46 {image-truncated} reach={argument} field=ImgPoint.x
+  img_points[1].y... non-constant at imgbudget.c:43:17 {image-truncated} reach={argument}
+  img_points[...] non-constant at imgbudget.c:43:17 {image-truncated} reach={argument}
+  img_small.a int 1 at imgbudget.c:66:30 {object-written} reach={argument} field=ImgSmall.a
+  img_small.b int 2 at imgbudget.c:66:33 {object-written} reach={argument} field=ImgSmall.b
+  img_small.c int 3 at imgbudget.c:66:36 {object-written} reach={argument} field=ImgSmall.c
+  img_union.s.a int 1 at imgbudget.c:33:30 {image-truncated,object-written} reach={argument} field=<anonymous>.a
+  img_union.s.b int 2 at imgbudget.c:33:33 {image-truncated,object-written} reach={argument} field=<anonymous>.b
+  img_union.s.c int 3 at imgbudget.c:33:36 {image-truncated,object-written} reach={argument} field=<anonymous>.c
+  img_union.s.d int 4 at imgbudget.c:33:39 {image-truncated,object-written} reach={argument} field=<anonymous>.d
+  img_union.s.e... non-constant at imgbudget.c:33:16 {image-truncated,object-written} reach={argument}
+  img_wide.a int 1 at imgbudget.c:18:28 {image-truncated,object-written} reach={argument} field=ImgWide.a
+  img_wide.b int 2 at imgbudget.c:18:31 {image-truncated,object-written} reach={argument} field=ImgWide.b
+  img_wide.c int 3 at imgbudget.c:18:34 {image-truncated,object-written} reach={argument} field=ImgWide.c
+  img_wide.d int 4 at imgbudget.c:18:37 {image-truncated,object-written} reach={argument} field=ImgWide.d
+  img_wide.e... non-constant at imgbudget.c:18:16 {image-truncated,object-written} reach={argument}

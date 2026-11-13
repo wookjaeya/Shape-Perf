@@ -1,0 +1,198 @@
+# OSAL README build, step 'make test' (README L30), 2026-10-08T01:43:05Z
+# previous attempt failed on a root-owned Testing/ dir created by the agent (see ..._FAILED_root_owned_Testing_dir_20261008.log); dir removed before this run
+# run user: ubuntu; RLIMIT_RTPRIO=0; fs.mqueue.msg_max=10; fs.mqueue.queues_max=256
+$ runuser -u ubuntu -- build_osal_readme.sh osal test
++ make test
+Running tests...
+Test project /home/user/work/procrace/baselines/osal-visibility/osal/build_osal_test
+      Start  1: coverage-vxworks-binsem
+ 1/85 Test  #1: coverage-vxworks-binsem ...................   Passed    0.00 sec
+      Start  2: coverage-vxworks-common
+ 2/85 Test  #2: coverage-vxworks-common ...................   Passed    0.00 sec
+      Start  3: coverage-vxworks-console
+ 3/85 Test  #3: coverage-vxworks-console ..................   Passed    0.00 sec
+      Start  4: coverage-vxworks-countsem
+ 4/85 Test  #4: coverage-vxworks-countsem .................   Passed    0.00 sec
+      Start  5: coverage-vxworks-dirs-globals
+ 5/85 Test  #5: coverage-vxworks-dirs-globals .............   Passed    0.00 sec
+      Start  6: coverage-vxworks-files
+ 6/85 Test  #6: coverage-vxworks-files ....................   Passed    0.00 sec
+      Start  7: coverage-vxworks-filesys
+ 7/85 Test  #7: coverage-vxworks-filesys ..................   Passed    0.00 sec
+      Start  8: coverage-vxworks-idmap
+ 8/85 Test  #8: coverage-vxworks-idmap ....................   Passed    0.00 sec
+      Start  9: coverage-vxworks-heap
+ 9/85 Test  #9: coverage-vxworks-heap .....................   Passed    0.00 sec
+      Start 10: coverage-vxworks-loader
+10/85 Test #10: coverage-vxworks-loader ...................   Passed    0.00 sec
+      Start 11: coverage-vxworks-mutex
+11/85 Test #11: coverage-vxworks-mutex ....................   Passed    0.00 sec
+      Start 12: coverage-vxworks-network
+12/85 Test #12: coverage-vxworks-network ..................   Passed    0.00 sec
+      Start 13: coverage-vxworks-queues
+13/85 Test #13: coverage-vxworks-queues ...................   Passed    0.00 sec
+      Start 14: coverage-vxworks-shell
+14/85 Test #14: coverage-vxworks-shell ....................   Passed    0.00 sec
+      Start 15: coverage-vxworks-sockets
+15/85 Test #15: coverage-vxworks-sockets ..................   Passed    0.00 sec
+      Start 16: coverage-vxworks-symtab
+16/85 Test #16: coverage-vxworks-symtab ...................   Passed    0.00 sec
+      Start 17: coverage-vxworks-tasks
+17/85 Test #17: coverage-vxworks-tasks ....................   Passed    0.00 sec
+      Start 18: coverage-vxworks-timebase
+18/85 Test #18: coverage-vxworks-timebase .................   Passed    0.00 sec
+      Start 19: coverage-vxworks-posix-gettime
+19/85 Test #19: coverage-vxworks-posix-gettime ............   Passed    0.00 sec
+      Start 20: coverage-vxworks-posix-io
+20/85 Test #20: coverage-vxworks-posix-io .................   Passed    0.00 sec
+      Start 21: coverage-vxworks-posix-files
+21/85 Test #21: coverage-vxworks-posix-files ..............   Passed    0.00 sec
+      Start 22: coverage-vxworks-posix-file-allocate
+22/85 Test #22: coverage-vxworks-posix-file-allocate ......   Passed    0.00 sec
+      Start 23: coverage-vxworks-posix-dirs
+23/85 Test #23: coverage-vxworks-posix-dirs ...............   Passed    0.00 sec
+      Start 24: coverage-vxworks-console-bsp
+24/85 Test #24: coverage-vxworks-console-bsp ..............   Passed    0.00 sec
+      Start 25: coverage-vxworks-bsd-select
+25/85 Test #25: coverage-vxworks-bsd-select ...............   Passed    0.00 sec
+      Start 26: coverage-vxworks-bsd-sockets
+26/85 Test #26: coverage-vxworks-bsd-sockets ..............   Passed    0.00 sec
+      Start 27: coverage-vxworks-bsd-sockets-dns
+27/85 Test #27: coverage-vxworks-bsd-sockets-dns ..........   Passed    0.00 sec
+      Start 28: coverage-vxworks-bsd-sockets-no-dns
+28/85 Test #28: coverage-vxworks-bsd-sockets-no-dns .......   Passed    0.00 sec
+      Start 29: coverage-vxworks-no-loader
+29/85 Test #29: coverage-vxworks-no-loader ................   Passed    0.00 sec
+      Start 30: coverage-vxworks-no-shell
+30/85 Test #30: coverage-vxworks-no-shell .................   Passed    0.00 sec
+      Start 31: coverage-vxworks-no-symtab
+31/85 Test #31: coverage-vxworks-no-symtab ................   Passed    0.00 sec
+      Start 32: coverage-vxworks-no-network-gethostname
+32/85 Test #32: coverage-vxworks-no-network-gethostname ...   Passed    0.00 sec
+      Start 33: coverage-vxworks-no-network-gethostid
+33/85 Test #33: coverage-vxworks-no-network-gethostid .....   Passed    0.00 sec
+      Start 34: coverage-vxworks-no-sockets
+34/85 Test #34: coverage-vxworks-no-sockets ...............   Passed    0.00 sec
+      Start 35: coverage-vxworks-no-condvar
+35/85 Test #35: coverage-vxworks-no-condvar ...............   Passed    0.00 sec
+      Start 36: coverage-vxworks-no-file-allocate
+36/85 Test #36: coverage-vxworks-no-file-allocate .........   Passed    0.00 sec
+      Start 37: coverage-shared-binsem
+37/85 Test #37: coverage-shared-binsem ....................   Passed    0.00 sec
+      Start 38: coverage-shared-clock
+38/85 Test #38: coverage-shared-clock .....................   Passed    0.00 sec
+      Start 39: coverage-shared-common
+39/85 Test #39: coverage-shared-common ....................   Passed    0.00 sec
+      Start 40: coverage-shared-condvar
+40/85 Test #40: coverage-shared-condvar ...................   Passed    0.00 sec
+      Start 41: coverage-shared-countsem
+41/85 Test #41: coverage-shared-countsem ..................   Passed    0.00 sec
+      Start 42: coverage-shared-dir
+42/85 Test #42: coverage-shared-dir .......................   Passed    0.00 sec
+      Start 43: coverage-shared-errors
+43/85 Test #43: coverage-shared-errors ....................   Passed    0.00 sec
+      Start 44: coverage-shared-file
+44/85 Test #44: coverage-shared-file ......................   Passed    0.00 sec
+      Start 45: coverage-shared-filesys
+45/85 Test #45: coverage-shared-filesys ...................   Passed    0.00 sec
+      Start 46: coverage-shared-heap
+46/85 Test #46: coverage-shared-heap ......................   Passed    0.00 sec
+      Start 47: coverage-shared-idmap
+47/85 Test #47: coverage-shared-idmap .....................   Passed    0.06 sec
+      Start 48: coverage-shared-module
+48/85 Test #48: coverage-shared-module ....................   Passed    0.00 sec
+      Start 49: coverage-shared-mutex
+49/85 Test #49: coverage-shared-mutex .....................   Passed    0.00 sec
+      Start 50: coverage-shared-network
+50/85 Test #50: coverage-shared-network ...................   Passed    0.00 sec
+      Start 51: coverage-shared-printf
+51/85 Test #51: coverage-shared-printf ....................   Passed    0.00 sec
+      Start 52: coverage-shared-queue
+52/85 Test #52: coverage-shared-queue .....................   Passed    0.00 sec
+      Start 53: coverage-shared-rwlock
+53/85 Test #53: coverage-shared-rwlock ....................   Passed    0.00 sec
+      Start 54: coverage-shared-select
+54/85 Test #54: coverage-shared-select ....................   Passed    0.00 sec
+      Start 55: coverage-shared-sockets
+55/85 Test #55: coverage-shared-sockets ...................   Passed    0.00 sec
+      Start 56: coverage-shared-task
+56/85 Test #56: coverage-shared-task ......................   Passed    0.00 sec
+      Start 57: coverage-shared-timebase
+57/85 Test #57: coverage-shared-timebase ..................   Passed    0.00 sec
+      Start 58: coverage-shared-time
+58/85 Test #58: coverage-shared-time ......................   Passed    0.00 sec
+      Start 59: coverage-shared-version
+59/85 Test #59: coverage-shared-version ...................   Passed    0.00 sec
+      Start 60: bin-sem-test
+60/85 Test #60: bin-sem-test ..............................   Passed    1.03 sec
+      Start 61: bin-sem-timeout-test
+61/85 Test #61: bin-sem-timeout-test ......................   Passed   19.05 sec
+      Start 62: condvar-test
+62/85 Test #62: condvar-test ..............................   Passed    0.57 sec
+      Start 63: count-sem-test
+63/85 Test #63: count-sem-test ............................   Passed    1.23 sec
+      Start 64: count-sem-timeout-test
+64/85 Test #64: count-sem-timeout-test ....................   Passed    8.64 sec
+      Start 65: file-api-test
+65/85 Test #65: file-api-test .............................   Passed    0.02 sec
+      Start 66: file-sys-add-fixed-map-api-test
+66/85 Test #66: file-sys-add-fixed-map-api-test ...........   Passed    0.02 sec
+      Start 67: idmap-api-test
+67/85 Test #67: idmap-api-test ............................   Passed    0.05 sec
+      Start 68: mutex-test
+68/85 Test #68: mutex-test ................................   Passed    5.63 sec
+      Start 69: network-api-test
+69/85 Test #69: network-api-test ..........................***Failed   24.03 sec
+      Start 70: osal-core-test
+70/85 Test #70: osal-core-test ............................   Passed    0.70 sec
+      Start 71: queue-test
+71/85 Test #71: queue-test ................................   Passed   12.84 sec
+      Start 72: rwlock-test
+72/85 Test #72: rwlock-test ...............................   Passed    5.06 sec
+      Start 73: select-test
+73/85 Test #73: select-test ...............................   Passed    3.58 sec
+      Start 74: sem-speed-test
+74/85 Test #74: sem-speed-test ............................   Passed    5.03 sec
+      Start 75: shell-test
+75/85 Test #75: shell-test ................................   Passed    0.02 sec
+      Start 76: symbol-api-test
+76/85 Test #76: symbol-api-test ...........................   Passed    0.02 sec
+      Start 77: time-base-api-test
+77/85 Test #77: time-base-api-test ........................   Passed    0.04 sec
+      Start 78: timer-add-api-test
+78/85 Test #78: timer-add-api-test ........................   Passed   30.03 sec
+      Start 79: timer-test
+79/85 Test #79: timer-test ................................   Passed   30.01 sec
+      Start 80: osal_core_UT
+80/85 Test #80: osal_core_UT ..............................   Passed   19.79 sec
+      Start 81: osal_loader_UT
+81/85 Test #81: osal_loader_UT ............................   Passed    0.05 sec
+      Start 82: osal_filesys_UT
+82/85 Test #82: osal_filesys_UT ...........................   Passed    0.02 sec
+      Start 83: osal_file_UT
+83/85 Test #83: osal_file_UT ..............................   Passed    0.03 sec
+      Start 84: osal_network_UT
+84/85 Test #84: osal_network_UT ...........................   Passed    0.02 sec
+      Start 85: osal_timer_UT
+85/85 Test #85: osal_timer_UT .............................   Passed    5.14 sec
+
+99% tests passed, 1 tests failed out of 85
+
+Total Test time (real) = 172.85 sec
+
+The following tests FAILED:
+	 69 - network-api-test (Failed)
+Errors while running CTest
+Output from these tests are in: /home/user/work/procrace/baselines/osal-visibility/osal/build_osal_test/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+make: *** [Makefile:71: test] Error 8
+# exit=2 wall=172.885173193 s
+
+# ---- diagnosis of the single failure (agent-added; not part of the README procedure) ----
+$ grep "\[ FAIL\]" Testing/Temporary/LastTest.log
+[ FAIL] 02.002 network-api-test.c:148 - OS_SocketOpen(&socket_id, OS_SocketDomain_INET6, OS_SocketType_DATAGRAM) (-1) == OS_SUCCESS (0)
+[ FAIL] 02.003 network-api-test.c:149 - OS_close(socket_id) (-16) == OS_SUCCESS (0)
+$ ls /proc/net/if_inet6; python3 -I -c "import socket; socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)"
+ls: cannot access '/proc/net/if_inet6': No such file or directory
+OSError: [Errno 97] Address family not supported by protocol
+# => the only failing assertions are AF_INET6 socket creation (network-api-test.c:148-149); this container has no IPv6 socket support. Not related to semaphores/idmap/tasks. Not worked around.

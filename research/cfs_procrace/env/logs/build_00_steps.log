@@ -1,0 +1,15 @@
+[2026-10-08T01:10:44.012Z] clone: git clone https://github.com/nasa/cFS.git (README L91)
+[2026-10-08T01:10:49.242Z] pin bundle commit 088b2fa828db9ff7e00733f1908e0eeb59f66ce3 (C-REV)
+[2026-10-08T01:10:49.524Z] git submodule init / git submodule update (README L93-94)
+[2026-10-08T01:13:22.741Z] submodule init+update took 151.952141732 s
+[2026-10-08T01:13:30.526Z] pinned state verified (bundle commit + 25 submodule commits); Makefile and sample_defs/ present at top level (README L96); nothing copied
+[2026-10-08T01:13:30.528Z] chown -R ubuntu: /home/user/work/procrace/cfs_ref (container adaptation D-1: lets the README L102 normal user write the build tree)
+[2026-10-08T01:13:31.307Z] build_04_prep: make native_std.prep (cwd /home/user/work/procrace/cfs_ref/cFS, user ubuntu)
+[2026-10-08T01:15:37.941Z] build_04_prep: exit 0, wall 126.622949295 s, warnings 6, 'error' lines 0
+[2026-10-08T01:15:37.944Z] build_05_install: make native_std.install (cwd /home/user/work/procrace/cfs_ref/cFS, user ubuntu)
+[2026-10-08T01:28:52.616Z] build_05_install: exit 0, wall 794.658927104 s, warnings 0, 'error' lines 8
+[2026-10-08T01:29:26.890Z] NOTE: first execution of build_cfs.sh stopped at the output-recording step (script bug: looked for cpu1/cfe_es_startup.scr; the generated file is cpu1/cf/cfe_es_startup.scr). Build steps had completed (prep exit 0, install exit 0). Script fixed; recording block re-run by hand -> build_06_outputs.log. Diagnostic counts recomputed with compiler-specific patterns: prep CMake warnings 6 (CMake Deprecation Warning, apps/sbn*, cmake_minimum_required), compiler errors 0; install compiler warnings 0, errors 0 (earlier 'error lines 8' were file names such as osapi-error-stubs.c).
+[2026-10-08T02:05:16.024Z] [build_cfs.sh v3 record] recorded effective settings of the existing build -> build_07_record_existing.log
+[2026-10-08T02:07:45.598Z] [build_cfs.sh v3 runtest] build_08_runtest: make native_std.runtest (cwd /home/user/work/procrace/cfs_ref/cFS, user ubuntu)
+[2026-10-08T02:08:46.424Z] [build_cfs.sh v3 runtest] build_08_runtest: exit 2, wall 60.814287780 s, compiler/CMake warnings 0, compiler/make errors 3
+[2026-10-08T02:08:46.500Z] [build_cfs.sh v3 runtest] runtest finished with make exit 2; summary in build_08_runtest_host_state.log

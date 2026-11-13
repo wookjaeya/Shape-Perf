@@ -1,0 +1,12 @@
+# poll_timeout_wrong -- the poll times out and the main actor goes on: the other branch of an
+# obs_fatal rule does not end in its terminal operation.  The replay reports it.
+#
+# Unit-test values only.
+const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
+
+T0 CFE_ES_CreateObjects call
+T0 core_sync_call pt
+T0 CFE_ES_MainTaskSyncDelay call arg.AppStateId=3 arg.TimeOutMilliseconds=30000
+T0 CFE_ES_MainTaskSyncDelay ret result=0xc4000027
+T0 CFE_ES_CreateObjects.reserve_core pt lp.slot=1
+T0 OS_TaskCreate call

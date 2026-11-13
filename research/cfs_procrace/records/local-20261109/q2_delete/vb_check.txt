@@ -1,0 +1,65 @@
+repo HEAD 7ce3010e2bb83db6d54ac833c0c2d042adb759cc
+== vb_boots -> c5-20261029-boots
+clone HEAD 9b3756e32dc8569170d746f267f2a84129625f0b
+clone sparse-checkout: research/cfs_procrace/records/c5-20261029-boots 
+clone remote branch: claude/busy-shannon-y903qc
+clone INFO.txt = repo records/c5-20261029-boots/INFO.txt (d8140066c3353b43319d6b8d21b4f5dd93af1bf9c21c80a2ea0a716d86dc9937)
+clone MANIFEST.sha256 = repo records/c5-20261029-boots/MANIFEST.sha256 (785bfebbf12fd7c61ef65fcae1503db79dfcb3304c78da8f80f837b5d1250c01)
+clone PARTS.sha256 = repo records/c5-20261029-boots/PARTS.sha256 (977f86253cca62cc2b9c71700edc9c75c75f0f0ab4a2c2210b13dde9c533e9bc)
+clone bundle.tar.xz.00 = repo records/c5-20261029-boots/bundle.tar.xz.00 (e4b24b48b01356308a5b7dbc30f8ee9c1e1becbc64440d9ada3281937b40a25d)
+joined bundle.tar.xz = cat of repo parts (e4b24b48b01356308a5b7dbc30f8ee9c1e1becbc64440d9ada3281937b40a25d)
+repo PARTS.sha256: OK
+extract against repo MANIFEST.sha256: OK
+MANIFEST lines 40, files in extract 40
+top entry: bundle.tar.xz
+top entry: clone
+top entry: extract
+VERIFIED output file of this run under vb_boots: 0 (files other than clone/, extract/, bundle.tar.xz)
+== vb_replays -> c5-20261029-replays
+clone HEAD 9b3756e32dc8569170d746f267f2a84129625f0b
+clone sparse-checkout: research/cfs_procrace/records/c5-20261029-replays 
+clone remote branch: claude/busy-shannon-y903qc
+clone INFO.txt = repo records/c5-20261029-replays/INFO.txt (86fc0bf999dd763d81646a651178d915a6c0cb355c74ea7c5b2bea5d55ec51c6)
+clone MANIFEST.sha256 = repo records/c5-20261029-replays/MANIFEST.sha256 (ac4c5bd6bb57c68cb42efb4d675a3bf2b68c8f1f2348a64033db70d717d078cb)
+clone PARTS.sha256 = repo records/c5-20261029-replays/PARTS.sha256 (1c9bd9028d8ebddcb0926fb839fd333c58b45a4a3a481f68b61ad15f4b7cc906)
+clone bundle.tar.xz.00 = repo records/c5-20261029-replays/bundle.tar.xz.00 (32b8204d4e595614cda9bc8eb10e0684b21a9026a55b26793dccd1300a982c9e)
+joined bundle.tar.xz = cat of repo parts (32b8204d4e595614cda9bc8eb10e0684b21a9026a55b26793dccd1300a982c9e)
+repo PARTS.sha256: OK
+extract against repo MANIFEST.sha256: OK
+MANIFEST lines 68, files in extract 68
+top entry: bundle.tar.xz
+top entry: clone
+top entry: extract
+VERIFIED output file of this run under vb_replays: 0 (files other than clone/, extract/, bundle.tar.xz)
+== vb_w6replays -> w6-20261029-replays
+clone HEAD 9b3756e32dc8569170d746f267f2a84129625f0b
+clone sparse-checkout: research/cfs_procrace/records/w6-20261029-replays 
+clone remote branch: claude/busy-shannon-y903qc
+clone INFO.txt = repo records/w6-20261029-replays/INFO.txt (5ed24cadb780cee91b5dbb2d9da342ffe93e0f0c9070b4f3bda5bd436146c478)
+clone MANIFEST.sha256 = repo records/w6-20261029-replays/MANIFEST.sha256 (47ac3ed01ee62386567bebf4456ce191baf7b121d38659beb0aa115faec5b251)
+clone PARTS.sha256 = repo records/w6-20261029-replays/PARTS.sha256 (fb82f8ca8508e4d5095408ea61f03f34e0cedf2dafd463bbb00cf5ce45624365)
+clone bundle.tar.xz.00 = repo records/w6-20261029-replays/bundle.tar.xz.00 (007b2f3f6558cd58a9cf68e09ab4b7ac66c2f7a98b1ef9800564654ae5b1e05e)
+joined bundle.tar.xz = cat of repo parts (007b2f3f6558cd58a9cf68e09ab4b7ac66c2f7a98b1ef9800564654ae5b1e05e)
+repo PARTS.sha256: OK
+extract against repo MANIFEST.sha256: OK
+MANIFEST lines 1066, files in extract 1066
+top entry: bundle.tar.xz
+top entry: clone
+top entry: extract
+VERIFIED output file of this run under vb_w6replays: 0 (files other than clone/, extract/, bundle.tar.xz)
+== vb_rebuild -> rebuild-20261029-records
+clone HEAD 9b3756e32dc8569170d746f267f2a84129625f0b
+clone sparse-checkout: research/cfs_procrace/records/rebuild-20261029-records 
+clone remote branch: claude/busy-shannon-y903qc
+clone INFO.txt = repo records/rebuild-20261029-records/INFO.txt (52f522ff68e76982e1af436e2916cac3971a5724305d89045514918bab733fb5)
+clone MANIFEST.sha256 = repo records/rebuild-20261029-records/MANIFEST.sha256 (0f71d7d73a13bd1a62e6aa03c68edca38db992453ad9cc82d782af6ef80ba139)
+clone PARTS.sha256 = repo records/rebuild-20261029-records/PARTS.sha256 (21eceaeac8eca30fc942308335c0657cad5a060a4b3e957618f6d7501b588366)
+clone bundle.tar.xz.00 = repo records/rebuild-20261029-records/bundle.tar.xz.00 (78319dba9605f0b36b4fe94ba3148f36af823fad7957cf098e35baf93c0113ed)
+joined bundle.tar.xz = cat of repo parts (78319dba9605f0b36b4fe94ba3148f36af823fad7957cf098e35baf93c0113ed)
+repo PARTS.sha256: OK
+extract against repo MANIFEST.sha256: OK
+MANIFEST lines 297, files in extract 297
+top entry: bundle.tar.xz
+top entry: clone
+top entry: extract
+VERIFIED output file of this run under vb_rebuild: 0 (files other than clone/, extract/, bundle.tar.xz)

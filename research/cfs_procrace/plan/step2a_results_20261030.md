@@ -1,0 +1,1284 @@
+# 단계 2a 완료 시험 T1–T7: 규칙 대상(R-T1·R-T2)과 사례 무관 질의 `kz-static relations` (2026-10-30)
+
+- 성격: **구현과 측정 보고**다. 단계 2a의 다섯째 묶음(S5)과 그 **수정 단계**(검증 지적 13건, §10), **둘째 수정 단계**(검증 지적 23건, §11), **셋째 수정 단계**(검증 지적 21건, §12)와 그 **둘째 차례**(넷째 검증 지적 12건, §13)다. `plan/extraction_design_20261030.md`(이하 ED) §6 단계 2a 항목 2(규칙 대상 R-T1·R-T2를 공유 base로 거르고 §2.3을 다시 잼)와 항목 3(사례 무관 질의 `kz-static relations`)을 kz-static에 넣고, ED §6의 완료 시험 T1–T7을 사례 입력 없이 돌렸다. 세 수정 단계(셋째는 두 차례)는 지적을 고치고 같은 시험을 다시 돌렸다. 이 문서의 수와 판정은 **셋째 수정 단계 둘째 차례**의 출력이다(§10·§11의 rel 줄 번호는 그 단계의 출력 `T_F1/`·`T_F2/`의 것이고, §12의 수는 셋째 수정 첫째 차례의 출력 `T_F3/`의 것이다). cFS를 기동하지 않았고 campaign을 돌리지 않았다. 정적 분석(kz-static)과 텍스트 처리만 했다.
+- 근거: ED §3.0(입력 계층, P0 조건), §3.1–§3.4(경로 A/B/C, 반사실 뒤집힘 신호, 관계 행의 칸), §5(R1–R9), §6(항목 2·3, T1–T7, 반증 조건); `plan/input_audit_20261030.md`; `plan/REDESIGN_REVIEW_ANALYSIS_20261030.md`(이하 RA); S1–S4 보고(`plan/step2a_s1_20261030.md` … `step2a_s4_20261030.md`); `CONDITIONS_POLICY.md`.
+- 코드: `kairos/lib/llvm/target_rules.cpp`·`.hpp`(규칙 대상), `relations.cpp`·`.hpp`(질의), `p0.cpp`·`p0.hpp`(P0 표·비교 표), `lockset.cpp`·`.hpp`(F5와 LOCK_PATHS), `model.hpp`·`serialize.cpp`·`facts_text.cpp`, `wrappers.cpp`·`wrappers.hpp`·`spec.hpp`(규칙 대상의 연결과 기록), `include/kz/schema/kz_facts.h`·`kz_schema.h`, `tools/kz-static/cmd_extract.cpp`·`cmd_show.cpp`·`commands.hpp`·`main.cpp`; 셋째 수정 둘째 차례는 `ast_fn.cpp`(함수 포인터 주소의 열린 노드, DERIVES 상한)·`ast_tu.cpp`(내부 연결 객체)·`model.cpp`·`unroll.cpp`(텍스트 상한)도 고쳤다. 문서는 `kairos/docs/static_facts.md` §5e·§5f·§5g·§5h·§5i, `kairos/docs/schema.md` §19.
+- 측정 드라이버: `env/redesign/step2a_tests.sh`(identity, npsame, run, s5same, fixsame, fix2same, fix3same, twice, count, sha)와 `env/redesign/step2a_tests_count.py`. 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests/`(이하 `T/`), 해시는 `T/sha256.txt`(125 파일). S5 때의 출력은 `/home/user/work/redesign/step2a/tests_s5/`(이하 `T_S5/`), 수정 단계의 출력은 `/home/user/work/redesign/step2a/tests_fix1/`(이하 `T_F1/`), 둘째 수정 단계의 출력은 `/home/user/work/redesign/step2a/tests_fix2/`(이하 `T_F2/`), 셋째 수정 첫째 차례의 출력은 `/home/user/work/redesign/step2a/tests_fix3/`(이하 `T_F3/`)에 그대로 두었다. 시험의 근거 줄은 `T/<build>/NP/relations.txt:L`(아래 "rel L")과 `T/<build>/NP/facts.txt:L`로 적는다. 증거 묶음은 `T/count/summary.txt`다.
+- 도구: 병합 트리 빌드 `merge-check/kz-llvm/tools/kz-static/kz-static`. 측정은 commit `76bcf6d`의 트리에서 `kairos` 아래 미커밋 변경 없이 돌렸다(`T/identity/identity.txt` 머리). 수정 단계는 `b76a9a9`, 둘째 수정은 `b00c370`, 셋째 수정 첫째 차례는 `56cf392`였다.
+- 표기: [M] 이번에 도구로 확인, [F] 소스·문서에서 읽음, [I] 추론, [U] 미확인, [D] 이 단계의 결정.
+- 사례 이름의 쓰임: 엔진 코드와 내장 표에는 사례 이름이 없다(`lint_case-ids` 통과 [M]). 사례·프레임워크 이름은 이 문서와 계수 스크립트의 **조회**(어느 행이 시험이 말하는 행인지 고르기)에만 쓴다. 프로필 없는 실행(NP)에는 프로필, 명령줄 어휘, `--target` 목록, G0 이름, 사례 rspec·`.kzm`·manifest를 주지 않았다. `--targets-rule`은 목록이 아니라 도구 규칙이다. `identity` 단계만 단계 2의 V2(사례 프로필)를 프로필 추출에 그대로 주어 그 모드가 바뀌지 않았음을 본다.
+
+## 0. 요약
+
+1. **구현** [M]
+   - `extract --no-profile --targets-rule R-T1,R-T2`: 둘째 읽기의 추출 대상을 첫째 읽기의 확장 사실에서 규칙으로 고른다. 두 규칙 모두 공유 base(전역 객체, 전역 배열 원소, 전역 포인터·전역에서 시작한 포인터 필드의 대상, 전역 주소만 돌려주는 함수의 호출 결과)의 레코드 필드만 고른다(§1.1). 조건 트리 걷기에 깊이 상한이 없다(수정 단계).
+   - `kz-static relations <facts> [-o OUT]`: 경로 A·B·C의 관계와 반사실 뒤집힘 신호를 행으로 낸다. 행마다 의존 근거, 실행 순서, 실현 가능성(등급과 이유), 위반 근거, 뒤집힘 신호, 입력 계층이 따로 된 칸이다. 필드·callee·사례 이름을 받지 않는다(§1.2). 둘째 수정의 **규칙 개정 3**은 경로 C의 "불가"를 조건 여섯으로 좁혔고 자식이 닿지 않는 호출 문맥을 `not graded`로 냈다(§11). 셋째 수정의 **규칙 개정 4**는 검증자가 반례 fixture로 보인 "불가"의 건전성 구멍 여섯을 막았다(§12): (1) callee 안의 조건 대기가 생성자의 잠금을 푸는 것, (2) 한 mutex를 두 정적 정체성(객체와 첫 멤버, union의 두 멤버)으로 부르는 것, (3) 읽는 함수를 본문 없는 함수가 되부르거나 풀리지 않은 간접 호출이 부르는 것, (4) 주소가 잡힌 생성자의 호출자를 다 알지 못하는 것, (5) `setjmp`/`longjmp`, (6) 스칼라 배열 필드의 원소 저장. 그리고 spawn의 스레드에 자식이 시작하는 스레드(후손)를 넣고 자식이 직접 부르는 다른 root의 코드를 자식의 것으로 보며, 스레드 집합이 완전하지 않으면 닿지 않는 문맥을 `undecidable`로 낸다. "불가" 문장은 쓰기 키, 유도 spawn 연산의 실패 길, 경로 C의 전제를 적는다. 뒤집힘은 실현 가능성이 센 쓰기로 평가하고, 이미지 키는 이미지 entry 규칙(FIELD_STATUS)을 따르고, 잠금을 이름 붙인 C 행 모두가 `P0-unverified`에 잠금 기본 연산을 단다. 셋째 수정 둘째 차례의 **규칙 개정 5**는 넷째 검증이 반례 fixture와 실행 사본으로 보인 "불가"의 구멍 넷을 막았다(§13): (1) spawn 뒤 생성자가 다시 들어와(상호 재귀) 같은 획득 지점에서 새로 잡는 것, (2) 간접 호출의 해결된 대상이 다가 아닌 것(memcpy·cast lvalue·dlsym 관용구로 바꾼 함수 포인터), (3) 본문 없는 함수가 되부르는 함수의 해제(잠금 집합), (4) 헤더의 `static` mutex가 단위마다 다른 객체인 것. 그리고 스레드 코드의 미해결 간접 호출이 주소가 잡힌 함수를 거쳐 닿을 수 있는 문맥을 `undecidable`로, union 멤버로 읽는 정적 이미지 entry의 스레드 집합을 완전하지 않은 것으로 보며, probe-create는 한 행위자일 때만 짝에서 뺀다. 남은 것은 경로 C의 전제 여섯(§1.2)으로 적는다.
+   - **F5 잠금 집합 개정**(셋째 수정): 함수가 잡지 않은 잠금으로 기다리는 호출은 `entry-release`를 만든다(LOCK_PATHS). 해제가 지우는 잡힌 잠금을 접근 경로의 겹침(같은 전역 객체의 접두·union 형제, 레코드 형으로 맞춘 포인터 경로)까지 넓혔다. FIELD_STATUS는 const가 아닌 스칼라 배열 필드를 complete로 부르지 않는다(새 flag `array-element-stores-not-collected`). `kairos/docs/static_facts.md` §5h. **개정 2**(셋째 수정 둘째 차례): 본문 없고 P0가 아닌 함수의 호출에서 그 호출이 넘기는 함수의 해제·대기·unknown 효과를 적용하고, 여러 단위에 정의되었거나 단위의 주 파일 밖에 정의된 내부 연결 객체의 잠금 정체성은 정적 인스턴스가 아니다(§5i). 추출은 해결된 간접 호출 가운데 흐름 그래프가 따라가지 않는 저장을 거칠 수 있는 것에 CALL_TARGETS `incomplete-source` 행을 붙이고, 잠금 집합과 relations가 그 호출을 대상이 풀리지 않은 것으로 읽는다(C1 44, R2 22, C5 0 호출 [M]).
+   - **facts schema 개정**: S5는 10, 수정 단계 11(LOCK_PATHS), 둘째·셋째 수정은 그대로 11이다. 셋째 수정은 `KZ_FSTATUS_FLAG`에 항목 하나를 더했고(배치 변화 없음, layout golden의 그 줄과 지문), BASIS `param.walk_bounds`에 식 트리 깊이 24를, `count.walk_bounds_hit`에 그 잘린 수를 더했다(§12 #15). 셋째 수정 둘째 차례는 열거형 항목 둘(CALL_TARGETS 이유 `incomplete-source`, DERIVES 이유 `walk-bound`)을 더했고(배치 변화 없음), DERIVES 복사 사슬 8과 LOOP_ITERS 식 텍스트 깊이 64를 기록하며 `count.indirect_calls_incomplete`를 더했다(§13 #12).
+   - **P0 표 개정 3**(72항목)과 **P0 비교 표 개정 2**(13항목)는 둘째 수정 그대로다(§1.3). 두 번 돌아오는 함수(`setjmp` 무리)는 relations의 이름 목록이고 P0 표 밖이다. 판 밖 묶음 목록을 채웠다(§1.3, §12 #18).
+2. **기존 동작은 바뀌지 않았다** [M] (§2).
+   - 시험 237/237 통과(`test_probe_anchor_reached`는 원래대로 건너뜀). `test_static_cli` 583개 확인(셋째 수정 첫째 차례 541; fixture `relsound.c`의 새 열 경우, 헤더의 `static` mutex를 두 단위가 포함하는 경우, 두 행위자의 probe-create, `incomplete-source` 행, 새 상한 둘), `test_static_wrappers` 512개 확인, lint 6/6. 11-10 뒤(8b·8c와 두 수정 단계, MC 제자리 재빌드): 시험 239개, 통과 238, 건너뜀 1(사유는 tracefs 없음, `records/step2a-20261110-8cfix/skip_reason.log`), 새 경로 188 + 옛 경로 51(`legacy-case`). `test_static_cli` 752개 확인, `lint_selftest` 102 경우, lint 6/6(§15.4, §16.4, §16.10.4). 판정과 수는 그대로다(§16.10.7).
+   - golden: 프로필 추출의 golden(`writers` … `lockset`, `flowfacts`, `argflow`, `core_cpu1`)은 셋째 수정에서 FIELD_STATUS를 쓰는 `lockset`의 한 줄 말고 그대로다. 셋째 수정에서 바뀐 것: `layout`·`records`(FIELD_STATUS flag 항목과 지문), `lockset`·`lockset_np`(fixture의 스칼라 배열 `fx_shared.tasks`가 DISABLED), relations golden 넷(`relations`, `relations_np`, `relpaths_np`, `relsound_np`; 규칙 개정 4, `relsound_np`는 새 경우의 행). 둘째 차례에서 바뀐 것: `layout`·`records`(열거형 항목 둘과 지문), `wrappers`(fixture의 정수 변수를 거친 트램펄린 호출에 CALL_TARGETS `incomplete-source` 행 하나), relations golden 넷(개정 5의 판·머리·전제 문장, `relsound_np`는 새 경우의 행).
+   - 프로필 추출: V0·V2 × C1 pre tx·R2 core·C5 6.4.1 여섯 경우 모두 단계 2 출력과 섹션 CRC가 STRINGS 말고 같다(둘째 차례에서 다시 확인). 다른 레코드는 이전과 같은 셋(build identity, parent basis 해시, `units_from`)이다.
+   - 프로필 없는 추출(`fix2same`, 둘째 수정 출력 대비): BASIS(`extract.build_identity`, `extract.units_from`, `param.walk_bounds`, `count.walk_bounds_hit`, C1·R2의 `count.lock_paths`), LOCK_PATHS(C1 두 판·R2에 `entry-release` 행 3개씩: OSAL의 `OS_CondVarWait_Impl`·`OS_CondVarTimedWait_Impl`·`OS_WaitForStateChange_Impl`의 조건 대기; C5 0), FIELD_STATUS(스칼라 배열 필드 183 / 183 / 147 / 175 / 175행) 말고 섹션의 레코드가 같다. LOCKSET, LOCK_IDS, AWAIT_L1, WRITERS, P0_TABLE은 다섯 빌드 모두 같다: 겹침 규칙과 배열 표시는 기준 빌드의 잠금 집합·정적 인스턴스·await를 바꾸지 않았다. 걷기 상한(셋 모두)에 걸린 수는 0이다.
+   - 프로필 없는 추출(`fix3same`, 셋째 수정 첫째 차례 대비): C5는 BASIS와 LOCK_PATHS(`entry-release` +29행씩: PSP `main`의 `signal` 호출이 넘기는 처리기의 효과)만, C1·R2는 거기에 CALL_TARGETS(`incomplete-source` 행 44 / 22), LOCKSET·LOCK_OPS(그 호출의 unknown 효과), C1의 AWAIT_L1 두 행(`unresolved-call` 표시) 말고 섹션의 레코드가 같다. LOCK_IDS, FIELD_STATUS, WRITERS, P0_TABLE은 다섯 빌드 모두 같다(§2a).
+   - 두 번 돌린 facts와 relations가 다섯 빌드 모두 바이트 단위로 같다(T7).
+3. **완료 시험** [M] (§4). 사례 입력 없이(두 문장 내장 프로필, P0, L0, 빌드만; G0 없음) 돌렸다. 판정은 셋째 수정 둘째 차례의 출력에 따른다. 셋째 수정은 두 차례 모두 판정을 바꾸지 않았다(둘째 차례에서 C5 행과 T1·T2 행은 등급·줄 번호가 그대로다). PI 대기 결정 A2(사전 등록)를 기준으로 읽은 표시는 §5에 따로 적는다.
+
+   | 시험 | 판정 | 한 줄 |
+   |---|---|---|
+   | T1 R2 | **PASS** (개정 뒤 통과, "관계를 낸다"의 통과: §5) | B 행 하나에 39곳, writer 3, callee 검사(`EVS_GetAppDataByID == NULL → CFE_EVS_APP_ILLEGAL_APP_ID`), 39/39 버림, 행위자 다름(F7 task-main root), 실현 가능성 "fixed unconfirmed (creation order + await; the await rests on the L1 premise only)". 순서 조건은 대체 표시 "고정 미확인"으로 문자 그대로 채워지고 완전성 규칙을 어느 쪽으로 정해도 채워진다(형 단위면 "creation order only"). 뒤집힘 static-undetermined. A·B 행은 둘째 수정과 같다 |
+   | T2 C1 | **PARTIAL** | 같은 구획, 게시 쓰기, BP `:126 → :132` probe-create(극성 확인과 handling 칸), BP 키 `"BP0_tsem"`(이미지 키가 이제 FIELD_STATUS 규칙도 거치며 그대로 풀림: `BP_Throttle_t.Name`은 const 원소 배열), SCH_LAB 키 상수 불일치, 수정 후 재시도(25, `-17`, F8 지연; 탈출식과 조회 결과의 연결은 facts에 없음)가 나온다. 수정 전 실패 → 종료 도달은 미달: (a) 흐름 민감한 도달 정의가 필요하고, (b) ED §3.0의 F8 예가 원문과 어긋난다 |
+   | T3 C5 | **PARTIAL** | 6.4.1: 잠금 창으로 "possible". 6.4.2: L800·L445·L551 "proven-impossible"(범위: `CFE_ES_AppCreate`의 한 호출; 개정 4·5의 조건을 모두 통과), L1858·L1892 "undecidable(failure path)". 미달: L667·L1020·L1284는 `not graded`(자식 다섯과 그 후손이 닿지 않음; 이 자식들은 스레드를 만들지 않고, 그 코드에 대상이 풀리지 않은 간접 호출이 없음 [M]). 개정 4의 "불가" 문장은 그 범위를 더 적는다: 쓰기 키 `TaskTable[TaskId]`가 이 호출의 자식 레코드인지는 정하지 않음, `OS_TaskCreate`가 스레드를 시작한 뒤 실패를 알려 쓰기를 건너뛰는 길(osapi.c L663·L675 → L672·L684)은 덮지 않음(그 길에서는 자식이 등록 전 값을 읽는다: 반사실이 실현되는 길), 경로 C의 전제 여섯(둘째 차례에서 셋을 더함) |
+   | T4 C5 수명 | **PASS(질의 수준)** | 조건은 모두 나온다. "writer에 `pthread_create`"는 relations가 질의 때 ARGFLOW와 P0 표를 맞춘 것이고 ED §3.0 G10의 추출 writer는 없다(§8 항목 10) |
+   | T5 입력 계층 | **PARTIAL** | 다섯 빌드의 모든 행(1,553)이 B/P0/(L0)/R만이다. 사례 계층 0, G0 0. 원문 대조 없는 P0 항목에 기대는 행 371 / 371 / 232 / 149 / 147(잠금을 이름 붙인 행이 모두 잠금 기본 연산을 단다, §12 #14; 둘째 차례의 새 C 행 20 / 20 / 33을 더함). PI A4 기본값으로는 통과가 아니다. basis 편차 159·156행, 선언된 가정·경로 C 전제·PI 대기 규칙 0 / 0 / 55 / 17 / 16행 |
+   | T6 정상 대조 | **PASS** | C5 OSAL `*GetIdByName`·`*Create` 6쌍과 C1·R2의 `OS_ObjectIdFindNextMatch` 콜백 3종이 A로 인식된다. 위반 근거 칸은 기록을 주지 않아 자명하게 unconfirmed다 |
+   | T7 결정성 | **PASS** | facts·relations 두 번 바이트 동일(다섯 빌드) |
+
+4. **반증 조건의 결과** [M][I] (§5). T1–T3 어느 것에도 **사례 입력을 더하지 않았고**, 세 사례의 관계가 행으로 나왔다. 그래서 ED §6의 반증 조건("사례 입력을 더하지 않으면 관계가 나오지 않음")은 **충족되지 않았다**(ED §6의 뜻에서 반증되지 않았다). 그러나 PI A2 사전 등록 ④·⑤로 읽으면 이것은 탐지 근거가 아니다: T1·T2의 통과는 "관계를 낸다"의 통과이고(미확인·미해결 표시), T1은 시험 재료를 보고 바꾼 규칙(F2 도달 정의, A5 표) 뒤의 통과이며, T1–T3의 행은 네 차례 수정(시험 행을 계기로 한 규칙 개정 2·3, 반례 fixture를 계기로 한 개정 4·5) 뒤의 것이다(§5). 그래서 "사례별 Φ 없이 근거 있는 관계를 낸다"를 **성립했다고 적지 않는다**.
+   - T2의 종료 도달이 미달이다(도달 정의 사실 없음, ED의 F8 예가 원문과 어긋남).
+   - T3의 6.4.2 읽기 지점 셋은 자식(과 그 후손)이 실행하지 않는 문맥이어서 등급이 없다. ED가 그 셋을 자식의 읽기 지점으로 적은 전제가 원문과 어긋난다. 6.4.2의 "불가"는 등록이 실행되는 길에 대한 것이고, `OS_TaskCreate`의 실패 길에서는 등록 전 값을 읽는 일이 실현된다(§4 T3).
+   - "불가"는 선언된 가정 셋, 필드 단위 규칙(PI 대기)에 더해 경로 C의 전제 여섯(§1.2, `static_facts.md` §5h·§5i)에 기댄다. 둘째 수정 문서는 가정 셋과 필드 단위 규칙에만 기댄다고 적었으나 검증자의 반례가 다른 전제 여섯을 보였다(§12 #1–#6, #11). 개정 4는 그 가운데 다섯을 도구가 검사하게 했고 남은 셋을 전제로 적었다. 셋째 수정 문서도 그 셋과 가정·규칙에만 기댄다고 적었으나, 넷째 검증의 반례가 또 넷의 의존(생성자가 다시 들어오지 않음, 간접 호출 대상이 다 풀림, 본문 없는 함수가 되부르는 함수의 잠금 효과 없음, 내부 연결 객체 키가 단위 사이에 하나)을 보였고 그 넷은 실행에서 깨졌다(§13 #1–#4, #6). 개정 5는 넷을 도구가 검사하게 했고, 남은 것을 전제 (라)–(바)로 더 적는다(mutex는 잡은 스레드만 풀고 P0 기본 연산으로만 바뀜, 표시 없는 간접 호출의 대상은 다 풀림, 풀리지 않은 간접 호출은 주소가 잡힌 함수만 부름). C5의 "불가" 6 + 14행은 그 검사를 모두 통과하고 그 전제에 대어 보았다(§4 T3, §8 항목 19).
+   - 남은 수작업 입력(L0 시작 스크립트 블록, C5 `front_end_diagnostic` 2줄)과 미대조 P0 원문 71+13개가 그대로이고, 행의 대부분이 거기에 기댄다(`P0-unverified`).
+   - 사례 관계는 후보 가운데 소수다: 행 175–431개 가운데 1–8개(0.3–4.6%), 등급이 있는 것만 세면 1–5개(0.3–2.9%)(§6).
+   - "고정된 잘못된 순서"(R2)와 "반대 순서 가능"(C1)은 정적으로 증명되지 않는다. 위반 근거는 실행 기록 없이는 늘 unconfirmed다.
+5. **ED §2.3 재측정** [M] (§3). 공유 base 필터를 건 R-T1 ∪ R-T2의 대상 수는 C1 340, R2 240, C5 259/261이다(V3 R-T1: 841 / 504 / 322). 세 수정 단계에서 바뀌지 않았다. 사례 필드 가운데 R2의 5개(`EVS_AppData_t.AppID`, `CFE_ES_AppRecord_t.AppId`·`AppState`·`Type`, `CFE_PSP_IdleTaskState_t.ShutdownReq`)와 C5 `CFE_ES_TaskRecord_t.TaskId`는 매개변수·지역 포인터로만 닿아 이 필터에서 빠진다.
+6. **정오표: C5 부팅 결과의 owner 오결합** (2026-11-09; RV3A(`plan/RV3_REVIEW_ANALYSIS_20261105.md`) §6.3 O14, RV4 분석(`plan/RV4_REVIEW_ANALYSIS_20261109.md`) §7.2 3) [F]. 이 문서의 수와 판정은 바뀌지 않는다. 대상은 C5 결과 문서 `plan/results_c5_boot_20261029.md`(이하 C5B)다. 무효인 것: C5B §0 L29와 §3.2 L182의 "SAMPLE_APP의 스레드는 owner 5(SAMPLE_LIB 요청)로 `confirmed`", 그리고 그 위의 READY 판정이다. PD(`plan/PI_DECISIONS_PENDING_20261030.md`) E6 표의 "C5 결과의 owner 오결합" 행(개정 5의 PD:936)이 정했다: "SAMPLE_APP 스레드 owner와 그 위의 READY 판정이 무효라는 정오표"(RA:30). 그래서 C5B §0 L25–26의 "6.4.1 발생 68, 6.4.2 발생 67, 전부 READY"를 그대로 인용하지 않는다. 그 수에는 SAMPLE_APP 스레드의 `GetAppID` 발생이 판마다 6개 들어 있다(C5B L215). 원인(C5B §4.3, RV3A §6.4 L6): SAMPLE_LIB의 스레드가 끝난 뒤 다음 `pthread_create`가 같은 `pthread_t`를 돌려줬다(641 `0xf7b42b40`, 642 `0xf7b83b40`; C5B L238). E-ID1은 id를 배정한 호출 1개와 알린 actor 1개만 검사하고, spawn의 출력 값과 자식의 `pthread_self`를 비교하지 않는다(RV3A §6.4 L6). 그래서 같은 값을 받은 두 spawn을 가르지 못했다. C5B L300도 같은 것을 적는다. 구분: 무효인 owner `confirmed`는 옛 계측 경로(E-ID1)의 결과다. 이 문서의 2a 결과는 사례 입력 없는 자동 추출이고, C5 기록을 읽지 않았다(§1.2: run-order 칸은 늘 `no record given`). 그래서 이 정오표는 2a의 수를 바꾸지 않는다. 무효인 결과를 2a의 성과로도 근거로도 세지 않는다. 인용: 인용 가능 사실 목록(RV3A §6.5 E13)에서 이 행들을 뺀다. 두 기록과 relations A1(`T/c5_641/NP/relations.txt:1303`)은 단계 1의 회귀 자료로 쓴다(RV3A §6.4 L6, 기대 "owner 미정"). O2(잘못된 AppId 반환, C5B §4.3)는 기록의 관측이고, 따로 조사할지는 PD C8이다. C5B 문서와 묶음 `records/c5-20261029-replays`는 이 정오표로 바꾸지 않는다. C5B 안의 정오표 절(RV3A §6.3 O14가 둔 자리)은 따로 한다.
+7. **C5 facts 재생성 절차** (2026-11-09; RV3A §6.1 P4) [F]. 2a의 C5 facts(`T/c5_641`, `T/c5_642`)를 다시 내는 길이다. 이 절차를 끝까지 돌려 본 적은 없다 [U]. 입력은 로컬 묶음 `c5-20261109-regen-inputs`다(78 파일, 기록 `records/c5-20261109-regen-inputs/`, 목록 `records/local-20261109/c5-20261109-regen-inputs.list`; push는 PD D4 뒤). ① tarball 셋을 `c5/dl/fetch_log.txt`의 주소에서 받아 `c5/dl/sha256.txt`로 대조한다(cFE 6.4.1 `ec26e33b…`, 6.4.2 `c64ed2aa…`, OSAL 4.1.1 `8f0f2b23…`). tarball 자체는 묶지 않았다. ② `kairos/instrument/gcc/scripts/derive_c5.sh`의 prepare와 keep 빌드로 pristine·keep 트리를 만든다. 트리 해시는 묶음의 `prepare.record`와 `build_keep.record`가 적는다(641 `12c731bc…`). keep 트리(82·80 MB)는 묶지 않았다(RV3A Q2, PD D4). 그래서 같은 트리가 나왔는지는 그 해시로만 본다. ③ compile DB는 묶음의 `c5tools/build/64x/est/compile_commands.json`을 쓴다. 경로가 keep 트리를 가리킨다. `est/est.record`의 해시로 대조한다(641 `414d37da…`). ④ PV의 kz-static `db172b74`(`/home/user/work/preserve/tools-20261109/`)를 풀어 `KZB`로 주고 `env/redesign/step2a_tests.sh run`을 새 OUT에 돌린다(입력은 `:63-65`·`:70-79`). facts를 `T/<build>/NP/sha256.txt`와 대조한다. 레시피는 `EB/inputs/c5_641.kzb`와 `kairos/profiles/c5-cfe-6.4.x/basis/core-linux.kzb`다.
+## 1. 구현 [F][M]
+
+### 1.1 규칙 대상 (`--targets-rule`, `lib/llvm/target_rules.cpp`, "target rules revision 1")
+
+| 항목 | 내용 |
+|---|---|
+| 언제 | `extract --no-profile`과만 쓴다(프로필 모드에서 주면 exit 2). 값은 `R-T1`, `R-T2`, 또는 둘. 없으면 프로필 없는 추출은 앞과 같이 대상이 없다 |
+| 무엇을 읽나 | 첫째 읽기의 확장 사실(ARGFLOW, READS, RETURNS). 이것들은 대상에 무관하다(S2–S4) |
+| 공유 base [D] | ARGFLOW base가 전역, 전역 배열 원소, 전역 포인터의 대상, `object`(전역)가 있는 포인터 필드의 대상, 또는 **모든 반환값이 전역 객체(의 일부)의 주소이거나 null인 함수**의 호출 결과. 마지막 것은 RETURNS로 정한다: 주소 식의 가장 안쪽 위치가 전역이거나, 쓴 그대로의 주소가 `&`와 읽기가 이름 붙인 전역 객체 이름으로 시작한다. 그런 함수의 호출 결과를 돌려주는 함수도 고정점까지 넣는다(유한) |
+| R-T1 | 호출 인자의 원천이 필드 읽기 또는 필드 주소이고 base가 공유인 레코드 필드 |
+| R-T2 | 공유 base로(READS 뿌리가 전역, 또는 위 함수의 호출 결과) 읽어 반환하거나 포인터 매개변수를 통해 저장하는 필드, 또는 분기에서 읽고 그 함수가 상수를 돌려주는 조건(RETURNS)에도 나오는 필드. 조건 트리는 깊이 상한 없이 걷는다: 풀이 같은 트리를 한 노드로 두고 노드를 자식 뒤에 만들므로 방문 집합으로 끝난다(수정 단계; S5에는 깊이 200 상한이 남아 있었다, §10 지적 1) |
+| 기록 | BASIS `target.T.f = rule R-T1` 등(정책 `unset`, 출처 행 없음: 사람이 넣은 입력이 아니다), `extract.targets_rule`, `count.targets_rule`·`_t1`·`_t2`·`_both`·`_t1_unshared_only`·`_t2_unshared_only`. extract 요약에 `rule targets` 줄 |
+| 영향 | 둘째 읽기에 대상이 생기므로 WRITERS, FACT_ATYPE, FACT_LOCS, FACT_INIT, OUTCALLS와 옛 L1 (i)(FACT_LOOPS)가 대상에 따라 나온다. 대상 무관 섹션(FIELD_STATUS, AWAIT_L1, LOCK_*)은 S4 규칙 그대로다 |
+
+### 1.2 `kz-static relations` (`lib/llvm/relations.cpp`, "relations rules revision 5")
+
+규칙 전문은 `kairos/docs/static_facts.md` §5e(개정 1), §5f(개정 2에서 바뀐 것), §5g(둘째 수정의 개정 3에서 바뀐 것), §5h(셋째 수정의 개정 4에서 바뀐 것), §5i(셋째 수정 둘째 차례의 개정 5에서 바뀐 것)다. 요점만 적는다. 개정 3에서 바뀐 곳은 "(개정 3)"으로 표시한다. 개정 5와 4는 먼저 따로 적는다.
+
+- **개정 5 (셋째 수정 둘째 차례, §13)** [D]
+  - **생성자의 재진입**: spawn 뒤 호출이 돌 수 있는 함수에 생성자가 있으면(상호 재귀) 그 중첩 호출의 획득은 spawn 의 획득 지점에서 새로 잡는 것이므로 `possible`. 생성자 아래 프레임이 제 획득으로 잡은 잠금은 그 지점이 spawn 의 획득 지점과 같아도 spawn 의 획득으로 받지 않는다(§13 #1).
+  - **불완전한 간접 호출 대상**: 추출이 붙인 CALL_TARGETS `incomplete-source` 행(흐름 그래프가 따라가지 않는 저장: 함수 포인터가 아닌 형의 노드, 본문 없는 함수의 결과·매개변수, 변환해 넘긴 주소, 그 밖에 잡힌 주소·배열 붕괴·복사된 함수 포인터 포인터, 필드 단위로 complete 가 아니거나 대입 아닌 writer 가 있는 필드)이 있는 호출을 대상이 풀리지 않은 호출로 읽는다(spawn 뒤 `unknown`, 생성자의 호출자 검사, 스레드 코드의 미해결 호출)(§13 #2).
+  - **잠금 집합 개정 2**: 본문 없고 P0 가 아닌 함수의 호출에서 넘긴 함수의 해제·대기·unknown 을 적용(§13 #3); 단위마다 다른 내부 연결 객체의 잠금 정체성은 `not-static`(§13 #4).
+  - **스레드 코드의 미해결 간접 호출**: spawn 의 스레드 코드가 대상이 (다) 풀리지 않은 간접 호출을 하면, 닿지 않는 문맥이라도 그 함수가 주소가 잡힌 함수에서 돌 수 있으면 `undecidable`이고 그런 읽기 함수는 닿지 않아도 받는다. 나머지 `not graded` 문장은 그 근거("그런 호출 없음" 또는 "주소가 잡힌 함수에서 돌지 않음")를 적는다(§13 #7).
+  - **정적 이미지 entry 의 전제**: 이미지가 읽는 멤버를 덮는 상수 아닌 잎이나 같은 레코드의 다른 멤버 함수 잎을 가지면 그 spawn 의 스레드 집합을 완전하지 않은 것으로 보고 머리 줄에 적는다(§13 #9).
+  - **경로 A probe-create**: 한 행위자가 조회와 생성을 다 돌릴 때만 짝에서 뺀다(§13 #8).
+  - **경로 C 의 전제**: (가)–(다)에 (라) mutex 는 잡은 스레드만 풀고 그 객체는 P0 기본 연산으로만 바뀜, (마) `incomplete-source` 표시가 없는 간접 호출의 대상은 해결된 후보 전부(인라인 어셈블리·다른 객체에서의 포인터 연산 저장은 보지 않음), (바) 풀리지 않은 간접 호출은 주소가 잡힌 함수만 부름(실행 중 기호 조회로 얻는 함수는 시작 스크립트 entry 로 푼 것 말고 세지 않음)을 더하고, (나)를 "제 잠금 효과가 없고 받은 함수만 되부르며 그 함수의 효과는 그 호출에서 읽음"으로 고쳤다. "불가" 문장과 layers `rests-on(premises of path C …)`에 적는다(§13 #5, #6).
+
+- **개정 4 (셋째 수정, §12)** [D]
+  - **spawn의 스레드**: 해결된 entry의 행위자(자식)와 그 코드가 제 spawn 호출로 시작하는 스레드(후손, 추이). 그 코드는 그 root들(과 트램펄린 entry)에서 호출 그래프로 닿는 함수이고 다른 root에서 멈추지 않는다(자식이 직접 부르는 root는 자식에서 돈다). 유도 spawn 연산의 안쪽 spawn 호출(SPAWN_WRAP `entry-argument`·`called-by-entry`)은 그 연산의 호출에서 읽는다. 행의 spawn 줄에 후손을 적는다. 그 스레드 집합이 완전하지 않으면(트램펄린이 entry를 풀지 못한 유도 spawn 호출의 스레드도 대신하거나, 그 코드가 entry를 풀지 못한 spawn 호출을 함) 닿지 않는 문맥은 `not graded`가 아니라 `undecidable`이다(§12 #7, #12).
+  - **읽기 문맥 더함**: 읽는 함수를 본문 없는 P0 밖 함수에 넘기는 호출마다 문맥(그 호출 지점의 잠금으로 등급), 읽는 함수의 주소가 잡혀 있고 그 스레드들의 코드에 풀리지 않은 간접 호출이 있으면 문맥 하나(`undecidable`)(§12 #3).
+  - **생성자의 호출자**: 생성자를 본문 없는 함수에 넘기는 호출도 호출자로 센다. 생성자의 주소가 잡혀 있고 풀리지 않은 간접 호출이 facts에 있으면 `undecidable`(§12 #4).
+  - **두 번 돌아오는 함수**(`setjmp`, `_setjmp`, `__setjmp`, `sigsetjmp`, `__sigsetjmp`, `savectx`, `getcontext`, `vfork`): 생성자, spawn 뒤 호출이 돌 수 있는 함수, 읽는 함수, 문맥 호출의 함수 가운데 하나가 부르면 "불가" 대신 `undecidable`(§12 #5). C1·R2에는 `__sigsetjmp` 호출이 4개 있다(`pthread_cleanup_push` 매크로), C5에는 없다 [M].
+  - **"불가"의 조건과 문장**: 필드가 스칼라 배열이면 FIELD_STATUS가 DISABLED여서 `undecidable`(§12 #6). 문장에 이 호출의 쓰기 키(자식의 레코드인지는 정하지 않음, §12 #8), 유도 spawn 연산이 스레드를 시작한 뒤 실패를 알리는 길은 덮지 않음(§12 #9), 경로 C의 전제 셋(잠금 정체성은 접근 경로가 보이는 대로만 겹침, 본문 없는 함수는 잠금 효과가 없고 그 호출에서 받은 함수만 되부름, 두 번 돌아오는 함수는 이름 목록으로만 앎; layers `rests-on`에도)을 적는다(§12 #11).
+  - **뒤집힘**: 실현 가능성이 센 spawn 뒤 쓰기의 상수 값으로 평가한다(§12 #10).
+  - **경로 A 이미지 키**: 이미지 entry 규칙(쓰인 잎 표시 없음, FIELD_STATUS 두 규칙 complete, 실행 중 writer 없음)일 때만 값이다(§12 #13).
+  - **`P0-unverified`**: C의 모든 등급과 잠금을 이름 붙인 모든 C 행에 프로그램이 부르는 잠금 기본 연산(§12 #14).
+
+- **입력**: facts 컨테이너 하나. 확장 사실이 없으면 이유와 함께 거부한다(exit 1). 개정 2는 LOCK_PATHS(schema 개정 11)도 요구한다. 받는 옵션은 `-o`뿐이다. 필드·callee·사례 이름을 받지 않는다.
+- **머리**: facts 해시, 모드, 내장 프로필·P0 표(판과 `p0_table_scope`)·유도 규칙·대상 규칙의 판, **P0 비교 표**(판, 항목, 담지 않는 묶음), facts에 복사된 basis 편차, 행위자 root(종류별 수)와 트램펄린, 트램펄린이 유도 spawn 연산의 호출로 대신하는 root와 entry를 풀지 못한 그런 호출의 수(개정 3), 다른 root에 들어가지만 행위자로 남은 root, 정적 이미지로 푼 spawn(그 멤버에 쓰기가 없다는 확인과 함께, 개정 3), entry를 풀지 못한 spawn과 그 이유, 경로·등급별 수(`not graded` 포함, 개정 3), `P0-unverified` 표시의 뜻과 `pthread_create` 원문 대조의 범위(개정 3).
+- **정적 행위자** [D]: root = `main`, 해결된 spawn entry(CALL_TARGETS, table walk 반복의 task-main, 시작 스크립트 진입), 그리고 spawn의 entry 인자가 정적 이미지가 있는 전역 표의 필드에서 오면 그 멤버의 함수 잎(`table-image-entry`, 수정 단계). root의 코드는 다른 root에 들어가지 않고 호출 그래프로 닿는 함수다. 트램펄린(행위자가 아니고 그 코드는 그것이 부르는 root들의 것)은 process가 아닌 root 가운데 **다른 root에 간접 호출로만 들어가고, 제 본문이 공유 root로 필드·전역을 읽지 않으며 전역을 쓰지 않는** 것이다(수정 단계; S5는 "다른 root를 부르면" 모두 트램펄린이었다, §10 지적 9). 다섯 빌드에서는 R2·C1의 `CFE_ES_TaskEntryPoint`, `OS_PthreadTaskEntry`가 트램펄린이고 S5와 같다 [M]. 트램펄린이 대신하는 root는 (가) 제 코드가 해결된 간접 호출(필드 기반 함수 포인터 흐름)로 들어가는 root와, (나) 개정 3부터 그 트램펄린을 안쪽 spawn에 넘기는 유도 spawn 연산(SPAWN_WRAP `called-by-entry`)의 호출 지점에서 푼 entry(table walk, 정적 이미지, 시작 스크립트, CALL_TARGETS)다. 수정 단계의 문서는 이것을 "필드 기반 may 근사"(과대 근사)라 적었으나, (가)만으로는 C1에서 정적 이미지 entry와 스크립트 entry가 빠지는 **과소 근사**였다(§11 #2). (나)를 더한 뒤에도 entry를 풀지 못한 그런 호출의 스레드는 빠진다(머리에 수, §8 항목 14).
+- **경로 B**: 공유 base 필드 인자를 (필드, 본문 있는 callee, 인자 위치)로 묶는다. writer가 없거나 한 행위자뿐이면 뺀다. 칸: 사이트와 결과 처리, INIT·writer(대상이면 WRITERS의 값·guard), 행위자, callee 검사(그 매개변수가 조건에 나오는 상수 반환, 그리고 조건 안에서 그 매개변수로 부르는 함수의 RET_CONSTS 한 단계).
+- **경로 C (개정 3에서 "불가"의 조건을 고침, §11 #9–#12, #14, #15)**: 읽기 문맥은 읽기가 제 함수에서 정적 인스턴스 잠금을 잡으면 그 읽기 하나, 아니면 (i) 읽는 함수가 spawn된 스레드의 entry이면 호출자 잠금 없는 문맥, (ii) 직접 호출마다, (iii) 해결된 간접 호출마다 하나다. 자식이 닿지 않는 호출의 문맥은 `not graded`(등급 없음)다. spawn 뒤 쓰기는 그 필드의 형 있는 쓰기에 더해 레코드 전체 쓰기(`T.*`)와 그 필드를 덮을 수 있는 데이터 함수 쓰기를 세고, 본문 없는 P0 밖 함수에 넘긴 함수도 호출 대상으로 센다. `proven-impossible`은 한 정체성 L이 spawn과 모든 쓰기에서 같은 획득으로 잡히고 그 획득 지점이 spawn 뒤에 다시 닿지 않으며(되돌아가는 간선 검사), 읽기가 L을 잡고, L이 정적 인스턴스이고, 필드가 필드 단위 규칙으로 complete이며, spawn 뒤에 대상이 풀리지 않은 간접 호출이 없고, 생성자를 부르는 함수의 제 본문에 그 필드 쓰기가 없을 때만이다. 범위는 생성자의 한 호출이다(ED §3.3 항목 3). L이 정적 인스턴스가 아니면 `undecidable`이다. 아래는 개정 2까지의 기술이다. 해결된 entry가 있는 spawn마다, 생성자 함수가 spawn **뒤**에 쓰는 필드와 spawn된 entry의 행위자 코드가 그 필드를 분기·반환·out 저장으로 읽는 곳의 짝이다. "뒤"는 수정 단계부터 LOCK_PATHS `after-spawn`(생성자의 제어 흐름 그래프에서 spawn 호출 뒤에 닿는 사건; 되돌아가는 간선 포함, 분기 가지치기 없음)이다. S5는 소스 위치였다(§10 지적 3). 생성자가 spawn 뒤에 부르는 함수의 같은 필드 쓰기도 실현 가능성에 넣는다(한 호출 아래는 호출 지점의 잠금과 합치고, 더 아래는 제 잠금만 센다). 본문 있는 유도 spawn 연산이 주소 인자를 통해 저장하는 필드(PARAM_FLOW out-store, ARGFLOW 원천이 그 필드의 주소)는 spawn 뒤의 쓰기로 세고 잠금은 모르는 것으로 둔다: CFG 순서에서 인자 사건은 호출보다 앞이고, 그 호출 안에서 스레드 생성과의 순서는 facts가 주지 않기 때문이다. P0 스레드 생성 연산의 out 인자는 새 스레드가 돌기 전에 저장된다고 보고(P0 의미) 세지 않는다. 생성자 본문에서는 쓰지 않고 callee에서만 쓰는 필드는 짝짓지 않고 `[C]` 머리에 수를 낸다. 생성자 정체성(spawn 연산의 out-store 매개변수), 쓰기 첨자(WRITERS key), 읽기 첨자가 자기 정체성인지(P0 thread-self·thread-specific-get에 닿는 사슬)를 적는다. 읽기가 정적 인스턴스 잠금을 잡지 않으면 그 함수의 호출 지점마다 행을 따로 내고, 읽기 행에 LOCK_PATHS `entry-release`가 있으면 호출 지점의 잠금을 읽기에 더하지 않는다(수정 단계, §10 지적 4). P0 스레드 생성의 out 인자를 spawn 뒤로 세지 않는 근거는 그 종류 항목의 의미 문장이다(개정 3에서 `thrd_create`에도 적음, §11 #19).
+- **경로 A**: 키 비교(P0 비교 표 함수 호출, 또는 분기의 `==`/`!=`)가 레코드 필드와 매개변수 사이에 있고, 그것이 검색 루프 안(A1)이거나 검색 루프의 간접 호출이 부르는 함수 안(A2)이며, 검색이 그 형을 전역 표에서 읽을 때 이름 공간(레코드 형, 키 필드)을 만든다. PARAM_FLOW로 키 매개변수 함수를 모으고, 바깥에서의 호출을 사용으로, 키 필드 쓰기에 닿는 것을 생성자로 나눈다. 구획은 사슬의 첫 상수 인자, 키 값은 문자열·상수 또는 PTR_FIELDS + GLOBAL_IMAGES다. 짝에서 빼는 이유(키 상수 다름, 한 행위자, probe-create)를 적는다. 개정 3: probe-create는 극성(생성자가 조회의 "맞음 없음" 결과에서 돌고 다른 값에서는 돌지 않음)을 RET_CONSTS·RETURNS로 확인할 때만 붙이고, 그 조회 행의 handling 칸에 적는다. 짝이 없을 때 dependency 칸은 제외 이유별 수를 적는다. 이미지 잎이 실행 중에도 쓰이는 키는 `unresolved`이고 제외·뒤집힘에 쓰지 않는다(§11 #6, #7). 처리: 감싼 루프(종류·횟수·탈출식·지연과 F8 사슬), 결과를 돌려주는 함수 사슬, 그 길의 종료 연산. 종료 연산이 may·noreturn이면 그 종료 호출의 guard와, 이 호출에서 인자가 갖는 상수 값으로 그 guard를 평가한 결과, 그 함수의 탈출 없는 루프를 적는다(수정 단계, §10 지적 2).
+- **수명**(경로 A 이름 공간 블록): 키·활성 필드의 writer(covers-more-than-the-field를 따로 셈), P0 out 인자 쓰기(relations가 ARGFLOW와 P0_TABLE을 맞춘 것이고 추출의 writer 집합에는 없다고 적음), entry 경로 규칙(프로그램에 null이 아닌 소멸자를 단 thread-specific key 생성도 cleanup push도 없을 때만 "entry가 돌아온 뒤 프로그램의 함수가 돌지 않는다"고 씀), 블록의 `namespace layers` 줄.
+- **칸(ED §3.4)**: `dependency`, `run-order`(이 판은 기록을 읽지 않는다: 늘 `no record given`), `feasibility`(`proven-impossible`/`possible`/`undecidable` + 이유; 수정 단계부터 "불가"는 기댄 가정과 규칙을 적는다; 개정 3부터 자식이 닿지 않는 호출의 C 문맥은 `not graded`), `violation`(RV2 §5.4; 기록 없으면 `unconfirmed`), `flip`(`static-possible`/`static-undetermined`/`none` + 이유), `layers`(B, P0, L0, R; 프로필 facts면 `case:profile(…)`, 명령줄 어휘가 있으면 `hand-entered:command-line(…)`; 수정 단계부터 `basis-deviation(…)`과 `rests-on(…)`; 개정 3부터 원문 대조가 없는 P0 항목에 기대면 `P0-unverified(…)`, 정적 인스턴스 판정을 쓰는 C의 모든 등급에 `rests-on(…)`).
+- **실현 가능성** [D]: C는 위 조건이 모두 성립할 때만 "불가"를 낸다. B는 펼친 table walk(LOOP_ITERS)의 생성 순서만 읽고 `undecidable`로 낸다. 등급 문장은 `fixed unconfirmed (creation order only)`와 `fixed unconfirmed (creation order + await; the await rests on the L1 premise only)`로 나뉘고, await 문장은 L1 전제가 성립한다는 것만 말한다(개정 3, §11 #3). 정적 이미지에서 푼 root끼리는 순서를 유도하지 않는다고 적는다(개정 3, §11 #1). A는 늘 `undecidable`이다.
+- **결정성**: 정렬된 맵만 쓰고, 식 트리는 쓰는 쪽의 후위 번호(자식 < 부모)를 따라 걷는다(깊이 상한 없음). 텍스트의 식 출력은 `show`와 같은 40단계 출력 한계를 쓴다. 이 한계는 출력에만 쓴다: callee 검사와 상수 반환의 중복 제거는 (값, 조건 트리)로 한다(수정 단계; S5는 잘린 텍스트를 키로 썼다, §10 지적 11). 이 한계로 잘린 식은 다섯 빌드의 relations에 0개다 [M].
+
+### 1.3 LOCK_PATHS와 P0 표 개정 2·3 (수정 단계, 둘째 수정)
+
+- **LOCK_PATHS**(facts schema 개정 11, 섹션 136) [D]: `after-spawn`(spawn 호출 뒤에 그 함수의 제어 흐름 그래프로 닿는 LOCKSET 사건)과 `entry-release`(함수 진입에서 그 사건까지의 어떤 경로에서 함수가 잡지 않은 잠금을 풀거나, 정적 인스턴스가 아닌 정체성의 잠금을 지울 수 있거나, 효과를 따라가지 못하는 호출이 있음; `site`는 소스 위치가 가장 앞선 그런 호출). LOCKSET과 같은 분석에서 구하고 LOCKSET 행은 바뀌지 않는다 [M: §2a]. 다섯 빌드의 행 수(셋째 수정 둘째 차례): 9,408 / 9,409 / 5,872 / 2,364 / 2,373(after-spawn 234 / 234 / 242 / 198 / 203, entry-release 9,174 / 9,175 / 5,630 / 2,166 / 2,170, spawn 호출 15 / 15 / 14 / 7 / 7) [M: facts BASIS `count.lock_paths`]. 둘째 수정까지는 9,330 / 9,331 / 5,803 / 2,335 / 2,344, 셋째 수정 첫째 차례는 9,333 / 9,334 / 5,806 / 2,335 / 2,344였다(§2a; 셋째 수정 문서의 이 줄은 고치지 않은 둘째 수정의 수였다: §13 #11).
+- **P0 표 개정 3** (둘째 수정; 셋째 수정에서 바꾸지 않음) [D]: 항목 72와 종류는 그대로다. scope 문장에서 "묶음을 통째로(listed whole)"를 없애고, 묶음의 어느 구성원이 항목인지와 빠진 묶음·구성원(스레드 join·detach, POSIX timer, I/O 다중화, 초기화·소멸·속성·조회 구성원, 스케줄링, `stpcpy`·`strlcpy` 등 데이터 함수, `sscanf` 등 형식 입력, 프로세스 종료 처리기 등록)을 이름으로 적는다. 다섯 빌드가 부르는 것 가운데 이 판 밖인 것: `pthread_join`(C1 1, R2 3), `pthread_detach`·`timer_create`·`timer_settime`·`timer_delete`(다섯 빌드), `select`(C1, R2), `poll`(R2), mutex·조건 변수·세마포어 초기화·소멸과 속성 함수, `sem_getvalue`(C1, R2), `sched_get_priority_*`·`pthread_setschedparam`, `sscanf`(C5) [M]. 셋째 수정에서 둘째 수정의 facts `[calls]`로 더 센 것(C1 pre / C1 post / R2 / C5 6.4.1 / C5 6.4.2): 다른 스레드의 취소 `pthread_cancel` 3 / 3 / 5 / 1 / 1(T2 (b)의 처방이 필요로 하는 묶음), `pthread_kill` 2 / 2 / 2 / 0 / 0, `kill` 1 / 1 / 1 / 0 / 0, 시그널 `sigaction` 1 / 1 / 1 / 2 / 2·`pthread_sigmask` 1 / 1 / 1 / 2 / 2·`signal` 1 / 1 / 1 / 1 / 1·`sigprocmask` 1 / 1 / 1 / 2 / 2·`sigsuspend` 2 / 2 / 2 / 0 / 0·`sigtimedwait` 1 / 1 / 1 / 0 / 0·`sigwait` 2 / 2 / 2 / 0 / 0, 취소 상태 `pthread_setcancelstate` 3 / 3 / 3 / 0 / 0·`pthread_setcanceltype` 1 / 1 / 1 / 0 / 0, `pthread_setschedprio` 1 / 1 / 1 / 1 / 1, `dlclose` 1 / 1 / 1 / 1 / 1·`dlerror` 6 / 6 / 6 / 3 / 3, 스레드 이름·affinity `pthread_setname_np`·`pthread_setaffinity_np` 1 / 1 / 1 / 0 / 0, 프로세스 생성 `fork` 1 / 1 / 1 / 0 / 0, `__sigsetjmp` 4 / 4 / 4 / 0 / 0(`setjmp`·`longjmp`·`vfork`·`getcontext` 0) [M]. 개정 3의 scope 문장은 스레드 이름·affinity 설정과 프로세스 생성을 항목으로도 뺀 것으로도 적지 않는다("스레드 이름 붙이기"는 `pthread_setname_np`를 덮는 것으로 읽힐 수 있다). 다음 P0 문장 개정에서 그 둘을 뺀 것으로 이름 붙인다(§8 항목 17, §12 #18). `thrd_create` 의미에 "새 스레드가 시작하기 전에 저장"을 적었고(원문 미대조), `pthread_create` 원문 줄에 배포판 패키지의 패치를 대조하지 않았다고 적었다(빌드는 `Ubuntu GLIBC 2.39-0ubuntu8.9`를 링크한다 [M]: `ldd --version`, `dpkg -l libc6`). §11 #18, #19.
+- **P0 표 개정 2** [D]: 개정 1의 묶음에 C11 `<threads.h>`의 같은 묶음 함수(`thrd_create`, `mtx_*`, `cnd_*`, `thrd_sleep`, `thrd_exit`, `thrd_current`, `tss_*`), glibc 2.39의 `*_clock*` 함수(`pthread_mutex_clocklock`, `pthread_cond_clockwait`, `sem_clockwait`), spin lock, `usleep`, `quick_exit`, assert 매크로가 부르는 `__assert_fail`·`__assert_perror_fail`, thread-specific key 생성·삭제, cleanup handler push·pop(`pthread_cleanup_push/pop` 매크로가 예외 없이 컴파일한 단위에서 부르는 함수), `dlmopen`·`dlvsym`을 더했다. 72항목, 항목마다 판 표기, 원문 대조는 `pthread_create` 하나다(개정 2의 "묶음을 통째로"는 초기화·소멸·속성 구성원과 몇 묶음을 빠뜨린 말이었다: 개정 3). 담지 않는 묶음(읽기-쓰기 잠금 전체, barrier, one-time init, 다른 스레드의 취소, 시그널, `dlclose`·`dlerror`·`dladdr`, 컴파일러·fortify가 원문 호출 없이 부르는 함수)은 `extract.p0_table_scope`에 이름으로 적는다. 읽기-쓰기 잠금을 통째로 뺀 까닭은 잠금 집합 분석이 공유 획득을 읽지 않기 때문이다: 쓰기 획득만 넣으면 읽기 획득 뒤의 해제가 호출자 잠금의 해제로 읽힌다. 통째로 빼면 그 획득이 잠금 연산이 아니어서 판정이 약해지기만 한다(R2는 `pthread_rwlock_rdlock/wrlock`을 부른다 [M]).
+- **P0 비교 표 개정 2** [D]: `strcoll_l`, `strcasecmp_l`, `strncasecmp_l`, `bcmp`, `strverscmp`, `thrd_equal`을 더했다(13항목, 모두 원문 대조 unverified). 넓은 문자 비교와 `__memcmpeq`는 이 개정 밖이다.
+- 새 P0 항목 가운데 다섯 빌드가 부르는 것은 `pthread_key_create`(다섯 빌드)와 `__pthread_register_cancel`·`__pthread_unregister_cancel`(C1·R2)뿐이다 [M]. 어휘가 아니어서 유도에 쓰이지 않으므로 FACTS, OP_DERIV, SPAWN_WRAP, LOCK_* 등 유도 결과는 S5와 같다 [M: §2a].
+
+## 2. 기존 동작 불변 확인 [M]
+
+| 확인 | 결과 | 근거 |
+|---|---|---|
+| 시험 | 237/237 통과(1개 건너뜀은 원래대로). 나눔(8c, §16.4): 2a 끝의 237 = 새 경로 186 + 옛 경로 51(`legacy-case`), 건너뜀 1(사유: tracefs 없음, `records/step2a-20261110-8cfix/skip_reason.log`). 8c 뒤 239 = 새 188(추출 규칙 쪽 44, 컨테이너·직렬화·공통 기능 144) + 옛 51. 탐지 정확도의 시험 수가 아니다. 셋째 수정은 두 차례 모두 새 시험을 더하지 않고 기존 시험에 확인을 더했다: `test_static_cli` 583개(첫째 차례 541, 둘째 수정 515; 첫째 차례는 fixture `relsound.c`의 열한 경우 `wait_*` … `opn_*`, 이미지 키의 형 없는 저장 변형, 걷기 상한 24; 둘째 차례는 `relsound.c`의 열 경우 `recur_*` … `arrhook_*`, 두 단위의 헤더 `static` mutex, 두 행위자의 probe-create, `incomplete-source` 행, 상한 8·64), `test_static_wrappers` 512개. lint 6/6 | ctest 로그 |
+| golden | 셋째 수정 둘째 차례에서 바뀐 것: `layout.golden`·`records.golden`(열거형 항목 `incomplete-source`·`walk-bound`와 지문), `wrappers.golden`(fixture 트램펄린 호출의 `incomplete-source` 행), relations golden 넷(개정 5의 판·머리·전제; `relsound_np`: 새 경우의 행). 첫째 차례에서 바뀐 것: `tests/golden/data/layout.golden`·`records.golden`(FIELD_STATUS flag 항목 `array-element-stores-not-collected` 한 줄과 schema 지문), `lockset.golden`·`lockset_np.golden`(fixture `lockset.c`의 스칼라 배열 `fx_shared.tasks`가 두 규칙 DISABLED), relations golden 넷(`relations`, `relations_np`, `relpaths_np`: 개정 4의 머리 줄, `P0-unverified`, "불가" 문장과 `rests-on`, 뒤집힘 하나; `relsound_np`: 새 경우의 행). 다른 프로필 추출 golden(`writers` … `argflow`, `core_cpu1`)과 2a의 다른 프로필 없는 golden(`wrappers`, `flowfacts_np`, `argflow_np`, `lockpaths_np`)은 그대로다. 둘째 수정까지의 변화는 §10·§11과 같다 | `git diff 672cd31..HEAD -- kairos/tests` |
+| 프로필 추출(identity) | V0·V2 × C1 pre tx·R2 core·C5 6.4.1: basis 6섹션·facts 22섹션 가운데 CRC가 다른 것은 STRINGS뿐. 다른 레코드는 basis 1(`front_end.build_identity`), facts 3(`extract.build_identity`, parent basis 해시, `extract.units_from`). show 텍스트 차이 2줄 | `T/identity/identity.txt` |
+| 프로필 없는 추출, 옵션 없음(npsame, S4 대비) | C5 34개, C1 30개, R2 31개 섹션 레코드 같음. BASIS·P0_TABLE·FIELD_STATUS 다름(FIELD_STATUS는 셋째 수정의 배열 표시), C1·R2의 CALL_TARGETS·LOCKSET·LOCK_OPS(셋째 수정 둘째 차례의 `incomplete-source`), C1의 AWAIT_L1 다름, LOCK_PATHS는 새 섹션(§2a) | `T/npsame/npsame.txt` |
+| 프로필 없는 추출, `--targets-rule`(s5same, S5 대비) | C5 34개, C1 30개, R2 31개 섹션 레코드 같음(WRITERS, FACT_LOCS, LOCK_IDS 포함). BASIS·P0_TABLE·FIELD_STATUS 다름, C1·R2의 CALL_TARGETS·LOCKSET·LOCK_OPS와 C1의 AWAIT_L1 다름, LOCK_PATHS 새 섹션(§2a) | `T/s5same/s5same.txt` |
+| 프로필 없는 추출, `--targets-rule`(fixsame, 수정 단계 대비) | C5 34개, C1 30개, R2 31개 섹션 레코드 같음. BASIS·P0_TABLE(개정 3)·FIELD_STATUS(배열)·LOCK_PATHS와 C1·R2의 CALL_TARGETS·LOCKSET·LOCK_OPS, C1의 AWAIT_L1 다름(§2a) | `T/fixsame/fixsame.txt` |
+| 프로필 없는 추출, `--targets-rule`(fix2same, 둘째 수정 대비) | C5 35개, C1 31개, R2 32개 섹션 레코드 같음(LOCK_IDS, P0_TABLE, WRITERS 포함). BASIS·FIELD_STATUS·LOCK_PATHS와 C1·R2의 CALL_TARGETS·LOCKSET·LOCK_OPS, C1의 AWAIT_L1 다름(§2a). 셋째 수정 첫째 차례의 출력으로는 C5 36개, C1·R2 35개였다(첫째 차례 문서의 "35·34"는 그 전 비교의 수였다: §13 #11) | `T/fix2same/fix2same.txt` |
+| 프로필 없는 추출, `--targets-rule`(fix3same, 셋째 수정 첫째 차례 대비) | C5 36개, C1 32개, R2 33개 섹션 레코드 같음(LOCK_IDS, FIELD_STATUS, P0_TABLE, WRITERS 포함). BASIS·LOCK_PATHS와 C1·R2의 CALL_TARGETS·LOCKSET·LOCK_OPS, C1의 AWAIT_L1 다름(§2a) | `T/fix3same/fix3same.txt` |
+| 결정성(T7) | 다섯 빌드 facts·relations 두 번 같음 | `T/twice.txt` |
+
+### 2a. npsame, s5same, fixsame, fix2same, fix3same
+
+C5는 STRINGS 말고 34개 섹션(ARGFLOW … WRITERS, LOCKSET·LOCK_IDS·AWAIT_L1 포함)의 레코드가 S4(옵션 없음)·S5(`--targets-rule`) facts와 같다 [M]. C1·R2는 셋째 수정 둘째 차례에서 CALL_TARGETS·LOCKSET·LOCK_OPS(C1은 AWAIT_L1도)가 더 달라졌다(아래 "셋째 수정 첫째 → 둘째 차례"). 다른 것은 아래다. 기계 판정 줄(레코드·필드 단위)은 §14.7이 가리킨다(2026-11-09).
+- **BASIS**: 항목 이름으로 비교했다(C1 pre tx; 다른 빌드도 같은 이름들).
+  - S5 → 둘째 수정: 더해진 것은 `p0.*` 34개(P0 표 개정 2; `p0.thrd_create` 포함), `extract.p0_table_scope`, `count.lock_paths`, `extract.basis_deviation[…]` 2개(C1·R2) 또는 7개(C5), `param.walk_bounds`, `count.walk_bounds_hit`다. 값이 바뀐 것은 `assume.lock_acquisition_succeeds`(획득 기본 연산이 spin lock·`mtx_lock`까지로 넓어진 문장), `extract.p0_table`(판과 수), `p0.pthread_create`(개정 3), 그리고 매번 바뀌는 `extract.build_identity`, `extract.units_from`이다. 빠진 항목은 없다. (둘째 수정 문서의 이 줄은 더해진 `extract.p0_table_scope`·`p0.thrd_create`를 바뀐 값에도 넣었다: §12 #19.)
+  - 수정 단계 → 둘째 수정: 바뀐 것은 `extract.p0_table`, `extract.p0_table_scope`, `p0.pthread_create`, `extract.units_from`, 더해진 것은 `param.walk_bounds`, `count.walk_bounds_hit`다. `p0.thrd_create`는 바뀌지 않았다(값 "thread-create; ISO C11 <threads.h> / glibc 2.39; source unverified"; "시작 전 저장"은 P0_TABLE의 의미 문장에만 있다). (둘째 수정 문서 §0 항목 2는 `p0.thrd_create`를 바뀐 것으로 적었다: §12 #19.)
+  - 둘째 수정 → 셋째 수정: 바뀐 것은 `extract.build_identity`, `extract.units_from`, `param.walk_bounds`(식 깊이 24), `count.walk_bounds_hit`(식 깊이의 잘린 수), C1·R2의 `count.lock_paths`(9330 → 9333, 9331 → 9334, 5803 → 5806 행)다. 더해지거나 빠진 항목은 없다.
+  - 셋째 수정 첫째 → 둘째 차례: 더해진 것은 `count.indirect_calls_incomplete`(44 / 44 / 22 / 0 / 0)다. 바뀐 것은 `extract.build_identity`, `extract.units_from`, `extract.extended_facts_f5`(잠금 집합 규칙 개정 2), `param.walk_bounds`(상한 8·64), `count.walk_bounds_hit`(그 걸린 수, 다섯 빌드 0), `count.lock_paths`(9333 → 9408, 9334 → 9409, 5806 → 5872, 2335 → 2364, 2344 → 2373 행), C1·R2의 `count.lock_ops`(2519 → 2450, 1586 → 1547: unknown 효과가 된 간접 호출의 해결된 대상에서 오던 대기 행이 빠짐)와 `count.lockset`(잠금을 잡은 행 1228 → 1208, 1188 → 1149)이다. 빠진 항목은 없다.
+- **P0_TABLE**: 72행. S5의 38행은 항목별로 그대로이고, 34행이 묶음 안에 끼어 들어갔다(그래서 위치 비교로는 다르다). 개정 3은 `pthread_create`의 원문 줄과 `thrd_create`의 의미 두 행만 바꿨다. 셋째 수정은 바꾸지 않았다.
+- **LOCK_PATHS**: 수정 단계의 새 섹션. 셋째 수정에서 C1 두 판과 R2에 `entry-release` 행이 3개씩 더해졌다: OSAL `os-impl-condvar.c`의 `OS_CondVarWait_Impl`·`OS_CondVarTimedWait_Impl`(조건 변수 객체의 mutex로 기다리되 그 함수가 잡지 않음: 호출자가 `OS_CondVarLock`으로 잡는다)과 `os-impl-idmap.c`의 `OS_WaitForStateChange_Impl`의 대기 뒤 사건이다. 행이 끼어 들어가 위치 비교로는 6030 / 6030 / 3579행이 다르다. C5는 같다 [M].
+- **FIELD_STATUS**: 셋째 수정에서 const가 아닌 스칼라 배열 필드 183 / 183 / 147 / 175 / 175행이 두 규칙 DISABLED와 flag `array-element-stores-not-collected`를 얻었다. 그 필드들은 잠금 정체성의 값으로도(LOCK_IDS 같음), 다섯 빌드의 await 술어의 관련 위치로도(AWAIT_L1 같음) 쓰이지 않는다 [M]. T3 사례 필드(`CFE_ES_TaskRecord_t.RecordUsed`·`AppId`, 스칼라)와 T2의 이미지 키(`BP_Throttle_t.Name`, const 원소 배열)는 그대로 complete다.
+- **걷기 상한**: `count.walk_bounds_hit`는 다섯 빌드 모두 "FACT_INIT walk 0 objects …, function-value initializer nesting 0 …, expression depth 0 subexpressions cut, DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut"이다 [M].
+- **셋째 수정 첫째 → 둘째 차례** [M] (`T/fix3same/fix3same.txt`):
+  - CALL_TARGETS: C1·R2에 `incomplete-source` 행 44 / 22개(해결된 간접 호출 가운데 그 함수 값이 흐름 그래프가 따라가지 않는 저장을 거칠 수 있는 것; 그래서 대상이 풀리지 않은 간접 호출이 18 → 62, 7 → 29). C5는 0이고 같다.
+  - LOCKSET·LOCK_OPS: C1 28 / 2,322행, R2 47 / 1,565행이 다르다(LOCK_OPS는 행이 줄어 위치 비교로 대부분 다름). 그 호출의 효과가 unknown 이 되어 그 뒤 사건의 잡힌 잠금이 빠진 것(예: C1 `CFE_ES_RegisterCDSEx`, `CFE_ES_CDSBlockWrite`의 호출이 `held=0 {unknown-release}`)이다. C5의 LOCKSET·LOCK_OPS는 같다.
+  - LOCK_PATHS: `entry-release` 행이 +75 / +75 / +66 / +29 / +29. C5의 29행은 PSP `main`(`cfe_psp_start.c:270`)의 `signal` 호출이 넘기는 처리기의 효과(잠금 집합 개정 2의 되부름 규칙)로 그 뒤 `main`의 사건이 `entry-release`가 된 것이다. C1·R2는 그것에 `incomplete-source` 호출의 unknown 효과가 더해졌다.
+  - AWAIT_L1: C1의 두 행(`TO_LAB_AppMain` 루프 `to_lab_app.c:96`, `OS_DeleteAllObjects` 루프 `osapi-common.c:366`)이 `unresolved-call` 표시를 얻었고, 뒤의 것은 필드 단위·형 단위 L1 (i)가 holds → undecided다. R2의 `CFE_ES_MainTaskSyncDelay` await(T1)와 C5는 같다.
+  - LOCK_IDS, FIELD_STATUS, WRITERS, P0_TABLE은 다섯 빌드 모두 같다: 내부 연결 객체의 규칙으로 `not-static`이 된 잠금 정체성은 0이다(LOCK_IDS 5 / 5 / 4 / 19 / 19행, 헤더에 정의된 내부 연결 객체 없음) [M].
+
+## 3. ED §2.3 재측정: 공유 base의 R-T1 ∪ R-T2 [M]
+
+`T/count/targets_rule.tsv`, `summary.txt`의 "ED §2.3 again" 절. 수정 단계와 둘째 수정에서 수가 하나도 바뀌지 않았다(facts.txt 줄 번호만 P0 행만큼 밀림). 셋째 수정 첫째 차례에서는 마지막 열(FIELD_STATUS)만 바뀌었다(둘째 차례는 바꾸지 않았다; c1_post_tx 칸을 첫째 차례 문서는 둘째 수정 값 194 / 118로 잘못 적었다: §13 #11): 스칼라 배열 필드가 두 규칙 DISABLED가 되어 대상 가운데 complete가 194 / 118 → 152 / 86(C1), 148 / 96 → 116 / 68(R2), 146 / 67 → 114 / 49(C5 6.4.1), 148 / 67 → 116 / 49(C5 6.4.2)이다. 대상, FACT_LOCS, writer 수, 사례 필드의 행은 그대로다 [M]. "FACT_LOCS"는 옛 규칙(대상 집합에 따라 바뀜, SF §4.1), "FIELD_STATUS"는 S4의 대상 무관 규칙(필드 단위 / 형 단위)이다. 괄호 안은 ED §2.3의 V3(G0 + R-T1, 공유 필터 없음).
+
+| 빌드 | 대상(R-T1 / R-T2 / 둘 다) | FACT_LOCS complete / DISABLED | writer 0 / 1 / 2–5 / >5 | DISABLED 원인(겹침) untyped / escape / cast / union / unknown | FIELD_STATUS complete: 필드 단위 / 형 단위 |
+|---|---|---|---|---|---|
+| c1_pre_tx | 340 (308 / 53 / 21) (V3 841) | 142 / 198 (208 / 633) | 44 / 57 / 193 / 46 (174 / 107 / 422 / 138) | 198 / 124 / 71 / 10 / 16 (633 / 244 / 435 / 154 / 151) | 152 / 86 (둘째 수정 194 / 118) |
+| c1_post_tx | 340 (308 / 53 / 21) | 142 / 198 | 44 / 57 / 193 / 46 | 198 / 124 / 71 / 10 / 16 | 152 / 86 (둘째 수정 194 / 118) |
+| r2_core | 240 (220 / 34 / 14) (V3 504) | 110 / 130 (200 / 304) | 20 / 47 / 143 / 30 (101 / 52 / 257 / 94) | 130 / 90 / 50 / 2 / 0 (304 / 137 / 196 / 33 / 12) | 116 / 68 (148 / 96) |
+| c5_641 | 259 (189 / 99 / 29) (V3 322) | 74 / 185 (61 / 261) | 29 / 45 / 130 / 55 (91 / 68 / 115 / 48) | 185 / 117 / 68 / 0 / 0 (261 / 111 / 171 / 0 / 4) | 114 / 49 (146 / 67) |
+| c5_642 | 261 (188 / 102 / 29) | 74 / 187 | 29 / 44 / 133 / 55 | 187 / 119 / 68 / 0 / 0 | 116 / 49 (148 / 67) |
+
+공유 base가 아니어서 빠진 필드(그 규칙이 고를 수 있었으나 매개변수·지역·다른 호출 결과로만 닿음): R-T1 537 / 537 / 293 / 132 / 132, R-T2 355 / 355 / 246 / 85 / 85.
+
+**사례 필드** (평가용 조회; `facts.txt` 줄은 `summary.txt` 같은 절)
+
+| 빌드 | 필드 | 규칙 대상 | FACT_LOCS(옛 규칙) | FIELD_STATUS 필드 단위 / 형 단위 |
+|---|---|---|---|---|
+| C1 | `OS_common_record_t.name_entry` | R-T1 | complete, writer 18 | complete / complete |
+| C1 | `OS_common_record_t.active_id` | R-T1 | complete, 6 | complete / complete |
+| C1 | `BP_Throttle_t.Sem` | 둘 다 | complete, 2 | complete / complete |
+| C1 | `BP_Throttle_t.Name` | R-T1 | complete, 0 | complete / complete |
+| C1 | `CF_Channel_t.sem_id` | R-T1 | DISABLED, 2 | DISABLED / DISABLED |
+| C1 | `CF_ChannelConfig_t.sem_name` | 둘 다 | DISABLED, 0 | DISABLED / DISABLED |
+| R2 | `CFE_SB_Global_t.AppId` | R-T1 | **DISABLED**, 3 | complete / DISABLED |
+| R2 | `EVS_AppData_t.AppID`, `CFE_ES_AppRecord_t.AppId`·`AppState`·`Type`, `CFE_PSP_IdleTaskState_t.ShutdownReq` | **아님** | — | 모두 complete / (AppRecord 셋 DISABLED, 둘 complete) |
+| C5 | `CFE_ES_TaskRecord_t.RecordUsed` | R-T2 | complete, 7 | complete / complete |
+| C5 | `CFE_ES_TaskRecord_t.AppId` | R-T2 | complete, 3 | complete / complete |
+| C5 | `CFE_ES_TaskRecord_t.TaskId` | **아님** | — | complete / complete |
+| C5 | `OS_task_record_t.id` | 둘 다 | DISABLED, 6 | DISABLED / DISABLED |
+| C5 | `OS_task_record_t.free` | R-T2 | DISABLED, 13 | complete / DISABLED |
+
+읽기 [I]:
+- **공유 필터는 대상을 1/2–1/2.5로 줄인다.** C1의 `timespec.tv_nsec` 같은 지역 base 대상은 사라졌다(ED §2.3 첫 예).
+- **ED §2.3의 "R-T1이 놓치는 사례 필드"는 R-T2로 일부만 들어왔다.** C5 `RecordUsed`는 R-T2로 들어왔다(전역 뿌리에서 분기로 읽히고 `CFE_ES_ERR_APPID` 반환 조건에 나온다). R2의 `AppState`·`Type`·`ShutdownReq`와 C5 `TaskId`는 들어오지 않았다. 이 필드들은 `AppRecPtr->AppState`처럼 지역 포인터(정의가 조회 함수 호출)나 매개변수 포인터로만 읽힌다. ARGFLOW는 지역 포인터의 정의를 따라가지만 READS는 따라가지 않는다. 그래서 공유 base로 판정되지 않는다. ED §6 항목 2가 요구한 필터를 그대로 걸었을 때의 결과다.
+- **옛 FACT_LOCS 규칙의 비단조는 그대로다.** R2 `CFE_SB_Global_t.AppId`는 규칙 대상에서도 DISABLED다(V3와 같음). 대상 무관 FIELD_STATUS는 필드 단위 complete, 형 단위 DISABLED로 S4와 같다. T1의 writer 3개는 WRITERS에서 온다(완전성 상태와 무관).
+- **R2 await와 옛 규칙.** R-T1 ∪ R-T2 대상의 옛 L1 (i)(FACT_LOOPS)은 `CFE_ES_MainTaskSyncDelay` 루프에서 여전히 fails다. 대상 무관 AWAIT_L1 필드 단위 규칙은 await다(`facts.txt:90905`). relations는 AWAIT_L1을 쓴다.
+- **깊이 상한 제거의 효과** [M]: 다섯 빌드의 대상 수와 대상 목록은 S5와 같다(§2a: BASIS의 `target.*` 항목이 그대로). RETURNS의 조건·guard 트리는 최대 27 / 27 / 18 / 25 / 25 단계여서(검증자 측정) 200 상한이 결과를 바꾼 적이 없다. fixture `deepcond.c`(필드가 조건 뿌리에서 211단계 아래)에서 R-T2가 그 필드를 고른다 [M].
+
+## 4. 완료 시험 T1–T7 (사례 입력 없음) [M]
+
+근거 줄은 `T/<build>/NP/relations.txt`의 줄 번호(rel L)다. 모든 행은 `T/count/summary.txt`에서도 같은 줄 번호로 나온다. 판정과 줄 번호는 셋째 수정 둘째 차례의 출력이다(T1–T4·T6의 rel 줄 번호는 첫째 차례·둘째 수정과 같다: 새 C 행은 C1·R2의 C 절에 들고 C5의 relations는 판·머리·문장 말고 같다 [M]). 아래 "나온 것"은 그 줄의 내용이 앞 단계의 기술과 같은 곳은 그대로 두었다. PI A2 사전 등록 ④·⑤로 읽은 표시는 §5에 따로 적는다. 기계가 찍은 근거 줄(단계 rc, T7, 계수 스크립트)은 §14.7이 가리킨다(2026-11-09). T1–T7의 판정 자체는 사람이 그 줄을 읽은 것이다.
+
+### T1 R2 — **PASS** (개정 뒤 통과, "관계를 낸다"의 통과)
+
+**통과 조건(ED §6)**: B 관계 `CFE_SB_Global_t.AppId → CFE_EVS_SendEventWithAppID#2`; 39 지점; 쓰기 3(EarlyInit 0, AppInit out-pointer 둘); callee 검사 `EVS_GetAppDataByID == NULL → CFE_EVS_APP_ILLEGAL_APP_ID`(F2); 결과 버림 39/39; 읽는 쪽과 쓰는 쪽 행위자 다름(G0 없이, F7의 task-main root로); 순서 조건: 코어 초기화 순서가 고정됨(생성 순서 + `CFE_ES_MainTaskSyncDelay` await)을 보이거나, 보이지 못하면 "고정 미확인"을 실현 가능성 칸에 적음.
+
+**나온 것** (r2_core; 셋째 수정은 이 행을 바꾸지 않았다: 줄 번호만 머리의 새 줄 하나만큼 밀렸다 [M: `summary.txt` fix2 대비 절, B 행 등급 변화 0]. 아래는 둘째 수정의 기술이다. 수정 단계와 같은 행이다. 다른 곳은 줄 번호가 아니라 세 칸이다: 실현 가능성 칸의 등급 문장과 await 문장(개정 3, §11 #3), layers 칸의 `P0-unverified(...)`(§11 #18). S5 대비로는 수정 단계에서 layers 칸과 실현 가능성 칸의 rests-on 문장이 이미 달라졌다: 수정 단계 문서의 "줄 번호와 layers 칸만 다르다"는 틀렸다, §11 #8)
+- 행 B65(rel 2147): `CFE_SB_Global_t.AppId -> CFE_EVS_SendEventWithAppID#2 sites=39 callee-check=yes`. 사이트 39곳(`cfe_sb_api.c` 34, `cfe_sb_priv.c` 1, `cfe_sb_task.c` 4), base 전역, hops 0.
+- 필드(rel 2187): INIT 0(`CFE_SB_Global`), writer 3, WRITERS(규칙 대상 R-T1, `facts.txt:107`).
+  - rel 2188: memset `cfe_sb_init.c:50:5` in `CFE_SB_EarlyInit`, 값 0.
+  - rel 2189: out-pointer `cfe_sb_task.c:138:5` in `CFE_SB_AppInit` via `CFE_ES_GetAppID`, 값 symbolic `[CFE_ES_AppRecordGetID(AppRecPtr)]`, guard `AppRecPtr != 0`.
+  - rel 2190: 같은 곳, 값 0 `[CFE_ES_APPID_UNDEFINED]`, guard `AppRecPtr == 0`.
+- 행위자(rel 2191): 읽는 쪽 {`CFE_ES_BackgroundTask`, `CFE_ES_TaskMain`, `CFE_EVS_TaskMain`, `CFE_SB_TaskMain`, `CFE_TBL_TaskMain`, `CFE_TIME_Local1HzTask`, `CFE_TIME_TaskMain`, `CFE_TIME_Tone1HzTask`}, 쓰는 쪽 {`CFE_SB_TaskMain`, `main`} → inter-actor. 개정 3의 트램펄린 규칙(유도 spawn 연산의 호출 지점 entry를 더함)으로도 R2의 트램펄린 root는 같다 [M].
+- callee 검사(rel 2193): `CFE_EVS_SendEventWithAppID returns 3254779907 [CFE_EVS_APP_ILLEGAL_APP_ID] when (and (not (eq param:Spec#3 0)) (eq (call-result EVS_GetAppDataByID (seq param:AppID#2)) 0))`. 한 단계 아래(rel 2196): `EVS_GetAppDataByID returns 0 [NULL] when …`.
+- 처리(rel 2198): `discarded 39, used 0, tested 0`.
+- 실현 가능성(rel 2201): `undecidable: fixed unconfirmed (creation order + await; the await rests on the L1 premise only): creation order at the table walk cfe_es_start.c:810:26 … writer actor CFE_SB_TaskMain at iteration 4; reader actors created before it: CFE_ES_TaskMain (iteration 1), CFE_EVS_TaskMain (iteration 2); after it: CFE_TBL_TaskMain (iteration 5), CFE_TIME_TaskMain (iteration 6). The call cfe_es_start.c:835:26 (CFE_ES_MainTaskSyncDelay) after the creation reaches the await loop cfe_es_start.c:871:5 …: an await loop follows the creation (the L1 premise holds under the AWAIT_L1 per-field rule …; type-level star-closed); lemma L1 itself is not decided, and whether the loop's predicate concerns the created actor and whether its timeout exit ends the creator are not read. … neither order is proven`.
+- 뒤집힘(rel 2203) `static-undetermined`, 위반 근거(rel 2202) unconfirmed, 계층(rel 2204) `B P0 R (writers: rule targets) rests-on(assume.no_cross_member_pointer_arithmetic; per-field completeness rule (PI decision pending)) P0-unverified(clock_nanosleep, pthread_cond_timedwait, pthread_cond_wait, pthread_mutex_lock, pthread_mutex_timedlock, pthread_mutex_unlock)`.
+
+**판정**: 조건이 모두 나왔다. 순서 조건은 ED가 허용한 대체 표시 "고정 미확인"으로 **문자 그대로** 채워진다. 그 표시는 await와 무관하게 table walk의 생성 순서만으로도 붙는다: 형 단위 완전성 규칙을 고르면 await 문장이 빠지고 등급 문장이 `fixed unconfirmed (creation order only)`가 되지만 조건은 그대로 채워진다(§11 #3). await 문장은 L1의 전제(AWAIT_L1이 인정한 루프가 생성 뒤에 옴)까지만 말한다. 수정 단계의 "the creations are serialized by it"은 도구가 유도하지 않은 것(술어가 생성된 행위자에 관한 것, 시간 초과 출구가 끝남)을 주장했다. R2에서 시간 초과 출구는 `CFE_PSP_Panic` → `abort()`(pc-linux `cfe_psp_support.c:120`)로 끝나지만 [F] 도구가 유도하지 않는다. 값 0이 검사를 통과하지 못함(ED §3.2)은 상수 접기가 없어 평가 불가로 남는다.
+- 참고 [M]: C1의 같은 관계(B73, rel 3154)는 쓰는 쪽 {`CFE_SB_TaskMain` (table-image-entry), `main`}, 읽는 쪽은 개정 3에서 15 root(rel 3209: 코어 task main 다섯, 스크립트 앱 다섯, spawn entry 다섯)다. 실현 가능성(rel 3219)은 "no static order derived: the spawn cfe_es_start.c:767:34 … starts writer actor(s) CFE_SB_TaskMain [[19]…] and reader actor(s) … [[21]…], [[17]…], …; for roots resolved from a static image this revision derives no creation order … and no await"다. **C1의 이 행은 T1의 생성 순서·await 문장을 얻지 않는다**: C1의 코어 task main은 정적 이미지에서 풀렸고, 이 판은 이미지 첨자를 반복 순서로 읽지 않는다. C1 원문은 R2와 같은 구조다(`cfe_es_start.c:716` 표 걷기, `:767` 생성, `:810–811` `CFE_ES_MainTaskSyncDelay`, `:892` await 루프) [F]. 수정 단계의 이 행 이유 "not created by one table walk"는 틀렸다(§11 #1, §8 항목 15). C1 B 행 가운데 이 문장을 받는 행은 49다(`summary.txt`).
+
+### T2 C1 — **PARTIAL**
+
+**통과 조건**: CF `cf_cfdp.c:993`(수정 후 `:1003`)과 BP `bp_flow.c:132`가 같은 구획; 게시 쓰기 L639/L640, L100, L1079; BP `:126 → :132` probe-create; BP 키 `"BP0_tsem"`(포인터 필드 흐름 + 이미지, 출처 `bp_semcfg.c` L43–L44)이 풀리거나 "필드 points-to 필요"로 표시; 수정 전 실패 분기 → 종료 도달(F2/F4, 종료 연산은 F8로 P0에서 유도); 수정 후 재시도(25, `!= -17`, 지연. 지연 연산은 F8로 P0에서 유도); SCH_LAB 생성은 키 상수 불일치로 짝 아님.
+
+**나온 것** (c1_pre_tx; c1_post_tx는 같은 줄 번호에 같은 내용이고 다른 곳만 적는다)
+- 이름 공간 `OS_common_record_t.name_entry`(rel 334): 검색 A2(rel 335) `OS_ObjectIdFindNextMatch`의 루프 `osapi-idmap.c:550:5`가 간접 호출(`:561:54`)로 `OS_ObjectNameMatch`의 `strcmp`(`:271:40`)에 닿는다. 활성 필드(rel 336) `OS_common_record_t.active_id`.
+- 게시 쓰기(rel 381): `active_id` `osapi-idmap.c:639:9`, `:1079:9`·`:1088:9`, `:432:21`·`:519:13`; `name_entry` `osapi-countsem.c:100:9`, `osapi-idmap.c:640:9`.
+- CF 조회 행 A21(rel 419): `cf_cfdp.c:993:19 … partition {3} key unresolved`, 키(rel 421) "needs field points-to (PTR_FIELDS)", 생성자(rel 423) BP `bp_flow.c:132:18`, (rel 424) SCH_LAB `sch_lab_app.c:168:16`, 둘 다 "key unresolved (lookup)"로 짝 후보. dependency(rel 429) "2 creator(s) of this partition in other actors". 계층(rel 434) `B P0 L0 R P0-unverified(abort, dlsym, pthread_exit, strcmp)`.
+- BP 조회 행 A20(rel 404): 키(rel 406) `BP_Throttles[0].Name = "BP0_tsem"`(매크로 `CF_CHANNEL_0_SEM_NAME`, `bp_semcfg.c:44:31`). 짝 아님(rel 408): **probe-create, 극성 확인**: "the creator's key read runs when OS_CountSemGetIdByName returns -17 (no match: OS_CountSemGetIdByName -> OS_ObjectIdFindByName -> OS_ObjectIdGetByName -> OS_ObjectIdGetBySearch -> OS_ObjectIdFindNextMatch) and not when it returns 0". 짝 아님(rel 409): SCH_LAB, `key constants differ`. handling(rel 412): `probe-create: on the lookup's failure result the same function creates the same key: bp_flow.c:132:18 -> OS_CountSemCreate (…)`. dependency(rel 413): `no creator left after exclusions (probe-create 1, key constants differ 1, same actor only 0)`.
+- 수정 전 처리(rel 425–428): 루프 `cf_cfdp.c:967:5`; `CF_CFDP_InitEngine`·`CF_Init`이 결과를 돌려줌; 종료(rel 428) `terminal CFE_ES_ExitApp at cf_app.c:366:5 … under (ne local:status 0) (the guard tests a local; … may)` 그리고 F8 사슬의 guard 평가 "with argument 0 = 3 every guard is false … the loop cfe_es_api.c:453:13 in CFE_ES_ExitApp has no exit".
+- 수정 후 처리(c1_post_tx A21의 handling): `in the loop cf_cfdp.c:1001:13 kind count-bounded trip upper-bound 25 exit (or (not (lt local:j 25)) (and (lt local:j 25) (ne local:ret -17))) delay cf_cfdp.c:1011:17 OS_TaskDelay (F8 must OS_TaskDelay -> OS_TaskDelay_Impl -> clock_nanosleep)`.
+
+**판정**: 조건 일곱 가운데 여섯이 나왔다. 그 가운데 둘은 문자 그대로만 채워진다.
+- **probe-create**: 개정 3부터 극성(조회의 "맞음 없음" 값 −17에서 생성자가 돌고, 0에서는 돌지 않음)을 RET_CONSTS·RETURNS로 확인한 뒤에만 붙고, 조회 행의 handling 칸에 적힌다. 수정 단계에서는 "짝 아님" 이유로만 나왔고 극성을 보지 않았다(소스 모양으로만 맞았다, §11 #6).
+- **수정 후 재시도**: 25, `-17`, F8 지연이 나온다. 그러나 탈출식의 `local:ret`이 조회 결과라는 연결은 facts에 없다. `ret`은 정의가 다섯이다(post `cf_cfdp.c:960`, `:971`, `:980`, `:1000`, `:1003` [F]). ED §3.5가 묻는 "탈출 상수가 그 호출의 실패 코드인가"는 사실로 연결되지 않고 문자 그대로만 채워진다(§11 #4).
+- 미달은 "수정 전 실패 분기 → 종료 도달"이다.
+  - (a) `CF_AppMain`의 `status`는 정의가 둘이다(`cf_app.c:330` `= CF_Init()`, `:342` `= CFE_SB_ReceiveBuffer(...)` [F]). WRITERS guard `(ne local:status 0)`(`cf_app.c:333`)을 `CF_Init`의 결과로 펼치려면 `cf_app.c:331`에서의 **흐름 민감한 도달 정의**가 필요하다. 기존의 펼침 규칙(RETURNS, derives, READS 첨자)은 모두 정의 하나인 지역 변수만 펼친다(`docs/static_facts.md` 해당 절). 수정 단계의 처방("지역 변수를 정의로 펼침")은 그 제한을 말하지 않아 그대로는 (a)를 may로 남긴다(§11 #4).
+  - (b) 종료 연산의 F8 유도가 CF의 길에 닿지 않는다 [M][F]. `CFE_ES_ExitApp`의 종료 호출(`ResetCFE` L399, `OS_TaskExit` L424)은 모두 `AppRecPtr->Type == CFE_ES_AppType_CORE`(L381) 아래이고 각각 `ExitStatus` 8·9일 때만이다. 외부 앱 가지는 `while (1) { OS_TaskDelay(500); }`(L453)다. **이것은 도구의 부족만이 아니다**: ED §3.0의 F8 예 "`CFE_ES_ExitApp → … → OS_TaskExit → pthread_exit`(종료, 외부 앱 분기에서만 may)"가 원문과 어긋난다. `OS_TaskExit`는 CORE 가지에 있다. T2의 조건 "종료 연산은 F8로 P0에서 유도"는 그 예에 기대므로, 설계대로의 F8 유도로는 채워질 수 없다. 다음 ED 개정에서 그 예를 고친다(§8 항목 2, §11 #5).
+- 더해야 할 입력: 사례 입력이 아니다. (a)는 계층 B/R의 사실 확장(흐름 민감한 도달 정의; 기존 섹션을 바꾸지 않으려면 새 섹션). (b)는 "탈출 없는 루프에서 멈춘 스레드를 다른 행위자가 끝낸다"는 행위자 사이 종료의 유도(P0의 다른 스레드 취소 묶음과 그 경로 규칙)와 ED 예의 정정이다.
+- 덤으로 생긴 것 [M]: CF·BP 조회는 이름 공간 `OS_filesys_internal_record_t.virtual_mountpt`에도 행이 있다(A48 rel 941, A40 rel 845; dependency "no creator of this partition"). 사례 관계로 세지 않는다(§6).
+
+### T3 C5 — **PARTIAL** (수정 단계 PASS에서 내림)
+
+**통과 조건**: spawn `CFE_ES_AppCreate:614`의 잠금 집합 ∅; 등록 쓰기 L649–L652의 잠금 집합 {ES 잠금}(F5 must 정체성 `CFE_ES_Global_t.SharedDataMutex`); 자식 `CFE_ES_GetAppID`의 `RecordUsed` 검사(F1)와 `CFE_ES_ERR_APPID` 반환(F2); "반대 순서 가능(잠금 창)". 6.4.2에서 읽기 지점마다: L800과 잠금 뒤 `GetAppIDInternal` 호출(L445, L551, L667, L1020, L1284) "불가 증명", `LockSharedData`·`UnlockSharedData` 오류 분기(L1858, L1892) "가능" 또는 "결정 불가". must 정체성이 없는 잠금 쌍으로 "불가"가 나오면 실패.
+
+**나온 것**
+- 6.4.1 (c5_641)
+  - spawn(rel 2987): entries 다섯 스크립트 앱, `locks held {}`; 등록 쓰기(rel 2988) L649 {#9} `acquired-at [cfe_es_apps.c:637:15]`.
+  - 행 C31(rel 2986) `CFE_ES_GetAppID` L861 읽기: **`possible: lock window: #9 … (static-instance) is not held at the spawn; the writes after it hold it from a later acquisition`**(rel 2993); 뒤집힘 static-possible(`CFE_ES_ERR_APPID`가 이전 값 0과, 쓴 값 1이 아님). layers에 `rests-on(...)`이 붙는다(개정 3: 정적 인스턴스 판정을 이름 붙인 등급 모두, §11 #16).
+  - `GetAppIDInternal` L1886의 호출 지점별: L445·L551 possible(잠금 창), **L700·L1081·L1345 `not graded`**(rel 3029, 3040, 3051: 자식과 그 후손이 그 호출을 실행하지 않음), L1919·L1953 undecidable(failure path).
+- 6.4.2 (c5_642)
+  - spawn(rel 2941): `locks held {#9 …} acquired-at [cfe_es_apps.c:571:12]`; 등록 쓰기(rel 2942) L652 {#9}, 같은 획득 L571.
+  - C30(rel 2940) `CFE_ES_GetAppID` L800 → **`proven-impossible`**(rel 2947). 이유 문장: 잠금 #9가 spawn과 `CFE_ES_AppCreate`의 이 호출에서 spawn 뒤 모든 `RecordUsed` 쓰기에 걸쳐 같은 획득으로 잡히고 그 획득이 spawn 뒤에 다시 닿지 않으며 읽기가 #9를 잡는다. **범위**: `CFE_ES_AppCreate`의 한 호출(ED §3.3 항목 3), 세는 쓰기는 형 있는 쓰기·레코드 전체 쓰기·덮는 데이터 함수·spawn 뒤 호출하는 함수의 쓰기, 필드는 필드 단위 규칙으로 complete, 생성자의 호출자 셋(`CFE_ES_ParseFileEntry`, `CFE_ES_ProcessControlRequest`, `CFE_ES_StartAppCmd`)의 제 본문에 그 필드 쓰기 없음, 그 호출자의 callee와 그 위 호출자가 반환 뒤 하는 일은 읽지 않음. 개정 4가 더한 문장(§12 #8, #9, #11): "it concerns the writes of this call: whether their keys (`CFE_ES_Global.TaskTable[TaskId]`) name the record of the child this call starts … is not decided", "it covers the paths on which those writes run: where the spawn operation `OS_TaskCreate` reports a failure after its thread has started and the creator skips them, the child may read the earlier value (not read in this revision)". 기댄 것: 선언된 가정 셋과 필드 단위 규칙(#9의 정적 인스턴스와 필드의 완전성), 형 단위로는 #9가 정적 인스턴스가 아님, 그리고 경로 C의 전제 여섯(잠금 정체성의 겹침은 접근 경로로만, 본문 없는 함수는 그 호출에서 받은 함수만 되부르고 그 효과는 그 호출에서 읽음, 두 번 돌아오는 함수는 이름 목록으로; 둘째 차례에서 더한 mutex는 잡은 스레드만 풀고 P0 기본 연산으로만 바뀜, 표시 없는 간접 호출의 대상은 다 풀림, 풀리지 않은 간접 호출은 주소가 잡힌 함수만 부름). 계층(rel 2950) `… rests-on(…; premises of path C (static_facts §5h, §5i: …)) P0-unverified(dlsym, pthread_cond_timedwait, pthread_cond_wait, pthread_getspecific, pthread_mutex_lock, pthread_mutex_unlock)`.
+  - 개정 5의 새 조건을 C5 행이 통과한 근거 [M][F]: 두 생성자(`CFE_ES_AppCreate`, `CFE_ES_CreateChildTask`)의 spawn 뒤 호출이 돌 수 있는 함수 집합(6.4.2 40·33개, 6.4.1 43·33개)에 생성자가 없다(재진입 없음); 그 집합의 간접 호출은 `builtin` `va_start`·`va_end`뿐이고 함수를 넘기는 호출이 없다(되부름 없음); C5의 `incomplete-source` 호출은 0이다; LOCK_IDS 19행 가운데 내부 연결 객체로 `not-static`이 된 것은 0이다(#9는 외부 연결의 `OS_mut_sem_table`과 `CFE_ES_Global`) [M: facts의 `[calls]`·`[lockpaths]`를 걷는 검증자 스크립트를 이 출력에 다시 돌림, LOCK_IDS]. 전제 (라): OSAL은 mutex를 `PTHREAD_MUTEX_RECURSIVE`로 만들고(osapi.c L3177, 두 판; 다른 스레드의 해제는 EPERM), `OS_mut_sem_table[].id`에 닿는 저장은 `OS_MutSemCreate`의 `pthread_mutex_init`(L3195)과 `OS_MutSemDelete`의 `pthread_mutex_destroy`(L3253)뿐이며, `CFE_ES_Global.SharedDataMutex`의 writer는 `cfe_es_start.c:235`의 `OS_MutSemCreate` 하나이고 지우는 곳이 없다 [F]. 읽는 쪽은 모두 먼저 잠그고(L790, L900, L440, L545, L1275; 6.4.1 L1337) 잠금과 읽기 사이에 `OS_TaskGetId` 말고 부르는 것이 없다 [F](검증자 확인과 같음). 그래서 개정 5에서도 C5의 6 + 14행은 그대로 `proven-impossible`이다 [M].
+  - 개정 4의 새 조건을 C5 행이 통과한 근거 [M][F]: 생성자 `CFE_ES_AppCreate`와 읽는 함수·문맥 함수는 주소가 잡히지 않았다(facts `{defined}`); 다섯 빌드 가운데 C5는 두 번 돌아오는 함수를 부르지 않는다(머리 "calls of them in these facts: 0"; 6.4.2 cfe·osal posix·psp pc-linux·apps 소스에 `setjmp`·`longjmp` 없음 [F: 검증자 grep]); `RecordUsed`·`AppId`는 스칼라 필드다; spawn 뒤 생성자의 호출(6.4.2 cfe_es_apps.c L630·L634·L648·L656·L659·L669·L676, cfe_es_api.c L1058·L1071·L1084)은 #9로 조건 대기에 닿지 않는다(프로그램의 조건 대기는 OSAL `OS_BinSemTake`·`OS_BinSemTimedWait`·`OS_CountSemTake`·`OS_CountSemTimedWait`가 제 표 mutex로 하는 것뿐; LOCK_PATHS 같음) [M][F]; spawn부터 마지막 TaskRecord 쓰기까지 해제 호출이 없다(L634는 쓰기 없이 돌아가는 오류 가지) [F]. 그래서 개정 4에서 C5의 6 + 14행은 그대로 `proven-impossible`이다 [M].
+  - `GetAppIDInternal` L1825를 부르는 호출마다: L445 `CFE_ES_ExitApp`(C32, rel 2961), L551 `CFE_ES_RunLoop`(C33, rel 2972) → **`proven-impossible`**. **L667 `CFE_ES_WaitForStartupSync`(C34, rel 2983), L1020 `CFE_ES_CreateChildTask`(C35, rel 2994), L1284 `CFE_ES_ExitChildTask`(C36, rel 3005) → `not graded`**. L1858 `CFE_ES_LockSharedData`(C37, rel 3016), L1892 `CFE_ES_UnlockSharedData`(C38, rel 3027) → `undecidable`(failure path).
+  - 다섯 스크립트 앱(`sample_lib`, `sample_app`, `ci_lab`, `to_lab`, `sch_lab`; basis `startup.entry[0..4]`)의 소스는 `CFE_ES_WaitForStartupSync`, `CFE_ES_CreateChildTask`, `CFE_ES_ExitChildTask`를 부르지 않는다. 그 셋을 부르는 것은 코어 task(ES·SB·EVS·TBL·TIME)와 `cfe_es_perf.c`다 [F: 6.4.2 트리 grep]. 도구의 정적 행위자 집합도 같다 [M].
+  - L1284는 다른 spawn의 행으로만 "불가"다: `CFE_ES_CreateChildTask` spawn(L1047, 자식 `CFE_ES_PerfLogDump`·`CFE_TIME_Local1HzTask`·`CFE_TIME_Tone1HzTask`)의 C16(rel 2789) `proven-impossible`. L667·L1020은 어느 spawn의 자식 문맥도 아니다(코어 task를 만드는 `CFE_ES_CreateObjects`의 spawn은 union 멤버로 entry를 읽어 풀리지 않는다, §8 항목 11).
+  - 6.4.2의 AppRecord 행 C19(rel 2822)·C20(rel 2832)은 수정 단계의 `proven-impossible`에서 **`undecidable`**이 되었다: `CFE_ES_AppRecord_t.RecordUsed`는 FIELD_STATUS 필드 단위 DISABLED다(cast 10, other fields 2) [M](§11 #14).
+- "불가"는 다섯 빌드를 통틀어 C 행에서만 나오고(0 / 0 / 0 / 6 / 14), 모두 정적 인스턴스 #9다. 6.4.1의 6은 `CFE_ES_CreateChildTask` spawn의 행이다(그 함수는 6.4.1에서도 spawn에 걸쳐 #9를 잡는다). 수정 단계의 14 / 30 가운데 8 / 14는 자식이 닿지 않는 호출 문맥이었고(이제 `not graded`), 6.4.2의 2는 C19·C20이다 [M](`summary.txt` fix1 대비 절). 정적 인스턴스가 아닌 잠금으로는 "불가"가 하나도 없다 [M].
+
+**판정**: PARTIAL(셋째 수정 두 차례에서 그대로). 6.4.1의 조건(spawn ∅, 등록 쓰기 {#9}, 읽기 검사와 반환, 잠금 창)과 6.4.2의 L800·L445·L551·L1858·L1892는 조건대로 나왔다. 미달은 6.4.2의 L667·L1020·L1284다. 그 셋은 `not graded`다(개정 4는 자식의 후손까지 보지만 다섯 스크립트 앱은 스레드를 만들지 않고 spawn 호출에 닿지 않는다 [M][F: 6.4.2 apps에 `CreateChildTask`·`OS_TaskCreate`·`pthread_create` 없음]; 스레드 집합이 완전하므로 `undecidable`이 아니라 `not graded`다. 개정 5에서 그 행 문장은 "their code makes no indirect call whose targets are not resolved"를 단다: 자식 코드에 대상이 풀리지 않은 간접 호출이 없다 [M], rel 2990·3001·3012). 이것은 개정 3의 건전성 수정의 결과다: 수정 단계는 자식(스크립트 앱)이 실행하지 않는 호출 문맥을 그 호출 지점의 잠금으로 "불가"라 했다(§11 #9). ED의 조건은 그 셋을 이 spawn 자식의 읽기 지점으로 적었으나, 이 빌드의 자식은 그 함수들을 부르지 않는다 [F]. 그래서 이 조건은 문자 그대로는 건전한 규칙으로 채워질 수 없고, ED 조건의 전제를 다음 개정에서 고쳐야 한다(§8 항목 16).
+- 정적 인스턴스 #9의 판정과 필드의 완전성은 S4의 필드 단위 규칙과 선언된 가정 셋에 기댄다. 6.4.1의 "잠금 창" 행도 그 정체성을 이름 붙이므로 같은 것을 `rests-on`으로 적는다. 다만 `possible` 등급 자체는 형 단위 규칙으로도 그대로다(잠금이 정적 인스턴스가 아니어도 창은 창이다). 형 단위 규칙을 고르면 6.4.2의 "불가"는 개정 3의 분기 규칙에서 `undecidable`(must 정체성 미증명)이 된다. 그래서 그 규칙에서의 대비는 6.4.1 `possible` 대 6.4.2 `undecidable`이다 [I: 코드의 분기; fixture `relsound.c` `ptr_*`에서 같은 분기를 확인 M]. 수정 단계의 "형 단위로는 '결정 불가'가 된다"는 그 코드에서는 틀렸다(정적이 아닌 공통 잠금이 `possible`로 갔다, §11 #12, #15).
+- **"불가"가 말하지 않는 것** (셋째 수정, §12 #9): `OS_TaskCreate`는 `pthread_create`(osapi.c L645)가 성공한 뒤에도 `pthread_detach`(L663 → L672)나 `pthread_attr_destroy`(L675 → L684)가 실패하면 `OS_ERROR`를 돌려준다(두 판 같음) [F]. 그때 스레드는 돌고 있고 `*task_id`(L690)는 쓰이지 않는다. 6.4.2 `CFE_ES_AppCreate`는 오류 가지(L628–L636)로 가 TaskRecord를 쓰지 않는다 [F]. 그 자식의 `CFE_ES_GetAppID`(L790–L806)는 등록되지 않은 TaskTable 칸을 읽어 `CFE_ES_ERR_APPID`를 돌려준다: 이 행들이 대표하는 반사실(자식이 등록 전 값을 봄)이 그 길에서 실현된다 [I]. "불가"는 쓰기가 실행되는 길에서 문자 그대로 참이지만, 그 길을 덮지 않는다는 것을 이제 문장이 적는다. 그래서 T3 6.4.2의 "불가 증명"은 "등록이 실행되는 길에서, 생성자 한 호출의 범위로, 가정 셋·필드 단위 규칙·경로 C 전제 여섯 아래"로만 인용한다. 유도 spawn 연산의 "스레드 시작 뒤 실패" 길을 사실로 찾아 그 길을 결정 불가로 내는 것은 하지 않았다(§8 항목 21).
+
+### T4 C5 수명 — **PASS(질의 수준)**
+
+**통과 조건**: `OS_task_table.id`의 writer에 `pthread_create`(P0) 포함; 진입 함수가 그냥 반환하는 경로에 해제 없음; 해제 쓰기는 `OS_TaskDelete`·`OS_TaskExit`와 `OS_TaskCreate` 실패 경로(L572, L652, L667, L679), 초기화는 `OS_API_Init`(L279)로 따로 분류; `OS_TaskRegister` 검색에 활성 검사 없음. #72 관계와 다른 행.
+
+**나온 것** (c5_641; c5_642는 같은 줄 번호에 같은 내용)
+- 이름 공간 `OS_task_record_t.id`(rel 1301): 검색 `OS_TaskRegister`의 루프 `osapi.c:921:5`, 키 `id ==`(L923, 지역 `pthread_id`와 비교, rel 1303); `OS_FindCreator`(L3786)의 `pthread_equal`(rel 1302). 활성 검사(rel 1304) 없음, `free == 0` 사용 중·`free == 1` 빈 칸(rel 1305–1306).
+- writer(rel 1321): `writers 6 from WRITERS (4 of them … covers-more-than-the-field)`.
+- P0 writer(rel 1328): `pthread_create (P0 thread-create) stores through arg 0 [&(OS_task_table[possible_taskid].id)] at osapi.c:645:19 in OS_TaskCreate (joined here from ARGFLOW and P0_TABLE: the extraction's writer sets -- WRITERS, FACT_LOCS, FIELD_STATUS -- have no row for this store)`.
+- 진입 경로(rel 1329): `… no function of this program runs after that entry returns (thread-specific keys created with a null destructor only: pthread_key_create at osapi.c:340:10 (arg 1 [NULL]); no cleanup handler push in the program), so the table has no write on that path (not read in this revision: handlers registered for process exit (atexit, at_quick_exit, on_exit), destructor functions, and units built with exceptions, …)`. 6.4.1 트리(단위 시험 제외)에 `atexit`·`at_quick_exit`·`on_exit`·`__attribute__((destructor))`가 없고 compile DB에 `-fexceptions`가 없다 [F: grep].
+- `free` 쓰기 분류(rel 1307–1320): L279 initialization; L551·L697 reservation; L572·L652·L667·L679·L761·L793 release. 블록 계층(rel 1332) `B P0 R basis-deviation(…osapi.c…)`.
+
+**판정**: 조건이 문자 그대로 모두 나왔으므로 PASS이되 **질의 수준**으로 적는다. (1) "writer에 `pthread_create` 포함"은 relations의 질의 시점 결합이다. ED §3.0 G10은 P0 요약을 추출에 넣어 `id`가 escape(DISABLED)를 벗어나게 하라고 했으나, facts의 FIELD_STATUS·FACT_LOCS에서 `id`는 여전히 DISABLED다. 빠진 것은 추출 쪽 G10 writer다(§8 항목 10, §11 #13). (2) 진입 경로 문장은 읽지 않는 조건을 이제 이름으로 적는다(§11 #23). (3) `OS_TaskRegister`의 비교 상대가 `pthread_self()`라는 것은 지역 변수 정의 사실이 없어 행에 나오지 않는다(T2 (a)와 같은 공백). 6.4.1 원문 대조: `pthread_create(&OS_task_table[possible_taskid].id, …)` L645, `pthread_key_create(&thread_key, NULL)` L340, `OS_TaskRegister` L921–923 [F](검증자 확인과 같음).
+
+### T5 입력 계층 — **PARTIAL**
+
+**통과 조건**: 위 행마다 입력 계층이 B/P0/L0/R만이다. 사례 계층 0, G0 0. P0·L0 항목마다 판과 원문 줄.
+
+**나온 것** (`summary.txt` T5 절)
+- 행 수와 계층: c1_pre 431, c1_post 431, r2 338, c5_641 178, c5_642 175, 합 1,553행(셋째 수정 첫째 차례 1,480, 둘째 수정 1,438). 계층은 `B P0 R`, `B P0 L0 R`와 그 둘에 `(writers: rule targets)`가 붙은 것뿐이다. `case:`·`hand-entered:` 표시가 붙은 행 0.
+- **`P0-unverified(...)`**(개정 3, §11 #18; 개정 4에서 잠금을 이름 붙인 C 행과 C의 모든 등급에 잠금 기본 연산을 붙임, §12 #14): 371 / 371 / 232 / 149 / 147행(셋째 수정 첫째 차례 351 / 351 / 203 / 149 / 147: 둘째 차례의 새 C 행 20 / 20 / 33 가운데 잠금 기본 연산을 다는 행; 둘째 수정 272 / 272 / 138 / 149 / 147). 잠금을 이름 붙인 행 106 / 106 / 79 / 39 / 38 가운데 잠금 기본 연산이 없는 행은 0이다 [M]. 아래 항목별 수는 둘째 수정의 것이다(개정 4의 항목별 수는 `T/count/summary.txt` T5 절). 이름 붙은 항목(행 수, C1 pre / R2 / C5 6.4.2): `dlsym` 188 / 0 / 85(스크립트 entry), `strncmp` 99 / 55 / 15, `strcmp` 25 / 10 / 16(검색 비교), `abort` 35 / 22 / 0, `pthread_exit` 6 / 0 / 14, `exit` 2 / 1 / 3(F8 종료 사슬), `pthread_mutex_lock`·`unlock`·`timedlock`, `pthread_cond_wait`·`timedwait` 14 / 71 / 16(잠금을 이름 붙인 행), `clock_nanosleep` 1 / 56 / 0(F8 지연), `pthread_getspecific` 0 / 0 / 32(자기 정체성), `pthread_equal` 2 / 2 / 0. 원문 대조된 `pthread_create`만 쓰는 행에는 표시가 없다.
+- `basis-deviation(…)` 0 / 0 / 0 / 159 / 156(이름 공간 블록 0 / 0 / 0 / 8 / 8). `rests-on(…)` 0 / 0 / 55 / 17 / 16(R2: B 행의 await 인정; C5: 정적 인스턴스 #9를 이름 붙인 C 행 — 불가 6·14, 잠금 창 11, 완전성·호출자 검사로 내려간 C19·C20).
+- 머리: P0 표 개정 3의 판과 scope, P0 비교 표, basis 편차, `P0-unverified`의 뜻과 `pthread_create` 원문 대조의 범위(upstream glibc 2.39 사본; 빌드가 링크하는 배포판 패키지 `2.39-0ubuntu8.9`의 패치는 대조 안 함 [U]).
+- P0 표(facts `[p0]`): 72항목 모두 판 표기. 원문 대조 줄은 `pthread_create` 1개, 71개는 `source unverified`. P0 비교 표 13항목도 모두 unverified.
+
+**판정**: 사례 계층과 G0이 0이라는 핵심 조건은 통과다. 미달은 둘이다.
+- "P0 항목마다 원문 줄" 조건은 84개(71 + 비교 13)가 unverified이고, 행의 다수가 그 항목에 기댄다(`P0-unverified` 371 / 371 / 232 / 149 / 147행). PI A4가 정해지지 않았으므로 그 기본값("미대조 P0 항목 n개 의존"을 모든 결과에 표시하고, T5는 그 의존이 0일 때만 통과)을 따른다: 표시는 이제 행마다 있고, 의존이 0이 아니어서 통과로 세지 않는다. 대조된 한 항목도 upstream 사본에 대한 것이고 배포판 패치는 [U]다.
+- 사람이 넣은 것과 결정이 대기 중인 것에 기대는 행: C5 행의 거의 전부(159 / 178, 156 / 175)가 PI D7의 `front_end_diagnostic` 편차에, R2의 await 55행과 C5의 #9 행 17·16이 선언된 가정과 필드 단위 규칙(PI 결정 대기)에 기댄다. C5의 "불가" 6·14행은 경로 C의 전제 셋(§1.2)에도 기댄다.
+
+### T6 정상 대조 — **PASS**
+
+**통과 조건**: C5 OSAL `*GetIdByName`·`*Create` 6쌍(task, queue, binsem, countsem, mutsem, timer)과 C1·R2의 `OS_ObjectIdFindNextMatch` 콜백 3종이 A로 인식된다. 정상 호출자는 신호만 내고 위반 확정은 내지 않는다.
+
+**나온 것**
+- C5(두 판 같음): `OS_task_record_t.name`(rel 1333) lookups `OS_TaskGetIdByName#1` / creators `CFE_ES_AppCreate#3 CFE_ES_CreateChildTask#1 OS_TaskCreate#1`; `OS_queue_record_t.name`(rel 1277); `OS_bin_sem_record_t.name`(rel 1185), `OS_count_sem_record_t.name`(rel 1206), `OS_mut_sem_record_t.name`(rel 1251), `OS_timer_record_t.name`(rel 1365) 각 `GetIdByName#1` / `Create#1`.
+- C1(두 판)·R2: A2 콜백 검색 3종. 키 `OS_common_record_t.name_entry`(`strcmp`, C1 rel 335 / R2 rel 96), `OS_filesys_internal_record_t.virtual_mountpt`(`strncmp`, rel 761 / 353), `OS_impl_task_internal_record_t.id`(`pthread_equal`, rel 1887 / 1045).
+- 위반 근거 칸: 다섯 빌드 1,553행 모두 `unconfirmed`.
+
+**판정**: 조건대로 나왔다. 다만 "정상 호출자는 위반 확정을 내지 않는다"는 기록을 주지 않았기 때문에 자명하게 성립한다(§8 항목 1).
+
+### T7 결정성 — **PASS**
+
+`T/twice.txt`: 같은 basis에서 extract(`--targets-rule R-T1,R-T2`)와 relations를 다시 돌렸다. facts가 다섯 빌드 모두 같다(`a26d580f…`, `20e2a73f…`, `55021411…`, `1b4f794a…`, `c7bb3c09…`). relations도 같다(`32fe9b34…`, `78552970…`, `75e6565d…`, `db98c85f…`, `44ad5c55…`). fixture golden은 relations를 두 번 돌려 같은 바이트를 요구한다(`relsound_np` 포함).
+
+## 5. 반증 조건 (ED §6, RV2 §11 단계 2, §12)
+
+- **조건**: T1–T3 가운데 하나라도 사례 입력을 더하지 않으면 관계가 나오지 않으면, 가설("사례별 Φ 없이 근거 있는 관계를 낸다")은 아직 성립하지 않은 것으로 보고한다.
+- **이번 결과** [M]: T1–T3은 사례 입력(프로필, 명령줄 어휘, `--target`, G0, rspec·`.kzm`·manifest) 없이 돌렸고, 세 사례의 관계 행이 나왔다(T1 B65, T2 A20·A21, T3 C30–C38). **ED §6의 반증 조건은 충족되지 않았다.** 사례 입력을 더해야 했던 시험은 없다. 이 결론은 아래 A2의 읽기와 따로 둔다: ED §6의 뜻에서 반증되지 않았다는 것과 탐지 근거라는 것은 다르다.
+- **PI A2 사전 등록으로 읽기** [I] (`plan/PI_DECISIONS_PENDING_20261030.md` A2 ④⑤, A5 표; A2는 결정 대기이고, 결정되지 않은 동안 이 문서는 그 권고안을 기준으로 표시만 한다)
+  - **④ "미확인·미해결 표시로 통과"는 "관계를 낸다"의 통과**다. T1의 순서 조건은 "고정 미확인"으로 채워졌다. T2의 사례 행 A21은 구획만 같은 짝(`key unresolved`)이고, CF 조회는 SCH_LAB과도 똑같이 짝을 짓는다(rel 423 `key unresolved (lookup)`); 실현 가능성 `undecidable`, 뒤집힘 `static-undetermined`다. 그래서 T1·T2는 순서 위반 탐지의 근거로 세지 않는다.
+  - **⑤ 시험이 계기가 된 개정 뒤의 통과는 "개정 n 뒤 통과"**다.
+    - T1: F2의 돌려주는 지역 변수 도달 정의 규칙은 T1 재료를 보고 넣었다(A5 표, S2:59). T1은 **그 규칙 개정 뒤 통과**다.
+    - 두 수정 단계의 개정 자체가 T1–T3 행을 계기로 했다: 수정 단계(relations 개정 2) 지적 2(T2 종료 사슬), 3(T3 C19·C20), 5(C1 B73 행위자); 둘째 수정(relations 개정 3) 지적 1(C1 B73), 3(T1 등급 문장), 6(T2 probe-create), 9–15(T3 C 행); 셋째 수정(relations 개정 4)과 그 둘째 차례(개정 5)는 사례 행이 아니라 검증자의 반례 fixture를 계기로 했고 T1–T3 행의 등급을 바꾸지 않았다(문장만 더함). 그래서 T1(PASS)은 "relations 개정 2·3 뒤의 통과"로, T2·T3(PARTIAL)의 채워진 부분도 같은 개정 뒤의 것으로 적는다. 그 사례들에 대해서는 "사례 입력 없이"의 근거로 세지 않는다. 그 근거는 동결 평가나 새 호출자 평가에서만 나온다.
+  - 그래서 "사례별 Φ 없이 근거 있는 관계를 낸다"는 이 다섯 개발 사례에서 **관계를 냈다**는 데까지만 말한다.
+- **그래도 "성립"이라고 적지 않는 이유** [I]
+  1. T2의 종료 도달이 미달이다. 흐름 민감한 도달 정의 사실이 없고(may), 종료 연산의 F8 유도는 CF의 길에서 P0 종료에 닿지 않는다(guard가 모두 거짓, 남는 길은 탈출 없는 루프). ED의 F8 예 자체가 원문과 어긋난다(§4 T2 (b)). 사례 입력으로 메울 것은 아니다.
+  2. T3의 6.4.2 읽기 지점 셋(L667, L1020, L1284)은 자식이 실행하지 않는 문맥이어서 등급이 없다. ED가 그 셋을 이 spawn 자식의 읽기 지점으로 적은 전제가 원문과 어긋난다(§4 T3).
+  3. "근거 있는"의 무게가 고르지 않다. T1의 순서는 "고정 미확인"이고, C1의 반대 순서 가능성도 "결정 불가"다. 위반 근거는 실행 기록이 있어야 생긴다(RV2 §5.4). T3의 "불가 증명"은 선언된 가정 셋과 필드 단위 규칙(PI 결정 대기)에 기대고, 범위는 생성자의 한 호출이다. 6.4.1의 "잠금 창"(T3의 반대 순서 가능 조건)도 #9를 정적 인스턴스로 이름 붙이므로 같은 규칙과 가정에 기댄다(`rests-on`; `possible` 등급 자체는 형 단위 규칙에서도 같다, §11 #16). 셋째 수정에서 드러난 것: "불가"는 경로 C의 전제(첫째 차례 셋: 잠금 정체성의 겹침은 접근 경로로만, 본문 없는 함수는 그 호출에서 받은 함수만 되부름, 두 번 돌아오는 함수는 이름 목록; 둘째 차례 셋: mutex는 잡은 스레드만 풀고 P0 기본 연산으로만 바뀜, 표시 없는 간접 호출의 대상은 다 풀림, 풀리지 않은 간접 호출은 주소가 잡힌 함수만 부름)에도 기대고, 등록이 실행되는 길에 대한 것이다(`OS_TaskCreate`가 스레드를 시작한 뒤 실패하는 길은 덮지 않는다, §4 T3). 둘째 차례의 반례 넷(생성자 재진입, 불완전한 간접 대상, 되부름의 해제, 헤더의 `static` mutex)은 실행 사본에서 "불가"가 막는다는 순서를 보였다: 문서가 적은 의존만으로는 "불가"가 서지 않았다(§13).
+  4. 남은 수작업 입력이 있다. L0(recipe의 시작 스크립트 블록), C5 `front_end_diagnostic` 2줄(PI D7; C5 행의 대부분이 기댐), unverified P0 원문 84개(행 다수가 `P0-unverified`로 기댐), P0·비교 표 자체가 그렇다.
+  5. 사례 관계는 행 175–431개 가운데 1–8개다(등급 있는 것 1–5개, §6). 질의는 사례 관계를 골라내지 않는다. 고르는 것은 이 문서의 평가용 조회다.
+  6. 다섯 사례는 개발 집합이다(ED §5 R7). 동결 뒤 고른 구성으로 따로 평가하지 않았다.
+
+## 6. 후보 부담 [M]
+
+`T/count/burden.tsv`. "사례 관계 행"은 평가용 조회로 고른 행이다. C1은 짝이 있는 이름 공간 `OS_common_record_t.name_entry`의 CF `:993`(수정 후 `:1003`) 조회 A21과 BP `:126` 조회 A20, 2행이다. 같은 조회가 콜백 이름 공간 `OS_filesys_internal_record_t.virtual_mountpt`에 낸 A40·A48은 짝이 없고 필드 기반 may의 부산물이어서 세지 않는다(S5 문서는 이것까지 4행으로 셌다: §10 지적 12). R2는 T1의 B65 1행, C5는 `CFE_ES_AppCreate` spawn × `RecordUsed` × `GetAppID`/`GetAppIDInternal` 읽기 지점 8행이다.
+
+| 빌드 | A(조회 사용) | B | C | 합 | 이름 공간 블록 | 사례 관계 행(비율) | 그 가운데 등급 있는 행(비율) | flip static-possible | proven-impossible | possible | undecidable | not graded |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| c1_pre_tx | 127 | 170 | 134 | 431 | 13 | 2 (0.5%) | 2 (0.5%) | 2 | 0 | 112 | 318 | 1 |
+| c1_post_tx | 127 | 170 | 134 | 431 | 13 | 2 (0.5%) | 2 (0.5%) | 2 | 0 | 112 | 318 | 1 |
+| r2_core | 68 | 155 | 115 | 338 | 8 | 1 (0.3%) | 1 (0.3%) | 1 | 0 | 79 | 254 | 5 |
+| c5_641 | 66 | 73 | 39 | 178 | 31 | 8 (4.5%) | 5 (2.8%) | 16 | 6 | 11 | 147 | 14 |
+| c5_642 | 66 | 71 | 38 | 175 | 31 | 8 (4.6%) | 5 (2.9%) | 16 | 14 | 0 | 147 | 14 |
+
+- **사례 관계 행의 셈** (셋째 수정, §12 #16): C5의 8행에는 개정 3부터 `not graded`인 3행(6.4.1 C35–C37, 6.4.2 C34–C36: 자식이 닿지 않는 문맥이고 이 판에서는 자식의 읽기가 아님)이 들어 있다. 그래서 등급이 있는 행만 센 수(5행, 2.8% / 2.9%)를 함께 적는다. 둘째 수정 문서와 PI B7·STATUS의 "0.3–4.6%"는 그 3행을 센 범위다. 등급 있는 행으로는 0.3–2.9%다.
+- **셋째 수정 첫째 차례 대비 변화** (둘째 차례, `T/count/against_fix3.tsv`, 행 머리로 비교) [M]
+  - A·B: 행 수와 등급이 다섯 빌드 모두 그대로다. C5의 C 행도 그대로다(39·38, 등급 변화 0).
+  - C: C1 114 → 134(빠짐 0, 새로 20, 등급이 바뀐 행 2), R2 82 → 115(빠짐 0, 새로 33, 바뀐 행 1).
+    - 바뀐 행 셋은 모두 첫째 차례의 `not graded`이고 이제 `undecidable`이다: C1 `CFE_ES_CreateObjects:767` spawn의 `CFE_ES_WaitForSystemState` 문맥(그 spawn의 entry를 읽는 정적 이미지에 상수 아닌 잎 18개와 다른 union 멤버의 함수 잎 7개가 있어 스레드 집합이 완전하지 않음, §13 #9), C1·R2 타임베이스 spawn(`os-impl-timebase.c:350`)의 `OS_TaskDelay_Impl` 문맥(자식 `OS_TimeBasePthreadEntry`의 코드가 대상이 풀리지 않은 간접 호출을 하고 `OS_TaskDelay`가 주소가 잡힌 함수에서 돈다, §13 #7).
+    - 새 행은 모두 그 타임베이스 spawn의 것이다: 그 스레드가 정적 호출 그래프로 닿지 않지만 주소가 잡힌 함수에서 도는 읽기(`timespec.tv_sec`·`tv_nsec`, `OS_impl_timebase_internal_record_t.assigned_signal`; "reads taken in only so" 11 / 11)와 그 문맥이다. C1 20행 가운데 19, R2 33행 가운데 28이 `undecidable`이고 나머지 1 / 5는 `not graded`(그 호출의 함수가 주소가 잡힌 함수에서 돌지 않음: C1 `OS_SelectMultiple_Impl`, R2 `OS_GetLocalTime`·`OS_TimeToRelativeMilliseconds`·`OS_CountSemTimedWait_Impl`의 문맥)다.
+  - 등급 수: proven-impossible 0 / 0 / 0 / 6 / 14 그대로; possible 112 / 112 / 79 / 11 / 0 그대로; undecidable 297 / 297 / 225 / 147 / 147 → 318 / 318 / 254 / 147 / 147; not graded 2 / 2 / 1 / 14 / 14 → 1 / 1 / 5 / 14 / 14.
+  - 개정 5의 다른 새 조건(생성자의 재진입, `incomplete-source` 호출, 되부름의 해제, 내부 연결 객체, probe-create의 행위자)은 다섯 빌드에서 등급을 바꾼 행이 없다(위의 셋 말고 같은 머리의 행 등급 변화 0 [M]). C1·R2의 "불가" 행은 원래 0이고, C5에는 `incomplete-source` 호출·재진입·되부름·내부 연결 잠금이 없다(§4 T3). 그 조건들이 등급을 바꾸는 경우는 fixture `relsound.c`가 보인다(§13).
+- **둘째 수정 대비 변화** (셋째 수정 첫째 차례의 기록, `T_F3/count/against_fix2.tsv`, 행 머리로 비교; 문맥 머리의 "닿지 않음" 문구가 바뀐 것은 같은 머리로 맞춤) [M]
+  - A·B: 행 수와 등급(실현 가능성, 뒤집힘)이 다섯 빌드 모두 그대로다.
+  - C: C1 96 → 114(빠짐 0, 새로 18, 등급이 바뀐 행 18), R2 76 → 82(빠짐 0, 새로 6, 바뀐 행 4), C5 39·38 그대로(바뀐 행 0).
+    - 바뀐 행은 모두 둘째 수정의 `not graded`다. C1의 18행은 `CFE_ES_CreateObjects:767`·`CFE_ES_AppCreate:768` spawn의 문맥으로, 자식(코어 task main 다섯, 스크립트 앱 다섯)의 후손(스크립트 앱, `CFE_ES_BackgroundTask`, TIME 1Hz 두 task, BP CLA 두 task)이 그 호출에 닿아 이제 호출 지점의 잠금으로 등급을 받았다: 모두 `possible`. 검증자가 짚은 `CFE_ES_RunExceptionScan` 문맥(둘째 수정 C46·C87·C91)도 여기에 든다(`CFE_ES_BackgroundTask`가 후손). R2의 4행: `StartAppTask:664` spawn의 `CFE_ES_RunLoop` 문맥(둘째 수정 C11, 이번 C11)과 `CreateObjects:810` spawn의 `CFE_ES_WaitForStartupSync` 문맥(C45)은 `undecidable`(스레드 집합이 완전하지 않음: 앞의 것은 트램펄린 `CFE_ES_TaskEntryPoint`가 entry를 풀지 못한 `cfe_es_apps.c:849:13`의 스레드도 대신하고, 뒤의 것은 자식 코드가 그 호출에 닿음), `CFE_ES_GetTaskInfo` 문맥 둘은 후손이 닿아 `possible`이다. 검증자가 짚은 R2 C65·C69(`RunExceptionScan`)도 후손으로 등급을 받았다.
+    - 새 행은 후손이 닿는 읽기와 문맥(C1 18, R2 6): `CFE_ES_RunLoop`·`CFE_ES_RunAppTableScan`·`CFE_ES_CleanUpApp`·`CFE_ES_GetAppInfo`·`CFE_ES_RunExceptionScan`의 읽기 문맥이다. 모두 `possible`이다(읽기 잠금 없음, 잠금 창, 잠금 없는 spawn 뒤 쓰기) [M].
+    - 남은 `not graded`: C1 2(`CFE_ES_WaitForStartupSync:663`의 `CFE_ES_WaitForSystemState` 문맥, 타임베이스 spawn의 `OS_TaskDelay` 문맥), R2 1(타임베이스 spawn의 `OS_TaskDelay`), C5 14·14(T3의 셋 포함; C5의 자식은 스레드를 만들지 않는다).
+  - 등급 수: proven-impossible 0 / 0 / 0 / 6 / 14 그대로; possible 76 / 76 / 71 / 11 / 0 → 112 / 112 / 79 / 11 / 0; undecidable 297 / 297 / 223 / 147 / 147 → 297 / 297 / 225 / 147 / 147; not graded 20 / 20 / 5 / 14 / 14 → 2 / 2 / 1 / 14 / 14.
+  - 다섯 빌드에서 개정 4의 다른 새 조건(callee 안의 조건 대기, 겹치는 정체성의 해제, 되부름·풀리지 않은 간접 호출 문맥, 주소가 잡힌 생성자, 두 번 돌아오는 함수, 스칼라 배열)은 등급을 바꾼 행이 없다: "불가" 행은 C5의 #9 행뿐이고 그 조건들을 모두 통과한다(§4 T3). 뒤집힘 칸의 평가 대상을 spawn 뒤 쓰기로 바꾼 것도 기존 행의 뒤집힘 등급을 바꾸지 않았다 [M]. 그 조건들이 등급을 바꾸는 경우는 fixture `relsound.c`가 보인다(§12).
+- 아래 "수정 단계 대비"와 "S5 대비"는 둘째 수정과 수정 단계의 기록이다(수와 행 번호는 그때 출력).
+- **수정 단계 대비 변화** (둘째 수정의 기록, `T_F2/count/against_fix1.tsv`, 행 머리로 비교) [M]
+  - A·B: 행 수와 등급이 다섯 빌드 모두 그대로다(A 127 / 68 / 66, B 170 / 155 / 73·71). C1 B 행의 행위자 칸은 트램펄린 root가 늘어 바뀌었고(읽는 쪽에 코어 task main·스크립트 앱), B73의 실현 가능성 문장이 정적 이미지 문장으로 바뀌었다(§4 T1 참고). A 행에는 probe-create 극성, handling 줄, dependency 문장, `P0-unverified`가 더해졌다.
+  - C: C1 95 → 96(머리 문장이 바뀐 행 6과 새 7: `StartAppTask:588` spawn의 자식이 트램펄린을 통해 15 root가 되어 "자식이 닿지 않음" 표시가 바뀌고 문맥이 하나 늚), R2 76 → 76(R2 `linux_sysmon` spawn의 읽기가 entry 문맥이 됨), C5 그대로. 등급이 바뀐 C 행 20 / 20 / 5 / 14 / 16: 대부분 `possible`·`proven-impossible` → `not graded`(자식이 닿지 않는 호출 문맥), 6.4.2의 C19·C20은 `proven-impossible` → `undecidable`(필드가 필드 단위 DISABLED).
+  - 등급 수: proven-impossible 0 / 0 / 0 / 14 / 30 → 0 / 0 / 0 / 6 / 14; possible 95 / 95 / 76 / 17 / 0 → 76 / 76 / 71 / 11 / 0; undecidable 297 / 297 / 223 / 147 / 145 → 297 / 297 / 223 / 147 / 147; not graded 0 → 20 / 20 / 5 / 14 / 14.
+  - 다섯 빌드에서는 C의 다른 새 조건(레코드 전체 쓰기, 덮는 쓰기, 다시 잡힌 잠금, 정적 인스턴스 아닌 공통 잠금, 풀리지 않은 호출, 생성자 호출자의 제 본문 쓰기)이 등급을 바꾼 행이 없다: 바뀐 행은 모두 문맥(자식이 닿지 않음)과 필드의 완전성 때문이다 [M]. 그 조건들이 등급을 바꾸는 경우는 fixture `relsound.c`가 보인다(§11).
+
+- S5 출력(`T_S5/`)에 같은 계수를 고쳐 적용하면 사례 관계 행은 2 / 2 / 1 / 8 / 8, 비율 0.7% / 0.7% / 0.4% / 4.4% / 4.5%(행 286 / 286 / 248 / 180 / 177)다 [M].
+- **S5 대비 변화(수정 단계의 기록; 수는 수정 단계 출력)** (`T_F1/count/against_s5.tsv`, 행 머리로 비교) [M]
+  - C1 A: 127행 그대로, 뒤집힘 등급이 바뀐 행 10(코어 task main이 행위자가 되어 `CFE_TIME_TaskInit`의 조회 하나가 다른 행위자의 같은 키 생성자와 짝이 되고(static-possible), 9행은 key 미해결 생성자와 짝이 됨(static-undetermined)). 짝 있는 조회 26 → 36, 키까지 같은 것 1 → 2.
+  - C1 B: 135 → 170(+35, 코어 task main이 행위자가 되어 inter-actor가 됨). 등급이 바뀐 행 0.
+  - C 행: C1 24 → 95(빠짐 2, 새로 73), R2 25 → 76(빠짐 2, 새로 53), C5 41 → 39·40 → 38(빠짐 2씩). 새 행은 모두 `CFE_ES_CreateObjects`의 table walk spawn이다: 루프 본문의 쓰기가 되돌아가는 간선으로 다음 반복의 spawn 뒤가 된다(C1은 그 spawn의 entry가 이제 풀림). 빠진 행은 다섯 빌드 모두 P0 스레드 생성의 out 인자(C1·R2 `OS_impl_task_internal_record_t.id`: `OS_TaskCreate_Impl`이 `&impl->id`를 `OS_Posix_InternalTaskCreate_Impl`에 넘기고, 그 함수가 매개변수를 그대로 `pthread_create`의 인자 0에 넘긴다(`os-impl-tasks.c:586`, `:543` [F]); C5 `OS_task_record_t.id`: `pthread_create(&OS_task_table[…].id, …)`)를 소스 위치 때문에 "뒤"로 셌던 것이다. P0 의미로 그 저장은 새 스레드가 돌기 전이다. 본문 있는 유도 spawn 연산 `CFE_ES_StartAppTask`가 인자 0으로 저장하는 `CFE_ES_AppRecord_t.MainTaskId`는 spawn 뒤 쓰기(잠금 모름)로 남는다: C1 `CFE_ES_AppCreate:768` spawn의 행 C15–C19가 그것이고, R2의 table walk 행 넷이 같은 줄을 단다 [M]. 등급이 바뀐 C 행은 6.4.2의 C19·C20 둘(possible → proven-impossible)뿐이었다(둘째 수정에서 `undecidable`).
+  - "불가": 0 / 0 / 0 / 14 / 28 → 0 / 0 / 0 / 14 / 30, 모두 #9(둘째 수정에서 0 / 0 / 0 / 6 / 14).
+- 경로별 남는 행의 거름(머리 줄): B는 필드–인자 묶음 가운데 writer 없음과 한 행위자뿐을 뺀 것이다. B 가운데 callee 검사가 있는 행은 40 / 40 / 29 / 26 / 24다. A는 이름 공간 13 / 13 / 8 / 31 / 31개의 조회 사용이고, 같은 구획의 다른 행위자 생성자가 있는 조회는 36 / 36 / 20 / 2 / 2, 키까지 같은 것은 2 / 2 / 1 / 0 / 0이다. C에서 생성자 본문에는 없고 spawn 뒤 callee에서만 쓰는 필드(짝짓지 않음)는 둘째·셋째 수정에서 1,588 / 1,588 / 592 / 404 / 404다(수정 단계 1,964 / 765 / 506; 이제 그 수는 짝짓는 필드와 같은 spawn의 집합 안에서 세고, callee 쪽 레코드 전체 쓰기는 따로 센다). 생성자가 spawn 뒤 레코드 전체만 쓰고 그 형의 필드는 형 있게 쓰지 않는 레코드 형(짝짓지 않음)은 380 / 380 / 177 / 102 / 102다.
+- 뒤집힘 신호 static-possible은 2 / 2 / 1 / 16 / 16행이다(셋째 수정에서 그대로). C1의 2행과 R2의 1행은 같은 키가 정적으로 맞는 조회–생성 짝이다(C1은 `OS_TimeBaseGetIdByName`의 SCH_LAB·TIME 조회). 사례 관계(T1, T2)는 static-undetermined에 들어 있다. 신호만으로 고르면 사례 관계를 놓친다.
+- 넘치는 원인 [I]: (a) 필드 기반 may 간접 호출(T2 덤 참고: 한 조회가 여러 콜백 이름 공간에 들어간다), (b) 트램펄린의 코드를 그것이 대신하는 모든 root에 귀속하는 것(그 코드의 행위자 집합이 넓어진다. 반대로 root 집합 자체는 유도 spawn 연산 호출의 entry를 풀지 못하면 빠지는 과소 근사다: 수정 단계 문서는 이것을 과대 근사라고만 적었다, §8 항목 14, §11 #2), (c) B의 inter-actor 기준이 `main`(process)을 writer 행위자로 세어 초기화 쓰기와 task 읽기를 모두 짝으로 만든다, (d) C의 "spawn 뒤"가 분기를 자르지 않는 CFG 도달이라 table walk 루프 본문의 모든 쓰기가 들어간다(과대 근사; "불가"를 줄이는 쪽).
+- 시간(이 VM, 한 번, 비용 주장 아님): NP extract(`--targets-rule`) 25.4 / 23.2 / 16.6 / 5.8 / 6.4 s(셋째 수정 첫째 차례 33.3 / 32.0 / 21.1 / 8.5 / 8.3 s), relations 1.2 / 1.1 / 0.6 / 0.5 / 0.5 s(`T/run.log`).
+
+## 7. 조건 기록 (`CONDITIONS_POLICY.md`)
+
+| 조건 | 값 | 상태 | 근거·이유 |
+|---|---|---|---|
+| 분석 대상 빌드 | S1–S4와 같은 기준 빌드 5 | from-reference | ED §1.1, §1.4 |
+| 대상 규칙 | R-T1 ∪ R-T2, 공유 base만 | 도구 규칙(연구 조건 아님), "target rules revision 1" | ED §6 항목 2. 호출 결과 base를 전역 주소만 돌려주는 함수로 넓힌 것은 ED의 "F4 원천이 전역인 포인터"를 이 판에서 읽은 방식이다 [D] |
+| relations 규칙 | §1.2 | 도구 규칙, "relations rules revision 5"; 잠금 집합 "lock-set rules … revision 2" | ED §3.1–§3.4, §6 항목 3; 수정 단계(§10), 둘째 수정(§11), 셋째 수정(§12, 둘째 차례 §13) |
+| P0 표 | 72항목, 개정 3, 담지 않는 묶음·구성원은 `extract.p0_table_scope` | 도구 내부 지원(P0 계층). 판 표기 항목마다, 원문 대조 1개(upstream 사본; 배포판 패치는 [U]) | 읽기-쓰기 잠금 묶음을 통째로 뺀 것은 개정 2의 범위 결정이다 [D](§1.3). 개정 3은 문장만 고쳤다 |
+| P0 비교 표 | 13항목, 개정 2 | 도구 내부 지원(P0 계층). 원문 대조 unverified | 추출은 쓰지 않는다 |
+| 수치 도구 매개변수 | 셋째 수정 둘째 차례에서 다시 찾아 둘을 더 적음(아래) | unspecified_by_reference | 셋째 수정 첫째 차례의 "모두 적음"도 틀렸다(§13 #12): DERIVES 복사 사슬 8(`ast_fn.cpp` `derive`; 잘린 사슬을 `not-a-copy`로 잘못 적었다)과 LOOP_ITERS에 저장하는 식 텍스트 깊이 64(`model.cpp` `emit`; 더 깊은 부분은 `...`)가 기록에 없었다. 둘째 차례는 그 둘을 `kDeriveDepth`·`kEmitDepth`로 이름 붙여 `param.walk_bounds`에 8·64를, `count.walk_bounds_hit`에 걸린 수를 적고(다섯 빌드 0 [M]), 잘린 사슬에 이유 `walk-bound`를 준다. DERIVES는 역할 있는 인자에만 나오므로 프로필 없는 추출에는 행이 없다(`[derives] 0`). 두 상한도 프로필 추출에서 작동하고 그 BASIS는 기록하지 않는다(식별 시험 여섯 경우는 바이트 동일). 새 코드(`incomplete-source`의 걷기, 정적 초기화자의 주소 찾기, 되부름 집합)는 방문 집합과 명시적 스택으로 걷고 수치 상한이 없다. 그래서 남은 고정 상한은 FACT_INIT 4096, 함수 값 초기화자 중첩 6, 식 트리 깊이 24, DERIVES 사슬 8, LOOP_ITERS 텍스트 64와 `--image-budget` 기본 4096이다. 이하 셋째 수정 첫째 차례까지의 기록: 수정 단계 문서의 "새것 없음"은 틀렸다(§11 #20): 2a에서 더한 상한 셋이 표에 없었다. 둘째 수정의 "모두 적음"도 틀렸다(§12 #15): 식 트리 깊이 24(`ast_fn.cpp` `to_expr`, 기존; 더 깊은 부분식은 `top "too deep"`)가 BASIS에도 계수에도 없었다. 셋째 수정은 그것을 `kExprDepth`로 이름 붙여 `param.walk_bounds`에 24로 적고 잘린 부분식을 `count.walk_bounds_hit`에 센다(다섯 빌드 0 [M]; 둘째 수정 출력의 FACT_EXPRS에도 "too deep" 노드 0, 검증자 측정). 이 상한과 FACT_INIT 4096 노드 상한(멈추면 "상수 아님" 행)은 옵션 없는 프로필 추출에서도 작동하고 그 BASIS는 상한도 걸린 수도 기록하지 않는다(식별 시험 여섯 경우는 바이트 동일이므로 걸리지 않았다). 둘째 수정의 처리: (1) PARAM_FLOW 사슬 문장의 반복 상한 100000(`argflow.cpp`, `129ace3`)과 텍스트 보기의 SEQ 걷기 상한 10000 둘(`facts_text.cpp`, `6025388`)은 방문 집합·후위 번호 조건으로 바꿨다(출력 변화 없음, golden 그대로). (2) 텍스트 보기가 PTR_FIELDS 원소의 정적 값을 64 원소까지만 적는 것(`facts_text.cpp`)은 보기의 출력 한계이고 facts에는 모든 행이 있다; 넘으면 그 줄에 적는다. (3) 2a 전부터 있던 둘: FACT_INIT 초기화자 걷기 4096 노드(`ast_tu.cpp`; 멈추면 이제 "상수 아님" 행을 더함, 전에는 잎 없이 멈추면 0)와 함수 값 초기화자 중첩 6 단계(`ast_fn.cpp`). 두 값은 BASIS `param.walk_bounds`(unspecified_by_reference), 걸린 수는 `count.walk_bounds_hit`에 확장 사실과 함께 남는다(빌드별 수는 §11 #20). 그 밖: 대상 규칙(R-T2 조건 걷기), relations(식 트리 걷기, 행위자, LOCK_PATHS 읽기), LOCK_PATHS 유도에 수치 상한이 없다. 식 텍스트의 40단계 출력 한계(`show`와 같음)는 출력에만 쓴다; 이 한계로 잘린 식은 다섯 빌드 0개 [M]. 기존 F4 상한(`--argflow-depth`·`--argflow-size`)은 기본값 none, `--image-budget` 4096(S3) 그대로 |
+| 경로 C의 전제 (셋째 수정, 둘째 차례에서 더함) | 여섯: (가) 잠금 정체성의 겹침은 접근 경로로만(같은 전역 객체의 접두·union 형제, 레코드 형으로 맞춘 포인터 경로), (나) 본문 없는 함수는 제 잠금 효과가 없고 그 호출에서 받은 함수만 되부름(그 함수의 효과는 그 호출에서 읽음), (다) 두 번 돌아오는 함수는 이름 목록(`setjmp` 무리 8개), (라) mutex는 잡은 스레드만 풀고 그 객체는 P0 기본 연산으로만 바뀜, (마) `incomplete-source` 표시가 없는 간접 호출의 대상은 해결된 후보 전부(인라인 어셈블리·다른 객체에서의 포인터 연산 저장은 보지 않음), (바) 풀리지 않은 간접 호출은 주소가 잡힌 함수만 부름 | 도구 규칙의 전제(연구 조건 아님). BASIS `assume.*`가 아니라 relations의 이유 문장과 layers `rests-on(premises of path C …)`에 적는다. 결정은 PI B4(가정 셋과 함께) | `static_facts.md` §5h·§5i. 둘째 수정까지 "불가"는 가정 셋과 필드 단위 규칙에만 기댄다고 적었다(§12 #11). 셋째 수정 첫째 차례는 (가)–(다)만 적었다(§13 #6) |
+| 선언된 가정 | S4의 셋 | S4 보고 §4와 같음. `assume.lock_acquisition_succeeds`의 문장은 P0 획득 기본 연산이 spin lock·`mtx_lock`까지로 넓어진 만큼 고쳤다 | T3의 "불가"가 기대고, 행이 적는다 |
+| 완전성 규칙의 선택 | relations와 AWAIT 인정은 필드 단위 규칙을 쓴다 | 결정 대기(S4 열린 문제 1) | 형 단위를 고르면 T1 행의 await 문장이 빠지지만 T1의 순서 조건은 "고정 미확인"(생성 순서만)으로 그대로 채워진다: 그 조건은 대체 표시로 문자 그대로 충족된다(§11 #3). T3에서는 #9가 정적 인스턴스가 아니게 되어 6.4.2의 "불가"가 `undecidable`(must 정체성 미증명)이 되고 6.4.1의 "잠금 창"은 `possible` 그대로다 [I: 개정 3의 분기 규칙에서]. 행이 `rests-on(per-field completeness rule (PI decision pending))`으로 적는다 |
+| 실행 기록 | 없음 | 이번 시험의 조건 | ED §6: 사례 입력 없이. run-order 칸은 늘 `no record given` |
+| L0, C5 `front_end_diagnostic` | S1과 같음 | S1 보고 §4와 같음 | 추출이 basis의 편차 항목을 `extract.basis_deviation[…]`로 facts에 복사하고, 행이 `basis-deviation(…)`으로 적는다 |
+
+## 8. 열린 문제
+
+1. **실행 기록 입력.** run-order 칸을 채우는 `--record`는 이 판에 없다. 기록의 neutral 사이트(파일:줄)를 행의 쓰기·사용 위치에 맞추는 일이 남았다. 그 전까지 위반 근거 칸은 늘 unconfirmed다.
+2. **지역 변수 정의의 사실과 행위자 사이 종료.** WRITERS·TERMINALS·READS ctx의 guard에 남는 지역 변수(`status = CF_Init()`, `pthread_id = pthread_self()`)를 정의로 펼치는 사실이 없다(T2 (a), T4 (2)). 필요한 것은 **흐름 민감한 도달 정의**다(그 guard 지점에 닿는 정의; 정의 하나 제한 없음): `CF_AppMain`의 `status`는 정의가 둘(`cf_app.c:330`, `:342`), 수정 후 재시도의 `ret`은 다섯이다(§11 #4). T2는 그 위에, 탈출 없는 루프에서 멈춘 스레드를 다른 행위자가 끝내는 것을 유도해야 한다(T2 (b): P0 다른 스레드의 취소 묶음과 그 경로 규칙). 그리고 **ED §3.0 F8 예의 정정**: "`CFE_ES_ExitApp → … → OS_TaskExit → pthread_exit`(종료, 외부 앱 분기에서만 may)"는 원문과 어긋난다. `OS_TaskExit`(L424)와 `ResetCFE`(L399)는 CORE 가지(L381)에 있고 외부 앱 가지는 탈출 없는 지연 루프(L453)다. T2의 "종료 연산은 F8로 P0에서 유도" 조건은 그 예에 기대므로 다음 ED 개정에서 고친다(§11 #5). 기존 섹션을 바꾸지 않으려면 새 섹션이 필요하다.
+3. **공유 base 판정의 범위.** READS는 지역 포인터의 정의를 따라가지 않는다. 그래서 `AppRecPtr->AppState` 같은 사례 필드가 R-T2에서 빠진다. ARGFLOW의 `base-via-local`과 같은 규칙을 READS에도 두면 넓어진다(새 섹션 또는 relations 쪽 계산).
+4. **필드 기반 may의 부담.** A의 간접 호출 콜백 혼입, 트램펄린 귀속, process 행위자를 writer로 세는 B 기준, 분기를 자르지 않는 C의 "spawn 뒤"가 행 수를 키운다(§6). 사슬의 함수 포인터 인자(예: `OS_ObjectNameMatch`를 고정해 넘기는 호출)로 콜백을 좁히는 규칙과, 생성 루프의 반복 사이 순서(같은 반복의 쓰기만 그 반복의 spawn에 묶기)가 다음 후보다. spawn 뒤 callee에서만 쓰는 필드(1,964 / 765 / 506)는 짝짓지 않았다.
+5. **상수 접기.** R2의 "초기 값 0은 검사를 통과하지 못함"(ED §3.2)은 본문 있는 함수의 상수 접기가 없어 static-undetermined로 남는다. 값은 C int32가 아니라 캐스트를 벗긴 값으로 출력된다(S2 열린 문제 4: `3254779907`).
+6. **C의 "spawn 뒤"와 callee의 잠금.** 수정 단계에서 CFG 도달(LOCK_PATHS)이 되었다. 둘째 수정(개정 3)에서 "불가"의 조건을 좁혔다(§1.2, §11 #9–#14). 남은 것: "불가"의 범위는 생성자의 한 호출이다. 생성자를 부르는 함수의 제 본문만 순서 없이 보고, 그 함수들의 callee와 그 위 호출자가 반환 뒤 하는 일(예: C5 ES task의 명령 루프가 나중에 앱을 지우며 `CleanupTaskResources`로 `RecordUsed`를 쓰는 일, 다음 `CFE_ES_AppCreate` 호출의 쓰기)은 읽지 않는다. 그것을 읽으려면 호출 뒤 사건의 LOCK_PATHS(새 종류)가 필요하고, 필드 기반 추상에서는 그 쓰기가 다른 레코드에 대한 것인지 정하지 못해 "불가"는 거의 남지 않는다 [I]. 형 없는 저장은 필드 단위 완전성 규칙(PI 대기)으로만 배제된다. 생성자의 루프가 다음 반복에서 다시 잡는 잠금은 획득 지점이 spawn 뒤 사건인지로만 본다(그 획득이 실제로 그 쓰기에 이르는 길에 있는지는 보지 않음: 보수). 아래는 수정 단계의 기술이다. S5 문서의 "이번 사례에서는 소스 위치와 CFG 순서가 같다는 것을 원문으로 확인했다 [F]"는 틀렸다: 6.4.2 C19·C20의 L690·L702는 spawn 가지를 배제하는 `else` 가지에 있었다(§10 지적 3). 남은 것: 분기 시험으로 도달을 자르지 않는다(과대 근사). 한 호출보다 아래의 callee 쓰기는 호출 지점의 잠금과 합치지 않는다(보수). 본문 있는 유도 spawn 연산이 인자를 통해 저장하는 것은 그 호출 안에서 스레드 생성과의 순서를 읽지 않고 spawn 뒤, 잠금 모름으로 센다(보수; "불가"를 막는 쪽).
+7. **P0 원문 대조.** 71 + 13항목 unverified(T5). glibc 2.39 upstream 사본이 필요하다.
+8. **완전성 규칙의 PI 결정**(S4 열린 문제 1)과 **facts의 프로필 해시 결합**(ED §5 R8)은 그대로 대기다. relations는 프로필 facts를 받되 모든 행에 사례 계층을 단다.
+9. **구획 비교**는 상수 값 집합의 같음이다. 상수가 둘 이상인 사슬(예: `OS_remove`의 `{1,11}`)에서 다른 의미의 상수가 섞일 수 있다.
+10. **escape → writer(ED §3.0 G10).** P0 out 인자(`pthread_create`의 id 저장)는 relations가 질의 시점에 맞춘다. 추출의 WRITERS·FACT_LOCS·FIELD_STATUS·LOCK_IDS에는 반영되지 않는다(FACT_LOCS는 escape로 셈; `OS_task_record_t.id`는 FIELD_STATUS에서 DISABLED). 그래서 T4는 "질의 수준" PASS다. 반영하려면 기존 섹션을 바꾸지 않는 새 섹션이 필요하다(§11 #13).
+11. **C5의 코어 task main.** C5 `CFE_ES_CreateObjects`의 spawn(6.4.1 `:875`, 6.4.2 `:855`)은 entry를 union 멤버 `VoidPtr`로 읽고 정적 이미지는 `FunctionPtr`을 초기화한다. 이 판은 union의 다른 멤버로 읽는 것을 풀지 않으므로(머리에 이유를 적음) C5의 코어 task main은 행위자가 아니다. 그 코드는 `CFE_ES_CreateObjects`의 간접 호출(`:961`, `FunctionPtr` 필드 기반)로 `main`에 닿는다 [M]. 그래서 C5의 B·C 행위자 집합에는 코어 task가 없다. union 멤버의 별칭을 사실로 내는 규칙(형 정보가 facts에 필요)이 다음 후보다. C1에서는 반대 방향의 같은 문제가 조용히 풀려 있었다(§13 #9): spawn `cfe_es_start.c:767`은 `CFE_ES_ObjectTable[i].FuncPtrUnion.MainTaskPtr`를 읽고, 그 union(`FunctionPtr`·`MainTaskPtr`·`VoidPtr`, `cfe_es_start.h:61–65`)의 정적 이미지는 상수 아닌 잎 18개와 다른 멤버 `FunctionPtr`의 함수 잎 7개(`CFE_Config_Init`, `CFE_ES_CDS_EarlyInit`, `CFE_EVS_EarlyInit` …)를 가진다. 이 판은 `MainTaskPtr` 잎 다섯만 entry로 쓰고, 그것이 맞는 것은 spawn이 `switch (ObjectType)`의 `CFE_ES_CORE_TASK` 가지(`:718`)에 있기 때문이다(그 guard는 읽지 않음) [F]. 개정 5는 그 spawn의 스레드 집합을 완전하지 않은 것으로 보고 머리 줄에 그 잎들을 적는다(그 spawn의 닿지 않는 문맥은 `undecidable`: C1 `CFE_ES_WaitForSystemState` 문맥 하나) [M]. guard를 이미지에 대어 원소를 고르는 규칙이 다음 후보다.
+12. **트램펄린 규칙의 쓰기.** 형 있는 레코드 필드 쓰기는 facts에 base가 없어 트램펄린 판정이 보지 않는다(전역 객체 쓰기와 공유 root 읽기만 본다).
+13. **읽기-쓰기 잠금.** P0 개정 2가 통째로 뺐다. 공유 획득을 상태에 따로 두는 잠금 집합 분석이 있어야 넣을 수 있다. 지금은 그 획득이 잠금 연산이 아니어서 판정만 약해진다.
+14. **트램펄린 root의 과소 근사.** 개정 3은 유도 spawn 연산의 호출 지점에서 푼 entry를 트램펄린의 root에 더한다. 그 호출 지점의 entry를 풀지 못하면(예: R2 `CFE_ES_AppCreate:849`의 `LoadStatus.InitSymbolAddress` entry) 그 스레드는 트램펄린 코드의 행위자에서 빠진다. 머리에 그런 호출의 수와 위치를 적는다: R2 1(`cfe_es_apps.c:849:13`; entry는 적재 모듈의 기호 주소 `LoadStatus.InitSymbolAddress`이고 R2에는 시작 스크립트 entry root가 없다(script-entry 0)), C1·C5 0 [M]. R2에서 그렇게 적재된 앱의 스레드가 트램펄린 코드를 돌리는 것은 행위자 집합에 없다 [I]. 셋째 수정(개정 4): 그런 호출이 있는 트램펄린을 스레드 집합에 넣는 spawn은 "스레드 집합이 완전하지 않음"으로 보고, 그 스레드들이 닿지 않는 문맥을 `not graded`가 아니라 `undecidable`로 낸다(R2 C11, C45). 자식의 코드가 entry를 풀지 못한 spawn 호출을 해도 같다. 자식이 시작하는 스레드(후손)는 이제 스레드 집합에 든다(§12 #12).
+15. **정적 이미지 root의 생성 순서.** C1의 코어 task main은 정적 이미지(`CFE_ES_ObjectTable[k]`)에서 풀린다. 이 판은 이미지 첨자를 반복 순서로 읽지 않고, 같은 반복의 await도 찾지 않는다. C1 원문은 R2와 같은 구조(`cfe_es_start.c:716`, `:767`, `:810–811`, `:892`)이므로, 표 걷기 루프의 첨자가 이미지 첨자와 같다는 사실(LOOP_ITERS와 같은 펼침)을 이미지에도 내면 T1의 C1 판 문장이 나올 수 있다 [I](§11 #1).
+16. **ED T3 조건의 전제.** ED §6 T3은 6.4.2의 `GetAppIDInternal` 호출 L667·L1020·L1284를 `CFE_ES_AppCreate` spawn 자식의 읽기 지점으로 적었다. 이 빌드의 자식(스크립트 앱 다섯)은 그 함수를 부르지 않는다 [F]. 건전한 규칙은 그 문맥에 등급을 주지 않는다(`not graded`). 다음 ED 개정에서 조건을 "자식이 실행하는 읽기 지점마다"로 고치거나, 그 셋을 부르는 자식이 있는 구성으로 옮긴다. 셋째 수정은 자식의 후손까지 보았으나 C5의 다섯 자식은 스레드를 만들지 않아 셋은 그대로 `not graded`다.
+17. **P0 원문과 배포판 패치.** `pthread_create`의 원문 대조는 upstream glibc 2.39 사본에 대한 것이다. C1·R2 빌드는 `Ubuntu GLIBC 2.39-0ubuntu8.9`를 링크한다 [M]. 배포판 패치는 대조하지 않았다 [U]. P0 표 개정 3의 scope가 이름 붙인 판 밖 묶음 가운데 `pthread_join`·`timer_create`(SIGEV_THREAD)·`select`·`sscanf`는 다섯 빌드가 부른다(§1.3): 그 호출의 효과(스레드를 시작하는 timer, 인자를 통해 저장하는 `sscanf`)는 이 판의 사실에 없다. 셋째 수정에서 판 밖으로 더 센 것(§1.3): 다른 스레드의 취소 `pthread_cancel`(다섯 빌드), `pthread_kill`·`kill`, 시그널(`sigaction`, `pthread_sigmask`, `signal`, `sigprocmask`, `sigsuspend`, `sigtimedwait`, `sigwait`), 취소 상태(`pthread_setcancelstate`·`pthread_setcanceltype`), `pthread_setschedprio`, `dlclose`·`dlerror`, 스레드 이름·affinity(`pthread_setname_np`·`pthread_setaffinity_np`, C1·R2), 프로세스 생성(`fork`, C1·R2). 개정 3의 scope 문장은 스레드 이름·affinity 설정과 프로세스 생성을 이름으로 적지 않는다: 다음 P0 문장 개정에서 뺀 것으로 이름 붙인다. 두 번 돌아오는 함수(`setjmp` 무리)는 relations의 이름 목록이고(§1.2) P0 표에 넣지 않았다.
+18. **걷기 상한.** FACT_INIT 4096 노드, 함수 값 초기화자 중첩 6, 식 트리 깊이 24(셋째 수정에서 기록에 더함, §12 #15), DERIVES 복사 사슬 8과 LOOP_ITERS 식 텍스트 깊이 64(둘째 차례에서 기록에 더함, §13 #12)는 남았다(값과 상태는 BASIS, 걸린 수는 다섯 빌드 0). 레퍼런스가 정하지 않는 값이고, 걸리면 FACT_INIT은 "상수 아님" 행을, CALL_TARGETS는 그 아래의 함수 값을, 식 트리는 그 아래 부분식을, DERIVES는 그 사슬의 원천(이유 `walk-bound`)을, LOOP_ITERS는 그 아래 텍스트를 잃는다(§7). 옵션 없는 프로필 추출은 같은 상한으로 돌되 기록하지 않는다.
+19. **경로 C의 전제** (셋째 수정, §12 #11). "불가"는 선언된 가정 셋과 필드 단위 규칙에 더해 세 전제에 기댄다: (가) 잠금 정체성은 접근 경로가 보이는 대로만 겹친다: 상대 경로가 이름 붙이지 않은 중첩 멤버를 가리키는 포인터나 관련 없는 레코드 형 사이의 cast로 같은 mutex를 부르는 것은 보지 않는다(정체성 노드에 레코드 형이 있으나 형의 포함 관계 전체는 facts에 없다). (나) 본문 없는 함수는 잠금에 효과가 없고 그 호출에서 받은 함수만 되부른다: 앞서 넘겨 저장한 함수를 나중 호출에서 부르는 라이브러리는 보지 않는다. (다) 두 번 돌아오는 함수는 이름 목록으로만 안다. C5의 "불가" 6 + 14행은 (가)–(다)를 원문으로 대어 보았다: spawn부터 마지막 쓰기까지 생성자에 해제가 없고, 읽는 함수·생성자가 주소를 잡히지 않았으며 본문 없는 함수에 넘겨지지 않고, `setjmp` 무리가 없다(§4 T3) [F][M]. 이 전제를 사실로 줄이는 것(형의 포함 관계, 콜백 등록 사실)이 다음 후보다. PI B4의 규칙·가정 결정은 이 전제도 덮어야 한다. **셋째 수정 둘째 차례(§13 #1–#6)**: 넷째 검증은 "불가"가 또 넷에 기댐을 반례와 실행 사본으로 보였다: 생성자가 spawn 뒤 다시 들어오지 않음(`recur.c`), 간접 호출의 해결된 대상이 다임(`hook_memcpy.c`, `member_memcpy.c`, `dlsym_idiom.c`, `hook_cast.c`), 본문 없는 함수가 되부르는 함수에 잠금 효과가 없음(`cb_qsort.c`), 내부 연결 객체의 키가 단위 사이에 하나임(두 단위 `hdr`). 개정 5와 잠금 집합 개정 2는 넷을 검사로 바꿨다(생성자 재진입과 아래 프레임의 같은 지점 획득은 `possible`; `incomplete-source` 호출은 풀리지 않은 호출; 되부름 함수의 해제·대기를 그 호출에 적용; 단위마다 다른 내부 연결 잠금은 `not-static`). 남은 것을 전제로 더 적는다: (나)를 "제 잠금 효과가 없고 그 호출에서 받은 함수만 되부르며 그 함수의 효과는 그 호출에서 읽음"으로 고치고, (라) mutex는 잡은 스레드만 풀고 그 객체는 P0 기본 연산으로만 바뀐다(다른 스레드의 해제, 잡힌 mutex 위의 일반 저장은 POSIX에서 정의되지 않은 동작이고 보지 않음: `nonowner.c`, `overwrite.c`는 그대로 "불가"), (마) `incomplete-source` 표시가 없는 간접 호출의 대상은 해결된 후보 전부다(추출은 흐름 그래프가 따라가지 않는 저장 — 다른 형의 노드, 본문 없는 함수의 결과·매개변수, 변환해 넘긴 주소, 그 밖에 잡힌 주소·배열 붕괴·복사된 함수 포인터 포인터, 필드 단위로 complete가 아닌 필드 — 을 모두 표시한다; 인라인 어셈블리와 다른 객체에서 포인터 연산으로 닿는 저장은 보지 않음), (바) 풀리지 않은 간접 호출은 주소가 잡힌 함수만 부른다(실행 중 기호 조회가 돌려주는 함수는 시작 스크립트 entry로 푼 것 말고 세지 않음). C5의 "불가" 6 + 14행은 새 검사를 모두 통과하고(재진입·되부름·`incomplete-source`·내부 연결 잠금 없음 [M]) 전제 (라)를 원문에 대어 보았다(OSAL mutex는 `PTHREAD_MUTEX_RECURSIVE`, osapi.c L3177; `OS_mut_sem_table[].id` 저장은 `pthread_mutex_init`·`pthread_mutex_destroy`뿐, L3195·L3253; `SharedDataMutex`는 writer 하나, 지움 없음 [F]). 헤더에 정의된 `static inline` 함수의 키도 단위 사이에 하나다(R2·C1의 `CFE_ES_AppRecordGetID@cfe_es_resource.h:183` 등): 같은 원문의 본문을 합치고, 그 안의 내부 연결 잠금은 위 규칙으로 `not-static`이 되므로 잠금 판정에는 들지 않는다 [I](항목 25).
+20. **`not graded`와 ED §3.4.** 개정 3의 넷째 실현 가능성 값 `not graded`는 ED §3.4가 정한 등급 셋(불가 증명·가능·결정 불가) 밖이다(셋째 수정 뒤 2 / 2 / 1 / 14 / 14행, 둘째 차례 뒤 1 / 1 / 5 / 14 / 14행). 다음 ED 개정(PI A2 ①의 개정 기록, "2a 출력 뒤")에서 넷째 값으로 받거나 `undecidable`(이유: 닿지 않음)로 합친다. 이 단계는 값을 그대로 두었다(§12 #17).
+21. **유도 spawn 연산의 "스레드 시작 뒤 실패" 길** (§12 #9). `OS_TaskCreate`처럼 안쪽 스레드 생성 뒤에 실패를 돌려주는 유도 spawn 연산에서는 생성자가 쓰기를 건너뛰는 길에서 자식이 등록 전 값을 읽는다(C5 두 판). 이 판은 "불가" 문장에 그 길을 덮지 않는다고 적을 뿐, 그 길을 사실로 찾지 않는다. 찾으려면 안쪽 spawn 뒤에 닿는 return과 그 값(LOCK_PATHS의 after-spawn에 return 사건을 더하거나 새 섹션)과 생성자에서 그 결과의 분기가 필요하다.
+22. **쓰기 키와 spawn 정체성** (§12 #8). ED §3.3 항목 3은 쓰기 첨자가 생성자 정체성(spawn의 out 인자)에서 오기를 요구한다. 이 판은 그것을 검사하지 않고 "불가" 문장에 키를 적고 "이 호출이 시작하는 자식의 레코드인지는 정하지 않음"이라고 적는다. C5의 키 `TaskTable[TaskId]`·`TaskTable[*TaskIdPtr]`는 `OS_TaskCreate`의 out 인자에서 온다 [F]. 그 연결을 사실로 내려면 지역 변수의 도달 정의(항목 2)와 out 인자의 흐름이 필요하다.
+23. **후손과 스레드 집합의 근사.** 개정 4의 후손은 필드 기반 may 근사다: C1에서 코어 task의 코드가 `CFE_ES_AppCreate`에 닿아 스크립트 앱 다섯이 후손이 되는 것처럼 실제로는 다른 경로(시작 스크립트는 `main`이 처리)로 만들어지는 스레드도 든다. 그래서 등급을 받는 문맥이 늘어 `possible`이 늘었다(C1 76 → 112). "불가"는 줄지 않는 쪽의 근사다.
+24. **배열 필드의 writer.** 스칼라 배열 원소 저장의 writer 수집(WRITERS·FUNC_WRITES)은 기존 섹션이라 그대로 두고 FIELD_STATUS에서 complete로 부르지 않게만 했다(§12 #6). 수집을 고치면 그 필드들(183 / 183 / 147 / 175 / 175)의 완전성을 다시 판정할 수 있다.
+25. **내부 연결 함수의 키** (§13 #4). 객체와 함수의 키는 정의 위치(`name@file:line`)이므로 헤더의 `static`·`static inline` 정의는 단위마다의 것이 한 키로 합쳐진다. 잠금 정체성은 개정 2에서 `not-static`으로 막았다. 잠금이 아닌 객체(헤더의 `static` 변수)는 단위마다 다른 객체를 하나로 보아 짝이 느는 쪽(과대)이고, 함수는 같은 원문의 본문을 합친다. 키에 단위의 주 파일을 넣는 것(지적의 첫째 방안)은 FUNCS·WRITERS 등 기존 섹션의 키를 바꾸므로 이 단계는 하지 않았다 [D].
+26. **되부름 집합의 범위** (§13 #3). 잠금 집합과 relations의 되부름 집합은 본문 없는 함수에 **이름으로** 넘긴 함수(ARGFLOW 원천 function)다. 함수 포인터 변수·필드에 담아 넘긴 함수, 앞서 넘겨 저장해 두었다가 나중에(또는 비동기로: `signal`의 처리기) 부르는 함수는 세지 않는다: 전제 (나)의 범위다. C5의 두 생성자의 spawn 뒤 함수 집합에서 본문 없는 callee는 `clock_gettime`, `memcpy`, `memset`, `printf`, `pthread_getspecific`, `pthread_mutex_unlock`, `remove`, `strcat`, `strcmp`, `strlen`, `strncat`, `strncmp`, `strncpy`, `strrchr`, `vsnprintf`이고 [M: facts `[calls]`], 이 C 라이브러리 함수들은 함수 인자를 받지 않는다 [F]. 함수 포인터 형의 인자를 이름 아닌 값으로 받는 본문 없는 호출을 unknown으로 보는 규칙은 인자의 형이 facts에 없어 하지 않았다.
+
+## 9. 재현
+
+```sh
+R=/home/user/Shape-Perf/research/cfs_procrace
+S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a/tests_fix1 FIX2=/home/user/work/redesign/step2a/tests_fix2 \
+  FIX3=/home/user/work/redesign/step2a/tests_fix3 $R/env/redesign/step2a_tests.sh all   # identity npsame run s5same fixsame fix2same fix3same twice count sha -> /home/user/work/redesign/step2a/tests
+```
+
+- 각 빌드 `T/<build>/NP/`에 `basis.kz`·`basis.txt`·`facts.kz`·`facts.txt`·`extract.txt`·`relations.txt`·`args.txt`·`sha256.txt`가 있다. `NP2/`는 T7의 두 번째 relations다.
+- `T/count/summary.txt`(T1–T7 증거, 줄 참조, S5·수정 단계·둘째 수정·셋째 수정 첫째 차례 대비), `burden.tsv`(등급 있는 사례 행 열 포함), `targets_rule.tsv`, `summary.tsv`, `against_s5.tsv`, `against_fix1.tsv`, `against_fix2.tsv`, `against_fix3.tsv`. `T/identity/identity.txt`, `T/npsame/npsame.txt`, `T/s5same/s5same.txt`, `T/fixsame/fixsame.txt`, `T/fix2same/fix2same.txt`, `T/fix3same/fix3same.txt`, `T/twice.txt`, `T/run.log`, `T/sha256.txt`(125 파일).
+- `fixsame`·`fix2same`·`fix3same`은 `FIX1`·`FIX2`·`FIX3`(수정 단계·둘째 수정·셋째 수정 첫째 차례 출력 `T_F1/`·`T_F2/`·`T_F3/`)의 facts와 이번 facts를 섹션별 레코드로 비교한다. 계수 스크립트의 넷째–여섯째 인자가 `FIX1`·`FIX2`·`FIX3`다(`step2a_tests_count.py OUT EB S5 FIX1 FIX2 FIX3`).
+- 셋째 수정 둘째 차례의 측정은 commit `76bcf6d`에서 돌렸다(`kairos` 아래 미커밋 변경 없음). 첫째 차례의 측정은 commit `56cf392`에서 돌렸다(`kairos` 아래 미커밋 변경 없음). 그 뒤 계수 스크립트(`env/`)의 머리 맞춤·출력 순서만 고쳐 `count`와 `sha`를 다시 돌렸다(도구 같음).
+- 둘째 수정의 측정은 commit `b00c370`에서 돌렸다. 그 뒤의 commit `9bef6ae`와 `30c8713`은 시험(`test_static_cli.cpp`)만 더했고 도구는 같다(둘째 수정 문서는 `9bef6ae`만 적었다: §12 #19).
+
+## 10. 수정 단계: 검증 지적과 처리 (2026-10-30)
+
+이 절의 rel 줄 번호와 수는 수정 단계의 출력(`T_F1/`)의 것이다.
+
+검증자 지적 13건(같은 내용 둘을 하나로 묶어 12건)을 파일과 출력에 대어 보았다. 모두 성립했다. 판정·시험을 바꾼 것은 지적 2·3·5·8이다. 버린 지적은 없다.
+
+| # | 지적(요지) | 확인 | 처리 | 결과 |
+|---|---|---|---|---|
+| 1 (와 10) | `target_rules.cpp` `field_loads`의 깊이 200 상한이 남아 있었고, §7과 보고가 "새 수치 매개변수 없음"이라 적었다 | 성립 [F] | 상한 없이 방문 집합으로 걷는다(풀은 같은 트리를 한 노드로 두고 노드를 자식 뒤에 만듦). §1.1, §7 고침. fixture `deepcond.c`(깊이 211) | 다섯 빌드 대상 수·목록 변화 0 [M]; fixture에서 R-T2가 211단계 아래 필드를 고름 [M]. 다른 걷기 상한(기존 둘, 새 루프 guard 셋, 텍스트 view 64)은 둘째 수정에서 정리함(§11 #20) |
+| 2 | T2의 F8 사슬 `ExitApp → ResetCFE → … abort`가 CF가 갈 수 없는 CORE 가지를 지난다 | 성립 [F][M] | relations가 may·noreturn 종료 연산의 종료 호출 guard(OP_DERIV)를 적고 이 호출의 인자 상수로 평가, 탈출 없는 루프도 적음. TERMINALS는 프로필 추출에도 있는 기존 섹션이라 바꾸지 않고 relations에서 OP_DERIV를 읽었다. §4 T2·§8 항목 2 고침 | C1 rel 426: "with argument 0 = 3 every guard is false … the loop cfe_es_api.c:453:13 … has no exit" [M]. T2 PARTIAL 유지, 미달 항목 (b) 추가 |
+| 3 | §8 항목 6의 [F] 주장("소스 위치와 CFG 순서가 같음")이 C5 C19·C20과 어긋난다 | 성립 [F] | 새 사실 LOCK_PATHS `after-spawn`(CFG 도달)으로 "뒤"를 정함. [F] 문장 삭제·정정 | 6.4.2 C19·C20 possible → proven-impossible(둘째 수정에서 `undecidable`로 고침: `RecordUsed`는 필드 단위 DISABLED, §11 #14); 소스 위치로 "뒤"였던 P0 스레드 생성 out 인자의 행 C1·R2·C5 2씩 빠짐; 루프 본문 쓰기로 C1 +73·R2 +53. 본문 있는 유도 spawn 연산의 인자 저장(PARAM_FLOW out-store)은 CFG에서 호출보다 앞이므로 spawn 뒤 쓰기(잠금 모름)로 따로 셈: C1 `MainTaskId` 행 C15–C19 유지 [M]; fixture `relpaths.c` `spawn_marked` [M] |
+| 4 | 호출 경유 문맥에서 callee가 읽기 전에 잠금을 푸는지, 생성자 callee의 spawn 뒤 쓰기를 보지 않았다 | 성립 [F] | LOCK_PATHS `entry-release`; 그 행이 있으면 호출 지점 잠금을 읽기에 더하지 않음. 생성자가 spawn 뒤 부르는 함수의 같은 필드 쓰기를 실현 가능성에 넣음(한 호출 아래만 합성) | 기준 빌드에서 등급이 바뀐 행 0(C5 해당 0) [M]; fixture `relpaths.c`에서 두 경우가 "불가"를 막음 [M]. 이유로 적은 "C1·R2는 잠금 없는 행"은 틀렸다: 그 행들은 호출 지점·쓰기 잠금을 단다. 등급이 그대로인 까닭은 spawn에서 그 잠금을 잡지 않거나(잠금 창) spawn 뒤 잠금 없는 쓰기가 있어 이미 `possible`이었기 때문이다(둘째 수정, §11 #15) |
+| 5 | C1·C5의 코어 task main이 행위자가 아니다 | 성립 [M] | spawn의 entry 인자가 정적 이미지가 있는 전역 표의 필드에서 오면 그 멤버의 함수 잎을 root로(`table-image-entry`); 풀지 못한 spawn은 머리에 이유와 함께 | C1 root 5개 더함(`CFE_ES/EVS/SB/TBL/TIME_TaskMain`), B73 writer `{CFE_SB_TaskMain, main}` [M]. C5는 union 멤버 별칭으로 미해결, 머리에 보고(§8 항목 11). 이미지가 실행 중의 값이라는 확인이 없었고 B73의 실현 가능성 문장이 틀렸다: 둘째 수정에서 고침(§11 #1, #22) |
+| 6 | T4의 `pthread_create` writer는 relations 결합일 뿐이고, entry 경로 규칙이 TSD 소멸자·cleanup handler를 보지 않는다; writer 6에 `name` memcpy가 섞여 있다 | 성립 [M][F] | P0 out 인자 줄에 "relations 결합, 추출 writer 집합에 없음" 명시; entry 경로 규칙을 P0 key 생성의 소멸자 인자와 cleanup push 호출로 조건화(P0 종류 넷 추가); covers-more-than-the-field를 따로 셈 | C5 rel 1327·1328·1320 [M]. G10 미실현은 §8 항목 10(둘째 수정에서 T4를 "질의 수준"으로 적음, §11 #13). 종료 처리기·소멸자 함수·예외 단위는 둘째 수정에서 읽지 않는 것으로 이름 붙임(§11 #23) |
+| 7 | P0 묶음이 다 차지 않았다(비교 표의 `_l`·`bcmp`, 본 표의 `*_clock*`·C11·`usleep`·`quick_exit`·rwlock) | 성립 [F] | P0 표 개정 2(72), 비교 표 개정 2(13), 담지 않는 묶음을 이름으로 기록(rwlock은 공유 획득 때문에 통째로 제외) | 새 항목 가운데 기준 빌드가 부르는 것은 `pthread_key_create`, `__pthread_(un)register_cancel`뿐이고 유도 결과 변화 0 [M]. "묶음을 통째로"라는 scope 문장은 틀렸다(빠진 구성원·묶음이 있었음): 둘째 수정의 P0 표 개정 3에서 고침(§11 #19) |
+| 8 | layers 칸이 basis 편차(PI D7)와 선언된 가정·필드 단위 규칙을 적지 못한다 | 성립 [M] | 추출이 basis 편차를 facts BASIS에 복사; 행이 이름 붙인 파일의 단위 편차를 `basis-deviation(…)`, 실현 가능성이 기댄 가정·규칙을 `rests-on(…)`으로 | C5 행 159·156이 basis-deviation, rests-on 55·14·30 [M]. T5 미달 항목에 추가. rests-on은 "불가" 분기에만 붙어 잠금 창 행에 빠져 있었다: 둘째 수정에서 정적 인스턴스 판정을 쓰는 모든 등급에 붙임(0 / 0 / 55 / 17 / 16, §11 #16) |
+| 9 | 트램펄린 판정이 보고서 설명보다 넓다(다른 root를 부르기만 하면 강등) | 성립 [F] | 간접 호출로만 다른 root에 들어가고 제 본문이 공유 읽기·전역 쓰기를 하지 않을 때만 강등. 머리에 남는 root를 이유별로 | 다섯 빌드 트램펄린 S5와 같음 [M]; fixture에서 직접 부르는 root는 행위자로 남음 [M]. 트램펄린이 대신하는 root가 과소 근사였던 것은 둘째 수정에서 고침(§11 #2) |
+| 11 | `ex()`의 40단계 잘린 텍스트가 검사 중복 제거의 키다 | 성립 [F] | (값, 조건 트리 뿌리)로 중복 제거(풀이 같은 트리를 한 노드로 둠). 40단계는 출력에만 | R2·C5의 B 행 텍스트가 S5와 같음(새 주석 말고) [M] |
+| 12 | C1 사례 관계 행 4는 콜백 이름 공간의 부산물 둘을 센 것이다 | 성립 [M] | 계수 스크립트가 짝 있는 이름 공간의 행만 셈; 부산물은 넘치는 원인 (a)로 | C1 2행; S5 출력에 고쳐 적용하면 0.7% [M] (§6) |
+| 13 | "기존 golden은 하나도 바뀌지 않았다"가 2a 전체로는 틀리다 | 성립 [F] | 문장을 S5로 한정하고 2a 전체(S1–S4의 schema dump golden)와 수정 단계의 golden 변화를 적음 | §0 항목 2, §2 |
+
+커밋: `29343d5`(lead의 WIP 스냅숏), `e43f611`, `83b2f3b`, `a378bf8`, `b76a9a9`(유도 spawn 연산의 인자 저장)와 이 문서의 커밋(접두 `kz-static 2a/fix:`).
+
+## 11. 둘째 수정 단계: 검증 지적과 처리 (2026-10-30)
+
+이 절의 rel 줄 번호와 수는 둘째 수정의 출력(이제 `T_F2/`)의 것이다.
+
+수정 단계(§10)에 대한 검증 지적 23건(막는 것 6: #9–#12, #14, #15; 나머지 17은 막지 않는 것)을 파일·출력·반례에 대어 보았다. **23건 모두 성립했다.** 처리 가운데 지적이 낸 방안과 다르게 한 곳(일부만 받거나 대안을 고른 곳)은 표 아래에 근거와 함께 적는다. 반례는 검증자의 것(`cx1`–`cx8`, `rec_after`·`memset_after`·`caller_after`·`nonstatic`)을 다시 돌려 확인했고, 그 모양을 fixture `relsound.c`(사례 이름 없음)에 옮겼다 [M]. 검증자의 반례 출력은 모두 고친 도구에서 `proven-impossible`이 아니다 [M].
+
+| # | 지적(요지) | 확인 | 처리 | 결과 |
+|---|---|---|---|---|
+| 1 | C1 B73의 실현 가능성 이유 "한 table walk로 만들지 않음"이 틀리다: 코어 task main은 `cfe_es_start.c:716`의 표 걷기 루프가 `:767`에서 만들고 `:810–811`에서 기다린다 | 성립 [F][M] | 이유를 정확한 문장으로 바꿈(지적의 둘째 방안): "no static order derived: the spawn … starts writer actor(s) … [k]…; for roots resolved from a static image this revision derives no creation order … and no await". 이미지 첨자에서 반복 순서를 유도하는 것(첫째 방안)은 하지 않음(아래 (가)) | C1 B 행 49가 이 문장 [M]. §4 T1 참고 문장, §8 항목 15 |
+| 2 | 트램펄린이 대신하는 root를 제 간접 호출에서만 모아, `CFE_ES_StartAppTask`가 `CFE_ES_TaskEntryPoint`를 넘기는 스레드(코어·스크립트·자식)가 빠진다(과소 근사인데 §6은 과대 근사라 함) | 성립 [F][M] | 지적의 첫째 방안: SPAWN_WRAP `called-by-entry` 연산의 호출 지점에서 푼 entry를 그 트램펄린의 root에 더하고, entry를 풀지 못한 그런 호출의 수를 머리에 적음. §1.2, §6 (b), §8 항목 14 | C1 두 트램펄린이 대신하는 root 5 → 15 [M]; R2 그대로. entry를 풀지 못한 그런 호출: R2 1(`CFE_ES_AppCreate` `cfe_es_apps.c:849:13`), C1·C5 0 [M]. C1 C 행 95 → 96(§6) |
+| 3 | B의 "fixed unconfirmed"는 await 없이 생성 순서만으로도 붙는데 문장이 같고, await 문장 "serialized by it"이 술어·시간 초과 출구를 보지 않은 단정이다 | 성립 [F][M] | 등급 문장 둘(`creation order only` / `creation order + await; the await rests on the L1 premise only`); await 문장을 "await 루프가 생성 뒤에 온다(L1 전제; L1 자체·술어의 대상·시간 초과 출구는 읽지 않음)"로. §4 T1·§7에 "대체 표시로 문자 그대로, 완전성 규칙 어느 쪽으로도" | R2 B65 포함 55행이 둘째 문장 [M]. T1 PASS(개정 뒤 통과) |
+| 4 | T2 (a)의 처방 "지역 변수를 정의로 펼침"은 정의 하나 규칙의 확장으로는 안 된다(`status` 정의 둘, 재시도 `ret` 정의 다섯); 재시도 항목의 탈출식이 조회 결과와 이어지지 않는다 | 성립 [F] | 문서: 처방을 흐름 민감한 도달 정의(정의 하나 제한 없음)로 적음; 재시도 항목은 문자 그대로(25, `-17`, F8 지연) 채워지나 탈출식 연결이 facts에 없다고 적음. 도구 변경 없음(새 사실이 필요, §8 항목 2) | T2 PARTIAL 그대로. §4 T2, §8 항목 2 |
+| 5 | ED §3.0 F8 예가 `OS_TaskExit`를 외부 앱 가지에 두나, 원문은 CORE 가지(L381; L399, L424)이고 외부 앱 가지는 탈출 없는 지연 루프(L453)다 | 성립 [F] | §4 T2 (b), §5, §8 항목 2에 ED 전제의 오류를 적고 다음 ED 개정에서 예를 고친다고 적음(지적의 처리안). ED 본문은 이 단계에서 고치지 않음 | T2 (b)는 도구 미달만이 아니라 조건 전제의 오류 [I] |
+| 6 | probe-create가 소스 모양만 보고 극성(조회 실패 결과 아래의 생성)을 보지 않으며, A의 handling 칸에 나오지 않고, dependency 문장이 제외 이유를 말하지 않는다 | 성립 [F][M] | 극성 검사(검색 함수의 RET_CONSTS를 "맞음 없음" 치환으로 평가, 콜백 검색은 콜백 반환으로, RETURNS 호출 결과 사슬로 조회 함수까지), `handling: probe-create: …` 줄, dependency "no creator left after exclusions (probe-create n, key constants differ m, same actor only k)" | C1 BP `:126 → :132` 행 handling에 극성(−17에서 돌고 0에서 돌지 않음) [M]; 제외 문장 15 / 15 / 9 / 9 / 9행; golden `relations`·`relations_np` |
+| 7 | 이미지 키의 필드가 실행 중에도 쓰여도 이미지 값을 키로 써서 제외·뒤집힘에 쓴다; 정적 이미지 entry도 같은 확인이 없다 | 성립 [F] | 잎에 field-/record-written이 있으면 키 `unresolved (image, field written at run time)`, 제외·뒤집힘에 쓰지 않음. entry 쪽은 #22 | 다섯 빌드 해당 키 0 [M]. `relations.c` 변형 시험(commit `9bef6ae`) [M] |
+| 8 | §4 T1 "나온 것"의 "S5와 같은 행이고 줄 번호와 layers 칸만 다르다"가 틀리다(rests-on 문장도 다름) | 성립 [M] | §4 T1 문장 고침(이번 판 대비와 S5 대비를 나눠 적음) | 문서 |
+| 9 | C의 읽기 문맥이 직접 호출자뿐이다: 읽는 함수가 entry이면 잠금 없는 실행이 빠지고(`cx1`), 간접 호출자가 빠지며(`cx4`), 자식이 닿지 않는 호출을 그 호출 지점 잠금으로 "불가"라 한다(6.4.2 L667·L1020·L1284 포함) | 성립 [F][M] | entry 문맥(호출자 잠금 없음), 해결된 간접 호출자마다 문맥, 자식이 닿지 않는 문맥은 행으로 두되 `not graded`(등급 없음). fixture `relsound.c` `entry_*`·`via_*` | "불가" 0/0/0/14/30 → 0/0/0/6/14; `not graded` 20 / 20 / 5 / 14 / 14 [M]. T3 PASS → PARTIAL(§4 T3, §8 항목 16) |
+| 10 | spawn 뒤 쓰기 집합이 형 있는 `T.f`만 센다: 레코드 전체 쓰기(`cx2`), 덮는 데이터 함수 쓰기, 형 없는 쓰기, 대상이 풀리지 않은 호출(`cx8`)을 빠뜨린다 | 성립 [F][M] | 레코드 전체 쓰기(`T.*`)와 WRITERS `covers-more-than-the-field` 위치의 쓰기를 셈; 생성자 아래 callee 닫힘(해결된 간접 대상, 본문 없는 P0 밖 함수에 넘긴 함수 인자 포함); 대상이 풀리지 않은 간접 호출이 있으면 `undecidable`. 형 없는 쓰기는 #14 (a)의 완전성 요구로 막음(아래 (나)). fixture `clear_*`·`hook_*` | 다섯 빌드 등급 변화 0(검증자의 C5 확인과 같음) [M] |
+| 11 | "같은 획득"을 획득 지점 집합으로만 비교해, 루프에서 풀었다 같은 곳에서 다시 잡는 경우(`cx3`)를 연속으로 본다 | 성립 [F][M] | 획득 지점이 spawn 뒤 사건(LOCK_PATHS `after-spawn`)으로 다시 닿으면 연속이 아님 → `possible`("may be released and taken again between them") | 다섯 빌드 변화 0(C5 spawn은 루프 밖) [M]; fixture `loop_*` [M] |
+| 12 | 공통 정체성이 정적 인스턴스가 아니면 `possible`("no lock of static identity")로 가고, ED §3.3의 "결정 불가"가 나오지 않는다(`cx5`) | 성립 [F][M] | 읽기·spawn·쓰기가 한 획득의 비정적 정체성을 공유하면 `undecidable`(must 정체성 미증명). §4 T3 판정과 §7의 [I] 문장을 고친 코드에서 다시 씀: 형 단위 규칙의 대비는 6.4.1 `possible` 대 6.4.2 `undecidable` | 다섯 빌드에 그 분기 행 0 [M]; fixture `ptr_*` [M] |
+| 13 | T4의 "writer에 `pthread_create`"는 relations의 질의 결합이고 ED §3.0 G10의 추출 writer는 실현되지 않았다 | 성립 [F] | 지적의 첫째 방안: T4를 **PASS(질의 수준)**으로 적고 G10 미실현을 빠진 것으로 명시(§0, §4 T4, §8 항목 10). 새 추출 섹션(둘째 방안)은 하지 않음(아래 (다)) | T4 PASS → PASS(질의 수준) |
+| 14 | "불가"가 필드의 FIELD_STATUS를 보지 않고(6.4.2 C19·C20의 `RecordUsed`는 DISABLED), 레코드 쓰기·형 없는 쓰기·효과 모르는 호출과 생성자 호출자의 반환 뒤 쓰기를 보지 않는다(`rec_after`, `memset_after`, `caller_after`) | 성립 [F][M] | (a) 필드가 필드 단위 규칙으로 writer-set-complete가 아니면 `undecidable`, 그 규칙을 `rests-on`에; (b) #10의 쓰기 집합; (c) 범위를 "생성자의 한 호출(ED §3.3 항목 3)"로 이유 문장과 문서 §5g에 적고, 생성자를 부르는 함수의 제 본문에 그 필드·레코드 쓰기나 풀리지 않은 호출이 있으면 `undecidable`(아래 (라)). fixture `after_*` | 6.4.2 C19·C20 `proven-impossible` → `undecidable` [M]. T3 사례 행(`CFE_ES_TaskRecord_t.RecordUsed`·`AppId`, 필드 단위 complete)은 이 조건으로 바뀌지 않음. §4 T3, §6, §10 지적 3 고침 |
+| 15 | 비대칭: 읽기만 비정적이면 `undecidable`, 공통 비정적이면 `possible`; §4 T3 [I] 문장과 §10 지적 4의 "C1·R2는 잠금 없는 행"이 틀리다 | 성립 [F][M] | #12와 한 규칙으로(공통 정체성 전체에 대칭). §4 T3 [I] 문장, §10 지적 4의 결과 칸 고침 | 검증자가 센 R2 18·C1 15 행은 spawn에서 그 잠금을 잡지 않거나(잠금 창) 잠금 없는 쓰기가 있어 정체성과 무관하게 `possible`로 남는다: 다섯 빌드의 `possible` 이유는 "읽기 잠금 없음", "잠금 창", "잠금 없는 spawn 뒤 쓰기"뿐이다 [M] |
+| 16 | `rests-on`이 "불가" 분기에만 붙어, 정적 인스턴스 판정을 쓰는 잠금 창 행(6.4.1 C31 등)에 없다 | 성립 [F][M] | 정적 인스턴스 판정을 쓰는 모든 분기(불가, 잠금 창, 다른 획득, 다시 잡힘, 두 정적 인스턴스)에 선언된 가정 셋과 필드 단위 규칙을 붙임. §4 T3·§5에 6.4.1 잠금 창도 기댄다고 적음 | rests-on 0 / 0 / 55 / 14 / 30 → 0 / 0 / 55 / 17 / 16 [M](6.4.2의 감소는 #9·#14로 "불가"가 줄어서) |
+| 17 | §0·§5가 PI A2 ④⑤로 읽은 표시 없이 "반증 조건 충족되지 않음"만 적는다 | 성립 [F] | §5에 A2 단락: T1은 "개정 뒤 통과", T1·T2의 통과는 "관계를 낸다"의 통과(④), 두 수정의 개정이 T1–T3 행을 계기로 함(⑤). "ED §6에서 반증되지 않음"과 "A2에서 탐지 근거 아님"을 나눔. §0 항목 4 | 문서 |
+| 18 | 행이 원문 대조 없는 P0 항목에 기대는 것이 layers 칸에 없고(PI A4 기본값), `pthread_create` 원문 대조가 배포판 패치를 보지 않았다는 [U]가 없다 | 성립 [F][M] | layers `P0-unverified(<항목>)`(행의 유도가 쓴 항목), T5에 행 수; `pthread_create` 원문 줄과 relations 머리에 배포판 패치 미대조. 빌드는 `Ubuntu GLIBC 2.39-0ubuntu8.9`를 링크 [M] | 272 / 272 / 138 / 149 / 147행 [M]. T5 PARTIAL 그대로(A4 기본값으로는 통과로 세지 않음) |
+| 19 | P0 scope가 "묶음을 통째로"라 하나 빠진 묶음·구성원(join·detach, timer, select·poll, 초기화·속성, `sscanf` 등)이 있고, `thrd_create`에 "시작 전 저장"이 없다 | 성립 [F][M] | P0 표 개정 3: scope 문장이 묶음의 어느 구성원이 항목인지와 빠진 것을 이름으로 적음; `thrd_create` 의미에 시작 전 저장; §1.3·문서 §5f의 "listed whole" 고침 | 다섯 빌드가 부르는 판 밖 함수는 §1.3. 유도 결과 변화 0(fixsame: BASIS·P0_TABLE만 다름) [M] |
+| 20 | 고정 수치 상한(argflow 100000, facts_text 10000·64, 기존 ast_tu 4096·ast_fn 6)이 기록·계수되지 않는다 | 성립 [F] | 루프 guard 둘(100000, 10000)은 방문 집합·후위 번호 조건으로 바꿈(출력 변화 없음); 64 원소는 보기의 출력 한계로 두고 넘으면 그렇다고 적음; 4096·6은 이름 붙인 상수로, 걸리면 FACT_INIT "상수 아님" 행(이전엔 0으로 적을 수 있었음)·잘린 수를 세고, BASIS `param.walk_bounds`(unspecified_by_reference)·`count.walk_bounds_hit`. §7 목록 | 다섯 빌드 걸린 수 0 [M] |
+| 21 | lint `case-ids`가 `tools/`를 읽지 않는다; `cmd_hold.cpp` 주석 | 성립 [F] | `tools/`를 읽게 함, selftest에 도구 파일 경우 추가, 주석 고침 | lint 6/6 [M] |
+| 22 | 정적 이미지 entry 규칙이 표가 실행 중에 쓰이지 않는다는 확인 없이 이미지를 값으로 쓴다(C1 표는 const 아님) | 성립 [F] | 멤버의 FIELD_STATUS가 두 규칙 모두 complete이고 writer 인스턴스가 없으며 이미지 잎에 object-/field-/record-written이 없을 때만 쓰고, 아니면 풀지 않고 이유를 머리에 적음. 머리에 확인 문장 | C1 `CFE_ES_FuncPtrUnion_t.MainTaskPtr` 확인 통과, root 5 그대로 [M]. `relpaths.c` 변형 시험(commit `30c8713`) [M] |
+| 23 | 수명의 entry 경로 문장이 프로세스 종료 처리기·소멸자 함수·예외 단위를 보지 않는다 | 성립 [F] | 문장과 문서 §5g에 읽지 않는 것으로 이름 붙임(`atexit`, `at_quick_exit`, `on_exit`, 소멸자 함수, 예외를 켠 단위) | 다섯 빌드 수명 문장 [M] |
+
+**지적의 방안과 다르게 한 곳** (받지 않은 부분과 근거)
+
+- (가) **#1의 반복 순서 유도.** 이미지 첨자(`[17]`·`[19]`…)를 생성 순서로 읽으려면 spawn을 감싼 루프의 첨자가 이미지 첨자를 차례로 지난다는 사실이 필요하다. 이 판의 순서는 LOOP_ITERS(펼친 table walk)에서만 오고, C1의 `CFE_ES_CreateObjects` 루프(`cfe_es_start.c:716`, loop 204)는 FACT_LOOPS에서 `count-bounded trip=exact(30)`이며 C1의 LOOP_ITERS는 0행이다(R2는 같은 함수의 루프 둘이 `table-walk … table=GLOBAL_CONFIGDATA.CoreObjectTable`, LOOP_ITERS 314행) [M]. 그래서 C1의 root는 `table-image-entry`다. 이미지 경로만으로 순서를 내면 루프 첨자와 이미지 첨자가 같다는 것을 증명 없이 받는 것이 된다. 지적이 허용한 둘째 방안(정확한 이유)으로 두고, 필요한 사실을 §8 항목 15에 적었다.
+- (나) **#10의 형 없는 쓰기.** 형 없는 쓰기를 행마다 짝짓지 않았다. 대신 #14 (a)로 필드가 필드 단위 규칙에서 writer-set-complete여야 "불가"를 낸다. 그 규칙에서 complete는 형 없는 저장(cast·escape·other fields·unknown effect)이 그 필드에 닿지 않는다는 뜻이다(S4, `kairos/docs/static_facts.md` §5c) [F]. 그래서 형 없는 쓰기가 있을 수 있는 필드는 이미 `undecidable`이 되고, 그렇지 않은 필드에는 셀 형 없는 쓰기가 없다. 다만 이 배제는 PI 결정 대기 규칙에 기대며, 행의 `rests-on`에 그 규칙이 적힌다. 같은 이유로 본문 없는 P0 밖 함수의 호출은, 그 레코드에 대한 포인터를 받으면 unknown effect로 필드가 complete가 아니게 되므로 따로 세지 않았고, 함수 인자를 받으면 그 함수를 호출 대상으로 센다(지적은 그런 호출을 모두 "잠금 없는 가능한 쓰기"로 보라 했다). 인자 없이 전역을 직접 쓰는 본문 없는 함수는 닫힌 프로그램(빌드의 단위 전부)을 전제로 한 S4 완전성 규칙 밖에서만 생긴다.
+- (다) **#13의 G10.** 추출에 P0 out 인자 저장을 writer로 넣으면 FIELD_STATUS(`OS_task_record_t.id` 등)의 결정이 바뀐다. 이 단계의 범위(새 섹션만 golden 변경 허용)에서 그것을 하려면 새 섹션과 그것을 읽는 완전성 규칙이 함께 필요하고, 그 규칙은 PI의 완전성 결정과 엮인다. 지적이 허용한 첫째 방안(질의 수준 PASS와 빠진 것 명시)으로 두었다.
+- (라) **#14 (c)의 호출자 반환 뒤.** 생성자를 부르는 함수의 **제 본문** 쓰기와 풀리지 않은 호출은 순서 없이 보아 있으면 `undecidable`로 내린다(fixture `after_*`). 그 함수의 callee와 그 위 호출자가 반환 뒤 하는 일은 읽지 않고, 그 범위를 이유 문장(`Scope: one call of P (ED §3.3 item 3) …`)과 문서에 적는다. 근거: ED §3.3은 질문을 "P 안에서 s 뒤에 오는 쓰기 w"(항목 3)와 "s 직전부터 w까지 같은 잠금"으로 정한다 [F]. P 밖의 뒤 쓰기는 다른 w의 관계다. 그것까지 "불가"의 조건에 넣으면 필드 기반 추상에서는 그 쓰기가 같은 레코드인지 정하지 못해 "불가"가 거의 남지 않는다 [I](C5의 ES 명령 루프는 나중에 앱을 지우며 `RecordUsed`를 쓴다). 6.4.2 L800·L445·L551의 "불가"는 이 범위의 것이다(호출자 `CFE_ES_ParseFileEntry`, `CFE_ES_ProcessControlRequest`, `CFE_ES_StartAppCmd`의 제 본문은 그 필드를 쓰지 않음 [M]). §8 항목 6.
+- (마) **#5의 ED 정정과 T3 조건의 전제.** ED 본문은 이 단계의 커밋 범위(도구, 시험, 드라이버, 결과 문서) 밖이어서 고치지 않았다. 고칠 곳을 §8 항목 2(F8 예)와 항목 16(T3 읽기 지점 셋)에 적었다.
+
+**재측정** [M]: 빌드 `merge-check/kz-llvm`, 시험 237/237(건너뜀 1, 원래대로), `test_static_cli` 515, `test_static_wrappers` 512, lint 6/6. 프로필 추출 V0·V2 × C1 pre tx·R2 core·C5 6.4.1 여섯 경우 STRINGS 말고 동일. `fixsame` 다섯 빌드 BASIS·P0_TABLE 말고 동일. T1–T7 드라이버(`all`)와 T7 두 번 실행 바이트 동일: facts `8e189863…`, `9f3a0e20…`, `e7c4fa16…`, `26cd3ee3…`, `ceec3748…`; relations `a40cdd11…`, `13b45c6f…`, `2e0eedf7…`, `4c3ca8fe…`, `6e91fe36…`(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642 순). `T/sha256.txt` 121 파일.
+
+**판정 변화**: T3 PASS → PARTIAL(#9), T4 PASS → PASS(질의 수준)(#13). T1 PASS(개정 뒤 통과), T2·T5 PARTIAL, T6·T7 PASS는 그대로다.
+
+커밋: `beab307`(lead의 WIP 스냅숏), `b00c370`(도구·시험·golden·문서·드라이버), `9bef6ae`·`30c8713`(시험 추가, 도구 같음)과 이 문서의 커밋(접두 `kz-static 2a/fix2:`).
+
+## 12. 셋째 수정 단계: 검증 지적과 처리 (2026-10-30)
+
+둘째 수정(§11)에 대한 셋째 검증의 지적 21건(막는 것 6: #1–#6; 나머지 15는 막지 않는 것)을 파일·출력·반례에 대어 보았다. **21건 모두 성립했다.** 막는 것 여섯은 모두 둘째 수정의 `proven-impossible`이 틀린 반례 fixture였다: 검증자의 fixture(`v3_wait`, `v3_wait2`, `v3_first`, `v3_union`, `v3_qsort`, `v3_fnarg`, `v3_cbcaller`, `v3_jmp`, `v3_elem`)는 둘째 수정 도구에서 "불가"였고, 검증자의 실행 사본은 3/3 실행에서 그 "불가"가 막는다는 순서를 보였다(검증자 측정). 고친 도구에서 그 fixture는 모두 `possible` 또는 `undecidable`이다 [M]. 반례의 모양은 fixture `relsound.c`(사례 이름 없음)에 옮겼다. 검증자는 C5의 "불가" 6 + 14행을 깨는 길은 찾지 못했다고 적었고, 고친 도구도 그 행들을 그대로 낸다 [M]. 처리가 지적의 방안과 다른 곳은 표 아래에 적는다. 버린 지적은 없다.
+
+| # | 지적(요지) | 확인 | 처리 | 결과 |
+|---|---|---|---|---|
+| 1 | 생성자의 첫 단계 callee 안에서 생성자가 잡은 잠금으로 기다리는 조건 대기(그 callee는 잡지 않음)가 잠금을 풀지만 `entry-release`를 만들지 않아, 그 뒤 쓰기에 생성자의 잠금·획득이 합쳐진다(`v3_wait`, 두 단계 아래 매개변수 mutex `v3_wait2`) | 성립 [F][M] | `lockset.cpp` `apply`: 잡지 않은 잠금으로 기다리는 대기도 `touches`(LOCK_PATHS `entry-release`). 문서 §5h. fixture `wait_*`, `waitp_*` | 두 반례 `possible`(쓰기가 잠금 없음) [M]. 다섯 빌드: LOCK_PATHS 행 +3 / +3 / +3 / 0 / 0(OSAL 조건 변수 구현), 등급 변화 0 |
+| 2 | 한 mutex를 두 정적 정체성(객체와 첫 멤버 `(pthread_mutex_t *)&q_obj`, union의 두 멤버)으로 풀면 `kill_may`가 다른 정체성을 지우지 않는다(`v3_first`, `v3_union`) | 성립 [F][M] | 해제가 지우는 범위를 접근 경로의 겹침으로 넓힘: 같은 전역 객체에서 접두이거나 union 형제, 포인터 경로는 첫 멤버의 레코드 형을 상대 경로의 형에 맞춰 같은 비교(지적의 첫째 방안에 포인터 경로를 더함, 아래 (가)). 정체성 노드가 레코드 형과 union 표시를 지님(텍스트·LOCK_IDS 그대로). 남는 전제를 §5h와 "불가" 문장·`rests-on`에 적음. fixture `first_*`, `union_*` | 두 반례 `possible` [M]. 다섯 빌드 LOCKSET·LOCK_IDS 변화 0 [M: fix2same] |
+| 3 | 자식 안의 읽기 문맥이 본문 없는 함수의 되부름(`qsort`)과 풀리지 않은 간접 호출을 빠뜨린다(`v3_qsort`, `v3_fnarg`) | 성립 [F][M] | 읽는 함수를 본문 없는 P0 밖 함수에 넘기는 호출마다 문맥(그 호출 지점 잠금으로 등급; `call_runs`와 같은 규칙), 읽는 함수의 주소가 잡혀 있고 스레드의 코드에 풀리지 않은 간접 호출이 있으면 문맥 하나(`undecidable`). fixture `back_*` | `v3_qsort` 되부름 문맥 `possible`, `v3_fnarg` 되부름 `possible`·간접 `undecidable` [M]. 다섯 빌드에 해당 문맥 0(헤더 `[C]`의 두 수) [M] |
+| 4 | 생성자 호출자 집합이 주소가 잡힌 생성자의 풀리지 않은 간접 호출자를 빠뜨려, 호출자의 제 본문 쓰기를 못 본다(`v3_cbcaller`) | 성립 [F][M] | 생성자를 본문 없는 함수에 넘기는 호출을 호출자로 세고, 생성자의 주소가 잡혀 있고 풀리지 않은 간접 호출이 facts에 있으면 `undecidable`(호출 지점을 적음; "none in these facts"를 내지 않음). fixture `addr_*` | 반례 `undecidable` [M]. C5의 생성자는 주소가 잡히지 않음 [M] |
+| 5 | `setjmp`로 돌아오는 비국소 점프가 CFG에 없는 길(풀고 쓰기)을 돌린다(`v3_jmp`) | 성립 [F][M] | 두 번 돌아오는 함수 이름 목록(relations 머리에 적음): 생성자·spawn 뒤 함수·읽는 함수·문맥 함수가 부르면 "불가" 대신 `undecidable`(아래 (나)). fixture `jump_*` | 반례 `undecidable` [M]. C1·R2에 `__sigsetjmp` 4개(`pthread_cleanup_push`), C5 0 [M] |
+| 6 | 스칼라 배열 필드의 원소 저장은 writer 행이 없는데 FIELD_STATUS가 complete라 부르고 "불가"가 그것에 기댄다(`v3_elem`) | 성립 [F][M] | FIELD_STATUS: const가 아닌 스칼라 배열 필드는 두 규칙 DISABLED, flag `array-element-stores-not-collected`(지적의 첫째 방안을 좁힘, 아래 (다)). `c_feasibility` 이유에 그 flag를 적음. fixture `elem_*`; `lockset.c`의 `fx_shared.tasks` | 반례 `undecidable` [M]. 다섯 빌드 183 / 183 / 147 / 175 / 175 필드가 DISABLED, LOCK_IDS·AWAIT_L1·relations 등급 변화 0 [M]. §3의 FIELD_STATUS 열이 바뀜 |
+| 7 | 자식이 직접 부르는 다른 root(다른 스레드의 entry)의 코드가 자식의 것이 아니어서, 자식이 잠금 없이 도는 문맥이 `not graded`가 된다(`v3_root`) | 성립 [F][M] | 스레드의 코드를 root에서 멈추지 않는 호출 그래프로 정함(지적의 첫째 방안). fixture `root_*` | 반례 문맥 `possible` [M]. 다섯 빌드에서 root에 직접 들어가는 root 0이라 그 자체로는 변화 0 |
+| 8 | "불가"가 쓰기 키가 spawn 정체성에서 오는지 보지 않는다(`v3_second`: 각 호출이 앞 호출의 자식을 등록) | 성립 [F][M] | 지적의 둘째 방안: "불가" 문장에 "이 호출의 쓰기에 관한 것이고, 그 키(WRITERS key)가 이 호출이 시작하는 자식의 레코드인지는 정하지 않음"을 적음. ED §3.3 항목 3의 요구는 미검사로 §8 항목 22 | `v3_second`는 `proven-impossible`이되 문장이 범위를 적음 [M]. C5 키 `TaskTable[TaskId]` [M] |
+| 9 | `OS_TaskCreate`가 스레드 생성 뒤 실패를 돌려주면(osapi.c L663·L675) 생성자가 등록을 건너뛰고 자식이 등록 전 값을 읽는다: 행이 대표하는 반사실이 실현되는데 "불가" 문장과 가정이 그 길을 말하지 않는다 | 성립 [F] | 지적의 첫째 방안: 유도 spawn 연산(본문 있음)의 "불가" 문장에 "그 연산이 스레드를 시작한 뒤 실패를 알려 쓰기를 건너뛰는 길은 덮지 않음(그 길에서 자식은 이전 값을 읽을 수 있음)"을 적음. 그 길의 탐지는 §8 항목 21 | C5 6.4.2 "불가" 14행·6.4.1 6행이 그 문장을 단다 [M]. §0, §4 T3에 적음 |
+| 10 | 뒤집힘 칸이 생성자 제 본문의 상수 쓰기만 써서, 실현 가능성 칸이 세는 callee 쓰기를 보지 않는다(`v3_wait`의 `used=2`) | 성립 [F][M] | 실현 가능성이 센 spawn 뒤 쓰기(생성자·callee의 형 있는 쓰기; spawn 연산의 인자 저장은 그 호출의 out-pointer writer 값; 레코드 전체·덮는 쓰기·상수 아님은 "평가 안 함")로 평가(지적의 첫째 방안) | 다섯 빌드의 기존 행 뒤집힘 변화 0 [M]. fixture `relpaths_np`·`relsound_np` golden에서 확인 |
+| 11 | 문서가 "불가"를 필드 단위 규칙과 가정 셋에만 기댄다고 적으나 반례들이 다른 전제 여섯을 보인다; C5 행이 그 전제에 대어졌는지 기록이 없다 | 성립 [F] | 도구가 다섯을 검사하게 한 뒤 남는 전제 셋(겹침은 접근 경로로만, 본문 없는 함수의 되부름은 그 호출에서 받은 함수만, 두 번 돌아오는 함수는 이름으로)을 §5h, "불가" 문장, layers `rests-on(premises of path C …)`에 적음. C5 행을 대어 본 것을 §4 T3·§8 항목 19와 PI B4에 적음 | `rests-on` 행 수 0 / 0 / 55 / 17 / 16 그대로(같은 행에 전제가 더해짐) [M] |
+| 12 | R2 C11(트램펄린이 entry를 풀지 못한 스레드도 대신함)과 C1·R2의 `RunExceptionScan` 문맥(자식이 시작하는 `CFE_ES_BackgroundTask`가 닿음)이 "no read of the child"로 `not graded`다 | 성립 [F][M] | 스레드 집합에 후손을 넣고(지적의 첫째 방안), 집합이 완전하지 않으면(트램펄린의 미해결 호출, 코드 안의 미해결 spawn) 닿지 않는 문맥을 `undecidable`로. 행의 spawn 줄에 후손 | `not graded` 20 / 20 / 5 / 14 / 14 → 2 / 2 / 1 / 14 / 14; R2 C11·C45 `undecidable`; 둘째 수정의 not graded 문맥 C1 18·R2 2는 `possible`, 후손만 닿는 새 행 18 / 18 / 6 [M](§6) |
+| 13 | 이미지 키 규칙이 FIELD_STATUS 완전성과 object-written을 보지 않는다(형 없는 저장 변형) | 성립 [F][M] | 이미지 entry 규칙과 한 함수(`image_value_why`)로: 쓰인 잎(object·field·record), FIELD_STATUS 두 규칙 complete, 실행 중 writer 없음. `test_static_cli`에 `relations.c` 형 없는 저장 변형 | 변형의 키 `unresolved (image, not taken as the run-time value: …)` [M]. C1 BP 키 `"BP0_tsem"`은 그대로 풀림(`BP_Throttle_t.Name` complete/complete, 원소 const) [M] |
+| 14 | 잠금을 이름 붙였는데 `P0-unverified`에 잠금 기본 연산이 없는 C 행이 있다(72 / 72 / 54 / 22 / 22) | 성립 [M] | `c_feasibility`가 모든 등급에서, 행 출력이 잠금을 이름 붙인 모든 C 행에서 잠금 기본 연산을 단다(지적의 첫째 방안). 계수 스크립트가 "잠금을 이름 붙였는데 기본 연산 없음"을 셈 | 그런 행 0 [M]. `P0-unverified` 351 / 351 / 203 / 149 / 147(T5) |
+| 15 | `to_expr` 깊이 상한 24가 BASIS·계수에 없는데 문서는 4096·6만 남은 상한이라 적는다; 프로필 모드의 4096 "상수 아님" 행 | 성립 [F] | `kExprDepth`로 이름 붙여 `param.walk_bounds`에 24, `count.walk_bounds_hit`에 잘린 수. 프로필 모드에서도 같은 상한이 돌고 기록하지 않음을 §5h·§7에 적음 | 다섯 빌드 잘린 수 0 [M] |
+| 16 | C5의 사례 관계 행 8에 `not graded` 3행이 들어 있어 비율 0.3–4.6%가 개정이 뺀 행을 센다 | 성립 [M] | 계수 스크립트가 등급 있는 사례 행을 따로 셈. §0·§6과 PI B7·STATUS에 둘 다 | 8(5 graded), 2.8% / 2.9%; 범위 0.3–2.9% [M] |
+| 17 | `not graded`는 ED §3.4 등급 셋 밖의 넷째 값인데 ED 정정 목록에 없다 | 성립 [F] | 다음 ED 개정의 편차로 기록(지적의 첫째 방안): §8 항목 20, PI A2·B5 | 문서 |
+| 18 | 판 밖 함수 목록이 덜 찼다(`pthread_cancel`, 시그널, 취소 상태, `pthread_setschedprio`, `dlclose`·`dlerror`, 이름·affinity 설정, `fork`) | 성립 [M] | 목록을 다섯 빌드의 수와 함께 채움(§1.3, §8 항목 17, STATUS). scope 문장의 개정은 지적대로 다음 P0 문장 개정으로 미룸(아래 (라)) | 문서 |
+| 19 | §0 항목 2·§2a의 BASIS 목록과 §9의 측정 뒤 commit 목록이 틀리다 | 성립 [M][F] | 항목 이름으로 다시 비교해 §2a에 세 비교를 적음(수정 단계 → 둘째: `p0.thrd_create`는 바뀌지 않음; S5 → 둘째: `extract.p0_table_scope`·`p0.thrd_create`는 더해진 것). §9에 `30c8713` | 문서 |
+| 20 | PI·STATUS의 "마지막 넷은 push 전"이 낡았다(원격이 `c712261`까지 가짐) | 성립 [M] | 두 문서를 고침: 둘째 수정까지 원격에 있고 셋째 수정 커밋은 로컬(push 하지 않음) | 문서(이 처리도 틀렸다: 문서를 쓰기 전에 원격이 `a9d9f34`까지 갱신돼 있었다, §13 #10) |
+| 21 | lint 데이터 파일 머리가 `include/`·`lib/`만 적는다(규칙은 `tools/`도 읽음) | 성립 [F] | 머리를 "include/, lib/ and tools/"로 | lint 6/6 [M] |
+
+**지적의 방안과 다르게 한 곳**
+
+- (가) **#2의 겹침 범위.** 지적은 같은 전역 객체에 뿌리를 둔 정체성의 겹침(접두, union 멤버)을 요구했다. 그것에 더해 포인터로 시작하는 경로를 그 첫 멤버의 레코드 형으로 상대 경로에 맞춰 비교한다(포인터로 같은 객체의 바깥 멤버를 푸는 경우). 형의 포함 관계 전체(상대 경로가 이름 붙이지 않은 중첩 멤버를 가리키는 포인터)와 관련 없는 레코드 형 사이의 cast는 facts에 없어 보지 않고 전제로 적었다(§8 항목 19).
+- (나) **#5의 처리.** 지적은 "P의 모든 사건을 spawn 뒤로 보고 획득을 다시 닿는 것으로" 또는 `undecidable`을 허용했다. `undecidable`을 골랐다: 두 번 돌아오는 호출은 돌아올 때의 잠금 상태가 CFG의 그 지점 상태가 아니므로(되돌아온 길에서 먼저 푼 잠금이 CFG로는 잡혀 있을 수 있음) 사건 순서만 넓혀서는 잠금 집합이 건전해지지 않는다. 같은 이유로 생성자뿐 아니라 spawn 뒤 함수, 읽는 함수, 문맥 함수에도 건다. 이름 목록은 P0 표가 아니라 relations에 두고 머리에 적었다(P0 표 개정 없이; 지적은 "P0 scope 또는 §5g"를 허용).
+- (다) **#6의 범위.** 지적은 배열 형 필드 전부를 complete에서 빼라 했다. 원소가 레코드인 배열은 원소 멤버 쓰기와 원소 통째 대입(레코드 쓰기, aggregate-assign writer)이 잡힌다 [M: fixture로 확인]. 원소가 const인 배열은 원소 저장에 const를 벗기는 cast·escape가 필요하고 그것은 A-TYPE 적중으로 잡힌다고 보았다 [I]. 그래서 const가 아닌 스칼라 배열만 뺐다. 이것으로 T2의 이미지 키(`BP_Throttle_t.Name`, `const char[]`)가 그대로다.
+- (라) **#18의 P0 문장.** scope 문장을 지금 고치면 P0 표 개정 4가 되고 BASIS·P0_TABLE·golden이 바뀐다. 지적은 "다음 P0 문장 개정에서"라고 했으므로 이 단계는 목록만 채우고 개정을 미뤘다(§8 항목 17).
+- (마) **#8·#9의 탐지.** 둘 다 지적이 허용한 문장 방안을 골랐다. 키와 spawn 정체성의 연결, "스레드 시작 뒤 실패" 길의 탐지는 새 사실(도달 정의, 안쪽 spawn 뒤 return)이 필요하다(§8 항목 21, 22).
+
+**재측정** [M]: 빌드 `merge-check/kz-llvm`, 시험 237/237(건너뜀 1, 원래대로), `test_static_cli` 541, `test_static_wrappers` 512, lint 6/6. 프로필 추출 V0·V2 × C1 pre tx·R2 core·C5 6.4.1 여섯 경우 STRINGS 말고 동일. `fix2same` 다섯 빌드: BASIS, FIELD_STATUS, C1·R2의 LOCK_PATHS만 다름(§2a). T1–T7 드라이버(`all`)와 T7 두 번 실행 바이트 동일: facts `51905faa…`, `ed969e09…`, `311387a1…`, `78598153…`, `e69aafcc…`; relations `999dcfb8…`, `84fab4cd…`, `aa638601…`, `3ab81c35…`, `87d34f9f…`(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642 순). `T/sha256.txt` 123 파일.
+
+**판정 변화**: 없다. T1 PASS(개정 뒤 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6·T7 PASS. "불가"는 0 / 0 / 0 / 6 / 14 그대로이고, `not graded`는 20 / 20 / 5 / 14 / 14 → 2 / 2 / 1 / 14 / 14, `undecidable`은 297 / 297 / 223 / 147 / 147 → 297 / 297 / 225 / 147 / 147이다. T3 6.4.2의 "불가"는 이제 등록이 실행되는 길에 대한 것임을 문장이 적고(#9), 경로 C의 전제 셋에 기댄다(#11).
+
+커밋: `02f3f79`(도구), `7506583`(시험·golden·lint 데이터), `56cf392`(드라이버·계수), `a9d9f34`(lead의 WIP 스냅숏: 규칙 문서), `0e554f2`(계수), `612c133`(이 문서·규칙 문서·PI·STATUS; 접두 `kz-static 2a/fix3:`). (첫째 차례 문서의 "push하지 않았다"는 틀렸다: 원격은 15:25:33에 `a9d9f34`까지 갱신되어 있었다. §13 #10.)
+
+## 13. 셋째 수정 단계 둘째 차례: 넷째 검증 지적과 처리 (2026-10-30)
+
+셋째 수정 첫째 차례(§12)에 대한 넷째 검증의 지적 12건(막는 것 4: #1–#4; 나머지 8은 막지 않는 것)을 파일·출력·반례에 대어 보았다. **12건 모두 성립했다.** 막는 것 넷은 모두 첫째 차례의 `proven-impossible`이 틀린 반례 fixture였고, 검증자의 실행 사본(`recur_demo`, `hook_demo`, `qsort_demo`, `hdr_demo`)은 그 "불가"가 막는다는 순서(자식이 쓰기 전 값을 읽음)를 보였다(검증자 측정). 고친 도구에서 그 fixture는 모두 `possible` 또는 `undecidable`이다 [M]. 검증자는 C5의 "불가" 6 + 14행을 깨는 길을 찾지 못했다고 적었고, 고친 도구도 그 행들을 그대로 낸다 [M].
+
+이 차례는 두 번에 걸쳐 했다. 첫 번(커밋 `65902ff`, `8a1a3b7`, `741b2d4`)이 도구·시험·드라이버를 커밋한 뒤 컨테이너가 다시 시작되어 끊겼고, 둘째 번이 그 커밋을 읽어 지적마다 고쳐졌는지 fixture로 다시 확인하고, #2에서 남은 구멍 하나(아래 (가))를 막은 뒤 재빌드·시험·식별·드라이버·문서를 마쳤다.
+
+| # | 지적(요지) | 확인 | 처리 | 결과 |
+|---|---|---|---|---|
+| 1 | "같은 획득"을 같은 획득 지점으로 본다: spawn 뒤 생성자가 제 closure로 다시 들어오면(상호 재귀) 같은 지점에서 새로 잡는다(`recur.c`) | 성립 [F][M] | 개정 5: spawn 뒤 호출이 돌 수 있는 함수에 생성자가 있으면 `possible`(그 호출을 적음); 생성자 아래 프레임이 제 획득으로 잡은 잠금이 spawn 의 획득 지점과 같으면 `possible`(지적의 두 방안). `relsound.c` `recur_*`(생성자 제 본문의 쓰기, 상호 재귀). `static_facts.md` §5i | `recur.c` `possible`: "o_create runs again after the spawn (the call recur.c:24:25 reaches it): its acquisition recur.c:20:3 runs again in that nested call" [M]. C5 두 생성자의 spawn 뒤 함수 집합(40·33 / 43·33)에 생성자 없음, 등급 변화 0 [M] |
+| 2 | 간접 호출의 해결된 대상 집합을 완전한 것으로 쓴다(`hook_memcpy.c`, `member_memcpy.c`, `dlsym_idiom.c`, `hook_cast.c`) | 성립 [F][M] | 지적의 첫째 방안을 넓혀: 추출이 열린 노드를 거칠 수 있는 해결된 간접 호출에 CALL_TARGETS `incomplete-source` 행을 붙이고(함수 포인터가 아닌 형의 노드, 본문 없는 함수의 결과, 주소가 잡힌 함수의 매개변수, 변환해 넘긴 주소, FIELD_STATUS가 없거나 필드 단위 complete가 아니거나 대입 아닌 writer가 있는 필드; 둘째 번이 더함: 그 밖에 잡힌 주소·배열 붕괴, 복사된 함수 포인터 포인터, 본문 없는 함수의 함수 포인터 포인터 매개변수), 잠금 집합·relations가 풀리지 않은 호출로 읽는다. BASIS `count.indirect_calls_incomplete`. `relsound.c` `memhook_*`, `dlhook_*`, `varhook_*`, `putcopy_*`, `arrhook_*` | 네 fixture `possible` [M]. 다섯 빌드 `incomplete-source` 호출 44 / 44 / 22 / 0 / 0, 풀리지 않은 간접 호출 18 → 62, 7 → 29(C1, R2) [M]. 등급 변화는 그 호출로 생긴 것이 없다(아래 #7의 세 행은 원래 풀리지 않은 호출과 이미지 전제 때문) [M] |
+| 3 | 본문 없는 함수가 되부르는 함수의 잠금 효과를 잠금 집합이 적용하지 않는다(`cb_qsort.c`) | 성립 [F][M] | 잠금 집합 개정 2(지적의 방안): 본문 없고 P0·비교 함수가 아닌 callee에 넘긴 함수(ARGFLOW 원천 function)의 해제·may 해제·소거를 may 해제로, 대기를 대기로, unknown을 그대로 적용하고 획득은 버림; 그 함수들을 호출자보다 먼저 분석. 전제 (나)의 문장 고침. `relsound.c` `cbq_*` | `cb_qsort.c` `possible`(쓰기 `held=0`) [M]. 다섯 빌드: LOCK_PATHS `entry-release` +29(C5: PSP `main`의 `signal` 처리기), C1·R2는 #2와 합쳐 +75 / +66; 등급 변화 0 [M] |
+| 4 | 헤더에 정의된 내부 연결 객체가 단위마다 다른 객체인데 한 키다(`hdr/`: `lk.h`의 `static pthread_mutex_t`, 두 단위) | 성립 [F][M] | 지적의 둘째 방안: 키는 그대로 두고, 둘 이상의 단위에서 정의되거나 단위의 주 파일 밖에 정의된 내부 연결 객체를 이름 붙인 잠금 정체성을 LOCK_IDS `not-static`(이유를 적음). `test_static_cli`의 두 단위 fixture | `hdr` C1 `undecidable`("#0 &unit_mutex@lk.h:3 closed not-static … an object of internal linkage defined in lk.h, which is not the main file of the translation unit a.c") [M]. 다섯 빌드 LOCK_IDS 5 / 5 / 4 / 19 / 19행, 그 규칙으로 `not-static`이 된 것 0 [M]. 함수 키의 같은 합침은 §8 항목 25 |
+| 5 | mutex 전제 둘이 이름 없다: 다른 스레드의 해제(`nonowner.c`), 잡힌 mutex 위의 일반 저장(`overwrite.c`) | 성립 [F][M] | 전제 (라)로 이름 붙임(§5i, "불가" 문장, `rests-on`, §8 항목 19, PI B4). 탐지는 하지 않음(지적이 선택으로 둠; 아래 (나)) | 두 fixture는 그대로 `proven-impossible`이고 문장이 (라)를 적음 [M]. C5: OSAL mutex `PTHREAD_MUTEX_RECURSIVE`(osapi.c L3177, 두 판), `OS_mut_sem_table[].id` 저장은 `pthread_mutex_init`(L3195)·`pthread_mutex_destroy`(L3253)뿐 [F] |
+| 6 | 문서가 "불가"의 의존을 가정 셋·필드 단위 규칙·전제 셋으로만 적는데, #1–#4가 넷을 더 보였다 | 성립 [F] | 넷을 검사로 바꾸고(지적의 우선 방안), 남은 것을 전제 (라)–(바)로; C5 행을 대어 본 기록을 §4 T3·§8 항목 19, PI B4, STATUS에 [M]·[F]로 | 문서. C5: spawn 뒤 함수 집합에 생성자·간접 호출(`builtin` 말고)·함수를 넘기는 호출 없음, 내부 연결 잠금 0 [M]; 재귀 mutex·저장 [F] |
+| 7 | 스레드 코드의 풀리지 않은 간접 호출을 닿음 판정이 무시한다(`v4_unres.c`, `v4_unres2.c`); C1 C113·R2 C80이 그 전제에 기댄 `not graded`다 | 성립 [F][M] | 개정 5(지적의 첫째 방안): 스레드 코드의 풀리지 않은 간접 호출을 모으고, 닿지 않는 문맥의 함수가 주소가 잡힌 함수에서 돌 수 있으면(`call_runs`의 추이) `undecidable`; 그런 읽기 함수는 닿지 않아도 받음; 나머지 `not graded` 문장이 근거를 적음. `relsound.c` `unres_*`, `unres2_*` | `v4_unres` C1 `undecidable`, `v4_unres2`에 행이 생겨 `undecidable` [M]. C1·R2: 타임베이스 spawn의 `OS_TaskDelay_Impl` 문맥 `not graded` → `undecidable`, 새 행 20 / 20 / 33(`undecidable` 19 / 19 / 28, `not graded` 1 / 1 / 5). C5 14 / 14 `not graded` 그대로: 자식 코드에 그런 호출 없음(행 문장) [M] |
+| 8 | probe-create 제외가 두 행위자가 도는 함수에서도 짝을 뺀다(`v4_probe3.c`; ED:512) | 성립 [F][M] | 한 행위자가 양쪽을 다 돌릴 때만 제외; 아니면 짝으로 두고 handling에 행위자 수를 적음(지적의 방안). `test_static_cli` 두 행위자 fixture, §5i | `v4_probe3` dependency "1 creator(s) of this partition in other actors" [M]. 다섯 빌드 변화 0(C1 A20의 probe-create는 `{BP_AppMain}` 한 행위자) [M] |
+| 9 | 정적 이미지 entry가 이미지의 상수 아닌 잎과 다른 union 멤버의 함수 잎을 보지 않는다(C1 `cfe_es_start.c:767`, `CFE_ES_FuncPtrUnion_t`) | 성립 [F][M] | 지적의 둘째 방안: 그런 잎이 있으면 그 spawn 의 스레드 집합을 완전하지 않은 것으로 보고 머리 줄에 적음. `relsound.c` `img_*`. §8 항목 11 | C1 머리 줄: "18 non-constant leaf/leaves covering that member … and 7 function leaf/leaves of another member of its record (… FunctionPtr CFE_Config_Init, … CFE_ES_CDS_EarlyInit, … CFE_EVS_EarlyInit, ...)"; `CFE_ES_WaitForSystemState` 문맥(첫째 차례 C67) `not graded` → `undecidable` [M] |
+| 10 | 문서가 셋째 수정 커밋을 "로컬만, push 안 함"이라 적었고 PI는 원격 끝을 `c712261`이라 적었다 | 성립 [M] | 고침: 원격은 15:25:33에 `a9d9f34`, 16:53:40에 `741b2d4`로 갱신됐다(`git reflog origin/…`). 그래서 첫째 차례의 커밋 전부(`02f3f79`–`612c133`)와 둘째 차례 첫 번의 세 커밋이 원격에 있다. 둘째 차례의 나머지(`619adfe`, `76bcf6d`, 이 문서의 커밋)는 로컬이다(이 단계는 push 하지 않음). 이 문장은 문서 커밋 때 `git status -sb`(`[ahead 2]` + 문서 커밋)와 `git branch -r --contains`로 맞췄다 | 문서(§12 끝, PI, STATUS) |
+| 11 | 수치가 출력과 다르다: (a) §3 c1_post_tx FIELD_STATUS, (b) §2 fix2same 수, (c) §1.3 LOCK_PATHS, (d) PI B6 행 범위, (e) PI의 rel 줄과 `ast_fn.cpp` 줄, (f) PI A3의 상한 수 | 성립 [M] | (a) 152 / 86, (b) 이번 출력의 fix2same(C5 35, C1 31, R2 32)과 첫째 차례 출력의 36·35를 함께, (c) 9,408 / 9,409 / 5,872 / 2,364 / 2,373과 앞 단계의 수, (d) 175–431, (e) 이번 출력(T/)의 줄: c5_641 B64 rel 2478·행위자 2519, r2_core B65 layers 2204, c5_642 C30 feasibility 2947·layers 2950, `ast_fn.cpp:4623` `kFpInitDepth`, `ast_tu.cpp:533` `kInitBudget`, (f) 상한 여섯(4096·6·24·8·64, 이미지 4096) | 문서 |
+| 12 | DERIVES 복사 사슬 8과 식 텍스트 64가 기록·계수에 없고, 잘린 사슬이 `not-a-copy`로 적힌다 | 성립 [F] | 이름 붙임(`kDeriveDepth`, `kEmitDepth`), `param.walk_bounds`·`count.walk_bounds_hit`, DERIVES 이유 `walk-bound`(열거형 항목 하나), LOOP_ITERS 텍스트의 잘림을 셈. §7, §8 항목 18, §5i, PI A3 | 다섯 빌드 걸린 수 0 [M]. 프로필 추출 여섯 경우 바이트 동일(STRINGS 말고) [M] |
+
+**지적의 방안과 다르게 한 곳**
+
+- (가) **#2의 범위.** 지적은 세 경우(필드의 FIELD_STATUS가 필드 단위로 complete가 아님, writer 값이 함수가 아님, 원천 변수가 object-written이거나 주소가 빠져나감)를 들었다. 첫 번은 셋째 경우를 "변환해 호출 인자로 넘긴 주소"(ARGFLOW)로만 읽었고, 남은 길("cast lvalue로 변수에 저장")을 전제 문장에 적었다. 둘째 번은 그 길을 반례로 확인했다(전역 함수 포인터를 `*(void **)(&hook) = dlsym(…)`로 바꾸는 fixture가 첫 번 도구에서 `proven-impossible`) [M] 그리고 막았다: 함수 포인터 변수·필드의 주소를 잡거나 그 배열이 포인터로 바뀌는 곳이 직접 호출의 함수 포인터 포인터 매개변수(변환 없음)나 포인터 변환만 거친 인자가 아니면 그 노드를 열린 것으로 보고, 함수 포인터 포인터의 값 복사와 본문 없는 함수의 함수 포인터 포인터 매개변수도 열린 것으로 본다(`ast_fn.cpp` `note_fp_address`·`note_fp_ptr_copy`, 정적 초기화자 `note_init_fp_addresses`, `lockset.cpp` `mark_incomplete_targets`). 새 형태의 행은 앞 형태가 아무것도 찾지 못한 노드에만 쓰여 앞 행의 문장은 그대로다. 남는 것(인라인 어셈블리, 다른 객체에서의 포인터 연산)을 전제 (마)로 적는다. "writer 값이 `top`"은 대입 writer의 값이 함수 포인터 형 식이면 흐름 간선으로 따라가므로(본문 없는 함수의 결과·다른 형의 노드면 열림) 따로 두지 않았다 [I].
+- (나) **#5의 탐지.** 지적이 선택으로 둔 탐지(자식 코드의 `entry-release`, spawn 뒤 잠금 객체 쓰기)는 하지 않았다. 앞의 것은 함수가 잡지 않은 잠금의 해제가 모든 래퍼 함수(호출자가 잡은 잠금을 푸는 `CFE_ES_UnlockSharedData` 같은 함수)에도 나타나 그대로는 구별되지 않는다 [I]. 전제로 이름 붙이고 C5에서 원문으로 대었다.
+- (다) **#4의 방식.** 키에 단위를 넣는 첫째 방안은 FUNCS·WRITERS 등 기존 섹션의 키와 프로필 추출의 출력을 바꾸므로, 둘째 방안(`not-static`)을 골랐다(§8 항목 25).
+- (라) **#7의 범위.** 지적의 더 단순한 방안(그런 호출이 있으면 그 spawn의 닿지 않는 문맥을 모두 `undecidable`)이 아니라, 주소가 잡힌 함수에서 돌 수 있는 함수의 문맥만 `undecidable`로 했다(전제 (바)). 그래서 R2에 새 `not graded` 5행이 남는다(주소가 잡힌 함수에서 돌지 않는 호출 문맥).
+
+**재측정** [M]: 빌드 `merge-check/kz-llvm`(commit `76bcf6d`), 시험 237/237(건너뜀 1, 원래대로), `test_static_cli` 583, `test_static_wrappers` 512, lint 6/6. 검증자 fixture(`verify3/r2/fx`, `verify3/r2/hdr`, `verify4/fx`)를 이 도구로 다시 돌림: `recur`·`hook_memcpy`·`member_memcpy`·`dlsym_idiom`·`hook_cast`·`cb_qsort` `possible`, `hdr` `undecidable`, `v4_unres` C1 `undecidable`, `v4_unres2` `undecidable`, `v4_probe3` 짝, `nonowner`·`overwrite` `proven-impossible`(전제 (라)) [M]. 프로필 추출 V0·V2 × C1 pre tx·R2 core·C5 6.4.1 여섯 경우 STRINGS 말고 동일. `fix3same`: C5는 BASIS·LOCK_PATHS만, C1·R2는 거기에 CALL_TARGETS·LOCKSET·LOCK_OPS(C1은 AWAIT_L1 두 행)만 다름(§2a). T1–T7 드라이버(`all`)와 T7 두 번 실행 바이트 동일: facts `a26d580f…`, `20e2a73f…`, `55021411…`, `1b4f794a…`, `c7bb3c09…`; relations `32fe9b34…`, `78552970…`, `75e6565d…`, `db98c85f…`, `44ad5c55…`(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642 순). `T/sha256.txt` 125 파일.
+
+**판정 변화**: 없다. T1 PASS(개정 뒤 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6·T7 PASS. "불가"는 0 / 0 / 0 / 6 / 14 그대로이고, `not graded`는 2 / 2 / 1 / 14 / 14 → 1 / 1 / 5 / 14 / 14, `undecidable`은 297 / 297 / 225 / 147 / 147 → 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0 그대로다. 행은 1,480 → 1,553(C1 +20씩, R2 +33). T3 6.4.2의 "불가"는 이제 경로 C의 전제 여섯과 개정 5의 검사(재진입·`incomplete-source`·되부름·내부 연결 잠금 없음)를 통과한 것으로 인용한다.
+
+커밋: `65902ff`(도구: 잠금 집합 개정 2, relations 개정 5), `8a1a3b7`(시험·golden), `741b2d4`(드라이버·계수), `619adfe`(도구: 함수 포인터 주소의 열린 노드), `76bcf6d`(시험·golden), 그리고 이 문서·규칙 문서·schema 문서·PI·STATUS의 커밋(접두 `kz-static 2a/fix3:`). 이 단계는 push 하지 않는다. 문서 커밋 때 원격 끝은 `741b2d4`이다.
+
+## 14. 드라이버 실패 전파와 `all` 재실행 (2026-11-09)
+
+- 성격: 드라이버 점검과 재실행 기록이다. 도구는 바꾸지 않았다(`db172b74`). 아무것도 빌드하지 않았고 cFS를 기동하지 않았다. 이 절은 앞 절의 수와 판정을 바꾸지 않는다.
+- 근거: RV3A(`plan/RV3_REVIEW_ANALYSIS_20261105.md`) §2.4, RV4 분석(`plan/RV4_REVIEW_ANALYSIS_20261109.md`) §2 #29와 §7.2 4. PI의 11-09 진행 지시("타당한 만큼 수용하고 진행해") 아래의 lead 일이다.
+- 기록: 저장소 `records/step2a-20261109-rv4rerun/`(텍스트만: status, 출력 해시 목록, 비교 표, 명령, df). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_rv4/`(이하 `T_RV4/`)다. 묶음은 없다. CM §5의 "보존됨"이 아니다. 보존 위치는 PI 답(PD D4) 뒤다.
+
+### 14.1 드라이버 수정 (commit `c4fe9db`) [F][M]
+
+- 파일 셋, +738/−134 [M: `git diff --stat b9cf5e7 c4fe9db`]: `env/redesign/step2a_tests.sh`, `env/redesign/step2a_tests_count.py`, 새 `env/redesign/step2a_tests_unit.sh`.
+- **상태 수집**: 파이프라인마다 그 상태를 부르는 셸에서 바로 읽는다(`PIPESTATUS`, `pipe_ok`). 파이프라인 안의 함수에서 FAIL을 올리지 않는다. 명령 치환은 대입에서 rc를 본다. 프로세스 치환은 없다. grep·diff는 rc 2 이상만 실패다.
+- **실패의 전달**: 실패마다 `OUT/status.txt`에 `FAIL <단계>:` 줄이 생긴다. 단계마다 PASS 또는 FAIL을 적는다. 실패한 단계가 있으면 그 단계와 `all`이 rc 1이다. 드라이버가 시작하지 못하면 rc 2다. 정정(§14.7): `c4fe9db`에서는 이 약속이 두 곳에서 어긋났다. STEP 없이 부르면 rc 1(`:49`의 `${1:?…}`), 캠페인 표지가 있으면 rc 3(`:66`)이었다 [M]. 같은 줄에서 rc 2로 고쳤다.
+- **`one()`**: basis·extract·show·relations·sha256sum의 rc를 본다. `.txt` 출력이 비었으면 실패다. `run.log` 줄 끝에 `sha256= sizes= verdict=`를 더했다. 앞 칸은 그대로다.
+- **빈 입력과 dump 실패**: kz-dump rc가 0이 아님, 섹션 없는 dump, 머리 `count=`와 레코드 줄 수가 다른 dump(잘림), 비교한 섹션 0은 실패다. 옛 함수는 빈 입력에 `DIFFERENT: none`, rc 0을 냈다(RV4 분석 §8 [M]).
+- **허용은 레코드 단위**: 표 `ALLOW`가 드라이버 안에 있다. 항목은 86개다 [M: 표 줄 셈; identity-basis 1, identity-facts 2, npsame 19, s5same 19, fixsame 16, fix2same 15, fix3same 14]. 드라이버 작성 보고는 87이라 적었다. 항목마다 단계, 섹션, 변경 종류(changed·added·removed), 다섯 빌드의 기대 수, 근거, 레코드 키가 있다. 어느 항목도 이름 붙이지 않은 레코드 변경은 실패다. 기대 수가 하나라도 어긋나도 실패다. 한쪽 dump에만 있는 섹션은 표가 그 머리(HEADER)를 이름 붙일 때만 허용한다. 정정(§14.7): (1) `c4fe9db`의 허용은 레코드 단위였고 필드 단위가 아니었다. 키는 새 레코드에서만 찾았다. 어느 필드가 바뀌었는지는 보지 않았다. 그래서 키를 가진 레코드는 다른 필드가 바뀌어도 통과했다 [M]. 이제 changed 항목마다 바뀌어도 되는 필드 목록이 있다. (2) 한쪽에만 있는 섹션의 허용은 RV4 분석 §2 #29 (다)("한쪽에만 있는 섹션이 있으면 실패")에서 벗어난다. 예외는 하나다. 정확한 수를 가진 HEADER `added` 항목이 그 머리를 이름 붙일 때만 통과한다. 까닭: LOCK_PATHS는 첫 수정 단계에서 생긴 새 섹션이다. 엄격한 규칙이면 npsame·s5same가 다섯 빌드 모두 실패한다.
+  - 표의 수는 11-09에 `db172b74`로 보관 출력에서 잰 것이다(T/ 대 EB·T_S5·T_F1–T_F3; npsame는 S4를 다시 추출) [M, 드라이버 작성 때]. §2a가 수를 준 곳(incomplete-source 44 / 22, FIELD_STATUS 183 / 183 / 147 / 175 / 175, LOCKSET 28 / 47, LOCK_PATHS 9,408 / 9,409 / 5,872 / 2,364 / 2,373과 +75 / +75 / +66 / +29 / +29, `count.lock_ops` 2519 → 2450·1586 → 1547)은 같다.
+  - identity도 레코드 단위 판정을 받는다. show 텍스트 검사를 더했다: `extract.units_from` 한 줄만 다를 수 있다.
+- **RV3A §2.4 ③④⑥**: `twice`는 `NP2/facts.kz`를 남기고 rc와 전체 해시를 `twice_detail.txt`에 적는다. `twice.txt` 줄은 그대로다. `run`은 `run.log`를 비우지 않는다. OUT 없이 돌린 `all`은 새 `step2a/tests_runs/run_<UTC>_<sha8>`에 쓰고 `latest` 링크를 고친다. `all`은 비지 않은 OUT을 거부한다. 정정(§14.7): `c4fe9db`에서는 `all`만 막았다. 단일 단계에 OUT=T/를 주면 `status.txt`를 T/에 더하고 그 단계의 출력을 덮었다(예: `count`는 `T/count/*`, `run`은 `T/<build>/NP/*`) [F]. 그래서 T/ 보호는 `all`에만 섰다. 이제 모든 단계가 T/와, 맨 위에 `sha256.txt`가 있는 OUT을 거부한다(`STEP2A_OVERWRITE=1`일 때만 쓴다). `C1`·`REF`·`CT`를 환경에서 바꿀 수 있다. 1–80줄의 번호는 그대로다(records/의 `:63-76` 인용).
+- **계수 스크립트**: 입력이 없거나 비었으면, 또는 `twice.txt` 줄이 same이 아니면 `# problems`를 찍고 exit 1이다.
+- **줄 인용**: RV3A와 RV4 분석이 인용한 드라이버 줄(`:94`, `:99`, `:107-134`, `:174`–`:218`, `:235-240`, `:249`)은 `c4fe9db` 전의 판이다. 그 줄은 옮겨졌다. 그 인용은 `b9cf5e7`의 파일로 읽는다.
+- **하지 않은 것**: RV3A P9(`NP/sha256.txt`에서 출력 해시와 도구·입력 해시를 나누기), P10의 공용 함수. RV3A §2.4 끝 항목("§2·§4가 스크립트의 판정 줄을 인용")은 이 판에서 하지 않았다. 정정 단계에서 §14.7이 그 줄을 가리키게 했다(§2·§4의 본문은 줄 번호를 지키려고 한 문장만 더했다).
+
+### 14.2 단위 점검 넷 [M]
+
+`step2a_tests_unit.sh`는 임시 디렉터리에 fixture와 kz-static·kz-dump 대역(셸 스크립트)을 만든다. 컴파일은 없다. 허용표는 거기서만 바꾼다(`STEP2A_ALLOW_TABLE`). 점검마다 결함 없는 대조를 먼저 돌려 rc 0을 본다. 그래서 rc 1은 결함에서 온다. 이 점검은 드라이버를 본다. 탐지 실험이 아니고 그 수에 넣지 않는다(RV4 L178). 11-09 11:00Z에 다시 돌렸다(`unit_new.txt`, `unit_old.txt`). 임시 디렉터리는 스크립트가 지웠다.
+
+| 점검 | 옛 드라이버 `b9cf5e7` (`132a2f97…`) | 새 드라이버 `c4fe9db` (`467a0a6e…`) |
+|---|---|---|
+| 1 필수 비교 실패 → 단계 rc 1 | 대조 0, 결함 0 → FAIL | 대조 0, 결함 1 → PASS (`FAIL s5same: c5_641: per-record comparison … (rc 1)`) |
+| 2 파이프라인 안 kz-dump rc 3 → `all` rc 1 | 0, 0 → FAIL | 0, 1 → PASS (`FAIL fix2same: kz-dump …/fix2/c5_642/NP/facts.kz (rc 3)`; 다른 단계 PASS) |
+| 3 빈 dump, kz-dump 실패 → 단계 rc 1 | 0 0, 0 0 → FAIL | 0 0, 1 1 → PASS (섹션 없는 dump; kz-dump rc 2) |
+| 4 허용 섹션 안 예상 밖 변경 → 단계 rc 1 | 0, 0 → FAIL | 0, 1 → PASS (fix3same c5_641) |
+| 합 | 0 / 4 (rc 1) | 4 / 4 (rc 0) |
+
+- 옛 드라이버는 입력 경로가 고정이다. 그래서 점검 2에서 그 `run`이 실제 컴파일 DB를 해시했다(읽기만).
+- 잘린 dump(머리 `count=`와 다른 레코드 수)의 실패는 코드에 있다 [F]. 그러나 네 점검에 들지 않는다.
+
+### 14.3 재실행 [M]
+
+- 명령: `env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS KZB=/home/user/work/merge-check/kz-llvm/tools $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_rv4`. T/에는 쓰지 않았다. 입력 경로는 기본값이다(`status.txt`의 `inputs` 줄).
+- 도구: `KZB=/home/user/work/merge-check/kz-llvm/tools`. kz-static sha256 `db172b74dc973de6a7e9c5b75e7f6655d26574023d746741606f458df5e1ffc4`, kz-dump `05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43`. 저장소 `c4fe9db`, `kairos` 아래 미커밋 0줄(`T_RV4/identity/identity.txt` 머리). 드라이버 sha256 `467a0a6e…`, 계수 스크립트 `7d2ab6a8…`. 허용표는 내장(built-in)이다.
+- 시간: 11:00:03Z–11:03:49Z.
+- **rc**: `all` 0, `result all: PASS`. 열 단계(identity, npsame, run, s5same, fixsame, fix2same, fix3same, twice, count, sha) 모두 PASS다. FAIL 줄은 0이다. `run.log` 11줄 모두 basis·extract·show 0, NP 다섯 줄은 relations 0, sha256 0, verdict PASS다. `twice_detail.txt` 다섯 빌드 모두 extract 0, relations 0이다.
+- **공간**(`df -B1 /`): 앞 1,061,470,208 B. 필요는 T/ 163,241,845 B와 새로 남기는 `NP2/facts.kz` 38,807,072 B, 합 약 202 MB로 보았다. 300 MB 하한에 멀어 한 번에 돌렸다(빌드별로 나누지 않음). 2초 표본의 최저는 836,116,480 B(11:02:47Z), 뒤는 857,931,776 B다. `T_RV4/`는 202,111,495 B, 149 파일이다. 같은 디스크를 다른 작업도 쓰므로 df의 차가 모두 이 실행의 몫은 아니다 [I].
+
+### 14.4 출력 비교: T/ 대비 [M]
+
+`T/sha256.txt`의 125 파일을 `T_RV4/`의 같은 경로와 sha256으로 맞췄다(`compare_T.tsv`). 같음 118, 다름 7, 없음 0이다.
+
+| 묶음 | 파일 | 결과 |
+|---|---|---|
+| NP 출력 | `<build>/NP/` facts.kz·basis.kz·facts.txt·basis.txt·extract.txt·relations.txt·relations.log·args.txt (5 × 8) | 40 같음 |
+| T7 둘째 실행 | `<build>/NP2/` extract.txt·relations.txt (5 × 2) | 10 같음 |
+| 판정 입력 | `count/summary.txt`와 tsv 일곱(targets_rule, summary, burden, against_s5, against_fix1–3) | 8 같음 |
+| 프로필 추출 | `identity/<b>/<V>/` basis.kz·facts.kz·basis.txt·facts.txt·extract.txt·args.txt·basis.dump.diff·facts.dump.diff·show.diff (6 × 9) | 54 같음 |
+| npsame 추출 로그 | `npsame/<build>/extract.txt` | 5 같음 |
+| T7 | `twice.txt` | 1 같음 |
+| 비교 텍스트 | npsame·s5same·fixsame·fix2same·fix3same `.txt` | 5 다름: 빌드마다 첫 두 줄(옛 드라이버의 줄)을 모으면 T/ 파일과 바이트 동일하다(25 / 25). 나머지 줄은 레코드 단위 판정이다 |
+| identity | `identity/identity.txt` | 다름: 머리 1–2줄은 날짜와 저장소 commit(`76bcf6d` → `c4fe9db`)만 다르다. T/의 3–73줄이 같은 순서로 모두 있다. 더해진 것은 레코드 단위 판정과 show 텍스트 판정이다 |
+| run.log | `run.log` | 다름: T/ 다섯 줄의 rc가 새 줄과 같다. 시간 칸은 잰 값이라 다르다. 칸 셋과 identity의 `one()` 여섯 줄이 더해졌다 |
+
+- T/ 목록 밖의 빌드별 `sha256.txt` 11개(NP 5, identity 6)도 T/와 바이트 동일하다.
+- `T/sha256.txt`의 125 파일 목록 밖에 있는 `T_RV4/`의 파일은 24개다. 그 가운데 12개는 T/에도 있는 `sha256.txt`다: 빌드별 11개는 T/와 바이트 동일하고, 맨 위 `sha256.txt`는 목록이 달라 다르다. 새로 생긴 것은 12개다: `NP2/facts.kz` 5(NP의 facts.kz와 해시 같음), `NP2/relations.log` 5(0 바이트), `status.txt`, `twice_detail.txt`. T/는 137 파일, `T_RV4/`는 149 파일이다 [M]. (정정, 2026-11-09: 첫 판은 24개 모두를 "`T_RV4/`에만 있는 것"이라 적었다. `compare.py`는 T/에 없는 파일이 아니라 `T/sha256.txt` 목록에 없는 파일을 센다.)
+- T7: facts `a26d580f…`, `20e2a73f…`, `55021411…`, `1b4f794a…`, `c7bb3c09…`; relations `32fe9b34…`, `78552970…`, `75e6565d…`, `db98c85f…`, `44ad5c55…`(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642 순). §13과 같고, 둘째 실행과 바이트 동일이다.
+- 레코드 단위 비교 37개(identity 12, 다섯 비교 단계 × 5 빌드)가 모두 PASS다. COUNT 0, UNEXPECTED 0, problem 0이다. show 텍스트 판정 6개도 PASS다. 변경 수(changed / added / removed, c1_pre_tx · c1_post_tx · r2_core · c5_641 · c5_642):
+  - npsame 274/9574/115 · 274/9575/115 · 237/6002/71 · 182/2445/0 · 182/2454/0
+  - s5same 277/9574/115 · 277/9575/115 · 240/6002/71 · 185/2445/0 · 185/2454/0
+  - fixsame 278/171/115 · 278/171/115 · 241/126/71 · 186/38/6 · 186/38/6
+  - fix2same 275/169/115 · 275/169/115 · 238/124/71 · 183/36/6 · 183/36/6
+  - fix3same 92/166/115 · 92/166/115 · 91/121/71 · 8/36/6 · 8/36/6
+  - identity: basis 1/0/0, facts 4/0/0(여섯 경우 모두)
+- T/는 실행 뒤에도 `T/sha256.txt`와 맞는다(`sha256sum -c` rc 0, 빌드별 NP `sha256.txt` 다섯 OK).
+
+### 14.5 판정과 수
+
+- 판정의 입력(`count/summary.txt`와 tsv 일곱)이 T/와 바이트 동일하다 [M]. 판정을 새로 읽지 않았다. 같은 입력이므로 판정도 같다 [I]: T1 PASS(개정 뒤 통과, "관계를 낸다"의 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6 PASS, T7 PASS.
+- 수(`burden.tsv`) [M]: `proven-impossible` 0 / 0 / 0 / 6 / 14, `not graded` 1 / 1 / 5 / 14 / 14, `undecidable` 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0. 행 431 / 431 / 338 / 178 / 175, 합 1,553. 사례 계층 행 0(`summary.tsv`). 모두 §13과 같다.
+- 등급 이름(`proven-impossible`)과 "불가"의 지위는 B8(PI 대기)을 따른다. 이 재실행은 등급 이름을 바꾸지 않았다.
+
+### 14.6 남는 것
+
+- [U] 정적 이미지의 잘림 표시(RV3A §2.5 ①)와 둘로 나눈 계수(`image_budget_exhausted`, `image_leaves_omitted`; RV4 분석 §2 #6)는 도구 코드를 바꾸고 빌드해야 한다. 빌드 자리(Q12)의 답 뒤다. 지금 출력의 `count.walk_bounds_hit`에는 이미지 예산의 수가 없다 [M: `T_RV4/c1_pre_tx/NP/facts.txt`]. 그래서 이 출력으로는 이미지 걷기가 예산에 걸렸는지, 걸려서 잎을 뺐는지 가르지 못한다. 4096 → 10^6 민감도 결과(RV3A §2.5)는 그대로다.
+- [U] B8 아래의 등급 이름 바꾸기도 빌드가 든다. PI 답 뒤다.
+- [I] 허용표의 수는 같은 도구의 보관 출력에서 잰 것이다(정정 단계의 필드 목록도 같다, §14.7). 그래서 이번 PASS는 같은 도구가 같은 출력을 다시 냈다는 뜻이다. 변경이 옳은지는 표가 보이지 않는다. 그 근거는 §2a와 §10–§13의 검토다. 다른 kz-static이면 수가 맞지 않아 비교가 실패한다(의도한 동작).
+- RV3A P9·P10은 하지 않았다(§14.1).
+- 출력 `T_RV4/`(202 MB)는 지우지 않았다. T/와 같은 파일이 118개다. 지울지는 정하지 않는다.
+
+### 14.7 정정 단계: 필드 단위 허용, 시작 약속, 판정 줄 (2026-11-09, `83e718e`·`ba00af8`) [M][F]
+
+- 근거: §14에 대한 검증 지적이다. 도구는 그대로다(`db172b74`). 아무것도 빌드하지 않았다. cFS를 기동하지 않았다. 기록: `records/step2a-20261109-rv4fields/`(텍스트만).
+- 드라이버 파일은 다른 작업의 스냅숏 `83e718e`에 먼저 들어갔다. 그 파일이 최종본이다(sha256 `6e78820c…`). 단위 점검과 기록은 `ba00af8`이다.
+- **필드 단위 허용**: 표 `ALLOW`에 `fields` 열을 더했다. changed 레코드는 옛·새 레코드에서 값이 다른 필드가 항목의 목록과 꼭 같을 때만 그 항목에 든다. 필드는 name=value 짝이다. 그 밖의 글자가 다르면 `<text>`다. 같은 정체성 안의 옛·새 레코드는 정렬 순서로 짝짓는다. 그래서 한 키에 필드 서명마다 항목이 하나씩 있다. 항목은 116개다(identity-basis 1, identity-facts 3, npsame 24, s5same 26, fixsame 23, fix2same 21, fix3same 18). 수는 11-09에 같은 도구로 보관 출력에서 쟀다. 비교마다 changed 레코드의 필드 서명을 찍는다(`fields <섹션> changed {…} key …: n`).
+- **시작 약속**: STEP 없음과 캠페인 표지는 rc 2다(`:49`, `:66`, 같은 줄; 1–80줄의 번호는 그대로). 모든 단계가 T/와, 맨 위에 `sha256.txt`가 있는 OUT을 거부한다(`STEP2A_OVERWRITE=1`이면 쓴다).
+- **단위 점검 여섯** [M]: 넷(§14.2)에 둘을 더했다. 5: 허용된 레코드가 목록 밖 필드도 바꿈 → 단계 rc 1. 6: STEP 없음, `sha256.txt`가 있는 OUT → rc 2(대조: 같은 단계에 `STEP2A_OVERWRITE=1` → rc 0). 6 / 6 통과(`unit_new.txt`). 점검 5의 결함은 따로 재현했다: FIELD_STATUS 옛 `status_field=complete flags={}`, 새 `status_field=INCOMPLETE flags={array-element-stores-not-collected}`, 키는 그 flag다. `c4fe9db`의 비교 함수는 PASS·rc 0, 이 판은 `UNEXPECTED FIELDS {flags,status_field}`·rc 1이다.
+- **재실행** [M]: 비교 여섯 단계(identity, npsame, s5same, fixsame, fix2same, fix3same)를 하나씩 새 디렉터리 `/home/user/work/redesign/step2a/tests_rv4f/`에 돌렸다(11:39:40Z–11:41:19Z). 비교 단계의 입력 `<build>/NP`는 `T_RV4/`로 가는 링크다. run·twice·count·sha의 코드는 `c4fe9db`와 같아 다시 돌리지 않았다. 여섯 모두 rc 0, PASS, FAIL 줄 0이다. 레코드 단위 비교 37개(identity 12, 다섯 단계 × 5)와 show 텍스트 6개가 PASS다. changed / added / removed 수는 §14.4와 빌드마다 같다. 옛 드라이버의 첫 두 줄도 `T_RV4/`와 같다. 파일 비교: 같음 65, 다름 7이다. 다른 것은 비교 텍스트 6과 `run.log`다. `run.log`의 identity 여섯 줄은 시간 칸 말고 같다(`T_RV4/`에는 run 다섯 줄이 더 있다). 여유는 851,922,944 → 828,579,840 B다. T/와 `T_RV4/`는 그대로다(`sha256sum -c` rc 0).
+- 잰 필드 서명(c1_pre_tx / c1_post_tx / r2_core / c5_641 / c5_642) [M: `fields.tsv`]:
+
+| 섹션 | 바뀐 필드 | 수 | 단계 |
+|---|---|---|---|
+| FIELD_STATUS | flags | 99 / 99 / 74 / 136 / 136 | npsame, s5same, fixsame, fix2same |
+| FIELD_STATUS | flags, status_field | 12 / 12 / 4 / 14 / 14 | 같음 |
+| FIELD_STATUS | flags, status_field, status_type | 72 / 72 / 69 / 25 / 25 | 같음 |
+| LOCKSET | flags | 8 / 8 / 8 / 0 / 0 | 다섯 비교 단계 |
+| LOCKSET | first, flags, held_root, n_held, opener_root | 20 / 20 / 39 / 0 / 0 | 다섯 비교 단계 |
+| LOCK_OPS | chain | 5 / 5 / 0 / 0 / 0 | 다섯 비교 단계 |
+| LOCK_OPS | chain, depth | 47 / 47 / 34 / 0 / 0 | 다섯 비교 단계 |
+| AWAIT_L1 | flags | 1 / 1 / 0 / 0 / 0 | 다섯 비교 단계 |
+| AWAIT_L1 | flags, l1_mod_field, l1_mod_type | 1 / 1 / 0 / 0 / 0 | 다섯 비교 단계 |
+| P0_TABLE | source | 1 / 1 / 1 / 1 / 1 | npsame, s5same, fixsame |
+| P0_TABLE | semantics | 1 / 1 / 1 / 1 / 1 | fixsame |
+| BASIS | value | 항목마다 | 모든 단계 |
+| HEADER | basis_sha256 / sha256 / sections | 하나씩 | 단계마다 |
+
+- 읽기:
+  - FIELD_STATUS [M: c1_pre_tx, `T_F2` 대 `T_RV4`]: 표시가 붙은 183행은 지금 모두 두 규칙 DISABLED다. 99행은 전에도 둘 다 DISABLED였다. 72행은 둘 다 writer-set-complete에서, 12행은 필드 규칙만 바뀌었다. §2a의 "두 규칙 DISABLED"와 맞는다.
+  - LOCK_OPS [M]: 52행 모두 키의 flag(`unknown-identity`)는 그대로다. 바뀐 것은 사슬(과 깊이)이다. 예: C1 pre `CI_LAB_delete_callback`의 사슬이 `OS_NotifyEvent -> CFE_PSP_OS_EventHandler`를 더 거치지 않는다(depth 10 → 6). 그 간접 호출이 `incomplete-source`가 된 결과로 읽는다 [I]. 첫 판 표의 키는 이 변화를 이름 붙이지 않았다.
+  - LOCKSET: 28행 가운데 20행은 잡힌 잠금의 내용(`n_held`, `held_root` 등)도 바뀐다. §2a의 "그 뒤 사건의 잡힌 잠금이 빠진 것"과 맞는다 [I].
+  - AWAIT_L1과 P0_TABLE은 §2a의 기술(`OS_DeleteAllObjects`의 L1 (i) holds → undecided; `pthread_create`의 원문 줄과 `thrd_create`의 의미)과 맞는다 [I].
+  - 필드 목록은 무엇이 바뀌었는지만 적는다. 그 변경이 옳은지는 §2a와 §10–§13의 검토가 근거다(§14.6).
+- **§2·§4의 기계 판정 줄** (RV3A §2.4 끝 항목). §2·§4의 본문은 줄 번호를 지키려고 고치지 않았다. 그 근거는 다음 줄로 읽는다.
+  - §2 identity 행: `tests_rv4f/identity/identity.txt`의 `verdict:` 줄 12개(레코드·필드 단위)와 `show text verdict:` 줄 6개.
+  - §2 npsame…fix3same 행과 §2a: `tests_rv4f/<단계>/<단계>.txt`의 빌드별 `verdict:` 줄 다섯과 `ok … fields=…` 줄. `T_RV4/`의 같은 파일은 레코드 단위 판정이다.
+  - §2 결정성 행과 §4 T7: `T_RV4/twice.txt`(빌드마다 same), `T_RV4/twice_detail.txt`(rc와 전체 해시), `T_RV4/status.txt`의 `step twice PASS`.
+  - §4 T1–T6의 입력: `T_RV4/status.txt`의 `step count PASS`와 `T_RV4/count/summary.txt`, tsv 일곱(T/와 바이트 동일, §14.4). 계수 스크립트는 PASS·PARTIAL을 찍지 않는다 [F]. 판정은 사람이 그 근거 줄을 읽은 것이다.
+- 줄 인용: 드라이버의 81줄 뒤는 이 정정으로 옮겨졌다. `c4fe9db`의 줄을 인용한 곳(검증 지적의 `:220-308`, `:409-427`, `:652-669`)은 그 판의 파일로 읽는다.
+- 하지 않은 것: `all` 전체의 재실행(코드가 바뀐 단계만 돌렸다), RV3A P9·P10, 이미지 잘림 표시와 둘로 나눈 계수(Q12, 빌드가 든다).
+
+## 15. 정적 이미지의 잘림 표시와 두 계수: MC 제자리 재빌드와 `all` 재실행 (2026-11-10, RV3A §6.7 8b)
+
+- 성격: 도구 수정, 재빌드, 재실행 기록이다. 고친 것은 RV3A §5 (가)2(= §2.5 ①②, RV4 분석 §2 #6으로 고친 꼴)뿐이다. 예산 값(4096)과 등급 규칙, 조건 값은 바꾸지 않았다. cFS를 기동하지 않았다.
+- 근거: PI 답(11-10) "Q2는 지워도 돼, Q12는 MC 제자리 재빌드로 진행해". Q12 (가)다. 빌드 디렉터리는 MC(`/home/user/work/merge-check/kz-llvm`) 하나다. 둘째 빌드 디렉터리는 만들지 않는다. 2a 도구(`db172b74`)는 PV 사본으로 남는다(§15.1).
+- 기록: 저장소 `records/step2a-20261110-8b/`(텍스트만). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_8b/`(이하 `T_8B/`)다. T/와 `T_RV4/`에는 쓰지 않는다.
+
+### 15.0 바뀌어도 되는 것의 선언 (실행 전에 적음) [D]
+
+빌드와 재실행 전에 적었다. 아래 밖의 차이는 결함으로 보고한다. 정정(§15.10, 지적 #12): 실행 전이라는 근거는 `declared_before_run.txt`의 mtime(07:10:37.51Z)과 그 파일이 스스로 적은 머리줄뿐이다. 실행 전에 만든 출력(드라이버 `status.txt`, 빌드 시작 기록)에 선언의 해시를 적지 않았고, 커밋은 실행 뒤다. 내용은 커밋한 이 절과 같다(끝의 빈 줄만 다름).
+
+- **golden**: 바뀌는 golden 파일은 없다. 까닭: (1) fixture의 정적 이미지는 객체마다 잎이 수십 개 아래라 4096에 닿지 않는다. (2) 고정 도구 golden은 BASIS를 뺀다(`tests/static/static_golden.cpp:42`). (3) 섹션·레코드 배치·열거형이 그대로라 `layout.golden`·`records.golden`·`tool_hash` golden도 그대로다. 새 golden 파일도 없다. 새 시험은 `test_static_cli`의 확인과 fixture `imgbudget.c`(컴파일 시험 하나 더함)다. 기존 확인 문자열은 고치지 않는다.
+- **프로필 추출 바이트 동일**(identity, V0·V2 × C1 pre tx·R2 core·C5 6.4.1, EB 대비): 드라이버 허용표의 기존 항목만 바뀐다. basis: BASIS `front_end.build_identity`. facts: BASIS `extract.build_identity`·`extract.units_from`, HEADER `basis_sha256`·`sha256`. show 글: `extract.units_from` 한 줄. 이 모드의 BASIS는 걷기 상한을 적지 않는다(`static_facts.md` §5g). 그래서 새 계수는 여기 나오지 않는다.
+- **NP 출력**(`T_8B/<build>/NP` 대 T/와 `T_RV4/`):
+  - basis.kz: 머리의 `tool_sha256`과 파일 해시만 바뀐다(새 kz-static). 레코드는 같다. `front_end.build_identity`는 kz-core의 identity라(`source=` core) 바뀌지 않아야 한다 [I: lib/core를 고치지 않음]. basis.txt: 첫 줄 `basis <sha256>`.
+  - facts.kz: HEADER `basis_sha256`·`sha256`(부모 basis의 파일 해시). BASIS `extract.units_from`(basis 해시 앞 16자), `count.walk_bounds_hit`(끝에 두 항목이 붙음). `extract.build_identity`도 core identity라 같아야 한다 [I].
+  - facts.txt(show): 그 두 BASIS 줄.
+  - extract.txt: 첫 줄 `facts <sha256>`. relations.txt: 둘째 줄 `facts <sha256>`. 그 밖의 줄은 바이트 동일.
+  - relations.log, args.txt: 바이트 동일.
+- **판정 입력**(`count/summary.txt`와 tsv 일곱): 바이트 동일. T7(`twice`): 같은 실행 안에서 same.
+- **드라이버 비교**(identity, npsame, s5same, fixsame, fix2same, fix3same): 허용표는 고치지 않는다. 바뀌는 BASIS 항목은 기존 항목이 이미 이름 붙인다(npsame·s5same·fixsame의 `count.walk_bounds_hit`는 added, fix2same·fix3same은 changed `value`, `wb`). 그래서 PASS와 §14.4·§14.7의 변경 수가 그대로여야 한다.
+- **조건부**(측정이 생략을 보일 때만): 4096에서 `image_leaves_omitted`가 0이 아니고 그 객체가 직렬화되면, 그 객체의 GLOBAL_IMAGES(프로필 추출이면 STATIC_IMAGE) 표시 잎 행이 더해지고 그 객체 행의 `flags`에 `image-truncated`가 붙고 BASIS `count.global_images`가 바뀐다. 이것은 결함이 아니라 고친 동작이다. 그때만 허용표에 따로 인용한 블록을 더한다(기존 항목은 넓히지 않는다). relations가 그 행을 읽어 바뀌면 그대로 적는다.
+- **도구 해시**: kz-static은 바뀐다. kz·kz-dump·kz-rt-dump·kz-phi는 바뀌지 않아야 한다 [I]: `lib/llvm`을 링크하지 않고 `include/`·`cmake/`·최상위 `CMakeLists.txt`를 고치지 않았다(`cmake/KzSourceIdentity.cmake:17-24`).
+
+### 15.1 손대기 전 [M]
+
+- MC의 네 도구 sha256이 PV 기록과 같다: kz-static `db172b74…`, kz `b254483e…`, kz-dump `05623054…`, kz-rt-dump `4390d4f1…`(`ORIGINAL_SHA256`·`ADDED_ORIGINAL_SHA256`, 넷 OK). 그래서 2a 도구는 PV 사본으로 남는다. PV 사본의 왕복 확인은 11-09 기록 그대로다(CK `rv4/pv/`).
+- 2a 도구의 소스: commit `76bcf6d`(tool_source `1ccee6ce`). 그 뒤 `kairos/`의 lib·tools·include·cmake·최상위 CMakeLists는 바뀌지 않았다. 손대기 전 HEAD는 `114f33b`, `kairos` 아래 미커밋 0줄이다. MC는 저장소의 `kairos/` 작업 트리를 읽는다(`CMAKE_HOME_DIRECTORY`). 기록: `pre_mc.txt`.
+
+### 15.2 코드 [F]
+
+- `lib/llvm/ast_tu.cpp`: `flatten_initializer`가 예산이 떨어진 곳에서 표시 잎을 둔다. 레코드·union 루프는 멤버마다 내려가기 전에 예산을 본다. 남은 멤버에 잎이 있으면 `경로.멤버...` 하나를 두고 멈춘다. 이른 반환 자리는 `경로...`를 둔다. 배열도 남은 원소(0 채움 행 포함)에 잎이 있을 때만 `경로[...]`를 둔다. 잎이 있는지는 새 함수 `image_has_leaf`·`members_have_leaf`가 같은 경우 나눔으로 본다. `read_global`이 객체마다 두 수를 센다.
+- `lib/llvm/model.hpp`: `Stats`에 `image_budget_exhausted`, `image_leaves_omitted`. 객체별 기록 `image_budget_objects`(객체 키 → 표시 잎 수).
+- `lib/llvm/ast_reader.hpp`(+6; 정정, §15.10 지적 #10): `image_has_leaf`, `members_have_leaf`, `image_truncated`의 선언과 멤버 `image_markers_`(만드는 이미지의 표시 잎 수).
+- `lib/llvm/serialize.cpp`: BASIS `count.walk_bounds_hit` 끝에 두 항목을 따로 적는다. 앞 다섯 항목의 글은 그대로다.
+- `tools/kz-static/cmd_extract.cpp`: `--verbose`면 예산을 다 쓴 객체마다 stderr 한 줄.
+- 바꾸지 않은 것: 예산 값 4096(`param.image_budget`), 소비자(`finalize.cpp`·`unroll.cpp`·`argflow.cpp`·basis table; RV3A §2.5 ③), 등급·조건 값, `include/`(schema 개정 11 그대로).
+- 문서: `kairos/docs/static_facts.md` §5j(표시 잎 경로 셋, 정확히 맞음, 두 계수의 뜻, 객체별 값, 소비자), §5c에 한 줄. `kairos/docs/schema.md` §19 끝에 8b 줄(개정 번호 그대로인 까닭, 옛 독자 규칙).
+- 시험: fixture `tests/static/fixtures/imgbudget.c`(사례 이름 없음)와 `test_static_cli`의 새 블록, 컴파일 시험 `static_fixture_compile_imgbudget`.
+- 규모: `git diff --stat -- kairos` 9 파일 +229/−13, 새 파일 하나.
+
+### 15.3 빌드 [M]
+
+- MC에서 제자리로 빌드했다. 대상: kz-static과 그것을 링크하거나 돌리는 시험 프로그램(static_golden, test_static_cli, test_static_expr·flow·recipe·gitrev·unroll·wrappers·link·elf32), kz_lint. `make -j4`, rc 0, 07:11:18Z–07:14:56Z. 링크된 것은 `libkz-llvm.a`, kz-static, 시험 프로그램 9개다(`make.log`). libkz-core identity는 `f6e3c7b4…` 그대로다.
+- 도구 해시:
+
+| 도구 | 전 | 뒤 |
+|---|---|---|
+| kz-static | `db172b74dc973de6a7e9c5b75e7f6655d26574023d746741606f458df5e1ffc4` | `7ef1a28c8fccc0e19553b55a5c7ad644777cf3866064ac4f6ea08cec84e44bf9` |
+| kz-static tool_sha256 / tool_source | `5e5d9e4e…` / `1ccee6ce…` | `add6cb73caf00d01634f85239d4e0ca66bd6f123a86ae6354cd0e2e05ebd491e` / `a1cc829a65aa16f09c8466fd1233bf8a009f2b9f29f55c59c874a203731c7771` |
+| kz | `b254483e…` | 같음 |
+| kz-dump | `05623054…` | 같음 |
+| kz-rt-dump | `4390d4f1…` | 같음 |
+| kz-phi | `7d34e6e2…` | 같음 |
+
+- §15.0의 예상대로 kz·kz-dump·kz-rt-dump·kz-phi는 다시 빌드되지 않았다.
+- 공간(`df -B1 /`): 앞 1,161,084,928 B, 가장 낮음 1,068,523,520 B(07:12:43Z), 뒤 1,163,042,816 B. MC는 3,553,803,254 B다. 기록: `post_mc.txt`, `df_build.log`.
+- 바이트 결정성(같은 commit의 두 빌드 비교, K9)은 이 방법으로 볼 수 없다. [U]로 남는다(RV4 분석 §6 Q12).
+
+### 15.4 시험 [M]
+
+- 전체 ctest: 238개, 통과 237, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, 종료 코드 77: 다른 컴파일러 빌드나 kz observe 실행이 없음). 237에서 하나 는 것은 `static_fixture_compile_imgbudget`이다. 라벨: static 44(전 43), golden 57, unit 84, runtime 66, lint 6, integration 4, instr 1, property 1(한 시험이 라벨을 여럿 가질 수 있다).
+- 옛 경로와 새 경로: `legacy-case` 라벨은 아직 없다(`ctest -N -L legacy-case` 0; RV3A O8은 8c다). 그래서 라벨로는 나눠 보이지 않는다. 이름 `phi_*`는 47개다. RV3A O8의 셈(옛 경로 51 = `phi_*` 47 + 넷)을 따르면 새 경로는 187이다 [I].
+- lint 6/6(`lint_case-ids` 포함). golden 파일은 하나도 바뀌지 않았다(`tests/static/data`, `tests/golden` 변경 없음). `static_golden_core_cpu1`도 통과했다.
+- `test_static_cli`가 fixture `imgbudget.c`의 다섯 경우를 `--image-budget 4`로 확인한다(각각, 그리고 함께; 기본 예산; `--verbose`가 facts를 바꾸지 않음). 기대값:
+
+| 경우 | 소진 | 표시 | 표시 잎 |
+|---|---|---|---|
+| 1 멤버가 예산보다 많은 구조체 | 1 | 1 | `img_wide.e...` |
+| 2 활성 멤버가 잘리는 union | 1 | 1 | `img_union.s.e...` |
+| 3 배열 안 구조체 | 1 | 2 | `img_points[1].y...`, `img_points[...]` |
+| 4 정확히 맞음(뒤에 잎 없는 배열 멤버) | 1 | 0 | 없음 |
+| 5 예산 안 | 0 | 0 | 없음 |
+| 함께 | 4 | 4 | 위 넷 |
+
+- 대조 [M]: 같은 fixture를 2a 도구(`db172b74`, PV 사본을 잠시 풀어 씀)로 읽으면 `img_wide`는 `.e`·`.f`가, `img_union`은 `.s.e`가 표시와 플래그 없이 빠진다. 배열의 `img_points[...]`만 표시된다(`fixture_old_new.txt`). RV3 §5.5의 결함을 fixture로 재현한 것이다.
+- 드라이버 단위 점검 6 / 6(`unit.txt`; 드라이버 `6e78820c…`는 고치지 않았다).
+- 정정(§15.10 지적 #5·#13): RV3A §2.5 ④는 잎·플래그·계수의 golden을 요구한다. 이 단계는 golden 대신 `test_static_cli`의 확인 문자열을 두었고, 그 다름과 까닭을 적지 않았다. 확인 문자열은 엉뚱한 행이 더 있어도 통과할 수 있다. 수정 단계에서 golden `imgbudget_np`(잎·플래그)를 더했다. 계수는 BASIS에 있고 golden은 BASIS를 뺀다(`tests/static/static_golden.cpp:42`, 도구 해시가 든다). 그래서 계수는 확인 문자열로 둔다.
+
+### 15.5 재실행 [M]
+
+- 명령: `env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8b`. 07:16:44Z–07:21:42Z. 허용표는 내장 그대로다(새 블록 없음).
+- rc: `all` 0, `result all: PASS`. 열 단계 모두 PASS, FAIL 줄 0. `twice` 다섯 빌드 모두 same.
+- 소스: 저장소 `114f33b` 더하기 이 단계의 미커밋 변경이다(`T_8B/identity/identity.txt` 머리 `kairos_uncommitted_lines=390`). 그 diff는 `T_8B/identity/kairos.diff`(sha256 `15c0238f…`)로 남았고, 커밋한 변경과 같다(§15.9).
+- 드라이버 비교의 변경 수(changed / added / removed, c1_pre_tx · c1_post_tx · r2_core · c5_641 · c5_642)는 §14.4와 모두 같다:
+  - npsame 274/9574/115 · 274/9575/115 · 237/6002/71 · 182/2445/0 · 182/2454/0
+  - s5same 277/9574/115 · 277/9575/115 · 240/6002/71 · 185/2445/0 · 185/2454/0
+  - fixsame 278/171/115 · 278/171/115 · 241/126/71 · 186/38/6 · 186/38/6
+  - fix2same 275/169/115 · 275/169/115 · 238/124/71 · 183/36/6 · 183/36/6
+  - fix3same 92/166/115 · 92/166/115 · 91/121/71 · 8/36/6 · 8/36/6
+  - identity: basis 1/0/0, facts 4/0/0(여섯 경우 모두). show 글 판정 6개 PASS.
+- 프로필 추출의 바이트 동일(V0·V2 × C1 pre tx·R2 core·C5 6.4.1, EB 대비): 위 identity 판정이다. 다른 것은 허용표의 기존 항목뿐이다.
+- 공간: 앞 1,164,120,064 B, 가장 낮음 938,950,656 B(07:20:13Z), 뒤 961,011,712 B. `T_8B/`는 202,207,238 B, 150 파일, `sha256.txt` 137줄. T/와 `T_RV4/`는 실행 뒤에도 제 `sha256.txt`와 맞는다(rc 0).
+
+### 15.6 T/·`T_RV4/` 대비 [M]
+
+`compare_8b.py`(기록 디렉터리)가 빌드마다 컨테이너를 kz-dump로 섹션별로, 글 출력을 줄별로 비교했다. 214줄이다: same 82, same-but-declared 56, DIFF 76. 두 기준(T/, `T_RV4/`)의 결과는 같다. DIFF 76줄을 모두 읽었다.
+
+정정(§15.10 지적 #7·#8·#9): (1) 컨테이너 비교는 복호한 레코드 수준이다. `compare_8b.py`는 `tool_sha256`·`artifact_sha256`·`container` 줄을 빼고, 섹션 줄의 count·crc32를 지우고, STRINGS를 건너뛴다. 그래서 가린 차이가 있다 [M]. facts.kz HEADER `tool_sha256`(`5e5d9e4e…` → `add6cb73…`; identity facts.kz도), 컨테이너 크기(c1_pre_tx 10,980,536 → 10,980,752), STRINGS, 섹션 crc32(BASIS 밖 37개 가운데 C1·C5는 33개, R2는 35개; 바뀌지 않은 것은 빈 섹션과 LOCK_PATHS). 원인은 BASIS 글이 길어져 문자열 위치가 옮겨진 것이다. 레코드 값은 같다. 이 차이들은 선언에 없었다. (2) identity 행은 EB 대비만 선언했다. T/ 대비 '맞음'은 선언이 아니라 읽은 결과다. `identity/c5_641/V2/extract.txt`의 facts 줄은 3째 줄이다(앞에 `40_rspec.kzp` 경고 두 줄). 스크립트는 1째 줄을 선언 줄로 보아 DIFF로 남겼고, 그것을 선언 틀림으로 적지 않았다. facts.dump.diff는 `section STRINGS … crc32=` 줄도 바뀐다. (3) 스크립트가 보지 않은 파일: identity basis.txt 여섯(해시 줄; C1·R2 1째, C5 V0 5째, C5 V2 7째 줄), npsame/<b>/extract.txt 다섯(1째 줄), 디렉터리마다의 sha256.txt. 모두 해시 줄만 다르다 [M]. (4) summary.txt는 아래 표의 다섯 줄이 아니라 열 줄이 다르다.
+
+| 비교 | 결과 | §15.0과 |
+|---|---|---|
+| NP basis.kz (5 × 2) | 레코드 같음 | 맞음. `front_end.build_identity`도 같다(core identity) |
+| NP facts.kz (5 × 2) | BASIS `count.walk_bounds_hit`·`extract.units_from`, HEADER `basis_sha256`·parent만 다름 | 맞음. `extract.build_identity`는 같다 |
+| NP facts.txt (5 × 2) | 그 두 줄만 다름 | 맞음 |
+| NP extract.txt, NP2 extract.txt | `facts <sha256>` 줄만 다름 | 맞음 |
+| NP·NP2 relations.txt (10 × 2) | 둘째 줄 `facts <sha256>`만 다름 | 맞음 |
+| NP basis.txt | C1·R2는 첫 줄만, C5 둘은 다섯째 줄만 다름 | **선언이 틀렸다**: 선언은 "첫 줄"이라 했다. C5의 basis.txt는 앞에 전단 진단 요약 줄 넷(`… generated.`)이 있고 그 뒤에 `basis <sha256>` 줄이 온다. 다른 줄은 그 해시 줄이다 |
+| relations.log, args.txt | 바이트 동일 | 맞음 |
+| count/ tsv 일곱 | 바이트 동일 | 맞음 |
+| count/summary.txt | 열 줄 다름(정정, §15.10 지적 #7; 전에 "다섯 줄만"이라 적었다) | **선언이 틀렸다**: 선언은 "바이트 동일"이라 했다. summary.txt는 빌드마다 facts.txt의 `count.walk_bounds_hit` 줄을 그대로 인용한다(`facts.txt:444` 등, 381·396·411·426·441째 줄). 그리고 T7 줄 다섯(487–491째 줄)이 facts·relations 해시를 적는다. 이 열 줄이 다르다. 나머지 줄은 같다 |
+| twice.txt | same 낱말 같음(해시는 facts를 따름) | 맞음 |
+| identity facts.kz (6 × 2) | BASIS `extract.units_from`, HEADER만 다름 | 맞음(허용표 항목과 같음) |
+| identity basis.kz | 레코드 같음 | 맞음 |
+| identity facts.txt, extract.txt, facts.dump.diff, show.diff | units_from 값, basis 해시, STRINGS crc32, facts 해시만 다름 | 맞음(그 해시가 든 줄) |
+
+- 사실 섹션 37개(BASIS 밖)의 레코드는 다섯 빌드에서 T/와 같다. GLOBAL_IMAGES·STATIC_IMAGE에 표시 잎 행이 없고 `image-truncated` 플래그도 없다. 그래서 §15.0의 조건부 항목은 쓰이지 않았다. 허용표에 블록을 더하지 않았다.
+- 선언의 틀림과 빠짐(정정, §15.10 지적 #7·#8·#9): 틀림은 셋이다. C5 basis.txt의 줄 번호, summary.txt의 인용 줄, summary.txt의 T7 해시 줄 다섯(셋째는 이번에 찾음). 같은 꼴의 읽기 틀림이 하나 더 있다. identity c5_641 V2 extract.txt의 facts 줄은 3째 줄이다(identity의 T/ 대비는 선언하지 않았다). 빠짐은 facts.kz의 `tool_sha256`, 컨테이너 크기, STRINGS, 섹션 crc32다. 모두 선언이 덮는 값(basis 해시 줄, `count.walk_bounds_hit`, facts·relations 해시, 도구 해시)이 다른 출력이나 바이트 배치에 옮겨진 것이다. 새 차이는 아니다. 그래도 선언은 고치지 않고 이 표에 적는다(`declared_before_run.txt`가 실행 전 글이다).
+
+### 15.7 판정과 수
+
+- 판정 입력(tsv 일곱)이 T/와 바이트 동일하다 [M]. summary.txt는 위 다섯 인용 줄과 T7 해시 줄 다섯만 다르다 [M](정정, §15.10 지적 #7; 전에 "다섯 인용 줄만"이라 적었다). 그래서 판정은 그대로다 [I]: T1 PASS(개정 뒤 통과, "관계를 낸다"의 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6 PASS, T7 PASS.
+- 수(`burden.tsv`) [M]: `proven-impossible` 0 / 0 / 0 / 6 / 14, `not graded` 1 / 1 / 5 / 14 / 14, `undecidable` 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0. 행 431 / 431 / 338 / 178 / 175, 합 1,553. §14.5와 같다. 다른 것은 없다.
+- T7의 새 해시(facts는 도구가 바뀌어 다르다; 둘째 실행과 바이트 동일): facts `c898f2dc…`, `4006157e…`, `b7418bdb…`, `6d1e9d5d…`, `746ae42a…`; relations `93503298…`, `86c563d7…`, `94ecde3f…`, `393cf7c5…`, `fff3e06f…`(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642 순; `twice_detail.txt`). relations의 해시가 다른 것은 둘째 줄의 facts 해시 때문이다(§15.6).
+- 등급 이름(`proven-impossible`)과 "불가"의 지위는 B8을 따른다. 이 단계는 등급 이름을 바꾸지 않았다.
+
+### 15.8 두 계수의 첫 측정 [M]
+
+- 빌드별(BASIS `count.walk_bounds_hit`, 프로필 없는 추출의 facts): 다섯 빌드 모두 `image_budget_exhausted` 0, `image_leaves_omitted` 0.
+- 객체별: 같은 basis와 같은 인자로 `--verbose`를 더해 다시 추출했다. 다섯 빌드와 identity 여섯 경우(프로필 추출) 모두 예산을 다 쓴 객체가 없다(줄 0). 다시 만든 facts는 `T_8B/`의 것과 바이트 동일했다(11개; `--verbose`는 facts를 바꾸지 않는다). 0이 아닌 객체가 없으므로 객체 목록은 비었다. 기록: `counters.txt`.
+- 읽기: 4096에서 이미지 걷기가 예산을 다 쓴 객체는 다섯 빌드에 없다. 정확히 맞은 객체도 없다. 그래서 RV3A §2.5의 "직렬화되지 않은 객체 안에서 잘림이 없었다는 것은 [U]"는 이 다섯 빌드에서 [M]으로 닫힌다(8b 도구로). 2a 도구도 같았다 [I: 코드]: 이번 수정은 예산이 0이 된 뒤의 표시만 바꾸고, 잎마다 예산을 쓰는 방식은 그대로다.
+- 덮는 범위: `read_global`이 걷는 객체(초기값이 있는 레코드·배열 전역)다. 스칼라 전역은 예산을 쓰지 않는다. basis의 table 항목(`read_unit_images`)은 세지 않는다. 같은 단위의 같은 객체를 같은 걷기로 읽으므로 같다 [I].
+
+### 15.9 남는 것
+
+- 커밋: 코드·시험·`kairos/docs`는 `fdea6a8`이다. 이 절과 기록은 그 다음 커밋이다(둘 다 "kz-static 8b:"). `git diff 114f33b fdea6a8 -- kairos`(새 fixture 파일 빼고)의 sha256이 빌드 때 남은 `T_8B/identity/kairos.diff`와 같다(`15c0238f…`) [M]. 커밋 뒤 `kairos` 아래 미커밋 변경은 없다 [M]. 그래서 `7ef1a28c`는 `fdea6a8`의 소스로 빌드한 것이다. fixture는 도구 identity 밖이다(`tests/`). push하지 않았다.
+- [U] 바이트 결정성(K9). 다른 경로의 빌드가 없다(Q12 (가)).
+- 하지 않은 것: 소비자 규칙(RV3A §2.5 ③, 잘린 이미지를 UNKNOWN으로), PD A3:173·부록 C:1009·S3:215의 근거 문구 바꾸기(§2.5 ⑤, §6.7 6의 문서 정정), 8c(O2·O8·O9·O12, `legacy-case` 라벨), E1(Q4), B8, B4, CM:42. RV3A §6.6 Q12·PD·STATUS의 상태 줄도 고치지 않았다.
+- `T_8B/`(202 MB)는 지우지 않았다. CM §5의 보존이 아니다. 보존 위치는 PI 답(PD D4) 뒤다.
+- 2a 도구는 MC에 없다. PV `kz-static.db172b74.xz`가 그 사본이다.
+
+## 15.10 수정 단계: 8b 검증 지적과 처리 (2026-11-10)
+
+- 성격: 8b 검증의 지적 13건(차단 2, 비차단 11)을 파일과 출력에 대어 보고 처리한 기록이다. 코드 수정, MC 제자리 재빌드, `all` 재실행을 포함한다. 예산 값(4096), 등급 규칙, 조건 값은 바꾸지 않았다. cFS를 기동하지 않았다.
+- 근거: PI 답(11-10) "Q2는 지워도 돼, Q12는 MC 제자리 재빌드로 진행해". Q12 (가) 그대로다. 빌드 디렉터리는 MC 하나다.
+- 기록: 저장소 `records/step2a-20261110-8bfix/`(텍스트만). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_8b_fix/`(이하 `T_8BF/`)다. T/, `T_RV4/`, `T_8B/`에는 쓰지 않는다.
+
+### 15.10.0 바뀌어도 되는 것의 선언 (빌드 전에 적고 커밋함) [D]
+
+빌드와 재실행 전에 적었다. 이 선언은 빌드 전에 커밋한다(지적 #12의 처리). 기준은 `T_8B/`다. T/와 `T_RV4/` 대비는 §15.0의 차이에 아래를 더한 것이다. 아래 밖의 차이는 결함으로 보고한다.
+
+- **도구 해시**: kz-static만 바뀐다(`ast_tu.cpp`, `finalize.cpp`). kz·kz-dump·kz-rt-dump·kz-phi는 다시 빌드되지 않는다 [I: `lib/llvm`을 링크하지 않고 `include/`·`cmake/`·최상위 `CMakeLists.txt`를 고치지 않음]. `tests/static/CMakeLists.txt`를 고쳐 MC가 다시 구성(cmake)된다. 도구 identity는 그 파일을 읽지 않는다(`cmake/KzSourceIdentity.cmake`).
+- **golden**: 새 파일 하나 `tests/static/data/imgbudget_np.golden`(imgbudget.c, `--no-profile --image-budget 4`). 그 밖의 golden은 바뀌지 않는다. 까닭: fixture에 덮어쓰는 지정자나 목록 아닌 배열 초기값이 없다(grep), 그리고 고정 도구 golden은 잘린 이미지가 없다. 시험 확인은 더한다(`test_static_flow`, `test_static_cli`). 기존 확인 문자열은 고치지 않는다.
+- **NP 출력**(`T_8BF/<build>/NP`·`NP2` 대 `T_8B/`):
+  - basis.kz: HEADER `tool_sha256`과 파일 해시. 레코드는 같다. basis.txt: `basis <sha256>` 줄(C1·R2는 1째 줄, C5는 5째 줄).
+  - NP2: NP와 같은 규칙이다(같은 실행의 둘째 추출).
+  - facts.kz: HEADER `tool_sha256`·`basis_sha256`·parent `sha256`. BASIS `extract.units_from`(basis 해시 앞 16자). STRINGS 바이트와 그 crc32. 그 밖의 섹션 레코드와 crc32, 컨테이너 크기는 `T_8B/`와 같다 [I: 바뀌는 글의 길이가 같다]. `count.walk_bounds_hit`는 `T_8B/`와 같다(두 계수 0).
+  - facts.txt: `extract.units_from` 한 줄. extract.txt: 1째 줄 `facts <sha256>`. relations.txt: 2째 줄 `facts <sha256>`. relations.log, args.txt: 바이트 동일.
+- **판정 입력**: tsv 일곱 바이트 동일. `count/summary.txt`: T7 줄 다섯(487–491, facts·relations 해시)만 다르다. `count.walk_bounds_hit` 인용 다섯 줄은 `T_8B/`와 같다. T/·`T_RV4/` 대비는 열 줄이다(§15.10.8). `twice`: 같은 실행 안에서 same.
+- **identity**(V0·V2 × C1 pre tx·R2 core·C5 6.4.1): EB 대비 판정은 허용표의 기존 항목만으로 PASS, 변경 수 basis 1/0/0, facts 4/0/0. `T_8B/` 대비: basis.kz HEADER, basis.txt 해시 줄(C1·R2 1째 줄, C5 V0 5째 줄, C5 V2 7째 줄), facts.kz HEADER·BASIS `extract.units_from`·STRINGS, facts.txt `units_from` 줄, extract.txt `facts` 줄(c5_641 V2는 3째 줄, 앞에 경고 두 줄), facts.dump.diff·show.diff의 그 값이 든 줄(`units_from`, STRINGS crc32).
+- **드라이버 비교**(npsame, s5same, fixsame, fix2same, fix3same): 허용표를 고치지 않는다. PASS, 변경 수는 §14.4·§15.5와 같다. npsame/<b>/extract.txt: 1째 줄.
+- **실행 기록**: `run.log`, `status.txt`, `identity/identity.txt`, `identity/kairos.diff`, 디렉터리마다의 `sha256.txt`의 해시 줄.
+- **조건부 1**(지적 #4의 수정이 다섯 빌드에 닿을 때만): 어느 빌드나 identity 경우에 목록·문자열·0 채움이 아닌 배열 초기값이 있으면, 그 배열 자리에 상수 아닌 잎 하나가 STATIC_IMAGE·GLOBAL_IMAGES에 더해진다. BASIS `count.global_images`와 STRINGS도 바뀐다. 이것은 고친 동작이다. 그때 identity가 EB 대비 FAIL이면 그 행을 인용한 허용 블록을 따로 더해 새 디렉터리에 다시 돌린다(기존 항목은 넓히지 않는다). relations가 그 행으로 바뀌면 그대로 적는다.
+- **조건부 2**(지적 #2): table walk의 이유 문장은 그 이미지에 표시 잎이 있을 때만 바뀐다. 다섯 빌드는 표시 잎이 0이므로 바뀌지 않아야 한다.
+
+### 15.10.1 지적별 판단 [M][F]
+
+| # | 지적 | 판단 | 처리 |
+|---|---|---|---|
+| 1 | schema §19의 "옛 독자 규칙"이 relations에서 틀림(차단) | 맞음 [M]. 원소 셋의 표, `--image-budget 5`에서 표시 `table[2].fn...`이 덮는 검사(`relations.cpp:606-608`)에 걸리지 않는다. entry가 `main_a main_b` → `main_b`, table-image-entry 2 → 1, path C 1 → 0. 예산 4(배열 표시)에서는 "1 non-constant leaf covering" 줄이 붙는다. relations는 `KZ_GIMAGE_FLAG_TRUNCATED`를 읽지 않는다(grep). PTR_FIELDS 값 읽기(`:2808`)는 필드가 빈 행을 건너뛴다 [F]. 2a 도구도 같은 relations 출력이라 회귀는 아니다 | 문서만: schema §19 고쳐 씀, SF §5j 소비자 문단 고쳐 씀, RV3A §2.5 ③에 relations를 더함(줄 수 그대로). RV3A §6.7에는 ③의 소비자 목록이 없어 고치지 않았다. relations 코드는 ③ 몫이라 고치지 않았다 |
+| 2 | 표시 잎 위 table walk의 이유가 틀림 | 맞음 [M]: `--image-budget 2`에서 8b 도구는 "no null element ends the table g_cfg.list"를 낸다. `has_prefix_entries`가 `g_cfg.list...`를 중첩 항목으로 본다 | 코드: `finalize.cpp`. 앞부분 조회가 표시 잎을 빼고, 풀리지 않은 walk의 이미지에 표시 잎이 있으면 이유가 잘림을 적는다. 풀리는지는 바뀌지 않는다 |
+| 3 | 이름 없는 멤버의 표시 경로 `s_an....` | 맞음 [M]. 다만 보통 잎도 빈 이름을 쓴다(`s_an..b`, `field=<anonymous>.b`). 이름을 넣으면 잎과 표시의 경로 규칙이 갈린다 | 문서: SF §5j에 빈 이름 규칙을 적음. 시험: `test_static_cli`(C11이라 C99 fixture가 아닌 시험 안 소스) |
+| 4 | DesignatedInitUpdateExpr 배열이 표시 없이 빠짐 | 맞음 [M]: 기본 예산에서 2a·8b 도구 모두 `u_du.s` 행이 없다. 예산과 무관하다 | 코드(따로 항목): 목록·문자열·0 채움이 아닌 배열 초기값은 상수 아닌 잎 하나(레코드와 같음). `image_has_leaf`도 같게. 시험: `test_static_cli` |
+| 5 | ④의 golden 대신 확인 문자열 | 맞음 [F]: 엉뚱한 행이 더 있어도 통과할 수 있다 | golden `imgbudget_np` 추가(잎과 플래그). 계수는 BASIS라 golden에 없고 `test_static_cli`가 본다 |
+| 6 | 결함 없음(쓸기 확인) | 받음. 다시 볼 것 없음 | 없음 |
+| 7 | summary.txt는 다섯 줄이 아니라 열 줄(차단) | 맞음 [M]: `diff`가 10줄 6 덩이. 인용 다섯(381·396·411·426·441)과 T7 다섯(487–491) | §15.6·§15.7·commands.txt를 고침. 셋째 선언 틀림으로 적음. `declared_before_run.txt`는 그대로 |
+| 8 | facts.kz 비교가 가린 차이 | 맞음, 한 곳은 좁힘 [M]. HEADER `tool_sha256`(`5e5d9e4e…` → `add6cb73…`), 컨테이너 크기(10,980,536 → 10,980,752, c1_pre_tx), STRINGS가 바뀐다. 섹션 crc32는 C1·C5에서 37개 가운데 33개, R2에서 35개가 바뀐다. 바뀌지 않은 것은 빈 섹션(crc 0: DERIVES, LOOP_ITERS·STATIC_IMAGE는 C1·C5)과 LOCK_PATHS다. 지적의 "37개 모두"는 넘친다 | §15.6에 비교 수준(복호 레코드, 가린 칸)과 이 차이를 적음. 이번 비교는 가리지 않는다(§15.10.6) |
+| 9 | identity 행과 덮지 않은 파일 | 맞음 [M]: c5_641 V2 extract.txt는 3째 줄. facts.dump.diff의 STRINGS crc32 줄. 덮지 않은 파일: identity basis.txt 6(c5_641 V2는 7째 줄), npsame extract.txt 5, 디렉터리별 sha256.txt. 모두 해시 줄만 다르다 | §15.6에 적음. 이번 비교 스크립트는 출력 디렉터리의 모든 파일을 본다 |
+| 10 | §15.2에 `ast_reader.hpp` 빠짐 | 맞음 [M: `git show --numstat fdea6a8`, +6] | §15.2에 한 줄 |
+| 11 | 보고의 df 값이 기록에 없음 | 맞음 [M]: 1,161,089,024와 959,332,352는 어느 기록에도 없다 | 기록된 값(앞 1,161,084,928, 끝 959,553,536)을 §15.10.8에 적음. 보고는 기록 값을 쓴다 |
+| 12 | 선언이 실행 전이라는 근거가 mtime뿐 | 맞음 [F] | 8b: §15.0에 그 사실을 적음. 이번: 선언을 빌드 전에 커밋하고 그 sha256을 commands.txt 1째 줄에 적음 |
+| 13 | ④와 다름을 적지 않음 | 맞음 [F]. #5와 같은 일 | #5의 golden으로 ④의 잎·플래그를 채움. 계수는 확인 문자열로 둔 까닭을 §15.4에 적음 |
+
+- 버린 지적은 없다. #8은 crc32 수를 좁혀 받았다. #1은 코드를 고치지 않고 문서로 받았다(지적이 권한 대로; relations의 규칙은 ③).
+
+### 15.10.2 코드와 문서 [F]
+
+- `lib/llvm/finalize.cpp`(+29/−2, 지적 #2): `is_marker`(종류 `non-constant`, 글 `<image truncated>`). `has_prefix_entries`가 표시 잎을 뺀다. 새 `marker_paths`. 풀리지 않은 walk의 이미지에 표시 잎이 있으면 이유가 잘림을 적는다: 필드가 잘린 바로 그 자리(`<필드>...`)이면 "the field .f of X was not read: the static image of X was cut at the image budget there (…)", 아니면 "… is not in the static image of X, which was cut at the image budget (…): the field has no initializer or is in the part that was not read", 끝나지 않는 표는 "no null element ends the table … in its static image, which was cut at the image budget (…): the elements after the cut were not read". walk가 풀리는지는 바뀌지 않는다 [I: 코드; 앞부분 조회가 표시 잎만 찾던 경우는 전에도 실패로 끝났다].
+- `lib/llvm/ast_tu.cpp`(+16/−2, 지적 #4, 예산과 무관한 따로 항목): 배열 초기값이 목록·문자열·0 채움(없음, `ImplicitValueInitExpr`)이 아니면 상수 아닌 잎 하나(레코드와 같은 꼴, 예산 하나). `image_has_leaf`도 같게 본다.
+- 시험: `test_static_flow`(표시 잎 위 table walk 넷: 잘린 자리, 잘린 뒤, 표 끝 전 잘림, 표시 없음의 옛 이유), `test_static_cli`(시험이 쓰는 소스 둘: 이름 없는 멤버의 `an_rec....`·`an_rec..c...`, 덮어쓰는 지정자 배열 `up_rec.s`, 예산 1·2의 계수와 플래그; 잘린 이미지 위 walk의 이유와 기본 예산의 `trip=exact(1)`), 새 golden `static_golden_imgbudget_np`(`tests/static/data/imgbudget_np.golden`, 56줄; `static_golden.cpp` 한 경우, `tests/static/CMakeLists.txt` 목록과 주석).
+- 문서: `docs/schema.md` §19의 옛 독자 규칙을 고쳐 씀(지적 #1)과 8b 수정 단계 줄. `docs/static_facts.md` §5j: 이름 없는 멤버의 빈 이름(지적 #3), 배열의 다른 초기값 꼴(지적 #4), 소비자 문단(table walk, 펼치기, argflow, basis, relations; 지적 #1·#2), 시험 문단(지적 #5). RV3A §2.5 ③에 relations를 더하고 머리 개정 줄에 한 문장(줄 수 그대로).
+- 바꾸지 않은 것: `relations.cpp`(③ 몫), 예산 값 4096, 등급·조건 값, `include/`(schema 개정 11 그대로), 이름 없는 멤버의 경로 규칙(보통 잎과 같은 빈 이름).
+- 커밋: 선언 `ea4e406`(빌드 전), 코드·시험·`kairos/docs` `6fc275e`(빌드 뒤, 실행 전). 이 절의 나머지와 기록은 그다음 커밋이다.
+
+### 15.10.3 빌드 [M]
+
+- MC 제자리, 8b와 같은 대상(`make -j4 kz-static static_golden test_static_cli …` 9개, `kz_lint`), rc 0, 08:01:03Z–08:02:52Z. CMake가 다시 구성했다(`tests/static/CMakeLists.txt`). 링크: `libkz-llvm.a`, kz-static, 시험 프로그램. 첫 ctest 뒤 `test_static_cli`의 기대 글 하나를 고쳐 `make test_static_cli`만 다시 했다. kz-static은 다시 링크되지 않았다(`post_mc.txt`).
+- 도구 해시:
+
+| 도구 | 전(8b) | 뒤 |
+|---|---|---|
+| kz-static | `7ef1a28c8fccc0e19553b55a5c7ad644777cf3866064ac4f6ea08cec84e44bf9` | `3c5dfc56293d69cd8bd05c1e75e7c0b5da7da559d54f5df4d7770ae6e0366cc2` |
+| kz-static tool_sha256 | `add6cb73…` | `9b9189d1cc7961ff13418af5fa53800f04f13913bb8e5a75a20e31631481d722` |
+| kz-static tool_source | `a1cc829a…` | `ae73a609c78665d7cb39e4811d4634b5f594717b0bec466316bdf46706ab1d34` |
+| core_source | `f6e3c7b4…` | 같음 |
+| kz / kz-dump / kz-rt-dump / kz-phi | `b254483e` / `05623054` / `4390d4f1` / `7d34e6e2` | 같음(다시 빌드되지 않음) |
+
+- 소스: `ea4e406`의 작업 트리에 이 단계의 변경. 빌드 시작 뒤 도구 identity의 파일(`kairos/lib`·`tools`·`include`·`cmake`·`CMakeLists.txt`)은 바뀌지 않았다(`find -newer` 0). `git diff ea4e406 6fc275e -- kairos/lib …`는 `ast_tu.cpp`·`finalize.cpp` 둘이다. 그래서 `3c5dfc56`은 `6fc275e`의 도구 소스다 [M].
+- 공간(`df -B1 /`): 앞 878,710,784 B(08:01:03Z), 가장 낮음 866,832,384 B(08:01:25Z), 뒤 936,570,880 B(08:02:51Z). MC 3,554,960,160 B. 기록: `pre_mc.txt`, `post_mc.txt`, `df_build.log`.
+- [U] 바이트 결정성(K9)은 그대로다.
+
+### 15.10.4 시험 [M]
+
+- 전체 ctest: 239개, 통과 238, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, 종료 코드 77). 늘어난 하나는 `static_golden_imgbudget_np`다. 라벨: static 45, golden 58, unit 84, runtime 66, lint 6, integration 4, instr 1, property 1. `phi_*` 47. `legacy-case` 라벨 0(8c).
+- 첫 ctest(08:03Z)는 `test_static_cli` 686 확인 가운데 1이 실패했다. 기본 예산 walk의 기대 글 "trip=1"이 틀렸다(보기 글은 `trip=exact(1)`). 기대 글만 고쳐 다시 돌렸다(08:05Z). 도구 문제는 아니다.
+- lint 6/6(`lint_case-ids` 포함). 시험이 쓰는 소스와 fixture에 사례 이름이 없다. golden: 새 `imgbudget_np.golden`만 더해졌다. 다른 golden 파일은 바뀌지 않았다(`git status -- kairos/tests/static/data kairos/tests/golden`).
+- `imgbudget_np.golden`의 GLOBAL_IMAGES 23행을 읽었다. §15.4 표와 같다: `img_wide.e...`, `img_union.s.e...`, `img_points[1].y...`·`img_points[...]`, `img_exact`는 표시·플래그 없음, `img_small`은 세 잎. 표시가 있는 객체는 모든 행에 `image-truncated`가 있다.
+- RV3A §2.5 ④: 잎과 플래그는 golden이, 계수는 `test_static_cli`가 본다(지적 #5·#13).
+- 드라이버 단위 점검 6/6(드라이버 `6e78820c…` 그대로).
+- 작은 소스로 본 새 도구(`fix_checks.txt`): (지적 #1) 원소 셋의 표, 예산 5에서 relations는 여전히 `main_b`만 푼다. 문서대로다. (지적 #2) 예산 2의 walk 이유가 "the field .list of g_cfg was not read …"다. 예산 3에서는 walk가 풀리고, 잘린 원소 이미지의 필드는 펼친 차례에서 "not in the image"의 상수 아닌 값이다. (지적 #3·#4) `s_an....`, `u_du.s non-constant … field=DU.s`.
+
+### 15.10.5 재실행 [M]
+
+- 명령: `env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8b_fix`. 08:06:44Z–08:11:36Z. 허용표는 내장 그대로다.
+- rc: `all` 0, `result all: PASS`. 열 단계 모두 PASS, FAIL 줄 0. `twice` 다섯 빌드 모두 same.
+- 소스: `repo 6fc275e…`, `kairos_uncommitted_lines=0`. 그래서 `identity/kairos.diff`가 생기지 않았다.
+- identity: 18 판정 모두 PASS(basis 1/0/0, facts 4/0/0, show 글). 드라이버 비교 다섯(npsame … fix3same)의 출력 파일은 `T_8B/`와 바이트 동일하다. 그래서 변경 수는 §14.4·§15.5와 같다.
+- 공간: 앞 876,924,928 B(08:06:44Z), 가장 낮음 651,919,360 B(08:10:02Z), 뒤 674,869,248 B(08:11:35Z). `T_8BF/`는 202,169,780 B, 149 파일, `sha256.txt` 136줄(sha256 `b87a5a94…`). T/, `T_RV4/`, `T_8B/`는 실행 뒤에도 제 `sha256.txt`와 맞는다(rc 0). 300 MB 아래로 가지 않아 아무것도 지우지 않았다.
+
+### 15.10.6 비교: 모든 파일, 가림 없음 [M]
+
+`compare_8bfix.py`(기록 디렉터리)가 두 디렉터리의 모든 파일을 본다(`os.walk`). 컨테이너는 kz-dump를 가리지 않고 비교한다: HEADER 키(`artifact_sha256`, 컨테이너 크기 포함), 섹션 줄(count, crc32), 섹션별 레코드(BASIS는 이름별). 결과 `compare_8bfix.tsv`:
+
+| 기준 | same | DIFF | 한쪽에만 |
+|---|---|---|---|
+| `T_8B/` | 39 | 110 | 1(`identity/kairos.diff`, 8b에만) |
+| T/ | 29 | 108 | 12(NP2/facts.kz·relations.log 각 5, status.txt, twice_detail.txt: T/ 뒤 드라이버가 더한 파일) |
+| `T_RV4/` | 34 | 115 | 0 |
+
+- `T_8B/` 대비 DIFF 110줄을 모두 읽었다. 아래 "선언의 빠짐 셋" 말고는 모두 §15.10.0에 든다:
+  - basis.kz 11(NP 5, identity 6): HEADER `tool_sha256`·`artifact_sha256`만. 레코드 같음.
+  - facts.kz 16(NP 5, NP2 5, identity 6): HEADER `tool_sha256`·`basis_sha256`·parent·`artifact_sha256`, 섹션 줄은 STRINGS crc32 하나, 레코드는 BASIS `extract.units_from` 하나. 컨테이너 크기와 다른 섹션의 crc32·레코드는 같다.
+  - basis.txt 11(해시 줄: NP C1·R2 1째, C5 5째; identity는 §15.10.0의 줄), extract.txt 21(NP·NP2·npsame 1째, identity 1째, c5_641 V2 3째), relations.txt 10(2째), facts.txt 11(`extract.units_from` 한 줄), facts.dump.diff 6(4줄: `basis_sha256`, parent, STRINGS crc32, `units_from`), show.diff 6(`units_from` 줄), summary.txt 1(487–491째 줄), 디렉터리별 sha256.txt 11, 실행 기록(run.log, status.txt, identity.txt, 최상위 sha256.txt), twice.txt·twice_detail.txt(해시 줄 다섯씩).
+- same: args.txt, relations.log, count/ tsv 일곱, 드라이버 비교 출력 다섯, identity basis.dump.diff.
+- **선언의 빠짐 셋**(새 차이는 아님; 선언한 값이 다른 출력에 옮겨진 것): (1) twice.txt·twice_detail.txt의 해시 줄. 선언은 "같은 실행 안에서 same"만 적었다. (2) identity facts.dump.diff의 `basis_sha256`·parent 줄. 선언은 그 파일에서 `units_from`·STRINGS crc32만 이름 붙였다(HEADER 값은 facts.kz에 선언함). (3) facts.kz의 파일 해시 `artifact_sha256`. facts.kz 항목에 이름이 없다(extract.txt의 `facts` 줄과 같은 값). `identity/kairos.diff`가 없는 것은 실행 기록의 차이이고, 까닭은 미커밋 0줄이다. 선언 파일(`declared_before_build.txt`)은 고치지 않는다.
+- 조건부 둘은 쓰이지 않았다. BASIS `extract.units_from` 밖의 레코드는 `T_8B/`와 모두 같다 [M]. 그래서 다섯 빌드와 identity 여섯 경우의 직렬화된 이미지(STATIC_IMAGE, GLOBAL_IMAGES)에는 목록·문자열·0 채움이 아닌 배열 초기값이 없다 [M]. 직렬화되지 않은 객체에 그런 꼴이 있는지는 재지 않았다 [U]. 있어도 facts 출력은 바뀌지 않았다 [M]. 표시 잎이 0이므로 walk 이유도 같다 [M].
+- T/·`T_RV4/` 대비: 레코드 수준의 차이는 BASIS `count.walk_bounds_hit`·`extract.units_from`뿐이다(NP; identity는 `units_from`뿐). 가리지 않은 수준의 차이는 §15.6 정정과 같다: 컨테이너 크기, 섹션 줄 35(C1·C5: STRINGS, BASIS, 33) 또는 37(R2), HEADER 해시. summary.txt는 열 줄(381·396·411·426·441, 487–491). 드라이버 비교 출력 다섯(npsame.txt … fix3same.txt)은 T/·`T_RV4/`와 다르다. 그 글의 꼴이 다르기 때문이다(§14.7의 필드 단위 허용표: `fields=` 칸, 항목 수). `T_8B/`와는 바이트 동일하다. 그 안의 변경 수는 §14.4와 같다(§15.5) [M].
+
+### 15.10.7 판정과 수
+
+- 판정 입력(tsv 일곱)이 T/, `T_RV4/`, `T_8B/`와 바이트 동일하다 [M]. 판정은 그대로다 [I]: T1 PASS, T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6 PASS, T7 PASS.
+- 수(`burden.tsv`, `T_8B/`와 바이트 동일) [M]: `proven-impossible` 0 / 0 / 0 / 6 / 14, `not graded` 1 / 1 / 5 / 14 / 14, `undecidable` 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0. 행 431 / 431 / 338 / 178 / 175, 합 1,553.
+- 두 계수: 다섯 빌드 모두 `image_budget_exhausted` 0, `image_leaves_omitted` 0(BASIS `count.walk_bounds_hit`가 `T_8B/`와 같다) [M]. 소진 객체 수가 0이므로 `--verbose` 목록도 빈다 [I].
+- T7의 새 해시(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642): facts `c94c1d40…`, `b467accc…`, `b2359c3e…`, `d5246fa3…`, `279b9432…`; relations `22841917…`, `3a7d67ae…`, `f18df2ac…`, `996af7fd…`, `a249d1fd…`(`twice.txt`).
+
+### 15.10.8 앞 절과 보고의 정정
+
+- §15.0: 실행 전이라는 근거가 mtime뿐이라는 것을 적었다(지적 #12).
+- §15.2: `ast_reader.hpp`(+6) 한 줄(지적 #10).
+- §15.4: ④와 다름과 golden 추가(지적 #5·#13).
+- §15.6: 비교 수준과 가린 차이, identity 행, 보지 않은 파일, summary.txt 열 줄(지적 #7·#8·#9). §15.7: summary.txt 열 줄(지적 #7).
+- `records/step2a-20261110-8b/commands.txt` §8: summary.txt 줄에 정정 줄을 더했다(열 줄, 6 덩이). 끝에 df 값 정정 줄을 더했다(지적 #11). `declared_before_run.txt`는 그대로다.
+- 8b 보고의 공간 값(지적 #11): 시작 1,161,089,024와 끝 959,332,352는 기록에 없다. 기록된 값은 빌드 앞 1,161,084,928 B(07:11:18Z, `commands.txt`), 감시 첫 값 1,161,076,736 B, 실행 뒤 961,011,712 B(07:21:41Z), 끝 959,553,536 B(07:29:23Z)다. 가장 낮은 두 값(1,068,523,520 B, 938,950,656 B)은 기록과 같다.
+- 8b 보고의 비교 표: summary.txt는 "5 lines"가 아니라 열 줄이다. facts.kz의 "37 sections are the same"은 복호한 레코드 수준에서만 맞다.
+
+### 15.10.9 남는 것
+
+- ③(잘린 이미지를 UNKNOWN으로): relations(spawn 이미지 entry, PTR_FIELDS 이미지 값)를 소비자 목록에 더했다. 그 뒤 relsound.c에 같은 꼴의 경우를 더한다(지적 #1의 권고). 하지 않았다.
+- 직렬화되지 않은 객체의 다른 꼴 배열 초기값의 유무 [U]. [U] 바이트 결정성(K9).
+- 하지 않은 것: PD A3:173·부록 C:1009·S3:215 문구(§2.5 ⑤, §6.7 6), 8c(O2·O8·O9·O12, `legacy-case`), E1(Q4), B8, B4, CM:42. RV3A §6.6 Q12·PD·STATUS의 상태 줄도 고치지 않았다. push하지 않았다.
+- `T_8BF/`(202 MB)와 `T_8B/`(202 MB)는 지우지 않았다. CM §5의 보존이 아니다.
+
+## 16. 둘째 제자리 재빌드: O2·O8·O9·O12 (2026-11-10, RV3A §6.7 8c)
+
+- 성격: 도구·시험·lint 수정, MC 제자리 재빌드, `all` 재실행 기록이다. 싣는 것은 RV3A §6.3의 O2·O8·O9·O12뿐이다. E1(도구 문구·golden, Q4)은 싣지 않는다. 등급 규칙, 조건 값, 예산 값은 바꾸지 않는다. cFS를 기동하지 않는다.
+- 근거: PI 답(11-10) "Q2는 지워도 돼, Q12는 MC 제자리 재빌드로 진행해". Q12 (가)다. 빌드 디렉터리는 MC 하나다. Q2는 (가)로 이미 끝났다(§15 앞, `114f33b`). 이 단계는 아무것도 지우지 않는 것을 기본으로 한다.
+- 기록: 저장소 `records/step2a-20261110-8c/`(텍스트만). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_8c/`(이하 `T_8C/`)다. T/, `T_RV4/`, `T_8B/`, `T_8BF/`에는 쓰지 않는다.
+
+### 16.0 바뀌어도 되는 것의 선언 (빌드 전에 적고 커밋함) [D]
+
+빌드와 재실행 전에 적었다. 이 선언은 빌드 전에 커밋한다. 기준은 `T_8BF/`다. T/·`T_RV4/` 대비는 §15.0·§15.10.0의 차이에 아래를 더한 것이다. 아래 밖의 차이는 결함으로 보고한다.
+
+- **설계(선언의 전제)**:
+  - O2: 명령줄 `--target`(출처 "command line")의 형·필드 선언을 읽은 단위에서 찾는다. 찾는 규칙은 writer를 맞추는 규칙(`targets_of_field`)과 같다. 없으면 FACT_LOCS 상태를 `unchecked`(0)로 둔다. writer-set-complete가 아니다. BASIS에 항목 `unknown_target.<형>.<필드>` 하나를 더한다. 값은 "unknown-target: no record type <형> is defined in the units read; …" 또는 "unknown-target: the record type <형> has no field <필드> in the units read; …"다. extract 요약 줄은 `-> unknown-target (…)`이다. 새 열거형 값은 두지 않는다. 까닭: `layout.golden`이 열거형을 적는다(`tests/golden/data/layout.golden:1889-1891`). 새 값은 기존 golden과 schema 개정을 바꾼다. 프로필 대상(`loc`, `bind`, store pattern)에는 적용하지 않는다. 까닭은 §16.1 O2다.
+  - O12: facts BASIS에 `extract.resource_dir`와 `extract.extra_arg[i]`를 더한다. `--extra-arg`가 없으면 `extract.extra_arg = none` 하나다. `--resource-dir`가 없으면 도구에 내장된 기본값을 쓴다(`tools/kz-static/main.cpp:71-74`). 그래서 값은 그 경로와 "(the tool's built-in default; no --resource-dir)"다. 경로도 기본값도 없으면 "none …"이다. 명령줄 대상의 `target.*` 두 기록 가운데 `= extraction target`(spec.declared에서 온 것)을 없앤다. `= command line` 기록 하나가 남는다. extract 요약의 "hand-entered inputs" 수는 그대로다(명령줄 대상을 따로 센다). `OpInfo.out`은 지운다(채우기만 하고 읽는 곳이 없다). `poll_fns`는 SF에 "옛 경로 전용, 미소비"로 적고 둔다(`--poll-fn`과 프로필 observe 규칙의 배관, BASIS 기록).
+  - O8: `legacy-case` 라벨을 51개에 더한다(`set_property(… APPEND PROPERTY LABELS legacy-case)`; 기존 라벨은 그대로). 51 = `tests/phi`의 시험 48(`phi_*` 47 + `test_phi_cli`) + `static_golden_core_cpu1` + `test_realrecord_derived` + `test_trace_neutral_real`.
+  - O9: lint `case-ids`의 범위에 `probe/`·`instrument/` 아래 코드 파일(`.c .cc .cpp .cxx .h .hh .hpp`)을 더한다. `tests/` 디렉터리 아래는 뺀다. 걸리는 11건을 고친다(§16.1 O9). runtime의 OSAL API 표는 문서다(`kairos/docs/framework_layer.md`, 새 파일). 코드에 넣지 않는다.
+- **도구 해시**: kz-static이 바뀐다(`lib/llvm`: `ast_reader.hpp`·`ast_tu.cpp`·`model.hpp`·`finalize.cpp`·`serialize.cpp`·`spec.hpp`·`spec.cpp`; `tools/kz-static/cmd_extract.cpp`). kz도 바뀐다. kz의 identity가 `probe/plan`·`probe/hold`를 덮기 때문이다(`cmake/KzSourceIdentity.cmake:77-116`, `tools/kz/CMakeLists.txt:6-11`). 바뀐 것은 주석과 지역 변수 이름뿐이다. kz-instr-clang은 다시 빌드된다(주석만). 바이너리가 바뀌는지는 잰다. kz-dump·kz-rt-dump·kz-phi는 다시 빌드되지 않아야 한다 [I: `lib/llvm`·`probe`를 링크하지 않음; `include/`·`cmake/`·최상위 `CMakeLists.txt`를 고치지 않음]. `kz_lint`도 다시 빌드된다. 시험 디렉터리의 CMakeLists를 고쳐 CMake가 다시 구성된다.
+- **golden**: 바뀌는 golden 파일도, 새 golden 파일도 없다(`tests/static/data`, `tests/golden/data`, `tests/phi/data`). 까닭: (1) golden의 명령줄 대상(outptr, loops, atype, clobber의 `--target`)은 모두 fixture에 선언이 있다. (2) 프로필 대상은 O2 밖이다. (3) 고정 도구 golden은 BASIS를 뺀다(`tests/static/static_golden.cpp:42`). (4) 라벨은 golden 내용이 아니다. O2·O12의 시험은 `test_static_cli`의 확인으로 둔다. 기존 확인 문자열은 고치지 않는다.
+- **NP 출력**(`T_8C/<build>/NP`·`NP2` 대 `T_8BF/`):
+  - basis.kz: HEADER `tool_sha256`과 파일 해시. 레코드는 같다. basis.txt: `basis <sha256>` 줄(C1·R2 1째, C5 5째).
+  - facts.kz: HEADER `tool_sha256`·`basis_sha256`·parent `sha256`·`artifact_sha256`, 컨테이너 크기. BASIS: 더해지는 레코드 둘(`extract.resource_dir`, `extract.extra_arg`), 바뀌는 레코드 하나(`extract.units_from`). BASIS의 count와 crc32. STRINGS 바이트와 crc32. 다른 섹션의 crc32는 바뀔 수 있다(문자열 위치가 옮겨짐; §15.6 정정과 같은 기작). 다른 섹션의 레코드(복호한 값)는 같다.
+  - facts.txt: `[basis] <수>` 머리 줄(+2), 더해지는 두 줄, `extract.units_from` 줄.
+  - extract.txt: 1째 줄 `facts <sha256>`. 요약 줄은 그대로다(명령줄 대상 없음). relations.txt: 2째 줄 `facts <sha256>`. relations.log, args.txt: 바이트 동일.
+- **판정 입력**: tsv 일곱 바이트 동일. `count/summary.txt`: T7 줄 다섯(facts·relations 해시)만 다르다. `twice`: 같은 실행 안에서 same. twice.txt·twice_detail.txt: 해시 줄.
+- **identity**(V0·V2 × C1 pre tx·R2 core·C5 6.4.1, EB 대비): 드라이버에 따로 인용한 허용 블록을 더한다(기존 항목은 넓히지 않는다).
+  - facts BASIS added 2(`extract.resource_dir`, `extract.extra_arg`): 여섯 경우 모두.
+  - facts BASIS removed 4: C1 pre tx V2만. 명령줄 대상 넷(`CF_Channel_t.sem_id`, `CF_ChannelConfig_t.sem_name`, `BP_Throttle_t.Name`, `BP_Throttle_t.Sem`)의 `= extraction target` 기록이다(`EB/c1_pre_tx/V2/facts.txt:25-28`). V0와 다른 빌드는 0이다. 그래서 드라이버의 비교에 변형(V0·V2)별 항목을 둔다(`identity-facts.V2`).
+  - show 글: 지금 허용하는 `extract.units_from` 두 줄에 더해, `[basis] <수>` 머리 두 줄(옛·새), 더한 두 줄(여섯 경우), 없앤 넷(C1 pre tx V2). 드라이버의 show 글 판정이 이 수를 경우마다 정확히 요구한다. `STEP2A_ALLOW_TABLE`(단위 점검)이면 0이다.
+  - 그 밖은 지금과 같다: basis 1/0/0, facts의 기존 4 changed.
+  - C1 pre tx V2의 명령줄 대상 넷은 선언이 있다 [F: `c1_build/pre/src/bp/fsw/src/bp_flow.h:54-61`, `cf/fsw/src/cf_cfdp_types.h:443-448`, `cf/fsw/src/cf_tbldefs.h:74-76`]. 그래서 FACT_LOCS와 `unknown_target.*`는 바뀌지 않아야 한다. 나오면 결함으로 보고한다.
+- **드라이버 비교**(npsame, s5same, fixsame, fix2same, fix3same): 따로 인용한 블록에 단계마다 BASIS added 2(`extract.resource_dir`, `extract.extra_arg`, 다섯 빌드 2)를 둔다. 그래서 added 수가 §14.4·§15.5보다 빌드마다 2 많다. changed·removed 수는 그대로다. 출력 글(npsame.txt …)은 그 수의 줄과 블록 항목의 줄이 다르다.
+- **시험**: ctest 수는 239 그대로다(새 시험 프로그램 없음; O2·O12는 `test_static_cli`, O9는 `lint_selftest`의 확인을 더함). `ctest -N -L legacy-case`는 51이다. 다른 라벨의 수는 그대로다. lint 6/6, 넓힌 `lint_case-ids` clean.
+- **드라이버 파일**: `env/redesign/step2a_tests.sh`가 바뀐다. 1–80줄의 번호는 그대로 둔다. 단위 점검 6/6이 그대로 통과해야 한다.
+- **실행 기록**: `run.log`, `status.txt`, `identity/identity.txt`, 디렉터리마다의 `sha256.txt`의 해시 줄.
+- **조건부**: identity의 명령줄 대상에 선언이 없다고 나오면(위 [F]가 틀림) 그 경우의 FACT_LOCS 행이 `unchecked`가 되고 `unknown_target.*`가 더해진다. 그때는 identity가 FAIL이다. 허용표를 넓히지 않고 결함으로 보고한다.
+
+### 16.1 항목 대조 (실행 전) [M][F]
+
+| 항목 | RV3A §6.3의 주장 | 파일·출력과 대조 | 처리 |
+|---|---|---|---|
+| O2 | 없는 `--target`이 writer-set-complete(0) | 맞음 [M]: CK `gaps/h10.txt`의 두 대상(`NoSuch_t.nofield`, `Slot.nofield`). 같은 결함이 프로필 대상에도 있다 [F]: fixture 프로필의 `loc Cell.id`(`tests/static/profile/00_fixture.kzp`)는 `Cell`이 없는 fixture 다섯(atype, loops, outptr, relations, clobber)의 golden에 행으로 있다. 넷은 `writer-set-complete writers=0`, clobber는 DISABLED다(`tests/static/data/*.golden`의 `[locs]`). `Cell`은 `writers.c`·`derives.c`에만 있다(grep) | 명령줄 대상만 고친다. 프로필 대상을 고치면 옛 경로 golden 다섯이 바뀐다. O2의 완료 기준("기존 golden 바이트 불변")과 맞지 않는다. 남는 결함으로 SF와 §16 끝에 적는다 |
+| O8 | `ctest -N` 237 중 옛 경로 51 | 51의 구성은 맞음 [M: `ctest -N`의 이름]. 전체는 지금 239다(8b·8b 수정에서 둘 더함). 그래서 새 경로는 188이다 | 라벨을 단다. AR·STATUS에는 잰 수를 적는다 |
+| O9 | 주석 11건 | 수는 맞음 [M: 사본 lint, probe 178/5·instrument 2128/73·runtime 156/15, CK와 같음]. 성격은 반만 맞다: 주석은 5건(`probe/hold/supervisor.hpp` 3, `instrument/clang/kz_instr_clang.cpp` 1줄 2건)이다. 6건은 `probe/plan/profile.cpp`의 지역 변수 `c1`·`c2`(콜론 위치)다. lint 자료가 "rename it"이라 한다(`tests/lint/data/case_identifiers.txt:13-14`) | 주석은 고쳐 쓰고 변수는 이름을 바꾼다. 줄 수는 그대로 둔다 |
+| O12 | `--resource-dir`·`--extra-arg` 기록 0, `target.*` 두 번, 죽은 입력 | 맞음 [F: `serialize.cpp:975-983`, `cmd_extract.cpp:36-43`; CK `h10.txt`의 `target.*` 두 쌍]. `--resource-dir`가 없어도 기본값이 쓰인다(`main.cpp:71-74`). basis는 그 값을 이미 적는다(`basis.cpp:406`, `front_end.arguments_added`) | facts에는 쓰인 값을 적는다(없음일 때만 none) |
+
+### 16.2 코드와 문서 [F]
+
+- 커밋: 선언 `7cc970d`(빌드 전). 코드·시험·lint·라벨·`kairos/docs`의 대부분은 `e261861`이다. 이 단계가 고치는 중에 lead가 작업 트리를 스냅숏으로 커밋했다(stop hook, 08:44:42Z, "WIP snapshot"). 빌드는 그 트리로 했다. 드라이버, `docs/framework_layer.md`, `docs/schema.md`의 문장 하나는 `dde72e1`이다(시험 뒤, 실행 전). 이 절과 기록은 그다음 커밋이다.
+- 규모: `git diff 7cc970d e261861 -- kairos` 19 파일 +204/−29. `e261861 → dde72e1` 3 파일 +86/−7(드라이버 +38/−6, 새 문서 `framework_layer.md` +47, `schema.md` +1/−1).
+- **O2**(`lib/llvm`):
+  - `ast_tu.cpp` `note_declared_targets`: 단위마다 `names`의 레코드 정의를 훑는다. 이름이 대상 형이면 그 필드와 안의 이름 없는 레코드의 필드를 `targets_of_field`로 맞춘다. `Model::target_types_defined`·`target_fields_defined`에 넣는다(`model.hpp`, `ast_reader.hpp`).
+  - `finalize.cpp`: 출처가 "command line"이고 선언이 없으면 상태를 `unchecked`로 두고 까닭을 `LocFact::unknown_target`에 적는다.
+  - `serialize.cpp`: 그런 대상마다 BASIS `unknown_target.<형>.<필드>`(정책 unset).
+  - `cmd_extract.cpp`: 요약 줄 `-> unknown-target (까닭)`.
+- **O12**: `cmd_extract.cpp`가 명령줄 대상의 둘째 기록(`add_declared(… "extraction target")`)을 더하지 않는다. "hand-entered inputs" 수는 명령줄 대상을 따로 더한다. BASIS `extract.resource_dir`·`extract.extra_arg[i]`(없으면 `extract.extra_arg = none`)를 notes로 더한다. `spec.hpp`·`spec.cpp`: `OpInfo.out`을 지웠다. `poll_fns`에 "옛 경로 전용, 미소비" 주석.
+- **O8**: `tests/phi/CMakeLists.txt`(디렉터리의 시험 48개), `tests/static/CMakeLists.txt`(`static_golden_core_cpu1`), `tests/cfs-free/CMakeLists.txt`(둘)에 `set_property(… APPEND PROPERTY LABELS legacy-case)`. 기존 라벨은 그대로다. `cmake/`와 최상위 `CMakeLists.txt`는 고치지 않았다(모든 도구 identity에 든다).
+- **O9**: `tests/lint/kz_lint.cpp`의 `case-ids` 범위에 `probe/`·`instrument/`의 C·C++ 코드 파일(`tests/` 밖)을 더했다. selftest 경우 다섯(걸려야 하는 넷, 걸리지 않아야 하는 하나). `data/case_identifiers.txt` 머리 글. 걸리던 11건: `probe/hold/supervisor.hpp` 주석 셋("cFS" → "target"), `instrument/clang/kz_instr_clang.cpp` 주석 하나("C1/R2" → "two case builds"), `probe/plan/profile.cpp`의 지역 변수 `c1`·`c2` → `p1`·`p2`(줄 넷, 6건). 파일마다 줄 수는 그대로다.
+- 시험: `test_static_cli`에 8c 블록(확인 33개). O2: `writers.c`에 없는 대상 셋(`NoSuch_t.nofield`, `Slot.nofield`, `Cell.nofield`)의 요약 줄, BASIS, FACT_LOCS `unchecked`; 프로필 대상 `Cell.id`는 그대로. O12: 대상 기록 하나, `extract.resource_dir`, `extract.extra_arg`(없음, 둘), relations의 "hand-entered vocabulary … 1 items".
+- 드라이버(`env/redesign/step2a_tests.sh`, sha256 `ccbb26f8…`; 1–80줄 그대로): 인용한 8c 블록(항목 7: identity-facts added 2, identity-facts.V2 removed 4, 비교 단계 다섯마다 added 2). 비교 함수가 변형(V0·V2)을 받는다. show 글 판정이 8c 줄(머리 둘, 더함 둘, 없앰 넷 또는 0)을 경우마다 정확히 요구한다(`show8c`). `STEP2A_ALLOW_TABLE`이면 0이다. 기존 항목은 고치지 않았다.
+- 문서: `docs/static_facts.md` §5k(새), `docs/schema.md` §19 끝에 8c 줄, `docs/framework_layer.md`(새, O9의 표).
+- 바꾸지 않은 것: `include/`(schema 개정 11 그대로, 열거형 그대로), golden 파일, 예산·등급·조건 값, 프로필 대상의 판정, relations 코드.
+
+### 16.3 빌드 [M]
+
+- MC 제자리 `make -j4 all`, rc 0, 08:48:00Z–08:50:55Z. 빌드 전 `make -n all`은 바뀐 것이 없었다(MC가 소스와 맞음). CMake가 다시 구성했다. libkz-core identity는 `f6e3c7b4…` 그대로다. 링크된 것: `kz_lint`, `kz-instr-clang`, `libkz-plan.a`, `libkz-hold.a`, kz, `libkz-llvm.a`, kz-static, 시험 프로그램(probe 8, hold·rtplan 2, static 9)(`make.log`).
+- 도구 해시:
+
+| 도구 | 전(8b 수정) | 뒤 |
+|---|---|---|
+| kz-static | `3c5dfc56293d69cd8bd05c1e75e7c0b5da7da559d54f5df4d7770ae6e0366cc2` | `ab482eab0fb34aa86e8a839ef35fa8207054ea4b28ff186f5c5079a1cd30b326` |
+| kz-static tool_sha256 | `9b9189d1…` | `b61256c55c84f199a09a50727e36e59d7e1c968b2c71662f4564446877143d20` |
+| kz-static tool_source | `ae73a609…` | `c2da0fdc3be3e79995a5b767d2000a7c49a980b288afe02e9a114eff10016a46` |
+| kz | `b254483e25873902ec6408b1764c7e9b71238fe4c400e237ae49f88f55fc824c` | `931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248` |
+| kz tool_source | `8ef6d6d7…` | `caf58235d6b9d032685e0f5df7eb4c5f8cfcdaadd0e37457c897664fa4911141` |
+| kz-instr-clang | 기록 없음(mtime 10-29 07:32:41, 97,195,536 B) | `28db40172dbdb06faa0e607b9a494805b19768ca888e865d0a5c3859dab8bcaf`(같은 크기) |
+| kz_lint | — | `191d0da095e75736ecfdf0d790815fb219e6738281ee0bb7f310bc898dad50df` |
+| core_source | `f6e3c7b4…` | 같음 |
+| kz-dump / kz-rt-dump / kz-phi | `05623054` / `4390d4f1` / `7d34e6e2` | 같음(다시 빌드되지 않음) |
+
+- kz는 §16.0대로 바뀌었다. 바이너리가 새 identity를 담는다(grep 1). 크기는 같다(75,503,864 B).
+- kz-instr-clang: 선언은 "바이너리가 바뀌는지는 잰다"였다. 빌드 전 해시를 적지 않았다. 그래서 바이너리 수준은 [U]다. 대신 목적 파일을 쟀다 [M]: `a5d52a2`와 `e261861`의 `kz_instr_clang.cpp`(주석 한 줄만 다름)를 같은 플래그로 같은 임시 경로에서 컴파일하면 두 목적 파일이 바이트 동일하다(`5b0f7e0a…`). 그래서 링크한 바이너리도 같다고 본다 [I].
+- 소스: 빌드 시작 뒤 도구 identity의 파일(`lib`·`tools`·`include`·`cmake`·`CMakeLists.txt`·`probe`·`instrument`)은 바뀌지 않았다(`find -newer` 0). `git diff e261861 dde72e1`의 그 경로와 `tests`·`runtime`은 0줄이다. 그래서 `ab482eab`는 `e261861`(= `dde72e1`)의 도구 소스다 [M].
+- 공간(`df -B1 /`): 앞 665,710,592 B(08:48:00Z), 가장 낮음 587,890,688 B(08:49:31Z), 뒤 661,958,656 B(08:50:55Z). 기록: `pre_mc.txt`, `post_mc.txt`, `df_build.log`.
+- [U] 바이트 결정성(K9)은 그대로다.
+
+### 16.4 시험과 시험 수 [M]
+
+- 전체 ctest(08:53:38Z–08:53:59Z): 239개, 통과 238, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, 사유는 LastTest.log). 새 시험 프로그램은 없다. `test_static_cli` 확인 719개(8b 수정 686, +33). `lint_selftest` 97 경우, 실패 0.
+- golden 파일은 하나도 바뀌지 않았다(`git diff a5d52a2 -- tests/static/data tests/golden/data tests/phi/data` 0, 새 파일 없음). 그래서 O2의 완료 기준("기존 golden 바이트 불변")이 섰다 [M].
+- `ctest -N -L legacy-case` = 51이다(`phi_*` 47, `test_phi_cli`, `static_golden_core_cpu1`, `test_realrecord_derived`, `test_trace_neutral_real`). O8의 완료 기준이 섰다 [M].
+- 시험 수의 나눔(`ctest -N -L`, 라벨 정확히 맞춤; `labels.txt`): 전체 239 = **새 경로 188 + 옛 경로 51(`legacy-case`)**, 건너뜀 1(사유는 LastTest.log). RV3A O8의 "186 + 51 = 237"은 11-05의 수다. 그 뒤 8b·8b 수정이 둘(`static_fixture_compile_imgbudget`, `static_golden_imgbudget_np`)을 더했다.
+  - 새 188 가운데 **추출 규칙 쪽(라벨 static) 44**: fixture 컴파일 확인 15(`static_fixture_compile_*`; fixture가 C99로 컴파일되는지), golden 20(`static_golden_*`), 단위·명령줄 시험 9(`test_static_*`).
+  - **컨테이너·직렬화·공통 기능 144**: runtime 66, unit 66(core·trace·probe·hold·predict 등), golden 8(layout, records, container 셋, render, tool_hash, probe golden), lint 6, integration 3, instr 1, property 1. 한 시험이 라벨을 여럿 가질 수 있어 이 합(151)은 144보다 7 크다. 라벨이 없는 시험은 없다.
+  - 이 수는 도구가 맞게 도는지 보는 시험의 수다. 탐지 정확도의 시험 수가 아니다.
+- ctest의 라벨 시간 요약은 unit을 84로 적는다. `ctest -N -L '^unit$'`는 87이다. 차이 3의 까닭은 찾지 않았다 [U]. 나눔은 `-N`의 수로 했다.
+- 드라이버 단위 점검 6/6(`unit.txt`, 드라이버 `ccbb26f8…`).
+
+### 16.5 lint와 세 묶음의 수 [M]
+
+- 넓힌 `lint_case-ids`: clean. 범위 안 `probe/`·`instrument/` 코드 파일은 30개다(`lint_widened.txt`). 심은 점검: 사본의 `probe/plan/profile.cpp`에 넣은 "C1"은 걸리고, `instrument/gcc/tests/`에 넣은 "R2"는 걸리지 않는다. O9의 완료 기준(넓힌 lint clean, 표)이 섰다. 표는 `kairos/docs/framework_layer.md`다.
+- 세 묶음(사본 lint, 디렉터리를 통째로 `lib/`로 복사해 읽음; `lint_groups.txt`, 규칙은 `lintgroups.py`):
+
+| 묶음 | 고치기 전 | 뒤 | 내용 |
+|---|---|---|---|
+| 1. 단계 3이 만들어야 할 입력 | 374 | 374 | `instrument/*/sites/*.kzs` 6 파일(수작업 사이트 manifest). 여기에 `profiles/*/instr/*.kzs`의 사이트(C1 37/38, R2 44, C5 33; ED:603, lint 범위 밖)가 더해진다 |
+| 2. 프레임워크 지식 | 75 | 75 | `runtime/src/kz_rt_osal.c` 56, `runtime/include/kz_rt_osal.h` 19. 부르는 OSAL 함수 9개. 표: `docs/framework_layer.md` |
+| 3. 무해 | 2,013 | 2,002 | 시험 77(instrument 32, runtime 45), 커밋된 변환 출력 763(`instrument/clang/out`), 드라이버 1,125(scripts: instrument 956, probe 169), 코드 파일의 주석·이름 36 → 25, 빌드 파일 12 |
+| 합 | 2,462 | 2,451 | probe 178 → 169, instrument 2,128 → 2,126, runtime 156 |
+
+  - 무해의 "코드 파일 36 → 25": 고친 11건(probe 9, instrument 2)이 빠졌다. 남은 25건은 runtime의 다른 코드다(`kz_rt.h` 9, `kz_rt_posix.h` 4, `kz_rt.c` 4, `kz_rt_dump.cpp` 2, manifest 6). 대부분 runtime ABI의 이름(`osal-internal` 문맥, OSAL id 열쇠, OSAL 시계)과 주석이다. runtime은 lint 범위 밖이다(O9). 그 이름도 프레임워크를 가리키므로 단계 3에서 묶음 2와 함께 본다 [I].
+  - CK의 셈과 다른 곳: CK는 시험을 72로 적었다(G09). 이 셈은 `tests/` 아래 모든 파일(CMakeLists, `.kzs`, 스크립트 포함)을 시험으로 셌다(77). 합은 CK와 같다(2,462).
+- 단계 3 완료 기준으로 쓰는 수(ED §8에도 적음): (1) 생성한 관측점 manifest가 묶음 1의 374행과 profiles manifest의 사이트를 함수 수준에서 덮는다. 사람이 고른 사이트 없이 새 호출자를 관측한다(ED §4.3). (2) 묶음 2의 75건은 `framework_layer.md`의 판·출처 행으로만 남는다. 판이 늘면 행을 더한다. (3) 묶음 3은 단계 3·5의 드라이버가 대체할 때 다시 센다. 엔진 코드(lint 범위)의 위반은 0을 유지한다.
+
+### 16.6 재실행 [M]
+
+- 명령: `env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8c`. 08:56:09Z–09:00:52Z. 허용표는 내장(8c 블록 포함)이다.
+- rc: `all` 0, `result all: PASS`. 열 단계 모두 PASS, FAIL 줄 0. `twice` 다섯 빌드 모두 same.
+- 소스: `repo dde72e1…`, `kairos_uncommitted_lines=0`.
+- identity: 18 판정 모두 PASS. basis 1/0/0. facts는 C1 pre tx V2가 4/2/4, 다른 다섯 경우가 4/2/0이다. 8c 항목은 모두 "expected = found"다(added 2, V2의 removed 4·0·0). show 글: 여섯 경우 모두 `[basis]` 머리 2, 더함 2, 없앰은 C1 pre tx V2만 4.
+- 드라이버 비교의 변경 수(changed / added / removed): added만 빌드마다 2 많다. 나머지는 §14.4와 같다.
+  - npsame 274/9576/115 · 274/9577/115 · 237/6004/71 · 182/2447/0 · 182/2456/0
+  - s5same 277/9576/115 · 277/9577/115 · 240/6004/71 · 185/2447/0 · 185/2456/0
+  - fixsame 278/173/115 · 278/173/115 · 241/128/71 · 186/40/6 · 186/40/6
+  - fix2same 275/171/115 · 275/171/115 · 238/126/71 · 183/38/6 · 183/38/6
+  - fix3same 92/168/115 · 92/168/115 · 91/123/71 · 8/38/6 · 8/38/6
+- 새 BASIS 두 항목은 다섯 빌드 모두 같다: `extract.resource_dir = /home/user/work/llvm-project/build/lib/clang/23 (the tool's built-in default; no --resource-dir)`, `extract.extra_arg = none`. O12의 완료 기준(다섯 빌드 BASIS에 두 항목, 식별 시험 통과)이 섰다 [M].
+- identity의 명령줄 대상 넷은 모두 선언이 있었다. `unknown-target`·`unknown_target`은 어느 출력에도 없다(grep 0). FACT_LOCS는 EB와 같다 [M]. 조건부 항목은 쓰이지 않았다.
+- 공간: 앞 661,561,344 B(08:56:09Z), 가장 낮음 437,309,440 B(08:59:10Z), 뒤 458,305,536 B(09:00:52Z). `T_8C/`는 202,212,345 B, 149 파일, `sha256.txt` 136줄(sha256 `950eb651…`). T/, `T_RV4/`, `T_8B/`, `T_8BF/`는 실행 뒤에도 제 `sha256.txt`와 맞는다(rc 0). 300 MB 아래로 가지 않아 아무것도 지우지 않았다.
+
+### 16.7 비교: 모든 파일, 가림 없음 [M]
+
+`compare_8c.py`(기록 디렉터리)는 8b 수정 단계의 `compare_8bfix.py`와 같다. 다른 것은 하나다: 글 파일의 차이를 덩이마다 모두 적는다. 결과 `compare_8c.tsv`:
+
+| 기준 | same | DIFF | 한쪽에만 |
+|---|---|---|---|
+| `T_8BF/` | 34 | 115 | 0 |
+| T/ | 29 | 108 | 12(T/ 뒤 드라이버가 더한 파일, §15.10.6과 같음) |
+| `T_RV4/` | 34 | 115 | 0 |
+
+- `T_8BF/` 대비 DIFF 115줄을 모두 읽었다. 아래 "선언의 틀림과 빠짐" 말고는 모두 §16.0에 든다:
+  - basis.kz 11(NP 5, identity 6): HEADER `tool_sha256`·`artifact_sha256`만.
+  - facts.kz 16(NP 5, NP2 5, identity 6): HEADER `tool_sha256`·`basis_sha256`·parent·`artifact_sha256`·컨테이너 크기. 섹션 줄: STRINGS·BASIS의 count·crc32, 다른 섹션의 crc32(NP: C1·C5 35줄, R2 37줄; identity 11–21줄). 레코드: BASIS뿐이다. `extract.units_from` changed, `extract.resource_dir`·`extract.extra_arg` added, C1 pre tx V2만 `target.*` 넷 removed. 다른 섹션의 레코드는 같다.
+  - 글: basis.txt 11(해시 줄), extract.txt 21(NP·NP2·npsame·identity의 `facts` 줄), relations.txt 10(2째 줄), facts.txt 11(`[basis]` 머리, `units_from` 줄과 그 뒤 두 줄; C1 pre tx V2는 넷이 빠짐), show.diff 6, facts.dump.diff 6, sha256.txt 12, twice.txt·twice_detail.txt(해시 줄), 드라이버 비교 글 다섯(옛 드라이버 줄의 BASIS 수, 항목 수, 8c 항목 줄, 판정 줄의 added 수), 실행 기록(`run.log`, `status.txt`, `identity.txt`), `count/summary.txt`.
+- same: args.txt 6+5, relations.log 10, count/ tsv 일곱, identity basis.dump.diff 6.
+- **선언의 틀림과 빠짐**(새 차이는 아님; 선언한 값이 다른 출력에 옮겨진 것). `declared_before_build.txt`는 고치지 않는다.
+  1. **틀림**: `count/summary.txt`. 선언은 "T7 줄 다섯만"이라 했다. 실제는 34줄이다. T7 줄 다섯(487–491)과, facts.txt의 줄 번호를 인용하는 29줄(50, 506–511, 514–519, 522–527, 530–534, 537–541)이다. BASIS가 두 줄 늘어 그 뒤 줄의 번호가 2씩 밀렸다. `facts.txt:<번호>`를 지우고 비교하면 T7의 10줄(옛·새)만 다르다. 444째 줄까지의 인용은 그대로다.
+  2. **빠짐**: identity의 `facts.dump.diff`와 `identity.txt`. 섹션 crc32 줄과 BASIS 레코드 줄의 차례 번호(`BASIS[i]`)가 바뀐다. 선언은 crc32 변화를 NP facts.kz에만 적었다. 같은 기작이다(§15.6 정정).
+  3. **빠짐**: 드라이버 비교 글의 "옛 드라이버" 줄. 그 줄이 BASIS의 레코드 수를 적는다. 선언은 "그 수의 줄"이라고만 했다.
+  4. **잰 것의 빠짐**: kz-instr-clang의 빌드 전 해시(§16.3).
+- T/·`T_RV4/` 대비: 레코드 수준의 차이는 BASIS `count.walk_bounds_hit`(8b)·`extract.units_from`과 8c의 두 항목, C1 pre tx V2의 `target.*` 넷뿐이다. count/ tsv 일곱은 바이트 동일하다.
+
+### 16.8 판정과 수
+
+- 판정 입력(tsv 일곱)이 T/, `T_RV4/`, `T_8B/`, `T_8BF/`와 바이트 동일하다 [M]. 판정은 그대로다 [I]: T1 PASS(개정 뒤 통과, "관계를 낸다"의 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6 PASS, T7 PASS.
+- 수(`burden.tsv`) [M]: `proven-impossible` 0 / 0 / 0 / 6 / 14, `not graded` 1 / 1 / 5 / 14 / 14, `undecidable` 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0. 행 431 / 431 / 338 / 178 / 175, 합 1,553.
+- 두 계수(8b): 다섯 빌드 모두 0 그대로다(`count.walk_bounds_hit` 레코드가 `T_8BF/`와 같음).
+- T7의 새 해시(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642): facts `d38c584d…`, `ef473928…`, `570047ee…`, `26d6e29d…`, `2af5c345…`; relations `c2489e51…`, `493aa87d…`, `60a65e3b…`, `6c1047c8…`, `712d896a…`(`twice.txt`).
+- 등급 이름과 "불가"의 지위는 B8을 따른다. 바꾸지 않았다.
+
+### 16.9 남는 것
+
+- O2의 남는 결함: 프로필 대상(`loc`, `bind`, store pattern)에 선언이 없어도 `writer-set-complete`다(§16.1). fixture golden 다섯이 그 행을 담는다. 고치면 옛 경로 golden이 바뀐다. 그 결정은 B4·A6의 옛 경로 정리와 함께다. 하지 않았다.
+- O9의 남는 것: C5 판(OSAL 4.1.1)의 표 행(`framework_layer.md` §3). runtime의 그 밖 코드 25건의 정리(§16.5). `OS_TimeGetTotalNanoseconds` 본문 대조 [U].
+- [U] 바이트 결정성(K9). [U] kz-instr-clang 바이너리의 전후 동일성(목적 파일은 같음). [U] ctest 라벨 시간 요약의 unit 84와 `-N`의 87의 차이.
+- 하지 않은 것: E1(Q4), ③ 소비자 규칙(잘린 이미지를 UNKNOWN으로), PD A3:173·부록 C:1009·S3:215 문구, B8, B4, CM:42. RV3A §6.6 Q12·PD의 상태 줄은 고치지 않았다. push하지 않았다.
+- `T_8C/`(202 MB), `T_8BF/`, `T_8B/`는 지우지 않았다. CM §5의 보존이 아니다.
+- 커밋: 선언 `7cc970d`, 스냅숏 `e261861`(lead), 드라이버·문서 `dde72e1`, 이 절과 기록은 그다음 커밋이다(모두 "kz-static 8c:").
+
+## 16.10 수정 단계: 8c 검증 지적과 처리 (2026-11-10)
+
+- 성격: 8c 검증의 지적 16건(차단 1, 비차단 15)을 파일과 출력에 대어 보고 처리한 기록이다. 코드 수정, MC 제자리 재빌드, `all` 재실행을 포함한다. 등급 규칙, 조건 값, 예산 값은 바꾸지 않는다. cFS를 기동하지 않는다.
+- 근거: PI 답(11-10) "Q2는 지워도 돼, Q12는 MC 제자리 재빌드로 진행해". Q12 (가)다. 빌드 디렉터리는 MC 하나다. Q2는 (가)다: 다시 만들 수 있는 scratch 사본만 대상이다. 빌드 트리, cFS 트리, T/, RD(`/home/user/work/redesign`), EB, CK, PV, 묶음은 건드리지 않는다.
+- 기록: 저장소 `records/step2a-20261110-8cfix/`(텍스트만). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_8c_fix/`(이하 `T_8CF/`)다. T/, `T_RV4/`, `T_8B/`, `T_8BF/`, `T_8C/`에는 쓰지 않는다.
+- 이 단계가 고치는 중에 lead가 작업 트리를 다시 스냅숏으로 커밋했다(`1377957`, 09:45:53Z, "WIP snapshot", stop hook). 그 커밋은 원격에도 있다. 이 단계는 push하지 않았다.
+
+### 16.10.0 바뀌어도 되는 것의 선언 (빌드 전에 적고 커밋함) [D]
+
+빌드와 재실행 전에 적었다. 기준은 `T_8C/`다. T/·`T_RV4/`·`T_8BF/` 대비는 §16.0의 차이에 아래를 더한 것이다. 아래 밖의 차이는 결함으로 보고한다.
+
+- **코드**(설계):
+  - `lib/llvm/finalize.cpp`: (가) `unknown_target`의 첫 이유 글을 "no record type T is found among the file-scope tags and typedef names of the units read"로 바꾼다(지적 #2). (나) 검사를 `--target`이 프로필 대상과 같을 때도 한다(지적 #5). 표시는 `TargetField::command_line`(`lib/llvm/spec.hpp`)이다. 대상 기록(`target.T.f`)은 프로필 출처 그대로다. BASIS에 새 기록을 더하지 않는다.
+  - `tools/kz-static/cmd_extract.cpp`: (나)의 표시를 단다. `extract.resource_dir`는 `--extra-arg`의 마지막 `-resource-dir=X`(또는 `-resource-dir`와 `X`)가 있으면 `X (--extra-arg -resource-dir, after and over the tool's: <도구의 값>)`이다(지적 #4). 없으면 지금과 같다.
+  - `tests/lint/kz_lint.cpp`: `case-ids`가 `probe/`·`instrument/`의 모든 글 파일을 본다. `tests/`·`scripts/`·`sites/`·`out/` 디렉터리 아래는 뺀다(지적 #6). 새로 걸리는 것은 `instrument/clang/CMakeLists.txt:15`의 주석 하나다(사본으로 잼, 37 파일 clean). 그 주석을 고친다. selftest 경우 다섯을 더한다. `tests/lint/data/case_identifiers.txt` 머리에 범위와 한계를 적는다(패턴은 그대로).
+  - 시험: `test_static_cli`에 8c 수정 블록(지적 #5·#7·#16, 중첩 태그). 8c 블록의 확인 글 넷은 새 이유 글로 고친다. 이유 글이 바뀌었기 때문이다. 8c 블록의 `resource_dir` 확인 하나는 내장 기본값만 받게 좁힌다. 그 밖의 기존 확인 글은 고치지 않는다.
+  - 하지 않는 것: 규칙 대상의 `<anonymous>`(지적 #1)와 중첩 태그 등록(지적 #2)의 코드 수정. 둘 다 C1·R2 NP의 FACT_LOCS나 writer 맞춤을 바꾼다. 그래서 따로 선언하고 빌드한다. 문서에 남는 결함으로 적는다.
+- **도구 해시**: kz-static이 바뀐다. kz_lint가 바뀐다. 시험 프로그램이 다시 링크된다. kz·kz-dump·kz-rt-dump·kz-phi는 다시 빌드되지 않아야 한다 [I: `lib/llvm`을 링크하지 않음; `probe/`·`include/`·`cmake/`·최상위 `CMakeLists.txt`를 고치지 않음]. kz-instr-clang은 `libkz-llvm`을 링크하지 않는다(`instrument/clang/CMakeLists.txt:7`). 그 CMakeLists의 주석만 바뀐다. 그래서 다시 링크되지 않아야 한다 [I]. 이번에는 빌드 전 해시를 적고 뒤와 비교한다(§16.7의 빠짐 4).
+- **golden**: 바뀌는 파일도 새 파일도 없다. 까닭: (1) golden의 명령줄 대상은 fixture에 선언이 있고 프로필 대상과 겹치지 않는다(`static_golden.cpp:60-77`의 `--target`). (2) 이유 글과 `resource_dir`는 BASIS에만 있고 golden은 BASIS를 뺀다(`static_golden.cpp:42`). (3) 프로필에만 있는 대상의 규칙은 그대로다.
+- **NP 출력**(`T_8CF/<build>/NP`·`NP2` 대 `T_8C/`): §15.10.0과 같은 꼴이다.
+  - basis.kz: HEADER `tool_sha256`과 파일 해시. 레코드는 같다. basis.txt: `basis <sha256>` 줄(C1·R2 1째, C5 5째).
+  - facts.kz: HEADER `tool_sha256`·`basis_sha256`·parent `sha256`·`artifact_sha256`. BASIS `extract.units_from` 한 레코드. STRINGS 바이트와 그 crc32. 그 밖의 섹션 crc32·레코드와 컨테이너 크기는 같다 [I: 바뀌는 글의 길이가 같다].
+  - facts.txt: `extract.units_from` 한 줄. extract.txt: 1째 줄. relations.txt: 2째 줄. relations.log, args.txt: 바이트 동일.
+  - `extract.resource_dir`·`extract.extra_arg`는 같다(2a의 어느 실행도 `--extra-arg`를 주지 않음 [M: `T_8C/` facts.txt 11개]). `unknown_target.*`는 없다.
+- **판정 입력**: tsv 일곱 바이트 동일. `count/summary.txt`: T7 줄 다섯(facts·relations 해시)만 다르다. BASIS 레코드 수가 같으므로 facts.txt 줄 번호는 밀리지 않는다. `twice`: 같은 실행 안에서 same. twice.txt·twice_detail.txt: 해시 줄.
+- **identity**(EB 대비): 판정과 변경 수는 `T_8C/`와 같다. basis 1/0/0, facts는 C1 pre tx V2가 4/2/4, 다른 다섯 경우가 4/2/0. show 글의 8c 줄도 같다. 드라이버의 허용표는 고치지 않는다.
+  - 조건: C1 pre tx V2의 `--target` 일곱 가운데 셋은 프로필 대상이다(`OS_common_record_t.name_entry`, `OS_common_record_t.active_id`, `OS_count_sem_internal_record_t.obj_name`; `T_8C/identity/c1_pre_tx/V2/args.txt`와 facts.txt 5–7째 줄) [M]. 이번부터 이 셋도 검사한다. 셋 다 선언이 있다 [M: FACT_LOCS writers 18, 6, 3; typedef `os-shared-globaldefs.h:44`, `os-shared-countsem.h:36`]. 그래서 FACT_LOCS와 BASIS는 바뀌지 않아야 한다. 바뀌면 identity가 FAIL이다. 허용표를 넓히지 않고 결함으로 보고한다.
+- **identity**(`T_8C/` 대비, 파일 단위; §16.7의 빠짐 5를 이번에는 미리 적음): 여섯 경우마다 basis.kz(HEADER `tool_sha256`·`artifact_sha256`), basis.txt(해시 줄: C1·R2 1째, C5 V0 5째, C5 V2 7째), facts.kz(HEADER, BASIS `extract.units_from`, STRINGS crc32), facts.txt(`units_from` 줄), extract.txt(`facts` 줄: 1째, C5 V2는 3째), facts.dump.diff(`basis_sha256`·parent·STRINGS crc32·`units_from`의 값이 든 줄), show.diff(`units_from` 줄), sha256.txt. `identity/identity.txt`는 그 값이 든 줄.
+- **드라이버 비교**(npsame, s5same, fixsame, fix2same, fix3same): 출력 글은 `T_8C/`와 바이트 동일하다 [I]. 변경 수는 §16.6과 같다. npsame/<b>/extract.txt: 1째 줄.
+- **시험**: ctest 수는 239 그대로다. `legacy-case` 51. 라벨 수는 그대로다(`ctest --show-only=json-v1`로 셈: unit 84, runtime 66 …). lint 6/6. `lint_selftest` 경우는 97에서 102로 는다. `test_static_cli`의 확인 수는 는다(실행 뒤 적음). 다른 시험의 확인 글은 그대로다.
+- **드라이버**: `env/redesign/step2a_tests.sh`를 고치지 않는다(sha256 `ccbb26f8…`). 단위 점검 6/6.
+- **실행 기록**: `run.log`, `status.txt`, `identity/identity.txt`, 디렉터리마다의 `sha256.txt`의 해시 줄.
+- **공간**: 지금 여유는 약 449 MB다. `all`은 8c에서 가장 낮을 때 약 224 MB를 썼고 202 MB가 남았다(§16.6). 그래서 그대로는 300 MB 아래로 간다. 빌드 전에 scratchpad의 큰 scratch 사본(검증 작업 디렉터리와 facts·dump 사본)을 무손실로 압축한다(xz). 압축 전 파일마다 sha256을 적고, 압축본을 스트림으로 풀어 같은 sha256을 확인한 뒤에만 원본을 지운다. 내용은 그대로 다시 만들 수 있다. 2a 로그(ctest 등)와 RD·EB·CK·PV·T/·빌드 트리·cFS 트리는 건드리지 않는다.
+
+### 16.10.1 지적별 판단 [M][F]
+
+| # | 지적 | 판단 | 처리 |
+|---|---|---|---|
+| 1 | 규칙 대상의 형 이름이 `<anonymous>`일 수 있다. SF §5k의 "규칙 대상은 늘 선언이 있다"가 틀림(차단) | 맞음 [M]. C99 소스 `rt.c`(`--no-profile --targets-rule R-T1,R-T2`): `g_anon.u1 = 3`, `g_outer.in.ix = 7`이 있어도 `<anonymous>.u1`·`<anonymous>.ix`가 `writer-set-complete writers=0`. `T_8C/`의 NP에 그런 대상 3/3/2/0/0. `c1_pre_tx/NP/facts.txt:58942`의 `<anonymous>.State` writers 0, escape 0. 원문 `unsock_intf.c:81-85`(이름 없는 구조체), `:231` memset, `:338` 원소 주소, `:371`·`:409` 쓰기. 루프 섹션·relations.txt에는 0줄(grep). 그래서 T1–T7은 그대로다 | 문서: SF §5k 고쳐 씀, §16.0·§16.9의 정정(§16.10.8), 남는 결함으로 적음. 코드는 하지 않음(지적이 권한 대로 따로 선언) |
+| 2 | 중첩·블록 태그를 보지 않음. 이유 글이 틀림. `Unn.q` | 맞음 [M]: `nest.c`의 `Inner.ix`, 블록 안 `Blk.bq`가 "no record type … is defined"; `unn.c`의 `Unn.q`는 선언 있음, writers 1. 원인은 `collect_typedefs`(`ast_tu.cpp:123-133`, 최상위 선언만) | 코드: 이유 글(finalize.cpp). 문서: SF §5k(파일 범위만, `Unn.q`의 규칙). 중첩 태그 등록은 하지 않음(writer 맞춤과 `record_name`이 바뀜). 남는 결함 |
+| 3 | 프로필 대상의 결함이 나오는 golden 수 | 맞음 [M: `grep -l 'Cell.id' tests/static/data/*.golden`, `grep -l Cell fixtures/*.c`]. `[locs]`와 요약 줄: atype, loops, outptr, relations, spawn. 요약 줄만: argflow, flowfacts, lockset. clobber DISABLED. 아홉이다 | 문서: SF §5k, §16.1·§16.9 정정. #9와 같은 지적이다 |
+| 4 | `--extra-arg -resource-dir=`가 덮어도 BASIS는 내장 기본값. extract는 basis와 옵션을 대조하지 않음 | 맞음 [M]: 가짜 resource 디렉터리의 `stddef.h`가 정한 매크로로 `Marker.a`가 선언됨, BASIS는 기본값. [F]: `ast_run.cpp:101-107`(도구의 것 뒤에 extra), `basis.cpp:1222-1225`. 2a의 facts 11개는 basis `front_end.arguments_added`와 맞다 [M] | 코드: 덮는 값을 적음(cmd_extract.cpp). 문서: SF §5k(대조하지 않음, 상대 경로, 빈 값) |
+| 5 | 프로필 대상과 같은 `--target`은 검사되지 않음 | 맞음 [M]: `o2.c`에서 `Cell.zz`는 unknown-target, `Cell.id`는 complete. 더한 사실: identity C1 pre tx V2의 `--target` 일곱 가운데 셋이 이 경우다 [M] | 코드: 검사를 적용(`TargetField::command_line`). BASIS 기록은 더하지 않음(위 셋의 identity BASIS를 바꾸지 않으려고; 인자는 args.txt에 남음). 문서: SF §5k |
+| 6 | lint `case-ids`의 범위가 확장자 일곱뿐 | 맞음 [M: 191d0da0, scratch 나무에서 `lib/a.inc`만 걸림] | 코드: 위 선언대로. 걸리던 주석 하나를 고침. 한계(문자열 이어 붙이기, 토큰 붙이기, 이스케이프, 소문자, NUL)는 data 머리에 |
+| 7 | `--resource-dir` 경우가 시험에 없음, 확인 하나가 두 값을 받음 | 맞음 [F]. 손으로: 상대 경로는 준 그대로 적힌다 [M]. 빈 값은 `writers.c`에서는 읽히고 "none"이다. 시스템 헤더를 쓰는 소스는 실패한다 [M] | 시험: 내장 기본값 정확히, `--resource-dir`, `--extra-arg -resource-dir=`, 빈 값. 문서: SF §5k |
+| 8 | `osal_id_t` 행이 한 갈래 | 맞음 [M]: f34759d `common_types.h:92-109`. d2d877a도 같은 두 갈래다 [M] | `framework_layer.md` 제자리(새 파일). 어댑터 빌드는 매크로를 주지 않는다 [F], 쓴 갈래는 [U] |
+| 9 | #3과 같음(수 정정, 다시 세는 명령) | 맞음 | #3과 같음 |
+| 10 | unit 84와 87 | 맞음 [M: `ctest --show-only=json-v1`]. `-L`은 fixture 준비 시험(`rt_end_kill`·`rt_end_segv`·`rt_end_normal`, 라벨 runtime만)을 끌어온다(`test_kzrt_recovered`의 FIXTURES_REQUIRED). unit 84 = 새 63 + 옛 21. 새 경로의 나머지 144의 라벨 합은 148, 겹침 4(unit;integration 셋, unit;golden 하나) | `labels.txt` 끝에 정정 주석. §16.4 정정. [U] 거둠 |
+| 11 | 건너뜀 사유가 LastTest.log에 없음 | 맞음 [M]. 좁힘: 이 세션의 `ctest -N`은 LastTest.log를 바꾸지 않았다 [M: mtime 그대로]. 덮은 것은 09:04Z의 다른 ctest 호출이다. 더한 사실: scratch 사본(08:54Z)에 출력이 있다. 혼자 돌려도 Skipped(종료 77)다. LastTest.log는 그때 "Test Passed."라 적는다. 까닭: root이고 바이너리는 있으나 tracefs가 없다(`/sys/kernel/tracing/uprobe_events` 없음, `KZ_TRACEFS` 비어 있음; `test_probe_anchor_reached.cpp:168-173`, `:250`) | 새 빌드 뒤 `ctest -R … -V -O`로 기록 디렉터리에 `skip_reason.log`. AR §2·STATUS:61·§16.4의 인용을 그 파일로 |
+| 12 | §16.7의 "모두 §16.0에 든다"가 identity 파일과 npsame extract.txt를 덮지 않음 | 맞음 [M: `compare_8c.tsv`, identity 30줄과 npsame 5줄; C5 V2는 basis.txt 7째, extract.txt 3째] | §16.10.8에 다섯째 항목. `declared_before_build.txt`는 그대로. 이번 선언은 미리 적음(위) |
+| 13 | relations의 hand-entered 수 2 → 1이 선언에 없음 | 맞음 [F: `relations.cpp:329`, `:1083`]. 더한 사실: 행마다의 layers 칸(`:1036`)도 같은 수를 쓴다 | §16.10.8, SF §5k |
+| 14 | ED §8의 "4.1.1은 아직 없음" | 맞음 [M: 4.1.1 열이 아홉 함수와 이름 셋에 있음; `osapi-os-core.h:195`·`:208`, `osapi.h:87` 확인] | ED §8 줄 안 정정. §16.9 정정 |
+| 15 | 인용 둘이 한 줄 어긋남 | 맞음 [M]: `osapi-clock.h:44`는 주석 끝, typedef는 45–48. `layout.golden`의 열거형은 1889–1892 | `framework_layer.md` 제자리. AR 인용은 §16.10.8 정정 줄 |
+| 16 | 긍정 확인이 프로필 대상 `Cell.id`를 씀 | 맞음 [F: `00_fixture.kzp:39`] | 시험: 프로필에 없는 선언된 대상 `Cell.aux`. 8c 블록의 주석을 고침 |
+
+- 버린 지적은 없다. #11은 덮은 호출을 좁혀 받았다. #1·#2의 코드 수정은 지적 자체가 "따로 선언"을 권한 대로 다음으로 미뤘다.
+
+### 16.10.2 코드와 문서 [F]
+
+- 커밋: 선언 `08a3632`(빌드 전). 코드·lint·문서와 시험의 대부분은 lead의 스냅숏 `1377957`이다. 첫 빌드가 시험의 지역 변수 하나(`-Werror=shadow`)에서 멈춰 그 한 줄을 고쳐 `90e423c`로 커밋했다(실행 전). 이 절과 기록은 그다음 커밋이다.
+- 규모(`git diff 1c5a093 90e423c`): `lib/llvm/finalize.cpp` +7/−5, `lib/llvm/spec.hpp` +3, `tools/kz-static/cmd_extract.cpp` +27/−4, `tests/lint/kz_lint.cpp` +18/−7, `tests/lint/data/case_identifiers.txt` +9/−6, `instrument/clang/CMakeLists.txt` +1/−1(주석), `tests/static/test_static_cli.cpp` +84/−6, `docs/static_facts.md` +14/−6, `docs/framework_layer.md` +3/−2, `docs/schema.md` +1, ED +1/−1.
+- **이유 글(지적 #2)**: "no record type T is found among the file-scope tags and typedef names of the units read". 둘째 글("the record type T has no field f in the units read")은 그대로다.
+- **프로필 대상과 같은 `--target`(지적 #5)**: `add_cli_vocabulary`가 같은 대상을 찾으면 `TargetField::command_line`을 단다. 새 기록은 더하지 않는다. `finalize`의 검사 조건이 출처 "command line" 또는 그 표시다.
+- **`extract.resource_dir`(지적 #4)**: `--extra-arg`의 `-resource-dir=X`와 `-resource-dir X`를 차례로 보고 마지막 것을 적는다. 값 꼴은 `X (--extra-arg -resource-dir, after and over the tool's: <도구의 값>)`이다.
+- **lint(지적 #6)**: 위 선언대로. `instrument/clang/CMakeLists.txt:15`의 "the C1 reference warning flags"를 "a case build's reference warning flags"로 고쳤다. selftest 다섯: 걸려야 하는 넷(`probe/plan/a.inc`, `probe/plan/a.ipp`, `instrument/gcc/CMakeLists.txt`, `instrument/llvm/gates.cmake`), 걸리지 않아야 하는 하나(`instrument/llvm/scripts/gates.cmake`, `probe/hold/tests/CMakeLists.txt`).
+- **시험**: 8c 수정 블록 — `Cell.aux`(프로필에 없는 선언된 명령줄 대상, `writers 2 … -> writer-set-complete`), `extract.resource_dir` 네 꼴(내장 기본값의 정확한 글, `--resource-dir`, `--extra-arg -resource-dir=`, 빈 값의 none), `Cell`이 없는 소스의 `--target Cell.id`(unknown-target, 기록은 `profile loc Cell.id`)와 중첩 태그 `Inner.ix`(unknown-target), `--target` 없는 `Cell.id`(프로필 규칙 그대로). 8c 블록: 이유 글 넷을 새 글로, `resource_dir` 확인 하나를 내장 기본값만으로, `Cell.id` 확인의 주석을 프로필 대상이라고.
+- **문서**: SF §5k(지적 #1–#5·#7·#13: 규칙 대상의 `<anonymous>`, 파일 범위만, `Unn.q`, 아홉 golden, 덮는 `-resource-dir`, 대조하지 않음, 상대 경로와 빈 값, 프로필 대상과 같은 `--target`, relations의 두 곳, 시험 문단). schema §19에 8c 수정 줄. `framework_layer.md` §2·§3(지적 #8·#15). ED §8 줄 안 정정(지적 #14). `tests/lint/data/case_identifiers.txt` 머리(지적 #6).
+- 바꾸지 않은 것: `include/`(schema 개정 11, 열거형 그대로), golden 파일, 드라이버와 허용표, 규칙 대상과 프로필에만 있는 대상의 판정, 이름 표(`collect_typedefs`), relations 코드, 예산·등급·조건 값.
+
+### 16.10.3 빌드 [M]
+
+- 손대기 전(`pre_mc.txt`, 09:49:35Z): 일곱 도구가 8c `post_mc.txt`와 같다. kz-instr-clang `28db4017…`도 이번에 적었다.
+- MC 제자리 `make -j4 all`. 첫째(09:49:51Z–09:52:26Z) rc 2: `test_static_cli.cpp:1430`의 지역 변수 `out`이 바깥 것을 가린다(`-Werror=shadow`). kz-static, kz_lint, `libkz-llvm.a`와 다른 static 시험은 이미 링크됐다. 그 줄을 고쳐 둘째(09:52:47Z–09:53:56Z) rc 0, `test_static_cli`만 링크했다(`make.log`). CMake가 다시 구성했다(`instrument/clang/CMakeLists.txt`). libkz-core identity `f6e3c7b4…` 그대로다.
+- 도구 해시:
+
+| 도구 | 전(8c) | 뒤 |
+|---|---|---|
+| kz-static | `ab482eab0fb34aa86e8a839ef35fa8207054ea4b28ff186f5c5079a1cd30b326` | `0024f192980dfbd93e4a662666239c3b4082fcb65f3bd5d25a19fbbfc06d2431` |
+| kz-static tool_sha256 | `b61256c5…` | `3b7de5b7d595d3c0f0042ea8e264d7865835dfa7cbc0524fcdcb2323ede43269` |
+| kz-static tool_source | `c2da0fdc…` | `bbd484360f2a56ad44a2aead276e4c4c9be1066994aee087a9fc08767ac19aab` |
+| kz_lint | `191d0da0…` | `b0f0d6a55153c8c76edb0f6592e1963c593c2b8298fc87ffca44e935d5c9650a` |
+| kz-instr-clang | `28db4017…` | 같음(다시 링크되지 않음) |
+| kz / kz-dump / kz-rt-dump / kz-phi | `931dd39c` / `05623054` / `4390d4f1` / `7d34e6e2` | 같음(다시 빌드되지 않음) |
+| core_source | `f6e3c7b4…` | 같음 |
+
+- 선언대로다. kz-instr-clang은 이번에 전후 해시가 같다 [M]. 그래서 §16.9의 [U] "kz-instr-clang 바이너리의 전후 동일성"은 8b 수정 → 8c 구간에 대해서는 그대로 [U]이고, 8c → 이 단계 구간은 [M]으로 같다.
+- 소스: 빌드 시작 뒤 도구 identity의 파일(`lib`·`tools`·`include`·`cmake`·`CMakeLists.txt`·`probe`·`instrument`·`runtime`)은 바뀌지 않았다(`find -newer` 0). `git diff 1377957 90e423c`의 그 경로는 0줄이다. 그래서 `0024f192`는 `1377957`(= `90e423c`)의 도구 소스다 [M].
+- 공간(`df -B1 /`): 앞 662,728,704 B(09:49:51Z), 가장 낮음 588,574,720 B(09:51:05Z), 뒤 661,970,944 B(09:53:56Z). 기록: `pre_mc.txt`, `post_mc.txt`, `df_build.log`.
+- [U] 바이트 결정성(K9)은 그대로다.
+
+### 16.10.4 시험 [M]
+
+- 전체 ctest(09:54:04Z–09:54:24Z): 239개, 통과 238, 실패 0, 건너뜀 1(`test_probe_anchor_reached`). 라벨 시간 요약: legacy-case 51, unit 84, runtime 66, static 45, golden 58, lint 6, integration 4, instr 1, property 1.
+- 건너뜀의 사유(지적 #11): `ctest -R '^test_probe_anchor_reached$' -V -O`로 `records/step2a-20261110-8cfix/skip_reason.log`에 적었다. 출력은 "observe: not root, no tracefs (KZ_TRACEFS) or no binary: the run part skipped", 확인 74개 통과, 종료 77(건너뜀). 이 기계는 root이고 tailjump 바이너리 둘이 있다. `/sys/kernel/tracing/uprobe_events`가 없고 `KZ_TRACEFS`가 비어 있다. 그래서 까닭은 tracefs가 없는 것이다 [M][F: `test_probe_anchor_reached.cpp:168-173`, `:250`].
+- `test_static_cli` 확인 752개(8c 719, +33). `lint_selftest` 102 경우, 실패 0. `lint_case-ids` clean(범위 안 37 파일, `lint_widened.txt`).
+- golden 파일은 하나도 바뀌지 않았다(`git diff 1c5a093 -- tests/static/data tests/golden/data tests/phi/data` 0, 새 파일 없음).
+- 라벨 수(`labels.txt`, `ctest --show-only=json-v1`의 LABELS): legacy-case 51, 새 경로 188 = static 44 + 나머지 144. 나머지 144의 라벨: runtime 66, unit 63, golden 8, lint 6, integration 3, instr 1, property 1. 합 148, 라벨 둘인 시험 넷(`test_hold_ptrace`·`test_hold_sequence`·`test_probe_observe` unit;integration, `test_probe_golden` golden;unit). unit 84 = 63 + 옛 21. `ctest -N -L '^unit$'`의 87은 fixture 준비 시험 셋(`rt_end_kill`·`rt_end_normal`·`rt_end_segv`, 라벨 runtime)을 더한 수다(지적 #10).
+- 드라이버 단위 점검 6/6(`unit.txt`, 드라이버 `ccbb26f8…` 그대로).
+- 작은 소스로 본 새 도구(`finding_checks.txt` 끝): `nest.c`의 `Inner.ix`는 새 이유 글, `rd.c`의 `extract.resource_dir`는 가짜 디렉터리와 "(--extra-arg -resource-dir, after and over the tool's: …)", `o2.c`의 `Cell.id`는 unknown-target이고 기록은 `profile loc Cell.id`다.
+
+### 16.10.5 재실행 [M]
+
+- 앞서 공간을 비웠다(§16.10.0, `pack.txt`): scratchpad의 scratch 사본 여덟(`v8b`, `fix3b`, `t7`, `v`, `T`, `s3`, `c5_642`, `verify3`; 793 파일, 226,922,496 B)을 xz로 묶었다(12.5 MB). 파일마다의 sha256을 압축본에서 스트림으로 다시 내어 같음을 본 뒤에 원본을 지웠다. 여유 448,630,784 → 662,777,856 B. 2a 로그(ctest 등)와 RD·EB·CK·PV·T/·빌드 트리·cFS 트리는 건드리지 않았다.
+- 명령: `env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8c_fix`. 09:56:06Z–10:00:52Z. 허용표는 내장 그대로다.
+- rc: `all` 0, `result all: PASS`. 열 단계 모두 PASS, FAIL 줄 0. `twice` 다섯 빌드 모두 same.
+- 소스: `repo 90e423c…`, `kairos_uncommitted_lines=0`.
+- identity: 18 판정 모두 PASS. 변경 수는 `T_8C/`와 같다: basis 1/0/0, facts는 C1 pre tx V2가 4/2/4, 다른 다섯 경우가 4/2/0. show 글의 8c 줄도 같다. C1 pre tx V2의 프로필 대상과 같은 `--target` 셋은 선언이 있었다. FACT_LOCS와 BASIS가 그대로다(아래 비교). 조건 항목은 쓰이지 않았다.
+- 드라이버 비교 다섯의 출력 글은 `T_8C/`와 바이트 동일하다. 그래서 변경 수는 §16.6과 같다.
+- `unknown-target`·`unknown_target`은 어느 출력에도 없다(grep 0).
+- 공간: 앞 661,454,848 B(09:56:06Z), 가장 낮음 436,219,904 B(09:59:32Z), 뒤 458,211,328 B(10:00:52Z). `T_8CF/`는 202,212,496 B, 149 파일, `sha256.txt` 136줄(sha256 `e7949053…`). T/, `T_RV4/`, `T_8B/`, `T_8BF/`, `T_8C/`는 실행 뒤에도 제 `sha256.txt`와 맞는다(rc 0). 300 MB 아래로 가지 않았다.
+
+### 16.10.6 비교: 모든 파일, 가림 없음 [M]
+
+`compare_8cfix.py`(기록 디렉터리)는 `compare_8c.py`와 같다(머리 주석 두 줄만 다름). 결과 `compare_8cfix.tsv`:
+
+| 기준 | same | DIFF | 한쪽에만 |
+|---|---|---|---|
+| `T_8C/` | 39 | 110 | 0 |
+| `T_8BF/` | 34 | 115 | 0 |
+| T/ | 29 | 108 | 12(§16.7과 같음) |
+| `T_RV4/` | 34 | 115 | 0 |
+
+- `T_8C/` 대비 DIFF 110줄을 모두 읽었다. 모두 §16.10.0에 든다. 이번에는 선언의 틀림과 빠짐이 없다:
+  - basis.kz 11(NP 5, identity 6): HEADER `tool_sha256`·`artifact_sha256`만.
+  - facts.kz 16(NP 5, NP2 5, identity 6): HEADER `tool_sha256`·`basis_sha256`·parent·`artifact_sha256`, 섹션 줄은 STRINGS crc32 하나, 레코드는 BASIS `extract.units_from` 하나. 컨테이너 크기와 다른 섹션의 crc32·레코드는 같다.
+  - 글: basis.txt 11(해시 줄: NP C1·R2 1째, C5 5째; identity C1·R2 1째, C5 V0 5째, C5 V2 7째), extract.txt 21(`facts` 줄: 1째, identity C5 V2 3째), relations.txt 10(2째 줄), facts.txt 11(`extract.units_from` 한 줄), facts.dump.diff 6(넷: `basis_sha256`, parent, STRINGS crc32, `units_from`), show.diff 6(`units_from` 줄), `count/summary.txt` 1(487–491째 줄, T7 다섯), 디렉터리별 sha256.txt 11, 실행 기록(`run.log`, `status.txt`, `identity/identity.txt`, 최상위 `sha256.txt`), twice.txt·twice_detail.txt(해시 줄).
+  - `identity/identity.txt`: 머리(시각, `repo`, `tool_sha256`, `tool_source`)와 parent `sha256`·`units_from` 값이 든 줄뿐이다.
+- same 39: args.txt(NP 5, identity 6), relations.log 10, count/ tsv 일곱, 드라이버 비교 출력 다섯(npsame.txt … fix3same.txt), identity basis.dump.diff 6.
+- `T_8BF/`·T/·`T_RV4/` 대비: (같음/DIFF/한쪽, 파일)의 짝이 §16.7의 `compare_8c.tsv`와 하나도 다르지 않다 [M]. 그래서 그 기준들과의 차이는 §16.7과 같고, 값만 이 도구의 해시다.
+
+### 16.10.7 판정과 수
+
+- 판정 입력(tsv 일곱)이 T/, `T_RV4/`, `T_8B/`, `T_8BF/`, `T_8C/`와 바이트 동일하다 [M]. 판정은 그대로다 [I]: T1 PASS(개정 뒤 통과, "관계를 낸다"의 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6 PASS, T7 PASS.
+- 수(`burden.tsv`) [M]: `proven-impossible` 0 / 0 / 0 / 6 / 14, `not graded` 1 / 1 / 5 / 14 / 14, `undecidable` 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0. 행 431 / 431 / 338 / 178 / 175, 합 1,553.
+- 두 계수(8b): 다섯 빌드 모두 `image_budget_exhausted` 0, `image_leaves_omitted` 0이다.
+- T7의 새 해시(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642): facts `0d7954fa…`, `821e3a9e…`, `6c7b7a3a…`, `e95bf36c…`, `c30e744f…`; relations `936cd6c8…`, `00b57eb2…`, `fc8ea8da…`, `1d4af508…`, `34ac45f1…`(`twice.txt`).
+- lint 세 묶음(`lint_groups.txt`, 사본): 합 2,451 → 2,450. 묶음 1 374, 묶음 2 75는 그대로다. 묶음 3의 빌드 파일이 12 → 11이다(`instrument/clang/CMakeLists.txt` 1 → 0; 남은 11은 `runtime/CMakeLists.txt`, lint 범위 밖). 묶음 3은 2,002 → 2,001이다.
+
+### 16.10.8 앞 절과 보고의 정정
+
+- §16.0(선언, 고치지 않음)의 정정 둘: (1) "`tests/golden/data/layout.golden:1889-1891`"은 1889–1892다(열거형 머리부터 DISABLED까지; 값만이면 1890–1892) (지적 #15). (2) O2 설계는 검사를 명령줄 대상에만 둔다. 규칙 대상(`--targets-rule`)도 빠진다는 것을 적지 않았다. SF §5k는 그 까닭을 "규칙 대상은 늘 선언이 있다"고 적었다. 틀렸다: 규칙 대상도 어느 레코드에도 맞지 않는 이름(`<anonymous>`)일 수 있다. 그래서 같은 결함이 규칙 대상에도 있다(지적 #1, §16.10.1).
+- §16.1 O2 행: "fixture 다섯(atype, loops, outptr, relations, clobber) … 넷은 writer-set-complete"는 틀렸다. 아홉이다: `[locs]`와 요약 줄이 writer-set-complete인 다섯(atype, loops, outptr, relations, spawn), 요약 줄만인 셋(argflow, flowfacts, lockset), DISABLED인 clobber. "옛 경로 golden 다섯이 바뀐다"는 "아홉 이상"이다(지적 #3·#9).
+- §16.4: "건너뜀 1(…, 사유는 LastTest.log)"의 그 파일에는 사유가 없다. 사유는 `skip_reason.log`다(§16.10.4). "unit 66(…)"은 63이다. "이 합(151)은 144보다 7 크다"는 "합 148, 겹침 4"다(라벨 둘인 시험 넷). "차이 3의 까닭은 찾지 않았다 [U]"는 [M]으로 풀렸다: `-N -L`이 fixture 준비 시험 셋을 끌어온다(지적 #10). `records/step2a-20261110-8c/labels.txt` 끝에 정정 주석을 더했다.
+- §16.7 "선언의 틀림과 빠짐"에 다섯째: identity 디렉터리의 basis.kz·facts.kz HEADER, basis.txt·extract.txt의 해시 줄(C5 V2는 7째, 3째), facts.txt의 BASIS 줄과 npsame/<b>/extract.txt 1째 줄(30 + 5줄)은 `T_8BF/` 대비로 선언되지 않았다. §16.0은 identity를 EB 대비 레코드 수와 show 글 수로만 적었다. "아래 말고는 모두 §16.0에 든다"는 그만큼 넘쳤다(지적 #12). `declared_before_build.txt`는 그대로다.
+- §16.0·§16.2·보고의 O12 정정: 명령줄 대상의 둘째 기록이 없어져 relations의 "hand-entered vocabulary on the command line" 수가 대상마다 2 → 1이 된다. 행마다의 layers 칸(`hand-entered:command-line(N items; …)`)도 같다. 2a 출력에는 보이지 않는다(relations는 명령줄 대상이 있는 identity facts에서 돌지 않음). §16.0에 없었고, 보고는 extract 요약의 수가 그대로라는 것만 적었다(지적 #13).
+- §16.9의 "O9의 남는 것: C5 판(OSAL 4.1.1)의 표 행"은 틀렸다. 4.1.1 열은 표에 이미 있다. 남은 것은 C5용 어댑터 항목이다(어댑터는 4.1.1 헤더와 맞지 않음) (지적 #14). ED §8은 줄 안에서 고쳤다.
+- §16.9의 [U] "ctest 라벨 시간 요약의 unit 84와 `-N`의 87의 차이"는 거둔다(위). §16.9의 O2 남는 결함 목록에 규칙 대상의 `<anonymous>`와 중첩·블록 태그를 더한다(§16.10.9).
+- `framework_layer.md`(이 단계의 새 파일이라 제자리에서 고침): `osal_id_t` 행은 두 갈래(`OSAL_OMIT_DEPRECATED`이면 `common_types.h:98-101`의 struct, 아니면 `:108`의 `uint32`; d2d877a도 같음)이고, `OS_time_t` f34759d는 `osapi-clock.h:45-48`이다(지적 #8·#15).
+- 8c 보고의 정정: (1) "four fixture goldens" → 아홉(위). (2) 테스트 주석 "a declared command-line target keeps the rule"의 `Cell.id`는 프로필 대상이다. 명령줄에만 있는 선언된 대상은 identity 실행만 덮었다. 이번에 `Cell.aux`를 더했다(지적 #16). (3) "unit = 84, while -N gives 87. I did not find the cause" → 위의 까닭. (4) "Still open: C5 rows for the OSAL table" → C5용 어댑터 항목.
+- AR §2(108째 줄)와 STATUS §5 첫 문단(그때 61째 줄; STATUS 개정 6이 머리말에 한 줄을 더해 지금 62째 줄)의 "사유는 LastTest.log"는 `skip_reason.log`를 가리키게 줄 안에서 고쳤다.
+
+### 16.10.9 남는 것
+
+- O2의 남는 결함 셋. 모두 고치면 출력이 바뀌므로 따로 선언하고 빌드한다:
+  - 규칙 대상의 `<anonymous>`(지적 #1): 2a NP에 3/3/2/0/0개. writers 0으로 complete가 될 수 있다. 루프 행과 relations에는 닿지 않는다.
+  - 중첩·블록 태그(지적 #2): 이름 표에 없다. 명령줄 대상은 unknown-target(안전한 쪽), 프로필·규칙 대상은 complete가 될 수 있다.
+  - 프로필에만 있는 대상: 선언이 없어도 complete다. 고치면 옛 경로 golden 아홉 이상이 바뀐다. 결정은 B4·A6의 옛 경로 정리와 함께다.
+- `Unn.q`의 규칙(이름 없는 형의 멤버 안 필드를 감싼 레코드의 필드로 봄)은 writer 맞춤의 성질이다. 바꾸지 않았다.
+- `extract`는 읽기 옵션을 basis의 `front_end.arguments_added`와 대조하지 않는다. 문서에 적었다. 대조는 하지 않았다.
+- lint의 한계(문자열 이어 붙이기, 토큰 붙이기, 이스케이프, 정규식 항목의 대소문자, 앞 4 KiB의 NUL)는 data 머리에 적었다. 고치지 않았다.
+- O9의 남는 것: C5용 어댑터 항목, runtime의 그 밖 코드 25건, `OS_TimeGetTotalNanoseconds` 본문 대조 [U], `osal_id_t`의 실제 갈래 [U].
+- [U] 바이트 결정성(K9). [U] kz-instr-clang의 8b 수정 → 8c 구간(이번 구간은 같음 [M]).
+- 기존 문제(지적 밖): `kairos/tests/static/profile/00_fixture.kzp`의 `authored` 줄에 모델 식별자가 있다. 파일에 모델 식별자를 두지 않는 규칙에 어긋난다. fixture 프로필의 입력이라 고치면 프로필 해시와 그것을 적는 출력이 바뀐다. 이 단계에서는 고치지 않았다. lead가 정한다.
+- 하지 않은 것: E1(Q4), ③ 소비자 규칙, PD A3:173·부록 C:1009·S3:215 문구, B8, B4, CM:42. push하지 않았다.
+- `T_8CF/`(202 MB), `T_8C/`, `T_8BF/`, `T_8B/`는 지우지 않았다. CM §5의 보존이 아니다. scratchpad의 압축본 여덟은 그 자리에 둔다.
+- 커밋: 선언 `08a3632`, 스냅숏 `1377957`(lead), 시험 한 줄 `90e423c`, 이 절과 기록은 그다음 커밋이다(모두 "kz-static 8c/fix:").

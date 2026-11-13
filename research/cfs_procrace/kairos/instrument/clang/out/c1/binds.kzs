@@ -1,0 +1,30 @@
+kzs-sites 1
+# bindings of clang-src-0.1 for the logical sites of /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/clang/sites/c1_post_1df262a.kzs (kz-instr-clang)
+bind 196609 site=20 backend=clang-src-0.1 module=3 at="bp_flow.c:126:13 initialize_throttling->OS_CountSemGetIdByName call-site-wrapper before; machine code inlined into BP_FlowInit (hook_census.txt)" status=inlined vals=0x3
+bind 196610 site=21 backend=clang-src-0.1 module=3 at="bp_flow.c:126:13 initialize_throttling->OS_CountSemGetIdByName call-site-wrapper after; machine code inlined into BP_FlowInit (hook_census.txt)" status=inlined vals=0x3
+bind 196611 site=22 backend=clang-src-0.1 module=3 at="bp_flow.c:132:18 initialize_throttling->OS_CountSemCreate call-site-wrapper before; machine code inlined into BP_FlowInit (hook_census.txt)" status=inlined vals=0x7
+bind 196612 site=23 backend=clang-src-0.1 module=3 at="bp_flow.c:132:18 initialize_throttling->OS_CountSemCreate call-site-wrapper after; machine code inlined into BP_FlowInit (hook_census.txt)" status=inlined vals=0x3
+bind 196613 site=24 backend=clang-src-0.1 module=3 at="bp_flow.c:519:7 BP_FlowInit callee-returns 2/2" status=bound vals=0x1
+bind 131073 site=14 backend=clang-src-0.1 module=2 at="cf_app.c:206:7 CF_Init callee-returns 1/1" status=bound vals=0x1
+bind 131074 site=15 backend=clang-src-0.1 module=2 at="cf_app.c:366:5 CF_AppMain->CFE_ES_ExitApp call-site-wrapper before" status=bound vals=0x1
+bind 131075 site=10 backend=clang-src-0.1 module=2 at="cf_cfdp.c:1003:23 CF_CFDP_InitEngine->OS_CountSemGetIdByName call-site-wrapper before" status=bound vals=0x3
+bind 131076 site=11 backend=clang-src-0.1 module=2 at="cf_cfdp.c:1003:23 CF_CFDP_InitEngine->OS_CountSemGetIdByName call-site-wrapper after" status=bound vals=0x3
+bind 131077 site=12 backend=clang-src-0.1 module=2 at="cf_cfdp.c:1011:17 CF_CFDP_InitEngine->OS_TaskDelay call-site-wrapper after" status=bound vals=0x1
+bind 131078 site=13 backend=clang-src-0.1 module=2 at="cf_cfdp.c:952:7 CF_CFDP_InitEngine callee-returns 1/1" status=bound vals=0x1
+bind 65537 site=40 backend=clang-src-0.1 module=1 at="cfe_es_api.c:340:6 CFE_ES_ExitApp callee-entry" status=bound vals=0x1
+bind 65538 site=43 backend=clang-src-0.1 module=1 at="cfe_es_api.c:1247:14 CFE_ES_CreateChildTask callee-entry" status=bound vals=0x3
+bind 65539 site=44 backend=clang-src-0.1 module=1 at="cfe_es_api.c:1247:14 CFE_ES_CreateChildTask callee-returns 1/1" status=bound vals=0x3
+bind 65540 site=41 backend=clang-src-0.1 module=1 at="cfe_es_apps.c:576:7 CFE_ES_StartAppTask callee-entry" status=bound vals=0x7
+bind 65541 site=42 backend=clang-src-0.1 module=1 at="cfe_es_apps.c:576:7 CFE_ES_StartAppTask callee-returns 1/1" status=bound vals=0x3
+bind 65542 site=30 backend=clang-src-0.1 module=1 at="osapi-countsem.c:204:7 OS_CountSemGetIdByName callee-entry" status=bound vals=0x5
+bind 65543 site=31 backend=clang-src-0.1 module=1 at="osapi-countsem.c:204:7 OS_CountSemGetIdByName callee-returns 1/3" status=bound vals=0x3 reason="2 return path(s) inside macro expansions are not instrumented"
+bind 65544 site=32 backend=clang-src-0.1 module=1 at="osapi-countsem.c:212:19 OS_CountSemGetIdByName->OS_ObjectIdFindByName call-site-wrapper before" status=bound vals=0x3
+bind 65545 site=33 backend=clang-src-0.1 module=1 at="osapi-countsem.c:212:19 OS_CountSemGetIdByName->OS_ObjectIdFindByName call-site-wrapper after" status=bound vals=0x3
+bind 65546 site=35 backend=clang-src-0.1 module=1 at="osapi-countsem.c:83:7 OS_CountSemCreate callee-entry" status=bound vals=0xd
+bind 65547 site=36 backend=clang-src-0.1 module=1 at="osapi-countsem.c:83:7 OS_CountSemCreate callee-returns 1/4" status=bound vals=0x3 reason="3 return path(s) inside macro expansions are not instrumented"
+bind 65548 site=37 backend=clang-src-0.1 module=1 at="osapi-countsem.c:106:23 OS_CountSemCreate->OS_ObjectIdFinalizeNew call-site-wrapper before" status=bound vals=0x1
+bind 65549 site=38 backend=clang-src-0.1 module=1 at="osapi-countsem.c:106:23 OS_CountSemCreate->OS_ObjectIdFinalizeNew call-site-wrapper after" status=bound vals=0x3
+bind 65550 site=34 backend=clang-src-0.1 module=1 at="osapi-idmap.c:978:20 OS_ObjectIdFindByName store-operand" status=bound vals=0x1
+bind 65551 site=45 backend=clang-src-0.1 module=1 at="osapi-task.c:164:7 OS_TaskCreate callee-entry" status=bound vals=0x7
+bind 65552 site=46 backend=clang-src-0.1 module=1 at="osapi-task.c:164:7 OS_TaskCreate callee-returns 1/6" status=bound vals=0x7 reason="5 return path(s) inside macro expansions are not instrumented"
+bind 65553 site=47 backend=clang-src-0.1 module=1 at="osapi-task.c:124:6 OS_TaskEntryPoint callee-entry" status=bound vals=0x1

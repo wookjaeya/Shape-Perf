@@ -1,0 +1,4 @@
+# 00_source.kzp -- CF 281a941 (D22: the parent of the fix; plan/C1_build_manifest.md 1).
+phi 1;
+
+source cf root "cf" rev "281a94188cd7d885a5aed01ee041f3ece2b0486f";

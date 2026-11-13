@@ -1,0 +1,7 @@
+bundle=env-20261029-survey
+created_utc=2026-10-29T01:40:36.462Z
+repo_commit=be0e7dac632a8aad1d1ea21cec599b40083a6a28
+kernel=6.18.44-fc-v185
+source=/home/user/work/env_20261029/env_survey files=5 bytes=117275
+tar_xz_bytes=21880 parts=1
+note=state of the new session container before any rebuild (PD29 A8)

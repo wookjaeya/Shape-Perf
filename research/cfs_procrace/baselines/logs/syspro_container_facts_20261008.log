@@ -1,0 +1,86 @@
+# container facts for SysPro, 2026-10-08T01:33:50Z
+## uname -a
+Linux vm 6.18.44-fc-v80 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+## /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+VERSION_ID="24.04"
+## nproc / lscpu model
+4
+model name	: Intel(R) Xeon(R) Processor @ 2.10GHz
+avx2 avx512f 
+## free -m
+               total        used        free      shared  buff/cache   available
+Mem:           16094         931        1576          15       13951       15163
+## df -h /home/user/work /
+/dev/vda        252G   35G  2.7G  93% /
+/dev/vda        252G   35G  2.7G  93% /
+## /proc/modules
+ls: cannot access '/proc/modules': No such file or directory
+head: cannot open '/proc/modules' for reading: No such file or directory
+/bin/bash: line 1: /proc/modules: No such file or directory
+(lines: )
+## CapEff decode
+CapInh:	0000000000000000
+CapPrm:	000001fffeffffff
+CapEff:	000001fffeffffff
+CapBnd:	000001fffeffffff
+CapAmb:	0000000000000000
+cap_sys_module
+cap_sys_ptrace
+cap_sys_admin
+cap_sys_boot
+## yama ptrace_scope
+cat: /proc/sys/kernel/yama/ptrace_scope: No such file or directory
+## kernel config: CONFIG_MODULES
+# CONFIG_MODULES is not set
+## tools present
+gdb      /usr/bin/gdb
+strace   /usr/bin/strace
+java     /usr/bin/java
+javac    /usr/bin/javac
+python3  /usr/local/bin/python3
+pip3     /usr/bin/pip3
+srcml    MISSING
+gcc      /usr/bin/gcc
+g++      /usr/bin/g++
+make     /usr/bin/make
+cmake    /usr/bin/cmake
+git      /usr/bin/git
+Python 3.11.15
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+## python modules nltk/gensim
+ModuleNotFoundError: No module named 'nltk'
+ModuleNotFoundError: No module named 'gensim'
+## PIN present?
+ls: cannot access '/opt/pin*': No such file or directory
+ls: cannot access '/usr/local/pin*': No such file or directory
+pin: MISSING
+## ptrace check: strace -f -e trace=clone,execve,openat /bin/true (first lines)
+execve("/bin/true", ["/bin/true"], 0x7ffe73ac4c38 /* 150 vars */) = 0
++++ exited with 0 +++
+exit=0
+## gdb batch run
+[Inferior 1 (process 11239) exited normally]
+  Num  Description       Connection           Executable        
+* 1    <null>                                 /usr/bin/true     
+## kexec_load / reboot capability (not attempted to boot; syscall probe only)
+kexec_load -> -1 ENOSYS
+## /dev/kvm
+ls: cannot access '/dev/kvm': No such file or directory
+## reachability only (no download, no version chosen) 2026-10-08T01:33:59Z
+https://www.intel.com/content/www/us/en/developer/articles/tool/pin-a-binary-instrumentation-tool-downloads.html -> 000
+https://software.intel.com/sites/landingpage/pintool/docs/98484/Pin/html/group__SYSCALL.html -> 000
+https://www.srcml.org/ -> 000
+https://pypi.org/simple/gensim/ -> 200
+https://www.philippe-fournier-viger.com/spmf/ -> 000
+## java -version
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=38291 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+openjdk version "21.0.10" 2026-01-20
+OpenJDK Runtime Environment (build 21.0.10+7-Ubuntu-124.04)
+OpenJDK 64-Bit Server VM (build 21.0.10+7-Ubuntu-124.04, mixed mode, sharing)
+## man2 pages present
+ls: cannot access '/usr/share/man/man2': No such file or directory
+## linux-libc-dev
+6.8.0-106.106
+## glibc
+2.39-0ubuntu8.9

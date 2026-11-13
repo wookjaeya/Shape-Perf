@@ -1,0 +1,23 @@
+# MC tools before the 8b fix rebuild (2026-11-10T08:00:43Z); they must equal the 8b post_mc.txt values
+7ef1a28c8fccc0e19553b55a5c7ad644777cf3866064ac4f6ea08cec84e44bf9  tools/kz-static/kz-static
+b254483e25873902ec6408b1764c7e9b71238fe4c400e237ae49f88f55fc824c  tools/kz/kz
+05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43  tools/kz-dump/kz-dump
+4390d4f13b5bcae3145ddd4b3decb089790d18d6ebbdc3104de99beb66e5063a  runtime/kz-rt-dump
+7d34e6e20934c62b91f006c20712b7a096692b231d318257b096eb22dc68075f  tools/kz-phi/kz-phi
+# kz-static --identity (before)
+tool=kz-static
+tool_sha256=add6cb73caf00d01634f85239d4e0ca66bd6f123a86ae6354cd0e2e05ebd491e
+tool_source=a1cc829a65aa16f09c8466fd1233bf8a009f2b9f29f55c59c874a203731c7771
+core_source=f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+# repository
+HEAD=ea4e406
+uncommitted lines under kairos (git diff -- kairos | wc -l): 298
+ research/cfs_procrace/kairos/docs/schema.md        |  3 +-
+ research/cfs_procrace/kairos/docs/static_facts.md  | 12 +++-
+ research/cfs_procrace/kairos/lib/llvm/ast_tu.cpp   | 18 +++++-
+ research/cfs_procrace/kairos/lib/llvm/finalize.cpp | 31 +++++++++-
+ .../kairos/tests/static/CMakeLists.txt             |  7 ++-
+ .../kairos/tests/static/static_golden.cpp          |  3 +
+ .../kairos/tests/static/test_static_cli.cpp        | 72 ++++++++++++++++++++++
+ .../kairos/tests/static/test_static_flow.cpp       | 20 ++++++
+ 8 files changed, 156 insertions(+), 10 deletions(-)

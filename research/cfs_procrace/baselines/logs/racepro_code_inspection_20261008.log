@@ -1,0 +1,129 @@
+# date: 2026-10-08T01:19:46Z
+# pinned revisions (all equal to upstream HEAD per git ls-remote, see racepro_source_fetch_20261008.log)
+racepro 681f94e39bf5049e24fd2641099001f5246a7b6d Tue Aug 23 03:34:18 2011 -0400
+racepro-bundle 72e9c55dc5c05354dff31820d2ba57b2917b806c Fri May 6 14:13:55 2011 -0400
+libscribe-racepro 011b64426dbd7d3f9185a8d2b61b0c476ec5164c Tue Aug 23 03:32:25 2011 -0400
+py-scribe-racepro 56d6187eafd7ec2d650099c7d7afd6130d4c5bff Tue Aug 23 03:32:43 2011 -0400
+linux-2.6-racepro b29e9afb4dae248e83aeb58482fb60013017576f Fri Aug 26 18:52:34 2011 -0400
+
+## bundle submodule pins (racepro-bundle 72e9c55)
+160000 commit 1542c634151c765b49d5e54990b6a218e4d5a625	libscribe
+160000 commit e5c7bc242167f8dae1d4306f236a346a57bf2b7d	linux-2.6-scribe
+160000 commit 7631c545d76b536a0be7b717eb976aea43481947	py-scribe
+
+## version coupling: SCRIBE_REAPED
+racepro/racepro/execgraph.py:124:                    if pid & scribe.SCRIBE_REAPED:
+racepro/racepro/execgraph.py:125:                        return pid & ~scribe.SCRIBE_REAPED
+libscribe-racepro/include/linux/scribe_api.h:102:#define SCRIBE_REAPED			0x80000000
+py-scribe-racepro/src/scribe/constants.pxi:43:SCRIBE_REAPED                 = scribe_api.SCRIBE_REAPED
+linux-2.6-racepro/include/linux/scribe_api.h:116:#define SCRIBE_REAPED			0x80000000
+SCRIBE_REAPED in bundle libscribe pin 1542c63: 0 files
+
+## kernel version / config
+VERSION = 2
+PATCHLEVEL = 6
+SUBLEVEL = 35
+EXTRAVERSION =
+3:# Linux kernel version: 2.6.35
+6:# CONFIG_64BIT is not set
+7:CONFIG_X86_32=y
+70:CONFIG_LOCALVERSION="-scribe"
+1609:CONFIG_SCRIBE=y
+
+## Scribe diff base..HEAD: arch files
+arch/x86/Kconfig
+arch/x86/include/asm/checksum_32.h
+arch/x86/include/asm/mmu_context.h
+arch/x86/include/asm/pgtable_32.h
+arch/x86/include/asm/scribe.h
+arch/x86/include/asm/uaccess.h
+arch/x86/include/asm/uaccess_32.h
+arch/x86/include/asm/unistd_32.h
+arch/x86/kernel/dumpstack.c
+arch/x86/kernel/entry_32.S
+arch/x86/kernel/process.c
+arch/x86/kernel/signal.c
+arch/x86/kernel/syscall_table_32.S
+arch/x86/kernel/traps.c
+arch/x86/kernel/tsc.c
+arch/x86/lib/usercopy_32.c
+arch/x86/mm/mmap.c
+arch/x86/mm/pgtable.c
+ipc/mqueue.c in diff: 0
+
+## Scribe resource types
+ */
+
+enum scribe_resource_type {
+	SCRIBE_RES_TYPE_INODE,
+	SCRIBE_RES_TYPE_FILE,
+	SCRIBE_RES_TYPE_FILES_STRUCT,
+	SCRIBE_RES_TYPE_PID,
+	SCRIBE_RES_TYPE_FUTEX,
+	SCRIBE_RES_TYPE_IPC,
+	SCRIBE_RES_TYPE_MMAP,
+	SCRIBE_RES_TYPE_PPID,
+	SCRIBE_RES_TYPE_SUNADDR,
+	SCRIBE_RES_NUM_TYPES
+};
+#endif /* CONFIG_SCRIBE */
+
+## RacePro race classes and filters
+19:class Race:
+43:class RaceList:
+96:class RaceResource(Race):
+194:        ignore_type = [ scribe.SCRIBE_RES_TYPE_FUTEX ]
+218:                _split_events_per_proc(resource, in_syscall=True)
+251:                        if node1.write_access == 0 and node2.write_access == 0:
+308:class RaceSignal(Race):
+396:class RaceExitWait(Race):
+572:class RaceToctou(Race):
+631:            events_per_proc = _split_events_per_proc(resource, in_syscall=True)
+692:def find_show_races(graph, args):
+696:    # step 1: find resource races
+705:    # step 2: find exit-exit-wait races
+714:    # step 3: find signal races
+723:    # step 4: statistics
+777:    # step 1: find toctou races
+782:    # step 2: statistics
+
+## HB edges in execution graph
+74:        self._dependency_ps()
+75:        self._dependency_fifo()
+76:        self._dependency_signal()
+129:    def _dependency_ps(self):
+132:            self.add_edge(node, child.first_anchor, label='fork')
+137:            self.add_edge(child.last_anchor, node, label='exit')
+139:    def _dependency_fifo(self):
+169:                        self.add_edge(write_sys, read_sys, label='fifo')
+182:    def _dependency_signal(self):
+186:            self.add_edge(sig.send.syscall, recv_syscall, label='signal')
+
+## fork/exit/wait syscall sets (i386 numbers)
+31:NR_exit                   = 1
+32:NR_fork                   = 2
+150:NR_clone                  = 120
+220:NR_vfork                  = 190
+279:NR_exit_group             = 252
+373:SYS_fork       = set([NR_fork, NR_clone, NR_vfork])
+374:SYS_exit       = set([NR_exit, NR_exit_group])
+375:SYS_wait       = set([NR_waitpid, NR_wait4, NR_waitid])
+
+## memory events referenced by racepro analysis?
+0
+
+## replay outcome classification
+213:                    print(verbose + 'replay deadlock')
+218:                    print(verbose + 'replay diverge (%d)' % derr.err)
+237:                print(verbose + 'BUG REPRODUCED')
+239:                print(verbose + 'BUG not triggered')
+
+## python2-only constructs in racepro
+/home/user/work/procrace/baselines/racepro/racepro/racepro/racecore.py:66:        return ifilter(lambda e: hasattr(e, 'syscall'), events)
+/home/user/work/procrace/baselines/racepro/racepro/racepro/racecore.py:69:        return ifilter(lambda n: n.proc == proc, events)
+/home/user/work/procrace/baselines/racepro/racepro/racepro/racecore.py:81:    return dict((k, list(v)) for k,v in d.iteritems())
+/home/user/work/procrace/baselines/racepro/racepro/racepro/racecore.py:129:        resources1 = ifilter(event_is_resource, self.node1.children)
+/home/user/work/procrace/baselines/racepro/racepro/racepro/racecore.py:130:        resources2 = ifilter(event_is_resource, self.node2.children)
+
+## modern glibc minimum kernel (binary built here)
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/m32: ELF 32-bit LSB pie executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, BuildID[sha1]=429eced2e4cda6fc241fa4538dc16633ed41fd60, for GNU/Linux 3.2.0, not stripped

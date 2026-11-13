@@ -1,0 +1,457 @@
+# compare_8bfix.py: /home/user/work/redesign/step2a/tests_8b_fix against /home/user/work/redesign/step2a/tests_8b /home/user/work/redesign/step2a/tests /home/user/work/redesign/step2a/tests_rv4
+# tests DIFF 108
+# tests ONLY 12
+# tests same 29
+# tests_8b DIFF 110
+# tests_8b ONLY 1
+# tests_8b same 39
+# tests_rv4 DIFF 115
+# tests_rv4 same 34
+same	tests_8b	c1_post_tx/NP/args.txt	bytes
+DIFF	tests_8b	c1_post_tx/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	c1_post_tx/NP/basis.txt	1 lines differ: 1; e.g. line 1: basis d6407ad4cba7d4991a2ffe670a8edc3ab3bcde84268537ad3da83cf38151efa9 -> basis 7c7edf1de4c68e3f77e2b2c72d89bc8ddbc7e3b1c6208c3de4e9f14f9a589a2c
+DIFF	tests_8b	c1_post_tx/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts 4006157eb1b81116fa35753b7232fea59b55c1ffd4addc94e7f66e9d88df8356 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+DIFF	tests_8b	c1_post_tx/NP/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	c1_post_tx/NP/facts.txt	1 lines differ: 462; e.g. line 462:   extract.units_from = basis d6407ad4cba7d499  (unset) ->   extract.units_from = basis 7c7edf1de4c68e3f  (unset)
+same	tests_8b	c1_post_tx/NP/relations.log	bytes
+DIFF	tests_8b	c1_post_tx/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts 4006157eb1b81116fa35753b7232fea59b55c1ffd4addc94e7f66e9d88df8356 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+DIFF	tests_8b	c1_post_tx/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: d6407ad4cba7d4991a2ffe670a8edc3ab3bcde84268537ad3da83cf38151efa9  basis.kz -> 7c7edf1de4c68e3f77e2b2c72d89bc8ddbc7e3b1c6208c3de4e9f14f9a589a2c  basis.kz
+DIFF	tests_8b	c1_post_tx/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts 4006157eb1b81116fa35753b7232fea59b55c1ffd4addc94e7f66e9d88df8356 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+DIFF	tests_8b	c1_post_tx/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+same	tests_8b	c1_post_tx/NP2/relations.log	bytes
+DIFF	tests_8b	c1_post_tx/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts 4006157eb1b81116fa35753b7232fea59b55c1ffd4addc94e7f66e9d88df8356 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+same	tests_8b	c1_pre_tx/NP/args.txt	bytes
+DIFF	tests_8b	c1_pre_tx/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	c1_pre_tx/NP/basis.txt	1 lines differ: 1; e.g. line 1: basis 9affc4bea00e2cdabfe3d2944c06039e715ee7f9d87c6cb0bb27580c67b4dad8 -> basis 80695ebbd704233026906f16dca65b72c0a5c31bb67280a7e58d664fe4e57381
+DIFF	tests_8b	c1_pre_tx/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts c898f2dc8ab63e3c327e6ee4cae4e3b7c87f1df8d7a894baab29f23c74df58ba -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+DIFF	tests_8b	c1_pre_tx/NP/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	c1_pre_tx/NP/facts.txt	1 lines differ: 462; e.g. line 462:   extract.units_from = basis 9affc4bea00e2cda  (unset) ->   extract.units_from = basis 80695ebbd7042330  (unset)
+same	tests_8b	c1_pre_tx/NP/relations.log	bytes
+DIFF	tests_8b	c1_pre_tx/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts c898f2dc8ab63e3c327e6ee4cae4e3b7c87f1df8d7a894baab29f23c74df58ba -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+DIFF	tests_8b	c1_pre_tx/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 9affc4bea00e2cdabfe3d2944c06039e715ee7f9d87c6cb0bb27580c67b4dad8  basis.kz -> 80695ebbd704233026906f16dca65b72c0a5c31bb67280a7e58d664fe4e57381  basis.kz
+DIFF	tests_8b	c1_pre_tx/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts c898f2dc8ab63e3c327e6ee4cae4e3b7c87f1df8d7a894baab29f23c74df58ba -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+DIFF	tests_8b	c1_pre_tx/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+same	tests_8b	c1_pre_tx/NP2/relations.log	bytes
+DIFF	tests_8b	c1_pre_tx/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts c898f2dc8ab63e3c327e6ee4cae4e3b7c87f1df8d7a894baab29f23c74df58ba -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+same	tests_8b	c5_641/NP/args.txt	bytes
+DIFF	tests_8b	c5_641/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	c5_641/NP/basis.txt	1 lines differ: 5; e.g. line 5: basis 2907ce70143b6a0e8f07b4b54ead167c143575b78d5ee449041d72b83803b3f4 -> basis 15b543071339d9b43cca0ed46172284649d356b76617cb67dd08d08a7d626c8c
+DIFF	tests_8b	c5_641/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts 6d1e9d5de63f0ce2708b044c4b312d9aecdfe873e0c17a594056d373b3131385 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+DIFF	tests_8b	c5_641/NP/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	c5_641/NP/facts.txt	1 lines differ: 381; e.g. line 381:   extract.units_from = basis 2907ce70143b6a0e  (unset) ->   extract.units_from = basis 15b543071339d9b4  (unset)
+same	tests_8b	c5_641/NP/relations.log	bytes
+DIFF	tests_8b	c5_641/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts 6d1e9d5de63f0ce2708b044c4b312d9aecdfe873e0c17a594056d373b3131385 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+DIFF	tests_8b	c5_641/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 2907ce70143b6a0e8f07b4b54ead167c143575b78d5ee449041d72b83803b3f4  basis.kz -> 15b543071339d9b43cca0ed46172284649d356b76617cb67dd08d08a7d626c8c  basis.kz
+DIFF	tests_8b	c5_641/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts 6d1e9d5de63f0ce2708b044c4b312d9aecdfe873e0c17a594056d373b3131385 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+DIFF	tests_8b	c5_641/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+same	tests_8b	c5_641/NP2/relations.log	bytes
+DIFF	tests_8b	c5_641/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts 6d1e9d5de63f0ce2708b044c4b312d9aecdfe873e0c17a594056d373b3131385 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+same	tests_8b	c5_642/NP/args.txt	bytes
+DIFF	tests_8b	c5_642/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	c5_642/NP/basis.txt	1 lines differ: 5; e.g. line 5: basis a73079a932927d5a18ba49f4172f30cca54c958a53e06ecb2e786d0ddd83b6cf -> basis 42b8d0f54a0536fe2b977c3c36f7a7b6917f56aaf971559fb2cddbf8dbbc8c75
+DIFF	tests_8b	c5_642/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts 746ae42a67cd523869f380c2cb2c967c0429514885d24283aad1f8667472d687 -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+DIFF	tests_8b	c5_642/NP/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	c5_642/NP/facts.txt	1 lines differ: 383; e.g. line 383:   extract.units_from = basis a73079a932927d5a  (unset) ->   extract.units_from = basis 42b8d0f54a0536fe  (unset)
+same	tests_8b	c5_642/NP/relations.log	bytes
+DIFF	tests_8b	c5_642/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts 746ae42a67cd523869f380c2cb2c967c0429514885d24283aad1f8667472d687 -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+DIFF	tests_8b	c5_642/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: a73079a932927d5a18ba49f4172f30cca54c958a53e06ecb2e786d0ddd83b6cf  basis.kz -> 42b8d0f54a0536fe2b977c3c36f7a7b6917f56aaf971559fb2cddbf8dbbc8c75  basis.kz
+DIFF	tests_8b	c5_642/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts 746ae42a67cd523869f380c2cb2c967c0429514885d24283aad1f8667472d687 -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+DIFF	tests_8b	c5_642/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+same	tests_8b	c5_642/NP2/relations.log	bytes
+DIFF	tests_8b	c5_642/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts 746ae42a67cd523869f380c2cb2c967c0429514885d24283aad1f8667472d687 -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+same	tests_8b	count/against_fix1.tsv	bytes
+same	tests_8b	count/against_fix2.tsv	bytes
+same	tests_8b	count/against_fix3.tsv	bytes
+same	tests_8b	count/against_s5.tsv	bytes
+same	tests_8b	count/burden.tsv	bytes
+same	tests_8b	count/summary.tsv	bytes
+DIFF	tests_8b	count/summary.txt	5 lines differ: 487,488,489,490,491; e.g. line 487:   c1_pre_tx facts twice: same (c898f2dc8ab63e3c); relations twice: same (93503298897ee67b) ->   c1_pre_tx facts twice: same (c94c1d40912d02e0); relations twice: same (22841917332de1ed)
+same	tests_8b	count/targets_rule.tsv	bytes
+same	tests_8b	fix2same/fix2same.txt	bytes
+same	tests_8b	fix3same/fix3same.txt	bytes
+same	tests_8b	fixsame/fixsame.txt	bytes
+same	tests_8b	identity/c1_pre_tx/V0/args.txt	bytes
+same	tests_8b	identity/c1_pre_tx/V0/basis.dump.diff	bytes
+DIFF	tests_8b	identity/c1_pre_tx/V0/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	identity/c1_pre_tx/V0/basis.txt	1 lines differ: 1; e.g. line 1: basis 56bef2c6192495a794594fd71c9a552da401b6e631a0a38c80e6bf55bbedc3be -> basis bf4c1bb6650f86401ee2219d699cf82e4c24b82aff75ba0843deeff7c471638b
+DIFF	tests_8b	identity/c1_pre_tx/V0/extract.txt	1 lines differ: 1; e.g. line 1: facts 6e336da07fc2497fab0ff9a23b1d3f142576a95e03b6c1cd5d1643ff408354bd -> facts 94a975a682463333086d23948306682a8eb098608cfde220a5b25799512e1620
+DIFF	tests_8b	identity/c1_pre_tx/V0/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=56bef2c6192495a794594fd71c9a552da401b6e631a0a38c80e6bf55bbedc3be -> > basis_sha256=bf4c1bb6650f86401ee2219d699cf82e4c24b82aff75ba0843deeff7c471638b
+DIFF	tests_8b	identity/c1_pre_tx/V0/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	identity/c1_pre_tx/V0/facts.txt	1 lines differ: 34; e.g. line 34:   extract.units_from = basis 56bef2c6192495a7  (unset) ->   extract.units_from = basis bf4c1bb6650f8640  (unset)
+DIFF	tests_8b	identity/c1_pre_tx/V0/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 56bef2c6192495a794594fd71c9a552da401b6e631a0a38c80e6bf55bbedc3be  basis.kz -> bf4c1bb6650f86401ee2219d699cf82e4c24b82aff75ba0843deeff7c471638b  basis.kz
+DIFF	tests_8b	identity/c1_pre_tx/V0/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis 56bef2c6192495a7  (unset) -> >   extract.units_from = basis bf4c1bb6650f8640  (unset)
+same	tests_8b	identity/c1_pre_tx/V2/args.txt	bytes
+same	tests_8b	identity/c1_pre_tx/V2/basis.dump.diff	bytes
+DIFF	tests_8b	identity/c1_pre_tx/V2/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	identity/c1_pre_tx/V2/basis.txt	1 lines differ: 1; e.g. line 1: basis 126c52761536f48d44ee98dcdc256f25f4bb043e2814ba57ff0e136cdbf1a3cc -> basis 7166e38ac5bedcd46a2fdcd0a583e5b757ed39efd9e122c9c60523d4146d3509
+DIFF	tests_8b	identity/c1_pre_tx/V2/extract.txt	1 lines differ: 1; e.g. line 1: facts f1531c3c678143a7e80d3079fdfe3741eae4e6b42ab69bc3ca5a2aadebd1cc97 -> facts 5fe5e34732eec79c9bd25583735fac71ecc017cabdf715d746dea426ec587ecf
+DIFF	tests_8b	identity/c1_pre_tx/V2/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=126c52761536f48d44ee98dcdc256f25f4bb043e2814ba57ff0e136cdbf1a3cc -> > basis_sha256=7166e38ac5bedcd46a2fdcd0a583e5b757ed39efd9e122c9c60523d4146d3509
+DIFF	tests_8b	identity/c1_pre_tx/V2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	identity/c1_pre_tx/V2/facts.txt	1 lines differ: 50; e.g. line 50:   extract.units_from = basis 126c52761536f48d  (unset) ->   extract.units_from = basis 7166e38ac5bedcd4  (unset)
+DIFF	tests_8b	identity/c1_pre_tx/V2/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 126c52761536f48d44ee98dcdc256f25f4bb043e2814ba57ff0e136cdbf1a3cc  basis.kz -> 7166e38ac5bedcd46a2fdcd0a583e5b757ed39efd9e122c9c60523d4146d3509  basis.kz
+DIFF	tests_8b	identity/c1_pre_tx/V2/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis 126c52761536f48d  (unset) -> >   extract.units_from = basis 7166e38ac5bedcd4  (unset)
+same	tests_8b	identity/c5_641/V0/args.txt	bytes
+same	tests_8b	identity/c5_641/V0/basis.dump.diff	bytes
+DIFF	tests_8b	identity/c5_641/V0/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	identity/c5_641/V0/basis.txt	1 lines differ: 5; e.g. line 5: basis c2d5fa5c3cefd3106dfc9f481aab01d4c5aeb37d83913b2aa9a58603ef99c93c -> basis 7b2596a664de9cbe2d461569dda2c7bac410c97e5265911603fda6ad8813c811
+DIFF	tests_8b	identity/c5_641/V0/extract.txt	1 lines differ: 1; e.g. line 1: facts f4ef40d88e1301599fb59767cee4de24c0c28a5d77b50fc19e9eae20eeb8c50d -> facts a3a97ed96ff3e5d5773f722488e2247079a99f929a1efe7cf589afb7a015749c
+DIFF	tests_8b	identity/c5_641/V0/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=c2d5fa5c3cefd3106dfc9f481aab01d4c5aeb37d83913b2aa9a58603ef99c93c -> > basis_sha256=7b2596a664de9cbe2d461569dda2c7bac410c97e5265911603fda6ad8813c811
+DIFF	tests_8b	identity/c5_641/V0/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	identity/c5_641/V0/facts.txt	1 lines differ: 34; e.g. line 34:   extract.units_from = basis c2d5fa5c3cefd310  (unset) ->   extract.units_from = basis 7b2596a664de9cbe  (unset)
+DIFF	tests_8b	identity/c5_641/V0/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: c2d5fa5c3cefd3106dfc9f481aab01d4c5aeb37d83913b2aa9a58603ef99c93c  basis.kz -> 7b2596a664de9cbe2d461569dda2c7bac410c97e5265911603fda6ad8813c811  basis.kz
+DIFF	tests_8b	identity/c5_641/V0/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis c2d5fa5c3cefd310  (unset) -> >   extract.units_from = basis 7b2596a664de9cbe  (unset)
+same	tests_8b	identity/c5_641/V2/args.txt	bytes
+same	tests_8b	identity/c5_641/V2/basis.dump.diff	bytes
+DIFF	tests_8b	identity/c5_641/V2/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	identity/c5_641/V2/basis.txt	1 lines differ: 7; e.g. line 7: basis 57473bb4609f67f918be9118da22cfe72b3bfc2c90e682681628b594f2065663 -> basis 47174ee150ecf06f23136f69cb4b93924cc3d3f757d77a0c0d67056acbac799e
+DIFF	tests_8b	identity/c5_641/V2/extract.txt	1 lines differ: 3; e.g. line 3: facts 6219f233e5777c789b15675e12f950feca2a513c5190946bea04cdbeb57142f2 -> facts c1d093651a2dedc482415c88821145cd3ef89dc1ce1abee7d1220543e76f605a
+DIFF	tests_8b	identity/c5_641/V2/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=57473bb4609f67f918be9118da22cfe72b3bfc2c90e682681628b594f2065663 -> > basis_sha256=47174ee150ecf06f23136f69cb4b93924cc3d3f757d77a0c0d67056acbac799e
+DIFF	tests_8b	identity/c5_641/V2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	identity/c5_641/V2/facts.txt	1 lines differ: 40; e.g. line 40:   extract.units_from = basis 57473bb4609f67f9  (unset) ->   extract.units_from = basis 47174ee150ecf06f  (unset)
+DIFF	tests_8b	identity/c5_641/V2/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 57473bb4609f67f918be9118da22cfe72b3bfc2c90e682681628b594f2065663  basis.kz -> 47174ee150ecf06f23136f69cb4b93924cc3d3f757d77a0c0d67056acbac799e  basis.kz
+DIFF	tests_8b	identity/c5_641/V2/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis 57473bb4609f67f9  (unset) -> >   extract.units_from = basis 47174ee150ecf06f  (unset)
+DIFF	tests_8b	identity/identity.txt	16 lines differ: 1,2,4,5,19,23,47,51,75,79,103,107,131,135,159,163; e.g. line 1: # step2a_tests.sh identity 2026-11-10T07:16:44Z: the profile-driven mode of this kz-static against the outputs of extrac -> # step2a_tests.sh identity 2026-11-10T08:06:44Z: the profile-driven mode of this kz-static against the outputs of extrac
+ONLY	tests_8b	identity/kairos.diff	only in ref
+same	tests_8b	identity/r2_core/V0/args.txt	bytes
+same	tests_8b	identity/r2_core/V0/basis.dump.diff	bytes
+DIFF	tests_8b	identity/r2_core/V0/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	identity/r2_core/V0/basis.txt	1 lines differ: 1; e.g. line 1: basis ead985f09c379db6bf6b7f5d6f2b01a613da89eacb7d54fc9de1fd8a1a95e95f -> basis 7d413be420d12676c01b60c6513cedcf7b59eb34f7a23318cae4cfc141c92523
+DIFF	tests_8b	identity/r2_core/V0/extract.txt	1 lines differ: 1; e.g. line 1: facts 41d8e5d5bf1718fcfcbad1d02595aba9fb9f2fe29fb473d7922eec3edb73eaee -> facts 606f234ded74604ee13b019f512ffcef40098028bb2fa2d0a9ab2a8ca5c74fa4
+DIFF	tests_8b	identity/r2_core/V0/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=ead985f09c379db6bf6b7f5d6f2b01a613da89eacb7d54fc9de1fd8a1a95e95f -> > basis_sha256=7d413be420d12676c01b60c6513cedcf7b59eb34f7a23318cae4cfc141c92523
+DIFF	tests_8b	identity/r2_core/V0/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	identity/r2_core/V0/facts.txt	1 lines differ: 34; e.g. line 34:   extract.units_from = basis ead985f09c379db6  (unset) ->   extract.units_from = basis 7d413be420d12676  (unset)
+DIFF	tests_8b	identity/r2_core/V0/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: ead985f09c379db6bf6b7f5d6f2b01a613da89eacb7d54fc9de1fd8a1a95e95f  basis.kz -> 7d413be420d12676c01b60c6513cedcf7b59eb34f7a23318cae4cfc141c92523  basis.kz
+DIFF	tests_8b	identity/r2_core/V0/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis ead985f09c379db6  (unset) -> >   extract.units_from = basis 7d413be420d12676  (unset)
+same	tests_8b	identity/r2_core/V2/args.txt	bytes
+same	tests_8b	identity/r2_core/V2/basis.dump.diff	bytes
+DIFF	tests_8b	identity/r2_core/V2/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	identity/r2_core/V2/basis.txt	1 lines differ: 1; e.g. line 1: basis cf7a70307f60388e304ec4ce7e4f751b1766af9a4836d83ab79b74bc98d4d5b4 -> basis 06d02399aef135f8186fea9e4a8c83fb24e3343f56445f0ec06bdf76c59393c2
+DIFF	tests_8b	identity/r2_core/V2/extract.txt	1 lines differ: 1; e.g. line 1: facts 44a55e40c825854d9cdb1b3cf5d21ede6db21c23b900dbca8f6a2cb6af0fb16d -> facts 3dcc3d1561c6b94527de982e21b6258d66d759e73f1777da24db682da8c5a713
+DIFF	tests_8b	identity/r2_core/V2/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=cf7a70307f60388e304ec4ce7e4f751b1766af9a4836d83ab79b74bc98d4d5b4 -> > basis_sha256=06d02399aef135f8186fea9e4a8c83fb24e3343f56445f0ec06bdf76c59393c2
+DIFF	tests_8b	identity/r2_core/V2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	identity/r2_core/V2/facts.txt	1 lines differ: 44; e.g. line 44:   extract.units_from = basis cf7a70307f60388e  (unset) ->   extract.units_from = basis 06d02399aef135f8  (unset)
+DIFF	tests_8b	identity/r2_core/V2/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: cf7a70307f60388e304ec4ce7e4f751b1766af9a4836d83ab79b74bc98d4d5b4  basis.kz -> 06d02399aef135f8186fea9e4a8c83fb24e3343f56445f0ec06bdf76c59393c2  basis.kz
+DIFF	tests_8b	identity/r2_core/V2/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis cf7a70307f60388e  (unset) -> >   extract.units_from = basis 06d02399aef135f8  (unset)
+DIFF	tests_8b	npsame/c1_post_tx/extract.txt	1 lines differ: 1; e.g. line 1: facts 6965d3ae25b466d553fee48c812b8b50756f3583e313240c034e4172f6748a1f -> facts 7410948cea6fb45471f70cc37c5eb804d85b526cce59229786342525a3fbb87a
+DIFF	tests_8b	npsame/c1_pre_tx/extract.txt	1 lines differ: 1; e.g. line 1: facts 29bc6a7bb9fb15d7c449d3832edfb61db141d68ec0cc6827d21ac23545fea3ba -> facts 286146e86b258f7c4f8cbcc0d4566b71fce480f1e8aa1ebb2d023d82cf995b5d
+DIFF	tests_8b	npsame/c5_641/extract.txt	1 lines differ: 1; e.g. line 1: facts d8dff76020f30e5b020acae2e5c5abdec91895fa9746af5a306d3a7080a12888 -> facts 4d9bd2346600693e7620e0c87d378e3912f33359be82ffb7a953117c15ab2dc1
+DIFF	tests_8b	npsame/c5_642/extract.txt	1 lines differ: 1; e.g. line 1: facts 4a977d578ba9b00ec12425537d13ecf94b61f872539c2db4c3f890313b4d17bd -> facts 6551332c4737705005b55aa42c50d3a014416b01ccdbe0f8a290709dc084b9c3
+same	tests_8b	npsame/npsame.txt	bytes
+DIFF	tests_8b	npsame/r2_core/extract.txt	1 lines differ: 1; e.g. line 1: facts 3710badded5bc3372363c3725e87f851a8af74941290fa5cde268380ed12483e -> facts 034d1e7a48b095edd58fcd796d2162e89266e2acc153f7724b6c84a3b95a026f
+same	tests_8b	r2_core/NP/args.txt	bytes
+DIFF	tests_8b	r2_core/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_8b	r2_core/NP/basis.txt	1 lines differ: 1; e.g. line 1: basis ecca8df30d0d5b09dc9654f337591d02f01e70e822b93656b1e219071de160cd -> basis c55ca7b9f9876d345ab8fb833f14d07dc3cca61eb6356cbfdc495a5e536f70ea
+DIFF	tests_8b	r2_core/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts b7418bdbc13a4183daeca8aa08391bfbccde774196e74a3d544d50c61ae70d0f -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests_8b	r2_core/NP/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_8b	r2_core/NP/facts.txt	1 lines differ: 362; e.g. line 362:   extract.units_from = basis ecca8df30d0d5b09  (unset) ->   extract.units_from = basis c55ca7b9f9876d34  (unset)
+same	tests_8b	r2_core/NP/relations.log	bytes
+DIFF	tests_8b	r2_core/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts b7418bdbc13a4183daeca8aa08391bfbccde774196e74a3d544d50c61ae70d0f -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests_8b	r2_core/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: ecca8df30d0d5b09dc9654f337591d02f01e70e822b93656b1e219071de160cd  basis.kz -> c55ca7b9f9876d345ab8fb833f14d07dc3cca61eb6356cbfdc495a5e536f70ea  basis.kz
+DIFF	tests_8b	r2_core/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts b7418bdbc13a4183daeca8aa08391bfbccde774196e74a3d544d50c61ae70d0f -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests_8b	r2_core/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+same	tests_8b	r2_core/NP2/relations.log	bytes
+DIFF	tests_8b	r2_core/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts b7418bdbc13a4183daeca8aa08391bfbccde774196e74a3d544d50c61ae70d0f -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests_8b	run.log	11 lines differ: 1,2,3,4,5,6,7,8,9,10,11; e.g. line 1: /home/user/work/redesign/step2a/tests_8b/identity/c1_pre_tx/V0 basis=0 extract=0 show=0 relations=- basis_s=1.1 extract_ -> /home/user/work/redesign/step2a/tests_8b_fix/identity/c1_pre_tx/V0 basis=0 extract=0 show=0 relations=- basis_s=0.2 extr
+same	tests_8b	s5same/s5same.txt	bytes
+DIFF	tests_8b	sha256.txt	lines 138 vs 137; 24 hunks; first: replace ref 2-6 new 2-6
+DIFF	tests_8b	status.txt	40 lines differ: 1,2,3,5,8,9,11,12,13,14,15,16,17,19,20,22,23,25,26,28,29,31,32,34,35,36,37,38,39,40,...; e.g. line 1: # step2a_tests.sh all 2026-11-10T07:16:44Z -> # step2a_tests.sh all 2026-11-10T08:06:44Z
+DIFF	tests_8b	twice.txt	5 lines differ: 1,2,3,4,5; e.g. line 1: c1_pre_tx facts twice: same (c898f2dc8ab63e3c); relations twice: same (93503298897ee67b) -> c1_pre_tx facts twice: same (c94c1d40912d02e0); relations twice: same (22841917332de1ed)
+DIFF	tests_8b	twice_detail.txt	5 lines differ: 1,2,3,4,5; e.g. line 1: c1_pre_tx extract=0 relations=0 facts NP c898f2dc8ab63e3c327e6ee4cae4e3b7c87f1df8d7a894baab29f23c74df58ba NP2 c898f2dc8a -> c1_pre_tx extract=0 relations=0 facts NP c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba NP2 c94c1d4091
+same	tests	c1_post_tx/NP/args.txt	bytes
+DIFF	tests	c1_post_tx/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	c1_post_tx/NP/basis.txt	1 lines differ: 1; e.g. line 1: basis e427aaf2a642d16ad8a1dece87de6148799005e552f11690bfb210947df881ca -> basis 7c7edf1de4c68e3f77e2b2c72d89bc8ddbc7e3b1c6208c3de4e9f14f9a589a2c
+DIFF	tests	c1_post_tx/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts 20e2a73f6c650f7e07265b49e756d46c805e7df8ca7724b285347d0a4fcc9a92 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+DIFF	tests	c1_post_tx/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests	c1_post_tx/NP/facts.txt	2 lines differ: 444,462; e.g. line 444:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests	c1_post_tx/NP/relations.log	bytes
+DIFF	tests	c1_post_tx/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts 20e2a73f6c650f7e07265b49e756d46c805e7df8ca7724b285347d0a4fcc9a92 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+DIFF	tests	c1_post_tx/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: e427aaf2a642d16ad8a1dece87de6148799005e552f11690bfb210947df881ca  basis.kz -> 7c7edf1de4c68e3f77e2b2c72d89bc8ddbc7e3b1c6208c3de4e9f14f9a589a2c  basis.kz
+DIFF	tests	c1_post_tx/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts 20e2a73f6c650f7e07265b49e756d46c805e7df8ca7724b285347d0a4fcc9a92 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+ONLY	tests	c1_post_tx/NP2/facts.kz	only in new
+ONLY	tests	c1_post_tx/NP2/relations.log	only in new
+DIFF	tests	c1_post_tx/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts 20e2a73f6c650f7e07265b49e756d46c805e7df8ca7724b285347d0a4fcc9a92 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+same	tests	c1_pre_tx/NP/args.txt	bytes
+DIFF	tests	c1_pre_tx/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	c1_pre_tx/NP/basis.txt	1 lines differ: 1; e.g. line 1: basis a1717478f0099180acf691a9ee7441484e2917cb5a4244fed308cf29f601397a -> basis 80695ebbd704233026906f16dca65b72c0a5c31bb67280a7e58d664fe4e57381
+DIFF	tests	c1_pre_tx/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts a26d580fd54406addf66d94c9da9b1ab11018c7565e663f9a93fcd05b4ce2791 -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+DIFF	tests	c1_pre_tx/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests	c1_pre_tx/NP/facts.txt	2 lines differ: 444,462; e.g. line 444:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests	c1_pre_tx/NP/relations.log	bytes
+DIFF	tests	c1_pre_tx/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts a26d580fd54406addf66d94c9da9b1ab11018c7565e663f9a93fcd05b4ce2791 -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+DIFF	tests	c1_pre_tx/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: a1717478f0099180acf691a9ee7441484e2917cb5a4244fed308cf29f601397a  basis.kz -> 80695ebbd704233026906f16dca65b72c0a5c31bb67280a7e58d664fe4e57381  basis.kz
+DIFF	tests	c1_pre_tx/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts a26d580fd54406addf66d94c9da9b1ab11018c7565e663f9a93fcd05b4ce2791 -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+ONLY	tests	c1_pre_tx/NP2/facts.kz	only in new
+ONLY	tests	c1_pre_tx/NP2/relations.log	only in new
+DIFF	tests	c1_pre_tx/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts a26d580fd54406addf66d94c9da9b1ab11018c7565e663f9a93fcd05b4ce2791 -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+same	tests	c5_641/NP/args.txt	bytes
+DIFF	tests	c5_641/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	c5_641/NP/basis.txt	1 lines differ: 5; e.g. line 5: basis dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd525e2f01c7a3d73f9aa -> basis 15b543071339d9b43cca0ed46172284649d356b76617cb67dd08d08a7d626c8c
+DIFF	tests	c5_641/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts 1b4f794a0cd338974a190137fcd9ec0fa1007c0cef91957ee2e4881e2c49fb38 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+DIFF	tests	c5_641/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests	c5_641/NP/facts.txt	2 lines differ: 363,381; e.g. line 363:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests	c5_641/NP/relations.log	bytes
+DIFF	tests	c5_641/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts 1b4f794a0cd338974a190137fcd9ec0fa1007c0cef91957ee2e4881e2c49fb38 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+DIFF	tests	c5_641/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd525e2f01c7a3d73f9aa  basis.kz -> 15b543071339d9b43cca0ed46172284649d356b76617cb67dd08d08a7d626c8c  basis.kz
+DIFF	tests	c5_641/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts 1b4f794a0cd338974a190137fcd9ec0fa1007c0cef91957ee2e4881e2c49fb38 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+ONLY	tests	c5_641/NP2/facts.kz	only in new
+ONLY	tests	c5_641/NP2/relations.log	only in new
+DIFF	tests	c5_641/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts 1b4f794a0cd338974a190137fcd9ec0fa1007c0cef91957ee2e4881e2c49fb38 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+same	tests	c5_642/NP/args.txt	bytes
+DIFF	tests	c5_642/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	c5_642/NP/basis.txt	1 lines differ: 5; e.g. line 5: basis 1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba9458a1f3536e89a96d7c92 -> basis 42b8d0f54a0536fe2b977c3c36f7a7b6917f56aaf971559fb2cddbf8dbbc8c75
+DIFF	tests	c5_642/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts c7bb3c096e46033c47615d0e7f55eda0a2e4af54f1ef2c796e844bf6d57de87f -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+DIFF	tests	c5_642/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests	c5_642/NP/facts.txt	2 lines differ: 365,383; e.g. line 365:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests	c5_642/NP/relations.log	bytes
+DIFF	tests	c5_642/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts c7bb3c096e46033c47615d0e7f55eda0a2e4af54f1ef2c796e844bf6d57de87f -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+DIFF	tests	c5_642/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba9458a1f3536e89a96d7c92  basis.kz -> 42b8d0f54a0536fe2b977c3c36f7a7b6917f56aaf971559fb2cddbf8dbbc8c75  basis.kz
+DIFF	tests	c5_642/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts c7bb3c096e46033c47615d0e7f55eda0a2e4af54f1ef2c796e844bf6d57de87f -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+ONLY	tests	c5_642/NP2/facts.kz	only in new
+ONLY	tests	c5_642/NP2/relations.log	only in new
+DIFF	tests	c5_642/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts c7bb3c096e46033c47615d0e7f55eda0a2e4af54f1ef2c796e844bf6d57de87f -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+same	tests	count/against_fix1.tsv	bytes
+same	tests	count/against_fix2.tsv	bytes
+same	tests	count/against_fix3.tsv	bytes
+same	tests	count/against_s5.tsv	bytes
+same	tests	count/burden.tsv	bytes
+same	tests	count/summary.tsv	bytes
+DIFF	tests	count/summary.txt	10 lines differ: 381,396,411,426,441,487,488,489,490,491; e.g. line 381:     facts.txt:444 count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value ini ->     facts.txt:444 count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value ini
+same	tests	count/targets_rule.tsv	bytes
+DIFF	tests	fix2same/fix2same.txt	lines 11 vs 184; 5 hunks; first: insert ref 3-2 new 3-40
+DIFF	tests	fix3same/fix3same.txt	lines 11 vs 154; 5 hunks; first: insert ref 3-2 new 3-34
+DIFF	tests	fixsame/fixsame.txt	lines 11 vs 204; 5 hunks; first: insert ref 3-2 new 3-44
+same	tests	identity/c1_pre_tx/V0/args.txt	bytes
+same	tests	identity/c1_pre_tx/V0/basis.dump.diff	bytes
+DIFF	tests	identity/c1_pre_tx/V0/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	identity/c1_pre_tx/V0/basis.txt	1 lines differ: 1; e.g. line 1: basis d233b3920d4303627f70686ab351a7f5ad09c3cf79678d42b2602d5b3f8b4a33 -> basis bf4c1bb6650f86401ee2219d699cf82e4c24b82aff75ba0843deeff7c471638b
+DIFF	tests	identity/c1_pre_tx/V0/extract.txt	1 lines differ: 1; e.g. line 1: facts e034be6513d289eab736c5c0af59e6117021571c2d03a5d4501e51a815e1d533 -> facts 94a975a682463333086d23948306682a8eb098608cfde220a5b25799512e1620
+DIFF	tests	identity/c1_pre_tx/V0/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=d233b3920d4303627f70686ab351a7f5ad09c3cf79678d42b2602d5b3f8b4a33 -> > basis_sha256=bf4c1bb6650f86401ee2219d699cf82e4c24b82aff75ba0843deeff7c471638b
+DIFF	tests	identity/c1_pre_tx/V0/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests	identity/c1_pre_tx/V0/facts.txt	1 lines differ: 34; e.g. line 34:   extract.units_from = basis d233b3920d430362  (unset) ->   extract.units_from = basis bf4c1bb6650f8640  (unset)
+DIFF	tests	identity/c1_pre_tx/V0/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: d233b3920d4303627f70686ab351a7f5ad09c3cf79678d42b2602d5b3f8b4a33  basis.kz -> bf4c1bb6650f86401ee2219d699cf82e4c24b82aff75ba0843deeff7c471638b  basis.kz
+DIFF	tests	identity/c1_pre_tx/V0/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis d233b3920d430362  (unset) -> >   extract.units_from = basis bf4c1bb6650f8640  (unset)
+same	tests	identity/c1_pre_tx/V2/args.txt	bytes
+same	tests	identity/c1_pre_tx/V2/basis.dump.diff	bytes
+DIFF	tests	identity/c1_pre_tx/V2/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	identity/c1_pre_tx/V2/basis.txt	1 lines differ: 1; e.g. line 1: basis f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa54ad724ea36a1deed0d9 -> basis 7166e38ac5bedcd46a2fdcd0a583e5b757ed39efd9e122c9c60523d4146d3509
+DIFF	tests	identity/c1_pre_tx/V2/extract.txt	1 lines differ: 1; e.g. line 1: facts 87cbdb9c219a12bd9f84bd8d00f10798bfcfdbe0a8e2a443dbdd1f6b4d27a256 -> facts 5fe5e34732eec79c9bd25583735fac71ecc017cabdf715d746dea426ec587ecf
+DIFF	tests	identity/c1_pre_tx/V2/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa54ad724ea36a1deed0d9 -> > basis_sha256=7166e38ac5bedcd46a2fdcd0a583e5b757ed39efd9e122c9c60523d4146d3509
+DIFF	tests	identity/c1_pre_tx/V2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests	identity/c1_pre_tx/V2/facts.txt	1 lines differ: 50; e.g. line 50:   extract.units_from = basis f3daeaee0d0339a4  (unset) ->   extract.units_from = basis 7166e38ac5bedcd4  (unset)
+DIFF	tests	identity/c1_pre_tx/V2/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa54ad724ea36a1deed0d9  basis.kz -> 7166e38ac5bedcd46a2fdcd0a583e5b757ed39efd9e122c9c60523d4146d3509  basis.kz
+DIFF	tests	identity/c1_pre_tx/V2/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis f3daeaee0d0339a4  (unset) -> >   extract.units_from = basis 7166e38ac5bedcd4  (unset)
+same	tests	identity/c5_641/V0/args.txt	bytes
+same	tests	identity/c5_641/V0/basis.dump.diff	bytes
+DIFF	tests	identity/c5_641/V0/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	identity/c5_641/V0/basis.txt	1 lines differ: 5; e.g. line 5: basis 33de0e1f01bc781cf49bc15e05d673388605746225635b059938e86d84647608 -> basis 7b2596a664de9cbe2d461569dda2c7bac410c97e5265911603fda6ad8813c811
+DIFF	tests	identity/c5_641/V0/extract.txt	1 lines differ: 1; e.g. line 1: facts b4a5ab86c048704ae81a4e6be5b058e47a793475f4314726a5e8b0f796e46d41 -> facts a3a97ed96ff3e5d5773f722488e2247079a99f929a1efe7cf589afb7a015749c
+DIFF	tests	identity/c5_641/V0/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=33de0e1f01bc781cf49bc15e05d673388605746225635b059938e86d84647608 -> > basis_sha256=7b2596a664de9cbe2d461569dda2c7bac410c97e5265911603fda6ad8813c811
+DIFF	tests	identity/c5_641/V0/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests	identity/c5_641/V0/facts.txt	1 lines differ: 34; e.g. line 34:   extract.units_from = basis 33de0e1f01bc781c  (unset) ->   extract.units_from = basis 7b2596a664de9cbe  (unset)
+DIFF	tests	identity/c5_641/V0/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 33de0e1f01bc781cf49bc15e05d673388605746225635b059938e86d84647608  basis.kz -> 7b2596a664de9cbe2d461569dda2c7bac410c97e5265911603fda6ad8813c811  basis.kz
+DIFF	tests	identity/c5_641/V0/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis 33de0e1f01bc781c  (unset) -> >   extract.units_from = basis 7b2596a664de9cbe  (unset)
+same	tests	identity/c5_641/V2/args.txt	bytes
+same	tests	identity/c5_641/V2/basis.dump.diff	bytes
+DIFF	tests	identity/c5_641/V2/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	identity/c5_641/V2/basis.txt	1 lines differ: 7; e.g. line 7: basis fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995fd599314893c00b69b81 -> basis 47174ee150ecf06f23136f69cb4b93924cc3d3f757d77a0c0d67056acbac799e
+DIFF	tests	identity/c5_641/V2/extract.txt	1 lines differ: 3; e.g. line 3: facts e2da6643c538b2cc3288f8df55fd0077f0d923d6c7fd1cb5c760a9908c3e89ba -> facts c1d093651a2dedc482415c88821145cd3ef89dc1ce1abee7d1220543e76f605a
+DIFF	tests	identity/c5_641/V2/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995fd599314893c00b69b81 -> > basis_sha256=47174ee150ecf06f23136f69cb4b93924cc3d3f757d77a0c0d67056acbac799e
+DIFF	tests	identity/c5_641/V2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests	identity/c5_641/V2/facts.txt	1 lines differ: 40; e.g. line 40:   extract.units_from = basis fef008e12c1c7317  (unset) ->   extract.units_from = basis 47174ee150ecf06f  (unset)
+DIFF	tests	identity/c5_641/V2/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995fd599314893c00b69b81  basis.kz -> 47174ee150ecf06f23136f69cb4b93924cc3d3f757d77a0c0d67056acbac799e  basis.kz
+DIFF	tests	identity/c5_641/V2/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis fef008e12c1c7317  (unset) -> >   extract.units_from = basis 47174ee150ecf06f  (unset)
+DIFF	tests	identity/identity.txt	lines 74 vs 176; 26 hunks; first: replace ref 1-2 new 1-2
+same	tests	identity/r2_core/V0/args.txt	bytes
+same	tests	identity/r2_core/V0/basis.dump.diff	bytes
+DIFF	tests	identity/r2_core/V0/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	identity/r2_core/V0/basis.txt	1 lines differ: 1; e.g. line 1: basis d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55d69e97e56a334dddf19 -> basis 7d413be420d12676c01b60c6513cedcf7b59eb34f7a23318cae4cfc141c92523
+DIFF	tests	identity/r2_core/V0/extract.txt	1 lines differ: 1; e.g. line 1: facts 20134bd091a74cfa07b65f33a65bdc814c5ea4e4ee317a0737d5086092ce9677 -> facts 606f234ded74604ee13b019f512ffcef40098028bb2fa2d0a9ab2a8ca5c74fa4
+DIFF	tests	identity/r2_core/V0/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55d69e97e56a334dddf19 -> > basis_sha256=7d413be420d12676c01b60c6513cedcf7b59eb34f7a23318cae4cfc141c92523
+DIFF	tests	identity/r2_core/V0/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests	identity/r2_core/V0/facts.txt	1 lines differ: 34; e.g. line 34:   extract.units_from = basis d4e74dbea8589182  (unset) ->   extract.units_from = basis 7d413be420d12676  (unset)
+DIFF	tests	identity/r2_core/V0/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55d69e97e56a334dddf19  basis.kz -> 7d413be420d12676c01b60c6513cedcf7b59eb34f7a23318cae4cfc141c92523  basis.kz
+DIFF	tests	identity/r2_core/V0/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis d4e74dbea8589182  (unset) -> >   extract.units_from = basis 7d413be420d12676  (unset)
+same	tests	identity/r2_core/V2/args.txt	bytes
+same	tests	identity/r2_core/V2/basis.dump.diff	bytes
+DIFF	tests	identity/r2_core/V2/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	identity/r2_core/V2/basis.txt	1 lines differ: 1; e.g. line 1: basis efa325b26be1232d0de82501e4fc7e39690319150d2b821ab593e11756b462fa -> basis 06d02399aef135f8186fea9e4a8c83fb24e3343f56445f0ec06bdf76c59393c2
+DIFF	tests	identity/r2_core/V2/extract.txt	1 lines differ: 1; e.g. line 1: facts f0136baef1fc7292b1e22543ca2331ca4036768248c0c690ade5b143b5eb5032 -> facts 3dcc3d1561c6b94527de982e21b6258d66d759e73f1777da24db682da8c5a713
+DIFF	tests	identity/r2_core/V2/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=efa325b26be1232d0de82501e4fc7e39690319150d2b821ab593e11756b462fa -> > basis_sha256=06d02399aef135f8186fea9e4a8c83fb24e3343f56445f0ec06bdf76c59393c2
+DIFF	tests	identity/r2_core/V2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests	identity/r2_core/V2/facts.txt	1 lines differ: 44; e.g. line 44:   extract.units_from = basis efa325b26be1232d  (unset) ->   extract.units_from = basis 06d02399aef135f8  (unset)
+DIFF	tests	identity/r2_core/V2/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: efa325b26be1232d0de82501e4fc7e39690319150d2b821ab593e11756b462fa  basis.kz -> 06d02399aef135f8186fea9e4a8c83fb24e3343f56445f0ec06bdf76c59393c2  basis.kz
+DIFF	tests	identity/r2_core/V2/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis efa325b26be1232d  (unset) -> >   extract.units_from = basis 06d02399aef135f8  (unset)
+DIFF	tests	npsame/c1_post_tx/extract.txt	1 lines differ: 1; e.g. line 1: facts 764edb56915037b009415a88195b51a55d1a834cf16dcfb2a6629e4e3eace716 -> facts 7410948cea6fb45471f70cc37c5eb804d85b526cce59229786342525a3fbb87a
+DIFF	tests	npsame/c1_pre_tx/extract.txt	1 lines differ: 1; e.g. line 1: facts 72fd8b276e3ea924ad262ad6ed10a5dec9142e2a7258849f1cda40a5d3913bb0 -> facts 286146e86b258f7c4f8cbcc0d4566b71fce480f1e8aa1ebb2d023d82cf995b5d
+DIFF	tests	npsame/c5_641/extract.txt	1 lines differ: 1; e.g. line 1: facts bf934e635cd5c9d8b344e6af666bebe69e5a8e2fe7eddf51340a35234783ec04 -> facts 4d9bd2346600693e7620e0c87d378e3912f33359be82ffb7a953117c15ab2dc1
+DIFF	tests	npsame/c5_642/extract.txt	1 lines differ: 1; e.g. line 1: facts bb2d3101089af37e2b26ae6e70516f2961716f9af7e0590981b9ed0ad9fdfaa6 -> facts 6551332c4737705005b55aa42c50d3a014416b01ccdbe0f8a290709dc084b9c3
+DIFF	tests	npsame/npsame.txt	lines 11 vs 199; 5 hunks; first: insert ref 3-2 new 3-43
+DIFF	tests	npsame/r2_core/extract.txt	1 lines differ: 1; e.g. line 1: facts 649c696ed5a69b78f7bbc75760da32e1970514260774e4277264035de05d81c0 -> facts 034d1e7a48b095edd58fcd796d2162e89266e2acc153f7724b6c84a3b95a026f
+same	tests	r2_core/NP/args.txt	bytes
+DIFF	tests	r2_core/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests	r2_core/NP/basis.txt	1 lines differ: 1; e.g. line 1: basis 70d6e14a387f5886a7bcb5267f4a6f0f70cb424c1560d5324311e14e9bfa4760 -> basis c55ca7b9f9876d345ab8fb833f14d07dc3cca61eb6356cbfdc495a5e536f70ea
+DIFF	tests	r2_core/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts 55021411c8d8b14b0a6a50450ef517487cd3f6edd4bca74802ec553ead8ba3b3 -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests	r2_core/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 37: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) STATIC_IMAGE(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) LOOP_ITERS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests	r2_core/NP/facts.txt	2 lines differ: 344,362; e.g. line 344:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests	r2_core/NP/relations.log	bytes
+DIFF	tests	r2_core/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts 55021411c8d8b14b0a6a50450ef517487cd3f6edd4bca74802ec553ead8ba3b3 -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests	r2_core/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 70d6e14a387f5886a7bcb5267f4a6f0f70cb424c1560d5324311e14e9bfa4760  basis.kz -> c55ca7b9f9876d345ab8fb833f14d07dc3cca61eb6356cbfdc495a5e536f70ea  basis.kz
+DIFF	tests	r2_core/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts 55021411c8d8b14b0a6a50450ef517487cd3f6edd4bca74802ec553ead8ba3b3 -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+ONLY	tests	r2_core/NP2/facts.kz	only in new
+ONLY	tests	r2_core/NP2/relations.log	only in new
+DIFF	tests	r2_core/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts 55021411c8d8b14b0a6a50450ef517487cd3f6edd4bca74802ec553ead8ba3b3 -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests	run.log	lines 6 vs 12; 1 hunks; first: replace ref 1-5 new 1-11
+DIFF	tests	s5same/s5same.txt	lines 11 vs 219; 5 hunks; first: insert ref 3-2 new 3-47
+DIFF	tests	sha256.txt	lines 126 vs 137; 18 hunks; first: replace ref 2-6 new 2-6
+ONLY	tests	status.txt	only in new
+DIFF	tests	twice.txt	5 lines differ: 1,2,3,4,5; e.g. line 1: c1_pre_tx facts twice: same (a26d580fd54406ad); relations twice: same (32fe9b341c4b6768) -> c1_pre_tx facts twice: same (c94c1d40912d02e0); relations twice: same (22841917332de1ed)
+ONLY	tests	twice_detail.txt	only in new
+same	tests_rv4	c1_post_tx/NP/args.txt	bytes
+DIFF	tests_rv4	c1_post_tx/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	c1_post_tx/NP/basis.txt	1 lines differ: 1; e.g. line 1: basis e427aaf2a642d16ad8a1dece87de6148799005e552f11690bfb210947df881ca -> basis 7c7edf1de4c68e3f77e2b2c72d89bc8ddbc7e3b1c6208c3de4e9f14f9a589a2c
+DIFF	tests_rv4	c1_post_tx/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts 20e2a73f6c650f7e07265b49e756d46c805e7df8ca7724b285347d0a4fcc9a92 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+DIFF	tests_rv4	c1_post_tx/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests_rv4	c1_post_tx/NP/facts.txt	2 lines differ: 444,462; e.g. line 444:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests_rv4	c1_post_tx/NP/relations.log	bytes
+DIFF	tests_rv4	c1_post_tx/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts 20e2a73f6c650f7e07265b49e756d46c805e7df8ca7724b285347d0a4fcc9a92 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+DIFF	tests_rv4	c1_post_tx/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: e427aaf2a642d16ad8a1dece87de6148799005e552f11690bfb210947df881ca  basis.kz -> 7c7edf1de4c68e3f77e2b2c72d89bc8ddbc7e3b1c6208c3de4e9f14f9a589a2c  basis.kz
+DIFF	tests_rv4	c1_post_tx/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts 20e2a73f6c650f7e07265b49e756d46c805e7df8ca7724b285347d0a4fcc9a92 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+DIFF	tests_rv4	c1_post_tx/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+same	tests_rv4	c1_post_tx/NP2/relations.log	bytes
+DIFF	tests_rv4	c1_post_tx/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts 20e2a73f6c650f7e07265b49e756d46c805e7df8ca7724b285347d0a4fcc9a92 -> facts b467accca574c4614604414c30c2929e5c92bb120ebee54859eb5cd1f82b8e57
+same	tests_rv4	c1_pre_tx/NP/args.txt	bytes
+DIFF	tests_rv4	c1_pre_tx/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	c1_pre_tx/NP/basis.txt	1 lines differ: 1; e.g. line 1: basis a1717478f0099180acf691a9ee7441484e2917cb5a4244fed308cf29f601397a -> basis 80695ebbd704233026906f16dca65b72c0a5c31bb67280a7e58d664fe4e57381
+DIFF	tests_rv4	c1_pre_tx/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts a26d580fd54406addf66d94c9da9b1ab11018c7565e663f9a93fcd05b4ce2791 -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+DIFF	tests_rv4	c1_pre_tx/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests_rv4	c1_pre_tx/NP/facts.txt	2 lines differ: 444,462; e.g. line 444:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests_rv4	c1_pre_tx/NP/relations.log	bytes
+DIFF	tests_rv4	c1_pre_tx/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts a26d580fd54406addf66d94c9da9b1ab11018c7565e663f9a93fcd05b4ce2791 -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+DIFF	tests_rv4	c1_pre_tx/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: a1717478f0099180acf691a9ee7441484e2917cb5a4244fed308cf29f601397a  basis.kz -> 80695ebbd704233026906f16dca65b72c0a5c31bb67280a7e58d664fe4e57381  basis.kz
+DIFF	tests_rv4	c1_pre_tx/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts a26d580fd54406addf66d94c9da9b1ab11018c7565e663f9a93fcd05b4ce2791 -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+DIFF	tests_rv4	c1_pre_tx/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+same	tests_rv4	c1_pre_tx/NP2/relations.log	bytes
+DIFF	tests_rv4	c1_pre_tx/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts a26d580fd54406addf66d94c9da9b1ab11018c7565e663f9a93fcd05b4ce2791 -> facts c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba
+same	tests_rv4	c5_641/NP/args.txt	bytes
+DIFF	tests_rv4	c5_641/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	c5_641/NP/basis.txt	1 lines differ: 5; e.g. line 5: basis dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd525e2f01c7a3d73f9aa -> basis 15b543071339d9b43cca0ed46172284649d356b76617cb67dd08d08a7d626c8c
+DIFF	tests_rv4	c5_641/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts 1b4f794a0cd338974a190137fcd9ec0fa1007c0cef91957ee2e4881e2c49fb38 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+DIFF	tests_rv4	c5_641/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests_rv4	c5_641/NP/facts.txt	2 lines differ: 363,381; e.g. line 363:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests_rv4	c5_641/NP/relations.log	bytes
+DIFF	tests_rv4	c5_641/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts 1b4f794a0cd338974a190137fcd9ec0fa1007c0cef91957ee2e4881e2c49fb38 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+DIFF	tests_rv4	c5_641/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd525e2f01c7a3d73f9aa  basis.kz -> 15b543071339d9b43cca0ed46172284649d356b76617cb67dd08d08a7d626c8c  basis.kz
+DIFF	tests_rv4	c5_641/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts 1b4f794a0cd338974a190137fcd9ec0fa1007c0cef91957ee2e4881e2c49fb38 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+DIFF	tests_rv4	c5_641/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+same	tests_rv4	c5_641/NP2/relations.log	bytes
+DIFF	tests_rv4	c5_641/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts 1b4f794a0cd338974a190137fcd9ec0fa1007c0cef91957ee2e4881e2c49fb38 -> facts d5246fa38e4206cbf0b717f4dc25b303911cd117cab4dee68cf2bf94ab7e98a5
+same	tests_rv4	c5_642/NP/args.txt	bytes
+DIFF	tests_rv4	c5_642/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	c5_642/NP/basis.txt	1 lines differ: 5; e.g. line 5: basis 1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba9458a1f3536e89a96d7c92 -> basis 42b8d0f54a0536fe2b977c3c36f7a7b6917f56aaf971559fb2cddbf8dbbc8c75
+DIFF	tests_rv4	c5_642/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts c7bb3c096e46033c47615d0e7f55eda0a2e4af54f1ef2c796e844bf6d57de87f -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+DIFF	tests_rv4	c5_642/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests_rv4	c5_642/NP/facts.txt	2 lines differ: 365,383; e.g. line 365:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests_rv4	c5_642/NP/relations.log	bytes
+DIFF	tests_rv4	c5_642/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts c7bb3c096e46033c47615d0e7f55eda0a2e4af54f1ef2c796e844bf6d57de87f -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+DIFF	tests_rv4	c5_642/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba9458a1f3536e89a96d7c92  basis.kz -> 42b8d0f54a0536fe2b977c3c36f7a7b6917f56aaf971559fb2cddbf8dbbc8c75  basis.kz
+DIFF	tests_rv4	c5_642/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts c7bb3c096e46033c47615d0e7f55eda0a2e4af54f1ef2c796e844bf6d57de87f -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+DIFF	tests_rv4	c5_642/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 35: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+same	tests_rv4	c5_642/NP2/relations.log	bytes
+DIFF	tests_rv4	c5_642/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts c7bb3c096e46033c47615d0e7f55eda0a2e4af54f1ef2c796e844bf6d57de87f -> facts 279b943217d38b36871b53cbdfa91d8fecb506296616e1ccddb40b5790fdc778
+same	tests_rv4	count/against_fix1.tsv	bytes
+same	tests_rv4	count/against_fix2.tsv	bytes
+same	tests_rv4	count/against_fix3.tsv	bytes
+same	tests_rv4	count/against_s5.tsv	bytes
+same	tests_rv4	count/burden.tsv	bytes
+same	tests_rv4	count/summary.tsv	bytes
+DIFF	tests_rv4	count/summary.txt	10 lines differ: 381,396,411,426,441,487,488,489,490,491; e.g. line 381:     facts.txt:444 count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value ini ->     facts.txt:444 count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value ini
+same	tests_rv4	count/targets_rule.tsv	bytes
+DIFF	tests_rv4	fix2same/fix2same.txt	lines 96 vs 184; 5 hunks; first: replace ref 3-19 new 3-40
+DIFF	tests_rv4	fix3same/fix3same.txt	lines 91 vs 154; 5 hunks; first: replace ref 3-18 new 3-34
+DIFF	tests_rv4	fixsame/fixsame.txt	lines 101 vs 204; 5 hunks; first: replace ref 3-20 new 3-44
+same	tests_rv4	identity/c1_pre_tx/V0/args.txt	bytes
+same	tests_rv4	identity/c1_pre_tx/V0/basis.dump.diff	bytes
+DIFF	tests_rv4	identity/c1_pre_tx/V0/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	identity/c1_pre_tx/V0/basis.txt	1 lines differ: 1; e.g. line 1: basis d233b3920d4303627f70686ab351a7f5ad09c3cf79678d42b2602d5b3f8b4a33 -> basis bf4c1bb6650f86401ee2219d699cf82e4c24b82aff75ba0843deeff7c471638b
+DIFF	tests_rv4	identity/c1_pre_tx/V0/extract.txt	1 lines differ: 1; e.g. line 1: facts e034be6513d289eab736c5c0af59e6117021571c2d03a5d4501e51a815e1d533 -> facts 94a975a682463333086d23948306682a8eb098608cfde220a5b25799512e1620
+DIFF	tests_rv4	identity/c1_pre_tx/V0/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=d233b3920d4303627f70686ab351a7f5ad09c3cf79678d42b2602d5b3f8b4a33 -> > basis_sha256=bf4c1bb6650f86401ee2219d699cf82e4c24b82aff75ba0843deeff7c471638b
+DIFF	tests_rv4	identity/c1_pre_tx/V0/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_rv4	identity/c1_pre_tx/V0/facts.txt	1 lines differ: 34; e.g. line 34:   extract.units_from = basis d233b3920d430362  (unset) ->   extract.units_from = basis bf4c1bb6650f8640  (unset)
+DIFF	tests_rv4	identity/c1_pre_tx/V0/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: d233b3920d4303627f70686ab351a7f5ad09c3cf79678d42b2602d5b3f8b4a33  basis.kz -> bf4c1bb6650f86401ee2219d699cf82e4c24b82aff75ba0843deeff7c471638b  basis.kz
+DIFF	tests_rv4	identity/c1_pre_tx/V0/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis d233b3920d430362  (unset) -> >   extract.units_from = basis bf4c1bb6650f8640  (unset)
+same	tests_rv4	identity/c1_pre_tx/V2/args.txt	bytes
+same	tests_rv4	identity/c1_pre_tx/V2/basis.dump.diff	bytes
+DIFF	tests_rv4	identity/c1_pre_tx/V2/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	identity/c1_pre_tx/V2/basis.txt	1 lines differ: 1; e.g. line 1: basis f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa54ad724ea36a1deed0d9 -> basis 7166e38ac5bedcd46a2fdcd0a583e5b757ed39efd9e122c9c60523d4146d3509
+DIFF	tests_rv4	identity/c1_pre_tx/V2/extract.txt	1 lines differ: 1; e.g. line 1: facts 87cbdb9c219a12bd9f84bd8d00f10798bfcfdbe0a8e2a443dbdd1f6b4d27a256 -> facts 5fe5e34732eec79c9bd25583735fac71ecc017cabdf715d746dea426ec587ecf
+DIFF	tests_rv4	identity/c1_pre_tx/V2/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa54ad724ea36a1deed0d9 -> > basis_sha256=7166e38ac5bedcd46a2fdcd0a583e5b757ed39efd9e122c9c60523d4146d3509
+DIFF	tests_rv4	identity/c1_pre_tx/V2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_rv4	identity/c1_pre_tx/V2/facts.txt	1 lines differ: 50; e.g. line 50:   extract.units_from = basis f3daeaee0d0339a4  (unset) ->   extract.units_from = basis 7166e38ac5bedcd4  (unset)
+DIFF	tests_rv4	identity/c1_pre_tx/V2/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa54ad724ea36a1deed0d9  basis.kz -> 7166e38ac5bedcd46a2fdcd0a583e5b757ed39efd9e122c9c60523d4146d3509  basis.kz
+DIFF	tests_rv4	identity/c1_pre_tx/V2/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis f3daeaee0d0339a4  (unset) -> >   extract.units_from = basis 7166e38ac5bedcd4  (unset)
+same	tests_rv4	identity/c5_641/V0/args.txt	bytes
+same	tests_rv4	identity/c5_641/V0/basis.dump.diff	bytes
+DIFF	tests_rv4	identity/c5_641/V0/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	identity/c5_641/V0/basis.txt	1 lines differ: 5; e.g. line 5: basis 33de0e1f01bc781cf49bc15e05d673388605746225635b059938e86d84647608 -> basis 7b2596a664de9cbe2d461569dda2c7bac410c97e5265911603fda6ad8813c811
+DIFF	tests_rv4	identity/c5_641/V0/extract.txt	1 lines differ: 1; e.g. line 1: facts b4a5ab86c048704ae81a4e6be5b058e47a793475f4314726a5e8b0f796e46d41 -> facts a3a97ed96ff3e5d5773f722488e2247079a99f929a1efe7cf589afb7a015749c
+DIFF	tests_rv4	identity/c5_641/V0/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=33de0e1f01bc781cf49bc15e05d673388605746225635b059938e86d84647608 -> > basis_sha256=7b2596a664de9cbe2d461569dda2c7bac410c97e5265911603fda6ad8813c811
+DIFF	tests_rv4	identity/c5_641/V0/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_rv4	identity/c5_641/V0/facts.txt	1 lines differ: 34; e.g. line 34:   extract.units_from = basis 33de0e1f01bc781c  (unset) ->   extract.units_from = basis 7b2596a664de9cbe  (unset)
+DIFF	tests_rv4	identity/c5_641/V0/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 33de0e1f01bc781cf49bc15e05d673388605746225635b059938e86d84647608  basis.kz -> 7b2596a664de9cbe2d461569dda2c7bac410c97e5265911603fda6ad8813c811  basis.kz
+DIFF	tests_rv4	identity/c5_641/V0/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis 33de0e1f01bc781c  (unset) -> >   extract.units_from = basis 7b2596a664de9cbe  (unset)
+same	tests_rv4	identity/c5_641/V2/args.txt	bytes
+same	tests_rv4	identity/c5_641/V2/basis.dump.diff	bytes
+DIFF	tests_rv4	identity/c5_641/V2/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	identity/c5_641/V2/basis.txt	1 lines differ: 7; e.g. line 7: basis fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995fd599314893c00b69b81 -> basis 47174ee150ecf06f23136f69cb4b93924cc3d3f757d77a0c0d67056acbac799e
+DIFF	tests_rv4	identity/c5_641/V2/extract.txt	1 lines differ: 3; e.g. line 3: facts e2da6643c538b2cc3288f8df55fd0077f0d923d6c7fd1cb5c760a9908c3e89ba -> facts c1d093651a2dedc482415c88821145cd3ef89dc1ce1abee7d1220543e76f605a
+DIFF	tests_rv4	identity/c5_641/V2/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995fd599314893c00b69b81 -> > basis_sha256=47174ee150ecf06f23136f69cb4b93924cc3d3f757d77a0c0d67056acbac799e
+DIFF	tests_rv4	identity/c5_641/V2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_rv4	identity/c5_641/V2/facts.txt	1 lines differ: 40; e.g. line 40:   extract.units_from = basis fef008e12c1c7317  (unset) ->   extract.units_from = basis 47174ee150ecf06f  (unset)
+DIFF	tests_rv4	identity/c5_641/V2/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995fd599314893c00b69b81  basis.kz -> 47174ee150ecf06f23136f69cb4b93924cc3d3f757d77a0c0d67056acbac799e  basis.kz
+DIFF	tests_rv4	identity/c5_641/V2/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis fef008e12c1c7317  (unset) -> >   extract.units_from = basis 47174ee150ecf06f  (unset)
+DIFF	tests_rv4	identity/identity.txt	lines 146 vs 176; 26 hunks; first: replace ref 1-2 new 1-2
+same	tests_rv4	identity/r2_core/V0/args.txt	bytes
+same	tests_rv4	identity/r2_core/V0/basis.dump.diff	bytes
+DIFF	tests_rv4	identity/r2_core/V0/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	identity/r2_core/V0/basis.txt	1 lines differ: 1; e.g. line 1: basis d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55d69e97e56a334dddf19 -> basis 7d413be420d12676c01b60c6513cedcf7b59eb34f7a23318cae4cfc141c92523
+DIFF	tests_rv4	identity/r2_core/V0/extract.txt	1 lines differ: 1; e.g. line 1: facts 20134bd091a74cfa07b65f33a65bdc814c5ea4e4ee317a0737d5086092ce9677 -> facts 606f234ded74604ee13b019f512ffcef40098028bb2fa2d0a9ab2a8ca5c74fa4
+DIFF	tests_rv4	identity/r2_core/V0/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55d69e97e56a334dddf19 -> > basis_sha256=7d413be420d12676c01b60c6513cedcf7b59eb34f7a23318cae4cfc141c92523
+DIFF	tests_rv4	identity/r2_core/V0/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_rv4	identity/r2_core/V0/facts.txt	1 lines differ: 34; e.g. line 34:   extract.units_from = basis d4e74dbea8589182  (unset) ->   extract.units_from = basis 7d413be420d12676  (unset)
+DIFF	tests_rv4	identity/r2_core/V0/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55d69e97e56a334dddf19  basis.kz -> 7d413be420d12676c01b60c6513cedcf7b59eb34f7a23318cae4cfc141c92523  basis.kz
+DIFF	tests_rv4	identity/r2_core/V0/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis d4e74dbea8589182  (unset) -> >   extract.units_from = basis 7d413be420d12676  (unset)
+same	tests_rv4	identity/r2_core/V2/args.txt	bytes
+same	tests_rv4	identity/r2_core/V2/basis.dump.diff	bytes
+DIFF	tests_rv4	identity/r2_core/V2/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	identity/r2_core/V2/basis.txt	1 lines differ: 1; e.g. line 1: basis efa325b26be1232d0de82501e4fc7e39690319150d2b821ab593e11756b462fa -> basis 06d02399aef135f8186fea9e4a8c83fb24e3343f56445f0ec06bdf76c59393c2
+DIFF	tests_rv4	identity/r2_core/V2/extract.txt	1 lines differ: 1; e.g. line 1: facts f0136baef1fc7292b1e22543ca2331ca4036768248c0c690ade5b143b5eb5032 -> facts 3dcc3d1561c6b94527de982e21b6258d66d759e73f1777da24db682da8c5a713
+DIFF	tests_rv4	identity/r2_core/V2/facts.dump.diff	4 lines differ: 4,8,12,20; e.g. line 4: > basis_sha256=efa325b26be1232d0de82501e4fc7e39690319150d2b821ab593e11756b462fa -> > basis_sha256=06d02399aef135f8186fea9e4a8c83fb24e3343f56445f0ec06bdf76c59393c2
+DIFF	tests_rv4	identity/r2_core/V2/facts.kz	HEADER artifact_sha256,basis_sha256,parent[0],tool_sha256; section lines 1: STRINGS(crc32); BASIS records changed extract.units_from; removed -; added -
+DIFF	tests_rv4	identity/r2_core/V2/facts.txt	1 lines differ: 44; e.g. line 44:   extract.units_from = basis efa325b26be1232d  (unset) ->   extract.units_from = basis 06d02399aef135f8  (unset)
+DIFF	tests_rv4	identity/r2_core/V2/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: efa325b26be1232d0de82501e4fc7e39690319150d2b821ab593e11756b462fa  basis.kz -> 06d02399aef135f8186fea9e4a8c83fb24e3343f56445f0ec06bdf76c59393c2  basis.kz
+DIFF	tests_rv4	identity/r2_core/V2/show.diff	1 lines differ: 4; e.g. line 4: >   extract.units_from = basis efa325b26be1232d  (unset) -> >   extract.units_from = basis 06d02399aef135f8  (unset)
+DIFF	tests_rv4	npsame/c1_post_tx/extract.txt	1 lines differ: 1; e.g. line 1: facts 764edb56915037b009415a88195b51a55d1a834cf16dcfb2a6629e4e3eace716 -> facts 7410948cea6fb45471f70cc37c5eb804d85b526cce59229786342525a3fbb87a
+DIFF	tests_rv4	npsame/c1_pre_tx/extract.txt	1 lines differ: 1; e.g. line 1: facts 72fd8b276e3ea924ad262ad6ed10a5dec9142e2a7258849f1cda40a5d3913bb0 -> facts 286146e86b258f7c4f8cbcc0d4566b71fce480f1e8aa1ebb2d023d82cf995b5d
+DIFF	tests_rv4	npsame/c5_641/extract.txt	1 lines differ: 1; e.g. line 1: facts bf934e635cd5c9d8b344e6af666bebe69e5a8e2fe7eddf51340a35234783ec04 -> facts 4d9bd2346600693e7620e0c87d378e3912f33359be82ffb7a953117c15ab2dc1
+DIFF	tests_rv4	npsame/c5_642/extract.txt	1 lines differ: 1; e.g. line 1: facts bb2d3101089af37e2b26ae6e70516f2961716f9af7e0590981b9ed0ad9fdfaa6 -> facts 6551332c4737705005b55aa42c50d3a014416b01ccdbe0f8a290709dc084b9c3
+DIFF	tests_rv4	npsame/npsame.txt	lines 121 vs 199; 10 hunks; first: replace ref 3-22 new 3-41
+DIFF	tests_rv4	npsame/r2_core/extract.txt	1 lines differ: 1; e.g. line 1: facts 649c696ed5a69b78f7bbc75760da32e1970514260774e4277264035de05d81c0 -> facts 034d1e7a48b095edd58fcd796d2162e89266e2acc153f7724b6c84a3b95a026f
+same	tests_rv4	r2_core/NP/args.txt	bytes
+DIFF	tests_rv4	r2_core/NP/basis.kz	HEADER artifact_sha256,tool_sha256
+DIFF	tests_rv4	r2_core/NP/basis.txt	1 lines differ: 1; e.g. line 1: basis 70d6e14a387f5886a7bcb5267f4a6f0f70cb424c1560d5324311e14e9bfa4760 -> basis c55ca7b9f9876d345ab8fb833f14d07dc3cca61eb6356cbfdc495a5e536f70ea
+DIFF	tests_rv4	r2_core/NP/extract.txt	1 lines differ: 1; e.g. line 1: facts 55021411c8d8b14b0a6a50450ef517487cd3f6edd4bca74802ec553ead8ba3b3 -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests_rv4	r2_core/NP/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 37: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) STATIC_IMAGE(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) LOOP_ITERS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+DIFF	tests_rv4	r2_core/NP/facts.txt	2 lines differ: 344,362; e.g. line 344:   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting ->   count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting
+same	tests_rv4	r2_core/NP/relations.log	bytes
+DIFF	tests_rv4	r2_core/NP/relations.txt	1 lines differ: 2; e.g. line 2: facts 55021411c8d8b14b0a6a50450ef517487cd3f6edd4bca74802ec553ead8ba3b3 -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests_rv4	r2_core/NP/sha256.txt	3 lines differ: 1,2,5; e.g. line 1: 70d6e14a387f5886a7bcb5267f4a6f0f70cb424c1560d5324311e14e9bfa4760  basis.kz -> c55ca7b9f9876d345ab8fb833f14d07dc3cca61eb6356cbfdc495a5e536f70ea  basis.kz
+DIFF	tests_rv4	r2_core/NP2/extract.txt	1 lines differ: 1; e.g. line 1: facts 55021411c8d8b14b0a6a50450ef517487cd3f6edd4bca74802ec553ead8ba3b3 -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests_rv4	r2_core/NP2/facts.kz	HEADER artifact_sha256,basis_sha256,container.size,parent[0],tool_sha256; section lines 37: STRINGS(count/crc32) BASIS(crc32) FILE_HASHES(crc32) PROVENANCE(crc32) FACTS(crc32) FACT_ARGS(crc32) FACT_EXPRS(crc32) FACT_LOOPS(crc32) FACT_INIT(crc32) FACT_CONSTS(crc32) FACT_ATYPE(crc32) WRITERS(crc32) FUNCS(crc32) CALL_TARGETS(crc32) STATIC_IMAGE(crc32) FACT_LOCS(crc32) TERMINALS(crc32) OUTCALLS(crc32) LOOP_ITERS(crc32) SPAWN_PARAMS(crc32) FUNC_WRITES(crc32) P0_TABLE(crc32) OP_DERIV(crc32) SPAWN_WRAP(crc32) READS(crc32) RETURNS(crc32) RET_CONSTS(crc32) LOOP_EXITS(crc32) ARGFLOW(crc32) PARAM_FLOW(crc32) PTR_FIELDS(crc32) GLOBAL_IMAGES(crc32) LOCK_OPS(crc32) LOCK_IDS(crc32) LOCKSET(crc32) FIELD_STATUS(crc32) AWAIT_L1(crc32); BASIS records changed count.walk_bounds_hit,extract.units_from; removed -; added -
+same	tests_rv4	r2_core/NP2/relations.log	bytes
+DIFF	tests_rv4	r2_core/NP2/relations.txt	1 lines differ: 2; e.g. line 2: facts 55021411c8d8b14b0a6a50450ef517487cd3f6edd4bca74802ec553ead8ba3b3 -> facts b2359c3ecfe2d033f8d59b85ac6241bc31098d3b58a4cce46fa62224a206f33e
+DIFF	tests_rv4	run.log	11 lines differ: 1,2,3,4,5,6,7,8,9,10,11; e.g. line 1: /home/user/work/redesign/step2a/tests_rv4/identity/c1_pre_tx/V0 basis=0 extract=0 show=0 relations=- basis_s=0.5 extract -> /home/user/work/redesign/step2a/tests_8b_fix/identity/c1_pre_tx/V0 basis=0 extract=0 show=0 relations=- basis_s=0.2 extr
+DIFF	tests_rv4	s5same/s5same.txt	lines 121 vs 219; 10 hunks; first: replace ref 3-22 new 3-45
+DIFF	tests_rv4	sha256.txt	102 lines differ: 2,3,4,5,6,8,9,10,12,14,15,16,17,18,20,21,22,24,26,27,28,29,30,32,33,34,36,38,39,40,...; e.g. line 2: e427aaf2a642d16ad8a1dece87de6148799005e552f11690bfb210947df881ca  ./c1_post_tx/NP/basis.kz -> 7c7edf1de4c68e3f77e2b2c72d89bc8ddbc7e3b1c6208c3de4e9f14f9a589a2c  ./c1_post_tx/NP/basis.kz
+DIFF	tests_rv4	status.txt	40 lines differ: 1,2,3,5,8,9,11,12,13,14,15,16,17,19,20,22,23,25,26,28,29,31,32,34,35,36,37,38,39,40,...; e.g. line 1: # step2a_tests.sh all 2026-11-09T11:00:03Z -> # step2a_tests.sh all 2026-11-10T08:06:44Z
+DIFF	tests_rv4	twice.txt	5 lines differ: 1,2,3,4,5; e.g. line 1: c1_pre_tx facts twice: same (a26d580fd54406ad); relations twice: same (32fe9b341c4b6768) -> c1_pre_tx facts twice: same (c94c1d40912d02e0); relations twice: same (22841917332de1ed)
+DIFF	tests_rv4	twice_detail.txt	5 lines differ: 1,2,3,4,5; e.g. line 1: c1_pre_tx extract=0 relations=0 facts NP a26d580fd54406addf66d94c9da9b1ab11018c7565e663f9a93fcd05b4ce2791 NP2 a26d580fd5 -> c1_pre_tx extract=0 relations=0 facts NP c94c1d40912d02e0693a49e35fd6e836e7319e19e3bd953d375c97a6001d96ba NP2 c94c1d4091

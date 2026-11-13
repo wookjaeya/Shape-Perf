@@ -1,0 +1,77 @@
+# c1_post_1df262a.kzs -- logical sites of case C1 for the stage C compiler-binding fitness check (kzs-sites 1,
+# kairos/docs/event_semantics.md section 3).  Configuration: CF 833fdbb (post-fix) + BP b051eb0 on cFS bundle
+# candidate 1df262a (plan/C1_build_manifest.md section 1).  The same logical sites for the three candidates
+# (GCC plugin, Clang source rewrite, LLVM pass); the labels are those of the F0 plan
+# kairos/profiles/c1-bp-b051eb0/observe/sites-cf833fdbb.kzp where the meaning is the same; ".before" labels are
+# new (F0 reads these values at the callee's entry, after the call has started).
+#
+# Line numbers are those of the files at the source revisions below.  The values are the operands the
+# original code uses at the site: call arguments, the call's result, and an out parameter read by the same
+# thread right after the call (from=out<k>, event_semantics.md 8.1).  Strings are copied only from the two
+# semaphore-name slots, whose memory is a char array of known size in the caller's table (string=validated,
+# the bound is the array size).  Pointers are recorded as numbers.  Nothing here is a research condition.
+kzs-sites 1
+source cfs-bundle rev=1df262a64a09f128357482d8f2e06b0fdfe84d37 ref="plan/C1_build_manifest.md section 1 (candidate A)"
+source cfe rev=6cccb3f5d10664b5b10aeb9cfcda871ba2d99b32 ref="gitlink of the bundle (plan/C1_build_manifest.md section 1)"
+source osal rev=f34759d6d6f7087e81afda94eccf7554e013cbe6 ref="gitlink of the bundle"
+source cf rev=833fdbb27a26f15f2429e79392e7eb73d61abdea ref="PR #342 head (plan/C1_build_manifest.md section 1)"
+source bp rev=b051eb0d12bfe76c0230215c2ff851cfaa553ce4 ref="plan/C1_build_manifest.md section 1"
+module 1 name=core source=cfs-bundle
+module 2 name=cf.so source=cf
+module 3 name=bp.so source=bp
+
+# ---- core: creation-side identity (F0 sites-cf833fdbb.kzp "creation-side evidence of app_owner") ----------
+site 1 label=es.start_task.entry op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_StartAppTask line=576 ref="cfe/modules/es/fsw/src/cfe_es_apps.c:576-591"
+value 1 0 role=name_ptr from=arg1 type=ptr ref="cfe_es_apps.c:576 const char *TaskName"
+value 1 1 role=entry_fn from=arg2 type=ptr ref="cfe_es_apps.c:576 EntryFunc"
+value 1 2 role=owner_id from=arg4 type=u32 ref="cfe_es_apps.c:619 TaskRecPtr->AppId = ParentAppId"
+site 2 label=es.start_task.ret op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_apps.c:576"
+value 2 0 role=status from=ret type=s32
+site 3 label=es.child_task.entry op=es.child_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask line=1247 ref="cfe/modules/es/fsw/src/cfe_es_api.c:1247-1249, owner 1302-1329"
+value 3 0 role=name_ptr from=arg1 type=ptr
+value 3 1 role=entry_fn from=arg2 type=ptr
+site 4 label=es.child_task.ret op=es.child_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask ref="cfe/modules/es/fsw/src/cfe_es_api.c:1247"
+value 4 0 role=status from=ret type=s32
+site 5 label=osal.task_create.entry op=osal.task_create phase=before tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskCreate line=164 ref="osal/src/os/shared/src/osapi-task.c:164-200"
+value 5 0 role=name_ptr from=arg1 type=ptr
+value 5 1 role=entry_fn from=arg2 type=ptr
+value 5 2 role=priority from=arg5 type=u8 ref="osal/src/os/inc/osapi-task.h:44 typedef uint8_t osal_priority_t"
+site 6 label=osal.task_create.ret op=osal.task_create phase=after tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskCreate ref="osal/src/os/shared/src/osapi-task.c:164"
+value 6 0 role=status from=ret type=s32
+site 7 label=osal.task_entry op=osal.task_entry phase=before tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskEntryPoint line=124 ref="osal/src/os/shared/src/osapi-task.c:124-140"
+value 7 0 role=task_id from=arg0 type=u32 ref="osal/src/os/inc/common_types.h:108 typedef uint32 osal_id_t"
+# The id OS_TaskCreate assigns, where it is passed to the new thread (the 5th argument entry_arg; its low 4 bytes
+# are OS_VoidPtrValueWrapper_t.id on this little-endian target).
+site 8 label=osal.task_create.id op=osal.task_create phase=before tu=osal/src/os/posix/src/os-impl-tasks.c func=OS_Posix_InternalTaskCreate_Impl line=434 ref="osal/src/os/posix/src/os-impl-tasks.c:434-435, 571-590"
+value 8 0 role=task_id from=arg4 type=u32 ref="osal/src/os/shared/inc/os-shared-globaldefs.h:70-77 union OS_VoidPtrValueWrapper_t { void *opaque_arg; ... osal_id_t id; }"
+value 8 1 role=entry_fn from=arg3 type=ptr
+# The exit of an application (CF on its init failure; post-fix CF does not exit in the F0 records).
+site 9 label=es.exit_app.entry op=es.exit_app phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_ExitApp line=340 ref="cfe/modules/es/fsw/src/cfe_es_api.c:340"
+value 9 0 role=exit_status from=arg0 type=u32
+
+# ---- cf.so: the dependent lookup in its caller (CF_CFDP_InitEngine, the retry loop of 833fdbb) --------------
+site 20 label=cf_lookup_call.before op=osal.countsem_lookup phase=before tu=cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_CountSemGetIdByName line=1003 ref="cf/fsw/src/cf_cfdp.c:1003-1004"
+value 20 0 role=sem_id_ptr from=arg0 type=ptr
+value 20 1 role=sem_name from=arg1 type=ptr string=validated bound=20 ref="cf/fsw/src/cf_tbldefs.h:74 char sem_name[OS_MAX_API_NAME]; OS_MAX_API_NAME 20 (generated osconfig.h L163, plan/C1_build_manifest.md section 6); cf_cfdp.c:991 tests sem_name[0]"
+control 20 ctx=task ref="CF main task in CF_Init; no lock is held at cf_cfdp.c:1003" note="gate placement of the C1 hold plans (docs/c1_hold_runs.md)"
+site 21 label=cf_lookup_call op=osal.countsem_lookup phase=after tu=cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_CountSemGetIdByName line=1003 ref="cf/fsw/src/cf_cfdp.c:1003-1007"
+value 21 0 role=status from=ret type=s32 ref="osal/src/os/inc/osapi-countsem.h:147-162 the documented results"
+value 21 1 role=sem_id from=out0 type=u32 ref="CF_AppData.engine.channels[i].sem_id, CF's own table"
+site 22 label=cf_retry_delay op=osal.task_delay phase=after tu=cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_TaskDelay line=1011 ref="cf/fsw/src/cf_cfdp.c:1000-1012"
+value 22 0 role=status from=ret type=s32
+
+# ---- bp.so: the provider (initialize_throttling, static, called only from BP_FlowInit) --------------------
+site 30 label=bp_existence_probe_call.before op=osal.countsem_lookup phase=before tu=bp/fsw/src/bp_flow.c func=initialize_throttling callee=OS_CountSemGetIdByName line=126 ref="bp/fsw/src/bp_flow.c:121-144"
+value 30 0 role=sem_id_ptr from=arg0 type=ptr
+value 30 1 role=sem_name from=arg1 type=ptr string=validated bound=20 ref="bp/fsw/src/bp_flow.h:56 const char Name[BP_SEM_NAME_SIZE]; bp_flow.h:43 BP_SEM_NAME_SIZE OS_MAX_API_NAME (20)"
+site 31 label=bp_existence_probe_call op=osal.countsem_lookup phase=after tu=bp/fsw/src/bp_flow.c func=initialize_throttling callee=OS_CountSemGetIdByName line=126 ref="bp/fsw/src/bp_flow.c:126-127"
+value 31 0 role=status from=ret type=s32
+value 31 1 role=sem_id from=out0 type=u32
+site 32 label=bp_create_call.before op=osal.countsem_create phase=before tu=bp/fsw/src/bp_flow.c func=initialize_throttling callee=OS_CountSemCreate line=132 ref="bp/fsw/src/bp_flow.c:132-133"
+value 32 0 role=sem_id_ptr from=arg0 type=ptr
+value 32 1 role=sem_name from=arg1 type=ptr string=validated bound=20 ref="bp/fsw/src/bp_flow.h:56, 43"
+value 32 2 role=sem_initial_value from=arg2 type=u32 ref="bp_flow.c:133 BP_GlobalData.Throttles[index].Max"
+control 32 ctx=task ref="BP main task in BP_FlowInit; no lock is held at bp_flow.c:132" note="gate placement of the C1 hold plans (docs/c1_hold_runs.md)"
+site 33 label=bp_create_call op=osal.countsem_create phase=after tu=bp/fsw/src/bp_flow.c func=initialize_throttling callee=OS_CountSemCreate line=132 ref="bp/fsw/src/bp_flow.c:132-134"
+value 33 0 role=status from=ret type=s32
+value 33 1 role=sem_id from=out0 type=u32

@@ -1,0 +1,41 @@
+# descry: glibc syscall-visibility check 2026-10-08T01:32:31Z
+# PURPOSE: supports the observation-model ANALYSIS in descry.md section 6. It is NOT a DESCRY run and NOT a cFS run.
+# DESCRY models schedule events as system calls (paper p3 Sec.2.2; p7 Sec.6). This checks which OSAL-POSIX primitives produce syscalls at all.
+# source: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/descry_sysvis/prims.c ; gcc 13.3.0 ; glibc 2.39
+## gcc -O0 -pthread prims.c -o prims -lrt
+exit=0
+## strace -f -e trace=!mmap,mprotect,munmap,brk,arch_prctl,set_tid_address,set_robust_list,rseq,prlimit64,getrandom,newfstatat,openat,read,close,pread64,execve,access,fstat ./prims  (loader noise filtered; marker writes kept)
+write(2, "M1 sem_init\n", 12M1 sem_init
+)           = 12
+write(2, "M2 sem_post\n", 12M2 sem_post
+)           = 12
+write(2, "M3 mutex+table write\n", 21M3 mutex+table write
+)  = 21
+write(2, "M4 pthread_create\n", 18M4 pthread_create
+)     = 18
+rt_sigaction(SIGRT_1, {sa_handler=0x7fc644499610, sa_mask=[], sa_flags=SA_RESTORER|SA_ONSTACK|SA_RESTART|SA_SIGINFO, sa_restorer=0x7fc644445330}, NULL, 8) = 0
+rt_sigprocmask(SIG_UNBLOCK, [RTMIN RT_1], NULL, 8) = 0
+rt_sigprocmask(SIG_BLOCK, ~[], [], 8)   = 0
+clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc6443ff990, parent_tid=0x7fc6443ff990, exit_signal=0, stack=0x7fc643bff000, stack_size=0x7fff80, tls=0x7fc6443ff6c0}strace: Process 10624 attached
+ => {parent_tid=[10624]}, 88) = 10624
+[pid 10623] rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+[pid 10623] write(2, "M5 pthread_join\n", 16M5 pthread_join
+) = 16
+[pid 10624] rt_sigprocmask(SIG_SETMASK, [],  <unfinished ...>
+[pid 10623] futex(0x7fc6443ff990, FUTEX_WAIT_BITSET|FUTEX_CLOCK_REALTIME, 10624, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+[pid 10624] <... rt_sigprocmask resumed>NULL, 8) = 0
+[pid 10624] rt_sigprocmask(SIG_BLOCK, ~[RT_1], NULL, 8) = 0
+[pid 10624] madvise(0x7fc643bff000, 8368128, MADV_DONTNEED) = 0
+[pid 10624] exit(0)                     = ?
+[pid 10624] +++ exited with 0 +++
+<... futex resumed>)                    = 0
+write(2, "M6 mq_open\n", 11M6 mq_open
+)            = 11
+mq_open("descry_sysvis_q", O_RDWR|O_CREAT, 0600, {mq_flags=0, mq_maxmsg=4, mq_msgsize=16, mq_curmsgs=0}) = 3
+write(2, "M7 mq_close+unlink\n", 19M7 mq_close+unlink
+)    = 19
+mq_unlink("descry_sysvis_q")            = 0
+write(2, "M8 end\n", 7M8 end
+)                 = 7
+exit_group(0)                           = ?
++++ exited with 0 +++

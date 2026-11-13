@@ -1,0 +1,7 @@
+# 05_consts.kzp -- the retry constants of CF 833fdbb (they do not exist at 281a941).  The W3 builds
+# evaluate them to 25 and 100 (plan/C1_build_manifest.md 6); they are read here from the cited lines and
+# are values of this revision only (plan/C1_basis_plan.md 9.7: never carried to another revision).
+phi 1;
+
+const CF_STARTUP_SEM_MAX_RETRIES = 25 prov cf_platform_retries;
+const CF_STARTUP_SEM_TASK_DELAY = 100 prov cf_platform_delay;

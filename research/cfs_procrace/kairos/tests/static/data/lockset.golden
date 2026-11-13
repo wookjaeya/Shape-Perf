@@ -1,0 +1,154 @@
+extract
+  translation units          1
+  functions                  26 (bodies read 20, in system headers skipped 0)
+  call sites                 41
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                1 (entry resolved 0)
+  loops                      3 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 1, await 0, star-closed 2
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        1 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        13 (built-in data-function table 12, command line 1)
+  declared assumptions       0 (static images of table-walk links that are not const)
+facts-view 1
+[functions] 26
+  fn 0 fx_app_create lockset.c:90-101 params=1 {defined}
+  fn 1 fx_bytes lockset.c:170-170 params=1 {defined}
+  fn 2 fx_create lockset.c:46-49 params=1 {defined}
+  fn 3 fx_delay lockset.c:125-130 params=1 {defined}
+  fn 4 fx_expose lockset.c:168-168 params=0 {defined}
+  fn 5 fx_get_id lockset.c:80-86 params=1 {defined}
+  fn 6 fx_get_internal lockset.c:66-66 params=1 {defined}
+  fn 7 fx_give lockset.c:38-42 params=1 {defined}
+  fn 8 fx_is_used lockset.c:123-123 params=1 {defined}
+  fn 9 fx_keep lockset.c:21 params=1 {}
+  fn 10 fx_lock_shared lockset.c:68-74 params=0 {defined}
+  fn 11 fx_log lockset.c:20 params=1 {}
+  fn 12 fx_other_reader lockset.c:105-111 params=0 {defined}
+  fn 13 fx_set_other lockset.c:103-103 params=1 {defined}
+  fn 14 fx_spawn lockset.c:172-172 params=1 {defined}
+  fn 15 fx_spin_count lockset.c:147-159 params=0 {defined}
+  fn 16 fx_take lockset.c:30-36 params=1 {defined}
+  fn 17 fx_try_reader lockset.c:113-120 params=0 {defined}
+  fn 18 fx_try_take lockset.c:44-44 params=1 {defined}
+  fn 19 fx_unlock_shared lockset.c:76-78 params=0 {defined}
+  fn 20 fx_wait_state lockset.c:132-144 params=1 {defined}
+  fn 21 main lockset.c:174-188 params=0 {defined}
+  fn 22 nanosleep lockset.c:19 params=2 {}
+  fn 23 pthread_mutex_lock lockset.c:16 params=1 {}
+  fn 24 pthread_mutex_trylock lockset.c:17 params=1 {}
+  fn 25 pthread_mutex_unlock lockset.c:18 params=1 {}
+[lockops] 8
+  fx_give release result-conditional success=0 lock &fx_mtab[$0].id may=fx_mrec.id {vocabulary,assumes-success,parameter-identity} via site 1 lockset.c:40:7 depth=1
+      chain fx_give -> pthread_mutex_unlock
+  fx_lock_shared acquire every-return lock &fx_mtab[fx_g.mutex].id may=fx_mrec.id {vocabulary,assumes-success} via site 3 lockset.c:69:11 depth=2
+      chain fx_lock_shared -> fx_take -> pthread_mutex_lock
+  fx_take acquire result-conditional success=0 lock &fx_mtab[$0].id may=fx_mrec.id {vocabulary,assumes-success,parameter-identity} via site 0 lockset.c:33:8 depth=1
+      chain fx_take -> pthread_mutex_lock
+  fx_try_take acquire try success=0 lock &fx_mtab[$0].id may=fx_mrec.id {parameter-identity} via site 2 lockset.c:44:38 depth=1
+      chain fx_try_take -> pthread_mutex_trylock
+  fx_unlock_shared release every-return lock &fx_mtab[fx_g.mutex].id may=fx_mrec.id {vocabulary,assumes-success} via site 6 lockset.c:77:7 depth=2
+      chain fx_unlock_shared -> fx_give -> pthread_mutex_unlock
+  pthread_mutex_lock acquire result-conditional success=0 lock $0 {primitive-op,vocabulary,assumes-success,parameter-identity}
+      chain pthread_mutex_lock
+  pthread_mutex_trylock acquire try success=0 lock $0 {primitive-op,parameter-identity}
+      chain pthread_mutex_trylock
+  pthread_mutex_unlock release every-return lock $0 {primitive-op,vocabulary,parameter-identity}
+      chain pthread_mutex_unlock
+[lockids] 2
+  #0 &fx_mtab[fx_g.mutex].id closed static-instance {address-of-global,reads-value} may=fx_mrec.id value-of=fx_shared.mutex object=fx_g writer-instances=1
+  #1 &fx_mtab[fx_g.other].id closed not-static {reads-value} may=fx_mrec.id value-of=fx_shared.other object=fx_g writer-instances=1 (fx_shared.other: 1 writer instance(s), not one that runs once)
+[lockset] 70
+  call site 0 lockset.c:33:8 in fx_take held=0 {}
+  call site 1 lockset.c:40:7 in fx_give held=0 {}
+  call site 2 lockset.c:44:38 in fx_try_take held=0 {}
+  call site 3 lockset.c:69:11 in fx_lock_shared held=0 {}
+  call site 4 lockset.c:71:11 in fx_lock_shared held=0 {failure-path}
+  call site 5 lockset.c:72:5 in fx_lock_shared held=0 {failure-path}
+  call site 6 lockset.c:77:7 in fx_unlock_shared held=0 {}
+  call site 7 lockset.c:77:33 in fx_unlock_shared held=0 {failure-path}
+  call site 8 lockset.c:82:3 in fx_get_id held=0 {}
+  call site 9 lockset.c:84:3 in fx_get_id held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:82:3] {}
+  call site 10 lockset.c:91:3 in fx_app_create held=0 {}
+  call site 11 lockset.c:93:3 in fx_app_create held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:91:3] {}
+  call site 12 lockset.c:94:7 in fx_app_create held=0 {}
+  call site 13 lockset.c:95:3 in fx_app_create held=0 {}
+  call site 14 lockset.c:98:9 in fx_app_create held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:95:3] {}
+  call site 15 lockset.c:99:3 in fx_app_create held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:95:3] {}
+  call site 16 lockset.c:107:9 in fx_other_reader held=0 {}
+  call site 17 lockset.c:109:9 in fx_other_reader held=1 [#1 &fx_mtab[fx_g.other].id] acquired-at=[lockset.c:107:9] {}
+  call site 18 lockset.c:115:7 in fx_try_reader held=0 {}
+  call site 19 lockset.c:117:11 in fx_try_reader held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:115:7] {}
+  call site 20 lockset.c:129:9 in fx_delay held=0 {}
+  call site 22 lockset.c:136:5 in fx_wait_state held=0 {}
+  call site 24 lockset.c:138:11 in fx_wait_state held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:136:5] {}
+  call site 25 lockset.c:139:5 in fx_wait_state held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:136:5] {}
+  call site 26 lockset.c:141:5 in fx_wait_state held=0 {}
+  call site 28 lockset.c:149:5 in fx_spin_count held=0 {}
+  call site 29 lockset.c:151:7 in fx_spin_count held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:149:5] {}
+  call site 30 lockset.c:155:5 in fx_spin_count held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:149:5] {}
+  call site 31 lockset.c:156:5 in fx_spin_count held=0 {}
+  call site 32 lockset.c:168:24 in fx_expose held=0 {}
+  call site 33 lockset.c:175:9 in main held=0 {}
+  call site 34 lockset.c:176:3 in main held=0 {}
+  call site 35 lockset.c:177:3 in main held=0 {}
+  call site 36 lockset.c:179:3 in main held=0 {}
+  call site 37 lockset.c:180:3 in main held=0 {}
+  call site 38 lockset.c:181:9 in main held=0 {}
+  call site 39 lockset.c:182:9 in main held=0 {}
+  call site 40 lockset.c:183:9 in main held=0 {}
+  call site 41 lockset.c:184:9 in main held=0 {}
+  call site 42 lockset.c:185:9 in main held=0 {}
+  call site 43 lockset.c:186:9 in main held=0 {}
+  read read 0 at lockset.c:32:29 in fx_take held=0 {}
+  read read 1 at lockset.c:39:29 in fx_give held=0 {}
+  read read 2 at lockset.c:66:45 in fx_get_internal held=0 {}
+  read read 3 at lockset.c:69:24 in fx_lock_shared held=0 {}
+  read read 4 at lockset.c:77:20 in fx_unlock_shared held=0 {}
+  read read 5 at lockset.c:83:12 in fx_get_id held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:82:3] {}
+  read read 6 at lockset.c:107:22 in fx_other_reader held=0 {}
+  read read 7 at lockset.c:108:12 in fx_other_reader held=1 [#1 &fx_mtab[fx_g.other].id] acquired-at=[lockset.c:107:9] {}
+  read read 8 at lockset.c:109:22 in fx_other_reader held=1 [#1 &fx_mtab[fx_g.other].id] acquired-at=[lockset.c:107:9] {}
+  read read 9 at lockset.c:115:24 in fx_try_reader held=0 {}
+  read read 10 at lockset.c:116:14 in fx_try_reader held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:115:7] {}
+  read read 11 at lockset.c:117:24 in fx_try_reader held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:115:7] {}
+  read read 12 at lockset.c:123:52 in fx_is_used held=0 {}
+  read read 13 at lockset.c:138:53 in fx_wait_state held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:136:5] {}
+  read read 14 at lockset.c:150:14 in fx_spin_count held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:149:5] {}
+  read read 15 at lockset.c:187:15 in main held=0 {}
+  write fx_mrec.id at lockset.c:33:27 in fx_take held=0 {}
+  write fx_mrec.id at lockset.c:40:28 in fx_give held=0 {}
+  write fx_mrec.id at lockset.c:44:60 in fx_try_take held=0 {}
+  write fx_app.used at lockset.c:92:3 in fx_app_create held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:91:3] {}
+  write fx_shared.count at lockset.c:97:3 in fx_app_create held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:95:3] {}
+  write fx_shared.other at lockset.c:103:33 in fx_set_other held=0 {}
+  write timespec.tv_sec at lockset.c:127:3 in fx_delay held=0 {}
+  write timespec.tv_nsec at lockset.c:128:3 in fx_delay held=0 {}
+  write fx_shared.count at lockset.c:154:5 in fx_spin_count held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:149:5] {}
+  write fx_pair.b at lockset.c:168:32 in fx_expose held=0 {}
+  write . at lockset.c:170:35 in fx_bytes held=0 {}
+  write fx_shared.mutex at lockset.c:175:19 in main held=0 {}
+  write fx_pair.a at lockset.c:178:3 in main held=0 {}
+[fstatus] 12
+  fx_app.id per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program}
+  fx_app.state per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program}
+  fx_app.used per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program} by fx_app_create
+  fx_mrec.free per-field=writer-set-complete type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program}
+  fx_mrec.id per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 3, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program}
+  fx_pair.a per-field=writer-set-complete type-level=DISABLED writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 1; untyped sites 1 {sibling-exposed,untyped-in-program} by main
+  fx_pair.b per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 1, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program}
+  fx_shared.apps per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program}
+  fx_shared.count per-field=writer-set-complete type-level=writer-set-complete writers=2 (direct 2, data 0, out-pointer 0, init 1) instances=2 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,writer-in-loop,several-instances} by fx_app_create; fx_spin_count
+  fx_shared.mutex per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 0, data 0, out-pointer 1, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program} by main
+  fx_shared.other per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,writer-function-not-once} by fx_set_other
+  fx_shared.tasks per-field=DISABLED type-level=DISABLED writers=1 (direct 0, data 0, out-pointer 1, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,array-element-stores-not-collected} by main
+[awaits] 2
+  loop site 21 lockset.c:134:3 in fx_wait_state relevant=[field:fx_app.state, field:fx_app.used, field:fx_shared.apps] via-callee=[fx_app.used] L1(ii)=one-lock-region lock #0 &fx_mtab[fx_g.mutex].id L1(i) per-field=holds type-level=holds {via-callee,lock-static}
+      per-field: await: L1 (i) and (ii) hold on the extracted facts (relevant locations: 3, functions called from the body: 7); lemma L1 itself is not decided here
+      type-level: await: L1 (i) and (ii) hold on the extracted facts (relevant locations: 3, functions called from the body: 7); lemma L1 itself is not decided here
+  loop site 27 lockset.c:148:3 in fx_spin_count relevant=[field:fx_shared.count] L1(ii)=one-lock-region lock #0 &fx_mtab[fx_g.mutex].id L1(i) per-field=fails type-level=fails {lock-static}
+      per-field: star-closed: L1 (i) fails: the body writes fx_shared.count by fx_spin_count at lockset.c:154:5
+      type-level: star-closed: L1 (i) fails: the body writes fx_shared.count by fx_spin_count at lockset.c:154:5

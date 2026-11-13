@@ -1,0 +1,6 @@
+== hook S1 pid=7805 at 1635 ms since launch, mono=1443.140977
+snapshot /home/user/Shape-Perf/research/cfs_procrace/env/logs/m1_A3_po_fixed30s_esrestart.S1 written (5.5 ms)
+== hook S1 end mono=1443.196420
+== hook S2 pid=7805 at 30007 ms since launch, mono=1471.511873
+snapshot /home/user/Shape-Perf/research/cfs_procrace/env/logs/m1_A3_po_fixed30s_esrestart.S2 written (4.8 ms)
+== hook S2 end mono=1471.564601

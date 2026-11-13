@@ -1,0 +1,93 @@
+extract
+  translation units          1
+  functions                  15 (bodies read 14, in system headers skipped 0)
+  call sites                 14
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                0 (entry resolved 0)
+  loops                      0 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        12 (built-in data-function table 12, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+facts-view 1
+[files] 1
+  0 derives.c 2bcd1fb1c29e 1358
+[functions] 15
+  fn 0 arithmetic derives.c:33-33 params=0 {defined}
+  fn 1 conditional derives.c:27-31 params=1 {defined}
+  fn 2 constant derives.c:41-41 params=0 {defined}
+  fn 3 direct derives.c:14-14 params=0 {defined}
+  fn 4 from_array derives.c:56-56 params=1 {defined}
+  fn 5 from_parameter derives.c:22-22 params=1 {defined}
+  fn 6 fx_consume derives.c:12 params=1 {}
+  fn 7 helper derives.c:24-24 params=1 {defined}
+  fn 8 narrowed derives.c:52-52 params=0 {defined}
+  fn 9 other_field derives.c:43-43 params=0 {defined}
+  fn 10 reassigned derives.c:35-39 params=0 {defined}
+  fn 11 through_call derives.c:25-25 params=0 {defined}
+  fn 12 through_locals derives.c:16-20 params=0 {defined}
+  fn 13 via_pointer derives.c:45-45 params=1 {defined}
+  fn 14 widened derives.c:49-49 params=0 {defined}
+[calls] 14
+  site 0 derives.c:14:21 direct -> fx_consume direct {}
+      arg 0:symbolic Cell.id role=stamp
+  site 1 derives.c:19:3 through_locals -> fx_consume direct {}
+      arg 0:top ~b role=stamp
+  site 2 derives.c:22:30 from_parameter -> fx_consume direct {}
+      arg 0:top ~p role=stamp
+  site 3 derives.c:24:22 helper -> fx_consume direct {}
+      arg 0:top ~p role=stamp
+  site 4 derives.c:25:27 through_call -> helper direct {intra-tu}
+      arg 0:symbolic Cell.id
+  site 5 derives.c:30:3 conditional -> fx_consume direct {}
+      arg 0:top ~a role=stamp
+  site 6 derives.c:33:25 arithmetic -> fx_consume direct {}
+      arg 0:top ~g_cell.id + 1 role=stamp
+  site 7 derives.c:38:3 reassigned -> fx_consume direct {}
+      arg 0:top ~a role=stamp
+  site 8 derives.c:41:23 constant -> fx_consume direct {}
+      arg 0:const 5 5 role=stamp
+  site 9 derives.c:43:26 other_field -> fx_consume direct {}
+      arg 0:symbolic Cell.aux role=stamp
+  site 10 derives.c:45:35 via_pointer -> fx_consume direct {}
+      arg 0:symbolic Cell.id role=stamp
+  site 11 derives.c:49:22 widened -> fx_consume direct {}
+      arg 0:symbolic g_small role=stamp
+  site 12 derives.c:52:23 narrowed -> fx_consume direct {}
+      arg 0:symbolic Cell.id role=stamp
+  site 13 derives.c:56:26 from_array -> fx_consume direct {}
+      arg 0:top ~g_ids[i] role=stamp
+[derives] 13
+  site 0 arg 0 of fx_consume: derived from Cell.id read at derives.c:14:39 hops=0 chain=field:Cell.id
+  site 1 arg 0 of fx_consume: derived from Cell.id read at derives.c:17:18 hops=2 chain=(copy b (copy a field:Cell.id))
+  site 2 arg 0 of fx_consume: not-derived (from-parameter)
+  site 3 arg 0 of fx_consume: not-derived (from-parameter)
+  site 5 arg 0 of fx_consume: not-derived (multiple-definitions)
+  site 6 arg 0 of fx_consume: not-derived (not-a-copy)
+  site 7 arg 0 of fx_consume: not-derived (multiple-definitions)
+  site 8 arg 0 of fx_consume: constant
+  site 9 arg 0 of fx_consume: derived from Cell.aux read at derives.c:43:44 hops=0 chain=field:Cell.aux
+  site 10 arg 0 of fx_consume: derived from Cell.id read at derives.c:45:49 hops=0 chain=field:Cell.id
+  site 11 arg 0 of fx_consume: derived from <global>.g_small read at derives.c:49:33 hops=0 chain=global:g_small
+  site 12 arg 0 of fx_consume: not-derived (not-a-copy)
+  site 13 arg 0 of fx_consume: derived from <global>.g_ids read at derives.c:56:37 hops=0 chain=global:g_ids
+[loops] 0
+[iters] 0
+[order] 0
+[init] 1
+  Cell.id in g_cell zero-initialized value=0 defined at derives.c:9:6
+[consts] 0
+[writers] 0
+[atype] 0
+[locs] 1
+  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+[targets] 0
+[spawnparams] 0
+[image] 0
+[terminals] 0
+[outcalls] 0
+[fwrites] 0

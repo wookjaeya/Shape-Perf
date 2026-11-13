@@ -1,0 +1,145 @@
+# 01_prov.kzp -- the cited texts of profile c5-cfe-6.4.x that are the same in both releases: OSAL 4.1.1 (one tarball
+# for both) and the cFE lines that are identical, at the same line numbers, in the 6.4.1 and 6.4.2 trees (compared for
+# this profile; where the whole file is byte-identical the note says so).
+#
+# Paths are relative to the root of a release tree, cFE-6.4.<V>-OSS-release/ with osal-4.1.1-release at osal/.  Each
+# sha256 is that of the cited lines, each followed by LF (`sed -n 'A,Bp' FILE | sha256sum`), computed from both trees
+# for this profile; nothing is quoted from memory.
+phi 1;
+
+prov osal_task_create_sig {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/posix/osapi.c";
+  lines 480 482;
+  sha256 "954a73d179d1d107190dea8146bc1206519c894f73758c5198a200e1a9ade954";
+  note "OS_TaskCreate(task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags) of OSAL 4.1.1 posix: the new task's id is returned through the first parameter";
+}
+
+prov osal_pthread_create_cell {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/posix/osapi.c";
+  lines 645 648;
+  sha256 "b317c297d4b89a7d2074c9872dd850fb16580c17bd6246d5da664208d99322b9";
+  note "pthread_create(&(OS_task_table[possible_taskid].id), &custom_attr, function_pointer, (void *)0): the new thread may run from here; the output argument is the task-table cell; the application's entry function is started directly (no OSAL entry wrapper, no id argument)";
+}
+
+prov osal_task_id_out {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/posix/osapi.c";
+  lines 690 690;
+  sha256 "a72eedafee1b57ac8b91e34748b0a45840c3fb92950b2fc5820bd874c215e7e5";
+  note "*task_id = possible_taskid: the creator receives the new task's id only after pthread_create (L645-L648)";
+}
+
+prov osal_task_register {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/posix/osapi.c";
+  lines 906 948;
+  sha256 "4bbb05a608fbd536745f5e58184ddac3dcb6c4fcd91c830faaea80ccc835d14d";
+  note "OS_TaskRegister: pthread_self() (L916) compared with each OS_task_table[i].id, without a lock and without looking at free (L921-L927); none found: OS_ERR_INVALID_ID (L932) and no pthread_setspecific; found: pthread_setspecific(thread_key, task_id) (L938)";
+}
+
+prov osal_task_getid {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/posix/osapi.c";
+  lines 959 972;
+  sha256 "60ffdd9acdc1db9cc6a800afcd5f91bad4a6e9e1f31e75e543523e74366e67b6";
+  note "OS_TaskGetId: the low 16 bits of the thread-specific value that OS_TaskRegister set; 0 when it was never set";
+}
+
+prov err_h_success {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/inc/cfe_error.h";
+  lines 155 158;
+  sha256 "c4c5bfbcc68c0e6095b5d437f8534dad366d1e527048522e8754b98d63f8beef";
+  note "CFE_SUCCESS (0L): operation was performed successfully (the same lines in the 6.4.1 and 6.4.2 trees)";
+}
+
+prov err_h_es_appid {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/inc/cfe_error.h";
+  lines 219 223;
+  sha256 "e27337d5ff1a5c0d628f1318faf0b4cff6a3af677b8d9ff99662e1af030c2e00";
+  note "CFE_ES_ERR_APPID (0xc4000001L): the given application ID does not reflect a currently active application (the same lines in both trees)";
+}
+
+prov err_h_es_buffer {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/inc/cfe_error.h";
+  lines 231 235;
+  sha256 "1a9400eb3f8ba604b30892956c459792603152b9bba4d70151ed8a044bf088d4";
+  note "CFE_ES_ERR_BUFFER (0xc4000003L): invalid pointer argument (NULL) (the same lines in both trees)";
+}
+
+prov es_h_getappid_doc {
+  tier contract-backed;
+  kind api_doc;
+  side supplier;
+  file "cfe/fsw/cfe-core/src/inc/cfe_es.h";
+  lines 600 623;
+  sha256 "9d6144100d3f9caa7604ae06bc475c4742d73c7fb3801058ba5e9ebaf35070b7";
+  note "CFE_ES_GetAppID retrieves the cFE Application ID for the calling Application; retcodes CFE_SUCCESS, CFE_ES_ERR_APPID, CFE_ES_ERR_BUFFER (cfe_es.h is byte-identical in the 6.4.1 and 6.4.2 trees)";
+}
+
+prov sb_createpipe_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/sb/cfe_sb_api.c";
+  lines 171 240;
+  sha256 "f935afb43472f51ce0602fba08642972ebd69ec9df646b487780acad006617b4";
+  note "CFE_SB_CreatePipe: AppId = 0xFFFFFFFF (L173); CFE_ES_GetAppID(&AppId) with its status not read (L224); the AppId goes unvalidated to CFE_ES_GetAppName (L227) and into the pipe table (L237) (cfe_sb_api.c is byte-identical in both trees)";
+}
+
+prov sb_createpipe_getappid {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/sb/cfe_sb_api.c";
+  lines 224 224;
+  sha256 "a51c962d3cba561212bc6dbac0ac93c920b4813e8f97ec688937da4fa6913598";
+  note "the call CFE_ES_GetAppID(&AppId) in CFE_SB_CreatePipe, the only call of it in that function";
+}
+
+prov evs_getappid_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c";
+  lines 122 140;
+  sha256 "441ae2e8c6753b375515a30e27261efd1ce5fd8d67a4149c4f5ebd1ab9622ba2";
+  note "EVS_GetAppID: CFE_ES_GetAppID(AppIdPtr) (L127), a range check on success, the status returned (the same lines in both trees)";
+}
+
+prov sample_app_init {
+  tier code-derived;
+  kind code_pattern;
+  file "apps/sample_app/fsw/src/sample_app.c";
+  lines 77 97;
+  sha256 "f535d670a313c2ffbd15cfb6a9c4d257a6c7e16bc26035c99ffd7fbb3d5a9aa6";
+  note "SAMPLE_AppInit: CFE_ES_RegisterApp, CFE_EVS_Register, CFE_SB_CreatePipe, two CFE_SB_Subscribe; no status is checked (sample_app.c is byte-identical in both trees)";
+}
+
+prov startup_script {
+  tier code-derived;
+  kind code_pattern;
+  file "build/cpu1/exe/cfe_es_startup.scr";
+  lines 1 5;
+  sha256 "94d7c3f1b0de423033d02b9a6a1e3768021c7bb184a36e5f99abb896e26b20d3";
+  note "the cpu1 start script: five CFE_APP entries, SAMPLE_LIB (priority 0), SAMPLE_APP 50, CI_LAB_APP 60, TO_LAB_APP 70, SCH_LAB_APP 80; each goes to CFE_ES_AppCreate (byte-identical in both trees)";
+}
+
+prov es_runloop_lookup {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 546 553;
+  sha256 "e55a5e4a49cbf2ac515e8939f7a139da2c4b7e56569497acf5ed3f06ca64a3d2";
+  note "CFE_ES_RunLoop: CFE_ES_LockSharedData (L546), then CFE_ES_GetAppIDInternal under that lock (L551), tested at L553 (the same lines in both trees)";
+}
+

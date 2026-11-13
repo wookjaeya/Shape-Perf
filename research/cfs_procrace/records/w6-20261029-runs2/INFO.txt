@@ -1,0 +1,7 @@
+bundle=w6-20261029-runs2
+created_utc=2026-10-29T06:28:53.724Z
+repo_commit=3aca115d0c2fb9f3909013699630ef83de91f26e
+kernel=6.18.44-fc-v185
+source=/home/user/work/w6/run files=1449 bytes=81700848
+tar_xz_bytes=811228 parts=1
+note=W6 run records after the C1 controlled runs with the W6 predict plans (post W1, pre W3; ctl_predict.log) and the R2 Power-On runs (F0, G-I; campaign.log R2 part). Superset of w6-20261029-c1-runs (c1nat and the stage B/C records unchanged).

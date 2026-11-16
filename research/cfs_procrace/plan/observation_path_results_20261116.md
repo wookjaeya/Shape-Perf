@@ -850,3 +850,119 @@ kz-static 빌드가 없으므로 빌드 전 선언은 없다. 바뀌는 출력�
 - **PI 의 선택이 되는 것(하면 멈추고 보고)**: 대상 소스·표·시작 스크립트·시작 구성 바꾸기, hold·gate·지향 순서, 새 권한이나 시스템 설정, 있는 출력 디렉터리 다시 쓰기, 공개, 바깥 출처. 이 단계는 그 어느 것도 하지 않는다.
 - **공간**: 하한 314,572,800 B. explain 은 공간 감시 아래(필요량 30,000,000 B), 묶음은 `bundle_local.sh` 의 자체 점검(여유 − 한계 ≥ 하한).
 - **지우는 것**: 이 단계가 scratchpad 에 만든 것(fixture 의 작업 디렉터리, 두 번째 explain 출력)만.
+
+### 7.1 바뀐 것 [F]
+
+- 커밋 `ab230a1`(선언, `explain.py`, fixture, 점검 15, 실행 스크립트; 실제 기록에 돌리기 전).
+- 첫 실행 뒤 `explain.py` 를 세 군데 고쳤다(§7.10). (1) 사슬 기록의 `same_build` 줄을 공백에서 잘라 읽었다(`unconfirmed(no` 까지만 실렸다). (2) 행이 부호 없이 적는 32-bit 상태 상수(예 `3254779907`)와 부호 확장된 기록 값(`-0x3dfffffd`)을 맞추지 못했다. 그래서 경로 B 의 상태 이름이 비었다. 지금은 기록 값이 32-bit 범위 안이면 2³² 로 나눈 나머지로 맞춘다(fixture 17 을 더함). (3) 사용 뒤의 run-loop entry 를 `effect.events` 에 넣었었다. 그것은 결과의 효과가 아니라 그 행위자가 멈춤 사건에 이른 창의 사실이라 `effect.window.consumer_run_loop_after_use` 로 옮겼다. `effect.events_scope` 글도 더했다(사용 뒤 같은 행위자의 사건이며 인과를 주장하지 않는다). 판정 값(violation, odf, 머리말)은 세 실행에서 모두 같다. (3) 때문에 9 기록의 `effect.status` 가 observed 에서 none_in_window 로 바뀌었다(B73 넷, B81 둘, B99 셋).
+- `run_explain.sh`: explain·copy 에 출력 이름 인자를 더했다. copy 는 색인, 입력, 거부, 모든 기록의 sha256, 관계 1 의 기록만 저장소에 둔다. 45 기록 모두는 2.3 MB 라 저장소 밖(`c1pre_explain/explain_r3/records/`)과 로컬 묶음에 둔다.
+- `plan/ovm_evidence_20261111/p_offline.md:27` 정정 글(§7.7)과 `SHA256SUMS` 의 그 파일 줄.
+- `records/LEDGER.tsv` 새 행 둘: `OBS_c1pre_explain`(145 파일), `B_obs1-20261116-cycle`(로컬 묶음 조각 1).
+- 대상 소스, 표, 시작 스크립트, 시작 구성, 하네스, Kairos 소스는 바꾸지 않았다.
+
+### 7.2 실행 [M]
+
+- facts 글 보기(`facts_view.txt`): T8CF facts `0d7954fa…`, `tool_sha256=3b7de5b7…`(파일 sha256 `0024f192…` 의 도구, §1.8), `extract.build_identity`(source `f6e3c7b4…`), `extract.p0_table` "P0 table revision 3 (2026-10-30), 72 entries", `p0.pthread_create` 항목.
+- explain 세 번(공간 감시 아래, 모두 rc 0, 기록 45, 거부 0): `explain`(08:33Z, 선언한 스크립트 그대로; 기록의 compat 글이 공백에서 잘림), `explain_r2`(08:35Z), `explain_r3`(08:36Z, 최종). 같은 입력으로 scratchpad 에 한 번 더 돌린 출력은 `explain_r3` 과 48 파일 모두 바이트 동일하다(`determinism.txt`; 그 사본은 지웠다).
+- 입력(`inputs.txt`; 모든 기록의 `inputs` 에 같은 목록): bindings `6a22b9ec…`, bprime_basis `a57c227b…`, chain `3d26a32b…`, dump_text `1290a5f6…`, facts_view, keys `d6d970d6…`, manifest `5f015c5a…`, relations `7c7396d2…`, run_meta `075f39b2…`, sidecar `8f5f200c…`, startup_script `8ddb9359…`, stop_eval `6eb44262…`, vocabulary `4b964d34…`. 결합: "chain confirmed; same_build unconfirmed(no build-id in dump)".
+- 단위 점검: `run_unit.sh` 15/15(점검 15 는 fixture 17/17), `step2a_tests_unit.sh` 7/7.
+
+### 7.3 관계 1 의 설명 기록 [M]
+
+기록 하나: (c1_pre_tx, 사용 지점 키 `17975444d83f6589`, 실행 행위자 12) — `records/obs1-20261116-explain/records/c1_pre_tx.A21.17975444d83f6589.actor-12.json`(39,561 B, sha256 `d6aa1575…`). 판정 규칙 3.1–3.2 의 필드마다:
+
+| 필드 | 값 | 출처 |
+|---|---|---|
+| `build_id` | B′ basis `a57c227b…`; run.meta 의 실행 파일 sha256(core-tx `c2aa181b…`, cf.so `f5af74f7…`, bp.so `6789ff75…`, rx 셋); 계획 facts `0d7954fa…`; compat "chain confirmed; same_build unconfirmed(no build-id in dump)" | B′ basis 파일, run.meta, sidecar, 사슬 기록 |
+| `extractor_rev`, `semantics_rev` | facts `tool_sha256 3b7de5b7…`, build_identity; `p0-only`, P0 표 개정 3(72), 프레임워크 계층 자료 `e2a39203…`(run-loop, app-exit 역할만); missing `absent_result_unevaluated(no common-semantics table of the framework APIs in this cycle)` | facts 글 보기, sidecar |
+| `plan_id` | sidecar `8f5f200c…`, manifest `5f015c5a…`, RUN 레코드의 manifest `5f015c5a…` | 파일, dump RUN 줄 |
+| `row_id`, `path` | 사용 지점 키 `17975444d83f6589`, 키 글 `A\|OS_common_record_t.name_entry\|CF_CFDP_InitEngine\|OS_CountSemGetIdByName#1\|1`, 행 번호 A21(출력 셈), `relations.txt:440`; path A | keys, relations |
+| `consumer_actor` | 실행 행위자 12(tid 28934). 생성 인자 묶기 determined: 행위자 1 aseq 452 의 `pthread_create` at-call(`os-impl-tasks.c:543`) `creation_arg 0x1000c` = 행위자 12 aseq 1 의 `OS_PthreadTaskEntry` `param0 0x1000c`(두 쪽 모두 한 번); 생성 결과 status 0, out `0x7f820ebe36c0`; 뒤의 owner store `cfe_es_apps.c:619` 값 `0x110009`, `:620`. root 묶기 determined: `CF_AppMain`(script-entry, site 281 aseq 2). 앱: CF(시작 스크립트에서 entry `CF_AppMain`) | dump, manifest, 시작 스크립트 |
+| `publisher_actors` | 13(BP_AppMain, `0x1000d`, 앱 BP), 14(SCH_Lab_AppMain, `0x1000b`, 앱 SCH_LAB_APP): 이 행의 생성자 site 에 사건이 있는 다른 행위자 | 같음 |
+| `actor_pair_kind` | 13: app-app, 14: app-app | 묶인 root 의 종류와 앱 |
+| `handling_label`, `handling_unknown_reason` | R, 없음(R 은 미확정 표시가 아님) | sidecar |
+| `priority`, `budget` | 층 1, 차례 1, D07, 순서 RELOC, 도달 CALLEE-ONLY; 예산 `tier:D07`, 잘림 419행, 한계 셋, 실행 예산 부팅 1 | sidecar |
+| `link` | status **established**(전제 L-ABS). resource_kind 이름 있는 객체; resource_key 이름 공간 `OS_common_record_t.name_entry` 칸 3, 이름 "BP0_tsem", 세대 `[0x30002]`; instance_evidence: 행위자 13 의 생성 키 "BP0_tsem" out `0x30002`, 13 의 "BP1_tsem" 와 14 의 "SCH_LAB" 은 다른 키; actor_token = 위의 생성 인자 묶기; missing 없음 | dump(키 글은 사용을 감싸는 호출 안 `osapi-countsem.c:212` 의 key-text 사건, 호출의 키 포인터 `0x55728e21174c` 와 같음) |
+| `use_cond` | status **partial**. callee_check 있음(`-17 [OS_ERR_NAME_NOT_FOUND], 0 [OS_SUCCESS]`, `relations.txt:454`); reach 없음(`static-undetermined`); caller_dependence 없음(종료 사슬의 가드가 "may", `:449`); writers 없음(생성자 둘 `:444-445`, 키 미해결); run_key_value "BP0_tsem"(기록의 키 글); predicate 없음. missing: `absent_result_unevaluated(static-undetermined)`, `key_unresolved(…:454)`, `caller_dependence_unknown(the terminal chain's guard is linked 'may')`, `key_unresolved(creator key unresolved: relations.txt:444)`, `fixed_proof_open(undecidable)` | relations 만 |
+| `order.static` | unknown, "order edges not computed in this cycle"(행의 feasibility 글을 note 로) | — |
+| `order.use_events` | 사용 하나: at-call 행위자 12 aseq 25(t_init 뒤 1556.926 ms), 키 포인터 `0x55728e21174c`, 키 글 "BP0_tsem"(잘림 없음, aseq 26); after-call aseq 27 status `-0x11` = `OS_ERR_NAME_NOT_FOUND`(행의 상수), out 읽지 않음(status 가 성공 상수 `OS_SUCCESS 0` 이 아님) | dump |
+| `order.publish_events` | 행위자 13: "BP0_tsem" 생성 at-call 1566.869 ms, status 0, out `0x30002`; "BP1_tsem" `0x30003`; 행위자 14: "SCH_LAB" 1556.760 ms, `0x30001`. out 은 등급 없이 적음(생성자의 반환 상수는 행에 없다) | dump |
+| `order.sync_results` | 생성 결과: 행위자 12·13·14 의 `pthread_create` status 0; 대기·잠금 not-planned(`plan_missing(need not planned)`) | dump, sidecar |
+| `order.per_consumer` | 항목 1 incomplete; 2 holds(게시 w = 행위자 13 aseq 12 앞의 사용 1, 실패 등급); 3 no_data(`no_matching_use_after_w`); 4 unchecked. 칸의 사건은 모두 행위자 12 | dump |
+| `order.status` | **events_only**, missing `absent_result_unevaluated(the predicate is not derived: use_cond partial)` | 규칙 |
+| `intervention` | generated, hold none, status **unconfirmed**, `intervention_out_of_scope(no hold, gate or directed run in this stage)` | sidecar |
+| `effect` | status **observed**. 창 0–5679.559 ms(RUN t_init–t_stop), 끝: 프로세스는 `stop=ci-es-restart-poweron`, `tx_exit=0`; 행위자는 app-exit entry(aseq 34). 사건: `CF_CFDP_InitEngine` 반환 -17(aseq 28), `CF_Init` 반환 -17(29), `cf_app.c:333` store 값 3(30), `CFE_ES_RunLoop` 반환 0(32), `CFE_ES_ExitApp` at-call 인자 3(33), entry param0 3(34). run-loop entry(aseq 31, 1556.953 ms)는 창의 사실. recovery not_attempted(범위: 계획된 site). unobserved: 프로세스 끝 뒤, 계획되지 않은 자리, not-planned 필요 | dump, stop_eval |
+| `tool_verdict` | violation **undetermined**(kind order_basis_unknown; 사유 = 위 use_cond 다섯과 order 하나), odf **failure_sign**(사용의 반환 -17 이 실패 등급; 유효한 개입 쌍 없음), final_effect `app_exit_called(CFE_ES_ExitApp param0=0x3)`, `no_recovery_in_window`; 머리말 **실패 징후**. 계산이 읽은 필드: link.status, use_cond.status, order.status, order.static, intervention.status, order.use_events.status_value, effect.status·events·recovery | 축만 |
+| 미완(19.2) | 필요 17: present 13, not-reached 1(`cf_app.c:357` store), not-planned 3(event-send, wait-result, lock-result); 정적 미완 넷(행의 incomplete 줄 그대로, `no_run(no run record read)` 은 정적 출력의 말); 예산 잘림 419행; 열린 전제 일곱 | sidecar, relations, 규칙 |
+
+- 이 기록이 주는 다섯 항목: 행위자(12 ↔ 생성 호출 1/452, root CF_AppMain, 앱 CF; 게시 13 ↔ 1/459, BP), 자원(칸 3 의 "BP0_tsem", 생성 세대 `0x30002`), 사용(1556.926 ms 의 조회, 같은 키의 생성 at-call 은 9.943 ms 뒤), 상태(-17 `OS_ERR_NAME_NOT_FOUND`, -17 이 InitEngine·CF_Init 로 올라감, run status store 3, RunLoop 반환 0, ExitApp 인자 3), 미완(위 사유들).
+- 3 이 무엇인지: run status store 의 값 3 은 행이 `cf_app.c:333` 의 store 를 `CFE_ES_RunStatus_APP_ERROR` 로 적는 자리의 값이다(행 `:449`); 그 상수의 값 3 은 bundle 1df262a `cfe_es_extern_typedefs.h:139` [F, §1.7]. 기록은 이름을 붙이지 않고 값만 싣는다(종료 상태의 등급 어휘는 이 주기의 자료에 없다).
+- L-ABS 에 기대는 것은 `link.status` 하나다. 이 기록에서 L-ABS 를 빼면 link 는 unlinked 가 되지만 violation 은 이미 use_cond partial 로 undetermined 이고 odf 의 failure_sign 은 link 를 조건으로 쓰지 않는다(판정 규칙 3.3). 그래서 판정은 바뀌지 않는다 [I: 규칙에서 읽음].
+
+### 7.4 완료 시험 [M]
+
+| 항목 | 결과 | 근거 |
+|---|---|---|
+| E1 출처 | pass | sidecar 머리(`plan.side:1-17`): 입력 셋(facts, basis, 프레임워크 계층 자료)과 sha256, 생성기 도구 `c3677e76…`(identity)·source, 규칙 판, 선택 규칙, 우선순위 판, 예산(값·이유·밝힘·잘림·미해결·민감도), 한계 셋, 매개변수 둘. 선언되지 않은 파일을 여는 길의 거부: `test_static_plan` 의 거부 경우(다른 파일을 이름 대는 자료 줄 → rc 2, 출력 없음; §4.3 ctest 246/0). 여는 호출의 추적은 하지 않았다(시험은 그 길을 막는 것을 본다). 재생성 점검 PASS(§6.0). RUN 레코드·B′·run.kzt 의 manifest = 계획(사슬 manifest 연결, §6.4). 플러그인 module 인자 = module 표(§5.2 `module_flags.txt`, §5.3). 프레임워크 계층 자료 9 항목 모두 출처 줄과 헤더 훑기에서 ok(`records/obs1-20261116-plangen/framework_check.txt`). lint `case-ids`, `case-ids-data` 통과(§4.3 `ctest_full.log`) |
+| E2 손 내용 없음 | pass | `plan_checks.txt`: manifest site 301 모두 규칙 이름과 ref, sidecar site 줄 301 모두 refs; 값 줄의 칸은 role, from, type, string, bound, ref 뿐(기대 값 칸 없음); 주석 밖에 기대의 낱말(expect, should, must return, normal) 0. 파생 스크립트는 manifest, module 표, 실행 파일 목록을 인자로 받고 사례 값을 쓰지 않는다(§5.1, 점검 8·9) |
+| E3 같은 빌드 | pass | B 와 B′ facts 는 선언 목록 밖 0(§5.3 `compare_after.tsv`); 실행 파일 일곱 = run.meta·목록(사슬 exe); RUN 의 manifest = 계획; build-id 는 B′ 파일에서 읽어 옆에 적음(core-tx `ca1ed0b1…`, `exe_buildids.tsv`), 사슬은 계획대로 `same_build: unconfirmed(no build-id in dump)`; 인스턴스 파일 31 해시, `cf_def_config.tbl` `455d265e…`(잰 값) |
+| E4 설명 | pass | (빌드, 행, 소비 행위자) 마다 기록 하나(관계 1 은 하나); 필드 이름과 상태 값은 판정 규칙 3.1–3.2; 모든 필드가 기록이나 정적 사실로 채워지거나 3.5 사유와 함께 빠짐으로 적힘(빈 칸은 `missing` 이나 사유가 있음: 3.6 항목 7 점검); 3.6 여덟과 어휘 검사 통과(45 기록 거부 0); 빠진 것을 정상 값으로 채우지 않음(out 은 성공 상수 아래만, 생성자 out 은 "not graded", `order.static` unknown, P 없음). 열린 전제: L-ABS(§7.0; `link.status` 만 기대고 판정은 바뀌지 않음, §7.3) |
+| E5 판정 | pass | `tool_verdict` 는 3.3 의 표대로 축의 상태만으로 계산(violation undetermined, odf failure_sign, 머리말 실패 징후)하고 3.6 을 통과. 미리 정하거나 빼지 않았다(선언 §7.0) |
+| E6 C5 | 이 주기에 없음 | 계획은 생성되었다(c5_641 manifest `17b6ab6a…`, §4.5). relation 2 의 행 C22, C31 은 층 2(차례 79, 83)라 `tier:D07` 예산에서 잘렸다. C5 는 빌드·부팅하지 않았다(생성 토큰이 필요한 전체 단계의 일). "통과"로 적지 않는다 |
+
+- 조회의 결과(-17)는 시험의 조건이 아니다(계획 1.2). 기록은 -17 과 그 처리 사슬을 설명한다.
+
+### 7.5 계획된 다른 행 [M]
+
+같은 스크립트, 같은 입력(더한 입력 없음). `summary.txt`, `index.tsv`.
+
+- 기록 45(행 12): A21 1, A22 1, A23 1, A50 1, A51 1(모두 소비자 CF 행위자 12), B13 1(실행 행위자 없음: 읽는 쪽 root 없음, 사용 사건 없음), B73 15, B81 15, B99 6, B113 1, B118 1, B119 1(B 행의 소비자는 use-call 에 사건이 있는 행위자와, 정적 읽는 쪽 root 에 묶인 사건 없는 행위자).
+- 판정별: violation undetermined 45. odf undetermined 43, failure_sign 2(A21 CF `OS_ERR_NAME_NOT_FOUND`; B73 의 행위자 2(`CFE_EVS_TaskMain`) `CFE_SB_Global.AppId` 를 넘긴 `CFE_EVS_SendEventWithAppID` 가 `CFE_EVS_APP_ILLEGAL_APP_ID` 를 넷 받음). 머리말: 미확정 43, 실패 징후 2.
+- 축별: link established 1(A21), unlinked 44(경로 B 40: 사용에서 읽은 주소가 계획에 없다; 경로 A 넷: 사용 사건 없음). use_cond partial 45. order events_only 22, record_insufficient 23. intervention unconfirmed 45. effect observed 3, none_in_window 19, outside_window_unknown 23.
+- violation 의 미확정 사유(사유별 기록 수): `absent_result_unevaluated` 45(하위 `static-undetermined` 45, `the predicate is not derived` 22), `caller_dependence_unknown` 45, `fixed_proof_open` 45, `writer_set_incomplete` 42(`FIELD_STATUS not complete` 26, 완전성이 전제뿐 16), `record_insufficient` 40(사용의 주소가 계획에 없음), `target_not_reached` 23, `key_unresolved` 12(경로 A 다섯 행), `link_unlinked` 1(B13 의 실행 행위자 없음).
+- 필요 상태(모든 기록의 필요 합): not-reached 2,049, present 268, not-planned 95; value-missing, text-partial, unknown-loss, unbound, build-mismatch 0.
+- 사용 사건이 없는 행: A22, A23, A50, A51(CF 의 `CF_CFDP_ResetTransaction`; CF 는 초기화에서 끝났다), B13, B113, B118, B119.
+
+### 7.6 손 manifest 기록(2026-10-29)과의 비교 [M]
+
+`hand_compare.txt`(`hand_compare_record.py`; site 대응은 부팅 전의 `hand_compare_c1_pre.txt`). 손 기록 `W/w6/run/c1nat/gi/pre_1df262a_tx/tx.dump.txt`(`9de99fd2…`, 205–240행; CF 행위자 13, BP 14), 이 기록(CF 12, BP 13, SCH_LAB 14).
+
+- 둘 다 가진 값(같은 값): CF 조회의 반환 `0xffffffffffffffef`(-17)와 out `0x0`(호출자 after-call; 손 35 / 생성 288); 조회 API 안 `:212` 의 키 글 "BP0_tsem"(손 12 / 생성 273); `CF_CFDP_InitEngine`·`CF_Init` 반환 -17(손 33·31 / 287·285); `CFE_ES_ExitApp` 호출 인자 3 과 ES entry 3(손 37·9 / 286·6); BP 생성의 at-call 인자(초기 값 `0xa`)와 반환 0, out `0x30002`·`0x30003`(손 44·45 / 280·279); BP 의 존재 탐침 안의 키 글 "BP0_tsem"·"BP1_tsem"(손 12 / 생성 273, BP 행위자). 행위자의 task entry 값 `0x1000c`·`0x1000d` 도 두 기록에 있으나 손은 `OS_TaskEntryPoint`, 생성은 `OS_PthreadTaskEntry` 의 param0 이라 site 대응 밖이다.
+- 손 기록에만 있는 것(42 사건)과 까닭: CF 호출자 at-call 의 키 글(생성은 호출자에서 포인터만 적는다: 호출자 쪽에 그 매개변수의 non-null 검사가 없어 gap `record_insufficient(key text)` 규칙이 글을 읽지 않는다; 글은 API 안에서 읽는다); `CF_Init`·`CF_CFDP_InitEngine`·`BP_FlowInit` 의 entry(규칙이 요구하지 않음); 조회 API entry 의 인자; BP 의 존재 탐침 호출(`bp_flow.c:126`, at-call 과 반환 -17)(다른 행 A20, 층 3 이라 예산에서 잘림; 생성은 API 안의 키 글만 가진다); `OS_CountSemCreate` entry, 게시 store, created(`OS_NotifyEvent`) 와 그 id(이 개정의 facts 에 게시·알림 규칙이 없음, §4.6).
+- 이 기록에만 있는 것(이 행위자들의 281 사건)과 까닭: 생성자(행위자 1)의 생성 인자 at-call·after-call 과 owner store(생성 인자 묶기의 규칙), root entry `CF_AppMain`·`BP_AppMain`, run status store 3(`cf_app.c:333`), `CFE_ES_RunLoop` entry 와 반환 0(처리 사슬·멈춤 사건), SCH_LAB 의 생성("SCH_LAB", `0x30001`; 행의 생성자 둘째), 생성 API 안의 키 글(`osapi-countsem.c:91` 의 `memchr` 앞, "BP0_tsem"·"BP1_tsem"), 그리고 계획된 다른 행(B73, B81, B99 등)의 site 에서 이 행위자들이 낸 사건(BP 의 run loop 33 번, use-call 들).
+- 손 기록은 사람이 사례를 보고 놓은 33 site 로 얻었고(판정 규칙 5.1), 이 기록은 규칙이 facts 에서 낸 301 site 로 얻었다. 관계 1 의 다섯 항목에 필요한 값(키, 반환, 처리 값, 종료 인자, 게시)은 두 기록이 같은 값으로 가진다. 손 기록에 없던 것은 행위자를 생성 호출에 잇는 값(생성 인자와 param0)과 run status·RunLoop 값이고, 이 기록에 없는 것은 호출자 쪽 키 글과 게시 store·알림이다.
+
+### 7.7 문서 정정 [F][M]
+
+- `plan/ovm_evidence_20261111/p_offline.md:27` 의 "Not in the record: event type, exit status value" 뒤에 "Correction (2026-11-16): …" 를 덧붙였다(원문은 그대로). 근거(`f0_exit_status.txt`): MC `kz-dump` `05623054` 로 푼 `W/run/c1nat/f0tx/pre_1df262a/run.kzt`(`d1e20517…`)와 `pre_1b0b338/run.kzt`(`c41adc9e…`) 모두 SITES[8] `CFE_ES_ExitApp` entry, SITE_SLOTS[21] slot 0 `role="exit_status"`, RAW_EVENTS[100] `a=[0x3,…]`. `run.kzt.record.txt` 에는 그 값이 찍히지 않는다(두 파일 모두 `exit_status`, `RAW_EVENTS`, `a[0]` 0줄). 사건 유형은 여전히 기록에 없다.
+- 같은 폴더의 `SHA256SUMS` 에서 `p_offline.md` 줄만 새 sha256 으로 바꿨다. `sha256sum -c SHA256SUMS` 29 OK.
+
+### 7.8 바이트 동일성, 로컬 묶음 [M]
+
+- MC: `post_mc.txt` 는 `pre_mc.txt` 와 HEAD(`fbab3de` → `ab230a1`)와 여유 줄 밖에서 같다. 도구를 빌드하지 않았다.
+- 누적 목록: `ledger_check.sh` 44행, 실패 0(새 행 둘). 입력(계획, 파생 작업 공간, B′, 부팅·변환 디렉터리, relations 재실행)과 F1T, W6·C5 기록, 도구 사본 모두 같다. `tools_check.sh --deep` 31행, 실패 0.
+- 로컬 묶음 `obs1-20261116-cycle`(`/home/user/work/preserve/bundles-20261116/`; `bundle/`): 파일 4,554(plangen, c1pre_rt, c1pre_derived, c1pre_bprime, c1pre_boot, c1pre_convert, c1pre_explain), tar.xz 9,341,660 B, sha256 `4d2a0325…`, 조각 1. 스트림 검증: PARTS OK, xz -t OK, 멤버 4,554 의 sha256·크기 = MANIFEST.tsv(차이 0), 멤버 종류 파일·디렉터리만, 원본 = MANIFEST.sha256. VERIFIED_LOCAL 08:38:14Z. push 하지 않았다. 원격에서 다시 받아 확인한 것이 아니므로 "보존됨"이 아니다.
+- 바깥 이름 점검(`--tree`): 묶음 디렉터리, `c1pre_explain`, 기록 디렉터리 깨끗함. 커밋 전 `--cached` 와 저장소 안 패턴 점검.
+
+### 7.9 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 선언 커밋 전 | 3,742,834,688 | 선언 전(`pre_mc.txt` 와 같은 때) |
+| 08:33:22 | 3,739,922,432 | 첫 explain(dip 2,519,040) |
+| 08:36:14 | 3,736,305,664 | 최종 explain(dip 2,469,888) |
+| 08:37–08:38 | 3,735,977,984 → 3,721,773,056 | 로컬 묶음(조각 9.3 MB, 검증 중 임시 디렉터리) |
+| 끝 | 3,724,787,712 | 기록 뒤 |
+
+- 하한을 넘지 않았다. 남긴 크기: `c1pre_explain` 7,091,104 B(세 실행과 facts 글 보기), 묶음 디렉터리 10,684,821 B.
+- 지운 것: scratchpad 의 fixture 작업 디렉터리와 두 번째 explain 출력(결정성 비교 뒤). 그 밖에 아무것도 지우지 않았다.
+
+### 7.10 계획과 다르게 한 것, 다음으로 넘기는 것
+
+- 선언 뒤 스크립트를 세 군데 고쳤다(§7.1). 첫 실행(`explain`)은 선언한 코드 그대로의 출력으로 남겨 두었고, 판정 값은 세 실행에서 같다. 고친 것은 사슬 줄 읽기, 32-bit 상태 상수 맞춤, 효과 사건의 범위다.
+- 설명 기록의 relations 입력은 T8CF 의 `relations.txt` 가 아니라 생성기 `de1315b3` 가 T8CF facts 에서 다시 낸 것(`plangen_relcheck/c1_pre_tx`, 개정 6, 앞 단계 출력과 바이트 동일)이다. 계획을 만든 도구와 규칙 판의 행이고, 사용 지점 키 파일이 함께 있다.
+- 저장소에는 관계 1 의 기록 하나와 모든 기록의 sha256 을 두었다. 45 기록 모두(2.3 MB)는 저장소 밖과 로컬 묶음에 있다.
+- `intervention` 의 differs·same 은 이 단계에서 나올 수 없어 fixture 도 unconfirmed 만 본다.
+- 경로 B 의 link 는 모두 unlinked 다: 계획이 사용의 읽은 주소를 적지 않는다(at-call 의 `field_value` 만). 같은 인스턴스를 보이려면 계획 규칙에 읽은 주소가 필요하다(다음 계획 개정의 일).
+- L-ABS(경로 A 부재 결과의 연결)는 lead 의 판단이고 PI 가 달리 정하면 바뀐다(판정은 바뀌지 않음, §7.3).
+- 다음으로: 실행 기록 45 가운데 실패 징후 둘(A21, B73 행위자 2)의 사건은 이 기록에 있다. B73 의 `CFE_EVS_APP_ILLEGAL_APP_ID` 가 무엇을 뜻하는지는 이 기록이 말하지 않는다 [미확인]. 사용 조건의 (c2)·(c3)·(c4)를 세우는 규칙(함수를 건너는 부재 평가, 순서 간선, 완전성 규칙)은 전체 단계의 일이다. C5(E6)는 생성 토큰과 공간 선택 뒤다. t_init 와 하네스 시각의 차이, 시작 동기화 지점의 여유는 [미확인] 그대로다.

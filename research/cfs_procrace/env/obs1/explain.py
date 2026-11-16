@@ -54,6 +54,17 @@ def sha_of(name):
     return INPUTS[name][1] if name in INPUTS else None
 
 
+def same_status(const, v):
+    """A row constant (printed unsigned for 32-bit statuses) against a recorded status (s64, sign-extended from the
+    callee's 32-bit status: the plugin widens from the operand's own type): equal, or equal modulo 2**32 when the
+    recorded value lies in the 32-bit range."""
+    if const is None or v is None:
+        return False
+    if const == v:
+        return True
+    return -(1 << 31) <= v < (1 << 32) and (const & 0xFFFFFFFF) == (v & 0xFFFFFFFF)
+
+
 def fail_class(v):
     return v is not None and (v < 0 or 0xC0000000 <= v <= 0xFFFFFFFF)
 
@@ -730,12 +741,12 @@ def explain_row(ctx, rowkey, consumer):
             u["after_call"] = evref(run, i.after)
             stv = run.val(i.after, "status")
             u["status_value"] = hx(stv)
-            names = [nm for v, nm, _ in st["consts"] if v == stv]
+            names = [nm for v, nm, _ in st["consts"] if same_status(v, stv)]
             u["status_name"] = names[0] if names else None
             u["status_name_source"] = ("%s (constants of the row)" % st["ref"](st["consts"][0][2])) if st["consts"] else None
             if succ is None:
                 u["out"] = {"read": False, "why": "no success constant: " + st["success_note"]}
-            elif stv == succ[0]:
+            elif same_status(succ[0], stv):
                 u["out"] = {"read": True, "value": hx(run.val(i.after, "out0")), "under": "%s %d" % (succ[1], succ[0])}
             else:
                 u["out"] = {"read": False, "why": "status %s is not the success constant %s %d" % (hx(stv), succ[1], succ[0])}
@@ -1101,16 +1112,24 @@ def effect_axis(ctx, st, cview, use_events, hc_sites):
     if use_events:
         last = use_events[-1]
         after_t = (last.get("after_call") or last.get("at_call"))["aseq"]
+    exit_fns = {r.split()[1] for r in ctx["stop_lines"] if r.startswith("app-exit ") and len(r.split()) > 1}
+    loops = []
     if ca is not None and after_t is not None:
         for e in run.by_actor.get(ca, []):
             if e.aseq <= after_t:
                 continue
             s = run.sites[e.site]
-            if e.site in hc_sites or "stop-event" in s.rules:
+            if e.site in hc_sites or ("stop-event" in s.rules and s.entry_of in exit_fns):
                 evs.append(evref(run, e, {"ref": s.ref[:200]}))
+            elif "stop-event" in s.rules:
+                loops.append(e)
+    # a run-loop entry after the use is a window fact (the actor reached its stop event), not an effect of the result
+    eff["window"]["consumer_run_loop_after_use"] = (evref(run, loops[0]) if loops else None)
+    eff["window"]["consumer_run_loop_entries_after_use"] = len(loops)
     eff["events"] = evs
-    exit_fns = {r.split()[1] for r in ctx["stop_lines"] if r.startswith("app-exit ") and len(r.split()) > 1}
-    exit_ev = [x for x in evs if "stop-event" in x["rule"] and run.sites[x["site"]].entry_of in exit_fns]
+    eff["events_scope"] = ("events of the consumer actor after its last use of the row at the row's handling-chain sites and "
+                           "the app-exit sites; their order in the actor is recorded, no causal link to the use is claimed")
+    exit_ev = [x for x in evs if "stop-event" in x["rule"]]
     later_use = [u for u in use_events[1:]] if len(use_events) > 1 else []
     if later_use:
         okv = [u for u in later_use if u.get("out", {}).get("read")]
@@ -1130,7 +1149,7 @@ def effect_axis(ctx, st, cview, use_events, hc_sites):
         eff["status"] = "observed"
     elif use_events:
         eff["status"] = "none_in_window"
-        eff["missing"].append("record_insufficient(no event of the handling chain or of a stop site after the use)")
+        eff["missing"].append("record_insufficient(no event of the handling chain or of an app-exit site after the use)")
     else:
         eff["status"] = "outside_window_unknown"
         eff["missing"].append("target_not_reached")
@@ -1398,7 +1417,7 @@ def main(argv):
         refused = [ln.split("\t")[0] for ln in chain.splitlines() if "\trefused" in ln]
         if refused:
             mism.append("chain links refused: " + ", ".join(refused))
-        sb = re.search(r"^same_build\t(\S+(?:\([^)]*\))?)", chain, re.M)
+        sb = re.search(r"^same_build\t([^\t\n]+)", chain, re.M)
         bp = re.search(r"^bprime\t\S+\tbasis=([0-9a-f]+)", chain, re.M)
         if bp and not sha_of("bprime_basis").startswith(bp.group(1)):
             mism.append("the B' basis given is not the chain's")

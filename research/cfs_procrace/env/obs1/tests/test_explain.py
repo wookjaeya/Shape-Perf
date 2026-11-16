@@ -208,6 +208,12 @@ ok = rc == 0 and len(R) == 1 and ax(r) == ("established", "partial", "events_onl
 case("control (present, not-planned; established/partial/events_only/unconfirmed/observed; undetermined, failure_sign)", ok,
      "rc %d records %d %s" % (rc, len(R), ax(r) if r else out[-300:]))
 CONTROL = d
+# --- a 32-bit status recorded sign-extended against the row's unsigned constant
+row32 = ROW_PARTIAL.replace("FIND returns -17 [ERR_NOT_FOUND]", "FIND returns 3221225473 [ERR_32]")
+rc, R, _, out = make("status32", row=row32, events=base_events(use_status="0xffffffffc0000001"))
+ok = rc == 0 and R and R[0]["order"]["use_events"][0]["status_name"] == "ERR_32"
+case("a 32-bit status recorded sign-extended matches the row's unsigned constant", ok,
+     str(R[0]["order"]["use_events"][0].get("status_name")) if R else out[-300:])
 # --- refuted link
 rc, R, _, out = make("refuted", events=base_events(pub_key="K2"))
 ok = rc == 0 and R and R[0]["link"]["status"] == "refuted" and R[0]["tool_verdict"]["violation"]["value"] == "refuted_link"

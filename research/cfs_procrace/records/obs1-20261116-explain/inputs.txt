@@ -1,0 +1,15 @@
+# explain.py revision 1 (2026-11-16)
+bindings	6a22b9ec9fe5dfcfa11baf3d33fe0cbb33a4a5ea3361794376986a9215d38c3c	/home/user/work/redesign/obs1/c1pre_derived/binds_instr.kzs
+bprime_basis	a57c227b2f9fd8ddd6f9c5a91bbc6f9396497d771fb623475c17f59288811fe8	/home/user/work/redesign/obs1/c1pre_bprime/c1_pre_tx/NP/basis.kz
+chain	3d26a32b8cbbccc0a3288c65eccefbce5b0a15498d7cd38c9d6349834402d2fd	/home/user/Shape-Perf/research/cfs_procrace/records/obs1-20261116-boot/chain.txt
+dump_text	1290a5f6edd6598a3ba32723a447695aa32fc0dbeee9a0b9d2cbc1e823e88b6d	/home/user/work/redesign/obs1/c1pre_boot/tx/tx.dump.txt
+facts_view	6a47ba779ef14b0904ab86a8f0638e210df184ece7bda76f282a1d9409013c4b	/home/user/work/redesign/obs1/c1pre_explain/facts_view.txt
+keys	d6d970d636361f88b30e59278eefcb8e485e3eef559e85f1ae3a774e03528408	/home/user/work/redesign/obs1/plangen_relcheck/c1_pre_tx/keys.txt
+manifest	5f015c5aa86bf642ac1a76cf49669c98520eac541868cf44e24966649d9d60ae	/home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.kzs
+relations	7c7396d2c7c10626ffda939af78644925ddc74d1720f973d0ddea44cd202c44e	/home/user/work/redesign/obs1/plangen_relcheck/c1_pre_tx/relations.txt
+run_meta	075f39b27fb3b6cfdd6053dbb78d5bfe01ac9f4aeb1682847d32f849ca56f64d	/home/user/work/redesign/obs1/c1pre_boot/tx/run.meta
+sidecar	8f5f200cbe436f587e3ef1e3ee2ec0782675ba3c2860aa8d0ec4f7cdba29c721	/home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.side
+startup_script	8ddb9359fd2e897b57b1c9c9f0b92f4d8efe36a8b5b290aafef62805657ba0ef	/home/user/work/redesign/obs1/c1pre_boot/tx/inst/tx/cf/cfe_es_startup.scr
+stop_eval	6eb442621c0b60eb4a1069c7b42d989dc65891de686a11634834694af5dd0291	/home/user/Shape-Perf/research/cfs_procrace/records/obs1-20261116-boot/stop_eval.tsv
+vocabulary	4b964d34812232886fbe906e00328be5d07a8978353cf1905a850a692f237678	/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/reason_vocabulary.txt
+combination	chain confirmed; same_build unconfirmed(no build-id in dump)

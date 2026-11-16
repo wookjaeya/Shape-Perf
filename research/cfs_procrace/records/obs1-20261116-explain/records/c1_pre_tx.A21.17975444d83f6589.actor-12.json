@@ -1,0 +1,1271 @@
+{
+ "record": "explanation",
+ "format": "JR 3.1-3.2 fields, 3.3 verdict, 3.5 reasons",
+ "script": "explain.py revision 1 (2026-11-16)",
+ "build_id": {
+  "build": "c1_pre_tx",
+  "bprime_basis_sha256": "a57c227b2f9fd8ddd6f9c5a91bbc6f9396497d771fb623475c17f59288811fe8",
+  "executables_run_meta": {
+   "tx/core-tx": "c2aa181b9922668423ca513040f271f4b59a4eebd28678dd275b88483a3a2d3c",
+   "tx/cf/cf.so": "f5af74f7fc41b7706db46db6fa916e171a83427e0b480da043f8c007357ea875",
+   "tx/cf/bp.so": "6789ff75c7d12818cdda4b1be9d8ff25c5339a41fc82f1e2c3b81ece1b244856",
+   "rx/core-rx": "d7d7be17f2b41fd7b9cdffe83d84687f0f1a0c1e7ba62cbfe1beffad89a69387",
+   "rx/cf/cf.so": "f5af74f7fc41b7706db46db6fa916e171a83427e0b480da043f8c007357ea875",
+   "rx/cf/bp.so": "6789ff75c7d12818cdda4b1be9d8ff25c5339a41fc82f1e2c3b81ece1b244856"
+  },
+  "plan_facts_sha256": "0d7954fa29aca64353e20a3509db39ee8dde9b0b4c896d10c203f1222eeb1a92",
+  "compat": "chain confirmed; same_build unconfirmed(no build-id in dump)"
+ },
+ "extractor_rev": {
+  "facts_tool_sha256": "3b7de5b7d595d3c0f0042ea8e264d7865835dfa7cbc0524fcdcb2323ede43269",
+  "build_identity": "kz-core abi=1 schema=6d1471a2f6a322736a5dc804c552ab01a00e014bad740dd03122da9168bc14b2 source=f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823 compiler=gcc 13.3.0 cxx=201703",
+  "source": "facts view facts_view.txt"
+ },
+ "semantics_rev": {
+  "value": "p0-only",
+  "p0_table": "P0 table revision 3 (2026-10-30), 72 entries",
+  "framework_layer_data": "e2a39203bac0b9a5c0016c71f076a898be8edeeb73e363a125768b92424696a0",
+  "scope": "the P0 table of the facts; framework-layer data for the run-loop and app-exit roles only",
+  "missing": [
+   "absent_result_unevaluated(no common-semantics table of the framework APIs in this cycle)"
+  ]
+ },
+ "plan_id": {
+  "sidecar_sha256": "8f5f200cbe436f587e3ef1e3ee2ec0782675ba3c2860aa8d0ec4f7cdba29c721",
+  "manifest_sha256": "5f015c5aa86bf642ac1a76cf49669c98520eac541868cf44e24966649d9d60ae",
+  "run_record_manifest_sha256": "5f015c5aa86bf642ac1a76cf49669c98520eac541868cf44e24966649d9d60ae"
+ },
+ "row_id": {
+  "use_site_key": "17975444d83f6589",
+  "key_text": "A|OS_common_record_t.name_entry|CF_CFDP_InitEngine|OS_CountSemGetIdByName#1|1",
+  "row_counter": "A21",
+  "row_counter_note": "the row number is an output counter of the relations text, not an identity",
+  "relations": "relations.txt:440"
+ },
+ "path": "A",
+ "handling_label": "R",
+ "handling_unknown_reason": null,
+ "priority": {
+  "tier": "1",
+  "position": "1",
+  "label": "R",
+  "class": "decided",
+  "order": "RELOC",
+  "reach": "CALLEE-ONLY",
+  "disposition": "D07",
+  "why": "label R, counterpart, no static order; reach CALLEE-ONLY",
+  "rule": "method-priority: method priority port revision 1 (2026-11-16): label, order class, reach mark and disposition of the method document's S1 rule over the row text; tier 1 = disposition D07 (label R or J, counterpart, order class RELOC), tier 2 = the other rows of order class RELOC, tier 3 = the rest; within a tier the order of the relations text"
+ },
+ "budget": {
+  "plan": {
+   "value": "tier:D07",
+   "reason": "the record pool is fixed (KZ_RT_POOL_BYTES = KZ_RT_MAX_ACTORS x 65536, kairos/runtime/include/kz_rt.h:61-64) and no event volume of a generated plan is measured yet: the priority tier is planned whole, the next tier is not",
+   "disclosure": "the value was chosen knowing which rows the priority tier holds on these builds (plan/ovm_rev1_20261116/S1_RETALLY.md 3.1 and its probe tables); which rows are in the plan is an output of the rule, checked after the generation",
+   "planned": "12",
+   "truncation": "419 rows cut (row lines with state cut)",
+   "unresolved": "whether the rows cut fit the record pool (no event volume measured)",
+   "sensitivity": "not measured"
+  },
+  "bounds": [
+   "string KZ_RT_STR_MAX=64 source=runtime/include/kz_rt.h:82 reason=\"the runtime's copy bound; a key text is bounded by the program's own constant length check where the facts show one\" truncation=\"the runtime flags a cut string per value\"",
+   "slots=4 source=instrument/gcc/kzgcc.cpp build_obs reason=\"values per event bound by kzgcc 0.3\"",
+   "sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason=\"the binding id scheme\" sites=301"
+  ],
+  "run": {
+   "boots": 1,
+   "reason": "one record suffices for the explanation test; repetition is a later cost study",
+   "sensitivity": "not measured"
+  }
+ },
+ "review": null,
+ "eval_result": null,
+ "premises": [
+  {
+   "id": "P-ARG",
+   "text": "the start routine receives the creation argument unchanged (POSIX pthread_create); collated only against the local glibc 2.39 copy; the build links the distribution's C library (results document 1.7, c_library.txt), whose patches to that function are not established",
+   "facts": "thread-create; POSIX.1-2017 / glibc 2.39; source glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 and :836); upstream copy sha256 36fd1e6da5cee9ce; the patches of a distribution package of glibc 2.39 are not checked"
+  },
+  {
+   "id": "P-ACTOR",
+   "text": "the runtime's actor ids are per thread (actor key tid:<n>; RUNX evidence line)"
+  },
+  {
+   "id": "P-STACK",
+   "text": "within one actor events are in program order (aseq) and calls are synchronous: an event between the at-call and the after-call of one call in the same actor belongs to that call"
+  },
+  {
+   "id": "P-CLOCK",
+   "text": "event times of all actors are read from one clock (RUN clock id; the POSIX adapter reads CLOCK_MONOTONIC, kairos/runtime/src/kz_rt_posix.c:43-44)"
+  },
+  {
+   "id": "P-STR",
+   "text": "a key text is NUL-terminated within its bound or the cut is flagged (manifest value refs)"
+  },
+  {
+   "id": "P-CONST",
+   "text": "the return constants the row gives for the use (its flip or callee-check line) are the status constants of the use's callee"
+  },
+  {
+   "id": "L-ABS",
+   "text": "path A, absence outcome: a use that found no object and a create of the same key in the row's namespace partition, in one process of one run, are taken as the same named resource; the generation the use saw is none (JR 3.2 axis 1 resource key: object kind, namespace, name, generation; JR 4.2: the run value of the key and the same-named object)"
+  }
+ ],
+ "consumer_actor": {
+  "run_actor": "12",
+  "key": "tid:28934",
+  "creation_tie": {
+   "status": "determined",
+   "why": "creation argument 0x1000c seen once among creation calls and once among start entries",
+   "creation_call": {
+    "actor": "1",
+    "aseq": 452,
+    "site": 270,
+    "rule": "actor-create",
+    "where": "at-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+    "t_ms": 1506.478,
+    "values": {
+     "start_routine": "0x55728dd1c740",
+     "creation_arg": "0x1000c",
+     "arg0": "0x55728e28d8e0",
+     "arg1": "0x7fff676d5070"
+    }
+   },
+   "creation_result": {
+    "actor": "1",
+    "aseq": 453,
+    "site": 269,
+    "rule": "actor-create",
+    "where": "after-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+    "t_ms": 1506.505,
+    "values": {
+     "status": "0x0",
+     "out0": "0x7f820ebe36c0"
+    }
+   },
+   "start_entry": {
+    "actor": "12",
+    "aseq": 1,
+    "site": 271,
+    "rule": "actor-start",
+    "where": "entry of OS_PthreadTaskEntry (osal/src/os/posix/src/os-impl-tasks.c)",
+    "t_ms": 1506.52,
+    "values": {
+     "param0": "0x1000c"
+    },
+    "entry_of": "OS_PthreadTaskEntry"
+   },
+   "owner_stores": [
+    {
+     "actor": "1",
+     "aseq": 454,
+     "site": 10,
+     "rule": "actor-owner",
+     "where": "store in CFE_ES_StartAppTask at cfe/modules/es/fsw/src/cfe_es_apps.c:619",
+     "t_ms": 1506.507,
+     "values": {
+      "value": "0x110009",
+      "address": "0x55728e163978"
+     }
+    },
+    {
+     "actor": "1",
+     "aseq": 455,
+     "site": 11,
+     "rule": "actor-owner",
+     "where": "store in CFE_ES_StartAppTask at cfe/modules/es/fsw/src/cfe_es_apps.c:620",
+     "t_ms": 1506.507,
+     "values": {
+      "value": "0x7f820ebec040",
+      "address": "0x55728e163990"
+     }
+    }
+   ]
+  },
+  "root_tie": {
+   "status": "determined",
+   "root": "CF_AppMain",
+   "kind": "script-entry",
+   "why": "actor-root entry of CF_AppMain recorded in the actor (site 281, aseq 2)"
+  },
+  "app": {
+   "status": "determined",
+   "app": "CF",
+   "class": "app",
+   "why": "root CF_AppMain is the entry point of the startup-script application CF"
+  }
+ },
+ "publisher_actors": [
+  {
+   "run_actor": "13",
+   "key": "tid:28936",
+   "creation_tie": {
+    "status": "determined",
+    "why": "creation argument 0x1000d seen once among creation calls and once among start entries",
+    "creation_call": {
+     "actor": "1",
+     "aseq": 459,
+     "site": 270,
+     "rule": "actor-create",
+     "where": "at-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+     "t_ms": 1506.629,
+     "values": {
+      "start_routine": "0x55728dd1c740",
+      "creation_arg": "0x1000d",
+      "arg0": "0x55728e28d8e8",
+      "arg1": "0x7fff676d5070"
+     }
+    },
+    "creation_result": {
+     "actor": "1",
+     "aseq": 460,
+     "site": 269,
+     "rule": "actor-create",
+     "where": "after-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+     "t_ms": 1506.656,
+     "values": {
+      "status": "0x0",
+      "out0": "0x7f820ebd06c0"
+     }
+    },
+    "start_entry": {
+     "actor": "13",
+     "aseq": 1,
+     "site": 271,
+     "rule": "actor-start",
+     "where": "entry of OS_PthreadTaskEntry (osal/src/os/posix/src/os-impl-tasks.c)",
+     "t_ms": 1506.667,
+     "values": {
+      "param0": "0x1000d"
+     },
+     "entry_of": "OS_PthreadTaskEntry"
+    },
+    "owner_stores": [
+     {
+      "actor": "1",
+      "aseq": 461,
+      "site": 10,
+      "rule": "actor-owner",
+      "where": "store in CFE_ES_StartAppTask at cfe/modules/es/fsw/src/cfe_es_apps.c:619",
+      "t_ms": 1506.659,
+      "values": {
+       "value": "0x11000a",
+       "address": "0x55728e1639b8"
+      }
+     },
+     {
+      "actor": "1",
+      "aseq": 462,
+      "site": 11,
+      "rule": "actor-owner",
+      "where": "store in CFE_ES_StartAppTask at cfe/modules/es/fsw/src/cfe_es_apps.c:620",
+      "t_ms": 1506.66,
+      "values": {
+       "value": "0x7f820ebd5b90",
+       "address": "0x55728e1639d0"
+      }
+     }
+    ]
+   },
+   "root_tie": {
+    "status": "determined",
+    "root": "BP_AppMain",
+    "kind": "script-entry",
+    "why": "actor-root entry of BP_AppMain recorded in the actor (site 276, aseq 2)"
+   },
+   "app": {
+    "status": "determined",
+    "app": "BP",
+    "class": "app",
+    "why": "root BP_AppMain is the entry point of the startup-script application BP"
+   }
+  },
+  {
+   "run_actor": "14",
+   "key": "tid:28932",
+   "creation_tie": {
+    "status": "determined",
+    "why": "creation argument 0x1000b seen once among creation calls and once among start entries",
+    "creation_call": {
+     "actor": "1",
+     "aseq": 445,
+     "site": 270,
+     "rule": "actor-create",
+     "where": "at-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+     "t_ms": 1506.286,
+     "values": {
+      "start_routine": "0x55728dd1c740",
+      "creation_arg": "0x1000b",
+      "arg0": "0x55728e28d8d8",
+      "arg1": "0x7fff676d5070"
+     }
+    },
+    "creation_result": {
+     "actor": "1",
+     "aseq": 446,
+     "site": 269,
+     "rule": "actor-create",
+     "where": "after-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+     "t_ms": 1506.305,
+     "values": {
+      "status": "0x0",
+      "out0": "0x7f820ec316c0"
+     }
+    },
+    "start_entry": {
+     "actor": "14",
+     "aseq": 1,
+     "site": 271,
+     "rule": "actor-start",
+     "where": "entry of OS_PthreadTaskEntry (osal/src/os/posix/src/os-impl-tasks.c)",
+     "t_ms": 1506.677,
+     "values": {
+      "param0": "0x1000b"
+     },
+     "entry_of": "OS_PthreadTaskEntry"
+    },
+    "owner_stores": [
+     {
+      "actor": "1",
+      "aseq": 447,
+      "site": 10,
+      "rule": "actor-owner",
+      "where": "store in CFE_ES_StartAppTask at cfe/modules/es/fsw/src/cfe_es_apps.c:619",
+      "t_ms": 1506.306,
+      "values": {
+       "value": "0x110008",
+       "address": "0x55728e163938"
+      }
+     },
+     {
+      "actor": "1",
+      "aseq": 448,
+      "site": 11,
+      "rule": "actor-owner",
+      "where": "store in CFE_ES_StartAppTask at cfe/modules/es/fsw/src/cfe_es_apps.c:620",
+      "t_ms": 1506.306,
+      "values": {
+       "value": "0x7f820ec33860",
+       "address": "0x55728e163950"
+      }
+     }
+    ]
+   },
+   "root_tie": {
+    "status": "determined",
+    "root": "SCH_Lab_AppMain",
+    "kind": "script-entry",
+    "why": "actor-root entry of SCH_Lab_AppMain recorded in the actor (site 4, aseq 2)"
+   },
+   "app": {
+    "status": "determined",
+    "app": "SCH_LAB_APP",
+    "class": "app",
+    "why": "root SCH_Lab_AppMain is the entry point of the startup-script application SCH_LAB_APP"
+   }
+  }
+ ],
+ "actor_pair_kind": {
+  "13": "app-app",
+  "14": "app-app"
+ },
+ "incompleteness": {
+  "needs": [
+   {
+    "need": "site 2 creator-call after-call of OS_CountSemCreate in SCH_LAB_AppInit at apps/sch_lab/fsw/src/sch_lab_app.c:168",
+    "events": 1,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 3 creator-call at-call of OS_CountSemCreate in SCH_LAB_AppInit at apps/sch_lab/fsw/src/sch_lab_app.c:168",
+    "events": 1,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 272 key-text at-call of memchr in OS_CountSemCreate at osal/src/os/shared/src/osapi-countsem.c:91",
+    "events": 3,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 273 key-text at-call of OS_ObjectIdFindByName in OS_CountSemGetIdByName at osal/src/os/shared/src/osapi-countsem.c:212",
+    "events": 3,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 279 creator-call after-call of OS_CountSemCreate in initialize_throttling at src/bp/fsw/src/bp_flow.c:132",
+    "events": 2,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 280 creator-call at-call of OS_CountSemCreate in initialize_throttling at src/bp/fsw/src/bp_flow.c:132",
+    "events": 2,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 282 handling-chain store in CF_AppMain at src/cf/fsw/src/cf_app.c:333",
+    "actor": "12",
+    "events": 1,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 283 handling-chain store in CF_AppMain at src/cf/fsw/src/cf_app.c:357",
+    "actor": "12",
+    "state": "not-reached",
+    "reason": "target_not_reached"
+   },
+   {
+    "need": "site 284 handling-chain after-call of CFE_ES_RunLoop in CF_AppMain at src/cf/fsw/src/cf_app.c:338",
+    "actor": "12",
+    "events": 1,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 285 handling-chain after-call of CF_Init in CF_AppMain at src/cf/fsw/src/cf_app.c:330",
+    "actor": "12",
+    "events": 1,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 286 handling-chain at-call of CFE_ES_ExitApp in CF_AppMain at src/cf/fsw/src/cf_app.c:366",
+    "actor": "12",
+    "events": 1,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 287 handling-chain after-call of CF_CFDP_InitEngine in CF_Init at src/cf/fsw/src/cf_app.c:252",
+    "actor": "12",
+    "events": 1,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 288 handling-chain+use-call after-call of OS_CountSemGetIdByName in CF_CFDP_InitEngine at src/cf/fsw/src/cf_cfdp.c:993",
+    "actor": "12",
+    "events": 1,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "site 289 use-call at-call of OS_CountSemGetIdByName in CF_CFDP_InitEngine at src/cf/fsw/src/cf_cfdp.c:993",
+    "actor": "12",
+    "events": 1,
+    "state": "present",
+    "reason": null
+   },
+   {
+    "need": "event-send (sidecar)",
+    "state": "not-planned",
+    "reason": "plan_missing(need",
+    "note": "the effects of a result (an event or a message sent on it) are not in the facts of this revision"
+   },
+   {
+    "need": "wait-result (sidecar)",
+    "state": "not-planned",
+    "reason": "plan_missing(need",
+    "note": "rule added in the manifest revision 4"
+   },
+   {
+    "need": "lock-result (sidecar)",
+    "state": "not-planned",
+    "reason": "plan_missing(need",
+    "note": "rule added in the manifest revision 4"
+   }
+  ],
+  "static_gaps": [],
+  "static_incomplete": [
+   "no_run(no run record read)",
+   "actor_not_extracted(spawn call with no resolved entry)",
+   "key_unresolved(pointer field without points-to)",
+   "fixed_proof_open(no static order between the actors)"
+  ],
+  "static_incomplete_source": "relations.txt:456",
+  "budget_truncation": "419 rows cut (row lines with state cut)",
+  "open_premises": [
+   "P-ARG",
+   "P-ACTOR",
+   "P-STACK",
+   "P-CLOCK",
+   "P-STR",
+   "P-CONST",
+   "L-ABS"
+  ]
+ },
+ "link": {
+  "resource_kind": "named object",
+  "actor_token": {
+   "status": "determined",
+   "why": "creation argument 0x1000c seen once among creation calls and once among start entries",
+   "creation_call": {
+    "actor": "1",
+    "aseq": 452,
+    "site": 270,
+    "rule": "actor-create",
+    "where": "at-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+    "t_ms": 1506.478,
+    "values": {
+     "start_routine": "0x55728dd1c740",
+     "creation_arg": "0x1000c",
+     "arg0": "0x55728e28d8e0",
+     "arg1": "0x7fff676d5070"
+    }
+   },
+   "creation_result": {
+    "actor": "1",
+    "aseq": 453,
+    "site": 269,
+    "rule": "actor-create",
+    "where": "after-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+    "t_ms": 1506.505,
+    "values": {
+     "status": "0x0",
+     "out0": "0x7f820ebe36c0"
+    }
+   },
+   "start_entry": {
+    "actor": "12",
+    "aseq": 1,
+    "site": 271,
+    "rule": "actor-start",
+    "where": "entry of OS_PthreadTaskEntry (osal/src/os/posix/src/os-impl-tasks.c)",
+    "t_ms": 1506.52,
+    "values": {
+     "param0": "0x1000c"
+    },
+    "entry_of": "OS_PthreadTaskEntry"
+   },
+   "owner_stores": [
+    {
+     "actor": "1",
+     "aseq": 454,
+     "site": 10,
+     "rule": "actor-owner",
+     "where": "store in CFE_ES_StartAppTask at cfe/modules/es/fsw/src/cfe_es_apps.c:619",
+     "t_ms": 1506.507,
+     "values": {
+      "value": "0x110009",
+      "address": "0x55728e163978"
+     }
+    },
+    {
+     "actor": "1",
+     "aseq": 455,
+     "site": 11,
+     "rule": "actor-owner",
+     "where": "store in CFE_ES_StartAppTask at cfe/modules/es/fsw/src/cfe_es_apps.c:620",
+     "t_ms": 1506.507,
+     "values": {
+      "value": "0x7f820ebec040",
+      "address": "0x55728e163990"
+     }
+    }
+   ]
+  },
+  "app_of_actor": {
+   "status": "determined",
+   "app": "CF",
+   "class": "app",
+   "why": "root CF_AppMain is the entry point of the startup-script application CF"
+  },
+  "static_basis": {
+   "row": "relations.txt:440",
+   "use_site_key": "17975444d83f6589",
+   "relations_sha256": "7c7396d2c7c10626ffda939af78644925ddc74d1720f973d0ddea44cd202c44e",
+   "keys_sha256": "d6d970d636361f88b30e59278eefcb8e485e3eef559e85f1ae3a774e03528408"
+  },
+  "instance_evidence": [
+   {
+    "publisher_actor": "13",
+    "key_text": "BP0_tsem",
+    "create": 12,
+    "out": "0x30002"
+   },
+   {
+    "publisher_actor": "13",
+    "key_text": "BP1_tsem",
+    "differs_from_use_key": "BP0_tsem"
+   },
+   {
+    "publisher_actor": "14",
+    "key_text": "SCH_LAB",
+    "differs_from_use_key": "BP0_tsem"
+   }
+  ],
+  "missing": [],
+  "status": "established",
+  "resource_key": {
+   "namespace": "OS_common_record_t.name_entry",
+   "partition": "3",
+   "namespace_source": "relations.txt:440",
+   "name": "BP0_tsem",
+   "generation": [
+    "0x30002"
+   ]
+  },
+  "grounds": [
+   "absence outcome: the use and the publisher's create name the same key in the namespace partition of the row in one process of one run; the use reached no instance (premise L-ABS)"
+  ]
+ },
+ "use_cond": {
+  "rule": "JR 4.2 name or key lookup (path A)",
+  "premises": [
+   "static row text of relations.txt (relations rules: relations rules revision 6 (2026-11-16))"
+  ],
+  "missing": [
+   "absent_result_unevaluated(static-undetermined)",
+   "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:454)",
+   "caller_dependence_unknown(the terminal chain's guard is linked 'may')",
+   "key_unresolved(creator key unresolved: relations.txt:444)",
+   "fixed_proof_open(undecidable)"
+  ],
+  "callee_check": {
+   "status": "present",
+   "text": "-17 [OS_ERR_NAME_NOT_FOUND], 0 [OS_SUCCESS]",
+   "sources": [
+    {
+     "kind": "static-row",
+     "ref": "relations.txt:454"
+    }
+   ]
+  },
+  "reach": {
+   "status": "missing",
+   "text": "flip: static-undetermined: the key of the lookup or of a creator is not resolved statically; search returns: OS_ObjectIdFindNextMatch returns -17 [OS_ERR_NAME_NOT_FOUND], OS_ObjectIdFindNextMatch returns 0 [OS_SUCCESS]",
+   "sources": [
+    {
+     "kind": "static-row",
+     "ref": "relations.txt:454"
+    }
+   ]
+  },
+  "caller_dependence": {
+   "status": "missing",
+   "text": "the terminal chain's guard is linked 'may'",
+   "sources": [
+    {
+     "kind": "static-row",
+     "ref": "relations.txt:449"
+    }
+   ]
+  },
+  "writers": {
+   "status": "missing",
+   "count": 2,
+   "sources": [
+    {
+     "kind": "static-row",
+     "ref": "relations.txt:444"
+    },
+    {
+     "kind": "static-row",
+     "ref": "relations.txt:445"
+    }
+   ]
+  },
+  "run_key_value": {
+   "text": "BP0_tsem",
+   "sources": [
+    {
+     "kind": "record-key",
+     "ref": "dump actor 12 aseq 26"
+    }
+   ]
+  },
+  "status": "partial",
+  "predicate": null
+ },
+ "order": {
+  "static": "unknown",
+  "static_reason": "order edges not computed in this cycle",
+  "static_note": {
+   "text": "feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)",
+   "source": "relations.txt:452"
+  },
+  "run_id": {
+   "run_id": "1",
+   "dump_text_sha256": "1290a5f6edd6598a3ba32723a447695aa32fc0dbeee9a0b9d2cbc1e823e88b6d",
+   "clock": "1"
+  },
+  "use_events": [
+   {
+    "call": "CF_CFDP_InitEngine -> OS_CountSemGetIdByName line 993",
+    "at_call": {
+     "actor": "12",
+     "aseq": 25,
+     "site": 289,
+     "rule": "use-call",
+     "where": "at-call of OS_CountSemGetIdByName in CF_CFDP_InitEngine at src/cf/fsw/src/cf_cfdp.c:993",
+     "t_ms": 1556.926,
+     "values": {
+      "key": "0x55728e21174c",
+      "arg0": "0x7f820ec145ac"
+     }
+    },
+    "after_call": {
+     "actor": "12",
+     "aseq": 27,
+     "site": 288,
+     "rule": "handling-chain+use-call",
+     "where": "after-call of OS_CountSemGetIdByName in CF_CFDP_InitEngine at src/cf/fsw/src/cf_cfdp.c:993",
+     "t_ms": 1556.927,
+     "values": {
+      "status": "-0x11",
+      "out0": "0x0"
+     }
+    },
+    "status_value": "-0x11",
+    "status_name": "OS_ERR_NAME_NOT_FOUND",
+    "status_name_source": "relations.txt:454 (constants of the row)",
+    "out": {
+     "read": false,
+     "why": "status -0x11 is not the success constant OS_SUCCESS 0"
+    },
+    "key": {
+     "pointer": "0x55728e21174c",
+     "text": "BP0_tsem",
+     "truncated": false,
+     "text_event": {
+      "actor": "12",
+      "aseq": 26,
+      "site": 273,
+      "rule": "key-text",
+      "where": "at-call of OS_ObjectIdFindByName in OS_CountSemGetIdByName at osal/src/os/shared/src/osapi-countsem.c:212",
+      "t_ms": 1556.926,
+      "values": {
+       "key_text": "0x55728e21174c",
+       "arg0": "0x3",
+       "arg2": "0x7f820ec145ac"
+      },
+      "str": "BP0_tsem",
+      "str_truncated": false
+     },
+     "pointer_equal_to_key_text_argument": true
+    }
+   }
+  ],
+  "publish_events": [
+   {
+    "actor": "13",
+    "call": "initialize_throttling -> OS_CountSemCreate line 132",
+    "at_call": {
+     "actor": "13",
+     "aseq": 12,
+     "site": 280,
+     "rule": "creator-call",
+     "where": "at-call of OS_CountSemCreate in initialize_throttling at src/bp/fsw/src/bp_flow.c:132",
+     "t_ms": 1566.869,
+     "values": {
+      "key": "0x7f820ebdc3e0",
+      "arg0": "0x7f820ebdc400",
+      "arg2": "0xa",
+      "arg3": "0x0"
+     }
+    },
+    "after_call": {
+     "actor": "13",
+     "aseq": 14,
+     "site": 279,
+     "rule": "creator-call",
+     "where": "after-call of OS_CountSemCreate in initialize_throttling at src/bp/fsw/src/bp_flow.c:132",
+     "t_ms": 1566.871,
+     "values": {
+      "status": "0x0",
+      "out0": "0x30002"
+     }
+    },
+    "status_value": "0x0",
+    "out": {
+     "value": "0x30002",
+     "read": "recorded; not graded (the creator's return constants are not in the row)"
+    },
+    "key": {
+     "pointer": "0x7f820ebdc3e0",
+     "text": "BP0_tsem",
+     "truncated": false,
+     "text_event": {
+      "actor": "13",
+      "aseq": 13,
+      "site": 272,
+      "rule": "key-text",
+      "where": "at-call of memchr in OS_CountSemCreate at osal/src/os/shared/src/osapi-countsem.c:91",
+      "t_ms": 1566.87,
+      "values": {
+       "key_text": "0x7f820ebdc3e0",
+       "arg1": "0x0",
+       "arg2": "0x14"
+      },
+      "str": "BP0_tsem",
+      "str_truncated": false
+     },
+     "pointer_equal_to_key_text_argument": true
+    }
+   },
+   {
+    "actor": "13",
+    "call": "initialize_throttling -> OS_CountSemCreate line 132",
+    "at_call": {
+     "actor": "13",
+     "aseq": 16,
+     "site": 280,
+     "rule": "creator-call",
+     "where": "at-call of OS_CountSemCreate in initialize_throttling at src/bp/fsw/src/bp_flow.c:132",
+     "t_ms": 1566.908,
+     "values": {
+      "key": "0x7f820ebdc404",
+      "arg0": "0x7f820ebdc424",
+      "arg2": "0xa",
+      "arg3": "0x0"
+     }
+    },
+    "after_call": {
+     "actor": "13",
+     "aseq": 18,
+     "site": 279,
+     "rule": "creator-call",
+     "where": "after-call of OS_CountSemCreate in initialize_throttling at src/bp/fsw/src/bp_flow.c:132",
+     "t_ms": 1566.909,
+     "values": {
+      "status": "0x0",
+      "out0": "0x30003"
+     }
+    },
+    "status_value": "0x0",
+    "out": {
+     "value": "0x30003",
+     "read": "recorded; not graded (the creator's return constants are not in the row)"
+    },
+    "key": {
+     "pointer": "0x7f820ebdc404",
+     "text": "BP1_tsem",
+     "truncated": false,
+     "text_event": {
+      "actor": "13",
+      "aseq": 17,
+      "site": 272,
+      "rule": "key-text",
+      "where": "at-call of memchr in OS_CountSemCreate at osal/src/os/shared/src/osapi-countsem.c:91",
+      "t_ms": 1566.908,
+      "values": {
+       "key_text": "0x7f820ebdc404",
+       "arg1": "0x0",
+       "arg2": "0x14"
+      },
+      "str": "BP1_tsem",
+      "str_truncated": false
+     },
+     "pointer_equal_to_key_text_argument": true
+    }
+   },
+   {
+    "actor": "14",
+    "call": "SCH_LAB_AppInit -> OS_CountSemCreate line 168",
+    "at_call": {
+     "actor": "14",
+     "aseq": 3,
+     "site": 3,
+     "rule": "creator-call",
+     "where": "at-call of OS_CountSemCreate in SCH_LAB_AppInit at apps/sch_lab/fsw/src/sch_lab_app.c:168",
+     "t_ms": 1556.76,
+     "values": {
+      "key": "0x7f820ec34000",
+      "arg0": "0x7f820ec36304",
+      "arg2": "0x0",
+      "arg3": "0x0"
+     }
+    },
+    "after_call": {
+     "actor": "14",
+     "aseq": 5,
+     "site": 2,
+     "rule": "creator-call",
+     "where": "after-call of OS_CountSemCreate in SCH_LAB_AppInit at apps/sch_lab/fsw/src/sch_lab_app.c:168",
+     "t_ms": 1556.764,
+     "values": {
+      "status": "0x0",
+      "out0": "0x30001"
+     }
+    },
+    "status_value": "0x0",
+    "out": {
+     "value": "0x30001",
+     "read": "recorded; not graded (the creator's return constants are not in the row)"
+    },
+    "key": {
+     "pointer": "0x7f820ec34000",
+     "text": "SCH_LAB",
+     "truncated": false,
+     "text_event": {
+      "actor": "14",
+      "aseq": 4,
+      "site": 272,
+      "rule": "key-text",
+      "where": "at-call of memchr in OS_CountSemCreate at osal/src/os/shared/src/osapi-countsem.c:91",
+      "t_ms": 1556.761,
+      "values": {
+       "key_text": "0x7f820ec34000",
+       "arg1": "0x0",
+       "arg2": "0x14"
+      },
+      "str": "SCH_LAB",
+      "str_truncated": false
+     },
+     "pointer_equal_to_key_text_argument": true
+    }
+   }
+  ],
+  "sync_results": {
+   "creation": [
+    {
+     "actor": "12",
+     "creation_result": {
+      "actor": "1",
+      "aseq": 453,
+      "site": 269,
+      "rule": "actor-create",
+      "where": "after-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+      "t_ms": 1506.505,
+      "values": {
+       "status": "0x0",
+       "out0": "0x7f820ebe36c0"
+      }
+     }
+    },
+    {
+     "actor": "13",
+     "creation_result": {
+      "actor": "1",
+      "aseq": 460,
+      "site": 269,
+      "rule": "actor-create",
+      "where": "after-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+      "t_ms": 1506.656,
+      "values": {
+       "status": "0x0",
+       "out0": "0x7f820ebd06c0"
+      }
+     }
+    },
+    {
+     "actor": "14",
+     "creation_result": {
+      "actor": "1",
+      "aseq": 446,
+      "site": 269,
+      "rule": "actor-create",
+      "where": "after-call of pthread_create in OS_Posix_InternalTaskCreate_Impl at osal/src/os/posix/src/os-impl-tasks.c:543",
+      "t_ms": 1506.305,
+      "values": {
+       "status": "0x0",
+       "out0": "0x7f820ec316c0"
+      }
+     }
+    }
+   ],
+   "wait": "not-planned: plan_missing(need not planned)",
+   "lock": "not-planned: plan_missing(need not planned)"
+  },
+  "missing": [
+   "absent_result_unevaluated(the predicate is not derived: use_cond partial)"
+  ],
+  "status": "events_only",
+  "per_consumer": {
+   "item1_mhb_use_before_w": {
+    "value": "incomplete",
+    "why": "order edges not computed in this cycle (fixed_proof_open)"
+   },
+   "item2_uses_before_w_all_fail": {
+    "value": "holds",
+    "events": [
+     {
+      "actor": "12",
+      "aseq": 25
+     }
+    ],
+    "grade_rule": "failure class: v < 0 or 0xC0000000 <= v <= 0xFFFFFFFF (the method's S1 rule as ported in kairos/lib/llvm/plan_gen.cpp:58; vocabulary plan/ORDER_VIOLATION_METHOD_20261111.md:381 (a), (b))"
+   },
+   "item3_after_w_no_such_status": {
+    "value": "no_data",
+    "events": [],
+    "why": "no_matching_use_after_w"
+   },
+   "item4_a_failing_use_stands": {
+    "value": "unchecked",
+    "events": [],
+    "why": "no initialization-window end or instance key in this cycle"
+   },
+   "w": {
+    "t_ms": 1566.869,
+    "events": [
+     {
+      "actor": "13",
+      "aseq": 12
+     }
+    ]
+   }
+  }
+ },
+ "intervention": {
+  "plan_origin": "generated",
+  "plan_inputs": [
+   "facts sha256=0d7954fa29aca64353e20a3509db39ee8dde9b0b4c896d10c203f1222eeb1a92 path=/home/user/work/redesign/step2a/tests_8c_fix/c1_pre_tx/NP/facts.kz",
+   "basis sha256=87a80eb0e3731b558a23f7c682d13dbe016b3d94e9511731c68ebf58d19bf519 path=/home/user/work/redesign/step2a/tests_8c_fix/c1_pre_tx/NP/basis.kz",
+   "framework-layer-data sha256=e2a39203bac0b9a5c0016c71f076a898be8edeeb73e363a125768b92424696a0 path=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_api_roles.txt"
+  ],
+  "validity": "no hold point in the plan",
+  "hold": "none",
+  "matched_use": null,
+  "side_effects": null,
+  "other_causes": null,
+  "repeats": 1,
+  "control_level": "none (natural boot)",
+  "status": "unconfirmed",
+  "missing": [
+   "intervention_out_of_scope(no hold, gate or directed run in this stage)"
+  ]
+ },
+ "effect": {
+  "missing": [],
+  "window": {
+   "start_ms": 0.0,
+   "end_ms": 5679.559,
+   "start": "RUN record t_init (runtime start)",
+   "end": "RUN record t_stop (in-process)",
+   "stop_events": [
+    "run-loop CFE_ES_RunLoop cfe/modules/es/fsw/src/cfe_es_api.c:470 decl cfe/modules/core_api/fsw/inc/cfe_es.h:397 version \"cFE 6.7.99 (baseline v7.0.0-rc4, build 205)\" data line 15",
+    "app-exit CFE_ES_ExitApp cfe/modules/es/fsw/src/cfe_es_api.c:340 decl cfe/modules/core_api/fsw/inc/cfe_es.h:355 version \"cFE 6.7.99 (baseline v7.0.0-rc4, build 205)\" data line 16"
+   ],
+   "consumer_app_stop": {
+    "actor": "12",
+    "stop_event": "CFE_ES_RunLoop",
+    "stop_ms": "1556.953",
+    "inside_window": "yes",
+    "status": "reached"
+   },
+   "consumer_run_loop_after_use": {
+    "actor": "12",
+    "aseq": 31,
+    "site": 7,
+    "rule": "stop-event",
+    "where": "entry of CFE_ES_RunLoop (cfe/modules/es/fsw/src/cfe_es_api.c)",
+    "t_ms": 1556.953,
+    "values": {
+     "param0": "0x7f820ebfb748"
+    },
+    "entry_of": "CFE_ES_RunLoop"
+   },
+   "consumer_run_loop_entries_after_use": 1
+  },
+  "end_reason": {
+   "process": [
+    "stop=ci-es-restart-poweron (CI L196-L197)",
+    "tx_exit=0 rx_exit=0"
+   ],
+   "actor": "app exit (app-exit entry recorded at aseq 34)"
+  },
+  "events": [
+   {
+    "actor": "12",
+    "aseq": 28,
+    "site": 287,
+    "rule": "handling-chain",
+    "where": "after-call of CF_CFDP_InitEngine in CF_Init at src/cf/fsw/src/cf_app.c:252",
+    "t_ms": 1556.952,
+    "values": {
+     "status": "-0x11"
+    },
+    "ref": "row 17975444d83f6589"
+   },
+   {
+    "actor": "12",
+    "aseq": 29,
+    "site": 285,
+    "rule": "handling-chain",
+    "where": "after-call of CF_Init in CF_AppMain at src/cf/fsw/src/cf_app.c:330",
+    "t_ms": 1556.952,
+    "values": {
+     "status": "-0x11"
+    },
+    "ref": "row 17975444d83f6589"
+   },
+   {
+    "actor": "12",
+    "aseq": 30,
+    "site": 282,
+    "rule": "handling-chain",
+    "where": "store in CF_AppMain at src/cf/fsw/src/cf_app.c:333",
+    "t_ms": 1556.953,
+    "values": {
+     "value": "0x3",
+     "address": "0x7f820ebfb748"
+    },
+    "ref": "row 17975444d83f6589 /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_app.c:333:9"
+   },
+   {
+    "actor": "12",
+    "aseq": 32,
+    "site": 284,
+    "rule": "handling-chain",
+    "where": "after-call of CFE_ES_RunLoop in CF_AppMain at src/cf/fsw/src/cf_app.c:338",
+    "t_ms": 1556.953,
+    "values": {
+     "status": "0x0"
+    },
+    "ref": "row 17975444d83f6589"
+   },
+   {
+    "actor": "12",
+    "aseq": 33,
+    "site": 286,
+    "rule": "handling-chain",
+    "where": "at-call of CFE_ES_ExitApp in CF_AppMain at src/cf/fsw/src/cf_app.c:366",
+    "t_ms": 1556.954,
+    "values": {
+     "arg0": "0x3"
+    },
+    "ref": "row 17975444d83f6589"
+   },
+   {
+    "actor": "12",
+    "aseq": 34,
+    "site": 6,
+    "rule": "stop-event",
+    "where": "entry of CFE_ES_ExitApp (cfe/modules/es/fsw/src/cfe_es_api.c)",
+    "t_ms": 1556.955,
+    "values": {
+     "param0": "0x3"
+    },
+    "entry_of": "CFE_ES_ExitApp",
+    "ref": "framework-layer data line 16: app-exit CFE_ES_ExitApp cfe/modules/es/fsw/src/cfe_es_api.c:340 (cFE 6.7.99 (baseline v7.0.0-rc4, build 205))"
+   }
+  ],
+  "events_scope": "events of the consumer actor after its last use of the row at the row's handling-chain sites and the app-exit sites; their order in the actor is recorded, no causal link to the use is claimed",
+  "recovery": "not_attempted",
+  "recovery_scope": "in the window, at the planned sites: no later use of the row by this actor; its app-exit entry is recorded",
+  "unobserved": [
+   "after the process end (RUN t_stop)",
+   "operations at no planned site",
+   "the effects of a result that the plan does not record (sidecar need lines not-planned)"
+  ],
+  "status": "observed"
+ },
+ "tool_verdict": {
+  "inputs": [
+   "link.status",
+   "use_cond.status",
+   "order.status",
+   "order.static",
+   "intervention.status",
+   "order.use_events.status_value",
+   "effect.status",
+   "effect.events",
+   "effect.recovery"
+  ],
+  "violation": {
+   "value": "undetermined",
+   "kind": "order_basis_unknown",
+   "undetermined_reasons": [
+    "absent_result_unevaluated(static-undetermined)",
+    "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:454)",
+    "caller_dependence_unknown(the terminal chain's guard is linked 'may')",
+    "key_unresolved(creator key unresolved: relations.txt:444)",
+    "fixed_proof_open(undecidable)",
+    "absent_result_unevaluated(the predicate is not derived: use_cond partial)"
+   ]
+  },
+  "odf": {
+   "value": "failure_sign",
+   "grade_rule": "failure class: v < 0 or 0xC0000000 <= v <= 0xFFFFFFFF (the method's S1 rule as ported in kairos/lib/llvm/plan_gen.cpp:58; vocabulary plan/ORDER_VIOLATION_METHOD_20261111.md:381 (a), (b))",
+   "failing_uses": [
+    {
+     "actor": "12",
+     "aseq": 27,
+     "status": "-0x11",
+     "name": "OS_ERR_NAME_NOT_FOUND"
+    }
+   ],
+   "no_valid_intervention_pair": [
+    "intervention_out_of_scope(no hold, gate or directed run in this stage)"
+   ]
+  },
+  "final_effect": {
+   "facts": [
+    "app_exit_called(CFE_ES_ExitApp param0=0x3)",
+    "no_recovery_in_window"
+   ],
+   "window": {
+    "start": "RUN record t_init (runtime start)",
+    "end": "RUN record t_stop (in-process)"
+   },
+   "end_reason": {
+    "process": [
+     "stop=ci-es-restart-poweron (CI L196-L197)",
+     "tx_exit=0 rx_exit=0"
+    ],
+    "actor": "app exit (app-exit entry recorded at aseq 34)"
+   }
+  },
+  "headline": "실패 징후"
+ },
+ "inputs": {
+  "bindings": {
+   "path": "/home/user/work/redesign/obs1/c1pre_derived/binds_instr.kzs",
+   "sha256": "6a22b9ec9fe5dfcfa11baf3d33fe0cbb33a4a5ea3361794376986a9215d38c3c"
+  },
+  "bprime_basis": {
+   "path": "/home/user/work/redesign/obs1/c1pre_bprime/c1_pre_tx/NP/basis.kz",
+   "sha256": "a57c227b2f9fd8ddd6f9c5a91bbc6f9396497d771fb623475c17f59288811fe8"
+  },
+  "chain": {
+   "path": "/home/user/Shape-Perf/research/cfs_procrace/records/obs1-20261116-boot/chain.txt",
+   "sha256": "3d26a32b8cbbccc0a3288c65eccefbce5b0a15498d7cd38c9d6349834402d2fd"
+  },
+  "dump_text": {
+   "path": "/home/user/work/redesign/obs1/c1pre_boot/tx/tx.dump.txt",
+   "sha256": "1290a5f6edd6598a3ba32723a447695aa32fc0dbeee9a0b9d2cbc1e823e88b6d"
+  },
+  "facts_view": {
+   "path": "/home/user/work/redesign/obs1/c1pre_explain/facts_view.txt",
+   "sha256": "6a47ba779ef14b0904ab86a8f0638e210df184ece7bda76f282a1d9409013c4b"
+  },
+  "keys": {
+   "path": "/home/user/work/redesign/obs1/plangen_relcheck/c1_pre_tx/keys.txt",
+   "sha256": "d6d970d636361f88b30e59278eefcb8e485e3eef559e85f1ae3a774e03528408"
+  },
+  "manifest": {
+   "path": "/home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.kzs",
+   "sha256": "5f015c5aa86bf642ac1a76cf49669c98520eac541868cf44e24966649d9d60ae"
+  },
+  "relations": {
+   "path": "/home/user/work/redesign/obs1/plangen_relcheck/c1_pre_tx/relations.txt",
+   "sha256": "7c7396d2c7c10626ffda939af78644925ddc74d1720f973d0ddea44cd202c44e"
+  },
+  "run_meta": {
+   "path": "/home/user/work/redesign/obs1/c1pre_boot/tx/run.meta",
+   "sha256": "075f39b27fb3b6cfdd6053dbb78d5bfe01ac9f4aeb1682847d32f849ca56f64d"
+  },
+  "sidecar": {
+   "path": "/home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.side",
+   "sha256": "8f5f200cbe436f587e3ef1e3ee2ec0782675ba3c2860aa8d0ec4f7cdba29c721"
+  },
+  "startup_script": {
+   "path": "/home/user/work/redesign/obs1/c1pre_boot/tx/inst/tx/cf/cfe_es_startup.scr",
+   "sha256": "8ddb9359fd2e897b57b1c9c9f0b92f4d8efe36a8b5b290aafef62805657ba0ef"
+  },
+  "stop_eval": {
+   "path": "/home/user/Shape-Perf/research/cfs_procrace/records/obs1-20261116-boot/stop_eval.tsv",
+   "sha256": "6eb442621c0b60eb4a1069c7b42d989dc65891de686a11634834694af5dd0291"
+  },
+  "vocabulary": {
+   "path": "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/reason_vocabulary.txt",
+   "sha256": "4b964d34812232886fbe906e00328be5d07a8978353cf1905a850a692f237678"
+  }
+ }
+}

@@ -2,7 +2,7 @@
 # run_explain.sh STEP -- the explanation records of the natural boot of B' (plan/observation_path_results_20261116.md 7.0)
 # and the evidence of the exit test.  Logs and small text records into this directory; outputs into one new directory
 # outside the repository, /home/user/work/redesign/obs1/c1pre_explain/.  Every input is read only.
-#   facts-view | explain | copy | plan-checks | hand | bundle
+#   facts-view | explain [NAME] | copy NAME [USE-SITE KEY...] | plan-checks | hand | bundle   (NAME: the output directory under c1pre_explain, default explain)
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../.." && pwd)"
@@ -29,19 +29,23 @@ case "${1:-}" in
       "$MC/tools/kz-dump/kz-dump" "$T8/facts.kz" | grep -E 'name="(extract\.build_identity|extract\.p0_table|extract\.p0_table_scope|p0\.pthread_create)"'
     } > "$EX/facts_view.txt"; cp "$EX/facts_view.txt" "$HERE/facts_view.txt"; cat "$HERE/facts_view.txt" | cut -c1-200 ;;
   explain)
-    "$GUARD" --need 30000000 --kind explain --log "$HERE/df_explain.log" -- \
+    N=${2:-explain}
+    "$GUARD" --need 30000000 --kind explain --log "$HERE/df_explain_$N.log" -- \
       python3 -I "$R/env/obs1/explain.py" --sidecar "$P/plan.side" --manifest "$P/plan.kzs" --bindings "$W/binds_instr.kzs" \
         --relations "$REL/relations.txt" --keys "$REL/keys.txt" --vocabulary "$R/kairos/tests/static/data/reason_vocabulary.txt" \
-        --facts-view "$EX/facts_view.txt" --bprime-basis "$BP/basis.kz" --build-label c1_pre_tx --out "$EX/explain" \
+        --facts-view "$EX/facts_view.txt" --bprime-basis "$BP/basis.kz" --build-label c1_pre_tx --out "$EX/$N" \
         --dump-text "$RUN/tx.dump.txt" --run-meta "$RUN/run.meta" --chain "$BOOTREC/chain.txt" --stop-eval "$BOOTREC/stop_eval.tsv" \
-        --startup-script "$RUN/inst/tx/cf/cfe_es_startup.scr" > "$HERE/explain.log" 2>&1; rc=$?
-    echo "explain rc=$rc" >> "$HERE/explain.log"; cat "$HERE/explain.log"; exit $rc ;;
+        --startup-script "$RUN/inst/tx/cf/cfe_es_startup.scr" > "$HERE/explain_$N.log" 2>&1; rc=$?
+    echo "explain rc=$rc" >> "$HERE/explain_$N.log"; cat "$HERE/explain_$N.log"; exit $rc ;;
   copy)
-    # the records are text: a copy into the repository, with their sha256
-    mkdir -p "$HERE/records" || exit 2
-    cp "$EX/explain/index.tsv" "$EX/explain/inputs.txt" "$EX/explain/refused.txt" "$HERE/"
-    cp "$EX/explain/records/"*.json "$HERE/records/"
-    (cd "$EX/explain" && find . -type f | sort | xargs sha256sum) > "$HERE/explain.sha256"; wc -l < "$HERE/explain.sha256" ;;
+    # the records are text; the repository keeps the index, the inputs, the refusals, the sha256 of every record and the
+    # records of the rows named by their use-site keys (arguments 3...); all records stay in the output directory
+    N=${2:-explain}; shift 2 || true
+    [ ! -e "$HERE/records" ] || { echo "run_explain.sh: $HERE/records exists" >&2; exit 2; }
+    mkdir "$HERE/records" || exit 2
+    cp "$EX/$N/index.tsv" "$EX/$N/inputs.txt" "$EX/$N/refused.txt" "$HERE/"
+    for k in "$@"; do cp "$EX/$N/records/"*".$k."*.json "$HERE/records/" || exit 2; done
+    (cd "$EX/$N" && find . -type f | sort | xargs sha256sum) > "$HERE/explain_$N.sha256"; wc -l < "$HERE/explain_$N.sha256" ;;
   plan-checks)
     # E2 mechanical checks over the generated plan: every site has a rule name and a ref; no expected value or state
     python3 -I - "$P/plan.kzs" "$P/plan.side" > "$HERE/plan_checks.txt" <<'PY'

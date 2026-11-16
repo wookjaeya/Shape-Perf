@@ -1,0 +1,23 @@
+new names: 5
+  name __atomic_wide_counter::__value32
+  name __pthread_mutex_s::__elision_data
+  name sigaction::__sigaction_handler
+  name sigevent_t::_sigev_un
+  name sigevent_t::_sigev_un::_sigev_thread
+class basis          change:basis-count                 1
+class basis          change:units-from                  1
+class basis          insert:reading-options             1
+class basis          mask:site                          1
+class fwrites        added-named                        18
+class fwrites        mask:site                          1
+class fwrites        removed-anon                       11
+class lockpaths      added-named                        1
+class lockpaths      mask:site                          114
+class lockpaths      removed-anon                       1
+class lockpaths      renamed                            1
+class lockset        added-named                        19
+class lockset        mask:site                          1
+class lockset        removed-anon                       12
+class lockset        renamed                            2
+undeclared other: 0
+compare_classes: only declared classes

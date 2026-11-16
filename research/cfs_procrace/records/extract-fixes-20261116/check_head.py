@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""check_head.py KZDUMP OLD NEW [--whole] -- two containers of one build (basis.kz or facts.kz of the re-extraction before
+"""check_head.py KZDUMP OLD NEW [--whole] [--allow-size] -- two containers of one build (basis.kz or facts.kz of the re-extraction before
 and after the extractor fixes) read by the same kz-dump: the header lines (up to the first `section` line), or with
 --whole the whole dump, must be equal apart from tool_sha256=, artifact_sha256= and basis_sha256= (64 hex) and a facts'
 parent[0] (the basis).  For a facts container the sections are compared by compare_classes.py over the text view; for a
-basis container --whole compares every record.  rc 0 when nothing else differs, 1 otherwise."""
+basis container --whole compares every record.  --allow-size (results 5.0b) also allows the line
+`container abi=1 kind=facts size=N` with another N: the byte count of a container whose content differs as declared.  rc 0 when nothing else differs, 1 otherwise."""
 import re
 import subprocess
 import sys
 
 H = r"[0-9a-f]{64}"
+SIZE = re.compile(r"^container abi=1 kind=facts size=\d+$")
 ALLOW = [re.compile(r"^(tool_sha256|artifact_sha256|basis_sha256)=" + H + "$"), re.compile(r"^  parent\[0\] kind=basis role=1 sha256=" + H + "$")]
 
 
@@ -27,7 +29,8 @@ def dump(kd, path, whole):
 def main():
     a = sys.argv[1:]
     whole = "--whole" in a
-    a = [x for x in a if x != "--whole"]
+    allow_size = "--allow-size" in a
+    a = [x for x in a if x not in ("--whole", "--allow-size")]
     if len(a) != 3:
         print(__doc__, file=sys.stderr)
         return 2
@@ -39,6 +42,8 @@ def main():
         if p == q:
             continue
         if any(r.match(p) and r.match(q) and p.split("=")[0] == q.split("=")[0] for r in ALLOW):
+            allowed += 1
+        elif allow_size and SIZE.match(p) and SIZE.match(q):
             allowed += 1
         else:
             bad.append("line %d: %s | %s" % (i + 1, p[:120], q[:120]))

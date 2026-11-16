@@ -5,7 +5,7 @@
 #   order      extfix_order/<b>/{order.txt,edges.tsv}: two runs the same bytes; against schema12_order/<b>/ only line 3 of
 #              order.txt (relations rules revision) differs, edges.tsv byte-identical; order.log empty
 #   extract    extfix_extract/<b>/<b>/NP against schema12_extract/<b>/<b>/NP: basis.kz record by record (check_head.py
-#              --whole), facts.kz header (check_head.py), the facts view (kz-static show, both read by the new tool; views
+#              --whole), facts.kz header (check_head.py --allow-size, results 5.0b), the facts view (kz-static show, both read by the new tool; views
 #              written to SCRATCH and removed after) with compare_classes.py facts_allow.tsv, extract.txt with
 #              extract_txt_allow.tsv, relations.txt with relations_allow.tsv, basis.txt and sha256.txt only the hash lines,
 #              args.txt and relations.log the same; the FACT_LOCS and FIELD_STATUS rows of the renamed types into
@@ -48,7 +48,7 @@ for b in c1_pre_tx c1_post_tx r2_core c5_641 c5_642; do
     extract)
       N=$O/extfix_extract/$b/$b/NP; P=$O/schema12_extract/$b/$b/NP; C=$HERE/compare
       python3 -I "$HERE/check_head.py" "$KD" "$P/basis.kz" "$N/basis.kz" --whole > "$C/basis_$b.txt"; [ $? = 0 ] && ok "$b basis.kz: $(head -1 "$C/basis_$b.txt")" || bad "$b basis.kz (compare/basis_$b.txt)"
-      python3 -I "$HERE/check_head.py" "$KD" "$P/facts.kz" "$N/facts.kz" > "$C/facts_head_$b.txt"; [ $? = 0 ] && ok "$b facts.kz: $(head -1 "$C/facts_head_$b.txt")" || bad "$b facts.kz header (compare/facts_head_$b.txt)"
+      python3 -I "$HERE/check_head.py" "$KD" "$P/facts.kz" "$N/facts.kz" --allow-size > "$C/facts_head_$b.txt"; [ $? = 0 ] && ok "$b facts.kz: $(head -1 "$C/facts_head_$b.txt")" || bad "$b facts.kz header (compare/facts_head_$b.txt)"
       "$KS" show "$P/facts.kz" > "$SCRATCH/old_$b.txt" && "$KS" show "$N/facts.kz" > "$SCRATCH/new_$b.txt" || bad "$b show"
       cls "$SCRATCH/old_$b.txt" "$SCRATCH/new_$b.txt" --allow "$HERE/facts_allow.tsv" --build "$b" --list 40 > "$C/facts_$b.txt"; [ $? = 0 ] && ok "$b facts view: $(tail -1 "$C/facts_$b.txt")" || bad "$b facts view (compare/facts_$b.txt)"
       { echo "# FACT_LOCS and FIELD_STATUS rows of record types without a file-scope name, before (schema12_extract) and after"

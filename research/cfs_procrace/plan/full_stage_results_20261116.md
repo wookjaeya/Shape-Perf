@@ -554,3 +554,9 @@
 - **둘째 빌드**(MC 제자리, 공간 감시 아래, 필요량 100,000,000): `make static_golden`, 그리고 `make all`. 다시 링크되는 것: `tests/static/static_golden` 하나(sha256 이 바뀔 수 있음). 그 밖은 모두 첫 빌드 뒤의 sha256 그대로여야 한다(`after_build1.sha256`: kz-static `c6aa4811…`, `libkz-llvm.a` 와 시험 프로그램 열하나, 그리고 `not_relink.sha256` 의 110). kz-static 의 정체성은 첫 빌드 뒤 그대로다(`tool_sha256=464d62b3…`).
 - **golden**: `anonrec_np.golden` 만 바뀐다: 첫 빌드 뒤 갱신한 판의 1–73 줄(facts 의 보기)과 같고, 74 줄부터의 `# relations` 부분이 없다. 다른 golden 은 바뀌지 않는다.
 - **시험**: 그 뒤 전체 ctest 254, 실패 0, 건너뜀 1. 그 밖의 선언(§5.0)은 그대로다. 다섯 빌드의 출력은 둘째 빌드 뒤의 kz-static(첫 빌드와 같은 바이트)으로 낸다.
+
+#### 5.0b 다시 뽑기 비교 뒤의 덧붙임 (그 비교를 다시 돌리기 전에 적고 커밋함) [D][M]
+
+- **선언 밖의 차이 하나** [M]. `compare.sh extract` 의 facts.kz 머리 비교(`check_head.py`)가 다섯 빌드 모두에서 한 줄을 더 보았다: kz-dump 의 둘째 줄 `container abi=1 kind=facts size=N` 의 N(컨테이너의 바이트 수). 선언(§5.0)은 머리에서 `tool_sha256`·`artifact_sha256`·`basis_sha256`·`parent[0]` 만 허용했다. 그 밖의 비교(basis.kz 전체, facts 의 섹션 보기, extract.txt, relations.txt, basis.txt, sha256.txt, args.txt, relations.log)는 선언 안이었다(`compare_extract.txt`). 그래서 여기서 멈추고 이 덧붙임을 먼저 커밋한다.
+- **까닭**: 컨테이너 크기는 내용의 바이트 수다. 선언이 허용한 내용의 차이(BASIS 항목 하나, 이름 바뀐 형의 새 행, 새 이름 문자열)가 크기를 바꾼다. 앞 단계(§4)의 다시 뽑기는 내용 길이가 같아 이 줄이 같았고, 이번 선언은 그 허용 목록을 그대로 옮겼다. 잰 크기(`facts_sizes.txt`, 옛 → 새, 차이): c1_pre_tx 10,980,952 → 10,996,136(+15,184), c1_post_tx 10,983,800 → 10,999,024(+15,224), r2_core 7,188,992 → 7,195,288(+6,296), c5_641 4,823,448 → 4,824,488(+1,040), c5_642 4,831,960 → 4,833,000(+1,040).
+- **고침**: `check_head.py` 에 `--allow-size`(facts 머리에서만): `container abi=1 kind=facts size=N` 의 N 만 다른 줄을 허용한다. basis.kz 는 그대로(`--whole`, 크기 줄 허용 없음; 다섯 모두 크기가 같다). 이 덧붙임 뒤 `compare.sh extract` 를 다시 돌린다(같은 출력 디렉터리, 출력은 바꾸지 않음; 비교 기록만 새로 씀).

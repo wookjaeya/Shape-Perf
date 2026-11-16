@@ -1,0 +1,11 @@
+new names: 4
+  name CFE_SB_MemParams_t::Partition
+  name CFE_TBL_BufParams_t::Partition
+  name PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type
+  name UnSock_Global@psp/fsw/modules/unsock_intf/unsock_intf_c:85::type
+class head           added-named                        4
+class head           change:facts-hash                  1
+class head           change:rule-targets                1
+class head           removed-anon                       3
+undeclared other: 0
+compare_classes: only declared classes

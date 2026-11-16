@@ -1,0 +1,83 @@
+new names: 25
+  name Buffer@cfe/modules/es/fsw/src/cfe_es_syslog_c:447::type
+  name CFE_SB_MemParams_t::Partition
+  name CFE_TBL_BufParams_t::Partition
+  name CborEncoder::data
+  name CborValue::source
+  name EndianCheck@cfe/modules/es/fsw/src/cfe_es_perf_c:50::type
+  name IdBuf@cfe/modules/es/fsw/src/cfe_es_apps_c:294::type
+  name IdBuf@cfe/modules/es/fsw/src/cfe_es_task_c:1110::type
+  name PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type
+  name UnSock_Global@psp/fsw/modules/unsock_intf/unsock_intf_c:85::type
+  name __atomic_wide_counter::__value32
+  name item@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd_c:945::type
+  name sigaction::__sigaction_handler
+  name sigevent_t::_sigev_un
+  name sigevent_t::_sigev_un::_sigev_thread
+  name siginfo_t::_sifields
+  name siginfo_t::_sifields::_kill
+  name siginfo_t::_sifields::_rt
+  name siginfo_t::_sifields::_sigchld
+  name siginfo_t::_sifields::_sigfault
+  name siginfo_t::_sifields::_sigfault::_bounds
+  name siginfo_t::_sifields::_sigfault::_bounds::_addr_bnd
+  name siginfo_t::_sifields::_sigpoll
+  name siginfo_t::_sifields::_sigsys
+  name siginfo_t::_sifields::_timer
+class argflow        mask:site                          16085
+class argflow        renamed                            20
+class atype          added-named                        134
+class atype          mask:site                          1
+class awaits         mask:site                          8
+class basis          added-named                        4
+class basis          change:basis-count                 9
+class basis          change:units-from                  1
+class basis          insert:reading-options             1
+class basis          mask:site                          1
+class basis          removed-anon                       3
+class calls          mask:site                          7142
+class calls          renamed                            16
+class derived        mask:site                          162
+class fstatus        added-named                        21
+class fstatus        mask:site                          1
+class fstatus        removed-anon                       10
+class fwrites        added-named                        51
+class fwrites        mask:site                          1
+class fwrites        removed-anon                       23
+class fwrites        renamed                            2
+class init           added-named                        4
+class init           mask:site                          1
+class lockops        mask:site                          2117
+class lockpaths      added-named                        12
+class lockpaths      insert:cf-entry-release            8
+class lockpaths      mask:site                          1635
+class lockpaths      remove:cf-entry-release            7
+class lockpaths      removed-anon                       2
+class lockpaths      renamed                            9
+class lockset        added-named                        40
+class lockset        mask:site                          7143
+class lockset        removed-anon                       12
+class lockset        renamed                            40
+class locs           added-named                        4
+class locs           mask:site                          1
+class locs           removed-anon                       3
+class loops          mask:site                          378
+class outcalls       mask:site                          447
+class outcalls       renamed                            1
+class paramflow      mask:site                          5471
+class paramflow      renamed                            15
+class reads          mask:site                          1930
+class reads          renamed                            24
+class returns        mask:site                          649
+class returns        renamed                            12
+class spawnparams    mask:site                          3
+class spawnwrap      mask:site                          16
+class targets        added-named                        1
+class targets        mask:site                          291
+class targets        renamed                            2
+class terminals      mask:site                          80
+class writers        added-named                        5
+class writers        mask:site                          1
+class writers        removed-anon                       1
+undeclared other: 0
+compare_classes: only declared classes

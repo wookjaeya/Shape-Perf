@@ -1,0 +1,2 @@
+check_head header: lines 8, allowed 3, other 1
+  line 2: container abi=1 kind=facts size=4831960 | container abi=1 kind=facts size=4833000

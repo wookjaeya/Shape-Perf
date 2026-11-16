@@ -30,3 +30,22 @@ ctest -j4 -> ctest_first.log: 254 tests, 11 failed as declared (static_golden of
 KZ_GOLDEN_UPDATE=1 ctest -R <the eleven> -> golden_update.log: the eleven goldens cmp equal to the scratch check build's
 ctest -j4 -> ctest_full.log: 254, 1 failed: test_static_reasons (1 of 663 checks: a relations golden without rows, anonrec_np) -- NOT DECLARED: stopped; addendum 5.0a written and committed before the second build
 after_build1.sha256: kz-static and the twelve test programs after build 1 except static_golden (must not change in build 2)
+
+## 3. build 2 (after the commit of the addendum 5.0a, 9a02643)
+build start in build2_start.txt; make -j4 static_golden (df_build2_static_golden.log dip 778240) and make -j4 all (df_build2_all.log dip 12288), --need 100000000: rc 0, rc 0; one Linking line (static_golden)
+sha256sum -c after_build1.sha256: 13 OK (kz-static c6aa4811 unchanged); not_relink.sha256: 110 OK; static_golden changed; CMakeCache.txt bc2f43b4 unchanged; find -newer <build 2 start>: 0 files
+ctest -j4 -> ctest2_first.log: 254, 2 failed: static_golden_anonrec_np (declared, 5.0a) and test_static_reasons (the golden not yet updated)
+KZ_GOLDEN_UPDATE=1 ctest -R '^static_golden_anonrec_np$' -> golden2_update.log: anonrec_np.golden 72 lines = lines 1-72 of the build-1 golden (the blank separator line 73 and the relations part 74-99 gone; the separator is part of the relations appendix, static_golden.cpp: view + "\n# relations\n" + rel)
+ctest -j4 -> ctest2_full.log: 254, 0 failed, 1 skipped (test_probe_anchor_reached); test_static_reasons 660 checks; ctest_counts.log (build 1): test_static_cli 953, test_static_plan 182, lint selftest 109, test_core_schema 34017, lint 7 of 7
+env/tools/tests/run_unit.sh -> unit_tools.txt 15 of 15; env/redesign/step2a_tests_unit.sh -> unit_step2a.txt 7 of 7; ctest -R '^lint' 7 of 7
+build_record.sh post -> post_mc_build2.txt (kz-static c6aa4811)
+
+## 4. the five builds (outputs under /home/user/work/redesign/obs1, each under the space guard)
+rerun.sh (df_rerun.log, rerun_run.txt) -> compare.sh relations -> compare_relations.txt
+order.sh (df_order.log, order_run.txt) -> compare.sh order -> compare_order.txt
+plans.sh (df_plans.log, plans_run.txt): five rc 0
+extract.sh (df_extract.log, extract_run.txt)
+order.sh extfix_extract extfix_on_extract (df_order_extract.log, order_extract_run.txt): rc 0; plans.sh extfix_extract extfix_plans_on_extract (df_plans_extract.log, plans_extract_run.txt): rc 0
+compare.sh extract -> compare_extract_first.txt: 40 OK, 5 BAD: the facts.kz header line `container abi=1 kind=facts size=N` (not declared) -- stopped; addendum 5.0b (check_head.py --allow-size for the facts header) written and committed before the comparison is run again; facts_sizes.txt
+compare.sh onextract -> compare_onextract.txt: 30 OK (two runs same, order.txt only declared classes, edges.tsv same, relations.txt same as the re-extraction's, key maps: 0 keys change)
+compare.sh plans -> compare_plans.txt: ten "only declared differences"

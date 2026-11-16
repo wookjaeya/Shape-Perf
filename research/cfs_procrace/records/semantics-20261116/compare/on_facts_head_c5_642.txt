@@ -1,0 +1,2 @@
+check_head header: lines 8, allowed 4, other 1
+  line 8: sections=42 | sections=43

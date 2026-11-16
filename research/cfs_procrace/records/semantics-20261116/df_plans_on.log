@@ -1,0 +1,5 @@
+# space_guard.sh kind=plans need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/semantics-20261116/plans.sh /home/user/work/redesign/obs1/sem_on_extract /home/user/work/redesign/obs1/sem_plans_on
+start 2026-11-16T19:03:45.341Z free=2300100608 threshold=414572800
+sample 2026-11-16T19:03:45.346Z 2300096512
+sample 2026-11-16T19:03:47.353Z 2299400192
+end 2026-11-16T19:03:49.360Z kind=plans verdict=completed rc=0 free=2299109376 lowest=2299109376 dip=991232 change=-991232

@@ -1132,3 +1132,13 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 336,981,82
 #### 8.0a 빌드 뒤 확인 수의 덧붙임 (다섯 빌드를 돌리기 전에 적고 커밋함) [D][M]
 
 선언 §8.0 은 `test_static_reasons` 의 확인 수를 660 으로 적었고(scratchpad 점검 빌드에서 잰 값), MC 의 갱신 뒤 ctest 는 666 이다(`ctest_counts.log`). 시험은 통과했다. 차이는 선언 밖이므로 여기서 멈추고 까닭을 적는다: 그 시험은 `tests/static/data/` 의 relations 가 든 golden 마다 행의 `incomplete:` 줄을 읽어 확인을 센다(`tests/static/test_static_reasons.cpp:105-138`: 비지 않은 줄 1, 사유 낱낱 1, golden 마다 행 머리·짝·summary 셋). 새 `semantics_np.golden` 은 relations 행 하나에 사유 둘(`no_run`, `writer_set_incomplete`)이라 1 + 2 + 3 = 6 이 더해진다. scratchpad 점검 빌드에서는 새 golden 을 저장소가 아닌 scratchpad 의 자료 디렉터리에 썼으므로 그 시험이 읽지 않았다. 선언의 값을 666(= 660 + 6)으로 고친다. 다른 시험·수는 선언대로다(`test_static_cli` 1058, `test_static_plan` 195, `test_core_schema` 34,017, `lint_selftest` 114, lint 8 규칙 clean, ctest 261 개 실패 0 건너뜀 1).
+
+#### 8.0b 옵션 켠 회차 비교의 덧붙임 (그 비교를 다시 돌리기 전에 적고 커밋함) [D][M]
+
+`compare.sh extract_on`(`records/semantics-20261116/compare_extract_on.txt`, rc 1)에서 두 가지가 선언 §8.0 의 허용 밖으로 나왔다. 나머지 40 줄은 OK 다(facts 보기는 `[semantics]` 와 BASIS 새 항목 18 개뿐, relations·extract·args·basis·sha256 는 선언대로). 선언 밖의 차이이므로 여기서 멈추고 까닭을 적는다.
+
+1. **facts.kz 머리의 `sections=` 줄**: 다섯 빌드 모두 그 줄 하나가 하나 늘었다(c1 `sections=42 | sections=43`; `compare/on_facts_head_<b>.txt`, 다른 줄 1). 선언은 머리에서 도구·artifact·basis 해시와 크기만 허용했고, 새 섹션 SEMANTICS 하나를 선언하면서 그 섹션 수 줄을 허용 목록에 넣지 않았다. 선언을 고친다: 머리는 앞의 허용에 더해 `sections=N` → `sections=N+1` 하나만 허용한다.
+2. **섹션 단위 sha256**: `compare/sections_on.txt` 에서 앞 회차의 섹션 가운데 같은 것이 c1·c5 4 개, r2 2 개뿐이고 나머지는 다 달랐다. 까닭: `section_sha.py` 는 kz-dump 의 `section` 줄(바이트의 crc32 를 담음)까지 해시하고, 레코드 바이트의 문자열 참조는 정규 STRINGS 풀(정렬, 참조된 문자열마다 한 번; `lib/core/container_writer.cpp`, `lib/core/container_reader.cpp:275`) 안의 위치다. SEMANTICS 의 새 문자열이 풀에 끼면 그 뒤 문자열의 위치가 밀려, 문자열을 참조하는 모든 섹션의 바이트와 crc32 가 바뀐다. 레코드의 내용은 같을 수 있다: kz-dump 의 레코드 줄은 문자열 참조를 글자로 적는다(예: c5_642 FUNCS 의 레코드 줄은 같고 `section` 줄의 crc32 만 다름). 선언이 문자열을 더하는 회차에서 바이트 수준의 섹션 동일을 기대한 것은 틀렸다.
+   선언을 고친다: 섹션은 레코드 글자로 비교한다. `section_text_sha.py` 가 두 회차의 facts.kz 마다 섹션별 레코드 수와 레코드 줄(`section` 줄 빼고)의 sha256 을 적고(`section_text_old.txt`, `section_text_new.txt`), `compare_sections_text.py` 가 빌드마다 앞 회차의 모든 섹션이 같은 수·같은 레코드 글자임을, 다만 STRINGS 와 BASIS 는 다를 수 있고 새 섹션은 SEMANTICS 하나임을 본다(`compare/sections_text_on.txt`). 앞의 `section_sha_on.txt` 는 이 회차의 섹션 바이트 기록으로 그대로 둔다.
+
+두 가지를 `compare.sh extract_on_text` 한 단계로 다시 돌린다(새 스크립트 `check_head_sem.py` 는 `check_head.py` 의 사본에 `--allow-new-section` 만 더함; `check_head.py`, `section_sha.py`, `compare_sections.py` 와 앞 출력은 바꾸지 않음). 출력 `compare_extract_on_text.txt`. 여기서도 OK 가 아닌 줄이 나오면 다시 멈춘다.

@@ -18,6 +18,10 @@
 #                --allow-size); the facts views (compare_sem.py, compare/on_<b>.txt); extract.txt apart from line 1 one new
 #                line `semantics ...`; relations.txt (compare_rel_sem.py); args.txt only the extract-only line;
 #                basis.txt and sha256.txt only the hash lines; relations.log empty
+#   extract_on_text (results 8.0b) the facts.kz header with the line sections= one more (check_head_sem.py
+#                --allow-new-section, compare/on_facts_head_sem_<b>.txt) and the sections by their record text
+#                (section_text_sha.py of both rounds -> section_text_old.txt, section_text_new.txt; compare_sections_text.py
+#                -> compare/sections_text_on.txt): the two checks of extract_on whose declared allowance was too narrow
 #   onextract_on sem_on_order/<b>: two runs the same bytes; order.txt against objacc_on_order apart from line 2, edges.tsv
 #                the same; relations.txt = the on re-extraction's; keys.txt = objacc_on_order's apart from line 2; logs
 #                empty
@@ -39,6 +43,7 @@ except_line() { cmp -s <(sed "$1d" "$2") <(sed "$1d" "$3"); }
 C=$HERE/compare
 mkdir -p "$C"
 [ "${1:-}" = extract_on ] && : > "$HERE/section_sha_on.txt.partial"
+[ "${1:-}" = extract_on_text ] && : > "$HERE/section_text_old.txt.partial" && : > "$HERE/section_text_new.txt.partial"
 for b in c1_pre_tx c1_post_tx r2_core c5_641 c5_642; do
   case "${1:-}" in
     relations)
@@ -110,11 +115,21 @@ for b in c1_pre_tx c1_post_tx r2_core c5_641 c5_642; do
       python3 -I "$HERE/measure_sem.py" "$SCRATCH/view_$b.txt" "$O/sem_on_order/$b/relations.txt" "$O/sem_on_order/$b/keys.txt" "$O/sem_plans_on/$b/plan.kzs" --key 17975444d83f6589 > "$C/measure_$b.txt" && ok "$b measured (compare/measure_$b.txt: $(head -1 "$C/measure_$b.txt"))" || bad "$b measure_sem"
       grep '^  [a-zP0-9-]* agreement ' "$SCRATCH/view_$b.txt" | sed -E 's/ decl [^ ]+$//' > "$C/agreement_$b.txt"
       rm -f "$SCRATCH/view_$b.txt" ;;
-    *) echo "usage: compare.sh relations|order|extract|onextract|plans|extract_on|onextract_on|plans_on|measure" >&2; exit 64 ;;
+    extract_on_text)
+      # results 8.0b: the two checks of extract_on that the declaration 8.0 wrote too narrowly, again with the allowance
+      # the addendum declares (the header line sections= one more; sections compared by their record text)
+      N=$O/sem_on_extract/$b/$b/NP; P=$O/objacc_on_extract/$b/$b/NP
+      python3 -I "$HERE/check_head_sem.py" "$KD" "$P/facts.kz" "$N/facts.kz" --allow-size --allow-new-section > "$C/on_facts_head_sem_$b.txt"; [ $? = 0 ] && ok "$b facts.kz header: $(head -1 "$C/on_facts_head_sem_$b.txt")" || bad "$b facts.kz header (compare/on_facts_head_sem_$b.txt)"
+      python3 -I "$HERE/section_text_sha.py" "$KD" "$P/facts.kz" >> "$HERE/section_text_old.txt.partial" && python3 -I "$HERE/section_text_sha.py" "$KD" "$N/facts.kz" >> "$HERE/section_text_new.txt.partial" || bad "$b section record text sha256" ;;
+    *) echo "usage: compare.sh relations|order|extract|onextract|plans|extract_on|extract_on_text|onextract_on|plans_on|measure" >&2; exit 64 ;;
   esac
 done
 if [ "${1:-}" = extract_on ]; then
   mv "$HERE/section_sha_on.txt.partial" "$HERE/section_sha_on.txt"
   python3 -I "$HERE/compare_sections.py" "$PREV/section_sha_on.txt" "$HERE/section_sha_on.txt" > "$C/sections_on.txt"; [ $? = 0 ] && ok "sections: $(grep -c '^OK' "$C/sections_on.txt") builds, every section of the earlier on-round the same but STRINGS and BASIS, SEMANTICS new (compare/sections_on.txt)" || bad "sections (compare/sections_on.txt)"
+fi
+if [ "${1:-}" = extract_on_text ]; then
+  mv "$HERE/section_text_old.txt.partial" "$HERE/section_text_old.txt"; mv "$HERE/section_text_new.txt.partial" "$HERE/section_text_new.txt"
+  python3 -I "$HERE/compare_sections_text.py" "$HERE/section_text_old.txt" "$HERE/section_text_new.txt" > "$C/sections_text_on.txt"; [ $? = 0 ] && ok "sections by record text: $(grep -c '^OK' "$C/sections_text_on.txt") builds, every section of the earlier on-round the same record text but STRINGS and BASIS, SEMANTICS new (compare/sections_text_on.txt)" || bad "sections by record text (compare/sections_text_on.txt)"
 fi
 exit $rc

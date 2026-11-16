@@ -47,3 +47,6 @@ compare extract rc=0
 compare extract_on rc=1
 compare measure rc=0
 compare extract_on: 3 BAD (relations.txt of c1_pre_tx, c1_post_tx, r2_core: layers lines); addendum 9.0a written; compare_rel_rf_2.py tried once on three builds before the commit (output not kept)
+compare extract_on_rel rc=0
+ledger_check end rc=0
+tools_check --deep end rc=0

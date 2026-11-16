@@ -1,0 +1,19 @@
+old lines kept in order: 3070 of 3070; added 644: {'enum': 50, 'field': 205, 'format': 115, 'item': 244, 'record': 15, 'section': 15}
+first line: kz-layout abi=1 revision=11 -> kz-layout abi=1 revision=12
+fingerprint: fingerprint=6d1471a2f6a322736a5dc804c552ab01a00e014bad740dd03122da9168bc14b2 -> fingerprint=6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd
+new section NACTOR_TOKEN type=112 record=kz_ntoken version=1
+new section NLIFE type=113 record=kz_nlife version=1
+new section NBUILD type=114 record=kz_nbuild version=1
+new section NSUFFICE type=115 record=kz_nsuffice version=1
+new section NCALLEND type=116 record=kz_ncallend version=1
+new section NORDER type=117 record=kz_norder version=1
+new section NORDER_OBS type=118 record=kz_norderobs version=1
+new section OBJECT_ACCESS type=137 record=kz_fact_objacc version=1
+new section FIELD_TYPES type=138 record=kz_fact_ftype version=1
+new section ARG_TYPES type=139 record=kz_fact_argtype version=1
+new section LOOP_DEFS type=140 record=kz_fact_loopdef version=1
+new section SEMANTICS type=141 record=kz_fact_sem version=1
+new section RESULT_FLOW type=142 record=kz_fact_rflow version=1
+new section RESULT_EFFECT type=143 record=kz_fact_reffect version=1
+new section LOCK_HANDLES type=144 record=kz_fact_lockh version=1
+layout_check: only additions

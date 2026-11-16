@@ -1,0 +1,92 @@
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+Test project /home/user/work/merge-check/kz-llvm
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 68
+    Start  68: test_core_schema
+
+68: Test command: /home/user/work/merge-check/kz-llvm/tests/unit/test_core_schema
+68: Working Directory: /home/user/work/merge-check/kz-llvm/tests/unit
+68: Test timeout computed to be: 10000000
+68: test_core_schema: 34017 checks passed
+1/8 Test  #68: test_core_schema .................   Passed    0.00 sec
+test 70
+    Start  70: test_core_kzdump
+
+70: Test command: /home/user/work/merge-check/kz-llvm/tests/unit/test_core_kzdump "/home/user/work/merge-check/kz-llvm/tools/kz-dump/kz-dump"
+70: Working Directory: /home/user/work/merge-check/kz-llvm/tests/unit
+70: Test timeout computed to be: 10000000
+70: test_core_kzdump: 35 checks passed
+2/8 Test  #70: test_core_kzdump .................   Passed    0.07 sec
+test 71
+    Start  71: tool_identity_schema_revision
+
+71: Test command: /usr/bin/cmake "-DDUMP=/home/user/work/merge-check/kz-llvm/tools/kz-dump/kz-dump" "-DTOOLS=/home/user/work/merge-check/kz-llvm/tools/kz-dump/kz-dump|/home/user/work/merge-check/kz-llvm/tools/kz/kz|/home/user/work/merge-check/kz-llvm/tools/kz-phi/kz-phi|/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "-P" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit/check_tool_schema_revision.cmake"
+71: Working Directory: /home/user/work/merge-check/kz-llvm/tests/unit
+71: Test timeout computed to be: 10000000
+71: -- 4 tools report schema revision 12, fingerprint 6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd
+3/8 Test  #71: tool_identity_schema_revision ....   Passed    0.05 sec
+test 105
+    Start 105: lint_selftest
+
+105: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "--selftest" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+105: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+105: Test timeout computed to be: 10000000
+105: lint selftest: 109 cases, 0 failed
+4/8 Test #105: lint_selftest ....................   Passed    0.07 sec
+test 122
+    Start 122: test_trace_neutral_rev12
+
+122: Test command: /home/user/work/merge-check/kz-llvm/tests/cfs-free/test_trace_neutral_rev12
+122: Working Directory: /home/user/work/merge-check/kz-llvm/tests/cfs-free
+122: Test timeout computed to be: 10000000
+122: test_trace_neutral_rev12: 113 checks passed
+5/8 Test #122: test_trace_neutral_rev12 .........   Passed    0.00 sec
+test 250
+    Start 250: test_static_reasons
+
+250: Test command: /home/user/work/merge-check/kz-llvm/tests/static/test_static_reasons "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/reason_vocabulary.txt" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data"
+250: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+250: Test timeout computed to be: 10000000
+250: test_static_reasons: 655 checks passed
+6/8 Test #250: test_static_reasons ..............   Passed    0.01 sec
+test 251
+    Start 251: test_static_plan
+
+251: Test command: /home/user/work/merge-check/kz-llvm/tests/static/test_static_plan "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_plan"
+251: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+251: Test timeout computed to be: 10000000
+251: test_static_plan: 182 checks passed
+7/8 Test #251: test_static_plan .................   Passed    0.20 sec
+test 252
+    Start 252: test_static_cli
+
+252: Test command: /home/user/work/merge-check/kz-llvm/tests/static/test_static_cli "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/objects" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/usr/bin/gcc" "/home/user/work/merge-check/kz-llvm/tests/static"
+252: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+252: Test timeout computed to be: 10000000
+252: test_static_cli: 911 checks passed
+8/8 Test #252: test_static_cli ..................   Passed    3.47 sec
+
+The following tests passed:
+	test_core_schema
+	test_core_kzdump
+	tool_identity_schema_revision
+	lint_selftest
+	test_trace_neutral_rev12
+	test_static_reasons
+	test_static_plan
+	test_static_cli
+
+100% tests passed, 0 tests failed out of 8
+
+Label Time Summary:
+lint      =   0.07 sec*proc (1 test)
+static    =   3.68 sec*proc (3 tests)
+unit      =   0.13 sec*proc (4 tests)
+
+Total Test time (real) =   3.89 sec

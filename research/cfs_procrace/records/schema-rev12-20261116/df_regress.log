@@ -1,0 +1,6 @@
+# space_guard.sh kind=regress need=392463680 floor=314572800 interval=2 cmd=bash env/c5/regress_eid1.sh /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/m9/old /home/user/work/merge-check/kz-llvm /home/user/work/redesign/obs1/schema12_regress
+start 2026-11-16T12:49:47.597Z free=3166224384 threshold=707036480
+sample 2026-11-16T12:49:47.601Z 3166220288
+sample 2026-11-16T12:49:49.606Z 3155595264
+sample 2026-11-16T12:49:51.613Z 3153428480
+end 2026-11-16T12:49:53.620Z kind=regress verdict=completed rc=0 free=3153297408 lowest=3153297408 dip=12926976 change=-12926976

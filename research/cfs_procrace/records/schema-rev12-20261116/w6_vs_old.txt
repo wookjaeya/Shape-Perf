@@ -1,0 +1,10 @@
+# the W6 G-I containers against the ones kz 931dd39c makes from the same dumps (regress_eid1.sh old side): differing byte ranges
+w6_r2_gi: 121-156 (36 bytes)
+w6_c1_gi_post_1b0b338_rx: 121-156 (36 bytes)
+w6_c1_gi_post_1b0b338_tx: 121-156 (36 bytes)
+w6_c1_gi_post_1df262a_rx: 121-156 (36 bytes)
+w6_c1_gi_post_1df262a_tx: 121-156 (36 bytes)
+w6_c1_gi_pre_1b0b338_rx: 121-156 (36 bytes)
+w6_c1_gi_pre_1b0b338_tx: 121-156 (36 bytes)
+w6_c1_gi_pre_1df262a_rx: 121-156 (36 bytes)
+w6_c1_gi_pre_1df262a_tx: 121-156 (36 bytes)

@@ -1,0 +1,4 @@
+[100%] Built target kz-core
+[100%] Building CXX object tools/kz-dump/CMakeFiles/kz-dump.dir/main.cpp.o
+[100%] Linking CXX executable kz-dump
+[100%] Built target kz-dump

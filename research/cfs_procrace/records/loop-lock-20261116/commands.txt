@@ -34,3 +34,28 @@ GOLDENS_SAME_AS_SCRATCH
 ctest full rc=0
 run_unit rc=0
 step2a unit rc=0
+## 3. the five builds (2026-11-16T22:31:05Z)
+/dev/vda       270553174016 39461040128 1861468160  96% /
+rerun rc=0
+order rc=0
+extract_off rc=0
+order_off_extract rc=0
+plans rc=0
+plans_off rc=0
+extract_final rc=0
+order_final rc=0
+plans_final rc=0
+five builds done
+## 4. comparisons (2026-11-16T22:37:50Z)
+compare relations rc=0
+compare order rc=0
+compare onextract rc=0
+compare plans rc=0
+compare final_order rc=0
+compare plans_final rc=0
+compare extract rc=0
+compare final rc=0
+compare rounds rc=0
+compare measure rc=0
+ledger_check end rc=0
+tools_check --deep end rc=0

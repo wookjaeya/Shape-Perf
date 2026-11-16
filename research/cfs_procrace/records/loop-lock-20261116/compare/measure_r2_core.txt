@@ -1,0 +1,27 @@
+loop defs: 13 rows (loops 4: recognised 1, refused-address-taken 1, refused-unresolved 2; definition rows 9); recognised 1; subexpressions cut at param.walk_bounds' expression depth 0 (not in count.walk_bounds_hit)
+lock handles: 967 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 11, not-static 956, of them no handle found 83)
+loops examined: 4 (recognised 1, refused-address-taken 1, refused-unresolved 2)
+recognised: cfe/modules/es/fsw/src/cfe_es_apps.c:573:5 in CFE_ES_GetTaskFunction form flag+value
+named wait: loop 13 cfe/modules/es/fsw/src/cfe_es_apps.c:573:5 in CFE_ES_GetTaskFunction recognised form flag+value {under-lock,call-result} predicate (and (ne (call-result CFE_ES_GetTaskRecordByContext) 0) (and (call-result CFE_ResourceId_IsDefined (seq field:CFE_ES_TaskRecord_t.AppId)) (ne field:CFE_ES_TaskRecord_t.EntryFunc 0)))
+lock handle rows: 967 (not-static 956, writer-set-incomplete 11)
+handle field: CFE_ES_Global_t.SharedDataMutex not-static rows 369
+handle field: (no field) not-static rows 316
+handle field: CFE_EVS_Global_t.EVS_SharedDataMutexID not-static rows 149
+handle field: CFE_SB_Global_t.SharedDataMutexId not-static rows 63
+handle field: CFE_TBL_Global_t.RegistryMutex not-static rows 28
+handle field: CFE_FS_Global_t.SharedDataMutexId not-static rows 12
+handle field: CFE_ES_CDS_Instance_t.GenMutex writer-set-incomplete rows 11
+handle field: CFE_ES_Global_t.PerfDataMutex not-static rows 11
+handle field: CFE_TBL_Global_t.WorkBufMutex not-static rows 8
+waits recognised: 3 -> 4
+through LOOP_DEFS: 1; budget values through a flag: 1; HB-lock by handle: 0
+HB-await edges: 0 -> 64 (conditional 64, hard 494 in all edges)
+caller-side uses of waits: 0 -> 4; HB-await edges to them 0 -> 64
+dependent uses: continue 6, inside 52, no-budget 26, unknown 4 -> caller-side 1, continue 6, inside 52, no-budget 26, skip 4, unknown 3
+HB-lock edges: 0; identity source: -
+rows: A 25 (unknown 24, unordered 1); B 155 (fixed_early_proved 4, hard_before 33, unknown 44, unordered 74); C 115 (unknown 1, unordered 114)
+rows (result flow round): A 25 (unknown 24, unordered 1); B 155 (fixed_early_proved 4, hard_before 33, unknown 44, unordered 74); C 115 (unknown 1, unordered 114)
+caller-dependent: spawn calls with resolved threads 11, caller-dependent 5; their callers 11, passing on no resolved entry 3 (distinct caller calls 3)
+caller-dependent: pairs of the rows 8566 (unordered 6489); with every such caller taken to create any of the call's own threads, pairs whose value differs 461 (new pairs 0); unordered -> fixed_early_proved 239; unordered -> hard_before 222
+caller-dependent: rows whose value differs 0
+relations path C by handle: 0, static-instance 0

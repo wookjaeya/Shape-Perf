@@ -1481,3 +1481,107 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
   - [I] 호출자에 기대는 spawn: 그런 호출 5/5/5/2/2, 그 호출자 13/13/11/6/6, 풀린 entry 를 넘기지 않는 호출자 2/2/3/1/1; 둘째 닫힘에서 값이 달라지는 짝 0/0/461/0/0(r2_core: unordered → fixed_early_proved 239, → hard_before 222), 행 0.
 - **공간**: 각 빌드·사본·실행은 감시 아래(`env/tools/space_guard.sh`, 2 초마다, 하한 314,572,800). 빌드 필요량 = 앞 kz-static 빌드 dip 의 최대 256,942,080 + 새 출력 약 200 MB(다시 뽑기 둘 약 125 MB, order 넷과 둘째 실행 약 65 MB, relations 약 8 MB, 계획 셋 약 3 MB) + 한 시간 흐름 13 MB = 469,942,080 B. 사본은 필요량 100,000,000(도구 파일 하나를 읽어 xz 를 씀; 푸는 바이너리는 파이프로만 확인하고 디스크에 쓰지 않음). 실행 단계와 무거운 비교(extract, final, rounds, measure)는 필요량 100,000,000. 점검 빌드(scratchpad)는 감시 아래에서 했고(`df_scratch_*.log`) 지웠다.
 - **스크립트**(이 선언과 함께 커밋, Python 은 `python3 -I`): `rerun.sh`, `order.sh`, `extract.sh`, `plans.sh`, `plan_one.sh`, `check_head.py`, `check_whole.py`, `compare_plans.py`, `check_head_rf.py`, `section_text_sha_2.py`(앞 단계의 것을 옮김), `section_text_cmp_ll.py`, `compare_ll.py`, `compare_rel_ll.py`, `compare_ord_ll.py`, `rounds_cmp.py`, `measure_ll.py`, `compare.sh`, `tool_copy/copy.sh`; 목록 `relink_expected.sha256`, `not_relink.sha256`, `golden_scratch.sha256`; 빌드 전 점검 `tools_check_pre.txt`, `ledger_check_pre.txt`.
+
+### 10.1 바뀐 것 [F]
+
+- 커밋 차례: `08760d6`(지금까지의 코드, fixture, 시험 의미 자료; 선언 전의 스냅숏), `ad30cf0`(선언 §10.0, 문서 §5v, 변수 이름 고침, 비교·측정 스크립트, 빌드 전 목록; 빌드 전), `870c499`(사본·빌드 기록, 새 golden 둘, 등록부 행; 다섯 빌드 전), 그리고 이 절의 커밋.
+- 규모(`dc632e7` 에서 `ad30cf0` 까지, `kairos/`): `ast_fn.cpp` +350 쯤(`emit_loop_defs`: 예산 지역을 뺀 조건 출구, flag·value 규칙, 정의 행과 루프 행), `serialize.cpp` +250 쯤(LOOP_DEFS·LOCK_HANDLES 행과 BASIS 항목 넷), `relations.cpp` +95(revision 11: `handle_at`, `common_handle`, 경로 C 의 핸들 갈래), `order.cpp` +200(revision 4: LOOP_DEFS 술어, `flag_budget_values`, `lock identity source:` 줄, 호출자에 기대는 spawn 의 둘째 닫힘과 보고), `facts_text.cpp` +46(절 둘), `model.hpp`·`spec.hpp`·`rel_facts.*`·`order.hpp`·`relations.hpp`, `cmd_extract.cpp`·`cmd_show.cpp`·`main.cpp`(옵션 둘과 `--caller-dependent-report`), 시험 `test_static_cli.cpp` +70, `static_golden.cpp` +11, fixture `looplock.c` 290 줄, 시험 의미 자료 14 줄, golden `looplock_np.golden`·`looplock_order_np.golden`(`870c499`), 문서 `static_facts.md` §5v, `schema.md` 날짜 줄.
+- 바꾸지 않은 것: `include/`, `cmake/`, 최상위 CMakeLists, `runtime/`, `instrument/`, `tests/lint/`, `semantics/`, 계획 생성기 규칙, 판정 규칙·어휘, 설명 스크립트, `one_build.sh`. relations 의 `rules` 줄(revision 9)과 order 의 첫 줄(revision 2)은 두 섹션 없는 facts 에서 앞판 그대로다.
+
+### 10.2 빌드 [M]
+
+MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,080). 사본 22:13:01Z, 빌드 시작 22:16:39Z, 빌드 전 HEAD `ad30cf0`(`pre_mc.txt`), kairos 아래 커밋 안 된 줄 0(`pre_mc.txt`, `post_mc.txt`). 첫 `make kz-static` 줄은 감시 스크립트를 상대 경로로 불러 rc 127 로 아무것도 돌지 않았고(`commands.txt` §1), 절대 경로로 다시 돌렸다.
+
+| 목표 | 때 (UTC) | dip (B) |
+|---|---|---|
+| `kz-static` | 22:16:39–22:22:04 | 119,521,280 |
+| `all` | 22:22:12–22:26:35 | 34,725,888 |
+
+- 다시 링크된다고 적은 14 가 모두 바뀌었다(`relink_result.txt`). `not_relink.sha256` 110 모두 같은 바이트.
+- 도구(`post_mc.txt`, `identity_kz-static.txt`): kz-static `499748bc…` → `9eb1395f3bd02fb4b4dc9b8be72b4e336845c3715481b0e38398b0dbd40f9452`; `--identity` 의 `tool_sha256` `221231bb…` → `0e1d8599cde099002d7670c67d8670c6e226fce19a9c09f150bb895b9aeab216`, `tool_source` `ad79bdaa…` → `a2365b1979f7dfe0ff191ae03c2aeb2ee35f6043e59cdf14b022064253899c6b`; `core_source` `568e5061…`, `schema_revision=12`, `schema_fingerprint` `6fbff6c6…` 그대로. `CMakeCache.txt` `bc2f43b4…` 그대로.
+- 도구 보존: 빌드 전 kz-static `499748bc` 를 `/home/user/work/preserve/tools-20261116-k/kz-static.499748bc.xz`(46,534,188 B)로 사본, 왕복 확인(`tool_copy/ROUNDTRIP.txt`: xz -t OK, 푼 sha256 같음, cmp 같음; 푼 것은 파이프로만). 등록부: 사본 직후 in-place+copy(`tools_check_after_copy.txt` 44 행 실패 0), 빌드 뒤 copy, 새 `9eb1395f` in-place(`tools_check_after_build.txt` 45 행 실패 0, deep).
+
+### 10.3 시험 [M]
+
+- 첫 ctest(`ctest_first.log`, `-V`): 267 개 가운데 실패 2, 선언한 그 둘(`static_golden_looplock_np`, `static_golden_looplock_order_np`, golden 없음). 건너뜀 1. 그 실행의 `test_static_reasons` 692, `test_static_cli` 1,151(`ctest_first.log` 의 줄).
+- `KZ_GOLDEN_UPDATE=1` 로 그 둘만 썼다(`golden_update.log`). scratchpad 점검 빌드의 것과 `cmp` 같다(`10f19fc4…`, `9b0debe4…`; `commands.txt`). 다른 golden 은 바뀌지 않았다(`git status` 에 새 파일 둘뿐).
+- 갱신 뒤 전체 ctest(`ctest_full.log`, `-V`): 267 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`).
+- 확인 수(`ctest_counts.log`, golden 뒤): `test_static_cli` 1,151, `test_static_reasons` 731, `test_static_plan` 195, `test_core_schema` 34,017, `lint_selftest` 114 경우 실패 0, lint 규칙 일곱 clean(selftest 와 함께 lint 시험 여덟 통과).
+- 단위 점검 `run_unit.sh` 16/16(`unit_tools.txt`), `step2a_tests_unit.sh` 7/7(`unit_step2a.txt`).
+
+### 10.4 바이트 동일성 [M]
+
+| 비교 | 결과 |
+|---|---|
+| relations, T8CF facts (`compare_relations.txt`) | 15 OK: `relations.txt`·`keys.txt` 가 `rf_relcheck` 와 바이트 동일, 로그 빈 파일 |
+| order, T8CF facts (`compare_order.txt`) | 25 OK: 두 번 같음, `rf_order` 와 바이트 동일 |
+| 다시 뽑기 옵션 없음 vs `rf_off_extract` (`compare_extract.txt`) | 45 OK: 도구 정체성의 값만 |
+| 그 facts 위 (`compare_onextract.txt`) | 40 OK |
+| 계획 (`compare_plans.txt`) | 열 모두 "only declared differences" |
+| 마지막 옵션 회차 vs `rf_on_extract` (`compare_final.txt`) | 50 OK |
+| 그 facts 위 (`compare_final_order.txt`) | 45 OK(order·간선·보고 두 번 같은 바이트) |
+| 계획 (`compare_plans_final.txt`) | 다섯 "only declared differences" |
+| 중간 회차 셋과 (`compare_rounds.txt`, `compare/rounds_sha.txt`) | 16 OK |
+
+- **옵션 없는 경로는 앞판과 같다**(위 첫 다섯 줄). 다른 것은 도구 정체성에서 오는 값과 계획의 생성기 정체성 줄뿐이다.
+- **마지막 회차 대 결과 흐름 회차**: 섹션은 빌드마다 앞 회차의 45 가운데 44 가 같은 레코드 글(FACT_EXPRS 는 c1_pre_tx +3, c1_post_tx +4, r2_core +3 행이 뒤에 더해짐, c5 두 빌드는 그대로), 다른 것 BASIS, 새 것 LOOP_DEFS(13/19/13/11/11 행)·LOCK_HANDLES(1,573/1,573/967/0/0 행)(`compare/final_sections_<b>.txt`; 섹션별 레코드 글 sha256 `section_text_final.txt`). facts 보기는 `[loopdefs]`·`[lockhandles]` 와 BASIS 새 항목 넷뿐(`compare/final_<b>.txt`). relations 는 2 번째 줄과 새 머리 한 줄뿐(`compare/final_relations_<b>.txt`). order 는 새 머리 한 줄, 새 HB-await 간선 120/120/64/0/0, HB-lock 간선의 `lock identity source:` 줄 0/0/0/18/48, 대기의 predicate 줄 5/6/4/5/5·awaited 줄 1/2/1/0/0·`use the call of` 결과 4/6/4/0/2·`use caller-side:` 줄 4/4/4/0/0, `[rows]` 같은 바이트(`compare/final_order_<b>.txt`); `edges.tsv` 는 HB-await 줄만 더해짐(`compare/final_edges_<b>.txt`).
+- **중간 회차와의 섹션 비교(계획 4.3)**: 컨테이너로(`compare/rounds_{objacc,sem,rf}_<b>.txt`) 열다섯 모두 OK: 회차의 섹션 42/43/45 가운데 BASIS 밖 모두 같은 레코드 글, FACT_EXPRS 는 앞 줄이 같고 뒤에 더해짐(rf 회차의 c5 두 빌드는 그대로). 남긴 sha256 으로(`compare/rounds_sha.txt`) 열다섯 모두 다른 섹션이 BASIS·FACT_EXPRS 뿐(c5 의 rf 회차는 BASIS 뿐), 마지막 회차에 없는 섹션 0. 그래서 세 중간 회차의 장부 행 비고에 “마지막 회차가 레코드 글로 다시 냄(BASIS·FACT_EXPRS 밖; 그 회차의 인자로 다시 돌린 것은 아님)”을 더했다. 어느 회차도 지우지 않았다.
+- **누적 목록과 등록부**: 빌드 전 `ledger_check_pre.txt` 114 행·`tools_check_pre.txt` 44 행 실패 0; 빌드 뒤 `ledger_check_after_build.txt` 114 행, `tools_check_after_build.txt` 45 행 실패 0(deep); 장부 행 열을 더한 뒤 `ledger_check_end.txt` 124 행 실패 0(새 행 `OBS_ll_relcheck`, `OBS_ll_order`, `OBS_ll_off_extract`, `OBS_ll_off_order`, `OBS_ll_final_extract`, `OBS_ll_final_order`, `OBS_ll_plans`, `OBS_ll_plans_off`, `OBS_ll_plans_final`, `TOOLS_20261116k`), `tools_check_end.txt` 45 행 실패 0(deep).
+- **마지막 facts**: `OBS_ll_final_extract` 의 비고가 “the final option-on round: the facts the next steps read (kz-static 9eb1395f, every extraction option …)”이다. 뒤 단계(계획 생성기 다음 판, 주기)는 `/home/user/work/redesign/obs1/ll_final_extract/<b>/<b>/NP/facts.kz` 를 읽는다.
+- 바깥 이름 점검(`--tree`)은 아홉 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다(`name_check_tree.txt`, 11 모두 rc 0).
+
+### 10.5 측정 [M]
+
+마지막 회차(`ll_final_extract`)와 그 위의 order·relations·보고(`ll_final_order`), kz-static `9eb1395f`. 수의 출처: `compare/measure_<b>.txt`(`measure_ll.py`)와 `compare/loopdefs_<b>.txt`. 측정이고 판정이 아니다. 모든 값이 선언 §10.0 의 scratchpad [I] 와 같다.
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| LOOP_DEFS 루프 (인식 / 거절·미검사) | 5 (1 / 4) | 6 (2 / 4) | 4 (1 / 3) | 5 (0 / 5) | 5 (0 / 5) |
+| LOCK_HANDLES 행 (static-instance / writer-set-incomplete / not-static) | 1,573 (0 / 23 / 1,550) | 1,573 (0 / 23 / 1,550) | 967 (0 / 11 / 956) | 0 | 0 |
+| 대기 인식: 결과 흐름 회차 → 마지막 회차 | 5 → 6 | 5 → 7 | 3 → 4 | 0 → 0 | 1 → 1 |
+| HB-await 간선 (모두 conditional) | 0 → 120 | 0 → 120 | 0 → 64 | 0 | 0 |
+| 호출자 쪽 사용 (flag 로 구한 예산 값) | 0 → 4 (1) | 0 → 4 (1) | 0 → 4 (1) | 0 | 0 |
+| HB-lock 간선 (정체성 출처) | 0 | 0 | 0 | 18 (must-static-instance) | 48 (must-static-instance) |
+| 핸들로 읽은 경로 C 행 | 0 | 0 | 0 | 0 | 0 |
+| 호출자에 기대는 spawn 호출 / 그 호출자 / 풀린 entry 를 넘기지 않는 호출자 | 5 / 13 / 2 | 5 / 13 / 2 | 5 / 11 / 3 | 2 / 6 / 1 | 2 / 6 / 1 |
+| 위 한계의 닫힘에서 값이 달라지는 짝 / 행 (짝 수) | 0 / 0 (24,609) | 0 / 0 (24,609) | 461 / 0 (8,566) | 0 / 0 (4,320) | 0 / 0 (4,311) |
+| 행 값(order.static) | 결과 흐름 회차와 같음 | 같음 | 같음 | 같음 | 같음 |
+
+- **이름 댄 두 대기**(`compare/measure_<b>.txt` 의 `named wait:`): c1 두 빌드의 `CFE_ES_GetTaskFunction` 루프(`cfe_es_apps.c:508:5`)와 r2_core 의 같은 루프(`:573:5`)가 form flag+value 로 인식된다: 술어 `(and (ne (call-result CFE_ES_GetTaskRecordByContext) 0) (and (call-result CFE_ResourceId_IsDefined (seq field:CFE_ES_TaskRecord_t.AppId)) (ne field:CFE_ES_TaskRecord_t.EntryFunc 0)))`, 깃발 `under-lock`, `call-result`(`compare/loopdefs_c1_pre_tx.txt`: `ReturnCode` before-loop 3288334359, in-body 0 의 guard, `EntryFunc` value, `TaskRecPtr` value). c1_post_tx 의 CF 재시도(`cf_cfdp.c:1001:13`)는 form value: `(ne (call-result OS_CountSemGetIdByName (seq (addr field:CF_Channel_t.sem_id) (seq field:CF_ChannelConfig_t.sem_name))) -17)`. c5 두 빌드에는 인식한 루프가 없다(거절 refused-unresolved 3, refused-address-taken 1, not-examined 1).
+- **그 대기의 순서 간선**: 기다리는 필드 `CFE_ES_TaskRecord_t.AppId`·`.EntryFunc`, 다른 스레드의 writer 둘(`CFE_ES_StartAppTask` 의 `cfe_es_apps.c:619:9`, `:620:9`), 호출자 `CFE_ES_TaskEntryPoint` 의 호출(`cfe_es_apps.c:552:9`)에서 예산 값 3288334359(`CFE_ES_ERR_APP_REGISTER`, flag 의 루프 앞 값; 몸 안 정의 0 은 뺌)로 guard 를 평가해 그 아래 호출 넷(`:559`, `:560`, `:561`, `:566` 의 간접 호출)이 skip. 그래서 writer → 그 호출들의 HB-await 간선이 c1 두 빌드에 120, r2 에 64 생겼고, 모두 conditional 이다: L1 의 인증(AWAIT_L1 per-field)이 이 루프에 `star-closed` 이고 LOOP_DEFS 의 술어에는 await 인증이 없다(hard 조건 `l1 && …`, `order.cpp` waits). 행의 order.static 은 바뀌지 않았다(conditional 간선은 hard 닫힘에 들지 않고, 이 간선들의 끝은 relations 행의 사용이 아님).
+- **핸들 정체성**: c1·r2 의 행 가운데 `static-instance` 0, `semantics-unverified` 0 이다. `CFE_ES_LockSharedData` 의 핸들 `CFE_ES_Global_t.SharedDataMutex`(그 필드로 1,573 행 가운데 722)는 FIELD_STATUS 의 writer 인스턴스 2(memset `cfe_es_start.c:81` 과 `OS_MutSemCreate` out-pointer `:92`)라 not-static 이고, 의미 자료에 `lock-object` 항목이 없다는 것도 전제 글에 적힌다. 핸들이 전역 객체의 필드가 아닌 행(토큰의 `obj_type` 등) 718. c5 두 빌드는 1 세대 잠금이 LOCK_IDS 에서 이미 static instance 라 행이 없고, HB-lock 18/48 은 모두 `must-static-instance (LOCK_IDS)`.
+- **호출자에 기대는 spawn 규칙의 덜 잡음**(§6.10 의 4): 풀린 entry 를 넘기지 않는 호출자 2/2/3/1/1(c1: `OS_TimeBaseCreate_Impl` 의 `os-impl-timebase.c:350:19`, `OS_TimeBaseCreate` 의 `osapi-timebase.c:141:23`; `ll_final_order/<b>/cdr.txt` 의 `[callers]`). 그런 호출자가 그 호출의 자기 스레드 모두를 만든다고 둔 닫힘에서 값이 달라지는 짝은 r2_core 에서만 461(unordered → fixed_early_proved 239, → hard_before 222), 행 값이 바뀌는 행은 다섯 빌드 모두 0 이다(그 짝들이 든 행에는 다른 unordered·unknown 짝이 남음). 461 은 이 규칙이 unordered 로 남긴 짝의 위 한계이고, 그 가운데 실제로 순서가 있는 짝의 수는 정해지지 않았다 [미확인].
+
+### 10.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 22:13:01 | 1,933,901,824 | 사본 시작(dip 46,555,136) |
+| 22:16:39 | 1,887,170,560 | `make kz-static`(가장 낮은 1,767,649,280, dip 119,521,280), `all`(34,725,888) |
+| 22:31:05–22:37:43 | 1,861,468,160 → 1,671,274,496 | relations(dip 7,675,904), order(14,209,024), 다시 뽑기 옵션 없음(47,161,344), 그 order(21,856,256), 계획 둘(987,136 씩), 마지막 회차(72,339,456), 그 order 와 보고(23,965,696), 계획(991,232) |
+| 22:37:50–22:39:21 | 1,671,213,056 → 1,692,893,184 | 비교 열(모두 감시 아래; 가장 큰 dip `final` 70,455,296, facts 보기는 scratchpad 에 쓰고 지움) |
+| 22:41:47 | 1,692,766,208 | 장부·등록부·이름 점검 뒤 |
+
+- 하한(314,572,800)을 넘지 않았다. 빌드 dip 은 필요량 안이었다.
+- 남긴 출력(장부 행): `ll_relcheck` 7,630,029, `ll_order` 7,058,482, `ll_off_extract` 46,967,354, `ll_off_order` 14,689,595, `ll_final_extract` 72,159,659, `ll_final_order` 15,953,440, `ll_plans` 886,291, `ll_plans_off` 886,583, `ll_plans_final` 894,413 B(합 167,125,846); 사본 46,534,188 B. 지운 것: scratchpad 의 점검 빌드와 그 출력(선언 전), 비교의 facts 보기(scratchpad), order 의 둘째 실행 디렉터리(같은 바이트임을 비교한 뒤).
+
+### 10.7 계획과 다르게 한 것
+
+- **핸들 정체성의 자리**: 설계 연구는 핸들 정체성을 order 출력의 칸으로만 두었다. HB-lock 간선은 relations 경로 C 의 proven-impossible 에서 오므로(`order.cpp` `lock_edges`), 핸들 정체성은 추출의 LOCK_HANDLES(개정 12 의 섹션 144)와 relations 경로 C 의 갈래(revision 11)에 두고, order 에는 `lock identity source:` 줄만 더했다. 의미 항목은 SEMANTICS 의 인자 역할 `lock-object` 로 읽는다(엔진에 API 이름 없음).
+- **실제 빌드에서 핸들 정체성이 서지 않는다**: 생성된 의미 자료에 `lock-object` 역할이 없어(coverage rule revision 1) `static-instance` 가 나올 수 없고, 그 갈래는 손으로 쓴 fixture 시험 자료로만 시험했다(`looplock_np` 의 경로 C 두 행 proven-impossible, HB-lock hard 둘). 의미 자료가 있었어도 c1·r2 의 공유 잠금 핸들은 writer 인스턴스 둘이라 not-static 이다.
+- **HB-await 는 conditional 이다**: 설계 연구의 기대([I])는 hard 였다. LOOP_DEFS 의 술어에는 AWAIT_L1 의 await 인증이 없어 hard 조건을 채우지 않는다. 인증 규칙을 LOOP_DEFS 술어로 넓히지 않았다(AWAIT_L1 은 바뀌지 않는다는 선언).
+- **첫 `make kz-static` 줄**이 감시 스크립트를 상대 경로로 불러 rc 127(아무것도 돌지 않음); 절대 경로로 다시 돌렸다(`commands.txt` §1).
+- **선언 전의 스냅숏 커밋 하나**(`08760d6`)가 있다. 그 뒤 선언 커밋 `ad30cf0` 에 변수 이름 고침(lint case-ids)이 들어갔고, 빌드·실행·비교는 모두 그 뒤다. scratchpad golden 은 이름 고침 전 빌드로 만들었고(출력이 같은 고침), MC 빌드의 golden 과 `cmp` 같았다.
+- **가벼운 비교도 감시 아래** 돌렸다(앞 단계는 감시 없이 돌림).
+- **호출자에 기대는 spawn 의 측정**은 위 한계(둘째 닫힘)로 쟀다: 실제로 순서가 있는 짝의 수가 아니다.
+
+### 10.8 열린 것
+
+- **의미 자료의 `lock-object` 역할**: 버전에 묶인 헤더의 brief 줄(`osapi-mutex.h` 의 `OS_MutSemTake` “Acquire the mutex object referenced by sem_id”, `OS_MutSemGive` “Releases the mutex object referenced by sem_id”)에서 이 역할을 만드는 것은 semantics coverage rule 의 다음 개정과 생성된 자료의 다시 만들기다(그 규칙을 어느 자료보다 먼저 커밋하는 차례). 그때까지 LOCK_HANDLES 는 실제 빌드에서 static-instance 를 주지 않는다.
+- **핸들 필드의 writer 둘**: `CFE_ES_Global_t.SharedDataMutex` 는 전역의 memset(0)과 생성 호출의 out-pointer 두 인스턴스다. 앞선 0 채움을 초기값으로 읽어 “한 번 도는 writer 하나”로 칠지는 LOCK_IDS 의 값 읽기 규칙과 함께 정할 일이다 [미확인: 그렇게 읽어도 건전한지].
+- **2 세대 잠금 집합**: LOCKSET 은 정체성을 모르는 해제(다른 형의 잠금이라도)가 있는 호출 뒤 OSAL 잠금을 잃는다(c1 `CFE_ES_GetTaskFunction` 안 `:513` 뒤 held 0). 핸들 단위의 잡힘 집합은 잠금 집합 분석을 핸들로 다시 돌려야 하고, 그 전에는 경로 C 가 핸들 잠금을 볼 일이 드물다.
+- **LOOP_DEFS 술어의 L1 인증**: HB-await 가 hard 가 되려면 그 술어의 읽기에 대한 L1 (i)/(ii) 인증이 있어야 한다. AWAIT_L1 을 바꾸지 않는 새 섹션이나 order 쪽 규칙으로 두는 것이 뒤 단계다.
+- **호출자에 기대는 spawn 의 위 한계 461**(r2_core): 그 짝 가운데 실제로 순서가 있는 짝은 정해지지 않았다 [미확인]. 풀린 entry 를 넘기지 않는 호출자 셋(`OS_TimeBaseCreate` 사슬 등)의 entry 를 푸는 것이 그 수를 줄이는 길이다.
+- **c5 의 대기**: 6.4.x 의 대기 다섯은 flag·value 규칙에 맞지 않는다(refused-unresolved 3, refused-address-taken 1, not-examined 1). 그 꼴(주소를 넘겨 채우는 지역, 여러 정의)을 받을지는 뒤 단계다.
+- 앞 단계에서 넘어온 열린 것(event type 의 등급, open 효과, c5 의 child without success, J?, 이름 결합)은 그대로다.
+- **마지막 facts**: `ll_final_extract` 가 뒤 단계의 입력이다(장부 `OBS_ll_final_extract`). 계획 생성기의 다음 판(manifest 개정 4)은 이 facts 를 읽는다.

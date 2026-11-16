@@ -1,0 +1,16 @@
+loop defs: 11 rows (loops 5: not-examined 1, refused-address-taken 1, refused-unresolved 3; definition rows 6); recognised 0; subexpressions cut at param.walk_bounds' expression depth 0 (not in count.walk_bounds_hit)
+lock handles: 0 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 0, not-static 0, of them no handle found 0)
+loops examined: 5 (not-examined 1, refused-address-taken 1, refused-unresolved 3)
+lock handle rows: 0 ()
+waits recognised: 0 -> 0
+through LOOP_DEFS: 0; budget values through a flag: 0; HB-lock by handle: 0
+HB-await edges: 0 -> 0 (conditional 0, hard 87 in all edges)
+caller-side uses of waits: 0 -> 0; HB-await edges to them 0 -> 0
+dependent uses: continue 2, inside 78, no-budget 48 -> continue 2, inside 78, no-budget 48
+HB-lock edges: 18; identity source: must-static-instance (LOCK_IDS) 18
+rows: A 66 (unknown 53, unordered 13); B 67 (hard_before 2, unknown 9, unordered 56); C 39 (hard_before 18, unordered 21)
+rows (result flow round): A 66 (unknown 53, unordered 13); B 67 (hard_before 2, unknown 9, unordered 56); C 39 (hard_before 18, unordered 21)
+caller-dependent: spawn calls with resolved threads 6, caller-dependent 2; their callers 6, passing on no resolved entry 1 (distinct caller calls 1)
+caller-dependent: pairs of the rows 4320 (unordered 4112); with every such caller taken to create any of the call's own threads, pairs whose value differs 0 (new pairs 0)
+caller-dependent: rows whose value differs 0
+relations path C by handle: 0, static-instance 0

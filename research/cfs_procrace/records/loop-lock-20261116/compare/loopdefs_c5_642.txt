@@ -1,0 +1,13 @@
+facts-view 1
+[loopdefs] 11
+  loop 49 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:358:5 in CFE_ES_PerfLogDump refused-unresolved {}
+    i@320:25 in-body at cfe/fsw/cfe-core/src/es/cfe_es_perf.c:358:10 refused-unresolved {} value 0
+    i@320:25 in-body at cfe/fsw/cfe-core/src/es/cfe_es_perf.c:358:45 refused-unresolved {}
+  loop 51 cfe/fsw/cfe-core/src/es/cfe_es_shell.c:220:17 in CFE_ES_ShellOutputCommand refused-unresolved {}
+    CurrFilePtr@87:11 in-body at cfe/fsw/cfe-core/src/es/cfe_es_shell.c:220:33 refused-unresolved {} value 0
+    CurrFilePtr@87:11 in-body at cfe/fsw/cfe-core/src/es/cfe_es_shell.c:220:98 refused-unresolved {}
+  loop 64 cfe/fsw/cfe-core/src/es/cfe_es_start.c:790:5 in CFE_ES_CreateObjects not-examined {}
+  loop 228 osal/src/os/posix/osapi.c:826:5 in OS_TaskDelay refused-unresolved {}
+    sleepstat@818:21 in-body at osal/src/os/posix/osapi.c:828:18 refused-unresolved {} value (call-result nanosleep (seq (addr local:waittime) (seq (addr local:waittime))))
+  loop 6 apps/to_lab/fsw/src/to_lab_app.c:110:4 in TO_Lab_AppMain refused-address-taken {}
+    RunStatus@101:28 before-loop at apps/to_lab/fsw/src/to_lab_app.c:101:28 refused-address-taken {} value 1

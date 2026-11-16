@@ -1,0 +1,1 @@
+check_whole: lines 72201, allowed 6, other 0

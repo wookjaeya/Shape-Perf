@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""compare_order.py OLD_DIR NEW_DIR -- `kz-static order` of one build before (order rules revision 1) and after (revision 2)
+"""compare_order.py OLD_DIR NEW_DIR [--facts-line] -- `kz-static order` of one build before (order rules revision 1) and after (revision 2)
 the review fixes: order.txt and edges.tsv, with the differences the declaration allows (plan/full_stage_results_20261116.md
 6.0 (나)).
 
@@ -22,6 +22,7 @@ order.txt
            ordered in the new one.
 edges.tsv  the header the same; rows by id: HB-spawn, L0-script and observed-only rows the same; HB-lock rows may differ only
            in the condition column after `child without success: `; HB-seq rows may be in one file only.
+--facts-line (addendum 6.0 (나-1): the order of two re-extractions) also allows head line 2 `facts <sha256>`.
 Prints the counts and up to 10 undeclared lines; rc 0 when nothing undeclared, 1 otherwise, 2 on a usage error."""
 import collections
 import os
@@ -110,10 +111,11 @@ def strip_cws(l):
 
 
 def main():
-    if len(sys.argv) != 3:
+    args = [x for x in sys.argv[1:] if x != "--facts-line"]
+    if len(args) != 2:
         print(__doc__, file=sys.stderr)
         return 2
-    od, nd = sys.argv[1], sys.argv[2]
+    od, nd = args
     oh, oe, ow, orows = split(read(os.path.join(od, "order.txt")))
     nh, ne, nw, nrows = split(read(os.path.join(nd, "order.txt")))
     om, nm = edge_meta(oe), edge_meta(ne)
@@ -121,7 +123,8 @@ def main():
     c = collections.Counter()
     # head
     allowed_head = (r"kz-static order \(order rules revision [12] \(2026-11-16\)\)", r"relations relations rules revision [89] \(2026-11-16\)",
-                    r"closure: .*", r"summary edges listed .*", r"summary spawn calls with resolved threads .*")
+                    r"closure: .*", r"summary edges listed .*", r"summary spawn calls with resolved threads .*") + \
+                   ((r"facts [0-9a-f]{64}",) if "--facts-line" in sys.argv[1:] else ())
     if len(oh) != len(nh):
         bad.append("head line count %d / %d" % (len(oh), len(nh)))
     for x, y in zip(oh, nh):

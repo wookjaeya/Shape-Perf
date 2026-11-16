@@ -1,0 +1,1 @@
+classes: marked 18, rules 1, set complete 13, set not established 2; other 0

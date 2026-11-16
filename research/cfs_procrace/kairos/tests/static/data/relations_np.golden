@@ -68,7 +68,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 8 (2026-11-16)
+rules relations rules revision 9 (2026-11-16)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 
@@ -118,6 +118,7 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
       callee-check: slot_create returns -17 [ERR_NOT_FOUND] with no condition
       callee-check: slot_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Slot.used 1)) (eq (call-result strcmp (seq field:Slot.name (seq param:name#0))) 0))
       callee-check: slot_create returns 0 [0] when (and (lt local:i 4) (eq field:Slot.used 0))
+      callee-check (set): slot_create: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
       writers: Config.name: no writer found under these premises; premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 0: direct 0, data-function 0, out-pointer 0, initial values 1; instances 0); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       writers: Slot.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       writers: Slot.used: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
@@ -143,6 +144,7 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
       callee-check: slot_create returns -17 [ERR_NOT_FOUND] with no condition
       callee-check: slot_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Slot.used 1)) (eq (call-result strcmp (seq field:Slot.name (seq param:name#0))) 0))
       callee-check: slot_create returns 0 [0] when (and (lt local:i 4) (eq field:Slot.used 0))
+      callee-check (set): slot_create: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
       writers: Slot.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       writers: Slot.used: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       handling: result discarded; no return of it and no terminal operation under it found

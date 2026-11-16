@@ -18,3 +18,30 @@ env/tools/tests/run_unit.sh: 15 of 15 (check 15: explain fixtures 22 of 22)
 relink_expected.sha256 (13), not_relink.sha256 (111) from MC (ELF executables and static libraries outside CMakeFiles), sha256 before the build
 env/tools/tools_check.sh --deep -> tools_check_pre.txt: 39 rows, 0 failing; env/tools/ledger_check.sh -> ledger_check_pre.txt: 76 rows, 0 failing
 free before the commit of the declaration: 2306027520 (2026-11-16T15:37:12Z)
+
+## 2. before the build (after the commit of the declaration, d75aa53)
+build_record.sh pre -> pre_mc.txt: HEAD d75aa53, uncommitted lines under kairos 0; kz-static c6aa4811 (a first call without the OUT argument refused, rc 64, nothing written)
+tool copy under the space guard (tool_copy/df_copy.log, need 100000000; dip 43290624): tool_copy/copy.sh /home/user/work/preserve/tools-20261116-g -> rc 0, tool_copy/ROUNDTRIP.txt: kz-static c6aa4811 (43,266,164 B; xz -t OK, stream sha256 equal, cmp SAME)
+
+## 3. the build: MC in place, each under env/tools/space_guard.sh --need 246981824 --kind <target>
+build start in build_start.txt
+make -j4 kz-static -> rc 0, make_kz-static.log (2 Linking lines: libkz-llvm.a, kz-static), df_build_kz-static.log dip 97423360
+make -j4 all       -> rc 0, make_all.log (11 Linking lines: the ten test_static_* that link libkz-llvm.a, test_static_cli), df_build_all.log dip 6135808
+linked names (13) = relink_expected.sha256; sha256sum -c relink_expected.sha256: 5 changed (libkz-llvm.a, kz-static, test_static_reasons, test_static_plan, test_static_cli), 8 relinked with the same bytes; sha256sum -c not_relink.sha256: 111 OK (static_golden included)
+CMakeCache.txt bc2f43b4 unchanged; find kairos/{lib,tools,include,cmake,CMakeLists.txt,probe,instrument,runtime,tests} -newer <build start> -> 0 files
+build_record.sh post -> post_mc.txt: kz-static 6adc1bdd (--identity tool_sha256 c657cb5c, tool_source 313d8a90; core_source 568e5061 and schema fingerprint 6fbff6c6 unchanged); flags.make list 95916686 -> bb6d74c5; the other six tools unchanged
+ctest -j4 -> ctest_first.log: 254, 9 failed as declared (static_golden of relations, relations_np, relpaths_np, relsound_np, relincomplete_np, relincomplete_cut_np, relcallback_np, order_np; test_static_plan)
+KZ_GOLDEN_UPDATE=1 ctest -R <the nine> -> golden_update.log: 9 passed; git diff of the goldens read against 6.0 (나) (the scratch goldens had been removed before the build: not compared by cmp, see 6.8)
+ctest -j4 -> ctest_full.log: 254, 0 failed, 1 skipped (test_probe_anchor_reached); ctest -V counts -> ctest_counts.log (test_static_cli 963, test_static_reasons 660, test_static_plan 182, test_core_schema 34017, lint selftest 109, lint 7 of 7)
+env/tools/tests/run_unit.sh -> unit_tools.txt 15 of 15; env/redesign/step2a_tests_unit.sh -> unit_step2a.txt 7 of 7
+after the build: env/tools/ledger_check.sh -> ledger_check_after_build.txt: 76 rows, 0 failing; env/tools/tools_check.sh --deep first gave 39 rows, 1 failing (c6aa4811 registered in-place, the file overwritten by the build: the registry not yet updated); records/TOOLS.tsv: c6aa4811 -> copy, 6adc1bdd in-place; again -> tools_check_after_build.txt: 40 rows, 0 failing
+
+## 4. the five builds (outputs under /home/user/work/redesign/obs1, each under the space guard)
+rerun.sh (df_rerun.log, rerun_run.txt) -> compare.sh relations -> compare_relations.txt: 15 OK
+order.sh (df_order.log, order_run.txt) -> compare.sh order -> compare_order.txt: 20 OK (compare/order_<b>.txt)
+extract.sh (df_extract.log dip 47157248, extract_run.txt): five PASS
+order.sh revfix_extract revfix_on_extract (df_order_extract.log, order_extract_run.txt): rc 0
+plans.sh (df_plans.log, plans_run.txt); plans.sh revfix_extract revfix_plans_on_extract (df_plans_extract.log, plans_extract_run.txt): rc 0, rc 0
+compare.sh extract (SCRATCH <scratch>/views) -> first/compare_extract_first.txt: 30 OK, 15 BAD (facts.kz whole dump: the STRINGS crc32 line and BASIS extract.units_from; the facts views: the extract.units_from line; relations.txt compared with the wrong reference, revfix_relcheck) -- NOT DECLARED: stopped
+compare.sh onextract -> first/compare_onextract_first.txt: 27 OK, 3 BAD (order.txt of c1_pre_tx, c1_post_tx, r2_core compared with the wrong reference, revfix_order: the T8CF facts and the re-extracted ones differ, results 5.5); the two-run checks OK, again/ removed by the step
+compare.sh plans -> compare_plans.txt: ten "only declared differences"

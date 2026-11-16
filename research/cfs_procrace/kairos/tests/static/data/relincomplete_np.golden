@@ -92,7 +92,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 8 (2026-11-16)
+rules relations rules revision 9 (2026-11-16)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 
@@ -156,6 +156,7 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
       callee-check: reg_create returns -17 [ERR_NOT_FOUND] with no condition
       callee-check: reg_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Reg.used 1)) (eq (call-result strcmp (seq field:Reg.name (seq param:name#0))) 0))
       callee-check: reg_create returns 0 [0] when (and (lt local:i 4) (eq field:Reg.used 0))
+      callee-check (set): reg_create: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
       writers: Reg.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       writers: Reg.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       handling: result discarded; no return of it and no terminal operation under it found
@@ -176,6 +177,7 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
       callee-check: reg_create returns -17 [ERR_NOT_FOUND] with no condition
       callee-check: reg_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Reg.used 1)) (eq (call-result strcmp (seq field:Reg.name (seq param:name#0))) 0))
       callee-check: reg_create returns 0 [0] when (and (lt local:i 4) (eq field:Reg.used 0))
+      callee-check (set): reg_create: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
       writers: Reg.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       writers: Reg.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       handling: result discarded; no return of it and no terminal operation under it found

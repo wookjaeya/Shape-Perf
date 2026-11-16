@@ -1,0 +1,27 @@
+Test project /home/user/work/merge-check/kz-llvm
+    Start 228: static_golden_relations
+1/9 Test #228: static_golden_relations ..............   Passed    0.09 sec
+    Start 233: static_golden_relations_np
+2/9 Test #233: static_golden_relations_np ...........   Passed    0.14 sec
+    Start 235: static_golden_relpaths_np
+3/9 Test #235: static_golden_relpaths_np ............   Passed    0.15 sec
+    Start 236: static_golden_relsound_np
+4/9 Test #236: static_golden_relsound_np ............   Passed    0.26 sec
+    Start 238: static_golden_relincomplete_np
+5/9 Test #238: static_golden_relincomplete_np .......   Passed    0.12 sec
+    Start 239: static_golden_relincomplete_cut_np
+6/9 Test #239: static_golden_relincomplete_cut_np ...   Passed    0.11 sec
+    Start 240: static_golden_relcallback_np
+7/9 Test #240: static_golden_relcallback_np .........   Passed    0.13 sec
+    Start 241: static_golden_order_np
+8/9 Test #241: static_golden_order_np ...............   Passed    0.15 sec
+    Start 253: test_static_plan
+9/9 Test #253: test_static_plan .....................   Passed    0.19 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Label Time Summary:
+golden    =   1.16 sec*proc (8 tests)
+static    =   1.35 sec*proc (9 tests)
+
+Total Test time (real) =   1.36 sec

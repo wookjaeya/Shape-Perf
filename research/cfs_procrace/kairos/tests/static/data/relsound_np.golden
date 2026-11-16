@@ -276,7 +276,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 8 (2026-11-16)
+rules relations rules revision 9 (2026-11-16)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 

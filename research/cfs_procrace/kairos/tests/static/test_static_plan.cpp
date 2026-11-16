@@ -1,4 +1,4 @@
-// test_static_plan -- `kz-static plan` (plan rules revision 1, docs/plan_manifest.md) on the fixture plangen.c:
+// test_static_plan -- `kz-static plan` (plan rules revision 2, docs/plan_manifest.md) on the fixture plangen.c:
 //
 //   test_static_plan <kz-static> <fixtures-dir> <data-dir> <work-dir>
 //
@@ -21,6 +21,9 @@
 //     budget reason, a budget it does not know, a --basis that is no basis container; no output file is written;
 //   - a second caller added later (-DPLANGEN_SECOND_CALLER) is planned by the same rules: every site key of the first
 //     plan is in the second, and the new lookup has its use-call sites;
+//   - plankey.c (plangen.c with the lookup's key in a character array tested before the call): with the facts of
+//     extract --object-access the key at the use is a validated string bounded by the array's extent (ARG_TYPES), without
+//     them a pointer; the same sites otherwise;
 //   - the text of the plan (manifest and sidecar, the sha256 values and the work path masked) against
 //     data/plangen_np.plan.golden (KZ_GOLDEN_UPDATE=1 rewrites it).
 #include <sys/wait.h>
@@ -315,6 +318,44 @@ int main(int argc, char** argv) {
     KZ_CHECK(k2.count("plangen.c|three_main|point|at-call|reg_find|136") == 1);
     KZ_CHECK(k2.count("plangen.c|three_main|point|after-call|reg_find|136") == 1);
     KZ_CHECK(k2.count("plangen.c|three_main|before|||0") == 1);
+  }
+
+  // ---- plan rules revision 2: a key argument that is a character array tested before the call (plankey.c).  With the facts
+  // of --object-access (ARG_TYPES) the key at the use is a validated string bounded by the array's extent; without them a
+  // pointer, as before; the rest of the plan does not depend on it (the same site keys)
+  {
+    const std::string kext = q(tool) + " extract --no-profile --source " + q((fixtures / "plankey.c").string()) + " --root " + q(fixtures.string()) + " --targets-rule R-T1,R-T2";
+    KZ_CHECK_EQ(run(kext + " --object-access -o " + q((work / "plankey_on.kz").string()) + " -- -std=c99 -pedantic", &log), 0);
+    KZ_CHECK_EQ(run(kext + " -o " + q((work / "plankey_off.kz").string()) + " -- -std=c99 -pedantic", &log), 0);
+    const fs::path kfw = data / "plankey_framework.txt";
+    Plan on, off;
+    KZ_CHECK(generate(plan_cmd(tool, work / "plankey_on.kz", kfw, work / "pk_on"), work / "pk_on", &on));
+    KZ_CHECK(generate(plan_cmd(tool, work / "plankey_off.kz", kfw, work / "pk_off"), work / "pk_off", &off));
+    kzrt::Manifest mon, moff;
+    std::string e1, e2;
+    KZ_CHECK(kzrt::parse_manifest(on.manifest, "on.kzs", &mon, &e1));
+    KZ_CHECK(kzrt::parse_manifest(off.manifest, "off.kzs", &moff, &e2));
+    auto key_at = [](const kzrt::Manifest& mm) -> const kzrt::Value* {
+      for (const kzrt::Site& st : mm.sites)
+        if (st.func == "one_init" && st.place == "at-call" && st.callee == "reg_find") return st.value(0);
+      return nullptr;
+    };
+    const kzrt::Value* kon = key_at(mon);
+    const kzrt::Value* koff = key_at(moff);
+    KZ_CHECK(kon != nullptr && kon->from == "arg1" && kon->string_mode == "validated" && kon->bound == 12);
+    KZ_CHECK(koff != nullptr && koff->from == "arg1" && koff->string_mode == "pointer-only");
+    KZ_CHECK(has(on.manifest, "ref=\"argument 1 is the character array OneCfg.name of extent 12 (declared at plankey.c:98), the read at plankey.c:104:15 dominates the call (ARG_TYPES)"));
+    KZ_CHECK(has(on.sidecar, "\nbound string-extent source=ARG_TYPES reason=") && !has(off.sidecar, "string-extent"));
+    KZ_CHECK(has(on.sidecar, "plan rules revision 2 (2026-11-16)") && has(off.sidecar, "plan rules revision 2 (2026-11-16)"));
+    // the callee's key text keeps its own bound (the runtime's, under the lookup's non-null test)
+    const kzrt::Site* ktx = nullptr;
+    for (const kzrt::Site& st : mon.sites)
+      if (st.func == "reg_find" && st.place == "at-call" && st.callee == "reg_search") ktx = &st;
+    KZ_CHECK(ktx != nullptr && ktx->value(0) != nullptr && ktx->value(0)->bound == 64);
+    std::set<std::string> son, soff;
+    for (const kzrt::Site& st : mon.sites) son.insert(st.func + "|" + st.place + "|" + st.callee + "|" + std::to_string(st.src_line));
+    for (const kzrt::Site& st : moff.sites) soff.insert(st.func + "|" + st.place + "|" + st.callee + "|" + std::to_string(st.src_line));
+    KZ_CHECK(son == soff);
   }
 
   // ---- the golden text

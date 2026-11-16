@@ -134,6 +134,12 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   for (const IterFact& i : m.iters) add(i.pos.file);
   for (const WriteEvent& we : m.write_events) add(we.pos.file);
   for (const std::string& f : m.main_files) add(f);
+  // --object-access: the declarations FIELD_TYPES and ARG_TYPES point at (a header that declares a record is no file of
+  // any other fact); without the option nothing is added
+  if (spec.object_access) {
+    for (const FieldTypeFact& f : m.field_types) add(f.pos.file);
+    for (const ArgTypeFact& a : m.arg_types) add(a.decl.file);
+  }
   std::map<std::string, uint32_t> fh;
   std::vector<kz_file_hash> file_rows;
   for (const std::string& f : files) {
@@ -945,6 +951,94 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     }
   }
 
+  // ---- types and object access (--object-access; kz_facts.h revision 10, static_facts.md 5s): OBJECT_ACCESS (a row per
+  // READS row, then a row per WRITERS row), FIELD_TYPES, ARG_TYPES.  Written last: their expression roots come after
+  // every earlier root.  Without the option none of them is written and nothing above changes.
+  std::vector<kz_fact_objacc> objacc_rows;
+  std::vector<kz_fact_ftype> ftype_rows;
+  std::vector<kz_fact_argtype> argtype_rows;
+  uint32_t objacc_resolved = 0, objacc_partial = 0;
+  if (spec.object_access) {
+    auto oa_row = [&](const ObjAccess& oa, uint8_t kind, const std::string& fkey, const Pos& pos, const std::string& type, const std::string& field) {
+      kz_fact_objacc r = zero<kz_fact_objacc>();
+      r.fn = fn_of(fkey);
+      r.site = KZ_NONE32;
+      r.read = KZ_NONE32;
+      r.writer = KZ_NONE32;
+      r.index_root = exprs.index_of(oa.index);
+      r.line = pos.line;
+      r.col = pos.col;
+      r.fh = fh_of(pos.file);
+      r.kind = kind;
+      r.base_kind = oa.base;
+      r.status = oa.status;
+      r.flags = oa.flags;
+      r.type = w.intern(type);
+      r.field = w.intern(field);
+      r.base_object = w.intern(oa.object);
+      r.path = w.intern(oa.path);
+      if (oa.status == KZ_OBJACC_STATUS_RESOLVED) ++objacc_resolved;
+      else if (oa.status == KZ_OBJACC_STATUS_PARTIAL) ++objacc_partial;
+      return r;
+    };
+    for (size_t i = 0; i < m.reads.size(); ++i) {
+      const ReadFact& x = m.reads[i];
+      if (!x.oa.set) continue;
+      kz_fact_objacc r = oa_row(x.oa, KZ_OBJACC_KIND_READ, x.func_key, x.pos, x.type, x.field);
+      r.read = static_cast<uint32_t>(i);
+      objacc_rows.push_back(r);
+    }
+    for (size_t i = 0; i < m.writers.size(); ++i) {
+      const WriterFact& x = m.writers[i];
+      if (!x.oa.set) continue;
+      const uint8_t kind = x.kind == KZ_WRITER_KIND_OUTPTR                                           ? KZ_OBJACC_KIND_OUT_POINTER
+                           : (x.kind == KZ_WRITER_KIND_MEMSET || x.kind == KZ_WRITER_KIND_MEMCPY) ? KZ_OBJACC_KIND_DATA_FUNCTION
+                                                                                                    : KZ_OBJACC_KIND_WRITE;
+      kz_fact_objacc r = oa_row(x.oa, kind, x.func_key, x.pos, x.loc_type, x.loc_field);
+      r.writer = static_cast<uint32_t>(i);
+      if (kind != KZ_OBJACC_KIND_WRITE) r.site = R.writer_site[i];
+      objacc_rows.push_back(r);
+    }
+    for (const FieldTypeFact& f : m.field_types) {
+      kz_fact_ftype r = zero<kz_fact_ftype>();
+      r.extent = f.extent;
+      r.elem_size = f.elem_size;
+      r.bit_width = f.bit_width;
+      r.line = f.pos.line;
+      r.col = f.pos.col;
+      r.fh = fh_of(f.pos.file);
+      r.elem_kind = f.elem_kind;
+      r.extent_kind = f.extent_kind;
+      r.flags = f.flags;
+      r.type = w.intern(f.type);
+      r.field = w.intern(f.field);
+      r.elem_type = w.intern(f.elem_type);
+      r.extent_text = w.intern(f.extent_text);
+      ftype_rows.push_back(r);
+    }
+    std::map<std::string, uint32_t> read_index;  // ReadFact::key -> READS row
+    for (size_t i = 0; i < m.reads.size(); ++i) read_index[m.reads[i].key()] = static_cast<uint32_t>(i);
+    for (const ArgTypeFact& a : m.arg_types) {
+      auto cit = R.call_index.find(a.call_key);
+      if (cit == R.call_index.end()) continue;
+      kz_fact_argtype r = zero<kz_fact_argtype>();
+      r.call = static_cast<uint32_t>(cit->second);
+      r.pos = a.pos;
+      r.extent = a.extent;
+      r.decl_line = a.decl.line;
+      r.decl_fh = a.decl.file.empty() ? KZ_NONE32 : fh_of(a.decl.file);
+      auto rit = a.read_key.empty() ? read_index.end() : read_index.find(a.read_key);
+      r.read = rit == read_index.end() ? KZ_NONE32 : rit->second;
+      r.type_class = a.type_class;
+      r.width = a.width;
+      r.read_dom = a.read_dom;
+      r.flags = a.flags;
+      r.type = w.intern(a.type);
+      r.decl_object = w.intern(a.decl_object);
+      argtype_rows.push_back(r);
+    }
+  }
+
   // ---- BASIS and PROVENANCE: the extraction parameters, the counts, the hand-entered inputs
   std::vector<kz_prov> provs;
   std::vector<kz_basis_item> basis;
@@ -1078,6 +1172,24 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
          KZ_POLICY_UNSET, KZ_NONE32);
     item("count.await_l1", num(await_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
   }
+  if (spec.object_access) {
+    const Model::ObjectStats& os = m.object_stats;
+    item("extract.object_access",
+         "types and object access (--object-access; kz_facts.h revision 10): OBJECT_ACCESS, FIELD_TYPES, ARG_TYPES; a target array field whose "
+         "pointer is passed to a call is an out-pointer call, whose pointer leaves otherwise an address-escape hit, and a store to an element of it a "
+         "writer row; a type name whose position lies outside the root is written by the file's source tree (static_facts.md 5s)",
+         KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.object_access", num(objacc_rows.size()) + " rows (resolved " + num(objacc_resolved) + ", partial " + num(objacc_partial) + ", not resolved " +
+                                    num(objacc_rows.size() - objacc_resolved - objacc_partial) + ")",
+         KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.field_types", num(ftype_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.arg_types", num(argtype_rows.size()) + " (character arrays read at a dominating point " + num(os.args_dominated) + ")", KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.array_decay", "out-pointer calls " + num(os.decay_outcalls) + ", address-escape hits " + num(os.decay_escapes) + ", element writer rows " +
+                                  num(os.element_writers),
+         KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.type_names_outside_root", "by source tree " + num(m.type_names_tree.size()) + ", absolute (no source tree) " + num(m.type_names_absolute.size()),
+         KZ_POLICY_UNSET, KZ_NONE32);
+  }
   for (const auto& n : opt.notes) item(n.first, n.second, KZ_POLICY_UNSET, KZ_NONE32);
   for (const auto& n : opt.deviation_notes) item(n.first, n.second, KZ_POLICY_DEVIATION, KZ_NONE32);
 
@@ -1103,6 +1215,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   if (spec.extended_facts && (!put(KZ_SEC_LOCK_OPS, lockop_rows) || !put(KZ_SEC_LOCK_IDS, lockid_rows) || !put(KZ_SEC_LOCKSET, lockset_rows) ||
                               !put(KZ_SEC_FIELD_STATUS, fstatus_rows) || !put(KZ_SEC_AWAIT_L1, await_rows) || !put(KZ_SEC_LOCK_PATHS, lockpath_rows)))
     return s;
+  if (spec.object_access && (!put(KZ_SEC_OBJECT_ACCESS, objacc_rows) || !put(KZ_SEC_FIELD_TYPES, ftype_rows) || !put(KZ_SEC_ARG_TYPES, argtype_rows))) return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;
   return w.finish(out);

@@ -1,10 +1,16 @@
-# The generated observation plan (`kz-static plan`, plan rules revision 1)
+# The generated observation plan (`kz-static plan`, plan rules revision 2)
 
 `kz-static plan` turns the rows of `kz-static relations` into an observation plan by rule: which points of the program a
 derived build records, and with which values.  It takes no field, callee or case name; the plan comes from the facts,
 the basis and the framework-layer data only, and it states what to record, never what to expect.  Code:
 `lib/llvm/plan_gen.hpp`, `plan_gen.cpp`, `tools/kz-static/cmd_plan.cpp`.  Tests: `tests/static/test_static_plan.cpp` on
-the fixture `tests/static/fixtures/plangen.c`.
+the fixture `tests/static/fixtures/plangen.c`, and `plankey.c` for the key argument of revision 2.
+
+Revision 2 (2026-11-16): the key argument of a `use-call` or `creator-call` site that is a character array of a known
+extent, read at a point that dominates the call (ARG_TYPES, facts of `kz-static extract --object-access`,
+`docs/static_facts.md` 5s), is recorded at the call as `string=validated` with `bound` = min(extent, `KZ_RT_STR_MAX`);
+the sidecar then has a line `bound string-extent source=ARG_TYPES`.  Facts without ARG_TYPES give the plan of revision 1
+except the revision text.
 
 ## 1. Command and inputs
 

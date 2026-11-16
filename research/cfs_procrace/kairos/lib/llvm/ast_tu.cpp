@@ -143,10 +143,37 @@ void TuReader::collect_typedefs() {
 // the line and, if asked, the column.
 std::string TuReader::name_pos(SourceLocation loc, bool with_column) {
   const Pos p = pos_of(loc);
-  std::string file = p.file;
+  std::string file = name_file(p.file);
   for (char& c : file)
     if (c == '.') c = '_';
   return file + ":" + std::to_string(p.line) + (with_column ? ":" + std::to_string(p.col) : std::string());
+}
+
+// --object-access (static_facts.md 5s): a file outside the root is recorded with its absolute path, which differs
+// between two checkouts of the same source tree (two builds of one application from two directories); in a type name
+// it is written by its position in its source tree, the nearest directory above it that holds a `.git` entry (a
+// directory, or a file that names the repository of a submodule or a worktree; gitrev.hpp), as "<tree>/<path>".
+std::string TuReader::name_file(const std::string& recorded) {
+  if (!opt_.object_access || recorded.empty() || recorded[0] != '/') return recorded;
+  auto it = name_file_cache_.find(recorded);
+  if (it != name_file_cache_.end()) return it->second;
+  std::string out = recorded;
+  const fs::path file(recorded);
+  for (fs::path d = file.parent_path(); !d.empty() && d != d.root_path(); d = d.parent_path()) {
+    std::error_code ec;
+    if (fs::exists(d / ".git", ec)) {
+      out = "<" + d.filename().generic_string() + ">/" + file.lexically_relative(d).generic_string();
+      break;
+    }
+  }
+  return name_file_cache_[recorded] = out;
+}
+
+std::string TuReader::object_key_for_name(const VarDecl* vd) {
+  if (vd->isExternallyVisible()) return vd->getNameAsString();
+  const VarDecl* def = vd->getDefinition();
+  const Pos p = pos_of((def != nullptr ? def : vd)->getLocation());
+  return vd->getNameAsString() + "@" + name_file(p.file) + ":" + std::to_string(p.line);
 }
 
 // The records the file-scope pass (collect_typedefs) leaves without a name, named so that every record type of the unit
@@ -212,7 +239,7 @@ void TuReader::name_unnamed_records() {
     } else if (auto mo = c.member_of.find(rd); mo != c.member_of.end()) {
       n = name_of(mo->second->getParent()) + "::" + mo->second->getName().str();
     } else if (auto ob = c.object_of.find(rd); ob != c.object_of.end()) {
-      n = object_key(ob->second);
+      n = object_key_for_name(ob->second);
       for (char& ch : n)
         if (ch == '.') ch = '_';
       n += "::type";
@@ -220,6 +247,11 @@ void TuReader::name_unnamed_records() {
       n = "<anonymous@" + name_pos(rd->getLocation(), true) + ">";
     }
     done[rd] = n;
+    // --object-access: count the names with a position outside the root (by its source tree, or still absolute)
+    if (opt_.object_access && n.find('@') != std::string::npos) {
+      if (n.find("@<") != std::string::npos) model_->type_names_tree.insert(n);
+      else if (n.find("@/") != std::string::npos) model_->type_names_absolute.insert(n);
+    }
     return n;
   };
   for (const RecordDecl* r : c.records) {

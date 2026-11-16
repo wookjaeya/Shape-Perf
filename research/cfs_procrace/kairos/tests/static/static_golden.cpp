@@ -56,6 +56,15 @@ const std::vector<std::string> kRelationSections = {"functions", "writers", "loc
 const std::vector<std::string> kNameSections = {"functions", "writers", "locs", "fstatus", "fwrites", "gimages"};
 // The order and entry-path facts of the F5 events (LOCK_PATHS, written with those of F1-F3).
 const std::vector<std::string> kPathSections = {"functions", "lockpaths"};
+// Types and object access (--object-access, static_facts.md 5s): the writer sets the rules of the option count, and the three
+// sections it writes (the views of a facts container without them have no such section).
+const std::vector<std::string> kObjectSections = {"functions", "writers", "atype", "locs", "outcalls", "fstatus", "objaccess", "ftypes", "argtypes"};
+const std::vector<std::string> kObjectTargets = {"--extended-facts", "--target", "Mem.pool", "--target", "Mem.buf", "--target", "Mem.label", "--target", "Mem.tag",
+                                                 "--target", "Mem.data", "--target", "Mem.raw", "--target", "Mem.count", "--target", "Chan.name"};
+std::vector<std::string> with_option(std::vector<std::string> v, const std::string& o) {
+  v.push_back(o);
+  return v;
+}
 
 const std::vector<Case>& cases() {
   static const std::vector<Case> all = {
@@ -98,6 +107,9 @@ const std::vector<Case>& cases() {
       // (static_facts.md 5q): anonrec.c
       // (no relations: the fixture has no threads, so relations has no row; test_static_reasons wants rows in a relations golden)
       {"anonrec_np", "anonrec.c", {"--targets-rule", "R-T1,R-T2"}, kNameSections, true},
+      // types and object access (static_facts.md 5s): objaccess.c with the option and, for the difference, without it
+      {"objaccess", "objaccess.c", with_option(kObjectTargets, "--object-access"), kObjectSections},
+      {"objaccess_off", "objaccess.c", kObjectTargets, kObjectSections},
   };
   return all;
 }

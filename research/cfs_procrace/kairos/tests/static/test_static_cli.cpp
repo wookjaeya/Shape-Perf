@@ -13,6 +13,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -1959,6 +1960,95 @@ startup_script {
         KZ_CHECK(has(sv, "read Hold.tbl") && !has(sv, " resolved "));
       }
     }
+  }
+
+  // ---- types and object access (--object-access, static_facts.md 5s) ------------------------------------------------------
+  {
+    const fs::path X = work / "objaccess";
+    fs::create_directories(X);
+    const std::string oc = fixtures + "/objaccess.c";
+    const std::string targets = " --target Mem.pool --target Mem.buf --target Mem.label --target Mem.tag --target Mem.data --target Mem.raw --target Mem.count --target Chan.name";
+    // the option needs the extended facts
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(oc) + " --object-access -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "--object-access needs the extended facts"));
+    KZ_CHECK(!fs::exists(X / "x.kz"));
+    std::string on, off, sv;
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(oc) + " --root " + q(fixtures) + " --extended-facts --object-access" + targets + " -o " +
+                        q((X / "on.kz").string()) + " -- -std=c99 -pedantic",
+                    &on),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(oc) + " --root " + q(fixtures) + " --extended-facts" + targets + " -o " +
+                        q((X / "off.kz").string()) + " -- -std=c99 -pedantic",
+                    &off),
+                0);
+    // the writer sets: the array that decays to a pointer counts (a call that keeps it as an integer, a function without a body,
+    // a store of the pointer, a conversion to an integer); a function that stores through it gives a writer row; a store to an
+    // element is a writer row; without the option every one of them is complete with the writers of the default rules
+    KZ_CHECK(has(off, "location Mem.pool   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> writer-set-complete"));
+    KZ_CHECK(has(on, "location Mem.pool   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 3, cast 0, union 0, "
+                     "unknown effect 0  -> DISABLED"));
+    KZ_CHECK(has(on, "location Mem.buf   writers 2 (direct 0, data function 1, out-pointer 1, initial values 1)"));
+    KZ_CHECK(has(on, "location Mem.data   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1)"));
+    KZ_CHECK(has(on, "location Chan.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 3,"));
+    KZ_CHECK(has(off, "location Chan.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0,"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "on.kz").string()) + " --section atype --section objaccess --section ftypes --section argtypes --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "Mem.pool address-escape at objaccess.c:60:3 in init: the array decays to a pointer to its first element, passed to pool_create: "));
+    KZ_CHECK(has(sv, "Mem.tag address-escape at objaccess.c:63:3 in init: the array decays to a pointer to its first element: assigned to last"));
+    KZ_CHECK(has(sv, "Mem.raw address-escape at objaccess.c:64:14 in init: the array decays to a pointer to its first element: converted to an integer"));
+    KZ_CHECK(has(sv, "Mem.label address-escape at objaccess.c:62:9 in init: the array decays to a pointer to its first element, passed to lookup: the callee has no body"));
+    // OBJECT_ACCESS: a global, an element of a global array, a path through a global pointer, a local, a parameter's pointee
+    KZ_CHECK(has(sv, "  read Mem.pool at objaccess.c:60:19 in init base=global object=mem path=[mem.pool] resolved {} read "));
+    KZ_CHECK(has(sv, " base=global-element object=cfg_store@objaccess.c:41 path=[cfg_store.chan[1].name] resolved {} index=[1] read "));
+    KZ_CHECK(has(sv, " base=global object=cfg path=[cfg->chan[i].name] partial {index-unknown} index=[local:i, 0] read "));
+    KZ_CHECK(has(sv, " base=local object=init/local path=[local.name] resolved {} read "));
+    KZ_CHECK(has(sv, "  write Mem.count at objaccess.c:54:33 in set_count base=param-pointee object=- path=[m->count] unresolved {} writer "));
+    KZ_CHECK(has(sv, "  out-pointer Mem.buf at objaccess.c:61:3 in init base=global object=mem path=[mem.buf] resolved {} writer "));
+    // FIELD_TYPES: the extent as evaluated and as written, the element, a bit-field
+    KZ_CHECK(has(sv, "  Chan.name at objaccess.c:19:8 element char [char] size 1 extent constant 20 [NAMELEN] {}\n"));
+    KZ_CHECK(has(sv, "  Mem.pool at objaccess.c:28:6 element char [u8] size 1 extent constant 32 [POOLSZ] {typedef-named}\n"));
+    KZ_CHECK(has(sv, "  Mem.flag at objaccess.c:36:12 element unsigned-integer [unsigned int] size 4 extent none 0 bits 3 {bit-field}\n"));
+    // ARG_TYPES: a character array read before the call under a test of it, one read after the call, one not read
+    KZ_CHECK(has(sv, "objaccess.c:70:37 lookup arg 1 char-array [char[20]] width 8 extent 20 of Chan.name declared at objaccess.c:19 read-dominating by the read at "
+                     "objaccess.c:70:22 {const-pointee,via-pointer-field}"));
+    KZ_CHECK(has(sv, "objaccess.c:71:9 lookup arg 1 char-array [char[20]] width 8 extent 20 of Chan.name declared at objaccess.c:19 read-not-dominating {const-pointee}"));
+    KZ_CHECK(has(sv, "objaccess.c:74:9 lookup arg 1 char-array [char[20]] width 8 extent 20 of Chan.name declared at objaccess.c:19 not-read {const-pointee}"));
+    KZ_CHECK(has(sv, "objaccess.c:68:3 set_count arg 0 record-pointer [Mem *] width 8 {}"));
+    KZ_CHECK(has(sv, "count.array_decay = out-pointer calls 6, address-escape hits 2, element writer rows 1  (unset)"));
+    KZ_CHECK(has(sv, "count.arg_types = 16 (character arrays read at a dominating point 1)  (unset)"));
+    // without the option: none of the three sections, no BASIS item of the option
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "off.kz").string()), &sv), 0);
+    KZ_CHECK(!has(sv, "[objaccess]") && !has(sv, "[ftypes]") && !has(sv, "[argtypes]") && !has(sv, "extract.object_access") && !has(sv, "count.array_decay"));
+    KZ_CHECK(!has(sv, "decays to a pointer"));
+    // the type names of records defined outside the root: by the file's source tree (the nearest directory above it with a
+    // `.git` entry), so that two checkouts of one tree give the same names; a file in no such tree keeps its absolute path
+    for (const char* c : {"c1", "c2"}) {
+      fs::create_directories(X / c / "app" / ".git");
+      write(X / c / "app" / "src" / "x.h",
+            "static struct { int a; int b; } obj_state;\nstatic inline void touch(void) { struct Local { int q; } l; l.q = 1; obj_state.a = l.q; }\n");
+    }
+    write(X / "sys" / "y.h", "static struct { int z; } sys_state;\nstatic inline void tz(void) { sys_state.z = 2; }\n");
+    write(X / "root" / "m.c", "#include \"x.h\"\n#include \"y.h\"\nint main(void) { touch(); tz(); return obj_state.b + sys_state.z; }\n");
+    std::map<std::string, std::string> views;
+    for (const char* c : {"c1", "c2"})
+      for (const char* o : {"on", "off"}) {
+        const std::string f = (X / (std::string(c) + "_" + o + ".kz")).string();
+        KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q((X / "root" / "m.c").string()) + " --root " + q((X / "root").string()) +
+                            (std::string(o) == "on" ? " --object-access" : "") + " -o " + q(f) + " -- -std=c99 -I" + q((X / c / "app" / "src").string()) + " -I" +
+                            q((X / "sys").string()),
+                        &out),
+                    0);
+        KZ_CHECK_EQ(run(q(tool) + " show " + q(f) + " --section fwrites", &views[std::string(c) + o]), 0);
+      }
+    // (the keys of the header's static functions keep the recorded path of their file: they are no type names)
+    for (const char* c : {"c1", "c2"}) {
+      KZ_CHECK(has(views[std::string(c) + "on"], "obj_state@<app>/src/x_h:1::type.a") && has(views[std::string(c) + "on"], "Local@<app>/src/x_h:2.q"));
+      KZ_CHECK(!has(views[std::string(c) + "on"], "/app/src/x_h"));
+      KZ_CHECK(has(views[std::string(c) + "off"], "obj_state@" + (X / c / "app" / "src").string() + "/x_h:1::type.a"));
+    }
+    KZ_CHECK(has(views["c1on"], "sys_state@" + (X / "sys").string() + "/y_h:1::type.z"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "c1_on.kz").string()) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "count.type_names_outside_root = by source tree 2, absolute (no source tree) 1  (unset)"));
   }
 
   fs::remove_all(work);

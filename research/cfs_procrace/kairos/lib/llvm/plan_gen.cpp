@@ -16,7 +16,7 @@
 
 namespace kzs {
 
-const char* plan_rules_revision() { return "plan rules revision 1 (2026-11-16)"; }
+const char* plan_rules_revision() { return "plan rules revision 2 (2026-11-16)"; }
 const char* plan_priority_revision() {
   return "method priority port revision 1 (2026-11-16): label, order class, reach mark and disposition of the method document's S1 rule over the row text";
 }
@@ -267,6 +267,12 @@ class Gen : public RelFacts {
     if (!(s = prepare()).ok()) return s;
     if (!(s = c_.read_section(KZ_SEC_FILE_HASHES, &files_)).ok()) return s;
     if (!(s = c_.read_section(KZ_SEC_FACT_ARGS, &args_)).ok()) return s;
+    // ARG_TYPES (facts of --object-access; absent otherwise): the extent of a character array a key argument is
+    {
+      std::vector<kz_fact_argtype> at;
+      if (!(s = c_.read_section(KZ_SEC_ARG_TYPES, &at)).ok()) return s;
+      for (const kz_fact_argtype& r : at) argtype_[{r.call, r.pos}] = r;
+    }
     if (!(s = read_framework()).ok()) return s;
     if (!(s = read_basis()).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_at_[{str(calls_[i].file), calls_[i].line, calls_[i].col}] = static_cast<uint32_t>(i);
@@ -671,6 +677,23 @@ class Gen : public RelFacts {
     key.from = "arg" + std::to_string(kparam);
     key.type = "ptr";
     key.string_mode = "pointer-only";
+    // revision 2: a key argument that is a character array of a known extent which the program reads at a point that
+    // dominates the call (ARG_TYPES, facts of --object-access) is a validated string at the call itself, bounded by
+    // that extent and the runtime's copy bound: the copy stays inside the array the program itself reads
+    if (kparam != kN) {
+      auto ait = argtype_.find({ci, kparam});
+      if (ait != argtype_.end() && ait->second.type_class == KZ_ARGT_CLASS_CHAR_ARRAY && ait->second.extent > 0 && ait->second.read_dom == KZ_ARGT_READ_DOMINATING) {
+        const kz_fact_argtype& a = ait->second;
+        key.string_mode = "validated";
+        key.bound = std::min<uint32_t>(a.extent, kStrMax);
+        std::string rd = "a read";
+        if (a.read < reads_.size()) rd = "the read at " + pos(str(reads_[a.read].file), reads_[a.read].line, reads_[a.read].col);
+        key.ref = "argument " + std::to_string(kparam) + " is the character array " + str(a.decl_object) + " of extent " + std::to_string(a.extent) +
+                  (a.decl_fh != KZ_NONE32 ? " (declared at " + file_path(a.decl_fh) + ":" + std::to_string(a.decl_line) + ")" : std::string()) + ", " + rd +
+                  " dominates the call (ARG_TYPES); bound min(extent " + std::to_string(a.extent) + ", KZ_RT_STR_MAX " + std::to_string(kStrMax) +
+                  "); premise: the string is NUL-terminated within the array or the cut is flagged";
+      }
+    }
     const bool string_key = kparam != kN && defined(kfn) && reaches_compare(kfn, kparam);
     at_call(ci, rule, rowref, kparam != kN ? std::vector<Val>{key} : std::vector<Val>{});
     after_call(ci, rule, rowref, out_params(ci));
@@ -1173,6 +1196,10 @@ class Gen : public RelFacts {
        << " sensitivity=" << quoted("not measured") << "\n";
     sc << "bound string KZ_RT_STR_MAX=" << kStrMax << " source=runtime/include/kz_rt.h:82 reason=" << quoted("the runtime's copy bound; a key text is bounded by the program's own constant length check where the facts show one")
        << " truncation=" << quoted("the runtime flags a cut string per value") << "\n";
+    if (!argtype_.empty())
+      sc << "bound string-extent source=ARG_TYPES reason="
+         << quoted("a key argument that is a character array read at a point that dominates the call is copied at the call within min(its extent, KZ_RT_STR_MAX)")
+         << "\n";
     sc << "bound slots=" << kSlots << " source=instrument/gcc/kzgcc.cpp build_obs reason=" << quoted("values per event bound by kzgcc 0.3") << "\n";
     sc << "bound sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason=" << quoted("the binding id scheme") << " sites=" << sites_.size() << "\n";
     sc << "param tu-root " << (out_root_.empty() ? "-" : out_root_) << " (units outside the bundle root are named relative to it)\n";
@@ -1265,6 +1292,7 @@ class Gen : public RelFacts {
   std::string budget_kind_;
   uint32_t budget_tier_ = 0, budget_rows_ = 0;
   std::vector<kz_file_hash> files_;
+  std::map<std::pair<uint32_t, uint32_t>, kz_fact_argtype> argtype_;  // (FACTS index, argument) -> ARG_TYPES row
   std::vector<kz_fact_arg> args_;
   std::vector<kz_basis_item> bitems_;
   std::vector<kz_tu> tus_;

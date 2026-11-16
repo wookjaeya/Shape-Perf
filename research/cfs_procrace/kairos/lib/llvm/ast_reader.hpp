@@ -47,6 +47,7 @@ class TuReader {
   clang::ASTContext& ctx() { return ctx_; }
   const clang::SourceManager& sm() const { return ctx_.getSourceManager(); }
   const ExtractSpec& spec() const { return spec_; }
+  const ReadOptions& options() const { return opt_; }
   Model& model() { return *model_; }
   const std::string& main_file() const { return main_file_; }
 
@@ -95,6 +96,13 @@ class TuReader {
   // The names of the records that have no file-scope tag or typedef name (static_facts.md 5q), into `names`.
   void name_unnamed_records();
   std::string name_pos(clang::SourceLocation loc, bool with_column);
+  // The file of a position as a part of a type name: the recorded path, or with --object-access, for a file outside the
+  // root, "<tree>/<path in the tree>" where <tree> is the last component of the nearest directory above the file that
+  // holds a `.git` entry (the file's source tree), so that the same definition read from two checkouts of that tree gets
+  // the same name (static_facts.md 5s).  A file outside the root in no such tree keeps its recorded (absolute) path.
+  std::string name_file(const std::string& recorded);
+  // object_key for a type name: the position of an object of internal linkage with name_file
+  std::string object_key_for_name(const clang::VarDecl* vd);
   // The targets this unit declares: Model::target_types_defined and target_fields_defined (static_facts.md 5k).
   void note_declared_targets();
   void read_function(const clang::FunctionDecl* fd);
@@ -115,6 +123,7 @@ class TuReader {
   Model* model_;
   std::string main_file_, directory_;
   std::map<clang::FileID, std::string> path_cache_;
+  std::map<std::string, std::string> name_file_cache_;
   std::map<std::pair<const clang::RecordDecl*, size_t>, int> contain_cache_;
   std::map<std::string, uint32_t> ordinal_counter_;
   uint32_t image_markers_ = 0;  // the marker leaves of the image being made (read_global)

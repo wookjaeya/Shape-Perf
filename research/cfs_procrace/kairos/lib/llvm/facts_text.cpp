@@ -20,7 +20,7 @@ constexpr uint32_t kViewElements = 64;
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
                                  "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits",
-                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits", "lockpaths"};
+                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits", "lockpaths", "objaccess", "ftypes", "argtypes"};
 
 class View {
  public:
@@ -54,7 +54,9 @@ class View {
                  {"ptrfields", KZ_SEC_PTR_FIELDS, &View::ptrfields},  {"gimages", KZ_SEC_GLOBAL_IMAGES, &View::gimages},
                  {"lockops", KZ_SEC_LOCK_OPS, &View::lockops},        {"lockids", KZ_SEC_LOCK_IDS, &View::lockids},       {"lockset", KZ_SEC_LOCKSET, &View::lockset},
                  {"fstatus", KZ_SEC_FIELD_STATUS, &View::fstatus},    {"awaits", KZ_SEC_AWAIT_L1, &View::awaits},
-                 {"lockpaths", KZ_SEC_LOCK_PATHS, &View::lockpaths}};
+                 {"lockpaths", KZ_SEC_LOCK_PATHS, &View::lockpaths},
+                 {"objaccess", KZ_SEC_OBJECT_ACCESS, &View::objaccess}, {"ftypes", KZ_SEC_FIELD_TYPES, &View::ftypes},
+                 {"argtypes", KZ_SEC_ARG_TYPES, &View::argtypes}};
     for (const auto& t : added)
       if (c_.find_section(t.id) != nullptr && (o_.sections.empty() || o_.sections.count(t.name) != 0)) (this->*t.fn)(os);
     *out = os.str();
@@ -105,6 +107,9 @@ class View {
     if (!(s = read(KZ_SEC_FIELD_STATUS, &fstatus_)).ok()) return s;
     if (!(s = read(KZ_SEC_AWAIT_L1, &awaits_)).ok()) return s;
     if (!(s = read(KZ_SEC_LOCK_PATHS, &lockpaths_)).ok()) return s;
+    if (!(s = read(KZ_SEC_OBJECT_ACCESS, &objacc_)).ok()) return s;
+    if (!(s = read(KZ_SEC_FIELD_TYPES, &ftypes_)).ok()) return s;
+    if (!(s = read(KZ_SEC_ARG_TYPES, &argtypes_)).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_by_site_[calls_[i].site] = i;
     for (size_t i = 0; i < loops_.size(); ++i) loop_by_site_[loops_[i].site] = i;
     return kz::Status::success();
@@ -657,6 +662,59 @@ class View {
       os << "\n";
     }
   }
+  // ---- types and object access (revision 10, --object-access) ----
+  std::string fh_pos(uint32_t fh, uint32_t line, uint32_t col) const {
+    std::string p = fh < files_.size() ? str(files_[fh].path) : std::string("-");
+    p += ":" + std::to_string(line);
+    if (col != 0) p += ":" + std::to_string(col);
+    return p;
+  }
+  void objaccess(std::ostream& os) {
+    std::vector<const kz_fact_objacc*> sel;
+    for (const kz_fact_objacc& r : objacc_)
+      if (want_loc(r.type, r.field)) sel.push_back(&r);
+    os << "[objaccess] " << sel.size() << "\n";
+    for (const kz_fact_objacc* r : sel) {
+      os << "  " << enum_text("KZ_OBJACC_KIND", r->kind) << " " << str(r->type) << "." << str(r->field) << " at " << fh_pos(r->fh, r->line, r->col) << " in " << fn_name(r->fn)
+         << " base=" << enum_text("KZ_OBJBASE", r->base_kind) << " object=" << (str(r->base_object).empty() ? std::string("-") : str(r->base_object)) << " path=[" << str(r->path)
+         << "] " << enum_text("KZ_OBJACC_STATUS", r->status) << " " << flags_text("KZ_OBJACC_FLAG", r->flags);
+      if (r->index_root != KZ_NONE32) os << " index=" << list(r->index_root);
+      if (r->read != KZ_NONE32) os << " read " << r->read;
+      if (r->writer != KZ_NONE32) os << " writer " << r->writer;
+      if (r->site != KZ_NONE32) os << " call " << site_text(r->site);
+      os << "\n";
+    }
+  }
+  void ftypes(std::ostream& os) {
+    std::vector<const kz_fact_ftype*> sel;
+    for (const kz_fact_ftype& r : ftypes_)
+      if (want_loc(r.type, r.field)) sel.push_back(&r);
+    os << "[ftypes] " << sel.size() << "\n";
+    for (const kz_fact_ftype* r : sel) {
+      os << "  " << str(r->type) << "." << str(r->field) << " at " << fh_pos(r->fh, r->line, r->col) << " element " << enum_text("KZ_FTYPE_ELEM", r->elem_kind) << " ["
+         << str(r->elem_type) << "] size " << r->elem_size << " extent " << enum_text("KZ_FTYPE_EXTENT", r->extent_kind) << " " << r->extent;
+      const std::string et = str(r->extent_text);
+      if (!et.empty()) os << " [" << et << "]";
+      if (r->bit_width != 0) os << " bits " << r->bit_width;
+      os << " " << flags_text("KZ_FTYPE_FLAG", r->flags) << "\n";
+    }
+  }
+  void argtypes(std::ostream& os) {
+    os << "[argtypes] " << argtypes_.size() << "\n";
+    for (const kz_fact_argtype& r : argtypes_) {
+      os << "  ";
+      if (r.call < calls_.size()) os << pos(calls_[r.call].file, calls_[r.call].line, calls_[r.call].col) << " " << str(calls_[r.call].callee);
+      else os << "call " << idx(r.call);
+      os << " arg " << r.pos << " " << enum_text("KZ_ARGT_CLASS", r.type_class) << " [" << str(r.type) << "] width " << static_cast<unsigned>(r.width);
+      if (r.type_class == KZ_ARGT_CLASS_CHAR_ARRAY) {
+        os << " extent " << r.extent << " of " << str(r.decl_object);
+        if (r.decl_fh != KZ_NONE32) os << " declared at " << fh_pos(r.decl_fh, r.decl_line, 0);
+        os << " " << enum_text("KZ_ARGT_READ", r.read_dom);
+        if (r.read < reads_.size()) os << " by the read at " << pos(reads_[r.read].file, reads_[r.read].line, reads_[r.read].col);
+      }
+      os << " " << flags_text("KZ_ARGT_FLAG", r.flags) << "\n";
+    }
+  }
   void fstatus(std::ostream& os) {
     os << "[fstatus] " << fstatus_.size() << "\n";
     for (const kz_fact_fstatus& r : fstatus_) {
@@ -838,6 +896,9 @@ class View {
   std::vector<kz_fact_lockid> lockids_;
   std::vector<kz_fact_lockset> lockset_;
   std::vector<kz_fact_lockpath> lockpaths_;
+  std::vector<kz_fact_objacc> objacc_;
+  std::vector<kz_fact_ftype> ftypes_;
+  std::vector<kz_fact_argtype> argtypes_;
   std::vector<kz_fact_fstatus> fstatus_;
   std::vector<kz_fact_await> awaits_;
   std::map<uint32_t, size_t> call_by_site_, loop_by_site_;

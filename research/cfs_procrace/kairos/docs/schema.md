@@ -395,6 +395,7 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 
 - 근거: `include/` 아래 파일 하나만 바뀌어도 kz-static, kz, kz-dump, kz-phi 의 소스 identity 가 바뀌고(`cmake/KzSourceIdentity.cmake` 의 `kz_tool_identity`: `include`, `cmake`, 최상위 `CMakeLists.txt` 를 늘 덮는다), `include/kz/schema` 가 바뀌면 libkz-core 의 identity(`KZ_CORE_SOURCE_PATHS`)와 schema fingerprint 도 바뀐다(§8). 그래서 뒤 작업(객체 접근·형, 의미 표, 결과 흐름·효과, 루프 정의와 잠금 정체성, 생성 토큰·수명·같은 빌드 판정·충분성·순서 인스턴스)이 쓸 레코드와 공개 구조를 이 개정에서 한 번에 정의하고, 뒤 작업의 코드는 `lib/` 안의 비공개 머리말에 둔다. 연구 조건은 정하지 않았다.
 - 방식: 개정 2–11과 같다. 기존 레코드의 배치·섹션 버전·필드 이름·열거형 값은 바꾸지 않았다. 옛 컨테이너는 그대로 읽힌다: 읽기는 레코드 크기와 섹션 버전이 다르면 거부하는데(`lib/core/container_reader.cpp` 의 섹션 표 검사), 기존 섹션은 둘 다 그대로다. `KZ_SCHEMA_REVISION` = 12 가 `layout_text()` 첫 줄에 들어가 schema fingerprint 와 모든 tool hash 가 바뀐다. 추출 레코드 개정은 10이다.
+- (2026-11-16 덧붙임: OBJECT_ACCESS, FIELD_TYPES, ARG_TYPES 는 `kz-static extract --object-access` 가 쓴다, `docs/static_facts.md` §5s. 레코드는 이 개정의 것 그대로다. 옵션 없는 추출은 셋 모두 쓰지 않는다.)
 - **이 개정의 어느 도구도 새 섹션을 쓰지 않는다.** 그래서 어느 도구가 쓰는 컨테이너든 섹션은 전과 같고, 다른 것은 도구 정체성에서 오는 값뿐이다(머리의 tool hash 와 그것을 덮는 해시, BASIS 의 build identity 문자열의 `schema=`·`source=`). 새 섹션은 그것을 채우는 뒤 작업의 옵션을 줄 때만, 레코드가 있을 때만 쓴다.
 - 새 추출 섹션(둘째 추출 범위 137–139 를 채우고, 셋째 추출 범위 140–159 를 연다; 모두 버전 1, `kz_facts.h` 머리 주석과 각 레코드 주석에 뜻):
   - OBJECT_ACCESS(137, `kz_fact_objacc` 72 B): 형이 있는 읽기·쓰기마다 바탕 객체(연결 범위를 가진 객체 키)와 접근 경로, 첨자 식 뿌리.

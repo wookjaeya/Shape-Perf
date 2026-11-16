@@ -91,6 +91,10 @@ struct ExtractSpec {
   // pass is an extraction of its own (the built-in profile, the fields of the record types the reads
   // name as targets) that keeps the raw A-TYPE hits; nothing else of it is written.
   bool keep_raw_atypes = false;
+  // Types and object access (--object-access, with the extended facts; static_facts.md 5s): the sections OBJECT_ACCESS,
+  // FIELD_TYPES and ARG_TYPES (kz_facts.h revision 10) are written.  The reading rules of the option (ReadOptions::
+  // object_access) are those of every pass.  Off, the facts are written as before.
+  bool object_access = false;
 
   bool has_field(const FieldRef& f) const;
   std::set<std::string> field_types() const;

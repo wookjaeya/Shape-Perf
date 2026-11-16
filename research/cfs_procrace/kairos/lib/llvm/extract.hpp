@@ -19,6 +19,12 @@ struct ReadOptions {
   // The leaves of the static image of one global object (STATIC_IMAGE, GLOBAL_IMAGES); the image of a
   // larger initializer ends in a `<image truncated>` leaf.  A tool parameter no reference fixes.
   size_t image_budget = 4096;
+  // Types and object access (--object-access; static_facts.md 5s), the reading rules of every pass: a target array field
+  // whose pointer leaves the expression (a call argument, an integer, a store) is counted for its writer set, a store to
+  // one of its elements is a writer row, the type name of a record defined outside the root has the position of its file
+  // in its source tree, and the walk collects what OBJECT_ACCESS, FIELD_TYPES and ARG_TYPES are written from.  Not a
+  // reading option of the front end (reading_arguments_text does not hold it).
+  bool object_access = false;
 };
 
 // The reading options of the front end as one text: the arguments every unit gets (the extraction's own, -w included),

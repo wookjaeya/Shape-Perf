@@ -677,8 +677,31 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 **relations rules revision 9** [D]: 생성자 callee 의 상수(§5o (5))에서, RETURNS 가 `redefined-later` 로 표시한 정의를 거쳐 오는 상수(그 상수의 RET_CONSTS 행, 또는 사슬의 call-result 반환)는 줄 끝에 `; not shown to reach the return: <그 정의>` 를 단다. 그런 정의의 값은 그 상수가 반환되는 경로에서 반환 전에 덮일 수 있다(도달 정의는 조건의 값을 보지 않는다; 예: `OS_CountSemCreate` 의 `return_code = OS_ObjectIdAllocateNew(...)` 는 성공이면 `:103`, `:106` 에서 다시 정의되고 `:109` 에 실패 값만 닿는다, `osapi-countsem.c:94-109`). 생성자 callee 마다 새 줄 `callee-check (set): <callee>: complete under these facts (…)` 또는 `… not established (N returns not followed, M constants not shown to reach the return): …; no success constant is taken from them`. 판정 규칙 8.2 기초 4 의 2026-11-16 덧붙임이 이 줄을 읽는다.
 
 **알려진 한계** [D] (고치지 않음, 결과 §6.9):
+- (2026-11-16 덧붙임: 아래 두 한계는 `extract --object-access` 아래에서 고친다, §5s. 옵션 없는 기본 경로는 그대로다.)
 - §5q 의 위치가 붙은 형 이름은 한 추출 안에서만 같다: 위치는 `TuReader::name_pos` → `pos_of` 이고 묶음 루트 밖의 파일은 절대 경로로 쓴다(`lib/llvm/ast_tu.cpp`). 같은 CF 소스가 c1_pre_tx 와 c1_post_tx 에서 `…/c1_build/pre/…` 와 `…/c1_build/post/…` 로 다른 이름을 얻는다. 빌드 사이의 대응(이름 결합의 실행 사이 대응, 빌드 사이 키 비교)에 이 이름을 그대로 쓰지 않는다. 오늘 relations 의 키는 이 이름을 담지 않는다(`records/extract-fixes-20261116/key_map_<b>.tsv`: 바뀐 키 0).
 - FACT_LOCS 의 writer-set-complete 는 배열 필드가 포인터로 바뀌어(배열에서 포인터로의 변환) 호출 인자로 넘어가는 것을 주소 탈출로 세지 않는다. C1 의 `CFE_SB_MemParams_t::Partition.Data`, `CFE_TBL_BufParams_t::Partition.Data` 는 `CFE_ES_PoolCreateEx`·`CFE_ES_PoolCreate` 에 `void *` 로 넘어가 풀 코드가 정수 주소로 그 안에 쓴다(`cfe_sb_init.c:104`, `cfe_tbl_internal.c:105`, `cfe_es_mempool.c:313`, `:84-85`). 그래서 그 두 행의 `writer-set-complete writers=1` 은 소스가 뒷받침하지 않는다. 추출 규칙의 고침(그런 넘김을 탈출이나 알 수 없는 효과로 셈)은 다섯 빌드의 다시 뽑기를 바꾸는 뒤 추출 단계의 일이다.
+
+## 5s. 형과 객체 접근: `extract --object-access` (추출 옵션, 2026-11-16) [D]
+
+결과는 `plan/full_stage_results_20261116.md` §7. 옵션을 주지 않은 추출은 앞판과 같은 바이트다(같은 코드 경로; 새 계수·수집·섹션은 모두 옵션 아래). 옵션은 확장 사실(`--extended-facts` 또는 `--no-profile`)과 함께만 받는다(그 밖이면 종료 코드 2). 읽기 규칙(아래 1–3)은 모든 추출 차례(profile-free 의 첫 차례, 완전성 차례, 둘째 차례)에 같고(`ReadOptions::object_access`), 섹션 쓰기는 마지막 facts 에만 한다(`ExtractSpec::object_access`). schema 는 개정 12 그대로다: 섹션 셋은 개정 12 가 정의한 레코드에 맞고(`include/kz/schema/kz_facts.h` 의 OBJECT_ACCESS·FIELD_TYPES·ARG_TYPES), `include/` 는 바꾸지 않았다.
+
+1. **배열이 포인터로 바뀌는 대상 필드(writer 집합의 셈).** 배열 형의 대상 필드를 값으로 쓰면 첫 원소의 포인터로 바뀐다(C11 6.3.2.1 p3). 앞판은 그것을 읽기로만 보아(`classify_lvalue_use` 가 암묵 변환에서 멈춤) 그 포인터가 호출 인자나 정수로 나가도 writer 집합에 아무것도 세지 않았다(§5r 의 알려진 한계). 옵션 아래(`lib/llvm/ast_fn.cpp` `note_array_decay`, `decayed_target_arg`):
+   - 호출 인자(괄호, 포인터 변환, 포인터 덧셈·뺄셈, 원소의 주소 `&x.f[i]` 를 지나도): `&x.f` 와 같은 out 포인터 호출(OUTCALLS 행). callee 요약이 판정한다: 저장만 하면 그 저장이 writer 행(out-pointer), 탈출하거나 본문이 없거나 간접 호출이면 그 필드의 주소 탈출 A-TYPE 행 "the array decays to a pointer to its first element, passed to …". 데이터 함수의 목적지·원천 인자는 그 요약이 이미 다룬다(건너뜀).
+   - 정수로의 변환, 포인터의 저장(대입의 오른쪽, 초기화, 초기화 목록의 원소), 반환, 이 규칙이 읽지 않는 쓰임: 주소 탈출 A-TYPE 행 "the array decays to a pointer to its first element: …"(`&x.f` 의 "other use" 와 같은 꼴로 그 형의 대상에 걸림).
+   - 원소에 대한 저장(`x.f[i] = v`, `*(x.f + k) = v`, 증감): 그 필드의 writer 행(assign·inc/dec, `partial-write`). 앞판은 이 저장을 writer 로 세지 않았다(FIELD_STATUS 의 `array-element-stores-not-collected` 표지는 그대로 남는다).
+   - 포인터의 시험(비교, `!`, 조건, `&&`·`||`)과 원소의 읽기는 아무것도 세지 않는다.
+2. **묶음 루트 밖 형 이름의 안정.** §5q 의 위치가 붙은 형 이름(`이름@파일:줄`, `<객체 키>::type`, `<anonymous@파일:줄:열>`)에서, 루트 밖 파일은 그 파일 위의 가장 가까운 `.git` 항목(디렉터리, 또는 submodule·worktree 의 `.git` 파일; `lib/llvm/gitrev.hpp`)이 있는 디렉터리, 곧 그 파일의 소스 트리를 기준으로 `<트리 이름>/<트리 안 경로>` 로 쓴다(`TuReader::name_file`). 같은 트리의 두 checkout(예: c1_pre_tx 의 `…/pre/src/cf` 와 c1_post_tx 의 `…/post/src/cf`)에서 같은 정의는 같은 이름을 얻는다. 어느 소스 트리에도 들지 않는 루트 밖 파일(시스템 머리말, 빌드 디렉터리의 생성 파일)은 앞판처럼 기록된 절대 경로다. BASIS `count.type_names_outside_root` 가 둘을 센다. 함수와 객체의 키(`이름@파일:줄`)는 바꾸지 않는다(형 이름이 아님).
+3. **수집.** 읽기(READS)·writer(WRITERS)마다 접근 경로의 바탕(ARGFLOW 의 바탕 규칙 `analyze_path`): 포인터 없이 닿는 전역·전역 배열 원소·지역은 resolved, 전역에서 포인터를 지나는 경로는 partial(이름 댄 바탕은 경로가 시작하는 곳, 접근하는 객체는 pointee), 매개변수의 pointee·호출 결과·그 밖은 unresolved. 경로 글(`.`/`->`, 첨자는 상수 또는 변수 이름, 그 밖 `*`)과 첨자 식(SEQ). 읽기가 이름 대는 레코드 형의 필드마다 형(원소 종류와 크기, 배열 크기의 평가값과 쓴 그대로의 글, 비트 필드 폭, const·volatile·typedef). 호출 인자마다 형의 종류와 폭; 문자 배열(원소가 char·signed char·unsigned char)이 포인터로 바뀐 인자는 그 크기와 선언, 그리고 그 배열 위치(같은 형·필드, 같은 경로 글)를 읽는 READS 행이 호출을 지배하는지(같은 함수의 잠금 집합 골격 위: 같은 블록의 앞이거나 그 블록이 호출의 블록을 지배; 배열 자체의 넘김인 `array-contents` 읽기는 셈하지 않음).
+
+**섹션**(옵션 아래에서만): OBJECT_ACCESS(READS 행마다 한 행, 이어 WRITERS 행마다 한 행; out-pointer·데이터 함수 writer 는 `site` 에 그 호출), FIELD_TYPES, ARG_TYPES(FACTS 차례). 식 뿌리는 앞 섹션의 것 다음. 선언이 있는 머리말 파일이 FILE_HASHES 에 더해질 수 있다. BASIS: `extract.object_access`, `count.object_access`, `count.field_types`, `count.arg_types`, `count.array_decay`, `count.type_names_outside_root`. `kz-static show` 의 절 `objaccess`, `ftypes`, `argtypes`.
+
+**계획 생성기(plan rules revision 2, `docs/plan_manifest.md`)**: 키 인자가 문자 배열이고 그 크기가 있으며 호출을 지배하는 읽기가 있으면(ARG_TYPES), 사용 호출의 at-call 에서 키를 `string=validated bound=min(크기, KZ_RT_STR_MAX)` 로 적는다. 런타임의 복사는 프로그램이 스스로 읽는 그 배열 안에 머문다. ARG_TYPES 가 없는 facts(옵션 없이 뽑은 것)에서는 앞판처럼 포인터다.
+
+**한계** [D]:
+- 형 단위의 규칙은 그대로다: 주소 탈출 A-TYPE 행은 `&x.f` 의 규칙처럼 그 형의 모든 대상에 걸리고(FACT_LOCS), 필드 단위 규칙(FIELD_STATUS per-field)만 원인 필드로 가른다. 객체 단위의 writer 집합(같은 형의 두 객체를 가름)은 OBJECT_ACCESS 를 읽는 쪽(relations 의 writer 나눔, 판정 규칙 8.12 (ㅈ))의 일이고 이 옵션은 그 입력만 준다.
+- 포인터 매개변수의 const 는 탈출을 면하지 않는다(C 는 const 를 벗기고 쓸 수 있다; §5h 의 형 변환 규칙과 같음). 그래서 본문 없는 함수(문자열 비교 등)에 넘어가는 문자 배열 대상은 모두 DISABLED 가 된다. P0 의미 표(뒤 단계)가 그런 함수의 효과를 주면 좁힐 수 있다.
+- 지배는 잠금 집합 골격(Clang CFG)의 블록 지배다. 첨자가 변수인 두 경로(`chan[i]`)는 같은 변수 이름이면 같은 위치로 본다(그 사이에 변수가 바뀌지 않는다는 전제).
+- 소스 트리의 기준은 `.git` 항목이다. 소스 트리가 아닌 checkout(내려받은 압축 파일 등)은 절대 경로로 남는다.
 
 ## 6. core-cpu1 결과 [M]
 

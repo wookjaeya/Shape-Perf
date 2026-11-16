@@ -257,6 +257,8 @@ bool resolve_table_walk(const Model& model, const Model::WalkSpec& walk, std::ve
 
 // ---- finalize ------------------------------------------------------------------------------------------
 
+void dominating_reads(Model* mp);
+
 void finalize(Model* mp, const ExtractSpec& spec) {
   Model& m = *mp;
   Model::Resolved& R = m.resolved;
@@ -510,6 +512,7 @@ void finalize(Model* mp, const ExtractSpec& spec) {
           w.via = st.via_func_key.empty() ? st.pos : st.via_pos;
           w.via_func_key = st.via_func_key.empty() ? oc.callee_key : st.via_func_key;
           w.call_key = oc.call_key;
+          w.oa = oc.oa;
           m.writers.push_back(w);
         }
       }
@@ -528,7 +531,8 @@ void finalize(Model* mp, const ExtractSpec& spec) {
       a.func_key = oc.func_key;
       a.tu = oc.tu;
       a.call_key = oc.call_key;
-      a.detail = "the address is passed to " + (oc.callee_name.empty() ? std::string("an indirect call") : oc.callee_name) + ": " + why;
+      a.detail = std::string(oc.decayed ? "the array decays to a pointer to its first element, passed to " : "the address is passed to ") +
+                 (oc.callee_name.empty() ? std::string("an indirect call") : oc.callee_name) + ": " + why;
       m.atypes.push_back(a);
     }
   }
@@ -822,6 +826,128 @@ void finalize(Model* mp, const ExtractSpec& spec) {
   // ---- the extended facts F4 and F6 (spec.extended_facts; empty otherwise): ARGFLOW, PARAM_FLOW, PTR_FIELDS,
   // GLOBAL_IMAGES (argflow.hpp)
   if (spec.extended_facts) finalize_flow_facts(&m, spec);
+
+  // ---- --object-access: ARG_TYPES in call order, and the character-array arguments the program reads at a point that
+  // dominates the call (static_facts.md 5s)
+  if (!m.arg_types.empty()) {
+    std::stable_sort(m.arg_types.begin(), m.arg_types.end(), [&](const ArgTypeFact& a, const ArgTypeFact& b) {
+      const size_t ia = R.call_index.count(a.call_key) ? R.call_index[a.call_key] : SIZE_MAX;
+      const size_t ib = R.call_index.count(b.call_key) ? R.call_index[b.call_key] : SIZE_MAX;
+      if (ia != ib) return ia < ib;
+      return a.pos < b.pos;
+    });
+    dominating_reads(&m);
+  }
+}
+
+// A READS row dominates a call when, on the control-flow graph of the function (the lock-set skeleton, LockCfg), every
+// path from the entry to the call passes it: the read is earlier in the call's block, or its block dominates the call's
+// block.  The reads looked at are loads of the argument's array location (READS kind field or global with the same
+// type and field, no array-contents flag: the decay of the argument itself reads no element) whose access path
+// (ObjAccess::path) is the argument's; the earliest such read by position is taken.
+void dominating_reads(Model* mp) {
+  Model& m = *mp;
+  std::map<std::string, std::vector<const ReadFact*>> reads_of;  // function key -> candidate reads
+  for (const ReadFact& r : m.reads)
+    if (r.oa.set && (r.flags & KZ_READ_FLAG_ARRAY_CONTENTS) == 0) reads_of[r.func_key].push_back(&r);
+  struct Where {
+    uint32_t block = kNone, index = 0;
+  };
+  struct Fn {
+    bool built = false;
+    std::vector<std::vector<bool>> dom;   // dom[b][d]: d dominates b
+    std::map<std::string, Where> call_at, read_at;
+  };
+  std::map<std::string, Fn> fns;
+  auto fn_of = [&](const std::string& fk) -> Fn* {
+    Fn& f = fns[fk];
+    if (f.built) return &f;
+    f.built = true;
+    auto it = m.lock_cfgs.find(fk);
+    if (it == m.lock_cfgs.end()) return &f;
+    const LockCfg& g = it->second;
+    const size_t n = g.blocks.size();
+    std::vector<std::vector<uint32_t>> preds(n);
+    for (size_t b = 0; b < n; ++b)
+      for (uint32_t s : g.blocks[b].succ)
+        if (s != kNone && s < n) preds[s].push_back(static_cast<uint32_t>(b));
+    // reachable blocks from the entry
+    std::vector<bool> reach(n, false);
+    std::vector<uint32_t> stack;
+    if (g.entry < n) {
+      reach[g.entry] = true;
+      stack.push_back(g.entry);
+    }
+    while (!stack.empty()) {
+      const uint32_t b = stack.back();
+      stack.pop_back();
+      for (uint32_t s : g.blocks[b].succ)
+        if (s != kNone && s < n && !reach[s]) {
+          reach[s] = true;
+          stack.push_back(s);
+        }
+    }
+    f.dom.assign(n, std::vector<bool>(n, true));
+    if (g.entry < n) f.dom[g.entry].assign(n, false), f.dom[g.entry][g.entry] = true;
+    for (bool changed = true; changed;) {
+      changed = false;
+      for (size_t b = 0; b < n; ++b) {
+        if (b == g.entry || !reach[b]) continue;
+        std::vector<bool> d(n, true);
+        bool any = false;
+        for (uint32_t p : preds[b]) {
+          if (!reach[p]) continue;
+          any = true;
+          for (size_t k = 0; k < n; ++k) d[k] = d[k] && f.dom[p][k];
+        }
+        if (!any) d.assign(n, false);
+        d[b] = true;
+        if (d != f.dom[b]) {
+          f.dom[b] = d;
+          changed = true;
+        }
+      }
+    }
+    for (size_t b = 0; b < n; ++b) {
+      if (!reach[b]) continue;
+      for (size_t i = 0; i < g.blocks[b].events.size(); ++i) {
+        const LockEvent& ev = g.blocks[b].events[i];
+        Where w{static_cast<uint32_t>(b), static_cast<uint32_t>(i)};
+        if (ev.kind == LockEvent::CALL) f.call_at.emplace(ev.key, w);
+        else if (ev.kind == LockEvent::READ) f.read_at.emplace(ev.key, w);
+      }
+    }
+    return &f;
+  };
+  for (ArgTypeFact& a : m.arg_types) {
+    if (a.type_class != KZ_ARGT_CLASS_CHAR_ARRAY) continue;
+    if (a.loc_type.empty()) {
+      a.read_dom = KZ_ARGT_READ_NOT_COMPUTED;  // a local array: READS names no local
+      continue;
+    }
+    Fn* f = fn_of(a.func_key);
+    auto cit = f->call_at.find(a.call_key);
+    if (cit == f->call_at.end()) continue;  // no control-flow graph, or the call is not on it: not computed
+    const ReadFact* best = nullptr;
+    bool any = false;
+    for (const ReadFact* r : reads_of[a.func_key]) {
+      if (r->type != a.loc_type || r->field != a.loc_field || r->oa.path != a.path) continue;
+      any = true;
+      auto rit = f->read_at.find(r->key());
+      if (rit == f->read_at.end()) continue;
+      const Where& rw = rit->second;
+      const Where& cw = cit->second;
+      const bool dominates = rw.block == cw.block ? rw.index < cw.index : f->dom[cw.block][rw.block];
+      if (dominates && best == nullptr) best = r;
+    }
+    if (best != nullptr) {
+      a.read_dom = KZ_ARGT_READ_DOMINATING;
+      a.read_key = best->key();
+      ++m.object_stats.args_dominated;
+    } else {
+      a.read_dom = any ? KZ_ARGT_READ_NOT_DOMINATING : KZ_ARGT_READ_NOT_READ;
+    }
+  }
 }
 
 }  // namespace kzs

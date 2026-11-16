@@ -85,6 +85,17 @@ std::string expr_text(ExprRef e, bool* cut = nullptr);
 
 // ---- facts -----------------------------------------------------------------------------------
 
+// The object a typed read or write starts from and its access path, as OBJECT_ACCESS writes it (--object-access;
+// kz_facts.h revision 10, static_facts.md 5s).  `set` is false where nothing was computed (the option off).
+struct ObjAccess {
+  bool set = false;
+  uint8_t base = KZ_OBJBASE_UNKNOWN;
+  uint8_t status = KZ_OBJACC_STATUS_UNRESOLVED;
+  uint32_t flags = 0;          // KZ_OBJACC_FLAG
+  std::string object, path;    // the base object (an object key, or "<function key>/<local>"), the path as text
+  ExprRef index = nullptr;     // the subscripts on the path, root first (a SEQ)
+};
+
 struct ArgFact {
   uint8_t kind = KZ_ARG_KIND_NONE;
   uint8_t role = KZ_ARG_ROLE_NONE;
@@ -267,6 +278,7 @@ struct WriterFact {
   std::string via_func_key;
   uint32_t flags = 0;
   std::string call_key;  // out-pointer: the call that instantiates it
+  ObjAccess oa;          // --object-access: where the write starts from
 };
 
 struct TerminalFact {
@@ -290,6 +302,10 @@ struct OutCallFact {
   std::string loc_type, loc_field, callee_key, callee_name;
   uint32_t n_stores = 0;
   uint8_t summary = KZ_OUTPTR_SUMMARY_NONE;
+  // --object-access: the argument is a target array field that decays to a pointer (or a pointer into it), not `&x.f`;
+  // and where the argument's access path starts from (copied to the writers the call instantiates)
+  bool decayed = false;
+  ObjAccess oa;
 };
 
 struct TargetFact {
@@ -422,6 +438,7 @@ struct ReadFact {
   int64_t ptr_index_const = 0;
   bool ptr_index_is_const = false;
   uint32_t ptr_steps = 0;
+  ObjAccess oa;  // --object-access: where the read starts from
   std::string key() const { return func_key + "|" + pos.str() + "#" + std::to_string(ordinal); }
 };
 // One alternative of a return statement (RETURNS).
@@ -666,6 +683,27 @@ struct LockPathFact {
   uint8_t kind = KZ_LOCKPATH_KIND_NONE;
 };
 
+// A row of FIELD_TYPES (--object-access): one field of a record type the reads name.
+struct FieldTypeFact {
+  std::string type, field, elem_type, extent_text;
+  uint32_t extent = 0, elem_size = 0, bit_width = 0;
+  Pos pos;  // the field's declaration
+  uint8_t elem_kind = KZ_FTYPE_ELEM_UNKNOWN, extent_kind = KZ_FTYPE_EXTENT_NONE;
+  uint16_t flags = 0;
+};
+// A row of ARG_TYPES (--object-access): one argument of one call.
+struct ArgTypeFact {
+  std::string call_key, func_key;
+  uint32_t pos = 0;
+  uint8_t type_class = KZ_ARGT_CLASS_UNKNOWN, width = 0, read_dom = KZ_ARGT_READ_NOT_COMPUTED, flags = 0;
+  uint32_t extent = 0;
+  std::string type, decl_object;
+  Pos decl;
+  // a character array: the location it is (`loc_type`.`loc_field`, "<global>" and the name for an array object) and its
+  // access path, which a dominating read must name; the READS row of that read (ReadFact::key), filled by finalize
+  std::string loc_type, loc_field, path, read_key;
+};
+
 struct Model {
   ExprPool exprs;
 
@@ -755,6 +793,19 @@ struct Model {
   std::vector<FieldStatusFact> field_status;
   std::vector<AwaitFact> awaits;
   std::vector<LockPathFact> lock_paths;
+  // Types and object access (--object-access): the rows of FIELD_TYPES and ARG_TYPES (OBJECT_ACCESS is written from
+  // ReadFact::oa and WriterFact::oa), and what the reading rules of the option counted.
+  std::vector<FieldTypeFact> field_types;
+  std::vector<ArgTypeFact> arg_types;
+  struct ObjectStats {
+    uint32_t decay_outcalls = 0;    // out-pointer calls whose argument is a target array field that decays
+    uint32_t decay_escapes = 0;     // address-escape hits: the decayed pointer leaves otherwise (integer, store, ...)
+    uint32_t element_writers = 0;   // writer rows of a store to an element of a target array field
+    uint32_t args_dominated = 0;    // character-array arguments read at a dominating point
+  } object_stats;
+  // type names with a position (static_facts.md 5s): those whose file lies outside the root and is written by its
+  // source tree, and those whose file lies outside the root in no source tree (written as recorded, an absolute path)
+  std::set<std::string> type_names_tree, type_names_absolute;
   struct LockStats {
     uint32_t bodies = 0, cfg_built = 0, sccs = 0, sccs_recursive = 0;
     uint32_t acquire_ops = 0, release_ops = 0, try_ops = 0, wait_ops = 0;

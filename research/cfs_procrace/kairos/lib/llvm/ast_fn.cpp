@@ -254,6 +254,8 @@ class FnWalker {
     pre.TraverseStmt(const_cast<Stmt*>(fd_->getBody()));
     assign_local_ids();
     ext_ = spec_.extended_facts;
+    oa_read_ = tu_.options().object_access;
+    oa_ = ext_ && oa_read_;
     visit(fd_->getBody());
     m_.summaries[fkey_] = summary_;
     if (spec_.collect_wrapper_inputs) record_cfg();
@@ -526,7 +528,394 @@ class FnWalker {
     w.key = key;
     w.guard = guard_from(0);
     w.flags = flags | current_flags(anchor);
+    if (oa_) w.oa = oa_lv_ != nullptr ? object_access_of(oa_lv_) : unknown_access(key);
     m_.writers.push_back(w);
+  }
+
+  // ---- object access (--object-access; static_facts.md 5s) ----
+  // The access path of an lvalue as text: members with `.` or `->`, subscripts with their constant or the variable they
+  // name ("*" otherwise), a dereference as a leading `*`; the root as it is named (a call result as "f()").
+  std::string path_text(const Expr* e, int depth, bool* cut) {
+    if (depth > 32) {
+      *cut = true;
+      return "...";
+    }
+    e = e->IgnoreParens();
+    if (const auto* m = dyn_cast<MemberExpr>(e)) {
+      const std::string name = m->getMemberDecl()->getNameAsString();
+      if (m->isArrow()) return path_text(m->getBase()->IgnoreParenImpCasts(), depth + 1, cut) + "->" + name;
+      return path_text(m->getBase(), depth + 1, cut) + "." + name;
+    }
+    if (const auto* as = dyn_cast<ArraySubscriptExpr>(e)) {
+      const Expr* b = as->getBase()->IgnoreParens();
+      const auto* bc = dyn_cast<ImplicitCastExpr>(b);
+      const Expr* base = (bc != nullptr && bc->getCastKind() == CK_ArrayToPointerDecay) ? bc->getSubExpr() : b->IgnoreParenImpCasts();
+      int64_t c = 0;
+      std::string ix = "*";
+      if (tu_.eval_int(as->getIdx()->IgnoreParenCasts(), &c)) ix = std::to_string(c);
+      else if (const auto* d = dyn_cast<DeclRefExpr>(as->getIdx()->IgnoreParenImpCasts())) ix = d->getDecl()->getNameAsString();
+      return path_text(base, depth + 1, cut) + "[" + ix + "]";
+    }
+    if (const auto* uo = dyn_cast<UnaryOperator>(e)) {
+      if (uo->getOpcode() == UO_Deref) return "*" + path_text(uo->getSubExpr()->IgnoreParenImpCasts(), depth + 1, cut);
+      if (uo->getOpcode() == UO_AddrOf) return "&" + path_text(uo->getSubExpr(), depth + 1, cut);
+    }
+    if (const auto* c = dyn_cast<CastExpr>(e)) return path_text(c->getSubExpr(), depth + 1, cut);
+    if (const auto* d = dyn_cast<DeclRefExpr>(e)) return d->getDecl()->getNameAsString();
+    if (const auto* call = dyn_cast<CallExpr>(e)) return callee_text(call) + "()";
+    return std::string("<") + e->getStmtClassName() + ">";
+  }
+  // Where the access path of `lv` starts (analyze_path, the base rule of ARGFLOW): an object the path reaches without a
+  // pointer is resolved (a global, an element of a global array, a local of the function); a path from a global through
+  // a pointer is partial (the base object named is where the path starts, the object accessed is a pointee); a pointee of
+  // a parameter, a call result or anything else is not resolved here.
+  ObjAccess object_access_of(const Expr* lv) {
+    ObjAccess oa;
+    oa.set = true;
+    if (const auto* uo = dyn_cast<UnaryOperator>(lv->IgnoreParenCasts()); uo != nullptr && uo->getOpcode() == UO_AddrOf) lv = uo->getSubExpr();
+    std::set<const VarDecl*> seen;
+    const PathInfo pi = analyze_path(lv, &seen);
+    bool cut = false;
+    oa.path = path_text(lv, 0, &cut);
+    if (cut) oa.flags |= KZ_OBJACC_FLAG_PATH_TRUNCATED;
+    if (pi.flags & KZ_ARGFLOW_FLAG_BASE_VIA_LOCAL) oa.flags |= KZ_OBJACC_FLAG_VIA_ARGFLOW;
+    std::vector<ExprRef> parts;
+    for (size_t i = pi.idx.size(); i > 0; --i) {
+      int64_t c = 0;
+      if (!tu_.eval_int(pi.idx[i - 1]->IgnoreParenCasts(), &c)) oa.flags |= KZ_OBJACC_FLAG_INDEX_UNKNOWN;
+      parts.push_back(to_expr(pi.idx[i - 1]));
+    }
+    if (!parts.empty()) oa.index = pool().list(KZ_EXPR_OP_SEQ, parts);
+    switch (pi.base) {
+      case KZ_ARGBASE_GLOBAL:
+      case KZ_ARGBASE_GLOBAL_ELEMENT:
+        oa.base = pi.base == KZ_ARGBASE_GLOBAL ? KZ_OBJBASE_GLOBAL : KZ_OBJBASE_GLOBAL_ELEMENT;
+        oa.object = pi.object;
+        oa.status = (pi.flags & KZ_ARGFLOW_FLAG_THROUGH_POINTER) ? KZ_OBJACC_STATUS_PARTIAL : KZ_OBJACC_STATUS_RESOLVED;
+        break;
+      case KZ_ARGBASE_LOCAL:
+        oa.base = KZ_OBJBASE_LOCAL;
+        oa.object = fkey_ + "/" + pi.root;
+        oa.status = KZ_OBJACC_STATUS_RESOLVED;
+        break;
+      case KZ_ARGBASE_FIELD_POINTER:
+      case KZ_ARGBASE_GLOBAL_POINTER:
+        oa.base = pi.object.empty() ? KZ_OBJBASE_UNKNOWN : KZ_OBJBASE_GLOBAL;
+        oa.object = pi.object;
+        oa.status = pi.object.empty() ? KZ_OBJACC_STATUS_UNRESOLVED : KZ_OBJACC_STATUS_PARTIAL;
+        break;
+      case KZ_ARGBASE_PARAM:
+        oa.base = KZ_OBJBASE_PARAM_POINTEE;
+        break;
+      case KZ_ARGBASE_CALL_RESULT:
+        oa.base = KZ_OBJBASE_CALL_RESULT;
+        break;
+      default:
+        break;
+    }
+    return oa;
+  }
+  static ObjAccess unknown_access(const std::string& text) {
+    ObjAccess oa;
+    oa.set = true;
+    oa.path = text;
+    return oa;
+  }
+  // Where the address of a target array field goes when the array decays to a pointer to its first element (C11 6.3.2.1
+  // p3) and is not the base of a subscript (static_facts.md 5s).  A call argument is an out-pointer call (visit_call,
+  // decayed_target_arg); a conversion to an integer, a store of the pointer, an initializer, a return and any use this
+  // rule does not read are address-escape hits of the field; a test of the pointer reads nothing.  A store to an element
+  // (`x.f[i] = v`, `*(x.f + k) = v`) is a writer row of the field (partial); the address of an element goes on as the
+  // pointer does.
+  void note_array_decay(const MemberExpr* me, const FieldDecl* fl, const std::vector<size_t>& tgts) {
+    const Stmt* cur = me;
+    const Stmt* p = parent_stmt(cur);
+    while (p != nullptr && isa<ParenExpr>(p)) {
+      cur = p;
+      p = parent_stmt(p);
+    }
+    const auto* dc = p != nullptr ? dyn_cast<ImplicitCastExpr>(p) : nullptr;
+    if (dc == nullptr || dc->getCastKind() != CK_ArrayToPointerDecay) return;
+    cur = dc;
+    std::string escape;
+    const Stmt* at = dc;
+    for (;;) {
+      p = parent_stmt(cur);
+      if (p == nullptr) {
+        if (const VarDecl* vd = parent_var(cur)) escape = "initializer of " + vd->getNameAsString();
+        break;
+      }
+      if (isa<ParenExpr>(p)) {
+        cur = p;
+        continue;
+      }
+      // an element: written (a partial writer row), its address (goes on as the pointer), or read
+      const Expr* element = nullptr;
+      if (const auto* as = dyn_cast<ArraySubscriptExpr>(p)) {
+        if (as->getBase() != cur) break;
+        element = as;
+      } else if (const auto* uo = dyn_cast<UnaryOperator>(p); uo != nullptr && uo->getOpcode() == UO_Deref) {
+        element = uo;
+      }
+      if (element != nullptr) {
+        const Stmt* ec = element;
+        const Stmt* ep = parent_stmt(ec);
+        while (ep != nullptr && isa<ParenExpr>(ep)) {
+          ec = ep;
+          ep = parent_stmt(ep);
+        }
+        if (const auto* bo = ep != nullptr ? dyn_cast<BinaryOperator>(ep) : nullptr; bo != nullptr && bo->isAssignmentOp() && bo->getLHS() == ec) {
+          add_element_writer(tgts, bo, bo->getOpcode() == BO_Assign ? bo->getRHS() : nullptr, me);
+          return;
+        }
+        if (const auto* uo = ep != nullptr ? dyn_cast<UnaryOperator>(ep) : nullptr) {
+          if (uo->isIncrementDecrementOp()) {
+            add_element_writer(tgts, uo, nullptr, me);
+            return;
+          }
+          if (uo->getOpcode() == UO_AddrOf) {
+            cur = uo;
+            at = uo;
+            continue;
+          }
+        }
+        return;  // the element is read (or is the base of a member access of its own)
+      }
+      if (const auto* c = dyn_cast<CastExpr>(p)) {
+        const CastKind k = c->getCastKind();
+        if (k == CK_ToVoid || k == CK_PointerToBoolean) return;
+        if (k == CK_PointerToIntegral) {
+          escape = "converted to an integer";
+          at = c;
+          break;
+        }
+        if (c->getType()->isPointerType()) {
+          cur = p;
+          continue;
+        }
+        escape = "converted to " + c->getType().getAsString();
+        at = c;
+        break;
+      }
+      if (const auto* bo = dyn_cast<BinaryOperator>(p)) {
+        const BinaryOperatorKind op = bo->getOpcode();
+        if ((op == BO_Add || op == BO_Sub) && bo->getType()->isPointerType()) {
+          cur = p;
+          continue;
+        }
+        if (bo->isComparisonOp() || op == BO_LAnd || op == BO_LOr || op == BO_Sub) return;
+        if (bo->isAssignmentOp() && bo->getRHS() == cur) {
+          escape = "assigned to " + tu_.source_text(bo->getLHS()->getSourceRange(), 60);
+          at = bo;
+          break;
+        }
+        if (op == BO_Comma) {
+          if (bo->getLHS() == cur) return;
+          cur = p;
+          continue;
+        }
+        escape = std::string("an operand of ") + bo->getOpcodeStr().str();
+        at = bo;
+        break;
+      }
+      if (const auto* co = dyn_cast<ConditionalOperator>(p)) {
+        if (co->getCond() == cur) return;
+        cur = p;
+        continue;
+      }
+      if (const auto* uo = dyn_cast<UnaryOperator>(p)) {
+        if (uo->getOpcode() == UO_LNot) return;
+        escape = std::string("an operand of ") + UnaryOperator::getOpcodeStr(uo->getOpcode()).str();
+        at = uo;
+        break;
+      }
+      if (isa<CallExpr>(p)) return;  // an argument: visit_call made its out-pointer call
+      if (isa<ReturnStmt>(p)) {
+        escape = "returned";
+        at = p;
+        break;
+      }
+      if (isa<InitListExpr>(p)) {
+        escape = "an element of an initializer list";
+        at = p;
+        break;
+      }
+      const Expr* cond = nullptr;
+      if (const auto* is = dyn_cast<IfStmt>(p)) cond = is->getCond();
+      else if (const auto* ws = dyn_cast<WhileStmt>(p)) cond = ws->getCond();
+      else if (const auto* ds = dyn_cast<DoStmt>(p)) cond = ds->getCond();
+      else if (const auto* fs = dyn_cast<ForStmt>(p)) cond = fs->getCond();
+      if (cond != nullptr && cond == cur) return;
+      if (isa<Expr>(p)) {
+        escape = std::string("used by ") + p->getStmtClassName();
+        at = p;
+        break;
+      }
+      return;  // a statement of its own: the value is not used
+    }
+    if (escape.empty()) return;
+    for (size_t t : tgts) {
+      add_atype(KZ_ATYPE_KIND_ADDRESS_ESCAPE, t, at, "the array decays to a pointer to its first element: " + escape, "", spec_.fields[t].field.field);
+      ++m_.object_stats.decay_escapes;
+    }
+    (void)fl;
+  }
+  void add_element_writer(const std::vector<size_t>& tgts, const Stmt* store, const Expr* rhs, const MemberExpr* me) {
+    const std::string key = tu_.source_text(me->getBase()->getSourceRange(), 60);
+    const Expr* keep = oa_lv_;
+    oa_lv_ = me;
+    for (size_t t : tgts) {
+      ValueInfo v = rhs != nullptr ? tu_.classify_value(rhs) : ValueInfo();
+      v.text = tu_.source_text(store->getSourceRange(), 60);
+      add_writer(t, store, rhs != nullptr ? KZ_WRITER_KIND_ASSIGN : KZ_WRITER_KIND_INCDEC, v, key, KZ_WRITER_FLAG_PARTIAL);
+      ++m_.object_stats.element_writers;
+    }
+    oa_lv_ = keep;
+  }
+  // A call argument that is a target array field decaying to a pointer, or a pointer into it (`x.f + k`, `&x.f[i]`),
+  // through pointer conversions: the member expression, else null.
+  const MemberExpr* decayed_target_arg(const Expr* a) {
+    const Expr* e = a;
+    for (int guard = 0; guard < 64; ++guard) {
+      e = e->IgnoreParens();
+      if (const auto* c = dyn_cast<CastExpr>(e)) {
+        if (c->getCastKind() == CK_ArrayToPointerDecay) {
+          const auto* me = dyn_cast<MemberExpr>(c->getSubExpr()->IgnoreParens());
+          const auto* fl = me != nullptr ? dyn_cast<FieldDecl>(me->getMemberDecl()) : nullptr;
+          return fl != nullptr && !tu_.targets_of_field(fl).empty() ? me : nullptr;
+        }
+        if (!c->getType()->isPointerType()) return nullptr;
+        e = c->getSubExpr();
+        continue;
+      }
+      if (const auto* bo = dyn_cast<BinaryOperator>(e)) {
+        if ((bo->getOpcode() != BO_Add && bo->getOpcode() != BO_Sub) || !bo->getType()->isPointerType()) return nullptr;
+        e = bo->getLHS()->getType()->isPointerType() ? bo->getLHS() : bo->getRHS();
+        continue;
+      }
+      if (const auto* uo = dyn_cast<UnaryOperator>(e); uo != nullptr && uo->getOpcode() == UO_AddrOf) {
+        const auto* as = dyn_cast<ArraySubscriptExpr>(uo->getSubExpr()->IgnoreParens());
+        if (as == nullptr) return nullptr;
+        e = as->getBase();
+        continue;
+      }
+      return nullptr;
+    }
+    return nullptr;
+  }
+  // The type of a call argument (ARG_TYPES).
+  ArgTypeFact arg_type_of(const CallExpr* ce, const FunctionDecl* callee, unsigned i, const std::string& ckey) {
+    ArgTypeFact t;
+    t.call_key = ckey;
+    t.func_key = fkey_;
+    t.pos = i;
+    const Expr* a = ce->getArg(i);
+    const QualType at = a->getType();
+    if (callee != nullptr && i < callee->getNumParams()) {
+      const QualType pt = callee->getParamDecl(i)->getType();
+      if (pt->isPointerType() && pt->getPointeeType().isConstQualified()) t.flags |= KZ_ARGT_FLAG_CONST_POINTEE;
+    } else if (at->isPointerType() && at->getPointeeType().isConstQualified()) {
+      t.flags |= KZ_ARGT_FLAG_CONST_POINTEE;
+    }
+    if (at->getAs<TypedefType>() != nullptr) t.flags |= KZ_ARGT_FLAG_TYPEDEF_NAMED;
+    // a character array that decays (through parentheses and pointer conversions)
+    const Expr* e = a;
+    const Expr* arr = nullptr;
+    for (int guard = 0; guard < 64 && arr == nullptr; ++guard) {
+      e = e->IgnoreParens();
+      const auto* c = dyn_cast<CastExpr>(e);
+      if (c == nullptr) break;
+      if (c->getCastKind() == CK_ArrayToPointerDecay) arr = c->getSubExpr()->IgnoreParens();
+      else if (c->getType()->isPointerType()) e = c->getSubExpr();
+      else break;
+    }
+    if (arr != nullptr) {
+      const ConstantArrayType* cat = ctx_.getAsConstantArrayType(arr->getType());
+      if (cat != nullptr && cat->getElementType()->isCharType()) {
+        t.type_class = KZ_ARGT_CLASS_CHAR_ARRAY;
+        t.extent = static_cast<uint32_t>(cat->getSize().getZExtValue());
+        t.width = static_cast<uint8_t>(ctx_.getTypeSizeInChars(at.getCanonicalType()).getQuantity());  // the pointer it decays to
+        t.type = arr->getType().getAsString();
+        bool cut = false;
+        t.path = path_text(arr, 0, &cut);
+        std::set<const VarDecl*> seen;
+        if (analyze_path(arr, &seen).ptr_steps > 0) t.flags |= KZ_ARGT_FLAG_VIA_POINTER_FIELD;
+        if (const auto* me = dyn_cast<MemberExpr>(arr)) {
+          if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl())) {
+            t.loc_type = field_type_name(fl);
+            t.loc_field = fl->getNameAsString();
+            t.decl_object = t.loc_type + "." + t.loc_field;
+            t.decl = tu_.pos_of(fl->getLocation());
+          }
+        } else if (const auto* d = dyn_cast<DeclRefExpr>(arr)) {
+          if (const auto* vd = dyn_cast<VarDecl>(d->getDecl())) {
+            t.loc_type = "<global>";
+            t.loc_field = vd->getNameAsString();
+            t.decl_object = vd->hasGlobalStorage() ? tu_.object_key(vd) : fkey_ + "/" + lid(vd);
+            t.decl = tu_.pos_of(vd->getLocation());
+            if (!vd->hasGlobalStorage()) t.loc_type.clear();  // a local array: no READS row names it
+          }
+        }
+        return t;
+      }
+    }
+    const QualType ct = at.getCanonicalType();
+    t.type = at.getAsString();
+    if (!ct->isIncompleteType() && !ct->isDependentType() && !ct->isVoidType()) t.width = static_cast<uint8_t>(std::min<int64_t>(255, ctx_.getTypeSizeInChars(ct).getQuantity()));
+    if (ct->isFunctionPointerType()) t.type_class = KZ_ARGT_CLASS_FUNCTION_POINTER;
+    else if (ct->isPointerType()) t.type_class = tu_.record_of(ct->getPointeeType()) != nullptr ? KZ_ARGT_CLASS_RECORD_POINTER : KZ_ARGT_CLASS_POINTER;
+    else if (ct->isSignedIntegerOrEnumerationType()) t.type_class = KZ_ARGT_CLASS_SIGNED;
+    else if (ct->isUnsignedIntegerOrEnumerationType()) t.type_class = KZ_ARGT_CLASS_UNSIGNED;
+    else t.type_class = KZ_ARGT_CLASS_OTHER;
+    return t;
+  }
+  // The fields of the record `rd` (named `type`) as FIELD_TYPES rows.
+  void note_field_types(const std::string& type, const RecordDecl* rd) {
+    for (const FieldDecl* f : rd->fields()) {
+      if (f->getName().empty()) continue;
+      FieldTypeFact ft;
+      ft.type = type;
+      ft.field = f->getNameAsString();
+      ft.pos = tu_.pos_of(f->getLocation());
+      const QualType t = f->getType();
+      QualType elem = t;
+      if (const ArrayType* arr = ctx_.getAsArrayType(t)) {
+        elem = arr->getElementType();
+        if (const auto* cat = dyn_cast<ConstantArrayType>(arr)) {
+          ft.extent = static_cast<uint32_t>(cat->getSize().getZExtValue());
+          ft.extent_kind = KZ_FTYPE_EXTENT_CONSTANT;
+        } else if (isa<IncompleteArrayType>(arr)) {
+          ft.extent_kind = KZ_FTYPE_EXTENT_FLEXIBLE;
+        } else {
+          ft.extent_kind = KZ_FTYPE_EXTENT_UNEVALUATED;
+        }
+        if (const TypeSourceInfo* tsi = f->getTypeSourceInfo())
+          if (const auto atl = tsi->getTypeLoc().getAsAdjusted<ArrayTypeLoc>())
+            if (const Expr* se = atl.getSizeExpr()) ft.extent_text = tu_.source_text(se->getSourceRange(), 60);
+      }
+      const QualType base = ctx_.getBaseElementType(t);
+      if (base.isConstQualified() || t.isConstQualified()) ft.flags |= KZ_FTYPE_FLAG_CONST;
+      if (base.isVolatileQualified() || t.isVolatileQualified()) ft.flags |= KZ_FTYPE_FLAG_VOLATILE;
+      if (f->isBitField()) {
+        ft.flags |= KZ_FTYPE_FLAG_BIT_FIELD;
+        ft.bit_width = f->getBitWidthValue();
+      }
+      if (elem->getAs<TypedefType>() != nullptr) ft.flags |= KZ_FTYPE_FLAG_TYPEDEF_NAMED;
+      ft.elem_type = elem.getAsString();
+      const QualType ce = elem.getCanonicalType();
+      if (!ce->isIncompleteType() && !ce->isDependentType() && !ce->isVoidType() && !ce->isFunctionType())
+        ft.elem_size = static_cast<uint32_t>(ctx_.getTypeSizeInChars(ce).getQuantity());
+      if (ce->isArrayType()) ft.elem_kind = KZ_FTYPE_ELEM_ARRAY;
+      else if (ce->isCharType()) ft.elem_kind = KZ_FTYPE_ELEM_CHAR;
+      else if (ce->isEnumeralType()) ft.elem_kind = KZ_FTYPE_ELEM_ENUM;
+      else if (ce->isSignedIntegerType()) ft.elem_kind = KZ_FTYPE_ELEM_SIGNED;
+      else if (ce->isUnsignedIntegerType()) ft.elem_kind = KZ_FTYPE_ELEM_UNSIGNED;
+      else if (ce->isFunctionPointerType()) ft.elem_kind = KZ_FTYPE_ELEM_FUNCTION_POINTER;
+      else if (ce->isPointerType()) ft.elem_kind = KZ_FTYPE_ELEM_POINTER;
+      else if (ce->isRecordType()) ft.elem_kind = KZ_FTYPE_ELEM_RECORD;
+      else if (ce->isRealFloatingType()) ft.elem_kind = KZ_FTYPE_ELEM_FLOATING;
+      m_.field_types.push_back(ft);
+    }
   }
 
   // ---- A-TYPE listing ----
@@ -2025,9 +2414,45 @@ class FnWalker {
         oc.callee_key = cf.callee_key;
         oc.callee_name = name;
         oc.summary = is_data ? KZ_OUTPTR_SUMMARY_DATA_FN : (callee == nullptr ? KZ_OUTPTR_SUMMARY_UNSUMMARIZED : KZ_OUTPTR_SUMMARY_NONE);
+        if (oa_) oc.oa = object_access_of(ce->getArg(i));
         m_.outcalls.push_back(oc);
       }
     }
+    // --object-access: a target array field that decays to a pointer (or a pointer into it) passed to a call is an
+    // out-pointer call as `&x.f` is (the summary of the callee decides: its stores are writer rows, an escape or no body is
+    // an address-escape hit); the destination and the source of a data function are its summary (static_facts.md 5s)
+    if (oa_read_)
+      for (unsigned i = 0; i < ce->getNumArgs(); ++i) {
+        if (cf.args[i].kind == KZ_ARG_KIND_ADDR_FIELD) continue;
+        const MemberExpr* dme = decayed_target_arg(ce->getArg(i));
+        if (dme == nullptr) continue;
+        if (is_data) {
+          const DataFn& d = spec_.data_fns.at(callee->getNameAsString());
+          if (static_cast<int>(i) == d.dest || static_cast<int>(i) == d.src) continue;
+        }
+        const auto* dfl = cast<FieldDecl>(dme->getMemberDecl());
+        for (size_t t : tu_.targets_of_field(dfl)) {
+          OutCallFact oc;
+          oc.call_key = ckey;
+          oc.func_key = fkey_;
+          oc.pos = cf.pos;
+          oc.ordinal = cf.ordinal;
+          oc.tu = cf.tu;
+          oc.arg_index = i;
+          oc.loc_type = spec_.fields[t].field.type;
+          oc.loc_field = spec_.fields[t].field.field;
+          oc.callee_key = cf.callee_key;
+          oc.callee_name = name;
+          oc.summary = callee == nullptr ? KZ_OUTPTR_SUMMARY_UNSUMMARIZED : KZ_OUTPTR_SUMMARY_NONE;
+          oc.decayed = true;
+          if (oa_) oc.oa = object_access_of(dme);
+          m_.outcalls.push_back(oc);
+          ++m_.object_stats.decay_outcalls;
+        }
+      }
+    // --object-access: the type of every argument (ARG_TYPES)
+    if (oa_)
+      for (unsigned i = 0; i < ce->getNumArgs(); ++i) m_.arg_types.push_back(arg_type_of(ce, callee, i, ckey));
     // pointers that reach a target, for the unknown-effect check of finalize (SPEC 4.2 steps 2-3):
     // the destination and the source of a data function are its summary, not an unknown effect
     for (unsigned i = 0; i < ce->getNumArgs(); ++i) {
@@ -2372,6 +2797,8 @@ class FnWalker {
     }
     // a conversion of a typed region to an untyped pointer at this call is the summary itself,
     // not a cast hit: handled by is_data_arg in visit_cast.
+    // --object-access: the destination's access path (the region lvalue, or what the pointer is)
+    oa_lv_ = region_lv != nullptr ? region_lv : core;
     for (size_t t : contained) {
       const bool is_exact = exact.count(t) != 0;
       add_writer(t, ce, d.writer_kind, vi, key, is_exact ? 0u : static_cast<uint32_t>(KZ_WRITER_FLAG_COVERS_MORE));
@@ -2385,6 +2812,7 @@ class FnWalker {
         pv.text = vi.text;
         add_writer(t, ce, d.writer_kind, pv, key, KZ_WRITER_FLAG_PARTIAL);
       }
+    oa_lv_ = nullptr;
     if (untyped) {
       Model::UntypedWrite u;
       u.pos = tu_.pos_of(ce->getBeginLoc());
@@ -2498,7 +2926,9 @@ class FnWalker {
           ValueInfo v;
           v.kind = KZ_ARG_KIND_TOP;
           v.text = tu_.source_text(bo->getRHS()->getSourceRange(), 60);
+          oa_lv_ = lhs;
           add_writer(t, bo, KZ_WRITER_KIND_AGGREGATE, v, tu_.source_text(lhs->getSourceRange(), 60), KZ_WRITER_FLAG_COVERS_MORE);
+          oa_lv_ = nullptr;
         }
       }
       note_untyped_store(lhs, bo);
@@ -2682,6 +3112,9 @@ class FnWalker {
       // a store to a part of the field (a member or an element of it) changes the field: a writer
       // whose value is not the value stored
       const uint32_t part_flags = use.partial ? static_cast<uint32_t>(KZ_WRITER_FLAG_PARTIAL) : 0u;
+      // --object-access: a target array field as a value decays to a pointer to its first element (note_array_decay)
+      if (oa_read_ && use.kind == LvalueUse::Read && !tgts.empty() && ctx_.getAsArrayType(me->getType()) != nullptr) note_array_decay(me, fl, tgts);
+      oa_lv_ = me;
       for (size_t t : tgts) {
         switch (use.kind) {
           case LvalueUse::Assign: {
@@ -2726,6 +3159,7 @@ class FnWalker {
           case LvalueUse::Read: break;
         }
       }
+      oa_lv_ = nullptr;
       // union member written: another member of the union may be the support type
       if (fl->getParent()->isUnion() && (use.kind == LvalueUse::Assign || use.kind == LvalueUse::IncDec)) {
         std::set<size_t> exposed, by_name;
@@ -3171,6 +3605,7 @@ class FnWalker {
       r.type = field_type_name(fl);
       r.field = fl->getNameAsString();
       if (m_.record_fields.count(r.type) == 0) {
+        if (oa_) note_field_types(r.type, fl->getParent());
         std::vector<std::string>& names = m_.record_fields[r.type];
         for (const FieldDecl* f : fl->getParent()->fields())
           if (!f->getName().empty()) {
@@ -3401,6 +3836,10 @@ class FnWalker {
           }
         }
       }
+    }
+    if (oa_) {
+      r.oa = object_access_of(named);
+      r.oa.index = r.index;
     }
     read_keys_[ce] = r.key();
     m_.reads.push_back(r);
@@ -4590,6 +5029,10 @@ class FnWalker {
     std::string loop_key;
   };
   bool ext_ = false;
+  // --object-access (ReadOptions::object_access): the reading rules of the option (every pass), and the collection of
+  // what OBJECT_ACCESS, FIELD_TYPES and ARG_TYPES are written from (with the extended facts)
+  bool oa_read_ = false, oa_ = false;
+  const Expr* oa_lv_ = nullptr;  // the lvalue the writer add_writer is about to add writes (its access path)
   std::map<const CallExpr*, std::string> ext_call_keys_;  // every call of the body -> its key, lookup only
   std::map<const void*, ExprRef> def_guards_;             // a definition of a variable -> its guard, lookup only
   std::map<const void*, bool> def_in_loop_;               // lookup only

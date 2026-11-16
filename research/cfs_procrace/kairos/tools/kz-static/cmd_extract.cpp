@@ -123,7 +123,7 @@ int cmd_extract(int argc, char** argv) {
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--basis", "--source", "--root", "--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn",
                    "--resource-dir", "--extra-arg", "--section", "--argflow-depth", "--argflow-size", "--image-budget", "--targets-rule", "-o"},
-                  {"--text", "--verbose", "--no-profile", "--extended-facts", "--accept-option-difference"}, &args, &err)) {
+                  {"--text", "--verbose", "--no-profile", "--extended-facts", "--accept-option-difference", "--object-access"}, &args, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
   }
@@ -164,6 +164,13 @@ int cmd_extract(int argc, char** argv) {
   kzs::spec_add_builtin_data_fns(&spec);
   // the extended facts F1-F6: always in the profile-free mode, on request in the profile-driven one
   spec.extended_facts = no_profile || args.has("--extended-facts");
+  // types and object access (static_facts.md 5s): the sections OBJECT_ACCESS, FIELD_TYPES and ARG_TYPES and the reading
+  // rules that come with them; off, the facts are written as before
+  if (args.has("--object-access") && !spec.extended_facts) {
+    std::fprintf(stderr, "kz-static extract: --object-access needs the extended facts (--extended-facts or --no-profile)\n");
+    return 2;
+  }
+  spec.object_access = args.has("--object-access");
   // the tool parameters of F4 and F6 (no reference fixes them; recorded as unspecified_by_reference)
   size_t image_budget = 4096;
   {
@@ -223,6 +230,7 @@ int cmd_extract(int argc, char** argv) {
   ro.extra_args = args.many("--extra-arg");
   ro.verbose = args.has("--verbose");
   ro.image_budget = image_budget;
+  ro.object_access = spec.object_access;
   so.image_budget = image_budget;
   std::string root = args.one("--root");
   // the deviations of the basis (policy deviation), copied into the facts of the runs that write the extended facts

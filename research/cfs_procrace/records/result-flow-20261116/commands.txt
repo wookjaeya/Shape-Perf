@@ -11,3 +11,7 @@ scratch check build <scratch>/re (cmake of the kairos source, the pinned LLVM, R
 tools_check.sh --deep -> tools_check_pre.txt (43 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (104 rows, 0 failing)
 relink_expected.sha256 (14) and not_relink.sha256 (110): sha256 of the MC binaries before the build
 code snapshot commits: 9334e97 (model.hpp, spec.hpp), d22ec58 (the rest of the code, fixture, tests, documents, probe, unit check); the declaration commit follows
+## 1. tool copy and build (2026-11-16T20:42:04Z); HEAD 7e11c2a (declaration commit)
+/dev/vda       270553174016 39019282432 2303225856  95% /
+copy rc=0
+tools after copy rc=0

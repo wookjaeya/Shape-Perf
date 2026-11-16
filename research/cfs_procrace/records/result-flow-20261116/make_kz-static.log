@@ -1,0 +1,11 @@
+-- GLOB mismatch!
+-- LLVM 23.0.0git at /home/user/work/llvm-project/build/lib/cmake/llvm; Clang at /home/user/work/llvm-project/build/lib/cmake/clang
+-- libkz-core source identity 568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+-- Configuring done (0.1s)
+-- Generating done (0.4s)
+-- Build files have been written to: /home/user/work/merge-check/kz-llvm
+[ 42%] Built target kz-core
+[ 42%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/model.cpp.o
+[ 47%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/spec.cpp.o
+[ 47%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/wrappers.cpp.o
+[ 52%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/finalize.cpp.o

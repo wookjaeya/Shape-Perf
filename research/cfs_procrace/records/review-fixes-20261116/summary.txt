@@ -1,0 +1,35 @@
+== c1_pre_tx
+summary edges listed 308 (HB-seq 231, HB-spawn 69, L0-script 8; hard 304, observed-only 4); HB-seq steps the closures followed 30824 (listed where a listed pair's path uses them)
+summary spawn calls with resolved threads 13; child without success: possible 0, not found 1, unknown 12 (position-based 12)
+summary waits 11 (poll 10, count-bounded 1; predicate recognised 5); dependent uses continue 8, inside 97, no-budget 23, unknown 4
+summary rows A 63 (unknown 60, unordered 3)
+summary rows B 170 (unknown 8, unordered 162)
+summary rows C 134 (unknown 7, unordered 127)
+== c1_post_tx
+summary edges listed 308 (HB-seq 231, HB-spawn 69, L0-script 8; hard 304, observed-only 4); HB-seq steps the closures followed 30824 (listed where a listed pair's path uses them)
+summary spawn calls with resolved threads 13; child without success: possible 0, not found 1, unknown 12 (position-based 12)
+summary waits 12 (poll 10, count-bounded 2; predicate recognised 5); dependent uses continue 19, inside 101, no-budget 23, unknown 6
+summary rows A 63 (unknown 60, unordered 3)
+summary rows B 170 (unknown 8, unordered 162)
+summary rows C 134 (unknown 7, unordered 127)
+== r2_core
+summary edges listed 498 (HB-seq 458, HB-spawn 40; hard 494, observed-only 4); HB-seq steps the closures followed 15030 (listed where a listed pair's path uses them)
+summary spawn calls with resolved threads 11; child without success: possible 0, not found 2, unknown 9 (position-based 9)
+summary waits 8 (poll 8, count-bounded 0; predicate recognised 3); dependent uses continue 6, inside 52, no-budget 26, unknown 4
+summary rows A 25 (unknown 24, unordered 1)
+summary rows B 155 (fixed_early_proved 4, hard_before 34, unknown 43, unordered 74)
+summary rows C 115 (unknown 1, unordered 114)
+== c5_641
+summary edges listed 91 (HB-lock 18, HB-seq 51, HB-spawn 14, L0-script 8; hard 87, observed-only 4); HB-seq steps the closures followed 8763 (listed where a listed pair's path uses them)
+summary spawn calls with resolved threads 6; child without success: possible 0, not found 1, unknown 5 (position-based 5)
+summary waits 7 (poll 6, count-bounded 1; predicate recognised 0); dependent uses continue 2, inside 78, no-budget 48
+summary rows A 66 (unknown 53, unordered 13)
+summary rows B 73 (hard_before 2, unknown 16, unordered 55)
+summary rows C 39 (hard_before 18, unordered 21)
+== c5_642
+summary edges listed 121 (HB-lock 48, HB-seq 51, HB-spawn 14, L0-script 8; hard 117, observed-only 4); HB-seq steps the closures followed 8760 (listed where a listed pair's path uses them)
+summary spawn calls with resolved threads 6; child without success: possible 0, not found 1, unknown 5 (position-based 5)
+summary waits 8 (poll 7, count-bounded 1; predicate recognised 1); dependent uses continue 3, inside 87, no-budget 49, unknown 2
+summary rows A 66 (unknown 53, unordered 13)
+summary rows B 71 (hard_before 2, unknown 15, unordered 54)
+summary rows C 38 (hard_before 36, unordered 2)

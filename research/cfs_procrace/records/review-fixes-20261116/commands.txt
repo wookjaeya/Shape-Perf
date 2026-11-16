@@ -45,3 +45,14 @@ plans.sh (df_plans.log, plans_run.txt); plans.sh revfix_extract revfix_plans_on_
 compare.sh extract (SCRATCH <scratch>/views) -> first/compare_extract_first.txt: 30 OK, 15 BAD (facts.kz whole dump: the STRINGS crc32 line and BASIS extract.units_from; the facts views: the extract.units_from line; relations.txt compared with the wrong reference, revfix_relcheck) -- NOT DECLARED: stopped
 compare.sh onextract -> first/compare_onextract_first.txt: 27 OK, 3 BAD (order.txt of c1_pre_tx, c1_post_tx, r2_core compared with the wrong reference, revfix_order: the T8CF facts and the re-extracted ones differ, results 5.5); the two-run checks OK, again/ removed by the step
 compare.sh plans -> compare_plans.txt: ten "only declared differences"
+addendum 6.0 (나-1) committed (6dbc9a0): check_whole.py, compare_relations.py --facts-line, compare_order.py --facts-line; compare.sh extract again -> first/compare_extract_second.txt: 44 OK, 1 BAD (c1_post_tx facts.kz: the STRINGS crc32 0x7c22f22 written with seven digits, the pattern took eight); compare.sh onextract again (15:53:20Z) -> compare_onextract.txt: 25 OK (the two-run checks point at first/compare_onextract_first.txt)
+addendum 6.0 (나-2) committed (4e5a267): crc32 pattern {1,8}; compare.sh extract again (15:53:51Z) -> compare_extract.txt: 45 OK (onextract not run again: (나-2) changes check_whole.py only, which the onextract step does not use)
+creator_success.py env/obs1/explain.py on revfix_relcheck/c1_pre_tx/relations.txt and on relrev7_check/c1_pre_tx/relations.txt, rows A20 A21 -> creator_success.txt (no success constant in either)
+measure.py extfix_order/<b>/order.txt revfix_order/<b>/order.txt with the pairs the review named -> measure.txt; the summary lines of revfix_order -> summary.txt
+
+## 5. after the five builds
+sha256 lists of the six new output directories (revfix_relcheck 15, revfix_order 15, revfix_extract 50, revfix_on_extract 30, revfix_plans 30, revfix_plans_on_extract 30 files); records/LEDGER.tsv: eight new rows (the seven OBS_revfix_* and TOOLS_20261116g)
+env/tools/ledger_check.sh -> ledger_check_end.txt: 84 rows, 0 failing; env/tools/tools_check.sh --deep -> tools_check_end.txt: 40 rows, 0 failing
+name_check.sh --tree on the seven output directories, the copy directory and this records directory -> name_check_tree.txt: all rc 0
+records/order-rules-rev1-20261116/commands.txt lines 36 and 40: c023b11 -> 6ae9a41 with a dated note (builds-7)
+results document: dated correction lines in sections 1-5 and sections 6.1-6.9

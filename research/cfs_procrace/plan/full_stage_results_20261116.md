@@ -42,6 +42,7 @@
 | c5_641 | `b62fd1f2…` | 66 | 66 | 0 |
 | c5_642 | `996d32bd…` | 66 | 66 | 0 |
 
+- 2026-11-16 검토 뒤 정정: §6.7 `rules-04`. 위 표의 계획된 경로 A 행(c1_pre_tx 의 A22, A23, A50, A51 과 c1_post_tx 의 넷)은 판정 규칙 8.6 (b)·(c)가 대조로 든 행이다. relations 규칙 개정 7(§2) 뒤의 모든 계획(`relrev7_plans`, `order_rev1b_plans`, `schema12_plans`, `extfix_plans`, `revfix_plans`)에서 경로 A 의 계획된 행은 c1_pre_tx 의 A21 하나이고, 그것은 규칙을 맞춘 C1 행이다. 그래서 지금 계획의 부팅은 8.6 의 사전 시험이 되지 않는다(판정 규칙 8.12 (ㄷ)). 위 수는 그날의 계획의 것으로 둔다.
 - C1 부팅 기록(`c1_record_sites.txt`; sidecar `8f5f200c…`, dump 글 `1290a5f6…`): A20 은 `tier=3 … state=cut`. 관계 1 의 행의 키 글 site 둘: 272(`OS_CountSemCreate` 안 `memchr`, `osapi-countsem.c:91`), 273(`OS_CountSemGetIdByName` 안 `OS_ObjectIdFindByName`, `:212`). 사건: 273 에 행위자 12 aseq 26 "BP0_tsem", 행위자 13 aseq 11 "BP0_tsem"·aseq 15 "BP1_tsem"(모두 arg0 = 0x3); 272 에 행위자 13 aseq 13 "BP0_tsem"·aseq 17 "BP1_tsem", 행위자 14 aseq 4 "SCH_LAB"(모두 arg2 = 0x14). C1 계획의 삭제 경로 site(`OS_ObjectIdFinalizeDelete`, `OS_CountSemDelete`) 0.
 - 프레임워크 계층 자료 `e2a39203…`(`framework_roles.txt`): run-loop 4, app-exit 4. 이름 공간 항목 0.
 - 이 주기의 설명 기록 45 의 link 칸: unlinked 45, refuted 0(`records/obs1-20261116-reviewfix/index.tsv`).
@@ -104,6 +105,7 @@
   - 빠진 (사용, 이름 공간) 짝마다 소스 대조(`callback_check.py`): `left out:` 줄이 이름 댄 callback 이, 줄이 가리키는 호출의 그 번째 인자로 소스 파일에 그대로 있고(묶음 루트 기준; 캐스트·괄호 허용), 이름 공간의 비교 함수와 다르다. 다섯 빌드 모두 어긋남 0 이어야 한다.
   - 기대(측정 전 [I]; 빌드 전에 scratchpad 에서 이 소스를 MC 의 `libkz-llvm.a` 사본에 넣어 링크한 점검 프로그램으로 잰 값이고, 근거가 아니다. 빌드 뒤의 도구로 다시 잰다): A 행 127/127/68/66/66 → 63/63/25/66/66(빠짐 64/64/43/0/0, `left out:` 줄 98/98/64/0/0, 소스 대조 모두 맞음); 남는 A 행 가운데 partition 이 바뀐 것 38/38/22/26/26, 생성자 집합이 바뀐 것 32/32/19/23/23; B·C 행은 다섯 빌드 모두 그대로. C1 관계 1 의 행(키 `17975444d83f6589`)은 남고 partition {3}, 생성자 둘(BP, SCH_LAB), 생성자 callee `OS_CountSemCreate` 의 상수 가운데 실패 등급이 아닌 것은 `0 [OS_SUCCESS]` 하나 [I]. 앞의 계획에 든 경로 A 행 A22, A23(name_entry 의 `OS_remove`)은 빠지고, A50, A51(같은 호출의 virtual_mountpt 행)은 생성자 없음이 된다 [I].
 - **다시 뽑기 다섯 빌드**(`extract.sh`: `env/redesign/one_build.sh` 를 빌드마다, 새 디렉터리 `/home/user/work/redesign/obs1/relrev7_extract/<b>/`): `env/redesign/compare_build.py` 로 T8CF `<b>/NP` 와 파일마다 비교, 허용 파일 `rev7_extract_allow.tsv`(이 선언과 함께 커밋): `basis.kz`, `facts.kz`(컨테이너 머리의 도구 해시와 거기서 따라 바뀌는 머리 칸; 섹션 레코드는 BASIS 의 `extract.units_from`(basis artifact 해시를 담음) 밖에서 모두 같아야 한다), `basis.txt`(첫 줄), `extract.txt`(첫 줄), `relations.txt`, `sha256.txt`, 한쪽에만 있는 `facts.txt`·`status.txt`·`space_guard.log`. 그 `relations.txt` 와 `keys` 는 위 `rerun.sh` 의 것과 둘째 줄(facts 해시) 밖에서 바이트 동일해야 한다. 추출 코드는 바뀌지 않으므로 [I] facts 의 레코드는 같다.
+  - 2026-11-16 검토 뒤 정정: §6.7 `builds-4`. 이 키 비교는 §2.7 에서 덧붙임 없이 빠졌다. §6.0 (가) 1 에서 이 단계의 도구 `038cd9e3` 을 보존 사본에서 풀어 다시 뽑은 facts 로 키를 냈고, 다섯 빌드 모두 `keys.txt` 가 `relrev7_check/<b>/keys.txt` 와 둘째 줄 밖에서 바이트 동일했다(`records/review-fixes-20261116/keys_check/keys_check.txt`, 26 OK).
 - **계획 다섯 빌드**(`plans.sh`, 새 도구, 앞 계획과 같은 인자: `records/obs1-20261116-plangen/plans.sh`): 다섯 모두 rc 0; manifest 가 런타임의 호스트 파서로 읽힘(scratchpad 의 작은 점검 프로그램, `libkzrt-manifest.a` 링크); c1_pre_tx 와 c5_641 의 재생성 점검(`env/tools/plan_regen.sh`, 같은 도구) PASS. 앞 계획(`/home/user/work/redesign/obs1/plangen/<b>/`)과의 차이를 `plan_diff.py`(이 선언과 함께 커밋)로 잰다: 계획된 행, 층과 처분이 바뀐 행, 규칙별 site, need·gap. 측정이고 판정이 아니다. 계획 생성기의 코드는 바뀌지 않으므로 차이는 모두 relations 행의 차이에서 온다 [I].
 - **시험**: 전체 ctest 246 → 248(새: `static_fixture_compile_relcallback`, `static_golden_relcallback_np`). 라벨: static +2, golden +1. golden 갱신 전 첫 실행에서 실패는 여덟이어야 한다: 바뀌는 golden 여섯, golden 이 아직 없는 `static_golden_relcallback_np`, `test_static_plan`(계획 golden 두 줄). `test_static_cli`(확인 864 개 [I: 위 점검 프로그램과 같은 방법으로 scratchpad 에서 컴파일해 잼]), `test_static_reasons` 는 처음부터 통과한다. 갱신 뒤 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음). lint 7/7(빌드 전 MC `kz_lint` `5f62ec20` 으로 이 트리에서 7/7 [M]). 단위 점검 `env/tools/tests/run_unit.sh` 15/15, `env/redesign/step2a_tests_unit.sh` 7/7.
 - **누적 바이트 동일성**: 빌드 뒤 `env/tools/ledger_check.sh` 전체(빌드 전 45 행, 실패 0 [M])와 `env/tools/tools_check.sh --deep`(빌드 전 31 행, 실패 0 [M]). 모두 같아야 한다. 새 출력은 장부 행으로 더한다.
@@ -140,6 +142,7 @@
 - 그 밖의 golden(`tests/static/data` 의 나머지, `tests/golden/data`, `tests/phi/data`)은 바뀌지 않았다(`git status`).
 - 갱신 뒤 전체 ctest(`ctest_full.log`): 248 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음; `skip_reason.log`). 라벨: golden 61, static 53, legacy-case 51, unit 84, runtime 66, lint 7(앞 단계에서 golden +1, static +2).
 - `test_static_cli` 확인 864 개(앞 837, +27: 새 블록), `test_static_reasons` 655 개, `test_static_plan` 182 개, `lint_selftest` 109 경우 실패 0, lint 7/7.
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-8`. 위의 확인 수 864, 655, 182, 109 는 콘솔에서 읽어 `commands.txt` 에만 적었고 도구 출력으로 남기지 않았다. 그 시험 프로그램은 뒤 빌드가 덮어 다시 잴 수 없다.
 - 단위 점검: `env/tools/tests/run_unit.sh` 15/15, `env/redesign/step2a_tests_unit.sh` 7/7.
 
 ### 2.4 바이트 동일성 [M]
@@ -156,6 +159,7 @@
 
 - 선언한 갈래 안의 주석 두 종류: c1 의 두 행(옛 번호 A26, A30)은 생성자 집합이 바뀌어 `layers:` 의 `P0-unverified(...)` 에서 `dlsym` 이 빠졌다(시작 스크립트 행위자의 생성자가 빠짐); c5 의 13 행은 새 줄이 이름 대는 파일(`psp/fsw/pc-linux/src/cfe_psp_start.c`)의 basis 편차 항목을 `layers:` 에 더했다. 둘 다 선언한 갈래다.
 - **다시 뽑기 다섯 빌드**(10:34Z–10:35Z, `/home/user/work/redesign/obs1/relrev7_extract/<b>/`): 다섯 모두 PASS(`extract_run.txt`). `compare_build.py` 와 허용 파일로 T8CF `<b>/NP` 와: 다섯 모두 허용 밖 0(`extract_compare.txt`, `compare/extract_<b>.tsv`). `facts.kz` 는 머리의 도구 해시·basis 해시·부모와 STRINGS crc32, BASIS 레코드 `extract.units_from` 만 다르고, 다른 섹션 레코드는 모두 같다. 그 `relations.txt` 는 위 재실행의 것과 둘째 줄 밖에서 바이트 동일하다. 추출이 바뀌지 않았음이 다섯 빌드에서 확인되었다.
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-4`. 선언(§2.0)의 다시 뽑기의 “keys” 비교는 이 단계에서 하지 않았다(§2.7). §6.0 (가) 1 로 했고 다섯 빌드 모두 선언대로였다(§2.0 의 정정 줄).
 - **누적 목록**: `ledger_check.sh` 48 행, 실패 0(새 행 셋: `OBS_relrev7_check`, `OBS_relrev7_extract`, `OBS_relrev7_plans`). `tools_check.sh --deep` 32 행, 실패 0. 바깥 이름 점검(`--tree`)은 세 출력 디렉터리에서 깨끗하다.
 - **도구 보존**: 등록부에서 `de1315b3` 은 in-place+copy → copy(사본은 빌드 전 왕복 확인; 남은 출력은 새 도구가 다시 만들지 못하므로 "대체됨"이 아니고, 그 출력은 남김). `038cd9e3` 은 in-place 행으로 더했다. 새 도구의 사본은 두지 않았다: 이 단계의 계획은 부팅에 닿지 않는다. 다음 제자리 빌드 전에 사본을 만든다(PI 의 답).
 
@@ -175,6 +179,7 @@
 - **새 사유의 행 수**(c1_pre_tx / c1_post_tx / r2_core / c5_641 / c5_642): `writer_set_incomplete(zero writers under the rules)` 3/3/1/2/2, `writer_set_incomplete(key writes reachable through unresolved indirect calls)` 5/5/4/5/5, `link_unlinked(namespace membership unresolved)` 1/1/1/0/0. 생성자가 없는 lookup 행의 까닭(c1_pre_tx, 59 행, 한 행에 여럿): 키 매개변수 없이 쓰이는 키 54, writer 집합이 완전하지 않음 54, 풀리지 않은 간접 호출이 닿을 수 있음 5, 다른 partition 의 생성자만 4, writer 없음 1, 소속이 풀리지 않음 1.
 - **C1 관계 1 의 행**(키 `17975444d83f6589`, 새 번호 A21 그대로; `c1_rows.txt`): partition `{3}`, `membership:` `OS_ObjectNameMatch` 를 `osapi-idmap.c:950:12` 에서 넘김. 생성자 둘(BP `bp_flow.c:132:18`, SCH_LAB `sch_lab_app.c:168:16`)은 그대로이고 dependency·feasibility·flip 은 같다. 새 줄: lookup 의 out 포인터 `arg 0 [&CF_AppData.engine.channels[i].sem_id]`(저장 `OS_ObjectIdFindByName` `osapi-idmap.c:978:9`), BP 생성자의 `arg 0 [&BP_GlobalData.Throttles[index].Sem]`, SCH_LAB 의 `arg 0 [&SCH_LAB_Global.TimingSem]`(저장 `OS_ObjectIdFinalizeNew` `:860:9`), 생성자 callee `OS_CountSemCreate` 의 상수 줄(값·이름이 다른 것 10, 그 가운데 실패 등급이 아닌 것은 `0 [OS_SUCCESS]` 하나; 따라가지 못한 반환 둘: `OS_NotifyEvent` 의 간접 호출 결과, `OS_ObjectIdFinalizeNew` 의 매개변수 반환), 키 필드·활성 필드·BP 키 이미지 필드(`BP_Throttle_t.Name`, writer 없음)의 `writers:` 줄. 설명 스크립트의 규칙(`env/obs1/explain.py:286` 의 상수 꼴, 실패 등급)을 이 줄에 그대로 적용하면 생성자의 성공 상수는 `0 [OS_SUCCESS]` 하나로 선다(`creator_success.txt`). 그래서 결과 문서 §7.11.7 의 열린 점 (b)(생성자 상수가 행에 없음)는 relations 쪽에서 채워졌다. 설명 기록은 다시 내지 않았다(부팅 없음; 스크립트가 읽는 것은 다음 단계에서 확인).
 - **BP 의 존재 탐침 행 A20**(키 `35f07539e7606e2e`): 같은 행위자 대조(판정 규칙 개정 2 §8.6)에 쓸 줄이 생겼다: lookup 과 생성자의 out 포인터가 같은 `&BP_GlobalData.Throttles[index].Sem`, 생성자 callee 의 성공 상수 `0 [OS_SUCCESS]` 하나. 행은 여전히 층 3 이라 이 계획에는 들지 않는다.
+- 2026-11-16 검토 뒤 정정: §6.7 `rules-01`, `rules-03`. 위 두 항목의 생성자 성공 상수 `0 [OS_SUCCESS]` 는 서지 않는다. `OS_CountSemCreate` 의 `0 [OS_SUCCESS]` 줄 넷(`relrev7_check/c1_pre_tx/relations.txt` 의 A20 519, 522, 523, 527 줄, A21 560, 563, 564, 568 줄)은 모두 `OS_ObjectIdAllocateNew` 사슬이고, 그 결과는 성공이면 `osapi-countsem.c:103` 과 `:106` 에서 다시 정의되어 `:109` 의 반환에 실패 값만 닿는다(`:95`; 묶음 1df262a). 그 줄은 흐름을 보지 않는 도달 정의에서 나왔다. 실제 성공 반환은 `OS_ObjectIdFinalizeNew` 의 매개변수 반환(`osapi-idmap.c:863`)이고, 같은 행이 그것을 `returns not followed` 로 적었다. `creator_success.txt` 의 `(0, OS_SUCCESS)` 도 그 줄에서 나왔다. relations 규칙 개정 9 는 그런 줄에 `not shown to reach the return` 을 달고 그 생성자 callee 를 `callee-check (set): … not established` 로 적으며, 설명 스크립트 개정 3 으로 다시 재면 A20·A21 모두 성공 상수가 없다(§6.5). 또 A20 은 생성자를 남기지 않아(`no creator left after exclusions`) 판정 규칙 8.2 의 범위로는 같은 행위자 대조의 쌍이 생기지 않는다. 그 범위는 8.12 (ㄴ)에 정했다.
 
 **c1_pre_tx 계획에서 바뀐 것**(`plans/plan_diff_c1_pre_tx.txt`; 앞 계획 `/home/user/work/redesign/obs1/plangen/c1_pre_tx`, 같은 인자):
 
@@ -212,14 +217,17 @@
 - **O4 의 const 한정 예외를 두지 않았다.** 설계 연구의 규칙은 const 이고 cast·union hit 이 없는 필드에는 writer 0 사유를 붙이지 않는 것이었다. facts 에 필드 타입(const 한정)이 없다(필드 타입 표는 뒤의 schema 개정). 그래서 writer 0 이면 언제나 사유를 단다(보수 쪽).
 - **"생성자가 없는 까닭"에 "다른 partition 의 생성자만" 을 더했다.** 설계 연구의 다섯((a)–(e)) 가운데 가장 흔한 실제 까닭이 그것이고(c1 4 행), 다섯의 어느 것에도 들지 않는다. "closure 밖 단위" 는 facts 에 closure 밖 목록이 없어(basis 에만 있음) `writers:` 줄에 "읽지 않음" 으로만 적었다.
 - **생성자 callee 의 상수는 RET_CONSTS 와 호출 결과를 돌려주는 반환을 따라간 집합이다.** `OS_CountSemCreate` 의 성공 반환은 지역 변수를 거쳐 `OS_ObjectIdFinalizeNew` 의 매개변수 반환으로 온다(`osapi-countsem.c:106`, `osapi-idmap.c:863`); facts 는 그 지역의 정의를 잇지 않는다. 그래서 `0 [OS_SUCCESS]` 는 같은 함수가 부르는 `OS_ObjectIdAllocateNew` 쪽 사슬에서 온 것이고, 그 줄의 뜻은 "돌려줄 수 있는 상수" 다(증명 아님). 따라가지 못한 반환은 `callee-check (returns not followed):` 줄에 적었다. 설명 스크립트의 성공 상수 규칙(실패 등급이 아닌 상수 하나)은 이 집합에서 선다.
+- 2026-11-16 검토 뒤 정정: §6.7 `rules-01`. 위 항목의 “돌려줄 수 있는 상수”는 틀렸다: `0 [OS_SUCCESS]` 는 `OS_CountSemCreate` 가 돌려줄 수 없는 줄이다(성공 갈래에서 다시 정의된 값; §2.5 의 정정 줄). 설명 스크립트의 성공 상수 규칙은 이 집합에서 서지 않는다(판정 규칙 8.12 (ㄱ)).
 - **소속 판정은 사용 자신의 인자에서 멈춘다.** callback 이 사용의 매개변수로 들어오면 그 위의 호출자는 따라가지 않고 "풀리지 않음" 이다(c1·r2 에 한 행씩).
 - **다시 뽑기의 키 목록은 없다.** 선언은 다시 뽑기의 `relations.txt` 와 "keys" 를 재실행의 것과 비교한다고 적었으나, 단일 빌드 실행기는 `--keys` 를 쓰지 않는다. relations 글만 비교했다(같음). 키 목록은 재실행의 것이 기록이다.
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-4`. 위 항목은 선언의 비교를 덧붙임 없이 뺀 것이다. 단일 빌드 실행기가 `--keys` 를 쓰지 않아도 같은 도구로 키를 낼 수 있었다. §6.0 (가) 1 에서 돌렸다.
 - **새 도구의 사본을 두지 않았다**(2.4). 계획 문서는 생성기의 사본을 두라 하지만 그 규칙은 부팅에 닿는 계획의 생성기에 대한 것이다.
 
 ### 2.8 열린 것
 
 - 설명 스크립트(`env/obs1/explain.py` 개정 2)가 새 줄(`membership:`, `id holder:`, 생성자의 `callee-check:`, `writers:`)을 담은 행을 읽는지는 이 단계에서 돌려 보지 않았다(부팅 없음, 스크립트 변경 없음). 생성자의 성공 상수는 그 스크립트의 규칙으로 서는 것만 확인했다(`creator_success.txt`). 생성자의 out id 를 실제로 읽으려면 계획이 생성자 호출의 out 을 after-call 에서 기록해야 한다(계획 생성기의 일).
 - 판정 규칙 개정 2 의 이름 결합 입력 가운데 이 단계가 준 것: 종류별 표 선택(partition 은 표 선택 상수만), 소속(같은 비교 함수), 생성자 성공 상수. 남은 것: 이름 공간 항목(공통 의미 단계), 다른 이름 대응이 없음의 근거(종류마다), 삭제·회수 site, 이름 수명.
+- 2026-11-16 검토 뒤 정정: §6.7 `rules-01`, `rules-07`, `rules-10`. 위 항목의 “이 단계가 준 것”을 이렇게 고쳐 읽는다. 생성자 성공 상수는 주지 않았다(§2.5 의 정정 줄). 종류별 표 선택은 조건 (라)의 정적 반쪽만이다: (라)는 정적 partition 과 실행의 두 쪽 종류 값이 모두 있어야 선다(판정 규칙 8.12 (ㅂ)). 판정 규칙 8.7 셋째 줄이 이 단계에 맡긴 키 필드 writer 의 종류별 나눔과 그 완전성(조건 (다))은 주지 않았고, 뒤 추출 단계가 맡는다(8.12 (ㅈ)).
 - 계획에서 빠진 경로 A 행 넷은 같은 실행에서 기록이 있던 행이다(앞 C1 부팅의 계획). 그 기록의 행 번호·키는 앞 계획의 sidecar 가 가진다. 새 계획으로 다음 부팅을 하면 경로 A 의 계획 행은 A21 하나다.
 - c5 에서 partition 이 없어져 생긴 짝 13 행(층 2 로 올라감)의 순서 근거는 다음 단계(순서 간선)의 몫이다.
 
@@ -300,6 +308,7 @@
 
 - 첫 빌드: golden 갱신 전 전체 ctest(`ctest_first.log`) 250 개 가운데 실패 1, 선언한 `static_golden_order_np`(golden 없음) 그대로. `KZ_GOLDEN_UPDATE=1` 로 쓴 `order_np.golden`(453 줄)은 scratchpad 점검 프로그램의 것과 `cmp` 같다. 갱신 뒤(`ctest_full.log`) 250 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음; `skip_reason.log`). `test_static_cli` 908, `test_static_reasons` 655, `test_static_plan` 182, `lint_selftest` 109 경우 실패 0, lint 7/7. 라벨 golden 62, static 55(+1, +2). 단위 점검 15/15, 7/7.
 - 둘째 빌드: 첫 ctest(`ctest_first_build2.log`) 실패 1, 선언한 `static_golden_order_np`(fixture 가 바뀜) 그대로. 갱신한 golden(491 줄, `golden_update_build2.log`)을 읽었다: 행 C5(`mapped_spawn`, hard_before, HB-lock)가 더해지고 그 spawn 간선의 child without success 가 `possible: start_mapped returns -12 [ERR_MAPPED] at order.c:190:16 after order.c:189:12 (the inner call order.c:189:12 may report a failure after its thread started: possible)`, `start_plain` 의 상태 조건이 `start_plain returns 0 [pthread_create created the thread (P0 pthread_create)]`; 나머지 행 값은 첫 빌드와 같다(A1 hard_before, A2 fixed_early_proved, A3 unordered, B1 unordered(짝 hard_before 1, unordered 1), B2 conditional_before(짝 conditional_before 1, hard_before 1), C1·C3·C4 hard_before, C2 unordered). 갱신 뒤(`ctest_full_build2.log`) 250 개, 실패 0, 건너뜀 1; `test_static_cli` 911, `test_static_reasons` 655, `test_static_plan` 182, lint 7/7, selftest 109; 단위 점검 15/15(`unit_tools_build2.txt`), 7/7(`unit_step2a_build2.txt`). 그 밖의 golden 은 바뀌지 않았다(`git status`).
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-8`. 위의 확인 수(`test_static_cli` 908/911, `test_static_reasons` 655, `test_static_plan` 182, selftest 109)는 콘솔에서 읽어 `commands.txt` 에만 적었고 도구 출력으로 남기지 않았다. 그 시험 프로그램은 뒤 빌드가 덮어 다시 잴 수 없다.
 
 ### 3.4 바이트 동일성 [M]
 
@@ -314,6 +323,7 @@
 | 계획 다섯 빌드 vs `relrev7_plans` | 선언한 줄만 (sidecar 둘째 줄, manifest 둘째 줄, module 표·실행 파일 목록 첫 줄; `compare_plans.txt`) | 같음 (`compare_plans_build2.txt`) |
 
 - **누적 목록**: `ledger_check.sh` 59 행, 실패 0(새 행 열하나: `OBS_orderrev1_order`, `OBS_orderrev1_relcheck`, `OBS_orderrev1_extract`, `OBS_orderrev1_onextract`, `OBS_orderrev1_plans`, 같은 다섯의 `…1b…`, `TOOLS_20261116d`). `tools_check.sh --deep` 34 행, 실패 0. 바깥 이름 점검(`--tree`)은 열 출력 디렉터리와 사본 디렉터리에서 깨끗하다.
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-6`. 누적 목록과 등록부는 첫 빌드 전(`commands.txt:19`)과 둘째 빌드 뒤(`:55`)에만 돌렸고, 첫 빌드와 둘째 빌드 사이에는 돌리지 않았다(빌드마다 다시 본다는 규칙에 어긋남). 끝의 실행은 통과했다. 검토 단계(§6)는 빌드 전, 빌드 뒤, 끝의 출력을 따로 남겼다.
 - **도구 보존**: `038cd9e3` 사본(`tools-20261116-d/kz-static.038cd9e3.xz`, 41,217,284 B)은 첫 빌드 전, `b1bf545d` 사본(`kz-static.b1bf545d.xz`, 42,426,196 B)은 둘째 빌드 전에 만들고 왕복 확인했다(`tool_copy/ROUNDTRIP.txt`, `ROUNDTRIP_first.txt`: `xz -t` OK, 스트림 sha256 같음, `cmp` 같음). 등록부: `038cd9e3` in-place → copy(그 relations·키 목록은 두 후속 도구가 바이트 동일하게 다시 냈으나 계획은 생성기 정체성 줄이 달라 "대체됨"으로 하지 않음), `b1bf545d` copy(출력이 남고, 둘째 빌드가 child without success 줄을 바꾸므로 대체되지 않음), `b52db538` in-place. 새 도구의 사본은 두지 않았다: 이 단계의 계획은 부팅에 닿지 않는다. 다음 제자리 빌드 전에 사본을 만든다.
 
 ### 3.5 측정 [M]
@@ -349,6 +359,8 @@
 - **C1 의 child without success 12 possible**: 고침 1 로 사슬이 `OS_TaskCreate → OS_TaskCreate_Impl → OS_Posix_InternalTaskCreate_Impl → pthread_create` 까지 간다. 가장 아래 단계가 `possible`(`os-impl-tasks.c:547:9` 의 `return OS_ERROR`, `:543:19` 뒤)이고 고침 2 가 위로 올린다. 소스를 읽으면 `:547` 은 `pthread_create` 실패 갈래이고 성공 뒤에는 `:562` 의 `return OS_SUCCESS` 뿐이다(§3.0a) [M]: 이 `possible` 은 규칙의 과대 근사(조건의 지역 `return_code` 가 정의를 여럿 가져 펼쳐지지 않음)이고, C1 의 스레드가 성공 없이 남는다는 근거가 아니다. c5 의 `possible` 에는 `:672`, `:684` 처럼 스레드가 이미 있는 갈래의 반환이 들어 있다.
 - **r2_core B 의 hard_before 34, fixed_early_proved 4**: 쓰기와 사용 사이에 spawn 호출이 있는 짝(쓰기가 spawn 앞이면 hard_before, 사용이 다른 스레드의 spawn 앞이면 fixed_early_proved)이다. 측정이고 판정이 아니다.
 - 기록: `summary_build2.txt`(다섯 빌드의 머리 줄), `named_rows_build2.txt`(위 행과 대기의 글 그대로), `awaited_build2.txt`, `spawn_flags.txt`(첫 빌드의 spawn 간선 표시).
+- 2026-11-16 검토 뒤 정정: §6.7 `semantics-1`. 위 표의 B·C 의 짝과 나열한 간선에는 닫힘이 공유 spawn 호출에서, 그 호출에 닿은 스레드와 무관하게 그 호출의 모든 자식으로 가서 생긴 경로가 들어 있다(`order.cpp` 빌드 전 판 `:957-961`, `:963-967`). 예: c1_pre_tx 의 BP 쓰기(`cfe_es_syslog.c:219:9`) → EVS 사용(`cfe_evs_log.c:207:17`) hard_before 의 경로는 “BP 의 `CFE_ES_CreateChildTask` 호출이 BackgroundTask 를 시작하고 BackgroundTask 의 호출이 EVS 를 시작”인데, 두 걸음 모두 소스로 틀렸다(BP 의 그 호출은 `BP_CLA_*` 만 만들고, BackgroundTask 는 ES 가, EVS 는 main 이 만든다). r2 의 TIME 쓰기 → BackgroundTask 사용 둘과 B37 의 “BackgroundTask 가 `CFE_TIME_TaskMain` 을 시작” 걸음도 같다. order rules revision 2 로 다시 잰 값(§6.5): 행 값은 다섯 빌드 모두 그대로, 모든 짝의 hard_before 5,023 → 1,525(c1 두 빌드), 1,660 → 1,117(r2), fixed_early_proved 2,549 → 1,276, 1,348 → 825, c5 그대로; 나열한 간선 c1 479 → 308, r2 517 → 498; 닫힘이 따라간 HB-seq 걸음 c1 30,956 → 30,824, r2 15,067 → 15,030. 검토가 든 짝은 모두 unordered 다.
+- 2026-11-16 검토 뒤 정정: §6.7 `semantics-2`. 위 표의 child without success `possible` 12/12/9/5/5 와 위 항목의 “c5 의 `possible`”은 사실로 적힌 표지가 거짓 증거에 섰다. C1 의 가장 아래 `os-impl-tasks.c:547` 은 `pthread_create` 실패 갈래이고(성공 뒤 반환은 `:562` 뿐), `OS_TaskCreate` 의 `osapi-task.c:202` 반환은 `:199` 의 `OS_ObjectIdFinalizeNew` 값이며(`:196` 의 `AllocateNew` 값은 다시 정의됨), `CFE_ES_CreateChildTask` 의 `CFE_ES_BAD_ARGUMENT`(`cfe_es_api.c:1332`)는 `:1327` 의 조건이 spawn 을 건너뛸 때만의 값이다. C5 의 첫 증거 `osapi.c:657` 도 `pthread_create` 실패 갈래다. 도구 출력에는 단서가 없었다. order rules revision 2 로 다시 잰 값: possible 0/0/0/0/0, unknown (position-based) 12/12/9/5/5, not found 1/1/2/1/1(§6.5). c5 의 `:672`, `:684`(스레드가 있는 갈래)도 조건이 지역을 읽어 위치 근거로 내려간다(덜 주장하는 쪽).
 
 ### 3.6 공간 [M]
 
@@ -376,10 +388,12 @@
 - **행마다 값별 짝 줄 6 개**(출력 한도; 모든 짝을 계산하고 `pairs:` 줄이 센다). 경로 B 의 행 하나가 짝 5,240 개(그 행의 글만 2.5 MB)를 가져 c1_pre_tx 의 글이 11.6 MB 가 되었기 때문이다(점검 프로그램).
 - **L0-script 의 fixture 경우가 없다.** 시작 스크립트 진입은 basis 의 `startup.entry` 와 symbol lookup 사슬이 있어야 나오고 fixture 는 basis 없이 추출한다. 실제 빌드(C1·C5 의 8 개)에서만 나왔다.
 - **child without success 는 위치로 "뒤" 를 읽는다**(문서에 적은 과대 근사). C1 의 가장 아래 단계에서 그것이 거짓 `possible` 을 낸다(§3.5).
+- 2026-11-16 검토 뒤 정정: §6.7 `semantics-1`, `semantics-2`. 위 항목의 “문서에 적은 과대 근사”는 도구 출력에 단서 없이 사실로 적혔고(§3.5 의 정정 줄), 닫힘이 공유 spawn 호출에서 스레드를 가리지 않은 것은 이 절에 적지 않은 결함이었다. 둘 다 order rules revision 2 에서 고쳤다(§6.0 (나), §6.5).
 
 ### 3.8 열린 것
 
 - 호출의 guard(facts schema 개정 11 의 호출 행에 없음): 예산 탈출 뒤 호출자 쪽 사용의 결과, HB-await 의 호출자 쪽 간선, `skip` 의 판정이 그것을 기다린다. 조건의 지역을 그 정의에 잇는 사실(reaching definitions)이 있으면 child without success 의 위치 근사도 좁힐 수 있다(C1 의 거짓 `possible`).
+- 2026-11-16 검토 뒤 정정: §6.7 `semantics-1`, `semantics-2`. 위 항목의 거짓 `possible` 은 이제 `unknown (position-based)` 로 나오고, 공유 spawn 호출의 스레드는 호출자에 기대는 규칙으로 가린다(order rules revision 2). 지역의 정의를 호출 결과에 잇는 사실이 오면 위치 근거의 unknown 을 다시 잴 수 있다(§6.9).
 - 지역 플래그 술어(loop 177, CF 재시도 대기의 `ret`)와 2 세대 잠금의 handle 단위 정체성(C1 의 HB-lock 0): 추출과 잠금 정체성 단계의 일.
 - 인스턴스 키는 글이다. 런타임 1.4 는 생성 토큰을 기록하지 않으므로 HB-spawn 을 실행의 스레드에 잇는 것은 생성 인자 결합(C1)이거나 없음(C5)이다. order 출력을 계획(manifest 개정 4)과 설명 스크립트가 읽는 것은 뒤 단계다. 설명 스크립트(`env/obs1/explain.py` 개정 2)는 바꾸지 않았고 앞 단계에서 넘어온 `explain.py:970-973` 의 refuted 갈래도 그대로다.
 - 경로 A 의 unknown 60/60/24/53/53 은 다른 스레드의 생성자가 없는 lookup 행이다(§2.5 의 생성자 없음의 까닭). 이름 결합 입력이 채워지면 다시 잰다.
@@ -404,6 +418,7 @@
 - **도구 해시와 정체성**:
   - 바뀌는 것: kz-static, kz, kz-dump, kz-phi 의 파일 sha256, `--identity` 의 `tool_sha256`, `tool_source`, `core_source`, schema fingerprint(`6d1471a2…` → 다른 값; scratchpad 의 점검 빌드에서 `6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd` [I, 근거 아님]). 빌드 전 값: kz-static `b52db538769e6bc8fecd9a7e3daec63fd785885c1873629c0dac244afa50b2f9`, kz `931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248`, kz-dump `05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43`, kz-phi `7d34e6e20934c62b91f006c20712b7a096692b231d318257b096eb22dc68075f`.
   - 다시 링크되는 것: 링크 줄에 `libkz-core.a` 가 있는 75 개 모두(`relink_expected.sha256`, 빌드 전 sha256; 도구 넷과 시험 프로그램 71)와 다시 묶이는 정적 라이브러리 여덟(`libkz-core.a`, `libkz-llvm.a`, `libkz-predict.a`, `libkz-trace.a`, `libkz-anchor.a`, `libkz-loader.a`, `libkz-plan.a`, `libkz-testsupport.a`; 그 목적 파일이 바뀐 머리말을 읽는다).
+  - 2026-11-16 검토 뒤 정정: §6.7 `builds-5`. 위의 “도구 넷과 시험 프로그램 71”은 틀렸다: `relink_expected.sha256` 의 75 는 `libkz-core.a`(1 줄), 시험 프로그램 70, 도구 넷이다. `libkz-core.a` 는 다음의 정적 라이브러리 여덟에도 들어 두 번 셌다.
   - 다시 링크되지 않아야 하는 것 29 개(`not_relink.sha256`, 빌드 전 sha256): kz-rt-dump `4390d4f1…`, kz_lint `5f62ec20…`, kz-instr-clang `28db4017…`, 런타임 라이브러리 다섯과 그 시험 프로그램 열일곱, `libkz-hold.a`, 시험 대상 프로그램 셋. 빌드 뒤 sha256 이 같아야 한다.
   - `CMakeCache.txt` `bc2f43b4…` 는 그대로 [I](새 시험 파일이 glob 으로 잡혀 다시 구성된다). flags.make 목록 해시와 도구 넷의 `KZ_TOOL_SOURCE_SHA256` 은 바뀐다.
 - **빌드**(MC 제자리, 목표별, 각각 공간 감시 아래, kind 를 따로 적는다): `make kz`(kind kz, 이 dip 이 뒤 kz 빌드의 선언 필요량이 된다), `make kz-dump`, `make kz-phi`, `make kz-static`, 그리고 `make all`(시험과 나머지). 감시가 도중에 멈추면 MC 는 개정 11·12 가 섞인 도구 모음이다. 그것을 기록하고, 모든 도구가 `--identity` 로 개정 12 를 적을 때까지(`identity_all.sh`) 어떤 출력도 내지 않으며, 필요하면 사본을 되돌린다.
@@ -440,6 +455,7 @@
 | `all` | 12:43:45–12:46:56 | 48,418,816 | 72 (시험 프로그램 71 과 `libkz-testsupport.a`) |
 
 - 링크된 것 83 은 선언의 목록(`relink_expected.sha256` 75 와 정적 라이브러리 여덟)에 새 시험 `test_trace_neutral_rev12` 하나를 더한 것과 같다(이름 집합 비교). 75 가운데 68 은 sha256 이 바뀌었고 7 은 다시 링크되었으나 바이트가 같다(`test_hold_plan`, `test_hold_ptrace`, `test_hold_sequence`, `test_rt_plan_convert`, `test_core_crc32`, `test_core_phi_parser`, `test_core_sha256`: libkz-core 에서 끌어오는 목적 파일이 바뀌지 않음). 선언은 "다시 링크된다(sha256 이 바뀔 수 있다)" 였으므로 선언 안이다.
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-5`. 위 셈은 84 가 되어 `libkz-core.a` 를 두 번 센다. 링크된 83 은 `relink_expected.sha256` 의 75(도구 넷, 시험 70, `libkz-core.a`), 그 밖의 정적 라이브러리 일곱, 새 시험 `test_trace_neutral_rev12` 다. 표의 `all` 줄 “시험 프로그램 71”은 70 과 새 시험이라 맞다.
 - 다시 링크되지 않아야 하는 29 는 모두 sha256 이 같다(`sha256sum -c not_relink.sha256` 29 OK): kz-rt-dump `4390d4f1…`, kz_lint `5f62ec20…`, kz-instr-clang `28db4017…`, 런타임 라이브러리와 그 시험, `libkz-hold.a`, 시험 대상 프로그램 셋.
 - 도구(`post_mc.txt`): kz-static `b52db538…` → `5ae220d2a0963097611688a5e55f77be34bebc0c40a1d98a6581af70ac3fc3cf`, kz `931dd39c…` → `913fcd99064b5aeca3b2c52da6f6f9e72584680ea783e6edb2f959eeb22eccfa`, kz-dump `05623054…` → `32a96ae7138fd71c9efd63d0439021cae044c4045b6a9557b659e1e1911c0438`, kz-phi `7d34e6e2…` → `df79fb82f962e69fdd29493cf9fd664feae38e370aa3578697227109cf1d59e2`.
 - `--identity`(`identity_all.txt`): 넷 모두 `schema_revision=12`, `schema_fingerprint=6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd`(옛 `6d1471a2…`), `core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920`(옛 `f6e3c7b4…`). tool_sha256 / tool_source: kz-static `783c7cd7…` / `f73da08c…`, kz `c19937fd…` / `fb7f09f9…`, kz-dump `c5e70435…` / `21cc60f2…`, kz-phi `7792f19b…` / `4a234a89…`. kz 의 tool hash 는 scratchpad 점검 빌드의 것과 같다(같은 소스, 다른 트리 위치).
@@ -584,7 +600,9 @@
 - 빌드 1 의 첫 ctest(`ctest_first.log`): 254 개 가운데 실패 11, 선언한 그대로(golden 열과 `test_static_plan`). 갱신한 열하나는 scratchpad 점검 빌드의 것과 `cmp` 같다(`golden_update.log`).
 - 갱신 뒤 ctest(`ctest_full.log`): 실패 1, `test_static_reasons`(선언 밖): §5.0a 로 멈추고 고침.
 - 빌드 2 뒤(`ctest2_first.log`): 실패 둘(`static_golden_anonrec_np` 선언대로, 그 golden 을 갱신하기 전이라 `test_static_reasons` 도). `anonrec_np.golden` 갱신(`golden2_update.log`): 72 줄, 빌드 1 판의 1–72 줄과 같다. 선언(§5.0a)은 "1–73 줄"이라 적었으나 73 줄은 relations 부분 앞의 빈 줄이고 그것도 relations 부분이다(`static_golden.cpp` 가 `view + "\n# relations\n" + rel` 로 붙임). 선언의 줄 번호가 하나 어긋났을 뿐 바뀐 내용은 선언한 그 부분이다(§5.8).
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-1`. 빌드 2 뒤 첫 ctest 의 `test_static_reasons` 실패는 선언 밖이었다: 덧붙임 §5.0a 는 첫 ctest 의 실패를 적지 않았고, 위 항목은 그 실패를 뒤에 와서 예상된 것이라 했다. 까닭은 아직 갱신하지 않은 `anonrec_np.golden` 이 행 없는 relations 부분을 담고 있었던 것이다. 그 ctest 전에 덧붙임은 없었다. 검토 단계의 선언(§6.0 (나))은 첫 ctest 의 실패를 이름으로 적었다.
 - 최종(`ctest2_full.log`): 254 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음). 확인 수: `test_static_cli` 953(911 + 42), `test_static_reasons` 660(앞 단계 655; 사유 표에 한 줄이 늘고 relations golden 의 줄이 둘 늘었다. 빌드 1 의 663 은 행 없는 relations golden 하나를 더 읽은 수), `test_static_plan` 182, `test_core_schema` 34,017, `lint_selftest` 109, lint 7/7. 단위 점검 15/15(`unit_tools.txt`), 7/7(`unit_step2a.txt`).
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-8`. 위의 `test_static_reasons` 660 과 빌드 1 의 663 은 `commands.txt` 에만 있었다(`ctest_counts.log` 는 빌드 1 의 것이고 reasons 가 없다). 660 은 같은 바이너리로 `records/review-fixes-20261116/counts_before_build.log` 에 다시 재 남겼다. 663 은 빌드 2 가 덮어 다시 잴 수 없다.
 
 ### 5.4 바이트 동일성과 다섯 빌드 [M]
 
@@ -596,6 +614,8 @@
 | 다시 뽑은 facts 위 (`compare_onextract.txt`) | order 두 번 같음, `order.txt` 는 선언한 갈래만(facts 해시, relations 개정, 레코드 전체 쓰기의 짝 줄 5: c1 둘·r2), `edges.tsv` 바이트 동일, `relations.txt` 는 다시 뽑기의 것과 바이트 동일, 키 표(30 OK) |
 | 계획 (`compare_plans.txt`) | T8CF 위 다섯과 다시 뽑은 facts 위 다섯이 모두 "only declared differences"(site 와 필요 줄 같음) |
 
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-2`, `builds-9`, `builds-10`. 위 표의 다시 뽑기 45 OK 는 짝 없는 옛 `<anonymous>` 줄과 새 이름 줄을 짝 없이 받고(`compare_classes.py:160-168`, `:174-180`), relations 의 `[C]` 머리를 `(spawn calls ` 뒤 `.*` 로 받은 비교의 결과였다. §6.0 (가) 2 에서 짝짓기와 좁힌 머리로 다시 돌렸고(`records/review-fixes-20261116/extract_compare/`), 덧붙임 (가-1)(`extract.txt` 의 `location` 줄 짝) 뒤 다섯 빌드 45 OK 였다.
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-6`. 누적 목록과 등록부는 빌드 1 전(`commands.txt:14`)과 빌드 2 뒤(`:56`)에만 돌렸고, 빌드 1 과 빌드 2 사이에는 돌리지 않았다. 끝의 실행은 통과했다.
 - **누적 목록**: `ledger_check.sh` 76 행, 실패 0(새 행 여덟: `OBS_extfix_pre_onextract`, `OBS_extfix_relcheck`, `OBS_extfix_order`, `OBS_extfix_extract`, `OBS_extfix_onextract`, `OBS_extfix_plans`, `OBS_extfix_plans_onextract`, `TOOLS_20261116f`). `tools_check.sh --deep` 39 행, 실패 0. 바깥 이름 점검(`--tree`)은 일곱 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다.
 - **도구 보존**(`tool_copy/ROUNDTRIP.txt`): kz-static `5ae220d2` 를 빌드 전에 `/home/user/work/preserve/tools-20261116-f/kz-static.5ae220d2.xz`(42,454,428 B)로 사본하고 왕복 확인했다(`xz -t` OK, 스트림 sha256 같음, `cmp` 같음). 등록부: `5ae220d2` copy, `c6aa4811` in-place. 대체되지 않음: 새 도구의 출력은 개정 줄과 이름에서 다르다.
 
@@ -612,6 +632,8 @@
 | CF `CF_CmdGetSetParam` entry-release 행(더해짐/빠짐) | 8 / 7 | 8 / 7 | 0 | 0 | 0 |
 | site 번호 등 움직인 번호만 다른 줄 | 43,564 | 43,577 | 21,255 | 117 | 117 |
 
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-2`, `builds-10`. 위 표의 갈래는 짝을 짓지 않은 셈이고(`removed-anon`, `added-named`), “site 번호 등”의 줄은 모두 `mask:site` 로 셌다(개정 1 이 두 줄을 다르게 남기는 첫 가림의 이름을 붙임). 짝을 짓고 가림을 나눈 새 표는 §6.5 에 있다: c1_pre_tx 로 renamed 249, successor 17, added-named 151, removed-anon-paired 54, 가림 site 41,919 / row 1,634 / count-head 10 / and-more 1. 줄의 합과 가림의 합은 같다.
+
 FACT_LOCS 와 FIELD_STATUS 의 그 형 행(`compare/names_<b>.txt`; 옛 → 새):
 
 | | c1_pre_tx, c1_post_tx | r2_core | c5_641, c5_642 |
@@ -624,10 +646,12 @@ FACT_LOCS 와 FIELD_STATUS 의 그 형 행(`compare/names_<b>.txt`; 옛 → 새)
 | 그 가운데 두 규칙 complete 이고 writers 0 | 9 → 1 | 5 → 1 | — |
 
 - C1 의 `<anonymous>.Data`(writers 0, complete)는 `CFE_SB_MemParams_t::Partition.Data` 와 `CFE_TBL_BufParams_t::Partition.Data` 둘로 갈라졌고, 각각 memset writer 하나(`cfe_sb_init.c:61:5`, `cfe_tbl_internal.c:52:5`)가 맞는다(FACT_LOCS complete writers 1; FIELD_STATUS 는 `array-element-stores-not-collected` 로 DISABLED, 앞의 규칙 그대로).
+- 2026-11-16 검토 뒤 정정: §6.7 `semantics-3`. 위 두 행의 `writer-set-complete writers=1` 은 소스가 뒷받침하지 않는다. `CFE_SB_Global.Mem.Partition.Data` 는 배열에서 포인터로 바뀌어 `CFE_ES_PoolCreateEx` 에 `void *` 로 넘어가고(`cfe_sb_init.c:104`; TBL 은 `cfe_tbl_internal.c:105` 의 `CFE_ES_PoolCreate`), 풀 코드가 그것을 정수 주소 `BaseAddr` 로 두고(`cfe_es_mempool.c:313`) `(CFE_ES_GenPoolBD_t *)(BaseAddr + Offset)` 으로 그 안에 쓴다(`:84-85`). FACT_LOCS 는 그 넘김을 주소 탈출로 세지 않는다. 이 결함은 이름 고침 전부터 있었다(옛 `<anonymous>.Data` 도 complete). 추출의 고침은 하지 않았다(§6.9; `kairos/docs/static_facts.md` §5r 의 알려진 한계).
 - `<anonymous>.sys_timebase_id` 는 `PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type.sys_timebase_id` 이고 writer 가 1 → 2(memset `cfe_psp_soft_timebase.c:50:5` 가 더해짐). 앞판에서 빠진 까닭은 memset 의 대상 형을 이름 표로 찾는 `owners_contained_in`(`lib/llvm/ast_fn.cpp` 의 데이터 함수 처리)이 이름 표에 없는 형을 맞추지 못한 것이고, 이제 그 형이 이름 표에 있다.
 - C1 의 `<anonymous>.State`(writers 0, complete)는 `UnSock_Global@…/unsock_intf_c:85::type.State` 이고 memset writer 1(`unsock_intf.c:231:5`)과 untyped 133·escape 1 hit 로 DISABLED 다.
 - C5 에는 FACT_LOCS·FIELD_STATUS 의 그런 행이 없고, 바뀐 것은 FUNC_WRITES·LOCKSET·LOCK_PATHS 의 `record … .*` 이름이다(OSAL 4.1.1 의 이름 없는 레코드가 시스템 머리말 형 `__pthread_mutex_s::__elision_data` 등으로).
 - 시스템 머리말 형도 이름을 얻는다(`siginfo_t::_sifields::_sigfault.si_addr` 등). 같은 정의는 모든 단위에서 같은 이름이다.
+- 2026-11-16 검토 뒤 정정: §6.7 `semantics-4`. 위 “같은 정의는 모든 단위에서 같은 이름”은 한 추출 안의 말이다. 묶음 루트 밖 파일의 위치는 절대 경로로 쓰여(`TuReader::name_pos` → `pos_of`, `lib/llvm/ast_tu.cpp`), 같은 CF 소스의 형이 c1_pre_tx 에서 `item@/home/user/work/procrace/c1_build/pre/…/cf_cmd_c:945::type`, c1_post_tx 에서 `…/c1_build/post/…` 로 다른 이름을 얻는다. 오늘 relations 의 키는 이 이름을 담지 않는다(`key_map_<b>.tsv`: 바뀐 키 0). `kairos/docs/static_facts.md` §5q 에 날짜 붙은 줄을 두었다(§6.9).
 - 간접 호출 하나의 해석이 바뀌었다(c1 두 빌드): `cf_cmd.c:1014:18` 의 `item.fn(...)` 이 `incomplete-source`(지역 객체 `item` 의 memset 이 writer 로 맞음). 그래서 relations 가 인용하는 "풀리지 않은 간접 호출"의 수가 62 → 63 이고(행 383 줄), LOCK_PATHS 의 entry-release 행 15 가 그 호출을 거친다.
 
 **relations 와 키.** 다섯 빌드 모두 행 수와 판정 칸이 그대로다(relations 비교의 갈래는 머리 셋, 그 수 인용, `[B]`·`[C]` 머리, 이름 바뀐 줄 c1 2·r2 1). `[B]` 머리의 "left out: no writer / one actor only": c1 두 빌드 33/111 → 31/113, r2 11/17 → 9/19, c5 그대로. `[C]` 머리의 "record types written whole after a spawn … not paired": c1 380 → 383, r2 177 → 178, c5 102 그대로. **옛 키 → 새 키 표**(`key_map_<b>.tsv`): 다섯 빌드 모두 바뀌는 키 0(같음 367/367/295/178/175, renamed 0, 한쪽에만 0). relations 행의 키 글에 이름 없는 형이 든 행이 없기 때문이다. 표는 행마다 같은 키를 적는다.
@@ -663,11 +687,13 @@ FACT_LOCS 와 FIELD_STATUS 의 그 형 행(`compare/names_<b>.txt`; 옛 → 새)
 - **이름 있는 멤버의 형인 태그 없는 레코드는 제 형이다.** 그 형을 `<Outer>::<member>` 로 부르면 앞판의 `Unn.q` 같은 맞춤(감싼 레코드의 필드로)이 없어진다. §5k 가 성질로 적은 것을 바꾼 것이고, 선언과 `test_static_cli` 에 적었다.
 - **잘린 이미지의 펼치기 고침은 값이 아니라 글이다.** 찾지 못한 필드는 전에도 모름(상수 아님)이었다. 바뀐 것은 그 까닭(잘린 경로)을 적는 것이고, residual guard 의 까닭은 호출 행의 비어 있던 text 칸에 둔다(schema 개정 없이). `kz-static show` 가 그 칸을 보이도록 했다.
 - **선언 밖의 일 셋**: (1) `test_static_reasons` 의 실패(행 없는 relations golden; §5.0a 로 멈추고 고침, 둘째 빌드); (2) facts.kz 머리의 크기 줄(§5.0b 로 멈추고 허용을 덧붙인 뒤 비교를 다시 돌림; 출력은 바꾸지 않음); (3) §5.0a 의 줄 번호가 하나 어긋남(73 이 아니라 72; 빈 줄도 relations 부분, §5.3). (1)·(2) 는 각각 덧붙임을 커밋한 뒤에 다음을 돌렸고, (3) 은 갱신 뒤에 보아 덧붙임 없이 여기 적는다.
+- 2026-11-16 검토 뒤 정정: §6.7 `builds-1`. 선언 밖의 일이 하나 더 있다: 빌드 2 뒤 첫 ctest 의 `test_static_reasons` 실패(§5.3 의 정정 줄). 그 ctest 전에 덧붙임은 없었다. 뒤 단계의 덧붙임이 golden 을 바꾸면 첫 ctest 에서 나올 실패를 이름으로 적는다.
 - **scratchpad 점검 빌드**는 감시 아래 돌렸다(앞 단계의 다짐대로). LLVM Release 구성으로 만들어 MC 의 것과 바이트가 다르다. 증거로 쓰지 않았고 지웠다.
 
 ### 5.8 열린 것
 
 - 이름 없는 형이 FACT_LOCS 에서 writer-set-complete 이면서 그 배열 원소 쓰기는 FIELD_STATUS 만 본다(`CFE_SB_MemParams_t::Partition.Data`: FACT_LOCS complete writers 1, FIELD_STATUS DISABLED `array-element-stores-not-collected`). FACT_LOCS 의 규칙(배열 원소 쓰기를 세지 않음)은 앞판 그대로다.
+- 2026-11-16 검토 뒤 정정: §6.7 `semantics-3`, `semantics-4`. 위 항목의 빈칸은 배열 원소 쓰기만이 아니다: 배열에서 포인터로 바뀌어 호출 인자로 넘어가는 탈출도 FACT_LOCS 가 세지 않아 `CFE_SB_MemParams_t::Partition.Data`, `CFE_TBL_BufParams_t::Partition.Data` 의 complete 는 소스가 뒷받침하지 않는다(§5.5 의 정정 줄). 또 위치가 붙은 형 이름은 빌드 사이에서 같지 않다(묶음 루트 밖 파일의 절대 경로). 이름 결합과 빌드 사이 단계는 이 이름을 그대로 쓰지 않는다(§6.9).
 - 읽기 옵션의 대조는 글의 비교다. 같은 글이 같은 읽기를 준다는 것은 같은 도구 판 안의 전제다. 다른 도구 판의 basis 로 추출하면 `front_end` 가 달라 거부된다(`--accept-option-difference` 로 편차를 적고 진행).
 - 이름 없는 형의 이름을 쓰는 다음 일: 객체 접근(OBJECT_ACCESS)의 바탕 객체와 형 단위 대신 객체 단위의 writer 집합(뒤 추출 단계). 이번 이름은 형을 갈랐을 뿐 같은 형의 두 객체를 가르지 않는다.
 
@@ -733,3 +759,149 @@ FACT_LOCS 와 FIELD_STATUS 의 그 형 행(`compare/names_<b>.txt`; 옛 → 새)
 #### 6.0 (나-2) 둘째 비교 뒤의 고침 (다시 돌리기 전에 적고 커밋함) [D][M]
 
 - §6.0 (나-1) 뒤의 둘째 실행(`first/compare_extract_second.txt`)에서 c1_post_tx 의 facts.kz 하나만 BAD 였다: STRINGS 줄의 crc32 가 `0x7c22f22`(일곱 자리)라 `check_whole.py` 의 무늬 `crc32=0x[0-9a-f]{8}` 에 맞지 않았다(`first/compare/facts_whole_c1_post_tx_second.txt`). kz-dump 는 crc32 를 앞의 0 없이 쓴다. 차이 자체는 §6.0 (나-1)이 받은 갈래(STRINGS 줄의 crc32 만)이고 스크립트의 무늬가 좁았다. 고침: 무늬를 `crc32=0x[0-9a-f]{1,8}` 로. 나머지 44 점검과 onextract 25 점검은 OK 였다. 이 고침을 커밋한 뒤 `compare.sh extract` 를 다시 돌린다.
+
+### 6.1 바뀐 것 [F]
+
+- **kairos**(`d75aa53`): `lib/llvm/order.cpp`(order rules revision 2: `chain_call`, `caller_dependent`, `callers_of`, `children_on`, 닫힘의 spawn 마디, HB-lock 의 자식, HB-spawn 의 `caller-dependent:` 줄, `closure:` 머리 줄, `positional_only`, `strength_of`, `child_without_success`, summary 줄), `lib/llvm/relations.cpp`(relations rules revision 9: `callee_returns` 의 `not shown to reach the return` 표지, `callee-check (set)` 줄), fixture `tests/static/fixtures/order.c`(`peers`, `local`), `tests/static/fixtures/relcallback.c`, `tests/static/test_static_cli.cpp`(확인 10 더), `docs/static_facts.md`(§5r 새, §5p·§5q 의 날짜 붙은 줄). golden 아홉(`6dbc9a0`): `relations`, `relations_np`, `relpaths_np`, `relsound_np`, `relincomplete_np`, `relincomplete_cut_np`, `relcallback_np`, `order_np`, `plangen_np.plan.golden`.
+- **연구 스크립트**: `env/obs1/explain.py` 개정 3(생성자 callee 의 반환이 다 따라가지지 않았거나 표지가 붙으면 성공 상수 없음), `env/obs1/tests/test_explain.py`(경우 둘 더: 20 → 22).
+- **판정 규칙**: `plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md` §8.12(새, (ㄱ)–(ㅈ))와 8.2–8.11 끝의 가리키는 줄. 8.0–8.11 의 글은 지우지 않았다.
+- **기록의 고침**: `records/order-rules-rev1-20261116/commands.txt` 의 36·40 줄(`builds-7`). 이 결과 문서 §1–§5 의 날짜 붙은 정정 줄(“2026-11-16 검토 뒤 정정: §6.7 <id>”).
+- **비교 스크립트**: `records/review-fixes-20261116/extract_compare/`(`compare_classes.py` 개정 2, 허용 파일 셋, `compare_extract.sh`), `keys_check/`, `compare.sh`, `compare_relations.py`, `compare_order.py`, `check_whole.py`, `compare_plans.py`, `creator_success.py`, `measure.py`.
+- 바꾸지 않은 것: `include/`, `cmake/`, CMakeLists, 추출 코드, 계획 생성기, 런타임, 계측, lint, 어휘 자료, 2a 드라이버와 `one_build.sh`.
+
+### 6.2 빌드 [M]
+
+MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 246,981,824), 모두 첫 시도에 rc 0. 빌드 시작 15:40:04Z(`build_start.txt`), 빌드 전 HEAD `d75aa53`(`pre_mc.txt`, kairos 아래 커밋 안 된 줄 0).
+
+| 목표 | dip (B) | 링크 줄 |
+|---|---|---|
+| `kz-static` | 97,423,360 | 2 (`libkz-llvm.a`, kz-static) |
+| `all` | 6,135,808 | 11 (`libkz-llvm.a` 를 링크하는 시험 프로그램 열, `test_static_cli`) |
+
+- 링크된 이름 13 = `relink_expected.sha256`. 그 가운데 바이트가 바뀐 것 5(`libkz-llvm.a`, kz-static, `test_static_reasons`, `test_static_plan`, `test_static_cli`), 다시 링크되었으나 같은 바이트 8. `sha256sum -c not_relink.sha256` 111 OK(`static_golden` 포함).
+- 도구(`post_mc.txt`): kz-static `c6aa4811…` → `6adc1bdd3d7e78ba29d2ea44f316a36e0944d4fdead0a4159fd61f0480e99ec0`; `--identity` 의 `tool_sha256` `c657cb5c…`, `tool_source` `313d8a90…`; `core_source` `568e5061…`, schema fingerprint `6fbff6c6…` 그대로; 나머지 여섯 도구 그대로. flags.make 목록 해시 `95916686…` → `bb6d74c5…`. `CMakeCache.txt` `bc2f43b4…` 그대로. 빌드 시작 뒤 바뀐 소스 파일 0.
+- 도구 보존: 빌드 전 kz-static `c6aa4811` 을 `/home/user/work/preserve/tools-20261116-g/kz-static.c6aa4811.xz`(43,266,164 B)로 사본, 왕복 확인(`tool_copy/ROUNDTRIP.txt`: `xz -t` OK, 스트림 sha256 같음, `cmp` 같음). 등록부: `c6aa4811` in-place → copy, `6adc1bdd` in-place.
+
+### 6.3 시험 [M]
+
+- 첫 ctest(`ctest_first.log`): 254 개 가운데 실패 9, 선언한 아홉 그대로(`static_golden` 의 relations 여섯·`relcallback_np`·`order_np`, `test_static_plan`).
+- `KZ_GOLDEN_UPDATE=1` 로 아홉을 다시 썼다(`golden_update.log`, 9 통과). 갱신한 golden 의 차이를 §6.0 (나)의 golden 갈래와 맞대어 읽었다: relations 여섯은 개정 줄 하나와 `callee-check (set)` 줄 2/2/0/0/2/3(선언대로); `relcallback_np` 는 fixture 의 바뀜과 `not established (1 returns not followed, 3 constants not shown to reach the return)` 줄; `order_np` 는 행 A1–A3, B1, B2, C1–C5 의 값이 그대로이고 새 행 B3(unordered), `caller-dependent:` 줄 6, `unknown (position-based)` 하나(`summary spawn calls … possible 3, not found 19, unknown 1 (position-based 1)`); `plangen_np.plan.golden` 은 relations 개정이 든 두 줄. 선언의 “scratchpad 의 것과 `cmp`”는 하지 못했다(§6.8).
+- 갱신 뒤 전체 ctest(`ctest_full.log`): 254 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음).
+- 확인 수는 `ctest -V` 출력으로 남겼다(`ctest_counts.log`): `test_static_cli` 963, `test_static_reasons` 660, `test_static_plan` 182, `test_core_schema` 34,017, `lint_selftest` 109 경우 실패 0, lint 7/7.
+- 단위 점검: `env/tools/tests/run_unit.sh` 15/15(점검 15 의 설명 fixture 22/22, `unit_tools.txt`), `env/redesign/step2a_tests_unit.sh` 7/7(`unit_step2a.txt`).
+
+### 6.4 바이트 동일성 [M]
+
+| 비교 | 결과 |
+|---|---|
+| relations 개정 7 의 다시 뽑기의 키(§6.0 (가) 1, 도구 `038cd9e3`) | `keys_check/keys_check.txt` 26 OK: 다섯 빌드 `keys.txt`·`relations.txt` 가 `relrev7_check` 와 둘째 줄 밖 같음, `relations.txt` = `relrev7_extract` 의 것, 둘째 줄이 다시 뽑은 facts, `relations.log` 빈 파일 |
+| 추출 고침 단계의 다시 뽑기 비교 다시 돌림(§6.0 (가) 2, (가-1)) | `extract_compare/compare_extract.txt` 46 OK(도구 확인과 45). 첫 실행은 `extract_compare/first/` |
+| relations, T8CF facts (`compare_relations.txt`) | 15 OK: 3 번째 줄, 표지 붙은 줄 94/94/14/18/18, `not established` 5/5/1/2/2, `complete` 0/0/0/13/13, 그 밖 0; `keys.txt` 3 번째 줄만; `relations.log` 빈 파일 |
+| order, T8CF facts (`compare_order.txt`) | 20 OK: 두 번 같은 바이트, 선언 밖 0(`compare/order_<b>.txt`), `order.log` 빈 파일 |
+| 다시 뽑기 (`compare_extract.txt`) | 45 OK(§6.0 (나-1), (나-2) 뒤): basis.kz 레코드 단위 허용 2, facts.kz 전체 dump 에서 STRINGS crc32 와 `extract.units_from` 만, facts 보기 `extract.units_from` 한 줄, `extract.txt` 1 줄, `relations.txt` 는 `extfix_extract` 의 것과 선언한 갈래만, `basis.txt`·`sha256.txt` 해시 줄만, `args.txt`·`relations.log` 같음. 첫 실행 둘은 `first/` |
+| 다시 뽑은 facts 위 (`compare_onextract.txt`) | 25 OK: order 는 `extfix_on_extract` 와 선언한 갈래만, `edges.tsv` = `revfix_order` 의 것, `relations.txt` = 다시 뽑기의 것, `keys.txt` = `revfix_relcheck` 의 것 2 번째 줄 밖 |
+| 계획 (`compare_plans.txt`) | 열 모두 “only declared differences”(site 와 필요 줄 같음; 계획된 행도 `extfix_plans` 와 같음) |
+
+- **누적 목록과 등록부**(빌드마다 따로 남김, `builds-6`): 빌드 전 `ledger_check_pre.txt` 76 행 실패 0, `tools_check_pre.txt` 39 행 실패 0; 빌드 뒤 `ledger_check_after_build.txt` 76 행 실패 0, `tools_check_after_build.txt` 40 행 실패 0(등록부를 고친 뒤; §6.8); 다섯 빌드 실행과 장부 행을 더한 뒤 `ledger_check_end.txt` 84 행 실패 0(새 행 여덟: `OBS_revfix_relrev7_extract_keys`, `OBS_revfix_relcheck`, `OBS_revfix_order`, `OBS_revfix_extract`, `OBS_revfix_onextract`, `OBS_revfix_plans`, `OBS_revfix_plans_onextract`, `TOOLS_20261116g`), `tools_check_end.txt` 40 행 실패 0(deep).
+- 바깥 이름 점검(`--tree`)은 일곱 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다(`name_check_tree.txt`).
+
+### 6.5 측정 [M]
+
+**order rules revision 2**(`revfix_order/<b>/order.txt`, `extfix_order` 와; `measure.txt`, `summary.txt`):
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| 행 값이 바뀐 행 | 0 | 0 | 0 | 0 | 0 |
+| 짝 줄이 바뀐 행 | 103 | 103 | 63 | 18 | 36 |
+| 모든 짝의 hard_before | 5,023 → 1,525 | 5,023 → 1,525 | 1,660 → 1,117 | 123 그대로 | 195 그대로 |
+| 모든 짝의 fixed_early_proved | 2,549 → 1,276 | 2,549 → 1,276 | 1,348 → 825 | 1 그대로 | 1 그대로 |
+| 모든 짝의 unordered | 16,868 → 21,639 | 같음 | 5,399 → 6,465 | 4,011 그대로 | 3,931 그대로 |
+| 나열한 hard·fixed 짝: 옛 (그 가운데 허락되지 않은 걸음) → 새 | 740 (572) → 242 | 같음 | 485 (154) → 449 | 90 (0) → 90 | 162 (0) → 162 |
+| 나열한 짝의 값 바뀜 | hard→unordered 369, hard→fixed 22, fixed→unordered 8 | 같음 | hard→unordered 18, fixed→unordered 7 | 0 | 0 |
+| 나열한 간선 (HB-seq) | 479 → 308 (402 → 231) | 같음 | 517 → 498 (477 → 458) | 91 그대로 | 121 그대로 |
+| 닫힘이 따라간 HB-seq 걸음 | 30,956 → 30,824 | 같음 | 15,067 → 15,030 | 8,763 그대로 | 8,760 그대로 |
+| `caller-dependent:` 줄이 붙은 HB-spawn 간선 | 53 | 53 | 30 | 6 | 6 |
+| child without success possible / not found / unknown (position-based) | 12/1/0 → 0/1/12 (12) | 같음 | 9/2/0 → 0/2/9 (9) | 5/1/0 → 0/1/5 (5) | 같음 |
+
+- 값이 바뀐 짝은 모두 옛 경로에 새 간선 줄이 허락하지 않는 caller-dependent HB-spawn 걸음이 있었고, unordered·unknown 이던 짝이 순서를 얻은 일은 없다(`compare_order.py` 의 점검 (b)). 새 글의 나열된 hard_before·fixed_early_proved 짝에는 그런 걸음이 없다(점검 (a)).
+- 검토가 든 짝: c1_pre_tx 의 BP 쓰기(`cfe_es_syslog.c:219:9`, BP_AppMain) → EVS 사용(`cfe_evs_log.c:207:17`) hard_before → unordered; r2_core 의 옛 `order.txt:3813`(TIME 쓰기 → BackgroundTask 사용), `:4956`(`os-impl-tasks.c:614:9` 의 TIME 쓰기 → BackgroundTask) hard_before → unordered; r2_core B37 의 fixed_early_proved 짝 가운데 “BackgroundTask 가 `CFE_TIME_TaskMain` 을 시작”(E73f4411c15f2c30c) 걸음을 쓰는 것 1 → 0. B37 의 남은 fixed_early_proved 경로는 ES 의 `CFE_ES_TaskMain` 이 제 BackgroundTask 를 spawn 하기 전의 사용이다(ES 가 만드는 스레드, 허락된 걸음).
+- 행 값은 하나도 바뀌지 않았다: 나열한 짝의 값이 바뀐 행(c1_pre_tx 80, r2_core 15)은 모두 이미 unordered 였다. r2 의 hard_before 34·fixed_early_proved 4 행은 그대로다. 측정이고 판정이 아니다.
+
+**relations rules revision 9**: 표지 붙은 줄 94/94/14/18/18, `callee-check (set)` `not established` 5/5/1/2/2, `complete` 0/0/0/13/13. 생성자 성공 상수의 재측정(`creator_success.txt`, 설명 스크립트 개정 3 의 함수로): `revfix_relcheck/c1_pre_tx` 의 A20·A21 은 `OS_CountSemCreate` 의 표지 붙은 줄 14, 받은 상수 둘(모두 실패 등급), `returns not followed`, 생성자 out 은 읽지 않음(성공 상수 없음). 같은 스크립트로 개정 7 의 relations(`relrev7_check`)를 읽어도 `returns not followed` 줄 때문에 성공 상수 없음이다: 앞 단계의 `records/relrules-rev7-20261116/creator_success.txt` 는 개정 2 의 규칙을 손으로 적용해 `(0, OS_SUCCESS)` 를 냈다.
+
+**추출 고침 단계의 비교 다시 돌림**(`extract_compare/compare/facts_<b>.txt`; 옛 표 §5.5 와 같은 출력, 갈래만 다시 셈):
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| renamed | 249 | 249 | 176 | 39 | 39 |
+| successor(짝을 얻은 뒤를 잇는 줄 가운데 선언한 칸이 다른 것) | 17 | 17 | 10 | 0 | 0 |
+| added-named | 151 | 151 | 12 | 2 | 2 |
+| removed-anon-paired | 54 | 54 | 42 | 24 | 24 |
+| 짝 목록 줄 | 183 | 183 | 157 | 60 | 60 |
+| mask: site / row / count-head / and-more | 41,919 / 1,634 / 10 / 1 | 41,932 / 1,634 / 10 / 1 | 20,983 / 264 / 8 / 0 | 0 / 114 / 3 / 0 | 0 / 114 / 3 / 0 |
+
+옛 표의 renamed + added-named(417/417/198/41/41)와 새 표의 renamed + successor + added-named 는 같다: 줄은 같고, 짝을 지어 이름만 바뀐 줄과 칸이 바뀐 줄로 다시 나눈 것이다. 가림 합(43,564/43,577/21,255/117/117)도 옛 표와 같다.
+
+### 6.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 14:58:08 | 2,805,444,608 | 키 점검 시작(dip 187,404,288; 푼 바이너리는 끝에 지움) |
+| 15:02:13 | 2,851,311,616 | 다시 뽑기 비교 다시 돌림 시작(dip 52,768,768) |
+| 15:37:12 | 2,306,027,520 | 선언 커밋 전(scratchpad 점검 프로그램이 있을 때) |
+| 15:39:49 | 2,805,026,816 | 사본 끝(dip 43,290,624; 그 전에 scratchpad 점검 프로그램을 지움) |
+| 15:40:42 | 2,807,885,824 | `make kz-static` 끝(가장 낮은 2,707,582,976, dip 97,423,360) |
+| 15:42:55 | 2,803,281,920 | `make all` 끝(dip 6,135,808) |
+| 15:47:36–15:51:08 | 2,794,598,400 → 2,716,418,048 | relations(dip 7,675,904), order(14,209,024), 다시 뽑기(47,157,248), 그 order(21,860,352), 계획 둘(987,136 씩) |
+| 이 절을 쓸 때 | 2,722,320,384 | 비교와 장부 뒤 |
+
+- 하한(314,572,800)을 넘지 않았다. 빌드 dip 은 필요량 안이다. 키 점검의 dip 은 선언한 필요량 60,000,000 보다 컸다(§6.8).
+- 남긴 출력: `revfix_relrev7_extract_keys` 7,564,932, `revfix_relcheck` 7,630,029, `revfix_order` 7,058,482, `revfix_extract` 46,967,397, `revfix_on_extract` 14,689,595, `revfix_plans` 886,411, `revfix_plans_on_extract` 886,913 B(장부 행), 사본 43,266,328 B. 지운 것: 비교 뒤의 둘째 실행(`again/`), facts 보기(scratchpad, 비교 뒤 바로), 키 점검이 푼 바이너리, scratchpad 의 점검 프로그램과 그 출력뿐이다.
+
+### 6.7 지적마다: 무엇이 틀렸고, 무엇을 바꿨고, 무엇을 다시 돌렸는가
+
+| id | 무엇이 틀렸나 | 무엇을 바꿨나 | 다시 돌린 것과 증거 |
+|---|---|---|---|
+| `rules-01` | relations 개정 7 의 A20·A21 에서 `OS_CountSemCreate` 의 `0 [OS_SUCCESS]` 줄 넷은 모두 `OS_ObjectIdAllocateNew` 사슬이고, 그 결과는 성공이면 `osapi-countsem.c:103`, `:106` 에서 다시 정의되어 `:109` 에 닿지 않는다. 그 줄로 “생성자 성공 상수를 주었다”(§2.5 :176–177, §2.8 :222), “돌려줄 수 있는 상수”(§2.7 :214)라 적었다 | relations rules revision 9(`relations.cpp`): `redefined-later` 정의를 거친 상수에 `; not shown to reach the return: …`, 생성자 callee 마다 `callee-check (set)` 줄. 설명 스크립트 개정 3. 결과 §2.5, §2.7, §2.8 의 정정 줄 | 빌드 뒤 relations 다섯(`compare_relations.txt` 15 OK, 표지 94/94/14/18/18); `creator_success.txt`: A20·A21 성공 상수 없음(개정 9 와 개정 7 의 relations 모두) |
+| `rules-02` | 기초 4 가 callee 의 상수 집합의 완전성을 요구하지 않아, 개정 7 의 불완전한 집합으로도 섰다 | 판정 규칙 8.12 (ㄱ)(8.2, 8.4, G10): 따라가지 못한 반환·`not established`·표지가 없을 때만 기초 4, 아니면 `record_insufficient(no success constant of the creator: the callee's returns are not all followed)`. `explain.py` 개정 3 의 `publisher_out` | `test_explain.py` 22/22(새 경우 `derived_met_open`, `derived_met_mark`), `run_unit.sh` 15/15; `creator_success.txt` |
+| `rules-03` | 8.6 (a)의 같은 행위자 대조가 8.2 의 범위로는 A20 에서 생길 수 없다(생성자가 남지 않음); §2.5 :177 은 그 줄이 생겼다고 적었다 | 8.12 (ㄴ): 존재 탐침 행의 대조에서 c 는 `probe-create` 로 뺀 생성과 `key constants differ` 로 뺀 생성, 결과는 대조 기록에만; 8.6 (a)의 [I] 는 이 범위를 조건으로. §2.5 의 정정 줄 | 이름 결합을 구현한 설명 스크립트 판이 아직 없어 돌린 것 없음(덧붙임은 어느 판보다 먼저 커밋: `d75aa53`) |
+| `rules-04` | 개정 7 뒤의 계획에 C1 관계 밖의 경로 A 행이 없어, 8.0 (2)·8.6 의 안전장치(사전 시험)가 서지 않는데 적지 않았다 | 8.12 (ㄷ): C1 관계 밖의 경로 A 행과 A20 을 기록된 예산 아래 넣은 계획의 부팅만 사전 시험. §1.4 의 정정 줄 | `revfix_plans` 의 계획된 행을 셈: 경로 A 는 c1_pre_tx 의 A21 하나(`extfix_plans` 와 같음) |
+| `rules-05` | 한 기록에 사용 사건이 여럿일 때 `link.status` 의 집계가 없고, 8.5 의 `not_observed_in_runs` 논증이 u 하나에 기댄다 | 8.12 (ㄹ): 기록 단위 집계, 섞인 바탕의 하위 사유 `link_unlinked(name binding: the uses of the record differ in basis)`, 서식 검사 12 | 돌린 것 없음(규칙 글; 구현은 §6.9) |
+| `rules-06` | relations 의 정적 키 상수 배제가 8.3 의 “키 글 차이만으로 refuted 를 내지 않음”과 어긋나는데 8.7·8.11 에 없었다 | 8.12 (ㅁ): 후보 거르기로만 남고 refuted 로 읽지 않으며 생성자 site 를 줄이지 않음; 8.7 의 입력, 8.11 의 남은 문제 14 | 돌린 것 없음; A20 의 계획 행 `order=NOPAIR … state=cut` 확인 |
+| `rules-07` | (라)의 증거가 “정적 또는 실행”인지 “정적과 실행”인지 모호; §2.8 은 표 선택을 준 것으로 셌다 | 8.12 (ㅂ): 둘 다 필요; 개정 7 은 정적 반쪽만. §2.8 의 정정 줄 | 돌린 것 없음 |
+| `rules-08` | 기초 6, 모순, 여럿 규칙에 1차 근거가 없고, 기초 6 의 경계가 경로 A 순서 규칙과 다른 까닭이 없었다 | 8.12 (ㅅ): G15–G17(`osapi-idmap.c:975`, `:1158`, `:828-863`, `:1170`, `:1177-1180`)과 경계의 까닭. 조회의 잠금 줄은 `:975` 다(지적의 `:974` 는 그 앞 줄) | 소스 대조(묶음 1df262a) |
+| `rules-09` | refuted 쌍의 (마) 구간이 c 가 u 앞일 때 정의되지 않았다 | 8.12 (ㅇ): 앞선 사건의 at-call 부터 나중 사건의 after-call 까지(8.2, 8.3) | 돌린 것 없음 |
+| `rules-10` | 8.7 셋째 줄이 종류별 writer 나눔을 relations 개정 7 에 맡겼는데, 그 단계가 주지 않았고 날짜 붙은 줄이 없었다 | 8.12 (ㅈ): 뒤 추출 단계(OBJECT_ACCESS 를 채우는 단계)가 맡음; 그때까지 (다)는 `link_unlinked(…)`. §2.8 의 정정 줄 | 개정 9 의 A20·A21 `writers:` 줄이 여전히 나누지 않은 한 줄임(relations 비교의 그 밖 0) |
+| `builds-1` | 추출 고침 단계의 빌드 2 뒤 첫 ctest 에서 `test_static_reasons` 가 실패했는데 덧붙임 §5.0a 가 첫 실패를 적지 않았고, §5.7 의 선언 밖 목록에도 없었다 | §5.3, §5.7 의 정정 줄. 이 단계의 선언 §6.0 (나)는 첫 ctest 의 실패 아홉을 이름으로 적었고 그대로였다 | `ctest_first.log`: 실패 9, 선언 그대로 |
+| `builds-2` | 그 단계의 facts 보기 비교가 짝 없는 옛 `<anonymous>` 줄과 새 이름 줄을 짝 없이 받았다 | `extract_compare/compare_classes.py` 개정 2(뒤를 잇는 줄과 짝짓기, 칸 허용은 `pair` 행), `facts_allow.tsv`, `extract_txt_allow.tsv`(§6.0 (가-1)). §5.4, §5.5 의 정정 줄 | `extract_compare/compare_extract.txt` 46 OK; 첫 실행(`first/`)은 `extract.txt` 셋 BAD → 덧붙임 → 다시 OK |
+| `builds-4` | relations 개정 7 의 선언이 요구한 다시 뽑기의 키 비교를 덧붙임 없이 뺐다 | `keys_check/keys_check.sh`(보존 사본 `038cd9e3` 을 풀어 돌림). §2.0, §2.4, §2.7 의 정정 줄 | `keys_check/keys_check.txt` 26 OK; 출력 `revfix_relrev7_extract_keys`(장부 행) |
+| `builds-5` | schema 개정 12 의 다시 링크 셈: 75 는 도구 넷·시험 70·`libkz-core.a` 인데 “시험 71”이라 적었고, 83 = 75 + 여덟 + 하나는 84 다 | §4.0, §4.2 의 정정 줄: 83 = 75 + 다른 정적 라이브러리 일곱 + `test_trace_neutral_rev12` | `records/schema-rev12-20261116/relink_expected.sha256` 의 줄을 셈(1 줄 `libkz-core.a`, 끝 넷 도구) |
+| `builds-6` | 빌드가 둘인 두 단계에서 누적 목록·등록부를 빌드 1 과 빌드 2 사이에 돌리지 않았다 | §3.4, §5.4 의 정정 줄. 이 단계는 빌드 전·빌드 뒤·끝에 따로 남김 | `ledger_check_pre/after_build/end.txt`, `tools_check_pre/after_build/end.txt` 모두 실패 0 |
+| `builds-7` | order 단계의 명령 기록 36·40 줄이 덧붙임과 빌드 2 전 HEAD 를 `c023b11` 로 적었다(실제 `6ae9a41`) | `records/order-rules-rev1-20261116/commands.txt` 36·40 줄을 `6ae9a41` 로, 날짜 붙은 괄호 | `pre_mc_build2.txt:30` `HEAD=6ae9a41`, `git log` 의 두 커밋 시각 |
+| `builds-8` | 몇 단계의 확인 수가 도구 출력 없이 `commands.txt` 의 글로만 있었다 | §2.3, §3.3, §5.3 의 정정 줄(콘솔에서 읽었고 남기지 않음). 추출 고침 단계의 660 은 빌드 전 같은 바이너리로 다시 재 남김; 이 단계는 `ctest_counts.log` | `counts_before_build.log`: `test_static_reasons` 660; `ctest_counts.log` |
+| `builds-9` | 그 단계의 relations 허용 `head-C` 가 `(spawn calls ` 뒤를 `.*` 로 받았다 | `extract_compare/relations_allow.tsv`: 머리의 글 그대로, 수만 `\d+`. §5.4 의 정정 줄 | `extract_compare/compare_extract.txt` 의 relations 다섯 OK |
+| `builds-10` | `compare_classes.py` 개정 1 이 가린 줄에 두 줄을 다르게 남기는 첫 가림의 이름을 붙여, 갈래 표가 `mask:site` 로 몰렸다 | 개정 2: 그 줄에 작용한 가림의 이름으로 셈. §5.5 의 정정 줄 | 새 갈래 표(§6.5): 가림 합은 옛 표와 같고 site/row/count-head/and-more 로 나뉨 |
+| `semantics-1` | order 닫힘이 공유 spawn 호출에서, 닿은 스레드와 무관하게 그 호출의 모든 자식으로 가서 소스로 틀린 hard 경로와 거짓 hard_before·fixed_early_proved 짝을 냈다(c1 BP→EVS, r2 TIME→BackgroundTask, r2 B37) | order rules revision 2: 호출자에 기대는 spawn 호출(`children_on`), HB-lock 의 자식, `caller-dependent:` 줄; fixture `peers`. §3.5, §3.7, §3.8 의 정정 줄 | 빌드 뒤 order 다섯(`compare_order.txt` 20 OK, 새 글의 허락되지 않은 걸음 0), 다시 뽑은 facts 위(`compare_onextract.txt`), `measure.txt`(검토가 든 짝 모두 unordered, B37 의 그 걸음 1 → 0) |
+| `semantics-2` | child without success `possible` 12/12/9/5/5 가 거짓 증거(`pthread_create` 실패 갈래, 다시 정의된 `AllocateNew` 의 값, spawn 을 건너뛴 갈래의 상수)에 섰고 출력에 단서가 없었다 | order rules revision 2: 증거가 위치만으로 서면 `unknown (position-based)`, summary 에 그 수; fixture `local`. §3.5, §3.7, §3.8 의 정정 줄 | 빌드 뒤 order 다섯: possible 0, unknown (position-based) 12/12/9/5/5, not found 1/1/2/1/1 |
+| `semantics-3` | C1 의 `CFE_SB_MemParams_t::Partition.Data`, `CFE_TBL_BufParams_t::Partition.Data` 의 `writer-set-complete writers=1` 은 배열이 포인터로 바뀌어 풀 코드로 넘어가는 탈출을 세지 않아 소스가 뒷받침하지 않는다 | 추출 규칙은 고치지 않음(다섯 빌드의 다시 뽑기를 바꾸는 뒤 추출 단계의 일, §6.9). `static_facts.md` §5r 의 알려진 한계, §5.5·§5.8 의 정정 줄 | 소스 대조(`cfe_sb_init.c:104`, `cfe_tbl_internal.c:105`, `cfe_es_mempool.c:313`, `:84-85`); 이 단계의 다시 뽑기도 그 행이 같음(facts 레코드 같음, §6.4) |
+| `semantics-4` | 묶음 루트 밖 파일의 형 이름이 절대 경로를 담아 c1_pre_tx 와 c1_post_tx 에서 다르다; §5q 의 “같은 이름”은 한 추출 안의 말인데 적지 않았다 | `static_facts.md` §5q 의 날짜 붙은 줄과 §5r 의 알려진 한계; §5.5 의 정정 줄. 위치를 상대 경로로 쓰는 고침은 하지 않음(§6.9) | `extract_compare/compare/facts_c1_{pre,post}_tx.txt` 의 새 이름 목록(`item@/home/user/work/procrace/c1_build/{pre,post}/…`) |
+
+### 6.8 계획과 다르게 한 것
+
+- **덧붙임 셋으로 멈췄다**(§6.0 (가-1), (나-1), (나-2)). 각각 비교의 첫 실행에서 선언 밖의 차이가 나왔고, 까닭을 적은 덧붙임을 커밋한 뒤 같은 비교를 다시 돌렸다(`be9a94b`, `6dbc9a0`, `4e5a267`). 첫 실행의 기록은 `extract_compare/first/`, `first/` 에 남겼다. 출력은 어느 것도 다시 만들지 않았다(비교 스크립트와 허용만 바뀜).
+- **키 점검의 dip**(187,404,288 B)은 선언한 필요량(60,000,000)보다 컸다: 선언이 사본에서 푼 바이너리(약 185 MB)를 필요량에 넣지 않았다. 감시 문턱(374,572,800) 위였고 하한은 넘지 않았다.
+- **갱신한 golden 을 scratchpad 의 것과 `cmp` 하지 못했다**: 빌드 전에 scratchpad 의 점검 출력(golden 사본 포함)을 공간 때문에 지웠다. 대신 갱신한 golden 의 `git diff` 를 선언의 golden 갈래와 하나씩 맞대어 읽었다(§6.3).
+- **빌드 뒤 첫 `tools_check.sh --deep`** 은 39 행 가운데 1 실패였다(덮인 `c6aa4811` 이 아직 in-place 로 등록됨). 등록부를 고친 뒤 다시 돌린 출력이 같은 파일 이름(`tools_check_after_build.txt`)을 덮어 첫 출력은 남지 않았다; `commands.txt` §3 에 적었다.
+- **닫힘 규칙을 선언 전에 한 번 넓혔다**: scratchpad 점검에서 r2_core 의 `OS_TaskCreate → OS_TaskCreate_Impl` 이 spawn 호출이 아니어서 `:4956` 이 남았고, “spawn 연산의 사슬에 든 호출”로 넓힌 뒤 선언을 적었다(`commands.txt` §1). 선언 뒤에는 코드를 바꾸지 않았다.
+- **§6.0 (나)의 다시 뽑기 비교의 기준을 잘못 적었다**(T8CF 쪽 출력): (나-1)에서 고쳤다.
+- **이름 결합을 구현하지 않았다**: `rules-03`, `rules-05`, `rules-06`, `rules-09` 는 규칙 글의 덧붙임이고, 그것을 읽는 설명 스크립트 판은 없다(개정 3 은 기초 4 의 생성자 쪽만).
+
+### 6.9 열린 것
+
+- **`semantics-3` 의 추출 고침**: 배열에서 포인터로의 변환으로 호출 인자에 넘어가거나 정수로 바뀐 대상 필드를 주소 탈출(또는 알 수 없는 효과)로 세는 것. 다섯 빌드의 facts 를 바꾸므로 뒤 추출 단계에서 선언·빌드·다시 뽑기와 함께 한다. 그때까지 그 두 행의 complete 는 소스가 뒷받침하지 않는다.
+- **`semantics-4` 의 이름 안정**: 묶음 루트 밖 파일의 위치를 앱 트리의 소스 루트 기준으로 쓰는 것. 이름 결합의 실행 사이 대응과 빌드 사이 비교 단계가 이 이름을 쓰기 전에 정한다.
+- **이름 결합의 구현**(8.2–8.5, 8.12 (ㄴ)(ㄹ)(ㅁ)(ㅇ))과 설명 스크립트의 여러 사용 사건 집계(지금 `use_events[0]` 만 읽음). 구현 판은 8.12 를 따르고 서식 검사 12 를 더한다.
+- **키 상수 배제로 빠진 생성자 site 의 계획**(8.12 (ㅁ), 8.11 의 14): 계획 생성기가 `not a pair: key constants differ` 줄의 생성 호출을 site 로 넣어야 8.3 (2)가 선다.
+- **사전 시험의 계획**(8.12 (ㄷ)): C1 관계 밖의 경로 A 행과 A20 을 기록된 예산 아래 넣은 계획. 지금 계획들의 경로 A 계획된 행은 A21 하나다.
+- **생성자 성공 상수**: 개정 9 는 그 상수를 서지 않게 했을 뿐 주지 않는다. `OS_CountSemCreate` 의 성공 반환(`OS_ObjectIdFinalizeNew` 의 매개변수 반환)을 따라가려면 지역의 정의를 호출 결과에 잇는 사실이 필요하다(order 의 위치 근거와 같은 빈칸, §3.8).
+- 호출자에 기대는 spawn 호출의 규칙은 덜 잡는 쪽이다(풀린 entry 를 넘기지 않는 호출자는 아무것도 더하지 않음). 그래서 새 unordered 가운데 실제로는 순서가 있는 짝이 있을 수 있다 [미확인].

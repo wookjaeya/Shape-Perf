@@ -1,0 +1,10 @@
+# /home/user/work/lead-tools/name_check.sh --tree <dir> (2026-11-16, after the five builds and the ledger rows)
+rc 0 revfix_relrev7_extract_keys
+rc 0 revfix_relcheck
+rc 0 revfix_order
+rc 0 revfix_extract
+rc 0 revfix_on_extract
+rc 0 revfix_plans
+rc 0 revfix_plans_on_extract
+rc 0 tools-20261116-g
+rc 0 review-fixes-20261116

@@ -16,3 +16,10 @@
 | `relink_expected.sha256`, `not_relink.sha256` | 빌드 전 sha256: 다시 링크되는 것 13, 다시 링크되지 않아야 하는 것 111 |
 | `tool_copy/` | 덮기 전 사본의 왕복 확인과 공간 감시 |
 | `tools_check_pre.txt`, `ledger_check_pre.txt` | 빌드 전 등록부와 누적 목록 |
+| `build_start.txt`, `pre_mc.txt`, `post_mc.txt`, `make_*.log`, `df_*.log` | 빌드(MC 제자리)와 공간 감시 |
+| `ctest_first.log`, `golden_update.log`, `ctest_full.log`, `ctest_counts.log`, `unit_tools.txt`, `unit_step2a.txt` | 시험과 확인 수 |
+| `tools_check_after_build.txt`, `ledger_check_after_build.txt`, `tools_check_end.txt`, `ledger_check_end.txt` | 빌드 뒤와 끝의 등록부·누적 목록 |
+| `*_run.txt`, `compare_*.txt`, `compare/`, `first/` | 다섯 빌드의 실행과 선언한 비교(첫 실행은 `first/`) |
+| `creator_success.txt`, `measure.py`, `measure.txt`, `summary.txt` | 재측정: 생성자 성공 상수, 짝 수와 검토가 든 짝, order 의 요약 줄 |
+| `revfix_*.sha256` | 새 출력 디렉터리의 sha256 목록(장부 행) |
+| `name_check_tree.txt` | 출력·사본·기록 디렉터리의 바깥 이름 점검 |

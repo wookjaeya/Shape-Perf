@@ -112,3 +112,38 @@ case identifiers out of `semantics/`.
 `env/tools/plan_regen.sh <generator or its xz copy> <args file>` runs the generator again with the recorded arguments and
 compares: manifest and sidecar byte for byte, the module table and the executable list after their first line and in it
 except the sidecar path.
+
+## 7. Path A control selection (control selection rule revision 1, 2026-11-16)
+
+Written and committed before any plan is generated with it.  It is read by the generator of plan rules revision 3
+(manifest revision 4, `--manifest 4`); plans of revision 2 (`kzs-sites 3`) do not use it.
+
+Purpose.  The judgement rules count a boot as the prior test of the name-binding rule only when its plan holds path A
+rows outside the relation the rule was fitted on and the same-actor control row, under a recorded budget
+(`plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md` 8.12 (ㄷ)).  The plan of revision 2 holds, of the path A rows, only
+what the tier order reaches (one row on c1_pre_tx, none on the other four builds: results document
+`plan/full_stage_results_20261116.md` 6.7 `rules-04`).  The control rows are therefore chosen by a rule over the row
+lines, never by a row id, a use-site key or a case value (lead decision of that document, 6.10 item 2).
+
+The rule.
+- Candidates: every path A row of the relations the generator computes in-process (`relations_rows`), whatever its tier
+  and whether the tier order plans it.
+- (a) `probe-create`: a row that has a `handling: probe-create` line (the same-actor control of 8.6 (a)).
+- (b) `creator-site`: a row that has at least one creator site.  The creator sites of a row are the create calls named
+  by its `creator:` lines and by its `not a pair: key constants differ` lines: that exclusion is a filter for candidates
+  only, it is not read as a refutation and it does not reduce the row's creator sites (8.12 (ㅁ)).  For a row of (a) the
+  create calls named by its `not a pair: probe-create` lines are creator sites as well (8.12 (ㄴ)).  A
+  `not a pair: same actor only (program order)` line names no creator site of this rule.
+- The control set is (a) then (b): the rows of (a) in the order of the relations text, then the rows of (b) that are not
+  in (a), in the same order.
+- Budget: `--control-budget all|rows:<n>` with `--control-budget-reason TEXT` (both required with `--manifest 4`).  The
+  sidecar writes the line `control-budget value=… reason=… rows=… planned=… cut=… complete=yes|no` before its first row
+  line; the value is given on the command line before the generation (the generator reads no other input for it).  The
+  rows of the control set past the budget are cut and listed by their use-site key.  `complete=no` means the plan does
+  not hold the whole control set: a boot with that plan is not a prior test in the sense of 8.12 (ㄷ), and its link
+  stays `unlinked` on that ground.
+- A control row is planned apart from the tier order and by the same observation rules as a tier row, with every one of
+  its creator sites as a `creator-call` site.  Its sidecar row line carries `control=<a|b|a+b>` and
+  `control-state=planned|cut`; its tier state is unchanged (a row may be planned by both).
+- The rule reads the row lines only.  Expectations per control row are [I] until a run, and are committed before the
+  boot whose plan holds them, not here.

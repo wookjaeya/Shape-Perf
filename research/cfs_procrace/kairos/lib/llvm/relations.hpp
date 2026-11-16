@@ -23,6 +23,11 @@
 // hand-entered vocabulary of the facts is named as such).  The query takes no field, callee or case
 // name.  Deterministic: the same container gives the same bytes.  No Clang types.
 //
+// Every row ends in one line `incomplete:`: the reasons, in the reason vocabulary of the judgement rules
+// (plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md 3.5), why what the row says is not complete, each with a sub-reason
+// (`reason(sub-reason)`), from the facts the row's derivation read (relations rules revision 6, docs/static_facts.md §5m).
+// The reasons a row can carry are the fixed table relations_incomplete_reasons(); the summary counts the rows per reason.
+//
 // The rows are records (RelRow): the text is rendered from them (render_relations), so a tool that reads the rows
 // reads what the text says, with references to the facts the row stands on and a use-site key that names where
 // the row's use is in the program (docs/static_facts.md §5l).  The facts are loaded and indexed by RelFacts
@@ -74,7 +79,20 @@ struct RelRow {
   // the use-site key: key_text and the first 16 hex digits of its sha256; B adds a key per site ("<key> <text>")
   std::string key_text, key;
   std::vector<std::string> site_keys;
+  // the incompleteness reasons of the row: indices into relations_incomplete_reasons(), in the table's order
+  std::vector<uint32_t> incomplete;
 };
+
+// An incompleteness reason a row can carry: the reason of the vocabulary, the sub-reason, and when the rules give it.
+struct RelReason {
+  const char* reason;
+  const char* sub;
+  const char* when;
+};
+// every reason `kz-static relations` can write, in the order the line and the summary write them
+const std::vector<RelReason>& relations_incomplete_reasons();
+// "reason(sub-reason)"
+std::string reason_text(const RelReason& r);
 
 // A part of the text: the lines that are no row (a path's heading line, a namespace of path A), then its rows.
 struct RelGroup {

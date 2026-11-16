@@ -2,12 +2,13 @@
 //
 // Every rule below reads the facts container only.  Nothing names a framework, a case or a resource
 // type: the program's own facts and the P0 tables are the vocabulary.  The rules are written down in
-// docs/static_facts.md §5e (revision 1), §5f (revision 2), §5g (revision 3), §5h (revision 4) and §5i (revision 5); the
-// revision string names them.
+// docs/static_facts.md §5e (revision 1), §5f (revision 2), §5g (revision 3), §5h (revision 4), §5i (revision 5) and §5m
+// (revision 6: the image cut at the budget, the incompleteness line); the revision string names them.
 #include "relations.hpp"
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <functional>
 #include <map>
 #include <set>
@@ -24,11 +25,54 @@
 
 namespace kzs {
 
-const char* relations_rules_revision() { return "relations rules revision 5 (2026-10-30)"; }
+const char* relations_rules_revision() { return "relations rules revision 6 (2026-11-16)"; }
 
 namespace {
 
 constexpr uint32_t kN = KZ_NONE32;
+
+// The incompleteness reasons of a row (relations rules revision 6, docs/static_facts.md §5m): a reason of the vocabulary
+// of the judgement rules (plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md 3.5) and a sub-reason.  The enumerators index
+// the table relations_incomplete_reasons(), in its order, which is the order of the line and of the summary.
+enum Inc : uint32_t {
+  kNoRun,
+  kActorUnresolvedSpawn,
+  kActorCutSpawn,
+  kActorNoRoot,
+  kActorChildSet,
+  kKeyNoArgflow,
+  kKeyPtrField,
+  kKeyImageCut,
+  kKeyImageWritten,
+  kKeyImageNotValue,
+  kKeyNoImageLeaf,
+  kKeyFieldNoImage,
+  kKeyOther,
+  kKeyCreator,
+  kTruncImage,
+  kTruncInit,
+  kTruncFpInit,
+  kTruncExpr,
+  kTruncDerives,
+  kTruncLoopText,
+  kWriterNotComplete,
+  kWriterNoStatus,
+  kWriterPremise,
+  kAbsentSearch,
+  kAbsentCallee,
+  kAbsentReader,
+  kFixedNoOrder,
+  kFixedCreationOnly,
+  kFixedImageOrder,
+  kFixedLocks,
+  kFixedUnresolved,
+  kFixedChildSet,
+  kFixedAssumption,
+  kLinkIdentity,
+  kLinkSelf,
+  kReadingDeviation,
+  kIncCount
+};
 
 // A three-valued constant: known or not.
 struct Val {
@@ -81,8 +125,10 @@ class Rel : public RelFacts {
   explicit Rel(const kz::Container& c) : RelFacts(c) { file_notes_ = &row_files_; }
 
   kz::Status run(RelReport* out) {
+    if (relations_incomplete_reasons().size() != kIncCount) return kz::Status::error(kz::Err::Invalid, "the incompleteness reason table does not match its index");
     kz::Status s = prepare();
     if (!s.ok()) return s;
+    global_reasons();
     RelReport rep;
     path_a(&rep);
     path_b(&rep);
@@ -259,6 +305,7 @@ class Rel : public RelFacts {
   struct ChildSet {
     std::set<uint32_t> roots, descendants, code;
     std::vector<std::string> incomplete;  // why the set is not known to be complete
+    bool cut = false;                     // entries of the set come from a static image cut at the image budget (revision 6)
     std::vector<uint32_t> unres;          // the indirect calls of that code whose targets are not (all) resolved (revision 5)
   };
   const ChildSet& child_set(uint32_t site, const std::set<uint32_t>& resolved) {
@@ -283,9 +330,17 @@ class Rel : public RelFacts {
     // entries read from a static image under a premise of the spawn's guard (image_premise_)
     auto image_premise = [&](uint32_t spawn_site, const std::string& where) {
       auto ip = image_premise_.find(spawn_site);
-      if (ip == image_premise_.end()) return;
-      const std::string t = "the entries of the spawn " + where + " are read from a static image: " + ip->second;
-      if (std::find(cs.incomplete.begin(), cs.incomplete.end(), t) == cs.incomplete.end()) cs.incomplete.push_back(t);
+      if (ip != image_premise_.end()) {
+        const std::string t = "the entries of the spawn " + where + " are read from a static image: " + ip->second;
+        if (std::find(cs.incomplete.begin(), cs.incomplete.end(), t) == cs.incomplete.end()) cs.incomplete.push_back(t);
+      }
+      // relations rules revision 6: entries from a cut image are those of the part read only
+      auto ic = image_cut_.find(spawn_site);
+      if (ic != image_cut_.end()) {
+        cs.cut = true;
+        const std::string t = "the entries of the spawn " + where + " are read from a static image: " + ic->second;
+        if (std::find(cs.incomplete.begin(), cs.incomplete.end(), t) == cs.incomplete.end()) cs.incomplete.push_back(t);
+      }
     };
     {
       auto sc = call_by_site_.find(site);
@@ -432,6 +487,71 @@ class Rel : public RelFacts {
     row_files_.clear();
     row_tags_.clear();
     row_p0_.clear();
+    row_inc_.clear();
+  }
+  // ---------------------------------------------------------------- incompleteness (relations rules revision 6, §5m)
+  // A reason of the row being written (Inc, relations_incomplete_reasons()).
+  void inc(Inc i) const { row_inc_.insert(i); }
+  // The reasons of the whole facts, which every row carries: spawn calls with no resolved entry (and the calls of a
+  // derived spawn operation a trampoline stands for with no resolved entry), spawn entries from a cut static image, and
+  // the walk bounds BASIS count.walk_bounds_hit counts as hit (the two counts of the image budget excluded: a cut image is
+  // read per object, image_cut).
+  void global_reasons() {
+    bool missing = !unresolved_spawns_.empty();
+    for (const auto& [t, ms] : via_op_missing_)
+      if (!ms.empty()) missing = true;
+    if (missing) global_inc_.insert(kActorUnresolvedSpawn);
+    if (!image_cut_.empty()) global_inc_.insert(kActorCutSpawn);
+    auto it = basis_map_.find("count.walk_bounds_hit");
+    if (it == basis_map_.end()) return;
+    const std::string& v = it->second;
+    const std::pair<const char*, Inc> bounds[] = {{"FACT_INIT walk ", kTruncInit},
+                                                  {"function-value initializer nesting ", kTruncFpInit},
+                                                  {"expression depth ", kTruncExpr},
+                                                  {"DERIVES copy chains ", kTruncDerives},
+                                                  {"LOOP_ITERS texts ", kTruncLoopText}};
+    for (const auto& [label, reason] : bounds) {
+      const size_t at = v.find(label);
+      if (at == std::string::npos) continue;
+      size_t i = at + std::strlen(label);
+      uint64_t n = 0;
+      bool digits = false;
+      while (i < v.size() && std::isdigit(static_cast<unsigned char>(v[i]))) {
+        n = n * 10 + static_cast<uint64_t>(v[i] - '0');
+        digits = true;
+        ++i;
+      }
+      if (digits && n != 0) global_inc_.insert(reason);
+    }
+  }
+  // the writer-set reason of a field: FIELD_STATUS has no row, or its row is not complete under both rules
+  void inc_writers(const std::string& tf) const {
+    auto fsit = fstatus_of_.find(tf);
+    if (fsit == fstatus_of_.end()) {
+      inc(kWriterNoStatus);
+      return;
+    }
+    const kz_fact_fstatus& f = fstatus_[fsit->second];
+    if (f.status_field != KZ_LOC_STATUS_COMPLETE || f.status_type != KZ_LOC_STATUS_COMPLETE) inc(kWriterNotComplete);
+  }
+  // The row's reasons, after its layers are written (they read the row's files and tags): the reasons of the whole
+  // facts, no run record, a basis deviation of a unit the row names, the per-field completeness rule and, for a
+  // proven-impossible grade, the declared assumptions and the premises of path C the grade rests on.
+  void finish(RelRow* r) {
+    inc(kNoRun);
+    for (uint32_t g : global_inc_) row_inc_.insert(g);
+    if (!row_deviations().empty()) inc(kReadingDeviation);
+    for (const std::string& t : row_tags_) {
+      if (t.compare(0, 28, "per-field completeness rule ") == 0) inc(kWriterPremise);
+      if (r->feasibility_grade == "proven-impossible" && (t.compare(0, 7, "assume.") == 0 || t.compare(0, 19, "premises of path C ") == 0)) inc(kFixedAssumption);
+    }
+    r->incomplete.assign(row_inc_.begin(), row_inc_.end());
+    std::set<std::string> reasons;
+    for (uint32_t i : r->incomplete) {
+      ++inc_rows_[i];
+      reasons.insert(relations_incomplete_reasons()[i].reason);
+    }
+    for (const std::string& x : reasons) ++inc_reason_rows_[x];
   }
   void tag(const std::string& t) const { row_tags_.insert(t); }
   // a P0 entry the row's derivation uses; named in the layers column when its source is not checked
@@ -547,6 +667,8 @@ class Rel : public RelFacts {
       os << "; the member " << image_member_.at(site) << " has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written";
       auto ip = image_premise_.find(site);
       if (ip != image_premise_.end()) os << "; " << ip->second << " (so the threads of this spawn are taken as not complete)";
+      auto ic = image_cut_.find(site);
+      if (ic != image_cut_.end()) os << "; " << ic->second << " (so the threads of this spawn are taken as not complete)";
       os << "]";
     }
     os << "\n";
@@ -557,6 +679,28 @@ class Rel : public RelFacts {
        << ", key-matched " << n_a_keymatch_ << ") B " << n_b_ << " (with a callee check " << n_b_check_ << ") C " << n_c_ << " (self-identity reads " << n_c_self_
        << "); flip static-possible " << n_flip_possible_ << ", static-undetermined " << n_flip_undet_ << ", none " << n_flip_none_ << "; feasibility proven-impossible "
        << n_feas_impossible_ << ", possible " << n_feas_possible_ << ", undecidable " << n_feas_undecidable_ << ", not graded " << n_feas_not_graded_ << "\n";
+    // relations rules revision 6: the rows per incompleteness reason (the reason, then its sub-reasons)
+    os << "summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m):";
+    const std::vector<RelReason>& table = relations_incomplete_reasons();
+    std::string last;
+    bool any = false;
+    for (size_t i = 0; i < table.size(); ++i) {
+      auto n = inc_rows_.find(static_cast<uint32_t>(i));
+      if (n == inc_rows_.end()) continue;
+      if (last != table[i].reason) {
+        os << (any ? "]; " : " ") << table[i].reason << " " << inc_reason_rows_.at(table[i].reason) << " [";
+        last = table[i].reason;
+      } else {
+        os << ", ";
+      }
+      os << table[i].sub << " " << n->second;
+      any = true;
+    }
+    os << (any ? "]" : " no rows");
+    os << "; reasons of the whole facts on every row:";
+    if (global_inc_.empty()) os << " none";
+    for (uint32_t g : global_inc_) os << " " << reason_text(table[g]);
+    os << "\n";
   }
   size_t count_kind(const char* k) const {
     size_t n = 0;
@@ -1076,6 +1220,11 @@ class Rel : public RelFacts {
       r.flip = grade + ": " + why;
       bool l0 = uses_script_root(ra) || uses_script_root(wa);
       r.layers = layers_text(true, l0, wsource.compare(0, 7, "WRITERS") == 0 ? "(writers: rule targets)" : "");
+      // relations rules revision 6: the incompleteness reasons of the field-argument row (the feasibility's in b_feasibility)
+      if (undetermined) inc(kActorNoRoot);
+      inc_writers(tf);
+      if (grade == "static-undetermined") inc(kAbsentCallee);
+      finish(&r);
       key_b(&r);
       site_keys(&r);
       out.rows.push_back(std::move(r));
@@ -1134,6 +1283,7 @@ class Rel : public RelFacts {
     }
     std::string grade = "undecidable";
     std::string text;
+    inc(ordered ? kFixedCreationOnly : !images.empty() ? kFixedImageOrder : kFixedNoOrder);
     if (ordered) {
       text = std::string("fixed unconfirmed (") + (any_await ? "creation order + await; the await rests on the L1 premise only" : "creation order only") + "): ";
       for (const std::string& p : parts) text += p + " ";
@@ -1648,6 +1798,7 @@ class Rel : public RelFacts {
             if (cx.not_reached && !cs.incomplete.empty()) {
               feas = "undecidable: the threads this spawn starts that these facts resolve (the child and its descendants) do not reach this call, but that set is not complete: " +
                      join(cs.incomplete, "; ");
+              inc(kFixedChildSet);
               tally_feas("undecidable");
             } else if (cx.not_reached && cx.open_reach) {
               // revision 5: an unresolved indirect call of the threads may call an address-taken function from which
@@ -1656,6 +1807,7 @@ class Rel : public RelFacts {
                      "makes indirect calls whose targets are not (all) resolved (" + unres_text(cs.unres) + "), and " + fname(cx.call_fn) +
                      " runs from an address-taken function such a call may call: the locks held where it runs are not known";
               note_lock_prims();
+              inc(kFixedUnresolved);
               tally_feas("undecidable");
             } else if (cx.not_reached) {
               feas = "not graded: the threads this spawn starts (the child and the threads its code starts) do not reach this call in the static call graph, so this context is "
@@ -1667,12 +1819,14 @@ class Rel : public RelFacts {
             } else if (cx.unresolved) {
               feas = "undecidable: an indirect call whose targets these facts do not resolve may call " + fname(u.fn) + " in code these threads run; the locks held there are not known";
               note_lock_prims();
+              inc(kFixedUnresolved);
               tally_feas("undecidable");
             } else {
               CExtra xc = x;
               xc.read_fn = u.fn;
               xc.ctx_fn = cx.call_row != kN ? lockset_[cx.call_row].fn : kN;
               feas = c_feasibility(lsit == lockset_call_.end() ? kN : lsit->second, wrows, cx, xc);
+              if (last_feas_grade_ == "undecidable") inc(kFixedLocks);
             }
             r.feasibility = feas;
             r.feasibility_grade = last_feas_grade_;
@@ -1766,6 +1920,14 @@ class Rel : public RelFacts {
             r.flip_grade = grade;
             r.flip = grade + ": " + why;
             r.layers = layers_text(true, uses_script_root(child) || uses_script_root(cs.descendants) || uses_script_root(ua));
+            // relations rules revision 6: the incompleteness reasons of the creation row (the feasibility's above)
+            inc(kLinkIdentity);
+            if (!self.empty()) inc(kLinkSelf);
+            if (!cs.incomplete.empty()) inc(kActorChildSet);
+            if (cs.cut) inc(kTruncImage);
+            inc_writers(tf);
+            if (grade == "static-undetermined") inc(kAbsentReader);
+            finish(&r);
             key_c(&r);
             grp.rows.push_back(std::move(r));
           }
@@ -2312,6 +2474,8 @@ class Rel : public RelFacts {
     std::string status;  // "known", "unresolved"
     std::set<std::string> values;
     std::string text;
+    Inc why = kIncCount;  // unresolved: the sub-reason of key_unresolved (relations rules revision 6)
+    bool cut = false;     // the static image the key is read from was cut at the image budget
   };
   // the key a use passes: a literal, a constant, or a field whose static image the facts reach
   KeyValue key_value(uint32_t site, uint32_t arg) const {
@@ -2320,6 +2484,7 @@ class Rel : public RelFacts {
     if (af == argflow_at_.end()) {
       kv.status = "unresolved";
       kv.text = "no ARGFLOW row";
+      kv.why = kKeyNoArgflow;
       return kv;
     }
     const kz_fact_argflow& a = argflow_[af->second];
@@ -2344,6 +2509,7 @@ class Rel : public RelFacts {
         if (p.status == KZ_PTRF_STATUS_UNRESOLVED) {
           kv.status = "unresolved";
           kv.text = "read through the pointer field " + str(p.type) + "." + str(p.field) + ": needs field points-to (PTR_FIELDS)";
+          kv.why = kKeyPtrField;
           return kv;
         }
         object = str(p.object);
@@ -2378,12 +2544,23 @@ class Rel : public RelFacts {
             }
           }
         }
+        // relations rules revision 6: an image cut at the image budget gives the values of the part read, not all of
+        // them, so the key is unresolved (with or without values found) and no exclusion and no flip rests on it
+        const std::string cut = image_cut(base_name(object));
+        if (!cut.empty()) {
+          kv.status = "unresolved";
+          kv.cut = true;
+          kv.why = kKeyImageCut;
+          kv.text += "; unresolved (image, not taken as the run-time value: " + image_value_why(str(a.type), field, written, cut) + ")";
+          return kv;
+        }
         // the image is the run-time value only under the rule of the static-image entries; otherwise no exclusion and no
         // flip rests on it
         if (!kv.values.empty()) {
           const std::string why = image_value_why(str(a.type), field, written);
           if (!why.empty()) {
             kv.status = "unresolved";
+            kv.why = written != 0 ? kKeyImageWritten : kKeyImageNotValue;
             kv.text += written & (KZ_GIMAGE_FLAG_FIELD_WRITTEN | KZ_GIMAGE_FLAG_RECORD_WRITTEN) ? "; unresolved (image, field written at run time)"
                        : written != 0                                                         ? "; unresolved (image, object written at run time)"
                                                                                                 : "; unresolved (image, not taken as the run-time value: " + why + ")";
@@ -2391,15 +2568,20 @@ class Rel : public RelFacts {
           }
         }
         kv.status = kv.values.empty() ? "unresolved" : "known";
-        if (kv.values.empty()) kv.text += "; no image leaf of the field";
+        if (kv.values.empty()) {
+          kv.text += "; no image leaf of the field";
+          kv.why = kKeyNoImageLeaf;
+        }
         return kv;
       }
       kv.status = "unresolved";
       kv.text = "field " + str(a.type) + "." + field + " read with base " + enum_text("KZ_ARGBASE", a.base) + " (no static image reached)";
+      kv.why = kKeyFieldNoImage;
       return kv;
     }
     kv.status = "unresolved";
     kv.text = enum_text("KZ_ARGSRC", a.src) + " [" + str(a.text) + "]";
+    kv.why = kKeyOther;
     return kv;
   }
 
@@ -2789,7 +2971,7 @@ class Rel : public RelFacts {
       L.line("key") << "key: " << u.key.text;
       L.line("actors") << "actors: " << actors_text(u.actors) << "; result=" << result_use(u.ci);
       std::vector<std::string> paired, excluded, probes;
-      bool any_inter = false, any_match = false, any_unres = false;
+      bool any_inter = false, any_match = false, any_unres = false, creator_unres = false, creator_cut = false;
       uint32_t n_probe = 0, n_differ = 0, n_same_actor = 0;
       for (const Use& w : uses) {
         if (!w.creator || w.part != u.part) continue;
@@ -2883,6 +3065,8 @@ class Rel : public RelFacts {
         any_inter = true;
         if (keyrel == "same key") any_match = true;
         else any_unres = true;
+        if (w.key.status != "known") creator_unres = true;
+        if (w.key.cut) creator_cut = true;
         paired.push_back(keyrel + ": " + line);
       }
       if (any_inter) ++n_a_paired_;
@@ -2933,6 +3117,16 @@ class Rel : public RelFacts {
       r.flip = grade + ": " + why;
       bool l0 = uses_script_root(u.actors);
       r.layers = layers_text(true, l0);
+      // relations rules revision 6: the incompleteness reasons of the lookup row
+      if (u.key.status != "known" && u.key.why != kIncCount) inc(u.key.why);
+      if (creator_unres) inc(kKeyCreator);
+      if (u.key.cut || creator_cut) inc(kTruncImage);
+      if (u.actors.empty()) inc(kActorNoRoot);
+      inc_writers(n.key);
+      for (const std::string& f : n.active) inc_writers(f);
+      if (fails.empty()) inc(kAbsentSearch);
+      if (!paired.empty()) inc(kFixedNoOrder);
+      finish(&r);
       key_a(&r);
       out->push_back(std::move(r));
     }
@@ -3052,6 +3246,10 @@ class Rel : public RelFacts {
   std::map<uint32_t, ChildSet> child_sets_;  // spawn site -> its child set
   uint32_t n_c_incomplete_ctx_ = 0, n_c_descendant_ctx_ = 0, n_c_callback_ctx_ = 0, n_c_unresolved_ctx_ = 0, n_c_open_reach_ctx_ = 0, n_c_open_reach_reads_ = 0;
   mutable std::set<std::string> row_files_, row_tags_, row_p0_;
+  mutable std::set<uint32_t> row_inc_;          // the incompleteness reasons of the row being written (Inc)
+  std::set<uint32_t> global_inc_;               // the reasons of the whole facts (global_reasons)
+  std::map<uint32_t, uint32_t> inc_rows_;       // reason (Inc) -> rows that carry it
+  std::map<std::string, uint32_t> inc_reason_rows_;  // reason of the vocabulary -> rows that carry it with any sub-reason
   std::string last_feas_grade_;  // the grade tally_feas counted last (the row's feasibility grade)
   std::map<std::string, std::set<int64_t>> in_use_, empty_;
   uint32_t n_a_ = 0, n_ns_ = 0, n_a_paired_ = 0, n_a_keymatch_ = 0, n_b_ = 0, n_b_check_ = 0, n_c_ = 0, n_c_self_ = 0;
@@ -3059,6 +3257,50 @@ class Rel : public RelFacts {
 };
 
 }  // namespace
+
+const std::vector<RelReason>& relations_incomplete_reasons() {
+  static const std::vector<RelReason> table = {
+      {"no_run", "no run record read", "every row: this revision reads no run record"},
+      {"actor_not_extracted", "spawn call with no resolved entry", "every row, when the facts have a spawn call with no resolved entry, or a call of a derived spawn operation a trampoline stands for with no resolved entry: the code their threads run is not known, so an actor set may miss them"},
+      {"actor_not_extracted", "spawn entries from a cut static image", "every row, when a spawn's entries are read from a static image cut at the image budget: the entries of the part not read are no roots"},
+      {"actor_not_extracted", "no root reaches the use", "A: no root reaches the lookup; B: no root reaches the readers or the writers"},
+      {"actor_not_extracted", "child threads not all resolved", "C: the set of the threads the spawn starts is not complete (ChildSet)"},
+      {"key_unresolved", "no argument flow row", "A: the key argument has no ARGFLOW row"},
+      {"key_unresolved", "pointer field without points-to", "A: the key is read through a pointer field PTR_FIELDS does not resolve"},
+      {"key_unresolved", "static image truncated", "A: the key's static image was cut at the image budget"},
+      {"key_unresolved", "static image written at run time", "A: a leaf of the key's static image is marked object-, field- or record-written"},
+      {"key_unresolved", "static image not the run-time value", "A: the key's image is not taken as its value: no FIELD_STATUS row, a writer set not complete, or writers at run time"},
+      {"key_unresolved", "no image leaf of the field", "A: the static image reached has no leaf of the key field"},
+      {"key_unresolved", "field read without a static image", "A: the key is a field read with a base whose static image the facts do not reach"},
+      {"key_unresolved", "argument is no literal, constant or field", "A: the key argument is a local, a parameter, a call result, a global or another source"},
+      {"key_unresolved", "creator key", "A: the key of a creator the row pairs is not resolved"},
+      {"truncated", "static image", "A: the key's image, the lookup's or a paired creator's, was cut at the image budget; C: the spawn's threads include entries from a cut image"},
+      {"truncated", "FACT_INIT walk bound", "every row, when BASIS count.walk_bounds_hit counts a FACT_INIT walk that stopped"},
+      {"truncated", "function-value initializer nesting bound", "every row, when BASIS count.walk_bounds_hit counts a function-value initializer cut"},
+      {"truncated", "expression depth bound", "every row, when BASIS count.walk_bounds_hit counts a subexpression cut"},
+      {"truncated", "DERIVES copy chain bound", "every row, when BASIS count.walk_bounds_hit counts a DERIVES chain cut"},
+      {"truncated", "LOOP_ITERS text bound", "every row, when BASIS count.walk_bounds_hit counts a LOOP_ITERS text cut"},
+      {"writer_set_incomplete", "FIELD_STATUS not complete", "A: the key or an active field, B and C: the field, whose FIELD_STATUS row is not complete under both rules"},
+      {"writer_set_incomplete", "no FIELD_STATUS row", "A: the key or an active field, B and C: the field, with no FIELD_STATUS row"},
+      {"writer_set_incomplete", "per-field completeness rule is a premise", "a row whose grade rests on the per-field completeness rule (rests-on in its layers)"},
+      {"absent_result_unevaluated", "no failure return of the search", "A: the searches of the namespace have no constant return (RET_CONSTS)"},
+      {"absent_result_unevaluated", "callee check not evaluated", "B: the flip column is static-undetermined"},
+      {"absent_result_unevaluated", "reader's returns not evaluated", "C: the flip column is static-undetermined"},
+      {"fixed_proof_open", "no static order between the actors", "A: a creator is paired and no static order is derived; B: neither a creation order nor a static image relates the actors"},
+      {"fixed_proof_open", "creation order without an order of the use", "B: a creation order (and an await) is derived, but not the order of the use and the awaited state"},
+      {"fixed_proof_open", "no creation order from a static image", "B: the actors come from one static image, whose index is not read as an order"},
+      {"fixed_proof_open", "lock sets do not decide the order", "C: the feasibility column, graded from the lock sets and paths, is undecidable"},
+      {"fixed_proof_open", "indirect call with unresolved targets", "C: an indirect call whose targets are not resolved may run the read or the call of its context"},
+      {"fixed_proof_open", "child threads not all resolved", "C: the context is not reached by the threads resolved, and their set is not complete"},
+      {"fixed_proof_open", "proof rests on an assumption", "C: proven-impossible under a declared assumption or the premises of path C (rests-on in its layers)"},
+      {"link_unlinked", "identity of the reader and the created thread not decided", "C: every row (the dependency column says so)"},
+      {"link_unlinked", "self-reported identity", "C: the read's subscript is the reader's own identity"},
+      {"reading_options_differ", "basis deviation of a unit of the row", "a row that names a position in a unit with a basis deviation (layers basis-deviation)"},
+  };
+  return table;
+}
+
+std::string reason_text(const RelReason& r) { return std::string(r.reason) + "(" + r.sub + ")"; }
 
 kz::Status relations_rows(const kz::Container& facts, const RelationsOptions& options, RelReport* out) {
   (void)options;
@@ -3078,6 +3320,11 @@ std::string render_row(const RelRow& r) {
   t += "      violation: " + r.violation + "\n";
   t += "      flip: " + r.flip + "\n";
   t += "      layers: " + r.layers + "\n";
+  t += "      incomplete: ";
+  const std::vector<RelReason>& table = relations_incomplete_reasons();
+  for (size_t i = 0; i < r.incomplete.size(); ++i) t += (i == 0 ? "" : "; ") + (r.incomplete[i] < table.size() ? reason_text(table[r.incomplete[i]]) : std::string("?"));
+  if (r.incomplete.empty()) t += "none found";
+  t += "\n";
   return t;
 }
 

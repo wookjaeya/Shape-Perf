@@ -113,11 +113,18 @@ struct RelFacts {
   // an unknown effect makes it not complete), and no leaf used may be marked as written (object-, field- or
   // record-written: a store to the object, the field or a whole record of its type); otherwise the spawn stays
   // unresolved, with the reason.
-  // Why the static image of a member is not taken as its run-time value ("" when it is): a leaf of the image is marked
-  // written (object-, field- or record-written, GLOBAL_IMAGES), FIELD_STATUS has no row of the member, its writer set
-  // is not complete under both rules, or it has writers at run time.  The rule of the static-image entries and of the
-  // image keys of path A.
-  std::string image_value_why(const std::string& type, const std::string& field, uint16_t written) const;
+  // Why the static image of a member is not taken as its run-time value ("" when it is): the image was cut at the image
+  // budget (`cut`: its marker leaves, image_cut; relations rules revision 6), a leaf of the image is marked written
+  // (object-, field- or record-written, GLOBAL_IMAGES), FIELD_STATUS has no row of the member, its writer set is not
+  // complete under both rules, or it has writers at run time.  The rule of the static-image entries and of the image
+  // keys of path A.
+  std::string image_value_why(const std::string& type, const std::string& field, uint16_t written, const std::string& cut = "") const;
+  // The marker leaves `<image truncated>` of the static image of an object (GLOBAL_IMAGES), as "object<path>, ...", or ""
+  // when the image is whole: the extraction stopped there at the image budget (static_facts.md 5j), and the part from
+  // there on was not read.  An image whose rows carry the flag image-truncated without a marker row is cut too (its text
+  // is then "<object> (image-truncated)").  Relations rules revision 6: a value read from a cut image is not known to be
+  // all the values of that image.
+  std::string image_cut(const std::string& object) const;
   void image_entries();
   // the functions whose every return value is the address of (a part of) a global object or null
   // (target_rules.cpp, the same rule over the records)
@@ -215,6 +222,7 @@ struct RelFacts {
   std::map<uint32_t, std::set<uint32_t>> image_spawn_;   // spawn site -> entries from a static image
   std::map<uint32_t, std::string> image_member_;          // spawn site -> the member the entry argument reads (Type.field)
   std::map<uint32_t, std::string> image_premise_;         // spawn site -> what its entries from the image rest on (relations rules revision 5)
+  std::map<uint32_t, std::string> image_cut_;             // spawn site -> its entries come from a cut image: why the set is not all (revision 6)
   std::map<uint32_t, std::string> unresolved_why_;        // indirect call site -> the reason of its unresolved row (CALL_TARGETS)
   std::map<uint32_t, std::map<uint32_t, std::string>> image_paths_;  // spawn site -> entry -> its image paths
   std::map<uint32_t, std::map<uint32_t, std::set<std::string>>> via_op_;  // trampoline -> root -> the derived spawn operations

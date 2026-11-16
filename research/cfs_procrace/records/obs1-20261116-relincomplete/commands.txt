@@ -1,0 +1,15 @@
+# declaration: sha256 of declared_before_build.txt (= the lines of section 3 of plan/observation_path_results_20261116.md up to the end of 3.0, before the build) = 6d5f7af47f32f3d133055580dfbfac089556d575e627aaf1968080960e2ea1b5 (2026-11-16T06:12:08Z; committed before the build)
+# obs1-20261116-relincomplete: commands, rc and free space (df -B1 /, bytes available)
+start: free 4367933440 at the first measurement of this step (after 05:47:40Z, the end of the step before; the time was not written down)
+# <scratch> is this session's scratchpad directory (m2/)
+
+## 0. before the declaration
+kz-static a763e255 (the tree's tool before this build) on <scratch>/fx/relincomplete.c, extract --no-profile --targets-rule R-T1,R-T2 [--image-budget 3] and relations: used to shape the fixture (the extraction is not changed by this step); at --image-budget 3 the old relations give the key of the cut name table as 'known' with three of the four names, and count the marker task_defs[...] as a non-constant leaf covering the member
+grep -l 'kz-relations 1' kairos/tests/{static,golden,phi}/data/* -> relations.golden relations_np.golden relpaths_np.golden relsound_np.golden (the goldens that draw relations)
+grep -c '      incomplete: ' and '^summary incomplete' over T8CF/*/NP/relations.txt -> 0 each (the new lines collide with no line)
+T8CF row counts: rows 431/431/338/178/175, A rows 127/127/68/66/66, A rows with key unresolved 72/72/32/64/64, lines 7162/7162/4966/3083/3037
+g++ <the MC kz-llvm / test flags, -Werror> -fsyntax-only lib/llvm/{rel_facts,relations}.cpp tests/static/{test_static_reasons,test_static_cli,static_golden}.cpp -> clean
+MC/tests/lint/kz_lint <rule> kairos --data kairos/tests/lint/data for case-ids retired-term banned-files no-llvm no-generated (kz_lint b0f0d6a5) -> clean
+python3 -I vocab_check.py plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md kairos/tests/static/data/reason_vocabulary.txt -> SAME table 22 reasons, data file 22 lines
+tool copy (tool_copy/): space_guard.sh --need 60000000 --kind tool-copy -- xz -9 -T4 -c MC/tools/kz-static/kz-static > /home/user/work/preserve/tools-20261116-b/kz-static.a763e255.xz (06:08-06:10Z) -> rc 0, 39,612,812 B, dip 39,632,896; round trip OK (ROUNDTRIP.txt)
+free before the commit of the declaration: 4324368384 (2026-11-16T06:12:08Z)

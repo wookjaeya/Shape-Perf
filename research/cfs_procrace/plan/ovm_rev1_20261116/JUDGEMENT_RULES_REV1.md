@@ -380,6 +380,32 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 | `fixed_proof_open` | 고정 순서의 정적 증명이 열려 있음 |
 | `no_matching_use_after_w` | 같은 소비자의 대응하는 사용이 게시 뒤에 없음 |
 | `no_material` | 대상 프로그램·구성·재현 입력이 없음(자료 부족) |
+| `intervention_out_of_scope` | 이 단계는 개입(보류·해제·지향 실행)을 하지 않음(2026-11-16 덧붙임) |
+| `reading_options_differ` | 사실을 읽은 옵션이 그 빌드의 옵션과 다름(2026-11-16 덧붙임) |
+| `build_mismatch` | 기록과 사실이 서로 다른 빌드에서 옴(2026-11-16 덧붙임) |
+
+**2026-11-16 덧붙임 (선언된 문서 변경).** 정적 관계 행이 미완 사유를 줄마다 쓰게 하는 도구 변경(relations 규칙 개정 6)을 빌드하기 전에, 이 표에 위의 세 줄을 더했다. 셋 모두 [보강 제안]이다. 각 줄이 기존 사유에 들지 않는 까닭은 다음과 같다.
+
+- `intervention_out_of_scope`: `plan_missing`은 계획이 없음, `budget_not_run`은 예산 때문에 하지 않음, `no_run`은 실행 기록이 없음이다. 이 사유는 개입이 그 단계의 범위 밖이라서 개입 축(`intervention.*`)이 비어 있음을 말한다. 계획·예산·기록이 있어도 생긴다. 그래서 셋 가운데 어느 것으로 적으면 계획·예산·기록의 부재로 잘못 읽힌다.
+- `reading_options_differ`: 정적 사실을 만든 읽기 옵션(예: basis 편차 `front_end.arguments_added`, 곧 컴파일 데이터베이스에 없는 인자를 더해 읽은 단위)이 그 빌드의 컴파일 옵션과 다르다. 그 단위의 사실이 빌드의 코드와 같다는 것이 전제로만 남는다. `no_material`(자료가 없음)도 `record_insufficient`(실행 기록이 모자람)도 아니다. 자료는 있고 그것을 읽은 방식이 다르다.
+- `build_mismatch`: 실행 기록이나 계획이 가리키는 빌드와 정적 사실의 빌드가 다르다(예: 실행 파일의 sha256 이 사실의 basis 와 다름). `no_run`은 같은 빌드의 기록이 없음이다. 이 사유는 기록은 있으나 다른 빌드의 것이라 결합을 거부했음을 말한다. 기록이 없는 경우와 가른다.
+
+**하위 사유의 표기 (2026-11-16 덧붙임).** 도구는 사유를 `사유(하위 사유)` 꼴로 쓴다. 하위 사유는 그 사유의 구체적인 까닭이고 새 사유가 아니다. 위 표에 없는 까닭은 가장 가까운 사유의 하위 사유로 쓰고, "기타"로 뭉치지 않는다. 예: 키 글을 기록에서 읽지 못함 → `record_insufficient(key text)`; 생성 토큰이 없음, 생성 인자 경로가 없음 → `link_unlinked(no creation token)`, `link_unlinked(no creation-argument channel)`; 실행 중 표 버퍼로 읽히는 키 → `key_unresolved(runtime table buffer)`; points-to 가 없는 포인터 필드로 읽히는 키 → `key_unresolved(pointer field without points-to)`.
+
+**관측 필요의 상태와 사유 (2026-11-16 덧붙임, [보강 제안]).** 관측 계획의 필요(need)마다 실행 뒤의 상태를 하나 둔다. 상태는 사유가 아니라 그 필요의 값이다. 사유는 다음 표 하나로만 대응시킨다.
+
+| 필요의 상태 | 사유 |
+|---|---|
+| present (값이 기록에 있음) | 없음 |
+| value-missing (사건은 있으나 값이 없음) | `record_insufficient(value)` |
+| text-partial (키 글이 잘렸거나 일부만 있음) | `record_insufficient(key text)` |
+| not-reached (실행이 그 자리에 닿지 않음) | `target_not_reached` |
+| unknown-loss (기록에 손실 표지가 있고 무엇을 잃었는지 모름) | `record_insufficient(loss marker)` |
+| unbound (계획한 자리가 파생 빌드에 묶이지 않음) | `record_insufficient(site not bound in the build)` |
+| not-planned (계획이 그 필요를 넣지 않음) | `plan_missing(need not planned)` |
+| build-mismatch (기록의 빌드가 사실의 빌드와 다름) | `build_mismatch` |
+
+"자기 식별이 다름", "대기가 시간 초과로 끝남" 같은 관측 결과는 필드의 값이다. 미확정 사유로 쓰지 않는다.
 
 ### 3.6 서식 검사
 

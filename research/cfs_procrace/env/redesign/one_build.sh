@@ -12,6 +12,8 @@
 #   ONE_BUILD_SHOW=1  also write facts.txt (kz-static show); off by default: the text view is written only when a check needs it
 #   ONE_BUILD_NEED  bytes the space guard requires above the floor before each step (default 20000000)
 #   ONE_BUILD_GUARD=0 run without env/tools/space_guard.sh (unit tests with a stub tool only)
+#   ONE_BUILD_EXTRACT_EXTRA  extra arguments of the extract step only, after the rule (e.g. "--image-budget 3" for a
+#                   sensitivity run of a budget); written into args.txt.  Empty by default: the driver's arguments
 #
 # Failure rule: every output is written under a temporary name (NAME.partial) and renamed to NAME only after every
 # step returned 0 and every output is non-empty.  On a failure the partial files are renamed NAME.failed, nothing is
@@ -33,6 +35,8 @@ C1=${C1:-/home/user/work/procrace/c1_build}
 REF=${REF:-/home/user/work/procrace/cfs_ref/cFS}
 CT=${CT:-/home/user/work/c5tools/build}
 RULE=(--targets-rule R-T1,R-T2)
+read -r -a EXTRA <<< "${ONE_BUILD_EXTRACT_EXTRA:-}"
+RULE+=("${EXTRA[@]}")
 # BEGIN inputs table (same as step2a_tests.sh inputs_of)
 inputs_of() {
   case "$1" in

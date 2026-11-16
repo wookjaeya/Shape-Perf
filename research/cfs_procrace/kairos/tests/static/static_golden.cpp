@@ -81,6 +81,10 @@ const std::vector<Case>& cases() {
       // the static image budget (static_facts.md 5j): marker leaves and the flag image-truncated at --image-budget 4, all
       // five cases of imgbudget.c together; the two counts are in BASIS, which goldens leave out (test_static_cli checks them)
       {"imgbudget_np", "imgbudget.c", {"--image-budget", "4"}, kFlowSections, true},
+      // the incompleteness line of relations (relations rules revision 6, static_facts.md 5m): relincomplete.c at the
+      // default image budget and at --image-budget 3, where its name table and its table of thread entries are cut
+      {"relincomplete_np", "relincomplete.c", {"--targets-rule", "R-T1,R-T2"}, kFlowSections, true, true},
+      {"relincomplete_cut_np", "relincomplete.c", {"--targets-rule", "R-T1,R-T2", "--image-budget", "3"}, kFlowSections, true, true},
   };
   return all;
 }

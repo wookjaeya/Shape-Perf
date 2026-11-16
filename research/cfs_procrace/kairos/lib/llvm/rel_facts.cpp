@@ -218,7 +218,8 @@ void RelFacts::thread_end_code() {
 // written (object-, field- or record-written, GLOBAL_IMAGES), FIELD_STATUS has no row of the member, its writer set
 // is not complete under both rules, or it has writers at run time.  The rule of the static-image entries and of the
 // image keys of path A.
-std::string RelFacts::image_value_why(const std::string& type, const std::string& field, uint16_t written) const {
+std::string RelFacts::image_value_why(const std::string& type, const std::string& field, uint16_t written, const std::string& cut) const {
+  if (!cut.empty()) return "the static image was cut at the image budget (marker leaves " + cut + "): the part not read is not known";
   if (written != 0) return "a leaf of the image is marked " + written_flags(written) + " (GLOBAL_IMAGES): the run-time value may differ from the image";
   auto fsit = fstatus_of_.find(type + "." + field);
   if (fsit == fstatus_of_.end()) return "FIELD_STATUS has no row of " + type + "." + field + ": that nothing writes it is not known";
@@ -230,6 +231,20 @@ std::string RelFacts::image_value_why(const std::string& type, const std::string
     return type + "." + field + " has writers at run time (FIELD_STATUS: direct " + std::to_string(f.n_direct) + ", data function " + std::to_string(f.n_data_fn) +
            ", out-pointer " + std::to_string(f.n_outptr) + ")";
   return "";
+}
+
+std::string RelFacts::image_cut(const std::string& object) const {
+  auto git = gimages_of_.find(object);
+  if (git == gimages_of_.end()) return "";
+  std::vector<std::string> markers;
+  bool flagged = false;
+  for (uint32_t gi : git->second) {
+    const kz_fact_gimage& g = gimages_[gi];
+    if (g.flags & KZ_GIMAGE_FLAG_TRUNCATED) flagged = true;
+    if (g.kind == KZ_IMAGE_KIND_NONCONST && str(g.text) == "<image truncated>") markers.push_back(object + str(g.path));
+  }
+  if (!markers.empty()) return join(markers, ", ");
+  return flagged ? object + " (image-truncated)" : "";
 }
 
 void RelFacts::image_entries() {
@@ -292,15 +307,19 @@ void RelFacts::image_entries() {
         paths[g.fn].insert(path);
         written |= g.flags & (KZ_GIMAGE_FLAG_OBJECT_WRITTEN | KZ_GIMAGE_FLAG_FIELD_WRITTEN | KZ_GIMAGE_FLAG_RECORD_WRITTEN);
       }
+    // relations rules revision 6: an image cut at the image budget gives the entries of the part read, not all of them
+    const std::string cut = image_cut(object);
     if (found.empty()) {
       std::string o;
       for (const std::string& x : others) o += (o.empty() ? "" : ", ") + x;
       unresolved_spawns_.push_back(where + ": the entry argument " + std::to_string(k) + " [" + str(a.text) + "] reads " + type + "." + field + " of " + object +
                                    ", and the static image has no function leaf of that member" +
+                                   (cut.empty() ? "" : " in the part read: the image was cut at the image budget (marker leaves " + cut + ")") +
                                    (o.empty() ? "" : " (its function leaves are of " + o + ": a read through another member of a union is not resolved in this revision)"));
       continue;
     }
-    // the image is the run-time value: no write of the member
+    // the image is the run-time value: no write of the member (a cut is not passed here: it does not make the leaves read
+    // wrong, it makes the set of entries not all, image_cut_)
     const std::string why = image_value_why(type, field, written);
     if (!why.empty()) {
       unresolved_spawns_.push_back(where + ": the entry argument " + std::to_string(k) + " [" + str(a.text) + "] reads " + type + "." + field + " of " + object +
@@ -309,6 +328,9 @@ void RelFacts::image_entries() {
     }
     image_spawn_[c.site] = found;
     image_member_[c.site] = type + "." + field;
+    if (!cut.empty())
+      image_cut_[c.site] = "the static image of " + object + " was cut at the image budget (marker leaves " + cut +
+                           "): the entries of the part not read are not found";
     // relations rules revision 5: the elements of the image whose member is not a function leaf of the member read
     // (a non-constant leaf covering it, or a function leaf of another member of its record: a union may hold that
     // value) give the member read another value; that the spawn reads only the elements found is the spawn's guard,
@@ -336,6 +358,7 @@ void RelFacts::image_entries() {
       for (uint32_t gi : git->second) {
         const kz_fact_gimage& g = gimages_[gi];
         const std::string pth = str(g.path), sh = shape(pth);
+        if (g.kind == KZ_IMAGE_KIND_NONCONST && str(g.text) == "<image truncated>") continue;  // a marker is no value (image_cut_)
         if (g.kind == KZ_IMAGE_KIND_NONCONST) {
           bool covers = false;
           for (const std::string& ct : containers)

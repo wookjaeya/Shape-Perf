@@ -1,0 +1,26 @@
+# The reason vocabulary of the judgement rules: plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md section 3.5, the table of
+# reasons, one reason per line in the order of that table (a row of the table that names two or three reasons gives a line
+# each).  The last three lines are the entries added to that table on 2026-11-16, before relations rules revision 6 was
+# built.  A tool writes a reason as `reason(sub-reason)`; the reason is one of these lines (test_static_reasons).
+key_unresolved
+absent_result_unevaluated
+handling_effect_unknown
+caller_dependence_unknown
+writer_set_incomplete
+multi_state_unlinked
+actor_not_extracted
+link_unlinked
+no_run
+target_not_reached
+record_insufficient
+plan_missing
+plan_rejected
+plan_manual
+budget_not_run
+truncated
+fixed_proof_open
+no_matching_use_after_w
+no_material
+intervention_out_of_scope
+reading_options_differ
+build_mismatch

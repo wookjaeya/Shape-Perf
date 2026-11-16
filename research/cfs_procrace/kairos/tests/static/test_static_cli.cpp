@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -1109,7 +1110,7 @@ startup_script {
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &a), 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &b), 0);
     KZ_CHECK_EQ(a, b);
-    KZ_CHECK(has(a, "rules relations rules revision 5 (2026-10-30)"));
+    KZ_CHECK(has(a, "rules relations rules revision 6 (2026-11-16)"));
     // roots: the image entries of the table, the root that calls a root directly, the dispatching trampoline
     KZ_CHECK(has(a, "table-image-entry 2"));
     KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member "
@@ -1164,6 +1165,101 @@ startup_script {
     KZ_CHECK(has(out, "rule targets               1 (R-T1 0, R-T2 1, both 0;"));
     KZ_CHECK_EQ(run(q(tool) + " show " + q(dp) + " --section basis", &out), 0);
     KZ_CHECK(has(out, "target.Deep.flag = rule R-T2  (unset)"));
+  }
+
+  // ---- the incompleteness line and the image cut at the budget (relincomplete.c; relations rules revision 6) -------
+  // Every row ends in `incomplete:` with reasons of the judgement rules' vocabulary.  At --image-budget 3 the name table
+  // and the table of thread entries are cut: the key read from the cut name table is unresolved (the three names read
+  // are not all), and the entries found in the cut table of thread entries are kept but not all, so the threads of the
+  // spawn are not complete and every row says that some entries are no roots.
+  {
+    const fs::path X = work / "relincomplete";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/relincomplete.c", fd = (X / "default.kz").string(), fc = (X / "cut.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(fd) + " -- -std=c99 -pedantic", &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --image-budget 3 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(fc) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    std::string d, c, d2;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(fd), &d), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(fd), &d2), 0);
+    KZ_CHECK_EQ(d, d2);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(fc), &c), 0);
+    // the row of a lookup, by the text of its first line: its block up to the next row
+    auto row_of = [](const std::string& text, const std::string& head) {
+      const size_t at = text.find(head);
+      if (at == std::string::npos) return std::string();
+      size_t end = text.find("\n  A", at + 1);
+      const size_t endc = text.find("\n  C", at + 1), endh = text.find("\n[", at + 1);
+      if (endc < end) end = endc;
+      if (endh < end) end = endh;
+      return text.substr(at, end == std::string::npos ? std::string::npos : end - at);
+    };
+    auto inc_of = [](const std::string& rowtext) {
+      const size_t at = rowtext.find("      incomplete: ");
+      if (at == std::string::npos) return std::string();
+      const size_t end = rowtext.find('\n', at);
+      return rowtext.substr(at + 18, end == std::string::npos ? std::string::npos : end - at - 18);
+    };
+    // every row of both has one incomplete line, and it starts with no_run
+    for (const std::string* t : {&d, &c}) {
+      size_t rows = 0, lines = 0, at = 0;
+      while ((at = t->find("\n  ", at)) != std::string::npos) {
+        ++at;
+        if (at + 3 < t->size() && ((*t)[at + 2] == 'A' || (*t)[at + 2] == 'C') && std::isdigit(static_cast<unsigned char>((*t)[at + 3]))) ++rows;
+      }
+      at = 0;
+      while ((at = t->find("\n      incomplete: no_run(no run record read)", at)) != std::string::npos) {
+        ++lines;
+        ++at;
+      }
+      KZ_CHECK_EQ(rows, static_cast<size_t>(6));
+      KZ_CHECK_EQ(lines, rows);
+      KZ_CHECK(has(*t, "\nsummary incomplete (rows that carry the reason, then per sub-reason; "));
+    }
+    // the default budget: the key from the name table is known, the key through the opaque pointer is not
+    const std::string dk = row_of(d, "lookup relincomplete.c:82:33 in seek_known -> reg_find#0"), dop = row_of(d, "lookup relincomplete.c:87:9 in seek_opaque -> reg_find#0"),
+                      dl = row_of(d, "lookup relincomplete.c:103:9 in red_main -> reg_find#0");
+    KZ_CHECK(has(dk, "partition {} key known\n"));
+    KZ_CHECK(has(dk, "image name_defs[3].name = \"grey\""));
+    KZ_CHECK(!has(inc_of(dk), "key_unresolved") && !has(inc_of(dk), "truncated"));
+    KZ_CHECK(has(inc_of(dop), "key_unresolved(pointer field without points-to)"));
+    KZ_CHECK(has(inc_of(dop), "fixed_proof_open(no static order between the actors)"));
+    KZ_CHECK(!has(inc_of(dl), "key_unresolved"));
+    KZ_CHECK(has(inc_of(dl), "fixed_proof_open(no static order between the actors)"));
+    KZ_CHECK(has(dl, "flip: static-possible"));
+    // the threads of the spawn rest on its guard (a function leaf of the other member of the union): not complete
+    KZ_CHECK(has(d, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relincomplete.c:"));
+    KZ_CHECK(has(d, "      incomplete: no_run(no run record read); actor_not_extracted(child threads not all resolved); link_unlinked(identity of the reader and "
+                    "the created thread not decided)\n"));
+    // the key field of the namespace has no complete writer set (FIELD_STATUS disabled: array element stores)
+    KZ_CHECK(has(inc_of(dk), "writer_set_incomplete(FIELD_STATUS not complete)"));
+    KZ_CHECK(!has(d, "spawn entries from a cut static image") && !has(d, "static image truncated"));
+    KZ_CHECK(has(d, "; reasons of the whole facts on every row: none\n"));
+    // --image-budget 3: the key from the cut name table is unresolved; no flip and no exclusion rests on it
+    const std::string ck = row_of(c, "lookup relincomplete.c:82:33 in seek_known -> reg_find#0");
+    KZ_CHECK(has(ck, "partition {} key unresolved\n"));
+    KZ_CHECK(has(ck, "image name_defs[2].name = \"blue\"; unresolved (image, not taken as the run-time value: the static image was cut at the image budget (marker "
+                     "leaves name_defs[...]): the part not read is not known)"));
+    KZ_CHECK(!has(ck, "key constants differ"));
+    KZ_CHECK(has(ck, "creator: key unresolved (lookup): "));
+    KZ_CHECK(has(ck, "flip: static-undetermined: the key of the lookup or of a creator is not resolved statically"));
+    KZ_CHECK(has(inc_of(ck), "actor_not_extracted(spawn entries from a cut static image)"));
+    KZ_CHECK(has(inc_of(ck), "key_unresolved(static image truncated)") && has(inc_of(ck), "truncated(static image)"));
+    // the entries of the part read are kept, the spawn's threads are not complete, and the header says why
+    KZ_CHECK(has(c, "table-image-entry 2"));
+    KZ_CHECK(has(c, "the static image of task_defs was cut at the image budget (marker leaves task_defs[...]): the entries of the part not read are not found (so the "
+                    "threads of this spawn are taken as not complete)"));
+    // a marker is no value: it is not counted among the non-constant leaves covering the member
+    KZ_CHECK(!has(c, "non-constant leaf/leaves covering that member (task_defs[...])"));
+    KZ_CHECK(has(c, "; reasons of the whole facts on every row: actor_not_extracted(spawn entries from a cut static image)\n"));
+    // the read in blue_main, whose entry is in the part not read: not reached by the entries found, so undecidable
+    const std::string cb = row_of(c, "(via the call relincomplete.c:117:9 in blue_main; the threads this spawn starts do not reach this call)");
+    KZ_CHECK(has(cb, "feasibility: undecidable: the threads this spawn starts that these facts resolve (the child and its descendants) do not reach this call, but that set "
+                     "is not complete: "));
+    KZ_CHECK(has(cb, "the static image of task_defs was cut at the image budget"));
+    KZ_CHECK(has(inc_of(cb), "fixed_proof_open(child threads not all resolved)") && has(inc_of(cb), "truncated(static image)"));
   }
 
   // ---- the soundness rules of relations path C (relsound.c; relations rules revisions 3 and 4) ---------------------

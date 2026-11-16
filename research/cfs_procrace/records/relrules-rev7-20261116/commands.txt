@@ -15,3 +15,43 @@ MC ctest -R '^lint' (kz_lint 5f62ec20, no build, on this tree) -> 7 of 7 passed
 records/relrules-rev7-20261116/tool_copy/ROUNDTRIP.txt: the existing copy of de1315b3 re-checked (xz -t OK, stream sha256 de1315b3, cmp SAME)
 env/tools/tools_check.sh --deep -> 31 rows, 0 failing; env/tools/ledger_check.sh -> 45 rows, 0 failing
 free before the commit of the declaration: 3255668736 (2026-11-16T10:28:39Z)
+
+## 1. declaration, code, fixture, tests, docs and scripts committed together before the build: d778b7f (line 1 above)
+
+## 2. before the build (pre_mc.txt, 10:28:59Z): the seven tools equal records/obs1-20261116-plangen/post_mc.txt; HEAD d778b7f, uncommitted lines under kairos 0
+
+## 3. rebuild in place in MC under the space guard
+cd MC && env/tools/space_guard.sh --need 292463680 --log df_build.log --kind kz-static -- bash -c "make -j4 all > make.log 2>&1"   (10:29:05Z-10:31:41Z) -> rc 0, first time; 14 Linking lines (libkz-llvm.a, kz-static, test_static_{recipe,flow,expr,gitrev,unroll,wrappers,link,elf32}, test_static_reasons, static_golden, test_static_plan, test_static_cli)
+free: start 3255271424, lowest 3211595776, end 3245293568 (dip 43675648, change -9977856); floor never crossed
+find kairos/{lib,tools,include,cmake,CMakeLists.txt,probe,instrument,runtime} -newer <build start> -> 0 files
+post_mc.txt: kz-static 038cd9e3 (tool_sha256 a3a6cb31, tool_source e8778114, core_source f6e3c7b4 unchanged); kz, kz-dump, kz-rt-dump, kz-phi, kz_lint, kz-instr-clang unchanged; defines of kz, kz-phi, kz-dump unchanged; CMakeCache.txt bc2f43b4 unchanged; flags.make list c92ab3c1 -> 7d2a0717
+
+## 4. tests
+ctest -j4 --output-on-failure -> ctest_first.log: 248 tests, 8 failed as declared (six relations goldens, static_golden_relcallback_np without a golden, test_static_plan); test_static_cli and test_static_reasons passed
+KZ_GOLDEN_UPDATE=1 ctest -R '^(static_golden_(relations|relations_np|relpaths_np|relsound_np|relincomplete_np|relincomplete_cut_np|relcallback_np)|test_static_plan)$' -> golden_update.log, rc 0
+compare_declared.py --golden <the golden at d778b7f> <the updated golden> for the six, and the plan golden with the two revision lines reverted -> golden_compare.txt: all of declared classes; plan golden same after the two lines
+ctest -j4 --output-on-failure -> ctest_full.log: 248 tests, 0 failed, 1 skipped (test_probe_anchor_reached; skip_reason.log); labels golden 61, static 53, legacy-case 51, unit 84, runtime 66, lint 7
+ctest -V: test_static_cli 864 checks, test_static_reasons 655, test_static_plan 182, lint selftest 109 cases 0 failed
+TMPDIR=<scratch>/tmp bash env/tools/tests/run_unit.sh -> unit_tools.txt, 15 of 15;  TMPDIR=<scratch>/tmp bash env/redesign/step2a_tests_unit.sh -> unit_step2a.txt, 7 of 7
+
+## 5. relations of the five builds (rerun.sh) on the tests_8c_fix NP facts
+env/tools/space_guard.sh --need 30000000 --log df_rerun.log --kind relations -- bash rerun.sh (10:33Z) -> rc 0; dip 7610368
+compare_declared.py plangen_relcheck/<b> relrev7_check/<b> -> compare/report_<b>.txt, compare/table_<b>.tsv: rc 0 on all five; callback_check.py -> compare/callback_<b>.tsv: 98/98/64/0/0 pairs, all MATCH; summary byte_identity.txt; kept outputs.sha256
+python3 -I (explain.py's constant form and failure class on the callee-check lines of A21 and A20) -> creator_success.txt; the two rows -> c1_rows.txt
+
+## 6. five builds re-extracted (extract.sh, the single-build runner)
+env/tools/space_guard.sh --need 80000000 --log df_extract.log --kind extract -- bash extract.sh (10:34Z-10:35:34Z) -> rc 0, five PASS (extract_run.txt); dip 47054848
+python3 -I env/redesign/compare_build.py MC/tools/kz-dump/kz-dump compare/extract_<b>.tsv relrev7_extract/<b>/<b>/NP T8CF/<b>/NP --allow rev7_extract_allow.tsv -> not allowed 0 on five; relations.txt = relrev7_check apart from line 2 on five (extract_compare.txt); kept extract.sha256
+
+## 7. plans of the five builds (plans.sh)
+env/tools/space_guard.sh --need 20000000 --log df_plans.log --kind plan -- bash plans.sh -> rc 0, five rc 0 (plans_run.txt); dip 987136
+<scratch>/parse_check (the 20-line program of the plan generator step, g++ against MC runtime/libkzrt-manifest.a) -> parse_check.txt: five ok (sites 259/245/42/147/139)
+env/tools/plan_regen.sh MC/tools/kz-static/kz-static relrev7_plans/<b>/args.txt <scratch>/regen_<b> for c1_pre_tx, c5_641 -> PASS (regen_<b>.txt)
+plan_diff.py plangen/<b>/plan.side relrev7_plans/<b>/plan.side -> plans/plan_diff_<b>.txt; kept plans.sha256
+
+## 8. registry, ledger, cumulative list
+records/TOOLS.tsv: de1315b3 in-place+copy -> copy (not superseded); new row 038cd9e3 in-place. env/tools/tools_check.sh --deep -> tools_check.txt, 32 rows, 0 failing
+records/LEDGER.tsv: new rows OBS_relrev7_check, OBS_relrev7_extract, OBS_relrev7_plans. env/tools/ledger_check.sh -> ledger_check.txt, 48 rows, 0 failing
+name_check.sh --tree over the three output directories -> clean
+deleted: only this step's scratch files in <scratch>; no cFS boot; no push
+end: 2026-11-16T10:39:09Z, free 3629264896

@@ -41,7 +41,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 6 (2026-11-16)
+rules relations rules revision 7 (2026-11-16)
 mode profile-driven
   extract.profile = static-fixtures / test data
 p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
@@ -54,7 +54,8 @@ actors: roots 1 (process 1, spawn-entry 0, table-walk-entry 0, table-image-entry
 spawn calls resolved through the static image of the table their entry argument is read from: 0
 spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
 summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition in another actor 1, key-matched 1) B 1 (with a callee check 1) C 0 (self-identity reads 0); flip static-possible 1, static-undetermined 1, none 1; feasibility proven-impossible 0, possible 0, undecidable 3, not graded 0
-summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 3 [no run record read 3]; actor_not_extracted 2 [no root reaches the use 2]; writer_set_incomplete 2 [FIELD_STATUS not complete 2]; absent_result_unevaluated 1 [callee check not evaluated 1]; fixed_proof_open 2 [no static order between the actors 2]; reasons of the whole facts on every row: none
+summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 0, creators 0; lookup rows with the membership unresolved 0; lookup rows without a creator of their partition 1 [writer set not complete 1]
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 3 [no run record read 3]; actor_not_extracted 2 [no root reaches the use 2]; writer_set_incomplete 2 [FIELD_STATUS not complete 2, zero writers under the rules 1]; absent_result_unevaluated 1 [callee check not evaluated 1]; fixed_proof_open 2 [no static order between the actors 2]; reasons of the whole facts on every row: none
 [A] 2 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
   namespace Slot.name (record type Slot; tables slots)
       search: A1 search loop relations.c:35:3 in slot_find: key Slot.name strcmp at relations.c:36:31 compared with parameter 0 [name] (search parameter 0)
@@ -68,30 +69,49 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
         write at relations.c:63:3 in slot_release value=value not extracted (not a target) (process actor only)
       publication writes of the creator slot_create#0: Slot.name write relations.c:53:7 in slot_create; Slot.used write relations.c:54:7 in slot_create
       key-parameter functions: lookups slot_find#0; creators slot_create#0
-      uses: lookups 2, creators 3 (calls from outside the key-parameter functions; a creator reaches a write of the key)
+      uses: lookups 2, creators 3 (calls from outside the key-parameter functions; a creator reaches a write of the key); left out, another callback passed to the search: lookups 0, creators 0
       namespace layers: B P0 R case:profile(static-fixtures / test data)
   A1 lookup relations.c:84:9 in worker_setup -> slot_find#0 namespace Slot.name partition {} key known
+      membership: reaches the comparison strcmp at relations.c:36:31 in its own search loop
       key: read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta"
+      aliases: the key is read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved)
       actors: {main (process)}; result=tested
+      id holder: the lookup's arg 1 [&worker.handle] address Worker.handle base global object worker@relations.c:77 <- slot_find stores through its parameter 1 in slot_find at relations.c:37:7 [i]
       not a pair: probe-create (same function, the same key argument, the creator's key read under the lookup's result; the creator's key read runs when slot_find returns -17 (no match: slot_find) and not when it returns 0): relations.c:85:13 in worker_setup -> slot_create key read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta" actors {main (process)}
       not a pair: key constants differ: relations.c:120:9 in other_main -> slot_create key string literal "gamma" actors {} (no root reaches it)
       not a pair: key constants differ: relations.c:121:9 in other_main -> slot_create key string literal "delta" actors {} (no root reaches it)
+      id holder: the creator relations.c:85:13 -> slot_create: arg 1 [&worker.handle] address Worker.handle base global object worker@relations.c:77 <- slot_create stores through its parameter 1 in slot_create at relations.c:55:7 [i]
+      aliases: the creator relations.c:85:13 -> slot_create: the key is read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved)
+      callee-check: slot_create returns -17 [ERR_NOT_FOUND] with no condition
+      callee-check: slot_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Slot.used 1)) (eq (call-result strcmp (seq field:Slot.name (seq param:name#0))) 0))
+      callee-check: slot_create returns 0 [0] when (and (lt local:i 4) (eq field:Slot.used 0))
+      writers: Config.name: no writer found under these premises; premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 0: direct 0, data-function 0, out-pointer 0, initial values 1; instances 0); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Slot.name: 1 (write 1) from LOCKSET write events (positions only: the field is no extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Slot.used: 2 (write 2) from LOCKSET write events (positions only: the field is no extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       handling: in the loop relations.c:83:3 kind constant-trip trip exact 2 exit (not (lt local:i 2))
       handling: result tested; no return of it and no terminal operation under it found
       handling: probe-create: on the lookup's failure result the same function creates the same key: relations.c:85:13 -> slot_create (the creator's key read runs when slot_find returns -17 (no match: slot_find) and not when it returns 0)
-      dependency: path A: no creator left after exclusions (probe-create 1, key constants differ 2, same actor only 0)
+      dependency: path A: no creator left after exclusions (probe-create 1, key constants differ 2, same actor only 0): writer set not complete (Slot.name not complete)
       run-order: no record given
       feasibility: undecidable: no pair
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: none: no creator of the same partition and key in another actor; search returns: slot_create returns -17 [ERR_NOT_FOUND], slot_create returns -5 [ERR_ILLEGAL], slot_create returns 0 [0], slot_find returns -17 [ERR_NOT_FOUND], slot_find returns 0 [0]
       layers: B P0 R case:profile(static-fixtures / test data) P0-unverified(strcmp)
-      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); writer_set_incomplete(zero writers under the rules)
   A2 lookup relations.c:113:9 in client_main -> slot_find#0 namespace Slot.name partition {} key known
+      membership: reaches the comparison strcmp at relations.c:36:31 in its own search loop
       key: string literal "gamma"
       actors: {} (no root reaches it); result=discarded
+      id holder: the lookup's arg 1 [&h] address base local <- slot_find stores through its parameter 1 in slot_find at relations.c:37:7 [i]
       creator: same key: relations.c:120:9 in other_main -> slot_create key string literal "gamma" actors {} (no root reaches it)
       not a pair: key constants differ: relations.c:85:13 in worker_setup -> slot_create key read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta" actors {main (process)}
       not a pair: key constants differ: relations.c:121:9 in other_main -> slot_create key string literal "delta" actors {} (no root reaches it)
+      id holder: the creator relations.c:120:9 -> slot_create: arg 1 [&h] address base local <- slot_create stores through its parameter 1 in slot_create at relations.c:55:7 [i]
+      callee-check: slot_create returns -17 [ERR_NOT_FOUND] with no condition
+      callee-check: slot_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Slot.used 1)) (eq (call-result strcmp (seq field:Slot.name (seq param:name#0))) 0))
+      callee-check: slot_create returns 0 [0] when (and (lt local:i 4) (eq field:Slot.used 0))
+      writers: Slot.name: 1 (write 1) from LOCKSET write events (positions only: the field is no extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Slot.used: 2 (write 2) from LOCKSET write events (positions only: the field is no extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       handling: result discarded; no return of it and no terminal operation under it found
       dependency: path A: 1 creator(s) of this partition in other actors
       run-order: no record given
@@ -106,6 +126,7 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
       site relations.c:112:3 in client_main [service.self_id] base=global hops=0 result=discarded
       field: no INIT row; writers 1 from LOCKSET write events (positions only: the field is no extraction target)
         write at relations.c:104:3 in service_main value=value not extracted (not a target)
+      writers: Service.self_id: 1 (write 1) from LOCKSET write events (positions only: the field is no extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       actors: readers {} (no root reaches it); writers {} (no root reaches it) (undetermined)
       callee-check: notify returns -5 [ERR_ILLEGAL] when (eq param:id#0 0)
       handling: discarded 2, used 0, tested 0

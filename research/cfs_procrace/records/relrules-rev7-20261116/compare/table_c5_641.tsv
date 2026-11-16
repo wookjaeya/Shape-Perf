@@ -1,0 +1,67 @@
+# key	path	old id	new id	namespace	old partition	new partition	old creators	new creators	old dependency (class)	new dependency (class)	old flip	new flip	change
+03c3499aa6b6ada2	A	A41	A41	CFE_SB_PipeD_t.PipeId	4,0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+05c6121a0c75fd29	A	A59	A59	CFE_TBL_RegistryRec_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+06b7a80dfee6bafb	A	A32	A32	CFE_SB_PipeD_t.PipeId	0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+0afc3cc27aa74c00	A	A7	A7	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+1d2203ea763bca8d	A	A47	A47	CFE_TBL_AccessDescriptor_t.AppId			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+1ed028c0e937b4b6	A	A30	A30	CFE_SB_PipeD_t.PipeId	0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+1f1c895b93ac9665	A	A29	A29	CFE_SB_PipeD_t.PipeId	0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+2375461a5b2cde9a	A	A8	A8	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+25aba2721fc2bdec	A	A53	A53	CFE_TBL_RegistryRec_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+26b7bac4f65fcacc	A	A39	A39	CFE_SB_PipeD_t.PipeId	4,0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+2ebcea15f4e79065	A	A16	A16	CFE_ES_CDS_RegRec_t.Name			2	2	2 creator(s) of this partition in other actors	2 creator(s) of this partition in other actors	static-undetermined	static-undetermined	kept
+324a02df98593f6d	A	A43	A43	CFE_SB_PipeD_t.PipeId	1		0	0	no creator left after exclusions (probe-create 0, key constant	no creator left after exclusions (probe-create 0, key constant	none	none	kept; partition changed
+36af47e311432de4	A	A20	A20	CFE_SB_PipeD_t.PipeId	4,0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+3affab7930cd8a56	A	A66	A66	OS_VolumeInfo_t.DeviceName			0	0	no creator left after exclusions (probe-create 0, key constant	no creator left after exclusions (probe-create 0, key constant	none	none	kept
+3eac966a43ecda14	A	A64	A64	OS_FDTableEntry.Path			0	0	no creator left after exclusions (probe-create 0, key constant	no creator left after exclusions (probe-create 0, key constant	none	none	kept
+453439e7a0ae669b	A	A50	A50	CFE_TBL_CritRegRec_t.CDSHandle			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+46941597aa05dada	A	A12	A12	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+47816a91c7787892	A	A62	A62	OS_FDTableEntry.Path			0	0	no creator left after exclusions (probe-create 0, key constant	no creator left after exclusions (probe-create 0, key constant	none	none	kept
+49aa151bd11573d9	A	A38	A38	CFE_SB_PipeD_t.PipeId	4,0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+4f183979a16da5c7	A	A42	A42	CFE_SB_PipeD_t.PipeId	1		0	0	no creator left after exclusions (probe-create 0, key constant	no creator left after exclusions (probe-create 0, key constant	none	none	kept; partition changed
+50a5d96622aba41a	A	A49	A49	CFE_TBL_CmdHandlerTblRec_t.MsgId			0	0	no creator of this partition	no creator of this partition: only initial values (no writer o	none	none	kept
+547ca309bcfaadde	A	A58	A58	CFE_TBL_RegistryRec_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+5494d8cc9c1687f2	A	A17	A17	CFE_ES_CDS_RegRec_t.Name			2	2	2 creator(s) of this partition in other actors	2 creator(s) of this partition in other actors	static-undetermined	static-undetermined	kept
+58e715e2277f1fef	A	A19	A19	CFE_SB_PipeD_t.AppId			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+5a236377382e0a5a	A	A55	A55	CFE_TBL_RegistryRec_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+5b457bd561ed6b33	A	A4	A4	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+5d7d60611d127379	A	A10	A10	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+5ea512131ad962c6	A	A54	A54	CFE_TBL_RegistryRec_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+61f19560972ae24e	A	A27	A27	CFE_SB_PipeD_t.PipeId	0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+67a1fb9158bdc0d1	A	A13	A13	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+6d757bcb9412e921	A	A34	A34	CFE_SB_PipeD_t.PipeId	0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+6f2baa5b19eb7ffc	A	A25	A25	CFE_SB_PipeD_t.PipeId	4,0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+710162f9eb5e6d90	A	A9	A9	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+71fa2f4d58460006	A	A46	A46	CFE_TBL_AccessDescriptor_t.AppId			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+733afe901172257a	A	A2	A2	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+73c28c2b4ca5f149	A	A11	A11	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+7ce1801426609b5b	A	A56	A56	CFE_TBL_RegistryRec_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+7f704205d9e76ef6	A	A24	A24	CFE_SB_PipeD_t.PipeId	4,0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+80afebde1dc3676a	A	A35	A35	CFE_SB_PipeD_t.PipeId	0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+88cc788fec26e1f7	A	A14	A14	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+8b4743e7695670c8	A	A18	A18	CFE_SB_PipeD_t.AppId			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+90653c94aa26e781	A	A63	A63	OS_FDTableEntry.Path			0	0	no creator left after exclusions (probe-create 0, key constant	no creator left after exclusions (probe-create 0, key constant	none	none	kept
+9a6e0dbdeec414b0	A	A28	A28	CFE_SB_PipeD_t.PipeId	0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+9b717cce08fe958c	A	A65	A65	OS_FDTableEntry.Path			0	0	no creator left after exclusions (probe-create 0, key constant	no creator left after exclusions (probe-create 0, key constant	none	none	kept
+9e2f102920c0861e	A	A37	A37	CFE_SB_PipeD_t.PipeId	4,0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+a7c56de3912f774a	A	A45	A45	CFE_SB_PipeD_t.PipeId	4,0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+b725fc19ac1644dc	A	A33	A33	CFE_SB_PipeD_t.PipeId	0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+b8003f8b02e1a68d	A	A31	A31	CFE_SB_PipeD_t.PipeId	0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+b955c7ab6464c8d7	A	A21	A21	CFE_SB_PipeD_t.PipeId	4,0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+ba0794e3f30cfddd	A	A15	A15	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+ba7ba0d56e8eedd0	A	A61	A61	OS_FDTableEntry.Path			0	0	no creator left after exclusions (probe-create 0, key constant	no creator left after exclusions (probe-create 0, key constant	none	none	kept
+bbcaec5d278f30b8	A	A1	A1	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+bbf4b4ba291468dd	A	A3	A3	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+be05162cfe278097	A	A60	A60	CFE_TBL_RegistryRec_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+be233c1ef867e45e	A	A48	A48	CFE_TBL_CmdHandlerTblRec_t.CmdCode			0	0	no creator of this partition	no creator of this partition: only initial values (no writer o	none	none	kept
+c2e0cf77cff6fe23	A	A26	A26	CFE_SB_PipeD_t.PipeId	4,0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+c858092726be070d	A	A36	A36	CFE_SB_PipeD_t.PipeId	0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+cc7629757c0fedbb	A	A44	A44	CFE_SB_PipeD_t.PipeId	1		0	0	no creator left after exclusions (probe-create 0, key constant	no creator left after exclusions (probe-create 0, key constant	none	none	kept; partition changed
+ce3b6577d04ae091	A	A57	A57	CFE_TBL_RegistryRec_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+d198d36b93b167c9	A	A22	A22	CFE_SB_PipeD_t.PipeId	4,0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+d1c9bdc186427841	A	A6	A6	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+e450207eda2971f2	A	A40	A40	CFE_SB_PipeD_t.PipeId	4,0		0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+f0558231f5a38416	A	A5	A5	CFE_ES_AppStartParams_t.Name			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+f3a414a9ea394624	A	A51	A51	CFE_TBL_CritRegRec_t.CDSHandle			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+f44b82b204280c9f	A	A23	A23	CFE_SB_PipeD_t.PipeId	4,0		0	1	no creator of this partition	1 creator(s) of this partition in other actors	none	static-undetermined	kept; creator set changed; partition changed
+fbb1c32e651d2448	A	A52	A52	CFE_TBL_CritRegRec_t.CDSHandle			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept

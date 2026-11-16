@@ -1,0 +1,5 @@
+same      -o /home/user/work/redesign/obs1/relrev7_plans/c5_641/plan.kzs sha256 765bebe546e451be8ac4c07dab594fd11503989d146770c910b310bb2ee80c74
+same      --sidecar /home/user/work/redesign/obs1/relrev7_plans/c5_641/plan.side sha256 b39bb0fae99b6b97c0c9a52f2fef681e903e986ed5cc808d43b8c9d062026ccb
+same      --modules-out /home/user/work/redesign/obs1/relrev7_plans/c5_641/plan.mod (first line except the sidecar path)
+same      --exes-out /home/user/work/redesign/obs1/relrev7_plans/c5_641/plan.exe (first line except the sidecar path)
+PASS: the plan regenerates byte-identically

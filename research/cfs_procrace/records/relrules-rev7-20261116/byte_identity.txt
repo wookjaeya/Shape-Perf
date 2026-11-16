@@ -1,0 +1,30 @@
+== c1_pre_tx
+compare rc=0 RESULT: all differences of declared classes
+rows: A old 127 new 63 (kept 63, removed 64; partition changed 38, creator set changed 32); B and C kept 304
+left out lines: 98
+callback_check: pairs 98, match 98, mismatch 0 rc=0
+relations.log bytes 0; facts line same: yes; lines 7254, bytes 2116012, sha256 63176ff6da732c72
+== c1_post_tx
+compare rc=0 RESULT: all differences of declared classes
+rows: A old 127 new 63 (kept 63, removed 64; partition changed 38, creator set changed 32); B and C kept 304
+left out lines: 98
+callback_check: pairs 98, match 98, mismatch 0 rc=0
+relations.log bytes 0; facts line same: yes; lines 7254, bytes 2116167, sha256 99d9acf15662edd3
+== r2_core
+compare rc=0 RESULT: all differences of declared classes
+rows: A old 68 new 25 (kept 25, removed 43; partition changed 22, creator set changed 19); B and C kept 270
+left out lines: 64
+callback_check: pairs 64, match 64, mismatch 0 rc=0
+relations.log bytes 0; facts line same: yes; lines 5112, bytes 1259794, sha256 0186b38e681b1004
+== c5_641
+compare rc=0 RESULT: all differences of declared classes
+rows: A old 66 new 66 (kept 66, removed 0; partition changed 26, creator set changed 23); B and C kept 112
+left out lines: 0
+callback_check: pairs 0, match 0, mismatch 0 rc=0
+relations.log bytes 0; facts line same: yes; lines 3643, bytes 866191, sha256 d8eccd7824b67b84
+== c5_642
+compare rc=0 RESULT: all differences of declared classes
+rows: A old 66 new 66 (kept 66, removed 0; partition changed 26, creator set changed 23); B and C kept 109
+left out lines: 0
+callback_check: pairs 0, match 0, mismatch 0 rc=0
+relations.log bytes 0; facts line same: yes; lines 3591, bytes 885409, sha256 c9f03cc48f6130d6

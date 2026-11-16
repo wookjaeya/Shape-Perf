@@ -92,7 +92,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 6 (2026-11-16)
+rules relations rules revision 7 (2026-11-16)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 
@@ -110,7 +110,8 @@ actors: roots 4 (process 1, spawn-entry 0, table-walk-entry 0, table-image-entry
 spawn calls resolved through the static image of the table their entry argument is read from: 1 [relincomplete.c:141:27: blue_main green_main red_main; the member TaskEntry.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written; besides the function leaves of TaskEntry.main, the image of task_defs has 1 function leaf/leaves of another member of its record (task_defs[0].u.call setup_hook@relincomplete.c:121; a union member read gives that value): that the spawn reads only the elements whose main is a function leaf rests on its guard, which this revision does not read (so the threads of this spawn are taken as not complete)]
 spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
 summary A 3 (namespaces 1, lookup uses 3, with a creator of the same partition in another actor 2, key-matched 1) B 0 (with a callee check 0) C 3 (self-identity reads 0); flip static-possible 1, static-undetermined 1, none 4; feasibility proven-impossible 0, possible 3, undecidable 3, not graded 0
-summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 6 [no run record read 6]; actor_not_extracted 3 [child threads not all resolved 3]; key_unresolved 1 [pointer field without points-to 1]; writer_set_incomplete 3 [FIELD_STATUS not complete 3]; fixed_proof_open 2 [no static order between the actors 2]; link_unlinked 3 [identity of the reader and the created thread not decided 3]; reasons of the whole facts on every row: none
+summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 0, creators 0; lookup rows with the membership unresolved 0; lookup rows without a creator of their partition 1 [writer set not complete 1]
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 6 [no run record read 6]; actor_not_extracted 3 [child threads not all resolved 3]; key_unresolved 1 [pointer field without points-to 1]; writer_set_incomplete 3 [FIELD_STATUS not complete 3, zero writers under the rules 1]; fixed_proof_open 2 [no static order between the actors 2]; link_unlinked 3 [identity of the reader and the created thread not decided 3]; reasons of the whole facts on every row: none
 [A] 3 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
   namespace Reg.name (record type Reg; tables regs)
       search: A1 search loop relincomplete.c:34:3 in reg_find: key Reg.name strcmp at relincomplete.c:35:30 compared with parameter 0 [name] (search parameter 0)
@@ -123,25 +124,39 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
         assign at relincomplete.c:53:7 in reg_create value=1 [1] guard=(and (lt local:i 4) (eq field:Reg.used 0)) class=reservation or activation (writes the in-use value)
       publication writes of the creator reg_create#0: Reg.name memcpy relincomplete.c:52:7 in reg_create; Reg.used assign relincomplete.c:53:7 in reg_create := 1
       key-parameter functions: lookups reg_find#0; creators reg_create#0
-      uses: lookups 3, creators 1 (calls from outside the key-parameter functions; a creator reaches a write of the key)
+      uses: lookups 3, creators 1 (calls from outside the key-parameter functions; a creator reaches a write of the key); left out, another callback passed to the search: lookups 0, creators 0
       namespace layers: B P0 R
   A1 lookup relincomplete.c:82:33 in seek_known -> reg_find#0 namespace Reg.name partition {} key known
+      membership: reaches the comparison strcmp at relincomplete.c:35:30 in its own search loop
       key: read through the pointer field Seeker.known -> name_defs@relincomplete.c:66 (PTR_FIELDS resolved), elements from 0 step 1 count 4; image name_defs[0].name = "red"; image name_defs[1].name = "green"; image name_defs[2].name = "blue"; image name_defs[3].name = "grey"
+      aliases: the key is read through the pointer field Seeker.known -> name_defs@relincomplete.c:66 (PTR_FIELDS resolved)
       actors: {main (process)}; result=discarded
+      id holder: the lookup's arg 1 [&seeker.handle] address Seeker.handle base global object seeker@relincomplete.c:77 <- reg_find stores through its parameter 1 in reg_find at relincomplete.c:36:7 [i]
       not a pair: key constants differ: relincomplete.c:111:9 in green_main -> reg_create key string literal "lime" actors {green_main (table-image-entry)}
+      writers: NameDef.name: no writer found under these premises; premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 0: direct 0, data-function 0, out-pointer 0, initial values 1; instances 0); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Reg.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Reg.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       handling: in the loop relincomplete.c:82:3 kind constant-trip trip exact 4 exit (not (lt local:i 4))
       handling: result discarded; no return of it and no terminal operation under it found
-      dependency: path A: no creator left after exclusions (probe-create 0, key constants differ 1, same actor only 0)
+      dependency: path A: no creator left after exclusions (probe-create 0, key constants differ 1, same actor only 0): writer set not complete (Reg.name not complete)
       run-order: no record given
       feasibility: undecidable: no pair
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: none: no creator of the same partition and key in another actor; search returns: reg_create returns -17 [ERR_NOT_FOUND], reg_create returns -5 [ERR_ILLEGAL], reg_create returns 0 [0], reg_find returns -17 [ERR_NOT_FOUND], reg_find returns 0 [0]
       layers: B P0 R P0-unverified(strcmp)
-      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); writer_set_incomplete(zero writers under the rules)
   A2 lookup relincomplete.c:87:9 in seek_opaque -> reg_find#0 namespace Reg.name partition {} key unresolved
+      membership: reaches the comparison strcmp at relincomplete.c:35:30 in its own search loop
       key: read through the pointer field Seeker.opaque: needs field points-to (PTR_FIELDS)
       actors: {main (process)}; result=discarded
+      id holder: the lookup's arg 1 [&seeker.handle] address Seeker.handle base global object seeker@relincomplete.c:77 <- reg_find stores through its parameter 1 in reg_find at relincomplete.c:36:7 [i]
       creator: key unresolved (lookup): relincomplete.c:111:9 in green_main -> reg_create key string literal "lime" actors {green_main (table-image-entry)}
+      id holder: the creator relincomplete.c:111:9 -> reg_create: arg 1 [&h] address base local <- reg_create stores through its parameter 1 in reg_create at relincomplete.c:54:7 [i]
+      callee-check: reg_create returns -17 [ERR_NOT_FOUND] with no condition
+      callee-check: reg_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Reg.used 1)) (eq (call-result strcmp (seq field:Reg.name (seq param:name#0))) 0))
+      callee-check: reg_create returns 0 [0] when (and (lt local:i 4) (eq field:Reg.used 0))
+      writers: Reg.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Reg.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       handling: result discarded; no return of it and no terminal operation under it found
       dependency: path A: 1 creator(s) of this partition in other actors
       run-order: no record given
@@ -151,9 +166,17 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
       layers: B P0 R P0-unverified(strcmp)
       incomplete: no_run(no run record read); key_unresolved(pointer field without points-to); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
   A3 lookup relincomplete.c:103:9 in red_main -> reg_find#0 namespace Reg.name partition {} key known
+      membership: reaches the comparison strcmp at relincomplete.c:35:30 in its own search loop
       key: string literal "lime"
       actors: {red_main (table-image-entry)}; result=discarded
+      id holder: the lookup's arg 1 [&h] address base local <- reg_find stores through its parameter 1 in reg_find at relincomplete.c:36:7 [i]
       creator: same key: relincomplete.c:111:9 in green_main -> reg_create key string literal "lime" actors {green_main (table-image-entry)}
+      id holder: the creator relincomplete.c:111:9 -> reg_create: arg 1 [&h] address base local <- reg_create stores through its parameter 1 in reg_create at relincomplete.c:54:7 [i]
+      callee-check: reg_create returns -17 [ERR_NOT_FOUND] with no condition
+      callee-check: reg_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Reg.used 1)) (eq (call-result strcmp (seq field:Reg.name (seq param:name#0))) 0))
+      callee-check: reg_create returns 0 [0] when (and (lt local:i 4) (eq field:Reg.used 0))
+      writers: Reg.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Reg.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       handling: result discarded; no return of it and no terminal operation under it found
       dependency: path A: 1 creator(s) of this partition in other actors
       run-order: no record given
@@ -168,6 +191,7 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
       spawn: callee pthread_create, entries blue_main green_main red_main (from the static image of the table the entry argument is read from); child actors {blue_main (table-image-entry), green_main (table-image-entry), red_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
       write after the spawn: relincomplete.c:142:3 key=state value=1 [1] locks {}
       read: [state.started] use=#3 index=- guard=- locks {}; at the call {}
+      writers: State.started: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       dependency: path C: the creator writes State.started after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: the read holds no lock
@@ -179,6 +203,7 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
       spawn: callee pthread_create, entries blue_main green_main red_main (from the static image of the table the entry argument is read from); child actors {blue_main (table-image-entry), green_main (table-image-entry), red_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
       write after the spawn: relincomplete.c:142:3 key=state value=1 [1] locks {}
       read: [state.started] use=#3 index=- guard=- locks {}; at the call {}
+      writers: State.started: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       dependency: path C: the creator writes State.started after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: the read holds no lock
@@ -190,6 +215,7 @@ summary incomplete (rows that carry the reason, then per sub-reason; reasons of 
       spawn: callee pthread_create, entries blue_main green_main red_main (from the static image of the table the entry argument is read from); child actors {blue_main (table-image-entry), green_main (table-image-entry), red_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
       write after the spawn: relincomplete.c:142:3 key=state value=1 [1] locks {}
       read: [state.started] use=#3 index=- guard=- locks {}; at the call {}
+      writers: State.started: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
       dependency: path C: the creator writes State.started after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: the read holds no lock

@@ -1,0 +1,5 @@
+rows: A old 127 new 63 (kept 63, removed 64; partition changed 38, creator set changed 32); B and C kept 304
+left out lines: 98
+note: 6d68763a2e9af5a1 A30 layers P0-unverified abort, dlsym, strcmp -> abort, strcmp (creator set changed)
+note: bf828c2274e57374 A26 layers P0-unverified abort, dlsym, strcmp -> abort, strcmp (creator set changed)
+RESULT: all differences of declared classes

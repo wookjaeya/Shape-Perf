@@ -1,0 +1,5 @@
+c1_post_tx/plan.kzs: ok version 3 sources 1 modules 7 sites 245 values 534 validated 0 identity 0 control 0 binds 0 max-site-id 245 max-slot 3 
+c1_pre_tx/plan.kzs: ok version 3 sources 1 modules 7 sites 259 values 564 validated 2 identity 0 control 0 binds 0 max-site-id 259 max-slot 3 
+c5_641/plan.kzs: ok version 3 sources 1 modules 6 sites 147 values 275 validated 0 identity 0 control 0 binds 0 max-site-id 147 max-slot 3 
+c5_642/plan.kzs: ok version 3 sources 1 modules 6 sites 139 values 263 validated 0 identity 0 control 0 binds 0 max-site-id 139 max-slot 3 
+r2_core/plan.kzs: ok version 3 sources 1 modules 1 sites 42 values 62 validated 0 identity 0 control 0 binds 0 max-site-id 42 max-slot 3 

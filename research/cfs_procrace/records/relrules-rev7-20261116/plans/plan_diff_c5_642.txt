@@ -1,0 +1,19 @@
+# plan_diff: /home/user/work/redesign/obs1/plangen/c5_642/plan.side -> /home/user/work/redesign/obs1/relrev7_plans/c5_642/plan.side
+rows: old 175, new 175; only old 0, only new 0
+planned rows: old 7 (B18 B19 B33 B39 B56 B62 B7), new 7 (B18 B19 B33 B39 B56 B62 B7)
+kept rows whose fields changed (field old -> new: rows):
+  order NOPAIR -> RELOC: 13
+  tier 3 -> 2: 13
+old tiers {'1': 7, '2': 66, '3': 102}; dispositions {'D01': 14, 'D03': 10, 'D05': 27, 'D06': 5, 'D07': 7, 'D10': 7, 'D11': 46, 'D12': 59}
+new tiers {'1': 7, '2': 79, '3': 89}; dispositions {'D01': 14, 'D03': 10, 'D05': 27, 'D06': 5, 'D07': 7, 'D10': 7, 'D11': 46, 'D12': 59}
+sites: old 139, new 139; only old 0, only new 0, same key 139
+sites per rule: actor-create 2 -> 2, actor-owner 2 -> 2, actor-root+actor-start 8 -> 8, stop-event 2 -> 2, use-call 104 -> 104, writer 21 -> 21
+need lines per (kind, reason): lock-result plan_missing(need not planned) 7 -> 7; observation budget_not_run(row outside the budget) 168 -> 168; wait-result plan_missing(need not planned) 7 -> 7
+gap lines per reason: link_unlinked(no creation-argument channel) 1 -> 1
+header lines that differ: 3 (of 39 / 39)
+  - generator tool=kz-static tool_sha256=c3677e76e8b01b55dd4c1e5b1778d6f61e3391942a83a4eba25c34ffb9304f7b tool_source=5640d5d65ad3310115ca5616f96a9d794d07e5e3f1681bff010765b127f77cb1 core_source=f6e3c7b4c3def727444c25ee7071f
+  + generator tool=kz-static tool_sha256=a3a6cb31da61e6edce2193d02700d95dad3f702da921ca46fcf3ef3be8fe4f6c tool_source=e8778114cc825ea7328f25a423df9540707dafdabf7f0590fb47c14c1fdce691 core_source=f6e3c7b4c3def727444c25ee7071f
+  - rules plan rules revision 1 (2026-11-16); relations rules revision 6 (2026-11-16)
+  + rules plan rules revision 1 (2026-11-16); relations rules revision 7 (2026-11-16)
+  - classes rows 175 tier1 7 tier2 66 tier3 102
+  + classes rows 175 tier1 7 tier2 79 tier3 89

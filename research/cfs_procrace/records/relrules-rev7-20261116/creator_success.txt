@@ -1,0 +1,2 @@
+A21: callee OS_CountSemCreate: constants 10 (distinct value/name), not of failure class [(0, 'OS_SUCCESS')] -> success constant (0, 'OS_SUCCESS')
+A20: callee OS_CountSemCreate: constants 10 (distinct value/name), not of failure class [(0, 'OS_SUCCESS')] -> success constant (0, 'OS_SUCCESS')

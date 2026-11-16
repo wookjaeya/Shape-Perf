@@ -1,0 +1,14 @@
+# declaration: sha256 of declared_before_build.txt (= the lines of section 4 of plan/observation_path_results_20261116.md up to the end of 4.0, before the build) = b9dcb4ea62b22b21963ed70abe245a20e27822892d8181766b71410efcf1f637 (2026-11-16T06:59:15Z; committed before the build)
+# obs1-20261116-plangen: commands, rc and free space (df -B1 /, bytes available)
+# <scratch> is this session's scratchpad directory (m3/)
+
+## 0. before the declaration (no tool of MC changed)
+framework_scan.py scan framework_trees.tsv > framework_scan.txt (190 lines); framework_scan.py check framework_trees.tsv kairos/semantics/framework_api_roles.txt -> framework_check.txt PASS (8 entries, 4 trees)
+scratch check program <scratch>/harness: g++ (the MC kz-static flags, -Werror) of lib/llvm/plan_gen.cpp, tools/kz-static/cmd_plan.cpp and a small entry, linked with MC lib/llvm/libkz-llvm.a, lib/core/libkz-core.a and the libraries of MC's kz-static link line
+  -> the fixture plan; the five plans on the T8CF facts and basis (rc 0 each; sites 301/287/42/147/139); priority_agreement.py on the five sidecars against the probe tables: every row equal (label, order class, reach, disposition), tier 1 = D07 and RELOC = directed candidates on all five
+  -> plan_regen.sh with the scratch program on its own c1_pre_tx plan: PASS; with one byte of the manifest changed: FAIL (rc 1)
+  -> test_static_plan compiled the same way against MC libkzrt-manifest.a and libkz-testsupport.a: 182 checks, 1 failing (the golden file did not exist yet)
+scratch kz_lint (g++ -std=c++17 -Werror of tests/lint/kz_lint.cpp): --selftest 109 cases 0 failed; case-ids clean; case-ids-data clean
+g++ -O2 (MC flags) -c plan_gen.cpp, cmd_plan.cpp, test_static_plan.cpp -> clean; -fsyntax-only kz_lint.cpp, test_static_reasons.cpp, main.cpp -> clean
+tool copy (tool_copy/): space_guard.sh --need 60000000 --kind tool-copy -- xz -9 -T4 -c MC/tools/kz-static/kz-static > /home/user/work/preserve/tools-20261116-c/kz-static.5d4a1d7f.xz (06:54:49Z-06:56:45Z) -> rc 0, 39,663,956 B, dip 40,706,048; round trip OK (ROUNDTRIP.txt)
+free before the commit of the declaration: 3734794240 (2026-11-16T06:59:15Z)

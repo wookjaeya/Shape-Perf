@@ -1,0 +1,6 @@
+# round trip of the copy before the build that overwrites it (2026-11-16T06:56:52Z)
+xz -t ok
+stream sha256 5d4a1d7f4023b20cbd6caf797edcdbd0e54d8efb329ace358c07002f27088749
+cmp with the original: same
+size 39663956
+2323bf4ef52bcfb8b5059f30d8d7981f4b663f2bad621a704c5dc92b5da96598  kz-static.5d4a1d7f.xz

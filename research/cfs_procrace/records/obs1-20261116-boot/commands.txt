@@ -1,0 +1,10 @@
+# declaration: sha256 of declared_before_boot.txt (= the lines of section 6 of plan/observation_path_results_20261116.md up to the end of 6.0, before the boot) = 6d67e4692b75080169603206bd8e1ae6b993f4e96eae0f2b5aaef26d5020178c (2026-11-16T08:02:57Z; committed before the boot)
+# obs1-20261116-boot: commands, rc and free space (df -B1 /, bytes available)
+
+## 0. before the declaration (no tool of MC changed, nothing built, nothing booted)
+space_guard.sh --need 250000000 --kind regen -- bash env/tools/plan_regen.sh /home/user/work/preserve/tools-20261116-c/kz-static.de1315b3.xz /home/user/work/redesign/obs1/plangen/c1_pre_tx/args.txt <scratch>/m5/regen -> regen_c1_pre_tx.txt: PASS (07:58:34Z; dip 184422400); the scratch directory (decompressed copy, 184,395,429 B) removed after
+env/tools/build_record.sh pre MC pre_mc.txt -> rc 0; equal to records/obs1-20261116-derived/post_mc.txt except the HEAD line
+TMPDIR=<scratch> bash env/tools/tests/run_unit.sh -> unit_tools.txt: 14 of 14 pass (checks 13 and 14 new)
+bash env/redesign/step2a_tests_unit.sh -> unit_step2a.txt: 7 of 7 pass
+cmp <W>/ws/bpxfer_defs/default_platform_cfg.h /home/user/work/procrace/c1_build/pre/1df262a/bpxfer_defs/default_platform_cfg.h -> same
+free before the commit of the declaration: 3751612416 (2026-11-16T08:02:57Z)

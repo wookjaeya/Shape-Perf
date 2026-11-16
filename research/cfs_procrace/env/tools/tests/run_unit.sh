@@ -31,6 +31,11 @@
 #  12 binding report (env/tools/plan_bindings.py): every site bound or unsupported with a reason and the module ids
 #     of the plugin rule -> rc 0; a site no unit reported, an unsupported site without a reason, a unit with another
 #     module id, a unit header with another manifest sha256 -> rc 1 each
+#  13 chain checker, the links of a generated plan (sidecar, plan inputs, instance list and tree, B' parent, dump,
+#     bindings, run container): a consistent stub chain -> confirmed (0); another sidecar, a changed instance file, an
+#     instance list run.meta does not name, a run container with another parent basis, another dump -> refused (1)
+#  14 stop-event evaluation (env/obs1/stop_eval.py): apps of a stub startup script reach run loop or exit -> rc 0; an
+#     app whose actor never reaches a stop site, an app without a root site in the plan -> rc 3; no RUN line -> rc 2
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../../.." && pwd)"
@@ -264,6 +269,51 @@ bf "$X/f3.kzs" "$msha" 2 ' reason="a line with two calls"' 1; pb "$X/f3.kzs"; f3
 bf "$X/f4.kzs" "$(printf 0%.0s {1..64})" 1 ' reason="a line with two calls"' 1; pb "$X/f4.kzs"; f4=$?
 ok=0; [ $c -eq 0 ] && [ $f1 -eq 1 ] && [ $f2 -eq 1 ] && [ $f3 -eq 1 ] && [ $f4 -eq 1 ] || ok=1
 res "binding report (stub plan and bindings)" $ok "control rc $c; site not seen rc $f1; unsupported without reason rc $f2; other module id rc $f3; other manifest sha256 rc $f4"
+
+# 13 chain checker, links of a generated plan
+X=$W/cc; mkdir -p "$X/b/exe/tx" "$X/inst/tx"
+echo side > "$X/side"; ss=$(sha256sum < "$X/side" | cut -c1-64); echo facts > "$X/facts"; echo basis > "$X/basis"
+printf 'input facts sha256=%s path=x\ninput basis sha256=%s path=y\n' "$(sha256sum < "$X/facts" | cut -c1-64)" "$(sha256sum < "$X/basis" | cut -c1-64)" >> "$X/side"
+ss=$(sha256sum < "$X/side" | cut -c1-64)
+printf '# kz plan\n# sidecar sha256=%s\nsite 1 x\n' "$ss" > "$X/plan.kzs"; mh=$(sha256sum < "$X/plan.kzs" | cut -c1-64)
+echo binary > "$X/b/exe/tx/core-tx"; echo module > "$X/b/exe/tx/m.so"; cp "$X/b/exe/tx/core-tx" "$X/b/exe/tx/m.so" "$X/inst/tx/"
+eh=$(sha256sum < "$X/b/exe/tx/core-tx" | cut -c1-64); oh=$(sha256sum < "$X/b/exe/tx/m.so" | cut -c1-64)
+printf 'plugin sha256 %s manifest sha256 %s\nexe/tx/core-tx sha256 %s (reference x)\nexe/tx/m.so sha256 %s (reference y)\n' "$(printf 0%.0s {1..64})" "$mh" "$eh" "$oh" > "$X/build.record"
+(cd "$X/inst" && find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$X/list"; lh=$(sha256sum < "$X/list" | cut -c1-64)
+echo bp > "$X/bpb"; bph=$(sha256sum < "$X/bpb" | cut -c1-64); echo dump > "$X/d.kzrt"; dh=$(sha256sum < "$X/d.kzrt" | cut -c1-64); echo binds > "$X/binds"; nh=$(sha256sum < "$X/binds" | cut -c1-64)
+mk_meta() { printf 'file tx/core-tx sha256=%s (build %s)\nmanifest %s sha256=%s\nbindings %s sha256=%s\ninstance_files dir=i files=2 other=0 list=l list_sha256=%s\ndump tx.kzrt bytes=5 sha256=%s\n' "$eh" "$eh" "$X/plan.kzs" "$mh" "$X/binds" "$nh" "$1" "$2" > "$X/run.meta"; }
+printf 'run backend="stub" manifest_sha256=%s\n' "$mh" > "$X/dump.txt"
+printf 'binary.sha256 = %s  (unset)\n' "$eh" > "$X/basis.txt"
+printf 'container abi=1 kind=facts\n  parent[0] kind=basis role=1 sha256=%s\n' "$bph" > "$X/fh.txt"
+mk_kzt() { printf 'container abi=1 kind=run\n  parent[0] kind=basis role=0 sha256=%s\n  BASIS[1] name="convert.dump.sha256" value="%s" policy=unset\n  FILE_HASHES[1] path="%s" sha256=%s size=1 prov=none\n  FILE_HASHES[2] path="%s" sha256=%s size=1 prov=none\n  NRUN[0] backend=kzrt manifest_sha256=%s\n' "$1" "$dh" "$X/plan.kzs" "$mh" "$X/binds" "$nh" "$mh" > "$X/kzt.txt"; }
+c2() { python3 -I "$TL/chain_check.py" --plan "$X/plan.kzs" --build-record "$X/build.record" --run-meta "$X/run.meta" --dump-text "$X/dump.txt" --main exe/tx/core-tx --build-root "$X/b" --basis-text "$X/basis.txt" \
+  --sidecar "$1" --plan-facts "$X/facts" --plan-basis "$X/basis" --inst-list "$X/list" --inst-tree "$X/b/exe" --dump "$X/d.kzrt" --bindings "$X/binds" --bprime-basis "$X/bpb" --facts-header "$X/fh.txt" --kzt-text "$X/kzt.txt" > "$X/out.txt" 2>&1; }
+mk_meta "$lh" "$dh"; mk_kzt "$bph"; c2 "$X/side"; c=$?; cv=$(tail -1 "$X/out.txt" | cut -f2); mso=$(grep -c '^exe .*inst_list' "$X/out.txt")
+cp "$X/side" "$X/side2"; echo more >> "$X/side2"; c2 "$X/side2"; f1=$?
+echo changed > "$X/inst/tx/m.so"; (cd "$X/inst" && find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$X/list"; mk_meta "$(sha256sum < "$X/list" | cut -c1-64)" "$dh"; c2 "$X/side"; f2=$?
+cp "$X/b/exe/tx/m.so" "$X/inst/tx/m.so"; (cd "$X/inst" && find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$X/list"; mk_meta "$(printf 1%.0s {1..64})" "$dh"; c2 "$X/side"; f3=$?
+mk_meta "$lh" "$dh"; mk_kzt "$(printf 2%.0s {1..64})"; c2 "$X/side"; f4=$?
+mk_kzt "$bph"; mk_meta "$lh" "$(printf 3%.0s {1..64})"; c2 "$X/side"; f5=$?
+ok=0; [ $c -eq 0 ] && [ "$cv" = confirmed ] && [ "$mso" = 2 ] && [ $f1 -eq 1 ] && [ $f2 -eq 1 ] && [ $f3 -eq 1 ] && [ $f4 -eq 1 ] && [ $f5 -eq 1 ] || ok=1
+res "chain checker, generated-plan links (stub chain)" $ok "consistent rc $c ($cv, $mso executables through the instance list); other sidecar rc $f1; changed instance file rc $f2; list not named rc $f3; other parent rc $f4; other dump rc $f5"
+
+# 14 stop-event evaluation
+X=$W/se; mkdir -p "$X"
+printf 'stop-event run-loop RL a.c:1 decl\nstop-event app-exit EX a.c:2 decl\n' > "$X/side"
+printf 'kzs-sites 3\nsite 1 label=s0001.actor-root op=entry.A_Main phase=before tu=a.c\nsite 2 label=s0002.actor-root op=entry.B_Main phase=before tu=b.c\nsite 3 label=s0003.stop-event op=entry.RL phase=before tu=x.c\nsite 4 label=s0004.stop-event op=entry.EX phase=before tu=x.c\nsite 5 label=s0005.use-call op=at-call.f phase=before tu=x.c\n' > "$X/plan.kzs"
+printf 'CFE_LIB, l, NULL, L_LIB, 0, 0, 0x0, 0;\nCFE_APP, a, A_Main, A_APP, 1, 1, 0x0, 0;\nCFE_APP, b, B_Main, B_APP, 1, 1, 0x0, 0;\n!\nCFE_APP, z, Z_Main, Z, 1, 1, 0x0, 0;\n' > "$X/scr"
+dmp() { { echo 'run abi=1 mode=stopped'; echo 'run t_init=1000000 t_attach=1 t_stop=9000000 t_dump=9100000'
+  echo 'ev actor=1 aseq=1 site=1[x] bind=1 link=0 t=2000000 pc=0x1 key=tid:1 v=[-] flags=clock'
+  echo 'ev actor=1 aseq=2 site=3[x] bind=1 link=0 t=3000000 pc=0x1 key=tid:1 v=[-] flags=clock'
+  echo 'ev actor=2 aseq=1 site=2[x] bind=1 link=0 t=2500000 pc=0x1 key=tid:2 v=[-] flags=clock'
+  echo "ev actor=2 aseq=2 site=$1[x] bind=1 link=0 t=4000000 pc=0x1 key=tid:2 v=[-] flags=clock"; } > "$X/d.txt"; }
+se() { python3 -I "$R/env/obs1/stop_eval.py" --manifest "$1" --sidecar "$X/side" --startup-script "$X/scr" --dump-text "$X/d.txt" > "$X/o.txt" 2>&1; }
+dmp 4; se "$X/plan.kzs"; c=$?; sm=$(grep '^summary' "$X/o.txt" | cut -f2)
+dmp 5; se "$X/plan.kzs"; f1=$?; nr=$(grep -c 'not-reached' "$X/o.txt")
+dmp 4; grep -v 'site 2 ' "$X/plan.kzs" > "$X/p2.kzs"; se "$X/p2.kzs"; f2=$?; un=$(grep -c 'unresolved(no root site' "$X/o.txt")
+grep -v '^run t_init' "$X/d.txt" > "$X/d2.txt"; mv "$X/d2.txt" "$X/d.txt"; se "$X/plan.kzs"; f3=$?
+ok=0; [ $c -eq 0 ] && [ "$sm" = "applications=2 reached_inside_window=2 libraries=1" ] && [ $f1 -eq 3 ] && [ "$nr" = 1 ] && [ $f2 -eq 3 ] && [ "$un" = 1 ] && [ $f3 -eq 2 ] || ok=1
+res "stop-event evaluation (stub plan, script and dump)" $ok "control rc $c ($sm); actor never at a stop site rc $f1; no root site rc $f2; no RUN line rc $f3"
 
 echo "unit checks: $((NC - NF)) of $NC pass"
 exit $((NF > 0))

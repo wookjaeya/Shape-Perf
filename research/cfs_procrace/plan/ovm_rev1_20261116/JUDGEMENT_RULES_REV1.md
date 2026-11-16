@@ -38,7 +38,8 @@
 
 | 약칭 | 파일 | 비고 |
 |---|---|---|
-| OVM | `plan/ORDER_VIOLATION_METHOD_20261111.md` | 816줄. SHA-256 `6bf837f7…a1bc1fee` [직접 확인: `sha256sum`]. 이 문서의 "OVM:줄"은 이 판의 줄 번호다 |
+| OVM | `plan/ORDER_VIOLATION_METHOD_20261111.md` | 816줄. SHA-256 `6bf837f7…a1bc1fee` [직접 확인: `sha256sum`]. 이 문서의 "OVM:줄"은 이 판의 줄 번호다. OVM의 줄 번호는 개정 2 이전 판(git 1e73df9)의 줄이다. 2026-11-16 개정 2(커밋 116dd94)에서 줄이 바뀌었다. 개정 2와 같은 날의 정정을 넣은 지금 판에서 조항 B는 :288-303, R2 절의 S5는 :491, 11절 15행은 :792에 있다(2026-11-16 덧붙임) |
+| PR1 | `plan/ovm_rev1_20261116/probe/clauseB_rev1.py`, `clauseB_rev1.out` | 조항 B를 소비자별로 다시 계산한 탐침(2026-11-16)과 그 출력 |
 | REL(빌드) | `/home/user/work/redesign/step2a/tests_8c_fix/<빌드>/NP/relations.txt` | 정적 추출 단계("2a")가 낸 관계 행. 빌드는 `c1_pre_tx`, `c1_post_tx`, `r2_core`, `c5_641`, `c5_642` |
 | CB | `plan/ovm_evidence_20261111/probe/clauseB.py`, `clauseB.out` | 조항 B의 오프라인 탐침과 그 출력 |
 | S1P | `plan/ovm_evidence_20261111/probe/s1.py` | 처리 표시의 오프라인 탐침 |
@@ -85,7 +86,7 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 | R07 | 미확정 표시(`T?` 등) | S1P:62, :79 | 미확정의 원인과 함께 관측·분석 집합에 남긴다 |
 | R08 | 조항 A (`CONFIRMED`) | 255-260 | "순서 의존 실패"의 규칙으로 자리를 옮긴다. 위반 판정이 아니다 |
 | R09 | "요구되는 순서는 실패하지 않은 실행의 순서" | 261 | 지운다. 필요한 순서는 사용 조건에서만 온다 |
-| R10 | 조항 B (`FIXED-ORDER`) | 263-269 | 소비자별 세 값 판정으로 고치고, 다른 소비자의 성공으로 빈칸을 채우지 않는다 |
+| R10 | 조항 B (`FIXED-ORDER`) | 263-269 | 소비자별 네 값(+미완성)으로 고치고, 다른 소비자의 성공으로 빈칸을 채우지 않는다 |
 | R11 | "남는다"(stands) | 165 | "관측 구간 안에서 복구가 관측되지 않음"이라는 사실로 낮춘다 |
 | R12 | `TOLERATED(B)` | 271, 289 | 판정 등급이 아니라 후속 영향 축의 사실로 적는다 |
 | R13 | `TOLERATED-BY-DESIGN` | 243, 290 | 자동 결론으로 쓰지 않는다 |
@@ -179,11 +180,11 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 - 기존 (OVM:263-269): "소비 행위자마다 따로 적용한다. 1. MHB가 그 행위자에 대해 u가 w보다 반드시 앞섬을 증명한다 … 2. 모든 기준 부팅에서, 다른 행위자의 스레드가 w 앞에서 행의 사용 지점을 한 번 이상 실행했고 그 발생이 모두 `fail`이다. 3. w 뒤의 발생이 비어 있지 않고, 2의 상태 값을 돌려준 것이 없다. 4. 2의 발생 가운데 남는 것이 하나 이상 있다. 5. 표시가 `R`이나 `J`다."
 - 이유: [직접 확인] 조항은 소비 행위자마다 적용한다고 하고(OVM:263) 3번은 게시 뒤의 발생이 비어 있지 않을 것을 요구하는데(OVM:266), 같은 문서의 R2 절은 "ES와 EVS의 스레드는 w 뒤에 사용이 없다"고 적으면서(OVM:427) 그 두 행위자에 `FIXED-ORDER`를 예상한다(OVM:429). 조항과 예상 판정이 어긋난다. [직접 확인: CB `clauseB.py`:29] 탐침은 `before`와 `after`를 전체 발생에서 한 번에 가르고 소비 행위자별로 나누어 조항을 판정하지 않는다. [직접 확인: `clauseB.out`:4-5, :10-11] 그 출력에서 게시 앞의 24번은 CFE_ES 20번과 CFE_EVS 4번이고, 게시 뒤 271번의 행위자 목록에는 CFE_ES도 CFE_EVS도 없다. 이 출력은 과거 기록에 대한 탐침의 결과이고 이번에 다시 실행하지 않았다. [직접 확인: REL(r2_core):2201] 관계 행의 정적 순서는 "fixed unconfirmed (creation order + await; the await rests on the L1 premise only)"이어서 1번이 채워지지 않았다. OVM도 같은 말을 적는다(OVM:426).
 - 새 조건: 두 갈래로 나누고 섞지 않는다.
-  - **(가) 소비자별 전후 자료.** (소비 행위자, 관계 행, 사용 지점) 단위로 기존 1–4번을 각각 `holds`(성립), `fails`(불성립), `no_data`(자료 없음)의 세 값으로 적는다. 같은 소비자의 대응하는 사용이 게시 뒤에 없으면 3번은 `no_data`이고 이 갈래의 결론은 미확정이다. 다른 소비자의 게시 뒤 성공은 `reference_other_consumers`에 참고로만 적고 3번을 채우는 데 쓰지 않는다.
+  - **(가) 소비자별 전후 자료.** (소비 행위자, 관계 행, 사용 지점) 단위로 기존 1–4번을 각각 `holds`(성립), `fails`(불성립), `no_data`(자료 없음), `unchecked`(미검사)의 네 값 가운데 하나로 적는다. 1번은 정적 증명이 열려 있는 동안 `incomplete`(미완성)다. 4번은 행위자별 초기화 구간의 끝이나 인스턴스 키가 기록에 없으면 `unchecked`다. "검사하지 않음"과 "증명이 열림"은 "자료 없음"과 다른 상태이므로 섞어 쓰지 않는다. 기존 5번(처리 표시)은 기록에만 싣고 이 갈래의 결론에 쓰지 않는다. 같은 소비자의 대응하는 사용이 게시 뒤에 없으면 3번은 `no_data`이고 이 갈래의 결론은 미확정이다. 다른 소비자의 게시 뒤 성공은 `reference_other_consumers`에 참고로만 적고 3번을 채우는 데 쓰지 않는다.
   - **(나) 고정 순서의 위반 판정.** 위반 판정은 R01의 규칙 하나로 한다. 사용 조건이 유도되고, 같은 빌드의 실행에서 그 소비자의 사용이 조건을 만족하지 않는 상태에서 일어났으며, MHB가 그 소비자에 대해 u가 w보다 반드시 앞섬을 전제와 함께 증명하면 `violation.kind = fixed_early`다. 정적 증명이 열려 있으면 `violation.kind = order_basis_unknown`이고 "이 실행에서 관측한 순서"와 "다른 순서 미확정"을 함께 적는다.
   - (나)는 한 사례만 통과시키는 예외가 아니다. 조건과 증거 서식이 모든 고정 순서 후보에 똑같이 적용된다. 반대 순서를 만들 수 없다는 이유만으로 관측된 조건 위반을 버리지 않지만, 스케줄 변화로 확인한 경합과 같은 집계에 넣지 않는다. 원 구성에서 반대 순서를 만들려면 코어의 대기 한도를 깨야 하는 경우, 그렇게 얻은 실행은 유효한 반대 순서 확인으로 세지 않는다.
   - 기존 5번(표시가 `R`이나 `J`)은 조건에서 뺀다(R19).
-- 자동 근거: 소비자·관계·사용 단위의 발생 집계, 조건별 세 값, 정적 증명의 간선과 전제 목록.
+- 자동 근거: 소비자·관계·사용 단위의 발생 집계, 조건별 네 값(+`incomplete`), 정적 증명의 간선과 전제 목록.
 - 미확정: `undetermined_reasons`에 `no_matching_use_after_w`, `fixed_proof_open`, `per_site_record_missing` 가운데 해당하는 것을 적는다. 게시 뒤 대응 사용이 없는 상태를 성공으로 처리하지 않는다는 회귀 점검이 필요하다.
 
 **R11. "남는다"(stands)와 R20. 초기화 구간의 끝**
@@ -273,7 +274,7 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 
 | 항목 | 내용 |
 |---|---|
-| 필드 | `order.static`(`hard_before`, `conditional_before`, `fixed_early_proved`, `fixed_early_candidate`, `unordered`, `unknown` 가운데 하나와 간선·전제 목록), `order.run_id`, `order.use_events`(사용의 호출·반환 사건과 그때 읽은 값), `order.publish_events`, `order.sync_results`(생성·잠금·대기의 결과: 성공인지 시간 초과인지 실패인지), `order.per_consumer`(R10 (가)의 세 값 표) |
+| 필드 | `order.static`(`hard_before`, `conditional_before`, `fixed_early_proved`, `fixed_early_candidate`, `unordered`, `unknown` 가운데 하나와 간선·전제 목록), `order.run_id`, `order.use_events`(사용의 호출·반환 사건과 그때 읽은 값), `order.publish_events`, `order.sync_results`(생성·잠금·대기의 결과: 성공인지 시간 초과인지 실패인지), `order.per_consumer`(R10 (가)의 네 값(+`incomplete`) 표. 5번 처리 표시는 기록만) |
 | 인정하는 증거 | 같은 빌드의 실행에서 얻은 사건, 값, 동기화 결과. 호출 지점과 호출 인스턴스, 바깥 호출 맥락이 구분되어야 한다 |
 | 인정하지 않는 것 | 다른 빌드의 기록, 다른 소비자의 사용, 반환 등급만 있고 읽은 값이 없는 기록(값이 없으면 "조건을 만족하지 않는 상태"를 직접 보이지 못한다) |
 | `status` | `unmet_state_observed`(P를 만족하지 않는 상태에서 사용이 관측됨), `met_state_only`(관측한 실행의 사용이 모두 P를 만족함), `events_only`(사건과 값의 기록은 있으나 P가 유도되지 않아 만족 여부를 판정하지 못함), `record_insufficient`(기록에 값이나 대응이 모자람), `static_only`(실행 없음) |
@@ -593,7 +594,7 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 | 연결 | `unlinked` | [직접 확인: REL(r2_core):2191] 행 B65의 읽는 행위자는 여덟이다. 과거 기록의 행위자 이름이 생성 토큰으로 이어진 것인지는 이번에 확인하지 못했다 [미확인] |
 | 사용 조건 | `partial` | 4.2절의 표 |
 | 실제 순서 | `events_only` | [직접 확인: `clauseB.out`:4-8] 탐침 출력에서 게시 앞의 사용 24번(CFE_ES 20, CFE_EVS 4)이 모두 인자 AppID 0에 결과 0xc2000003이다. 과거 기록에 대한 출력이고 이번에 다시 돌리지 않았다. [문서 보고: OVM:427] 그 기록은 손으로 놓은 지점으로 얻었고, 지점별 기록은 39곳 가운데 3곳에만 있다. `order.static`은 `fixed_early_candidate`다(행의 "fixed unconfirmed" [직접 확인: :2201]) |
-| `order.per_consumer` | 1번 `no_data`(증명 열림), 2번 `holds`(위의 두 기록에 한함), 3번 `no_data`, 4번은 소비자별 계산이 없어 `no_data` | [직접 확인: `clauseB.out`:10-11] 게시 뒤의 행위자 목록에 CFE_ES와 CFE_EVS가 없다. 조건별 정확한 표는 소비자별 재집계가 낸다 |
+| `order.per_consumer` | 1번 `incomplete`(REL(r2_core):2201), 2번 `holds`(기록별), 3번 `no_data`(게시 후 자기 대응 사용 0번), 4번 `unchecked`(초기화 구간의 끝과 인스턴스 키가 기록에 없음), 5번 `J`(기록만) | [직접 확인: `PR1/clauseB_rev1.out`의 "항목 1"–"항목 5" 줄(CFE_ES, CFE_EVS, a2, a4)]. 2번은 기록마다 평가했고, 두 기록 사이에서 같은 소비자인지는 미검사다 [미확인] |
 | 개입 증거 | `unconfirmed` | [문서 보고: OVM:269, :428] 반대 순서는 원 구성에서 만들 수 없다. 코어 task를 늦추면 생성자의 대기가 한도를 넘어 종료한다. 그렇게 만든 실행은 유효한 반대 순서 확인으로 세지 않는다 |
 | 후속 영향 | 문서 보고만 있음 | [문서 보고: OVM:427] 파이프 생성과 구독의 이벤트는 같은 스레드가 되풀이하지 않고, 콘솔에는 그 상태를 말하는 줄이 0개다 |
 

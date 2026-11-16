@@ -5,7 +5,14 @@
 # usage:
 #   python3 -I clauseB_rev1.py --relations <relations.txt> --row <ROW> \
 #           --record NAME=<replay text>,<occurrence table>,<record dump> [--record ...]
+#   python3 -I clauseB_rev1.py --relations <relations.txt> --fixed-rows --record NAME=... [--record ...]
 #   python3 -I clauseB_rev1.py --selftest
+#
+# The row given with --row is chosen by a person on the command line.  --fixed-rows instead applies the clause to
+# every fixed-order candidate row of the file, chosen by a rule on the row text only (path B, the feasibility line
+# names a reader actor created before the writer, and it is not "proven-impossible"; the same rule as the order
+# class FIXED of s1_rev1.py).  A row whose sites have no point site in a record is reported as "기록에 지점 없음".
+# The records themselves were obtained with observation sites placed by a person; they are not tool evidence.
 #
 # Inputs
 #   relations.txt      the step 2a relation rows.  The row (e.g. B65) gives: the shared field, the callee and the
@@ -34,15 +41,21 @@
 #   - the column of a row site is not in the record (file, line and function are compared);
 #   - before/after w is the position in the merged event order of the record relative to the event of F4.
 #
-# Clause B, per consumer c (an actor of the record other than the actor of w).  Every item prints exactly one of
+# Clause B, per consumer c (an actor of the record other than the actor of w).  Items 1-4 decide the verdict;
+# item 5 is recorded only and is not a condition (method document 3.3).  Every item prints exactly one of
 #   성립 / 불성립 / 자료 없음 / 미검사      (item 1 may also print 미완성: the static proof is not complete)
 #   1  the facts prove that u precedes w for c                         <- the row's order grade
 #   2  c executed a use site of the row before w at least once, and all those occurrences are fail
 #   3  c's OWN occurrences after w at the sites c used before w are not empty, and none returns a status of item 2
 #   4  at least one occurrence of item 2 "stands": its instance (actor, site, outer call site, string key) does not
 #      reappear with a non-fail grade inside the actor's initialization interval
-#   5  the label of the use is R or J: here J = the status is discarded at the site (row) and the absence result
-#      read from c's own occurrences before w is of the fail grade
+#   5  recorded only; not a condition.  The label of the use: here J = the status is discarded at the site (row)
+#      and the absence result read from c's own occurrences before w is of the fail grade
+# Item 2 ("in all baseline runs") is evaluated inside each record.  Matching the same consumer across records is
+# not done (미검사).
+# A verdict 충족 means only that the before/after data of the clause are complete for that consumer.  It is not a
+# violation verdict: fixed_early also needs the derived use condition and the static fixed-order proof
+# (method document 1.1, 3.3).
 # The occurrences of another consumer never enter c's items.  They are printed as reference only.
 # Grade rule (method document 3.1, R-CLASS, cFE status): fail when bits 31-30 are 11; info when they are 01.
 import collections
@@ -273,7 +286,7 @@ def evaluate(consumer, occs, w, row, item1, init_end=None, pooled=False):
     if bef_m:
         nf = [o for o in bef_m if grade(o['result']) != 'fail']
         r['items'][2] = OK if not nf else NO
-        r['why'][2] = '게시 전 관계 소속 발생 %d번, fail %d번, fail 아님 %d번, 상태 값 %s' % (len(bef_m), len(bef_m) - len(nf), len(nf), st2)
+        r['why'][2] = '게시 전 관계 소속 발생 %d번, fail %d번, fail 아님 %d번, 상태 값 %s (이 기록 안의 평가. 기록 사이의 같은 소비자 대응은 미검사)' % (len(bef_m), len(bef_m) - len(nf), len(nf), st2)
     elif bef_u:
         r['items'][2] = NODATA
         r['why'][2] = '게시 전 발생 %d번이 모두 지점 미관측(관계 소속 미확인)' % len(bef_u)
@@ -337,7 +350,7 @@ def evaluate(consumer, occs, w, row, item1, init_end=None, pooled=False):
     else:
         r['items'][5] = NO
         r['why'][5] = '기록의 부재 결과에 fail 아닌 등급이 있음'
-    vals = list(r['items'].values())
+    vals = [r['items'][k] for k in (1, 2, 3, 4)]      # item 5 is recorded only
     if all(v == OK for v in vals):
         r['verdict'] = '충족'
     elif NO in vals:
@@ -417,7 +430,7 @@ def report(name, row, occs, info, paths):
             consumers.append(o['actor'])
     res = [evaluate(c, occs, w, row, item1_for(c, order, amap), info['init_end']) for c in consumers]
     others_ok = lambda c: sum(1 for o in mem if o['idx'] > w and o['actor'] != c and grade(o['result']) != 'fail')
-    P('   소비자별 조항 B (게시자 %s 제외, 소비자 %d개).  열: 소비자 | 게시 전 소속/미확인 | 게시 후 소속/대응/미확인 | 1 | 2 | 3 | 4 | 5 | 판정' % (info['w_actor'], len(res)))
+    P('   소비자별 조항 B (게시자 %s 제외, 소비자 %d개).  열: 소비자 | 게시 전 소속/미확인 | 게시 후 소속/대응/미확인 | 1 | 2 | 3 | 4 | 5 (기록만) | 판정(1-4번으로)' % (info['w_actor'], len(res)))
     for r in res:
         P('   %-16s | %3d/%-3d | %3d/%3d/%-3d | %s | %s | %s | %s | %s | %s' % (
             r['consumer'], r['n_before'], r['n_before_unknown'], r['n_after'], r['n_after_corr'], r['n_after_unknown'],
@@ -428,7 +441,7 @@ def report(name, row, occs, info, paths):
             continue
         P('   - %s  판정 %s' % (r['consumer'], r['verdict']))
         for k in (1, 2, 3, 4, 5):
-            P('       항목 %d: %s -- %s' % (k, r['items'][k], r['why'][k]))
+            P('       항목 %d%s: %s -- %s' % (k, '(기록만, 판정 조건 아님)' if k == 5 else '', r['items'][k], r['why'][k]))
         P('       게시 전 지점별: %s; 인자 값: %s (필드의 초기값 %s)' % (
             {'%s:%d' % (os.path.basename(row['sites'][s]['file']), row['sites'][s]['line']): n for s, n in r['sites_before'].items()},
             r['keys_before'], row.get('init')))
@@ -438,7 +451,7 @@ def report(name, row, occs, info, paths):
         info['w_actor'], sum(1 for o in pubocc if o['idx'] < w), sum(1 for o in pubocc if o['idx'] > w),
         sum(1 for o in pubocc if o['idx'] > w and o['member'])))
     c = collections.Counter(r['verdict'] for r in res)
-    P('   요약: 조항 B 충족 %d, 미확정 %d, 미충족 %d (소비자 수).  충족 0이면 이 기록으로는 FIXED-ORDER 판정이 서지 않는다.' % (c['충족'], c['미확정'], c['미충족']))
+    P('   요약: 조항 B 충족 %d, 미확정 %d, 미충족 %d (소비자 수). 충족은 소비자별 전후 자료가 갖춰졌다는 뜻이다. 위반(fixed_early)은 사용 조건의 유도와 정적 고정 증명이 따로 서야 한다(방법 문서 1.1절, 3.3절).' % (c['충족'], c['미확정'], c['미충족']))
     P('   미충족 가운데 "게시 전에 이 callee를 부른 발생이 0번"인 소비자 %d개(조항 B의 대상이 되지 않음)' % sum(1 for r in res if r['why'][2].startswith('게시 전에 이 callee')))
     return res
 
@@ -469,26 +482,33 @@ def selftest():
     def occ(actor, idx, site, res, member=True, outer=None, skey=None):
         return {'actor': actor, 'idx': idx, 'site': site, 'member': member, 'result': res, 'key': '0', 'outer': outer, 'skey': skey}
     w = 100
-    occs = [occ('X', 10, 0, FAIL), occ('X', 11, 0, FAIL),                       # X: fails before w, nothing after
+    occs = [occ('X', 10, 0, FAIL, outer='o1', skey='k1'), occ('X', 11, 0, FAIL, outer='o1', skey='k1'),   # X: fails before w, nothing after
             occ('Y', 110, 0, OKV), occ('Y', 111, 0, OKV), occ('Y', 112, 0, OKV),  # Y: only successes after w, same site
             occ('Z', 20, 0, FAIL, outer='o1', skey='k1'), occ('Z', 120, 0, OKV, outer='o2', skey='k2'),
             occ('Q', 30, 0, FAIL, outer='o1', skey='k1'), occ('Q', 130, 0, OKV, outer='o1', skey='k1'),
             occ('S', 40, 0, FAIL), occ('S', 140, 0, FAIL),                      # S: the item-2 status again after w
             occ('U', 50, None, FAIL, member=None), occ('U', 150, None, OKV, member=None),   # U: site not observed
-            occ('V', 60, 0, FAIL), occ('V', 160, 1, OKV)]                       # V: after w only at ANOTHER site
+            occ('V', 60, 0, FAIL, outer='o1', skey='k1'), occ('V', 160, 1, OKV, outer='o1', skey='k1')]   # V: after w only at ANOTHER site
     proved = (OK, 'test: item 1 given as proved')
-    ends = {'Z': 500, 'Q': 500}
+    ends = {'Z': 500, 'Q': 500, 'X': 500, 'V': 500}
     checks = []
     def chk(name, cond):
         checks.append((name, cond))
     x = evaluate('X', occs, w, row, proved)
-    chk('X: 게시 후 대응 사용이 없는 소비자는 조항을 충족하지 않는다', x['verdict'] != '충족')
+    # X and V are evaluated with the end of the initialization interval and the instance keys, so that items 1, 2
+    # and 4 hold and only item 3 decides: these two checks guard the per-consumer after-set at the verdict level.
+    xe = evaluate('X', occs, w, row, proved, ends)
+    chk('X(초기화 구간의 끝·인스턴스 키 있음): 1·2·4번 성립', [xe['items'][k] for k in (1, 2, 4)] == [OK, OK, OK])
+    chk('X: 게시 후 대응 사용이 없는 소비자는 조항을 충족하지 않는다(3번만이 가르는 조건에서)', xe['verdict'] != '충족' and xe['items'][3] == NODATA)
     chk('X: 항목 2 성립', x['items'][2] == OK)
     chk('X: 항목 3 자료 없음(다른 소비자 Y의 성공이 채우지 않는다)', x['items'][3] == NODATA)
     xp = evaluate('X', [o for o in occs if o['actor'] in ('X', 'Y')], w, row, proved, pooled=True)
-    chk('민감도: 전체 합산 방식(이전 계산)이면 X의 항목 3이 성립으로 나온다 -- 이 점검이 그 결함을 잡는다', xp['items'][3] == OK)
+    chk('시연(이전 계산의 결함 재현): 전체 합산 방식이면 X의 항목 3이 성립으로 나온다. 지키는 점검이 아니다', xp['items'][3] == OK)
     z = evaluate('Z', occs, w, row, proved, ends)
-    chk('Z: 다섯 항목이 모두 성립하면 충족', z['verdict'] == '충족' and all(v == OK for v in z['items'].values()))
+    chk('Z: 1-4번이 모두 성립하면 충족', z['verdict'] == '충족' and all(z['items'][k] == OK for k in (1, 2, 3, 4)))
+    row_t = dict(row, sites=[dict(row['sites'][0], use='tested'), row['sites'][1]])
+    zt = evaluate('Z', occs, w, row_t, proved, ends)
+    chk('Z: 5번이 미검사여도 1-4번이 성립하면 충족(5번은 기록만)', zt['items'][5] == UNCHECKED and zt['verdict'] == '충족')
     z2 = evaluate('Z', occs, w, row, (INCOMPLETE, 'test'), ends)
     chk('Z: 항목 1이 미완성이면 충족이 아니다', z2['verdict'] == '미확정')
     z3 = evaluate('Z', occs, w, row, proved, None)
@@ -499,8 +519,9 @@ def selftest():
     chk('S: 게시 후에 항목 2의 상태 값이 나오면 항목 3 불성립', s['items'][3] == NO)
     u = evaluate('U', occs, w, row, proved)
     chk('U: 지점 미관측 발생은 항목 2·3을 채우지 않는다', u['items'][2] == NODATA and u['items'][3] == NODATA and u['verdict'] != '충족')
-    v = evaluate('V', occs, w, row, proved)
-    chk('V: 다른 지점에서의 게시 후 성공은 대응 사용이 아니다', v['items'][3] == NODATA and v['verdict'] != '충족')
+    v = evaluate('V', occs, w, row, proved, ends)
+    chk('V: 다른 지점에서의 게시 후 성공은 대응 사용이 아니다(1·2·4번 성립, 3번만이 가르는 조건에서)',
+        [v['items'][k] for k in (1, 2, 4)] == [OK, OK, OK] and v['items'][3] == NODATA and v['verdict'] != '충족')
     y = evaluate('Y', occs, w, row, proved)
     chk('Y: 게시 전 사용이 없으면 항목 2 불성립', y['items'][2] == NO and y['verdict'] == '미충족')
     # the parsers and the filter on tiny text files
@@ -552,7 +573,7 @@ def selftest():
     amap, how = map_actors(order, info['ident'], info['w_actor'])
     chk('정적 행위자 대응: P<->P, W<->W', amap == {'P': 'P', 'W': 'W'})
     p = evaluate('P', o, info['w'], r, item1_for('P', order, amap), info['init_end'])
-    chk('P(게시 후 자기 사용 없음): 항목 1 미완성, 2 성립, 3 자료 없음, 4 미검사, 5 성립, 판정 미확정',
+    chk('P(게시 후 자기 사용 없음): 항목 1 미완성, 2 성립, 3 자료 없음, 4 미검사, 5 성립(기록만), 판정 미확정',
         [p['items'][k] for k in (1, 2, 3, 4, 5)] == [INCOMPLETE, OK, NODATA, UNCHECKED, OK] and p['verdict'] == '미확정')
     for f in (rel, dump, rep, tab):
         os.remove(f)
@@ -565,25 +586,109 @@ def selftest():
     return 1 if bad else 0
 
 
+def fixed_row_ids(path):
+    """the fixed-order candidate rows, by a rule on the row text only (the order class FIXED of s1_rev1.py)"""
+    ids, cur, feas = [], None, {}
+    for line in open(path, errors='replace'):
+        m = re.match(r'^  ([ABC]\d+) ', line)
+        if m:
+            cur = m.group(1)
+            continue
+        if cur and line.startswith('      ') and line.strip().startswith('feasibility:'):
+            feas[cur] = line.strip()[len('feasibility:'):].strip()
+    for rid, f in feas.items():
+        if not rid.startswith('B') or f.startswith('proven-impossible'):
+            continue
+        cl = re.findall(r'reader actors created before it: ([^;.]*); after it: ([^.]*)\.', f)
+        if any(not b.strip().startswith('none') for b, a in cl):
+            ids.append(rid)
+    return ids
+
+
+def fixed_rows(rel, recs):
+    """apply the clause to every fixed-order candidate row; condensed output"""
+    P = print
+    P('clause B per consumer, all fixed-order candidate rows (offline probe, revision 1).  읽기만 한다. 탐지 주장이 아니다.')
+    P('행은 사람이 고르지 않았다: 행 글자의 규칙(경로 B, 작성자보다 먼저 만들어지는 독자가 적힘, proven-impossible 아님)으로 골랐다.')
+    P('기록은 사람이 놓은 관측 지점으로 얻은 것이고 도구의 증거가 아니다.')
+    P('relations %s sha256 %s' % (rel, sha(rel)))
+    ids = fixed_row_ids(rel)
+    P('고정 순서 후보 행 %d개: %s' % (len(ids), ids))
+    cache = {}
+    for name, (replay, occtable, dump) in recs:
+        if dump not in cache:
+            sites, events = read_dump(dump)
+            tab = read_occtable(occtable)
+            callees = sorted(set(sites[events[int(t['nevent'])][2]]['symbol'] for t in tab))
+            cache[dump] = (sites, callees)
+    tally = collections.Counter()
+    for rid in ids:
+        row = read_row(rel, rid)
+        for name, (replay, occtable, dump) in recs:
+            sites, callees = cache[dump]
+            hit = set()
+            for si, st in sites.items():
+                for k, rs in enumerate(row['sites']):
+                    if match_site(st, rs['file'], rs['line'], rs['fn']):
+                        hit.add(k)
+            if not hit:
+                P('   %-5s %-4s %s -> %s: 기록에 지점 없음 (행의 지점 %d곳 가운데 기록의 지점별 관측과 맞는 것 0곳)' % (
+                    rid, name, row.get('field'), row.get('callee'), len(row['sites'])))
+                tally['기록에 지점 없음'] += 1
+                continue
+            if row.get('callee') not in callees:
+                P('   %-5s %-4s %s -> %s: 지점 %d곳이 맞으나 기록의 발생 표에 이 callee의 호출이 없음(발생 자료 없음; 표의 callee %s)' % (
+                    rid, name, row.get('field'), row.get('callee'), len(hit), callees))
+                tally['발생 자료 없음'] += 1
+                continue
+            occs, info = load_record(row, replay, occtable, dump)
+            if info['w'] is None:
+                P('   %-5s %-4s 게시 w에 해당하는 기록 지점이 없음: 판정하지 않음' % (rid, name))
+                tally['게시 지점 없음'] += 1
+                continue
+            order = static_order(row)
+            amap, how = map_actors(order, info['ident'], info['w_actor'])
+            consumers = [i['actor'] for i in info['ident'] if i['actor'] != info['w_actor']]
+            for o in occs:
+                if o['actor'] not in consumers and o['actor'] != info['w_actor']:
+                    consumers.append(o['actor'])
+            res = [evaluate(c, occs, info['w'], row, item1_for(c, order, amap), info['init_end']) for c in consumers]
+            c = collections.Counter(r['verdict'] for r in res)
+            P('   %-5s %-4s 지점 %d곳 일치. 소비자 %d개: 충족 %d, 미확정 %d, 미충족 %d. 게시 전 사용이 있는 소비자: %s' % (
+                rid, name, len(hit), len(res), c['충족'], c['미확정'], c['미충족'],
+                ['%s(전 %d, 1-4번 = %s, 5번(기록만) = %s)' % (r['consumer'], r['n_before'], '/'.join(r['items'][k] for k in (1, 2, 3, 4)), r['items'][5]) for r in res if r['n_before']]))
+            tally['판정함'] += 1
+    P('요약(행 x 기록 %d쌍): %s' % (len(ids) * len(recs), dict(tally)))
+    P('"충족"은 소비자별 전후 자료가 갖춰졌다는 뜻일 뿐 위반 판정이 아니다(방법 문서 1.1절, 3.3절).')
+    return 0
+
+
 def main(argv):
     if '--selftest' in argv:
         return selftest()
     rel = rid = None
     recs = []
+    allfixed = False
     i = 1
     while i < len(argv):
         if argv[i] == '--relations':
             rel = argv[i + 1]; i += 2
         elif argv[i] == '--row':
             rid = argv[i + 1]; i += 2
+        elif argv[i] == '--fixed-rows':
+            allfixed = True; i += 1
         elif argv[i] == '--record':
             name, rest = argv[i + 1].split('=', 1)
             recs.append((name, rest.split(','))); i += 2
         else:
             raise SystemExit('unknown argument ' + argv[i])
+    if allfixed and rel and recs:
+        return fixed_rows(rel, recs)
     if not (rel and rid and recs):
         raise SystemExit(__doc__ or 'usage: see the head of this file')
     print('clause B per consumer (offline probe, revision 1).  읽기만 한다. 이 출력은 기존 기록에 대한 점검이고 탐지 주장이 아니다.')
+    print('행 %s은 명령줄에서 사람이 골랐다. 고정 순서 후보 행 전체에 같은 규칙을 대는 것은 --fixed-rows가 한다.' % rid)
+    print('기록은 사람이 놓은 관측 지점으로 얻은 것이고 도구의 증거가 아니다.')
     row = read_row(rel, rid)
     describe_row(row, rel)
     allres = {}

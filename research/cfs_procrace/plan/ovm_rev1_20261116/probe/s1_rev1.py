@@ -47,15 +47,19 @@
 #    D04 치유                                        label H
 #    D05 실패 표시 없음                              label 0
 #    D06 표시 확정·상대 없음                         label R or J, path A, no creator in another actor
-#    D07 지향 실행 후보(재배치 후보)                 label R or J, counterpart, RELOC, reach not INDEPENDENT (for J)
+#    D07 우선 지향 실행 후보(재배치 후보 중 표시 R·J) label R or J, counterpart, RELOC, reach not INDEPENDENT (for J)
 #    D08 재배치 후보·실패 상수가 값과 무관(행의 평가) label J, counterpart, RELOC, reach INDEPENDENT
 #    D09 표시 확정·순서 미정                         label R or J, counterpart, order UNK or NOPAIR
 #    D10 부재 결과 있음·처리 효과 미확정(F)          label F
 #    D11 처리 효과 미확정(T?)                        label T?
 #    D12 부재 결과 미확정(E)                         label E
 #    D13 미분류                                      nothing matched (must be 0)
-#    observation set (no intervention) = D02 D03 D07 D08 D09 D10 D11 D12
-#    directed-run candidates           = D07
+#    observation set of the revised rule (method document 3.1) = every disposition except D13 (D13 must be 0).
+#        No label and no proof of the row removes a row from it; this includes D01, D04, D05 and D06.
+#    earlier range of this probe = D02 D03 D07 D08 D09 D10 D11 D12 (printed for comparison only; not the rule)
+#    directed-run candidates = relocation candidates (order class RELOC), whatever the label (method document 3.1)
+#    priority directed-run candidates = D07 (relocation candidates with label R or J); a label sets the order of
+#        the runs, it does not filter the candidates
 import collections
 import hashlib
 import re
@@ -76,11 +80,12 @@ def consts(text):
 
 DISP = collections.OrderedDict([
     ('D01', '순서 강제(행의 증명)'), ('D02', '고정 순서 후보'), ('D03', '조건부 순서 후보'), ('D04', '치유'),
-    ('D05', '실패 표시 없음'), ('D06', '표시 확정·상대 없음'), ('D07', '지향 실행 후보(재배치 후보)'),
+    ('D05', '실패 표시 없음'), ('D06', '표시 확정·상대 없음'), ('D07', '우선 지향 실행 후보(재배치 후보 중 표시 R·J)'),
     ('D08', '재배치 후보·실패 상수가 값과 무관(행의 평가)'), ('D09', '표시 확정·순서 미정'),
     ('D10', '부재 결과 있음·처리 효과 미확정(F)'), ('D11', '처리 효과 미확정(T?)'), ('D12', '부재 결과 미확정(E)'),
     ('D13', '미분류')])
-OBSERVE = ('D02', 'D03', 'D07', 'D08', 'D09', 'D10', 'D11', 'D12')
+OBSERVE = ('D02', 'D03', 'D07', 'D08', 'D09', 'D10', 'D11', 'D12')      # the earlier range of this probe
+OBSERVE_RULE = tuple(d for d in DISP if d != 'D13')                       # method document 3.1
 UNDET = ('T?', 'F', 'E')
 
 
@@ -290,8 +295,9 @@ def main(argv):
     P('[흐름] 입력 행 -> 처리(행마다 정확히 하나). 합계 %d (입력 %d과 같아야 한다: %s)' % (sum(dc.values()), n, '같음' if sum(dc.values()) == n else '다름'))
     for d, name in DISP.items():
         sub = [r for r in rows if r['disp'] == d]
-        P('   %s %-34s %4d  경로 %s  표시 %s  관측 집합 %s' % (d, name, len(sub), dict(sorted(C(r['p'] for r in sub).items())),
-                                                              dict(sorted(C(r['lab'] for r in sub).items())), '예' if d in OBSERVE else '아니오'))
+        P('   %s %-34s %4d  경로 %s  표시 %s  개정 규칙의 관측 집합 %s, 탐침의 이전 범위 %s' % (d, name, len(sub), dict(sorted(C(r['p'] for r in sub).items())),
+                                                              dict(sorted(C(r['lab'] for r in sub).items())), '예' if d in OBSERVE_RULE else '아니오',
+                                                              '예' if d in OBSERVE else '아니오'))
     assert dc['D13'] == 0 and sum(dc.values()) == n
     P('   처리 x 순서 등급: %s' % {'%s/%s' % k: v for k, v in sorted(C((r['disp'], r['oc']) for r in rows).items())})
     # set (a): label classes
@@ -304,15 +310,21 @@ def main(argv):
     und = [r for r in rows if r['lab'] in UNDET]
     P('   미확정 표시(T?, F, E) 행 %d의 처리: %s' % (len(und), dict(sorted(C(r['disp'] for r in und).items()))))
     out_und = [r for r in und if r['disp'] not in OBSERVE]
-    P('   미확정 표시 가운데 관측 집합 밖 %d (모두 D01 순서 강제여야 한다: %s)' % (len(out_und), dict(C(r['disp'] for r in out_und))))
+    P('   미확정 표시 가운데 탐침의 이전 범위 밖 %d (모두 D01 순서 강제여야 한다: %s). 개정 규칙의 관측 집합에서는 남는다' % (len(out_und), dict(C(r['disp'] for r in out_und))))
     # set (b): observation without intervention / static gaps
+    obs_rule = [r for r in rows if r['disp'] in OBSERVE_RULE]
+    P('[집합 2-개정 규칙] 관측 집합 %d행 (방법 문서 3.1절: D13 말고 모든 처리. 입력 행 %d, D13 %d)' % (len(obs_rule), n, dc['D13']))
+    P('   단위: 행 %d, 서로 다른 (경로, 공유 요소) %d, 행에 적힌 지점 수의 합 %d' % (
+        len(obs_rule), len(set((r['p'], r['elem']) for r in obs_rule)), sum(r['nsite'] for r in obs_rule)))
+    P('   그 가운데 다른 행위자의 상대가 행에 있는 것 %d, 없는 것(경로 A, 생성자 없음) %d. 상대가 없는 것이 추출의 빈틈 때문인지는 이 탐침이 가리지 못한다(미확인)' % (
+        sum(1 for r in obs_rule if r['pair'] > 0), sum(1 for r in obs_rule if r['pair'] == 0)))
     obs = [r for r in rows if r['disp'] in OBSERVE]
-    P('[집합 2] 비개입 관측 대상 %d행 = %s' % (len(obs), ' + '.join('%s %d' % (d, dc[d]) for d in OBSERVE)))
+    P('[집합 2-탐침의 이전 범위] 비개입 관측 대상 %d행 = %s (비교용. 개정 규칙이 아니다)' % (len(obs), ' + '.join('%s %d' % (d, dc[d]) for d in OBSERVE)))
     P('   단위: 행 %d, 서로 다른 (경로, 공유 요소) %d, 행에 적힌 지점 수의 합 %d (경로 B는 sites=N, A와 C는 행마다 1)' % (
         len(obs), len(set((r['p'], r['elem']) for r in obs)), sum(r['nsite'] for r in obs)))
     P('   그 가운데 다른 행위자의 상대가 행에 있는 것 %d, 없는 것(경로 A, 생성자 없음) %d' % (
         sum(1 for r in obs if r['pair'] > 0), sum(1 for r in obs if r['pair'] == 0)))
-    P('   순서 강제(D01)인데 표시가 미확정이라 이전 집계에는 들어 있던 행 %d (포함하면 관측 대상 %d)' % (len(out_und), len(obs) + len(out_und)))
+    P('   탐침의 이전 범위가 개정 규칙의 관측 집합에서 빠뜨린 행 %d = %s' % (len(obs_rule) - len(obs), ' + '.join('%s %d' % (d, dc[d]) for d in OBSERVE_RULE if d not in OBSERVE)))
     gap_order = [r for r in rows if r['disp'] in ('D02', 'D03')]
     gap_eff = [r for r in obs if r['lab'] in ('T?', 'F')]
     P('   관측만으로 메워지지 않는 정적 정보 공백(검토 판단에 따른 두 부류):')
@@ -326,13 +338,17 @@ def main(argv):
         dc['D02'], dict(sorted(C(r['lab'] for r in rows if r['disp'] == 'D02').items())), sum(1 for r in rows if r['disp'] == 'D02' and r.get('mixed')),
         dc['D03'], dict(sorted(C(r['lab'] for r in rows if r['disp'] == 'D03').items())), len(reloc), dict(sorted(C(r['lab'] for r in reloc).items()))))
     P('   순서 등급 전체: %s' % dict(sorted(C(r['oc'] for r in rows).items())))
+    P('   지향 실행 후보(재배치 후보, 표시와 무관) %d행: 경로 %s, 처리 %s; 서로 다른 (경로, 공유 요소) %d; 행에 적힌 지점 수의 합 %d; 고정 후보(D02)와 겹치는 행 %d' % (
+        len(reloc), dict(sorted(C(r['p'] for r in reloc).items())), dict(sorted(C(r['disp'] for r in reloc).items())),
+        len(set((r['p'], r['elem']) for r in reloc)), sum(r['nsite'] for r in reloc), sum(1 for r in reloc if r['disp'] == 'D02')))
     d7 = [r for r in rows if r['disp'] == 'D07']
-    P('   지향 실행 후보(D07) %d행: 경로 %s, 표시 %s, 도달 표시 %s; 서로 다른 (경로, 공유 요소) %d; 행에 적힌 지점 수의 합 %d' % (
+    P('   우선 지향 실행 후보(D07, 재배치 후보 중 표시 R·J) %d행: 경로 %s, 표시 %s, 도달 표시 %s; 서로 다른 (경로, 공유 요소) %d; 행에 적힌 지점 수의 합 %d' % (
         len(d7), dict(sorted(C(r['p'] for r in d7).items())), dict(sorted(C(r['lab'] for r in d7).items())), dict(sorted(C(r['reach'] for r in d7).items())),
         len(set((r['p'], r['elem']) for r in d7)), sum(r['nsite'] for r in d7)))
     P('     행: %s' % [r['id'] for r in d7])
-    P('   고정 후보(D02)는 지향 실행 후보에서 제외: D02와 D07에 함께 드는 행 %d' % len([r for r in rows if r['disp'] == 'D02' and r in d7]))
-    P('   보류: 재배치 후보이면서 표시 F(D10, 호출자의 처리를 사실에서 이은 뒤에야 후보가 됨) %d; 재배치 후보이면서 값과 무관(D08) %d' % (
+    P('   고정 후보(D02)는 지향 실행 후보가 아니다: D02와 재배치 후보에 함께 드는 행 %d, D02와 D07에 함께 드는 행 %d' % (
+        len([r for r in reloc if r['disp'] == 'D02']), len([r for r in rows if r['disp'] == 'D02' and r in d7])))
+    P('   재배치 후보이면서 표시 F: 우선순위 밖의 지향 실행 후보(D10) %d; 재배치 후보이면서 값과 무관(D08) %d' % (
         sum(1 for r in rows if r['disp'] == 'D10' and r['oc'] == 'RELOC'), dc['D08']))
     P('   고정 후보 행: %s' % [(r['id'], r['lab'], r['reach']) for r in rows if r['disp'] == 'D02'])
     P('   조건부 후보 가운데 표시 J·F: %s' % [(r['id'], r['lab'], r['reach']) for r in rows if r['disp'] == 'D03' and r['lab'] in ('J', 'F', 'R')])
@@ -363,14 +379,20 @@ def main(argv):
     P('   + %d  규칙 변경(방법 문서 3.1의 정의에 맞춤): 고정 순서 후보는 표시와 무관하게 관측 집합에 든다. 표시 %s' % (len(a_fix), dict(C(r['lab'] for r in a_fix))))
     P('   + %d  규칙 변경: 조건부 순서 후보(새 등급)는 표시와 무관하게 관측한다. 표시 %s' % (len(a_cond), dict(C(r['lab'] for r in a_cond))))
     P('   + %d  그 밖(0이어야 한다)' % len(a_other))
-    P('   - %d  규칙 변경: 행이 순서를 증명한 행(D01)은 표시가 미확정이어도 관측 대상에서 뺀다. 표시 %s; 그 밖의 빠짐 %d(0이어야 한다)' % (
+    P('   - %d  탐침 범위의 차이(개정 규칙에서는 남음): 행이 순서를 증명한 행(D01)이 탐침의 이전 범위 밖에 있다. 표시 %s; 그 밖의 빠짐 %d(0이어야 한다)' % (
         sum(1 for r in rem if r['disp'] == 'D01'), dict(C(r['lab'] for r in rem if r['disp'] == 'D01')), sum(1 for r in rem if r['disp'] != 'D01')))
     P('   새 사실로 인한 차이 0: 입력은 같은 relations.txt다')
+    addr = [r for r in obs_rule if r['id'] not in ids(old_obs)]
+    remr = [r for r in old_obs if r['id'] not in ids(obs_rule)]
+    P('[차이: 이전 집계 -> 개정 규칙의 관측 집합] 이전 %d -> 지금 %d  (더해짐 %d, 빠짐 %d(0이어야 한다))' % (len(old_obs), len(obs_rule), len(addr), len(remr)))
+    P('   + %d  결함 수정: T? 행 보존' % sum(1 for r in addr if r['lab'] == 'T?'))
+    P('   + %d  규칙 변경: 표시와 행의 순서 증명은 후보를 거르지 않는다(방법 문서 3.1절). 처리 %s' % (
+        sum(1 for r in addr if r['lab'] != 'T?'), dict(sorted(C(r['disp'] for r in addr if r['lab'] != 'T?').items()))))
     addn = [r for r in d7 if r['id'] not in ids(old_narrow)]
     remn = [r for r in old_narrow if r['id'] not in ids(d7)]
-    P('[차이: 좁은 후보 -> 지향 실행 후보] 이전 %d -> 지금 %d  (더해짐 %d, 빠짐 %d)' % (len(old_narrow), len(d7), len(addn), len(remn)))
+    P('[차이: 좁은 후보 -> 우선 지향 실행 후보(D07)] 이전 %d -> 지금 %d  (더해짐 %d, 빠짐 %d)' % (len(old_narrow), len(d7), len(addn), len(remn)))
     P('   - %d  결함 수정: 고정 순서 후보(D02)를 지향 실행 후보에서 제외. 행 %s' % (sum(1 for r in remn if r['disp'] == 'D02'), [r['id'] for r in remn if r['disp'] == 'D02']))
-    P('   - %d  규칙 변경(방법 문서 3.1의 S4 정의에 맞춤): 표시 F는 R·J가 아니므로 후보가 아니다(호출자의 처리가 행에 없음). 처리 %s' % (
+    P('   - %d  우선 후보에서 빠짐(후보에서는 빠지지 않음): 표시 F는 R·J가 아니다(호출자의 처리가 행에 없음). 처리 %s' % (
         sum(1 for r in remn if r['lab'] == 'F'), dict(sorted(C(r['disp'] for r in remn if r['lab'] == 'F').items()))))
     P('   - %d  규칙 변경: 조건부 순서 후보(D03, 표시 R·J)를 전제가 정해질 때까지 제외. 행 %s' % (
         sum(1 for r in remn if r['disp'] == 'D03' and r['lab'] != 'F'), [r['id'] for r in remn if r['disp'] == 'D03' and r['lab'] != 'F']))
@@ -378,17 +400,22 @@ def main(argv):
     rest = [r for r in remn if not (r['disp'] in ('D02', 'D09') or r['lab'] == 'F' or (r['disp'] == 'D03'))]
     P('   그 밖의 빠짐 %d, 더해짐 %d (둘 다 0이어야 한다)' % (len(rest), len(addn)))
     P('   새 사실로 인한 차이 0')
+    rn = [r for r in old_narrow if r['id'] not in ids(reloc)]
+    P('[차이: 좁은 후보 -> 지향 실행 후보(재배치 후보)] 이전 %d -> 지금 %d. 좁은 후보 가운데 재배치 후보가 아닌 행 %d: 처리 %s, 행 %s' % (
+        len(old_narrow), len(reloc), len(rn), dict(sorted(C(r['disp'] for r in rn).items())), [r['id'] for r in rn]))
     if show:
         for r in rows:
             if r['id'] in show:
                 P('SHOW %s 표시 %s 순서 %s 도달 %s 처리 %s %s -- %s' % (r['id'], r['lab'], r['oc'], r['reach'], r['disp'], DISP[r['disp']], r['why']))
     if tsv:
         with open(tsv, 'w') as f:
-            f.write('row\tsource_line\tpath\tlabel\tlabel_class\torder_class\treach\tflip\tresult\tcounterpart\tsites\telement\tdisposition\tdisposition_name\tobserve\treason\n')
+            f.write('row\tsource_line\tpath\tlabel\tlabel_class\torder_class\treach\tflip\tresult\tcounterpart\tsites\telement\tdisposition\tdisposition_name\tobserve_rule\tobserve_earlier_range\tdirected_candidate\tpriority_candidate\treason\n')
             for r in rows:
                 lc = 'decided' if r['lab'] in ('R', 'J', 'H', '0') else ('effect-undetermined' if r['lab'] in ('T?', 'F') else 'absence-undetermined')
                 f.write('\t'.join([r['id'], str(r['line']), r['p'], r['lab'], lc, r['oc'], r['reach'], r['flip'], r['res'], str(r['pair']), str(r['nsite']),
-                                   r['elem'], r['disp'], DISP[r['disp']], 'yes' if r['disp'] in OBSERVE else 'no', r['why']]) + '\n')
+                                   r['elem'], r['disp'], DISP[r['disp']], 'yes' if r['disp'] in OBSERVE_RULE else 'no',
+                                   'yes' if r['disp'] in OBSERVE else 'no', 'yes' if r['oc'] == 'RELOC' else 'no',
+                                   'yes' if r['disp'] == 'D07' else 'no', r['why']]) + '\n')
     return 0
 
 

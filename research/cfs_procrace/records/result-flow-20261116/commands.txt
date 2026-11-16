@@ -1,0 +1,13 @@
+sha256 of declared_before_build.txt: e32dbc2db9c0e6ea78f15211ea6176395dd76d6163d087e7f409803ba2447080
+# commands of the result flow step (plan/full_stage_results_20261116.md section 9); <scratch> is this session's scratchpad
+# directory (one directory in it); times UTC
+## 0. before the declaration
+code, fixture resultflow.c, tests, static_facts.md 5u, schema.md dated line, probe s1_rev2.py, run_unit.sh check 16
+scratch check build <scratch>/re (cmake of the kairos source, the pinned LLVM, Release), every make under env/tools/space_guard.sh, rc 0;
+  ctest: 264 tests, the two new goldens failing (no golden yet); test_static_cli 1099 checks, test_static_reasons 692 with the new golden in a
+  scratch copy of the data directory, lint 8 rules clean, run_unit.sh 16/16; the two goldens kept in <scratch>/re/gkeep (golden_scratch.sha256);
+  one_build.sh with the scratch kz-static on the five builds with the option-on arguments into <scratch>; relations, order, plans, s1_rev1/s1_rev2:
+  the [I] values of 9.0; these outputs are scratch and no evidence; the scratch build and outputs removed before the declaration
+tools_check.sh --deep -> tools_check_pre.txt (43 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (104 rows, 0 failing)
+relink_expected.sha256 (14) and not_relink.sha256 (110): sha256 of the MC binaries before the build
+code snapshot commits: 9334e97 (model.hpp, spec.hpp), d22ec58 (the rest of the code, fixture, tests, documents, probe, unit check); the declaration commit follows

@@ -1,0 +1,26 @@
+OK restored kz-static sha256 038cd9e36af4d4ded9f8801346405f0ceaa38025a2d603ac35974ea48097d0ce
+OK c1_pre_tx keys.txt = relrev7_check apart from line 2
+OK c1_pre_tx relations.txt = relrev7_check apart from line 2
+OK c1_pre_tx relations.txt = relrev7_extract's (the single-build runner's)
+OK c1_pre_tx keys.txt line 2 names the re-extracted facts
+OK c1_pre_tx relations.log empty
+OK c1_post_tx keys.txt = relrev7_check apart from line 2
+OK c1_post_tx relations.txt = relrev7_check apart from line 2
+OK c1_post_tx relations.txt = relrev7_extract's (the single-build runner's)
+OK c1_post_tx keys.txt line 2 names the re-extracted facts
+OK c1_post_tx relations.log empty
+OK r2_core keys.txt = relrev7_check apart from line 2
+OK r2_core relations.txt = relrev7_check apart from line 2
+OK r2_core relations.txt = relrev7_extract's (the single-build runner's)
+OK r2_core keys.txt line 2 names the re-extracted facts
+OK r2_core relations.log empty
+OK c5_641 keys.txt = relrev7_check apart from line 2
+OK c5_641 relations.txt = relrev7_check apart from line 2
+OK c5_641 relations.txt = relrev7_extract's (the single-build runner's)
+OK c5_641 keys.txt line 2 names the re-extracted facts
+OK c5_641 relations.log empty
+OK c5_642 keys.txt = relrev7_check apart from line 2
+OK c5_642 relations.txt = relrev7_check apart from line 2
+OK c5_642 relations.txt = relrev7_extract's (the single-build runner's)
+OK c5_642 keys.txt line 2 names the re-extracted facts
+OK c5_642 relations.log empty

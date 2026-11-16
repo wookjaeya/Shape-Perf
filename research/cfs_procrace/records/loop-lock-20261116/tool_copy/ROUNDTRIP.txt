@@ -1,0 +1,7 @@
+# round trip of the tool copies before the build of the loop flag and lock handle step (2026-11-16T22:13:01Z)
+copy: /home/user/work/preserve/tools-20261116-k/kz-static.499748bc.xz (46534188 B)
+xz -t: OK
+sha256 of the xz file: de44cdf42632108c66bf9dfc026446f86c0b29775cfed44ba6fb4f82edd5cb7c
+xz -dc | sha256sum: 499748bc22881d9019e7dc31b9cc3a7aeb0740e16b5ad94207cc8e52503a163a
+in place: 499748bc22881d9019e7dc31b9cc3a7aeb0740e16b5ad94207cc8e52503a163a
+xz -dc | cmp in place: SAME

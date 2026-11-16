@@ -1,0 +1,302 @@
+extract
+  translation units          1
+  functions                  37 (bodies read 32, in system headers skipped 0)
+  call sites                 57
+  indirect calls             1 (resolved 1, unresolved 0)
+  spawn calls                4 (entry resolved 4)
+  loops                      4 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 1, await 0, star-closed 3
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 3, escaping 0, unsummarized 3
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location HRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location MutRec.m   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 3, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Named.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Named.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location PRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Shared.mutex   writers 1 (direct 0, data function 0, out-pointer 1, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Twice.mutex   writers 2 (direct 0, data function 0, out-pointer 2, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location WRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 32, control-flow graphs 32, call-graph components 32 (recursive 0)
+  delay operations (F8)      must 2 (vocabulary), may 4 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 4 (callers of a fixed-entry operation left as they are: 1)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               8 (R-T1 3, R-T2 5, both 0; left out, reached only through an unshared base: R-T1 0, R-T2 1)
+semantics                    rows 11 (collated / rows: P0 2/5, framework 4/6, status-space 0/0; collated: a verification state other than unverified)
+result flow                  42 rows (uses: branch 3, return 4, argument 0, store 0, other 4, none 27; guard rows 4); calls with a result 35
+result effect                19 rows (open 13; event send 0, application exit 0, terminal 0; calls on the paths that are none of these, no row: 4); calls explored 6, outcomes 9
+loop defs                    15 rows (loops 4: recognised 2, refused-reset-in-body 1, refused-address-taken 1; definition rows 11); recognised 2; subexpressions cut at param.walk_bounds' expression depth 0 (not in count.walk_bounds_hit)
+lock handles                 8 rows (static-instance 2, semantics-unverified 0, writer-set-incomplete 0, not-static 6, of them no handle found 0)
+facts-view 1
+[functions] 37
+  fn 0 again_twice looplock.c:70-70 params=0 {defined}
+  fn 1 get_task_function looplock.c:171-193 params=1 {defined}
+  fn 2 h_create looplock.c:92-99 params=0 {defined}
+  fn 3 h_used looplock.c:78-84 params=0 {defined}
+  fn 4 h_worker looplock.c:86-90 params=1 {defined,address-taken}
+  fn 5 init_locks looplock.c:65-68 params=0 {defined}
+  fn 6 main looplock.c:278-290 params=0 {defined}
+  fn 7 mut_create looplock.c:35-41 params=2 {defined}
+  fn 8 mut_give looplock.c:45-45 params=1 {defined}
+  fn 9 mut_index looplock.c:33-33 params=1 {defined,static}
+  fn 10 mut_take looplock.c:43-43 params=1 {defined}
+  fn 11 name_lookup looplock.c:224-230 params=2 {defined}
+  fn 12 nanosleep /usr/include/time.h:282 params=2 {}
+  fn 13 p_create looplock.c:121-128 params=0 {defined}
+  fn 14 p_used looplock.c:107-113 params=0 {defined}
+  fn 15 p_worker looplock.c:115-119 params=1 {defined,address-taken}
+  fn 16 param_lock looplock.c:62-62 params=1 {defined}
+  fn 17 param_unlock looplock.c:63-63 params=1 {defined}
+  fn 18 poke looplock.c:261-263 params=1 {defined}
+  fn 19 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 20 pthread_mutex_init /usr/include/pthread.h:781 params=2 {}
+  fn 21 pthread_mutex_lock /usr/include/pthread.h:794 params=1 {}
+  fn 22 pthread_mutex_unlock /usr/include/pthread.h:835 params=1 {}
+  fn 23 retry_lookup looplock.c:232-242 params=1 {defined}
+  fn 24 shared_lock looplock.c:58-58 params=0 {defined}
+  fn 25 shared_unlock looplock.c:59-59 params=0 {defined}
+  fn 26 task_by_context looplock.c:167-167 params=0 {defined}
+  fn 27 task_child looplock.c:169-169 params=0 {defined,address-taken}
+  fn 28 task_entry_point looplock.c:195-205 params=1 {defined,address-taken}
+  fn 29 task_start looplock.c:207-215 params=0 {defined}
+  fn 30 twice_lock looplock.c:60-60 params=0 {defined}
+  fn 31 twice_unlock looplock.c:61-61 params=0 {defined}
+  fn 32 w_create looplock.c:150-157 params=0 {defined}
+  fn 33 w_used looplock.c:136-142 params=0 {defined}
+  fn 34 w_worker looplock.c:144-148 params=1 {defined,address-taken}
+  fn 35 wait_addr looplock.c:265-276 params=0 {defined}
+  fn 36 wait_reset looplock.c:247-259 params=0 {defined}
+[lockops] 10
+  mut_give release every-return lock &mut_table@looplock.c:31[?(the result of mut_index)].m may=MutRec.m {vocabulary,assumes-success,unknown-identity} via site 5 looplock.c:45:36 depth=1
+      chain mut_give -> pthread_mutex_unlock
+  mut_take acquire every-return lock &mut_table@looplock.c:31[?(the result of mut_index)].m may=MutRec.m {vocabulary,assumes-success,unknown-identity} via site 2 looplock.c:43:36 depth=1
+      chain mut_take -> pthread_mutex_lock
+  param_lock acquire every-return lock &mut_table@looplock.c:31[?(the result of mut_index)].m may=MutRec.m {vocabulary,assumes-success,unknown-identity} via site 12 looplock.c:62:37 depth=2
+      chain param_lock -> mut_take -> pthread_mutex_lock
+  param_unlock release every-return lock &mut_table@looplock.c:31[?(the result of mut_index)].m may=MutRec.m {vocabulary,assumes-success,unknown-identity} via site 13 looplock.c:63:39 depth=2
+      chain param_unlock -> mut_give -> pthread_mutex_unlock
+  pthread_mutex_lock acquire result-conditional success=0 lock $0 {primitive-op,vocabulary,assumes-success,parameter-identity}
+      chain pthread_mutex_lock
+  pthread_mutex_unlock release every-return lock $0 {primitive-op,vocabulary,parameter-identity}
+      chain pthread_mutex_unlock
+  shared_lock acquire every-return lock &mut_table@looplock.c:31[?(the result of mut_index)].m may=MutRec.m {vocabulary,assumes-success,unknown-identity} via site 8 looplock.c:58:32 depth=2
+      chain shared_lock -> mut_take -> pthread_mutex_lock
+  shared_unlock release every-return lock &mut_table@looplock.c:31[?(the result of mut_index)].m may=MutRec.m {vocabulary,assumes-success,unknown-identity} via site 9 looplock.c:59:34 depth=2
+      chain shared_unlock -> mut_give -> pthread_mutex_unlock
+  twice_lock acquire every-return lock &mut_table@looplock.c:31[?(the result of mut_index)].m may=MutRec.m {vocabulary,assumes-success,unknown-identity} via site 10 looplock.c:60:31 depth=2
+      chain twice_lock -> mut_take -> pthread_mutex_lock
+  twice_unlock release every-return lock &mut_table@looplock.c:31[?(the result of mut_index)].m may=MutRec.m {vocabulary,assumes-success,unknown-identity} via site 11 looplock.c:61:33 depth=2
+      chain twice_unlock -> mut_give -> pthread_mutex_unlock
+[lockids] 1
+  #0 &mut_table@looplock.c:31[?(the result of mut_index)].m unknown undecidable {} may=MutRec.m (the result of mut_index)
+[loopdefs] 15
+  loop 0 looplock.c:176:3 in get_task_function recognised form flag+value {under-lock,call-result} predicate (and (ne (call-result task_by_context) 0) (and (ne field:TaskRec.app_id 0) (ne field:TaskRec.entry 0)))
+    rc@172:7 before-loop at looplock.c:172:7 recognised flag {under-lock} value -5
+    rc@172:7 in-body at looplock.c:184:12 recognised flag {under-lock} value 0 guard (and (ne local:t 0) (and (ne field:TaskRec.app_id 0) (ne local:e 0)))
+    e@174:10 before-loop at looplock.c:174:10 recognised value {under-lock} value 0
+    e@174:10 in-body at looplock.c:182:9 recognised value {under-lock} value field:TaskRec.entry guard (ne local:t 0)
+    t@177:14 in-body at looplock.c:180:7 recognised value {under-lock,call-result} value (call-result task_by_context)
+  loop 1 looplock.c:236:3 in retry_lookup recognised form value {call-result} predicate (ne (call-result name_lookup (seq string:x (seq param:id#0))) -17)
+    ret@233:7 before-loop at looplock.c:233:7 recognised value {call-result} value -17
+    ret@233:7 in-body at looplock.c:237:9 recognised value {call-result} value (call-result name_lookup (seq string:x (seq param:id#0)))
+  loop 2 looplock.c:251:3 in wait_reset refused-reset-in-body {}
+    ok@248:7 before-loop at looplock.c:248:7 refused-reset-in-body {} value 0
+    ok@248:7 in-body at looplock.c:253:8 refused-reset-in-body {} value 0
+    ok@248:7 in-body at looplock.c:254:29 refused-reset-in-body {} value 1 guard (ne global:ready_flag 0)
+  loop 3 looplock.c:269:3 in wait_addr refused-address-taken {}
+    flag@266:7 before-loop at looplock.c:266:7 refused-address-taken {} value 0
+[lockhandles] 8
+  lockop 0 mut_give site 5 looplock.c:45:36 family MutRec.m not-static {} handle param:#0 sem 5 lock #0
+      premise: the handle is parameter 0 of mut_give (the semantics item lock-object (doc), looplock.c:45 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:45)): its identity is the argument of each call of it
+  lockop 1 mut_take site 2 looplock.c:43:36 family MutRec.m not-static {} handle param:#0 sem 8 lock #0
+      premise: the handle is parameter 0 of mut_take (the semantics item lock-object (doc), looplock.c:43 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:43)): its identity is the argument of each call of it
+  lockop 2 param_lock site 12 looplock.c:62:37 family MutRec.m not-static {} handle param:h#0 sem 8 lock #0
+      premise: handle at looplock.c:62:37 (mut_take argument 0): the handle is parameter 0 of param_lock: its identity is the argument of each call of it; the semantics item lock-object (doc) of mut_take argument 0 (looplock.c:43 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:43))
+  lockop 3 param_unlock site 13 looplock.c:63:39 family MutRec.m not-static {} handle param:h#0 sem 5 lock #0
+      premise: handle at looplock.c:63:39 (mut_give argument 0): the handle is parameter 0 of param_unlock: its identity is the argument of each call of it; the semantics item lock-object (doc) of mut_give argument 0 (looplock.c:45 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:45))
+  lockop 6 shared_lock site 8 looplock.c:58:32 family MutRec.m static-instance {one-writer,writer-runs-once} field Shared.mutex handle field:Shared.mutex writer 2 sem 8 lock #0
+      premise: handle at looplock.c:58:32 (mut_take argument 0): the object the handle names is not deleted and created again between two operations (a run can check it); the semantics item lock-object (doc) of mut_take argument 0 (looplock.c:43 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:43))
+  lockop 7 shared_unlock site 9 looplock.c:59:34 family MutRec.m static-instance {one-writer,writer-runs-once} field Shared.mutex handle field:Shared.mutex writer 2 sem 5 lock #0
+      premise: handle at looplock.c:59:34 (mut_give argument 0): the object the handle names is not deleted and created again between two operations (a run can check it); the semantics item lock-object (doc) of mut_give argument 0 (looplock.c:45 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:45))
+  lockop 8 twice_lock site 10 looplock.c:60:31 family MutRec.m not-static {} field Twice.mutex handle field:Twice.mutex sem 8 lock #0
+      premise: handle at looplock.c:60:31 (mut_take argument 0): Twice.mutex: 2 writer instance(s), not one that runs once (FIELD_STATUS not-once); the semantics item lock-object (doc) of mut_take argument 0 (looplock.c:43 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:43))
+  lockop 9 twice_unlock site 11 looplock.c:61:33 family MutRec.m not-static {} field Twice.mutex handle field:Twice.mutex sem 5 lock #0
+      premise: handle at looplock.c:61:33 (mut_give argument 0): Twice.mutex: 2 writer instance(s), not one that runs once (FIELD_STATUS not-once); the semantics item lock-object (doc) of mut_give argument 0 (looplock.c:45 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:45))
+
+# relations
+kz-relations 1
+rules relations rules revision 9 (2026-11-16)
+mode profile-free
+  extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
+  extract.profile = kz-static-builtin-minimal / 
+  extract.p0_table = P0 table revision 3 (2026-10-30), 72 entries
+  extract.p0_table_scope = families of this revision: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread or process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Of a family the members that take, release, wait, signal, sleep, end, name a thread, bind or create a key, push or pop a handler, load or look up, or store memory are entries; a family is not listed whole where this list names members left out.  Not in this revision: read-write locks (pthread_rwlock_*; their shared acquisitions are not read by the lock-set analysis, so the family is left out whole and its acquisitions are no lock operations), barriers (pthread_barrier_*), one-time initialization (pthread_once, call_once), thread cancellation of another thread (pthread_cancel and the cancellation state functions), signals (kill, raise, pthread_kill, sigwait), dlclose, dlerror and dladdr, functions a compiler or a fortify wrapper calls without a call in the source (__stack_chk_fail, __chk_fail and the *_chk functions); thread join and detach (pthread_join, pthread_tryjoin_np, pthread_timedjoin_np, pthread_detach, thrd_join, thrd_detach); POSIX timers (timer_create, timer_settime, timer_gettime, timer_getoverrun, timer_delete; a timer with SIGEV_THREAD notification starts its function on a new thread, which is no actor here); I/O multiplexing (select, pselect, poll, ppoll); the initialization, destruction, attribute and query members of the mutex, spin lock, semaphore and condition variable families and of thread creation (pthread_mutex_init, pthread_mutex_destroy, pthread_mutexattr_*, pthread_spin_init, pthread_spin_destroy, sem_init, sem_destroy, sem_open, sem_close, sem_unlink, sem_getvalue, pthread_cond_init, pthread_cond_destroy, pthread_condattr_*, mtx_init, mtx_destroy, cnd_init, cnd_destroy, pthread_attr_*); scheduling (sched_*, pthread_setschedparam, pthread_getschedparam, pthread_setschedprio); data functions not in this revision (stpcpy, stpncpy, strlcpy and strlcat (glibc 2.38 and later), mempcpy, memccpy, explicit_bzero, and the wide-character members); formatted input, which stores through its arguments (sscanf, vsscanf, fscanf, vfscanf, scanf, vscanf); handlers registered for process exit (atexit, at_quick_exit, on_exit)
+  extract.derivation_rules = wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  extract.targets_rule = R-T1,R-T2 (target rules revision 1): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)
+  extract.reading_options_vs_basis = not compared: no basis (--source)
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
+semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): rows 11 (collated / rows: P0 2/5, framework 4/6, status-space 0/0; collated: a verification state other than unverified); rows that name a function with framework semantics items 4, of them with items not verified 4 (sem-unverified(api:column) in the layers column; the P0 entries stay in P0-unverified)
+rules with lock handles: relations rules revision 11 (2026-11-16), over LOCK_HANDLES (extract --lock-handles, docs/static_facts.md 5v): 8 rows (static-instance 2, semantics-unverified 0, writer-set-incomplete 0, not-static 6, of them no handle found 0); path C rows whose common lock is identified by its handle 3, of them with a static-instance handle 2
+rules with result flow: relations rules revision 10 (2026-11-16), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): 42 rows (uses: branch 3, return 4, argument 0, store 0, other 4, none 27; guard rows 4); calls with a result 35; 19 rows (open 13; event send 0, application exit 0, terminal 0; calls on the paths that are none of these, no row: 4); calls explored 6, outcomes 9
+handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: none 6
+run order: no record given (this revision reads no run record; the column says so in every row)
+functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
+actors: roots 5 (process 1, spawn-entry 4, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 0
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
+summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition in another actor 0, key-matched 0) B 6 (with a callee check 0) C 4 (self-identity reads 0); flip static-possible 3, static-undetermined 1, none 6; feasibility proven-impossible 2, possible 1, undecidable 7, not graded 0
+summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 0, creators 0; lookup rows with the membership unresolved 0; lookup rows without a creator of their partition 0 []
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 10 [no run record read 10]; writer_set_incomplete 2 [per-field completeness rule is a premise 2]; absent_result_unevaluated 1 [reader's returns not evaluated 1]; fixed_proof_open 9 [no static order between the actors 6, lock sets do not decide the order 1, proof rests on an assumption 2]; link_unlinked 4 [identity of the reader and the created thread not decided 4]; reasons of the whole facts on every row: none
+[A] 0 (namespaces 0, key comparisons 1; left out: searches over no global table 0)
+[B] 6 (field-argument groups 6; left out: no writer 0, one actor only 0)
+  B1 Shared.mutex -> mut_give#0 sites=1 callee-check=none
+      site looplock.c:59:34 in shared_unlock [shared_global.mutex] base=global hops=0 result=discarded
+      field: INIT 0 (shared_global); writers 1 from WRITERS (the field is an extraction target)
+        out-pointer at looplock.c:66:9 in init_locks via mut_create value=top [slot % 4u] guard=(not (eq param:id#0 0))
+      writers: Shared.mutex: 1 (out-pointer 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 0, data-function 0, out-pointer 1, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      actors: readers {h_worker (spawn-entry), main (process), task_entry_point (spawn-entry)}; writers {main (process)} (inter-actor)
+      handling: discarded 1, used 0, tested 0
+      handling_label: none (no callee check)
+      dependency: path B: the shared field Shared.mutex is read as argument 0 of mut_give at 1 sites; its writers run in another actor
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no callee check depends on the argument
+      layers: B P0 R (writers: rule targets) sem-unverified(mut_give:agreement)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
+  B2 Shared.mutex -> mut_take#0 sites=1 callee-check=none
+      site looplock.c:58:32 in shared_lock [shared_global.mutex] base=global hops=0 result=discarded
+      field: INIT 0 (shared_global); writers 1 from WRITERS (the field is an extraction target)
+        out-pointer at looplock.c:66:9 in init_locks via mut_create value=top [slot % 4u] guard=(not (eq param:id#0 0))
+      writers: Shared.mutex: 1 (out-pointer 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 0, data-function 0, out-pointer 1, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      actors: readers {h_worker (spawn-entry), main (process), task_entry_point (spawn-entry)}; writers {main (process)} (inter-actor)
+      handling: discarded 1, used 0, tested 0
+      handling_label: none (no callee check)
+      dependency: path B: the shared field Shared.mutex is read as argument 0 of mut_take at 1 sites; its writers run in another actor
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no callee check depends on the argument
+      layers: B P0 R (writers: rule targets) sem-unverified(mut_take:agreement)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
+  B3 Shared.mutex -> param_lock#0 sites=2 callee-check=none
+      site looplock.c:109:3 in p_used [shared_global.mutex] base=global hops=0 result=discarded
+      site looplock.c:123:3 in p_create [shared_global.mutex] base=global hops=0 result=discarded
+      field: INIT 0 (shared_global); writers 1 from WRITERS (the field is an extraction target)
+        out-pointer at looplock.c:66:9 in init_locks via mut_create value=top [slot % 4u] guard=(not (eq param:id#0 0))
+      writers: Shared.mutex: 1 (out-pointer 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 0, data-function 0, out-pointer 1, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      actors: readers {main (process), p_worker (spawn-entry)}; writers {main (process)} (inter-actor)
+      handling: discarded 2, used 0, tested 0
+      handling_label: none (no callee check)
+      dependency: path B: the shared field Shared.mutex is read as argument 0 of param_lock at 2 sites; its writers run in another actor
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no callee check depends on the argument
+      layers: B P0 R (writers: rule targets)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
+  B4 Shared.mutex -> param_unlock#0 sites=2 callee-check=none
+      site looplock.c:111:3 in p_used [shared_global.mutex] base=global hops=0 result=discarded
+      site looplock.c:126:3 in p_create [shared_global.mutex] base=global hops=0 result=discarded
+      field: INIT 0 (shared_global); writers 1 from WRITERS (the field is an extraction target)
+        out-pointer at looplock.c:66:9 in init_locks via mut_create value=top [slot % 4u] guard=(not (eq param:id#0 0))
+      writers: Shared.mutex: 1 (out-pointer 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 0, data-function 0, out-pointer 1, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      actors: readers {main (process), p_worker (spawn-entry)}; writers {main (process)} (inter-actor)
+      handling: discarded 2, used 0, tested 0
+      handling_label: none (no callee check)
+      dependency: path B: the shared field Shared.mutex is read as argument 0 of param_unlock at 2 sites; its writers run in another actor
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no callee check depends on the argument
+      layers: B P0 R (writers: rule targets)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
+  B5 Twice.mutex -> mut_give#0 sites=1 callee-check=none
+      site looplock.c:61:33 in twice_unlock [twice_global.mutex] base=global hops=0 result=discarded
+      field: INIT 0 (twice_global); writers 2 from WRITERS (the field is an extraction target)
+        out-pointer at looplock.c:67:9 in init_locks via mut_create value=top [slot % 4u] guard=(not (eq param:id#0 0))
+        out-pointer at looplock.c:70:32 in again_twice via mut_create value=top [slot % 4u] guard=(not (eq param:id#0 0))
+      writers: Twice.mutex: 2 (out-pointer 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 0, data-function 0, out-pointer 2, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      actors: readers {main (process), w_worker (spawn-entry)}; writers {main (process)} (inter-actor)
+      handling: discarded 1, used 0, tested 0
+      handling_label: none (no callee check)
+      dependency: path B: the shared field Twice.mutex is read as argument 0 of mut_give at 1 sites; its writers run in another actor
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no callee check depends on the argument
+      layers: B P0 R (writers: rule targets) sem-unverified(mut_give:agreement)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
+  B6 Twice.mutex -> mut_take#0 sites=1 callee-check=none
+      site looplock.c:60:31 in twice_lock [twice_global.mutex] base=global hops=0 result=discarded
+      field: INIT 0 (twice_global); writers 2 from WRITERS (the field is an extraction target)
+        out-pointer at looplock.c:67:9 in init_locks via mut_create value=top [slot % 4u] guard=(not (eq param:id#0 0))
+        out-pointer at looplock.c:70:32 in again_twice via mut_create value=top [slot % 4u] guard=(not (eq param:id#0 0))
+      writers: Twice.mutex: 2 (out-pointer 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 0, data-function 0, out-pointer 2, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      actors: readers {main (process), w_worker (spawn-entry)}; writers {main (process)} (inter-actor)
+      handling: discarded 1, used 0, tested 0
+      handling_label: none (no callee check)
+      dependency: path B: the shared field Twice.mutex is read as argument 0 of mut_take at 1 sites; its writers run in another actor
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no callee check depends on the argument
+      layers: B P0 R (writers: rule targets) sem-unverified(mut_take:agreement)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
+[C] 4 (spawn calls 4, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 4; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 0, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)
+  C1 spawn looplock.c:95:3 in h_create -> pthread_create; field HRec.used; read looplock.c:81:17 in h_used (via the call looplock.c:88:9 in h_worker)
+      spawn: callee pthread_create, entries h_worker; child actors {h_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:94:3]
+      write after the spawn: looplock.c:96:3 key=h_recs[0] value=1 [1] locks {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:94:3]
+      read: [h_recs[0].used] use=branch index=(seq 0) guard=- locks {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:80:3]; at the call {}
+      writers: HRec.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      dependency: path C: the creator writes HRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: proven-impossible: lock #0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable), one mutex by its handle Shared.mutex (handle at looplock.c:58:32 (mut_take argument 0): the object the handle names is not deleted and created again between two operations (a run can check it); the semantics item lock-object (doc) of mut_take argument 0 (looplock.c:43 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:43))), is held from the same acquisition across the spawn and every write of HRec.used after it in this call of h_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of h_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of HRec.used, the writes of the whole record HRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; HRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of h_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (h_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable) a static instance and HRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved); and the lock identity by handle (LOCK_HANDLES, relations rules revision 11): every acquisition at the spawn and at the read passes that handle, its field's writer set is complete per field with one writer instance that runs once, a verified semantics item says the operation acts on the object the handle references, and that object is not deleted and created again between the acquisitions
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: h_used returns 1 [1] with the earlier value (INIT 0 (h_recs)), not with the written value 1 [1]; h_used returns 0 [0] not with the earlier value (INIT 0 (h_recs)), with the written value 1 [1]
+      layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
+  C2 spawn looplock.c:124:3 in p_create -> pthread_create; field PRec.used; read looplock.c:110:17 in p_used (via the call looplock.c:117:9 in p_worker)
+      spawn: callee pthread_create, entries p_worker; child actors {p_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:123:3]
+      write after the spawn: looplock.c:125:3 key=p_recs[0] value=1 [1] locks {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:123:3]
+      read: [p_recs[0].used] use=branch index=(seq 0) guard=- locks {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:109:3]; at the call {}
+      writers: PRec.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      dependency: path C: the creator writes PRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: proven-impossible: lock #0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable), one mutex by its handle Shared.mutex (the handle Shared.mutex passed at looplock.c:123:3 as parameter 0 of param_lock (static-instance)), is held from the same acquisition across the spawn and every write of PRec.used after it in this call of p_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of p_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of PRec.used, the writes of the whole record PRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; PRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of p_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (p_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable) a static instance and PRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved); and the lock identity by handle (LOCK_HANDLES, relations rules revision 11): every acquisition at the spawn and at the read passes that handle, its field's writer set is complete per field with one writer instance that runs once, a verified semantics item says the operation acts on the object the handle references, and that object is not deleted and created again between the acquisitions
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: p_used returns 1 [1] with the earlier value (INIT 0 (p_recs)), not with the written value 1 [1]; p_used returns 0 [0] not with the earlier value (INIT 0 (p_recs)), with the written value 1 [1]
+      layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
+  C3 spawn looplock.c:153:3 in w_create -> pthread_create; field WRec.used; read looplock.c:139:17 in w_used (via the call looplock.c:146:9 in w_worker)
+      spawn: callee pthread_create, entries w_worker; child actors {w_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:152:3]
+      write after the spawn: looplock.c:154:3 key=w_recs[0] value=1 [1] locks {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:152:3]
+      read: [w_recs[0].used] use=branch index=(seq 0) guard=- locks {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:138:3]; at the call {}
+      writers: WRec.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      dependency: path C: the creator writes WRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: undecidable: lock #0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable) is held from the same acquisition across the spawn and every write after it, and the read holds it, but its identity is no static instance: that the read's lock and the writes' lock are one mutex is not proven (must identity, ED §3.3); every acquisition of it at the spawn and at the read passes the handle Twice.mutex not-static (handle at looplock.c:60:31 (mut_take argument 0): Twice.mutex: 2 writer instance(s), not one that runs once (FIELD_STATUS not-once); the semantics item lock-object (doc) of mut_take argument 0 (looplock.c:43 (framework_semantics_fixture-lock.txt, fixture-lock; applies by its definition looplock.c:43))), which is no static instance with a verified semantics item
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: w_used returns 1 [1] with the earlier value (INIT 0 (w_recs)), not with the written value 1 [1]; w_used returns 0 [0] not with the earlier value (INIT 0 (w_recs)), with the written value 1 [1]
+      layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); fixed_proof_open(lock sets do not decide the order); link_unlinked(identity of the reader and the created thread not decided)
+  C4 spawn looplock.c:209:12 in task_start -> pthread_create; field TaskRec.app_id; read looplock.c:183:14 in get_task_function (via the call looplock.c:198:7 in task_entry_point)
+      spawn: callee pthread_create, entries task_entry_point; child actors {task_entry_point (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
+      write after the spawn: looplock.c:212:3 locks {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:210:3]
+      read: [t->app_id] use=branch index=- guard=(ne local:t 0) locks {#0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable)} acquired-at [looplock.c:179:5]; at the call {}
+      writers: TaskRec.app_id: 1 (write 1) from LOCKSET write events (positions only: the field is no extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      dependency: path C: the creator writes TaskRec.app_id after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: possible: lock window: #0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable) is not held at the spawn; the writes after it hold it from a later acquisition, so the read may come before them
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-undetermined: not evaluated: no WRITERS row of the write at looplock.c:212:3 (not a target); no constant value among the writes of TaskRec.app_id after the spawn; no initial value of TaskRec.app_id
+      layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); absent_result_unevaluated(reader's returns not evaluated); link_unlinked(identity of the reader and the created thread not decided)

@@ -1,0 +1,37 @@
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+Test project /home/user/work/merge-check/kz-llvm
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 254
+    Start 254: static_golden_looplock_np
+
+254: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "looplock_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_looplock_np"
+254: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+254: Test timeout computed to be: 10000000
+254: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/looplock_np.golden
+1/2 Test #254: static_golden_looplock_np .........   Passed    0.15 sec
+test 255
+    Start 255: static_golden_looplock_order_np
+
+255: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "looplock_order_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_looplock_order_np"
+255: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+255: Test timeout computed to be: 10000000
+255: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/looplock_order_np.golden
+2/2 Test #255: static_golden_looplock_order_np ...   Passed    0.15 sec
+
+The following tests passed:
+	static_golden_looplock_np
+	static_golden_looplock_order_np
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+golden    =   0.30 sec*proc (2 tests)
+static    =   0.30 sec*proc (2 tests)
+
+Total Test time (real) =   0.31 sec

@@ -1,0 +1,45 @@
+OK 0024f192980dfbd9 kz-static copy xz-t=ok
+OK 931dd39c6bdbe12a kz copy xz-t=ok
+OK 05623054296bbb99 kz-dump copy xz-t=ok
+OK 4390d4f13b5bcae3 kz-rt-dump in-place+copy file=same xz-t=ok
+OK 7d34e6e20934c62b kz-phi copy xz-t=ok
+OK b0f0d6a55153c8c7 kz_lint copy xz-t=ok
+OK 28db40172dbdb06f kz-instr-clang in-place file=same
+OK db172b74dc973de6 kz-static copy xz-t=ok
+OK b254483e25873902 kz copy xz-t=ok
+OK 5d64256abd78e489 kz in-place+copy file=same xz-t=ok
+OK 3ec20abf59343da9 kz-static copy xz-t=ok
+OK 16b284ccc915e110 kz-static copy xz-t=ok
+OK 0f469da5ba68d589 kz-dump in-place file=same
+OK 89b963d7de3058cb kz-phi in-place file=same
+OK b644bbc92d3b933f kz-rt-dump in-place file=same
+OK 921a68acbf6dc5cd kz_lint in-place file=same
+OK 56a96b79606f2d50 kzgcc.so in-place file=same
+OK 27a49a6a7d7a5617 kzgcc.so in-place file=same
+LISTED 7ef1a28c8fccc0e1 kz-static listed (no file, no copy)
+LISTED 3c5dfc56293d69cd kz-static listed (no file, no copy)
+LISTED ab482eab0fb34aa8 kz-static listed (no file, no copy)
+LISTED 191d0da095e75736 kz_lint listed (no file, no copy)
+LISTED 7c6044bf9b787b78 kz listed (no file, no copy)
+LISTED 000ab68bd9a4543c kz-static listed (no file, no copy)
+LISTED 36a6965eb481195a kz-dump listed (no file, no copy)
+LISTED c8ed043c823ffdf4 kz-phi listed (no file, no copy)
+OK a763e2550ad6902f kz-static copy xz-t=ok
+OK 5d4a1d7f4023b20c kz-static copy xz-t=ok
+LISTED 2e0f8e404cc76b8d kz-static listed (no file, no copy)
+OK de1315b359af279c kz-static copy xz-t=ok
+OK 5f62ec20d2d26e74 kz_lint copy xz-t=ok
+OK 038cd9e36af4d4de kz-static copy xz-t=ok
+OK b1bf545defe081a0 kz-static copy xz-t=ok
+OK b52db538769e6bc8 kz-static copy xz-t=ok
+OK 5ae220d2a0963097 kz-static copy xz-t=ok
+OK 913fcd99064b5aec kz in-place file=same
+OK 32a96ae7138fd71c kz-dump in-place file=same
+OK df79fb82f962e69f kz-phi in-place file=same
+OK c6aa4811612f13bd kz-static copy xz-t=ok
+OK 6adc1bdd3d7e78ba kz-static copy xz-t=ok
+OK 88f529b1acd70915 kz-static copy xz-t=ok
+OK 12a3970f91ce8b9d kz-static copy xz-t=ok
+OK 3d4d5a8faf6995d3 kz_lint in-place file=same
+OK 499748bc22881d90 kz-static in-place+copy file=same xz-t=ok
+tools_check: 44 rows, 0 failing

@@ -1,0 +1,14 @@
+68: test_core_schema: 34017 checks passed
+        Start 105: lint_selftest
+105: lint selftest: 114 cases, 0 failed
+105/267 Test #105: lint_selftest .................................   Passed    0.08 sec
+106: lint case-ids: clean
+107: lint case-ids-data: clean
+108: lint semantics-names: clean
+109: lint retired-term: clean
+110: lint banned-files: clean
+111: lint no-llvm: clean
+112: lint no-generated: clean
+265: test_static_reasons: 731 checks passed
+266: test_static_plan: 195 checks passed
+267: test_static_cli: 1151 checks passed

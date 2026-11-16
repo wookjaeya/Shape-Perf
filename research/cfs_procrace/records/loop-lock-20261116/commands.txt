@@ -18,3 +18,19 @@ scratch check build <scratch>/ll/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_B
 tools_check.sh --deep -> tools_check_pre.txt (44 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (114 rows, 0 failing)
 relink_expected.sha256 (14) and not_relink.sha256 (110, the same bytes as the result flow step's list): sha256 of the MC binaries before the build
 a snapshot commit 08760d6 of the code written so far exists before this declaration commit
+## 1. tool copy and build (2026-11-16T22:13:01Z); HEAD ad30cf0 (declaration commit)
+/dev/vda       270553174016 39388606464 1933901824  96% /
+copy rc=0
+tools after copy rc=0
+make kz-static rc=127
+(the first make line above: rc 127, the guard script was named by a relative path after cd into MC; nothing ran)
+make kz-static rc=0
+make all rc=0
+tools after build rc=0
+ledger after build rc=0
+ctest first rc=8
+golden update rc=0
+GOLDENS_SAME_AS_SCRATCH
+ctest full rc=0
+run_unit rc=0
+step2a unit rc=0

@@ -4,7 +4,8 @@
   python3 -I explain.py --sidecar plan.side --manifest plan.kzs --bindings binds_instr.kzs \
       --relations relations.txt --keys keys.txt --vocabulary reason_vocabulary.txt --facts-view facts_view.txt \
       --bprime-basis basis.kz --build-label NAME --out NEW_DIR \
-      [--dump-text tx.dump.txt --run-meta run.meta --chain chain.txt --stop-eval stop_eval.tsv --startup-script scr]
+      [--dump-text tx.dump.txt --run-meta run.meta --chain chain.txt --stop-eval stop_eval.tsv --startup-script scr \
+       --instance-list inst_files.sha256 --boot-budget boot_budget.tsv]
   python3 -I explain.py --check RECORD.json --vocabulary reason_vocabulary.txt
 
 One record per (build, planned relation row, consumer actor) in the field names and status values of the judgement
@@ -24,7 +25,13 @@ record's `inputs`).  The script reads no case value: rows, sites, values, keys a
     function, callee and line closes the innermost open one; a callee-side event (a site whose function is the callee)
     belongs to the innermost closed instance that brackets it, otherwise it is unattributed;
   - out values are read only when the status equals the success constant: the one constant among the row's return
-    constants of the use that is not of failure class;
+    constants of the use that is not of failure class; a publisher's (creator's) out value likewise only under the
+    success constant of the creator's callee, from the row's "callee-check: <callee> returns" lines (the line form the
+    relations text uses for a use's callee); without one it is kept as raw evidence, not read;
+  - link (JR 3.2 axis 1 as written): established only on a run record in which the read and the write reached the
+    same object instance (path A: the use's out id read under its success constant = a tied publisher's create out id
+    read under the creator's success constant); equal key texts are recorded as instance evidence and are not admitted
+    ("ID 문자열이 같다는 것"); an absence outcome (the use's out not read) reaches no instance and stays unlinked;
   - failure class (the method's S1 rule as ported in kairos/lib/llvm/plan_gen.cpp:58; vocabulary of the method
     document, plan/ORDER_VIOLATION_METHOD_20261111.md:381 (a) cFE severity bits, (b) OSAL negative values): v < 0, or
     0xC0000000 <= v <= 0xFFFFFFFF.  It grades run returns for odf only; never for use_cond (JR 3.6 item 3);
@@ -38,7 +45,7 @@ import os
 import re
 import sys
 
-SCRIPT_REV = "explain.py revision 1 (2026-11-16)"
+SCRIPT_REV = "explain.py revision 2 (2026-11-16, after review)"
 INPUTS = {}  # name -> (path, sha256)
 
 
@@ -73,6 +80,50 @@ FAIL_CLASS_RULE = ("failure class: v < 0 or 0xC0000000 <= v <= 0xFFFFFFFF (the m
                    "kairos/lib/llvm/plan_gen.cpp:58; vocabulary plan/ORDER_VIOLATION_METHOD_20261111.md:381 (a), (b))")
 
 KV = re.compile(r'(\w+)=("(?:[^"\\]|\\.)*"|\S+)')
+
+
+def reason_of(text):
+    """The reason= value of a sidecar need or gap line: a quoted value, or name or name(sub-reason) with the sub-reason
+    up to its balanced closing parenthesis (the sub-reason may hold spaces: JR 3.5 'reason(sub-reason)').  An
+    unbalanced value runs to the end of the line, and the vocabulary check refuses it."""
+    m = re.search(r"(?:^|\s)reason=", text)
+    if not m:
+        return None
+    s = text[m.end():]
+    if s.startswith('"'):
+        q = re.match(r'"((?:[^"\\]|\\.)*)"', s)
+        return q.group(1).replace('\\"', '"') if q else s
+    n = re.match(r"[A-Za-z_]\w*", s)
+    if not n:
+        return s.split()[0] if s.split() else ""
+    rest = s[n.end():]
+    if not rest.startswith("("):
+        return n.group(0)
+    depth = 0
+    for i, ch in enumerate(rest):
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+            if depth == 0:
+                return n.group(0) + rest[:i + 1]
+    return n.group(0) + rest
+
+
+REASON_FORM = re.compile(r"^([a-z_]+)(?:\((.*)\))?$", re.S)
+
+
+def reason_form_ok(r):
+    """JR 3.5: 'name' or 'name(sub-reason)'; parentheses inside the sub-reason balanced."""
+    m = REASON_FORM.match(r) if isinstance(r, str) else None
+    if not m:
+        return False
+    depth = 0
+    for ch in m.group(2) or "":
+        depth += {"(": 1, ")": -1}.get(ch, 0)
+        if depth < 0:
+            return False
+    return depth == 0
 
 
 def kv(text):
@@ -147,13 +198,13 @@ def parse_sidecar(text):
         elif ln.startswith("need row "):
             p = ln.split(" ", 5)
             a = kv(p[5]) if len(p) > 5 else {}
-            sc["needs"].setdefault(p[2], []).append({"what": p[3], "state": p[4], "reason": a.get("reason"),
+            sc["needs"].setdefault(p[2], []).append({"what": p[3], "state": p[4], "reason": reason_of(ln),
                                                       "note": a.get("note")})
         elif ln.startswith("gap row "):
             m = re.match(r'gap row (\S+) "((?:[^"\\]|\\.)*)" (.*)$', ln)
             if m:
                 a = kv(m.group(3))
-                sc["gaps"].setdefault(m.group(1), []).append({"text": m.group(2), "reason": a.get("reason"),
+                sc["gaps"].setdefault(m.group(1), []).append({"text": m.group(2), "reason": reason_of(m.group(3)),
                                                               "rule": a.get("rule")})
         elif ln.startswith("input "):
             sc["inputs"].append(ln[len("input "):])
@@ -287,6 +338,15 @@ def row_static(row, rel_name):
     st["success_note"] = ("one non-failure-class constant" if len(succ) == 1 else
                           "%d non-failure-class constants among the row's return constants of the use" % len(succ))
     st["creators"] = [(n, t) for n, t in body if t.startswith("creator:")]
+    # the return constants the row gives for any callee ("callee-check: <callee> returns ..."): the source of a
+    # publisher's success constant (a creator's out is read only under it)
+    cc = {}
+    for n2, t2 in body:
+        mm = re.match(r"callee-check: (\S+) returns", t2)
+        if mm:
+            for v, name in CONST.findall(t2):
+                cc.setdefault(mm.group(1), []).append((int(v), name, n2))
+    st["callee_consts"] = cc
     st["writers"] = [(n, t) for n, t in body if re.match(r"(out-pointer|assign|memset|call|store|copy) at ", t)]
     n, t = first("field:")
     st["field_line"] = (n, t)
@@ -693,6 +753,7 @@ def explain_row(ctx, rowkey, consumer):
     rec["build_id"] = {"build": ctx["label"], "bprime_basis_sha256": sha_of("bprime_basis"),
                        "executables_run_meta": ctx["exes"], "plan_facts_sha256": ctx["facts_sha"],
                        "compat": ctx["compat"]}
+    rec["build_id"].update(ctx["exes_inst"])
     rec["extractor_rev"] = ctx["extractor"]
     rec["semantics_rev"] = ctx["semantics"]
     rec["plan_id"] = {"sidecar_sha256": sha_of("sidecar"), "manifest_sha256": sha_of("manifest"),
@@ -787,8 +848,9 @@ def explain_row(ctx, rowkey, consumer):
             if i.at is i.after:
                 p["store"] = evref(run, i.at)
             else:
-                p["status_value"] = hx(run.val(i.after, "status"))
-                p["out"] = {"value": hx(run.val(i.after, "out0")), "read": "recorded; not graded (the creator's return constants are not in the row)"}
+                pst = run.val(i.after, "status")
+                p["status_value"] = hx(pst)
+                p["out"] = publisher_out(st, i, pst, hx(run.val(i.after, "out0")))
         if st["path"] == "A":
             k = key_of_instance(run, i, kt_sites)
             p["key"] = {"pointer": hx(k["pointer"]), "text": k["text"], "truncated": k["truncated"],
@@ -869,27 +931,42 @@ def explain_row(ctx, rowkey, consumer):
                 else:
                     differing.append(p)
             for p in matched:
-                link["instance_evidence"].append({"publisher_actor": p["actor"], "key_text": p["_k"]["text"],
-                                                  "create": p.get("at_call", {}).get("aseq"), "out": p.get("out", {}).get("value")})
+                link["instance_evidence"].append({
+                    "publisher_actor": p["actor"], "key_text": p["_k"]["text"], "create": p.get("at_call", {}).get("aseq"),
+                    "out": p.get("out"), "same_key_text_as_the_use": True,
+                    "admitted": False, "why": "equal key texts are not admitted evidence of one object instance "
+                                              "(JR 3.2 axis 1: 'ID 문자열이 같다는 것')"})
             for p in differing:
                 link["instance_evidence"].append({"publisher_actor": p["actor"], "key_text": p["_k"]["text"],
                                                   "differs_from_use_key": ukey})
             u0 = use_events[0]
             if matched:
-                if u0.get("out", {}).get("read"):
-                    same = [p for p in matched if p.get("out", {}).get("value") == u0["out"]["value"]]
+                if not u0.get("out", {}).get("read"):
+                    # JR 3.2 axis 1 as written: the use reached no object instance, so no record shows the read and
+                    # the write at the same instance
+                    lm.append("link_unlinked(absence outcome: the use reached no object instance)")
+                else:
+                    readp = [p for p in matched if p.get("out", {}).get("read")]
+                    same = [p for p in readp if p["out"]["value"] == u0["out"]["value"]]
                     if same:
                         status = "established"
-                        grounds.append("the use's out id %s (read under the success constant) is the out id of the "
-                                       "publisher's create with the same key" % u0["out"]["value"])
+                        grounds.append("JR 3.2 axis 1, a run record in which the read and the write reached the same "
+                                       "object instance: the use's out id %s (read under its success constant) is the out "
+                                       "id of the create by actor %s (read under the creator's success constant)"
+                                       % (u0["out"]["value"], same[0]["actor"]))
+                        link["resource_key"]["generation"] = u0["out"]["value"]
+                        link["resource_key"]["generation_source"] = "the out id both read (one run)"
+                    elif not readp:
+                        pass  # the generation-missing reason below names it
                     else:
                         lm.append("link_unlinked(the use's out id is not the out id of a publisher's create with its key)")
-                else:
-                    status = "established"
-                    grounds.append("absence outcome: the use and the publisher's create name the same key in the "
-                                   "namespace partition of the row in one process of one run; the use reached no "
-                                   "instance (premise L-ABS)")
-                link["resource_key"]["generation"] = [p.get("out", {}).get("value") for p in matched]
+                if link["resource_key"]["generation"] is None:
+                    gm = ("record_insufficient(no success constant of the creator: the creator's out id is not read)"
+                          if not any(p.get("out", {}).get("read") for p in matched) else
+                          "link_unlinked(no object instance reached by the use)")
+                    link["resource_key"]["generation_missing"] = gm
+                    if gm not in lm:
+                        lm.append(gm)
             elif differing and not unknown and not lm:
                 status = "refuted"
                 grounds.append("every publisher event of the row in the record names another key: " +
@@ -1030,6 +1107,21 @@ def explain_row(ctx, rowkey, consumer):
     return rec
 
 
+def publisher_out(st, inst, status, raw):
+    """A publisher's out value: read only when its status equals the success constant of its callee, the one
+    non-failure-class constant of the row's "callee-check: <callee> returns" lines; otherwise kept as raw evidence."""
+    cs = st["callee_consts"].get(inst.callee, [])
+    succ = sorted({(v, nm) for v, nm, _ in cs if not fail_class(v)})
+    if len(succ) != 1:
+        return {"raw": raw, "read": False,
+                "why": "not read: no success constant of the creator in the row (%d non-failure-class constants of %s "
+                       "among the row's callee-check lines)" % (len(succ), inst.callee)}
+    if not same_status(succ[0][0], status):
+        return {"raw": raw, "read": False, "why": "status %s is not the creator's success constant %s %d" % (hx(status), succ[0][1], succ[0][0])}
+    return {"value": raw, "read": True, "under": "%s %d" % (succ[0][1], succ[0][0]),
+            "source": st["ref"](sorted({n for v, nm, n in cs if (v, nm) == succ[0]})[0])}
+
+
 def evaluate_p(st, use_events, publish_events):
     """P evaluated from read values only (keys, out ids, field values, times), never from return grades."""
     if st["path"] == "A":
@@ -1040,7 +1132,8 @@ def evaluate_p(st, use_events, publish_events):
         same = [p for p in publish_events if p.get("_k", {}).get("text") == u["_k"]["text"] and p.get("after_call")]
         if any(p["at_call"]["t_ms"] > ut for p in same if "at_call" in p) and not any(p["after_call"]["t_ms"] < ut for p in same):
             return "unmet_state_observed", None
-        if u.get("out", {}).get("read") and any(p["after_call"]["t_ms"] < ut and p.get("out", {}).get("value") == u["out"]["value"] for p in same):
+        if u.get("out", {}).get("read") and any(p["after_call"]["t_ms"] < ut and p.get("out", {}).get("read") and
+                                                p["out"]["value"] == u["out"]["value"] for p in same):
             return "met_state_only", None
         return "record_insufficient", "record_insufficient(the state at the use is not decided by the values read)"
     vals = [u.get("_fv") for u in use_events]
@@ -1302,6 +1395,9 @@ def check_record(rec, vocab):
                 if e.get("actor") != ca:
                     bad.append("JR 3.6 item 8: order.per_consumer.%s holds an event of actor %s, not of the consumer %s" % (k, e.get("actor"), ca))
     for r in all_reasons(rec):
+        if not reason_form_ok(r):
+            bad.append("JR 3.5: reason %r is not of the form name or name(sub-reason) with balanced parentheses" % (r,))
+            continue
         base = r.split("(", 1)[0]
         if base not in vocab:
             bad.append("JR 3.5: reason %r is not in the vocabulary" % r)
@@ -1320,19 +1416,58 @@ PREMISES = [
     {"id": "P-CLOCK", "text": "event times of all actors are read from one clock (RUN clock id; the POSIX adapter reads "
                               "CLOCK_MONOTONIC, kairos/runtime/src/kz_rt_posix.c:43-44)"},
     {"id": "P-STR", "text": "a key text is NUL-terminated within its bound or the cut is flagged (manifest value refs)"},
-    {"id": "P-CONST", "text": "the return constants the row gives for the use (its flip or callee-check line) are the status "
-                              "constants of the use's callee"},
-    {"id": "L-ABS", "text": "path A, absence outcome: a use that found no object and a create of the same key in the row's "
-                            "namespace partition, in one process of one run, are taken as the same named resource; the "
-                            "generation the use saw is none (JR 3.2 axis 1 resource key: object kind, namespace, name, "
-                            "generation; JR 4.2: the run value of the key and the same-named object)"},
+    {"id": "P-CONST", "text": "the return constants the row gives for the use (its flip or callee-check line), and for a "
+                              "publisher's callee (its callee-check line), are the status constants of that callee"},
 ]
+
+
+def run_budget(o, run, process_end, stop_eval):
+    """budget.run (JR 3.1: value, reason, truncation, unresolved, sensitivity): the run budget and the boot's stop
+    budget from the boot budget record (--boot-budget, written from the declaration before the boot); whether the stop
+    budget fired from run.meta's process-end lines; the unresolved part from the stop-event evaluation."""
+    rb = {"boots": 1 if run else 0}
+    if run is None:
+        rb["missing"] = ["no_run"]
+        return rb
+    if not o.boot_budget:
+        rb["missing"] = ["record_insufficient(no budget record of the boot given)"]
+        return rb
+    bb = {}
+    for ln in read_input("boot_budget", o.boot_budget).splitlines():
+        if ln and not ln.startswith("#") and "\t" in ln:
+            k, v = ln.split("\t", 1)
+            bb[k] = v
+    rb["source"] = "boot budget record %s" % sha_of("boot_budget")[:16]
+    rb["run"] = {k: bb.get("run." + k) for k in ("value", "reason", "truncation", "unresolved", "sensitivity")}
+    stop = {k: bb.get("stop." + k) for k in ("value", "source", "reason", "truncation", "sensitivity", "rule", "note")}
+    st = [x for x in process_end if x.startswith("stop=")]
+    kill = [x for x in process_end if "SIGKILL" in x or x.startswith("killed")]
+    ex = [x for x in process_end if x.startswith("tx_exit=") or x.startswith("rx_exit=")]
+    if st:
+        stop["fired"] = "yes: run.meta '%s'%s; %s" % (st[0], ("; " + "; ".join(ex)) if ex else "",
+                                                       ("SIGKILL: " + "; ".join(kill)) if kill else "no SIGKILL line in run.meta")
+    else:
+        stop["fired"] = None
+        rb.setdefault("missing", []).append("record_insufficient(no stop line in run.meta)")
+    apps = {a: r for a, r in stop_eval.items() if not r.get("status", "").startswith("library")}
+    notr = sorted(a for a, r in apps.items() if r.get("status") != "reached" or r.get("inside_window") != "yes")
+    if not apps:
+        stop["unresolved"] = None
+        rb.setdefault("missing", []).append("record_insufficient(no stop-event evaluation given)")
+    elif notr:
+        stop["unresolved"] = "applications without their stop event inside the window: " + ", ".join(notr)
+    else:
+        stop["unresolved"] = ("none: %d of %d applications reached their stop event inside the window (stop-event "
+                              "evaluation)" % (len(apps), len(apps)))
+    rb["stop"] = stop
+    return rb
 
 
 def main(argv):
     ap = argparse.ArgumentParser()
     for a in ("sidecar", "manifest", "bindings", "relations", "keys", "vocabulary", "facts-view", "bprime-basis",
-              "dump-text", "run-meta", "chain", "stop-eval", "startup-script", "build-label", "out", "check", "rows"):
+              "dump-text", "run-meta", "chain", "stop-eval", "startup-script", "instance-list", "boot-budget",
+              "build-label", "out", "check", "rows"):
         ap.add_argument("--" + a)
     o = ap.parse_args(argv)
     if o.check:
@@ -1377,6 +1512,7 @@ def main(argv):
     run = None
     dump = None
     exes = {}
+    exes_inst = {}
     process_end = []
     compat = "no run"
     stop_eval = {}
@@ -1422,6 +1558,43 @@ def main(argv):
         if bp and not sha_of("bprime_basis").startswith(bp.group(1)):
             mism.append("the B' basis given is not the chain's")
         compat = "chain %s; same_build %s" % (cv.group(1) if cv else "absent", sb.group(1) if sb else "absent")
+        # the executables of the build: every plan executable as the chain's exe links name it, with its sha256 from
+        # the instance list that run.meta names by list_sha256 (run.meta's own file lines are a fixed set)
+        ml = re.search(r"^instance_files .*\blist_sha256=([0-9a-f]{64})", meta, re.M)
+        if o.instance_list:
+            lst = read_input("instance_list", o.instance_list)
+            if not ml or ml.group(1) != sha_of("instance_list"):
+                mism.append("the instance list is not the one run.meta names by list_sha256")
+            inst = {}
+            for ln in lst.splitlines():
+                mm = re.match(r"([0-9a-f]{64})  \./(\S+)$", ln)
+                if mm:
+                    inst[mm.group(2)] = mm.group(1)
+            ex, why = {}, []
+            for ln in chain.splitlines():
+                mm = re.match(r"exe exe/(\S+)\t(\S+)\t(.*)$", ln)
+                if not mm:
+                    continue
+                pth, cst = mm.group(1), mm.group(2)
+                il = re.search(r"inst_list\[[^\]]*\]=([0-9a-f]+)", mm.group(3))
+                if pth not in inst:
+                    mism.append("the chain's executable %s is not in the instance list" % pth)
+                    continue
+                if il is None or not inst[pth].startswith(il.group(1)):
+                    mism.append("the chain's instance-list value of %s differs from the instance list" % pth)
+                ex[pth] = {"sha256": inst[pth], "chain": cst}
+            for pth, h in exes.items():
+                if inst.get(pth) not in (None, h):
+                    mism.append("run.meta's file line of %s differs from the instance list" % pth)
+            exes_inst = {"executables_plan": ex,
+                         "executables_plan_source": "the plan's executables as the chain's exe links name them; sha256 from "
+                                                    "the instance list run.meta names (list_sha256 %s, %d entries)"
+                                                    % (sha_of("instance_list")[:16], len(inst))}
+            if not ex:
+                exes_inst["executables_missing"] = "record_insufficient(no exe link in the chain record)"
+        else:
+            exes_inst = {"executables_plan": None,
+                         "executables_missing": "record_insufficient(the instance list is not given: run.meta's file lines only)"}
         run = Run(dump, sites)
     m_tool = re.search(r"tool_sha256=([0-9a-f]{64})", fv)
     m_bid = re.search(r'name="extract\.build_identity" value="([^"]*)"', fv)
@@ -1443,11 +1616,10 @@ def main(argv):
             any(int(a.get("overflow", "0") or 0) or int(a.get("partial", "0") or 0) or int(a.get("dropped_bytes", "0") or 0)
                 for a in dump["actors"].values()) or int(dump["format"].get("partial", "0") or 0) > 0
     ctx = {"sc": sc, "sites": sites, "run": run, "bound": bound, "keys": keys, "rel_name": rel_name, "rel_head": rel_head,
-           "label": o.build_label, "exes": exes, "facts_sha": facts_sha, "compat": compat, "extractor": extractor,
+           "label": o.build_label, "exes": exes, "exes_inst": exes_inst, "facts_sha": facts_sha, "compat": compat, "extractor": extractor,
            "semantics": semantics, "premises": premises, "loss_any": loss_any, "apps": apps, "stop_eval": stop_eval,
            "stop_lines": sc["stop"], "process_end": process_end, "mismatch": bool(mism),
-           "run_budget": {"boots": 1 if run else 0, "reason": "one record suffices for the explanation test; repetition is a later cost study",
-                          "sensitivity": "not measured"}, "static": {}}
+           "run_budget": run_budget(o, run, process_end, stop_eval), "static": {}}
     if mism:
         ctx["compat"] = "refused: " + "; ".join(mism)
     planned = [k for k, r in sc["rows"].items() if r.get("state") == "planned"]

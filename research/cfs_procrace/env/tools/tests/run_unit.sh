@@ -27,10 +27,13 @@
 #     a malformed option -> rc 2
 #  11 derived comparison (env/redesign/compare_derived.py, stand-in kz-dump): B' records with the derived paths and a
 #     FILE_HASHES order of their own compare equal to B after the map; a declared difference -> rc 0 with it listed;
-#     an undeclared record difference, an undeclared text line, a path left outside the map -> rc 1
+#     an undeclared record difference, an undeclared text line, a path left outside the map -> rc 1; (b) a facts
+#     container whose FILE_HASHES order differs (tu= indices shift) and a TUS flags value with escaped quotes under a
+#     declared only= field -> no finding (rc 0); a real tu= target change, a change outside the stripped fields -> rc 1
 #  12 binding report (env/tools/plan_bindings.py): every site bound or unsupported with a reason and the module ids
 #     of the plugin rule -> rc 0; a site no unit reported, an unsupported site without a reason, a unit with another
-#     module id, a unit header with another manifest sha256 -> rc 1 each
+#     module id, a unit header with another manifest sha256 -> rc 1 each; with --file-hashes every unit tied to its
+#     source sha256 -> rc 0; a source changed on disk, a unit not in FILE_HASHES -> rc 1 each
 #  13 chain checker, the links of a generated plan (sidecar, plan inputs, instance list and tree, B' parent, dump,
 #     bindings, run container): a consistent stub chain -> confirmed (0); another sidecar, a changed instance file, an
 #     instance list run.meta does not name, a run container with another parent basis, another dump -> refused (1)
@@ -250,7 +253,29 @@ mkdir -p "$X/P2"; mk "$X/P2" /w ba b1 ' flags=x'; cd_ "$X/P2"; f1=$?
 mkdir -p "$X/P3"; mk "$X/P3" /w ba b1 ""; echo e2 > "$X/P3/extract.txt"; cd_ "$X/P3"; f2=$?
 mkdir -p "$X/P4"; mk "$X/P4" /v ba b1 ""; cd_ "$X/P4"; f3=$?
 ok=0; [ $c -eq 0 ] && [ "$cl" = 2 ] && [ $f1 -eq 1 ] && [ $f2 -eq 1 ] && [ $f3 -eq 1 ] || ok=1
-res "derived comparison (stand-in kz-dump)" $ok "control rc $c (declared findings $cl); undeclared record rc $f1; undeclared text line rc $f2; path outside the map rc $f3"
+# (b) facts tu= under another FILE_HASHES order; an only= field holding escaped quotes
+mkf() { # DIR ROOT ORDER(ab|ba) FACTS-TU FLAGS LANG CMD
+  local d=$1 r=$2 o=$3 tu=$4 fl=$5 lg=$6 cm=$7 fh
+  mkdir -p "$d"
+  if [ "$o" = ab ]; then fh=$(printf '  FILE_HASHES[0] path="%s/src/a.c" sha256=aa size=1\n  FILE_HASHES[1] path="%s/ws/build/b.c" sha256=bb size=1' "$r" "$r")
+  else fh=$(printf '  FILE_HASHES[0] path="%s/ws/build/b.c" sha256=bb size=1\n  FILE_HASHES[1] path="%s/src/a.c" sha256=aa size=1' "$r" "$r"); fi
+  { echo "kz-dump 1"; echo "container abi=1 kind=basis size=10"; echo "tool_sha256=t"
+    echo "section TUS type=4 count=1 crc32=0x1"; echo "  TUS[0] tu=0 file=\"$r/src/a.c\" lang=$lg flags=\"$fl\" command_sha256=$cm"
+    echo "section FILE_HASHES type=3 count=2 crc32=0x2"; echo "$fh"; } > "$d/basis.kz"
+  { echo "kz-dump 1"; echo "container abi=1 kind=facts size=10"; echo "tool_sha256=t"
+    echo "section FILE_HASHES type=3 count=2 crc32=0x2"; echo "$fh"
+    echo "section FACTS type=5 count=1 crc32=0x3"; echo "  FACTS[0] kind=read tu=$tu name=\"x\""; } > "$d/facts.kz"
+  printf 'basis x\n' > "$d/basis.txt"; echo e > "$d/extract.txt"; echo rel > "$d/relations.txt"; : > "$d/relations.log"; echo a > "$d/args.txt"; echo s > "$d/sha256.txt"
+}
+FLB='-DX=\"a b\" -O2'; FLP='-DX=\"a b\" -O2 -fplugin=k.so'
+mkf "$X/fB" /ref ab 0 "$FLB" c c1; mkf "$X/fP" /w ba 1 "$FLP" c c2
+printf '*\tTUS\tnew=-fplugin=;;only=flags,command_sha256\tplugin options\n' > "$X/decl2.tsv"
+cdf() { python3 -I "$R/env/redesign/compare_derived.py" "$X/kzd" "$X/outf.txt" "$X/fB" "$1" --path-map "$X/map.tsv" --declared "$X/decl2.tsv" > "$X/cdf.log" 2>&1; }
+cdf "$X/fP"; c2=$?; nd2=$(grep -c 'NOT-DECLARED' "$X/outf.txt")
+mkf "$X/fP1" /w ba 0 "$FLP" c c2; cdf "$X/fP1"; g1=$?
+mkf "$X/fP2" /w ba 1 "$FLP" cxx c2; cdf "$X/fP2"; g2=$?
+[ $c2 -eq 0 ] && [ "$nd2" = 0 ] && [ $g1 -eq 1 ] && [ $g2 -eq 1 ] || ok=1
+res "derived comparison (stand-in kz-dump)" $ok "control rc $c (declared findings $cl); undeclared record rc $f1; undeclared text line rc $f2; path outside the map rc $f3; (b) shifted tu= and escaped quotes rc $c2 (undeclared $nd2); real tu= change rc $g1; change outside the stripped fields rc $g2"
 
 # 12 binding report
 X=$W/b; mkdir -p "$X"
@@ -271,7 +296,22 @@ bf "$X/f2.kzs" "$msha" 1 '' 1; pb "$X/f2.kzs"; f2=$?
 bf "$X/f3.kzs" "$msha" 2 ' reason="a line with two calls"' 1; pb "$X/f3.kzs"; f3=$?
 bf "$X/f4.kzs" "$(printf 0%.0s {1..64})" 1 ' reason="a line with two calls"' 1; pb "$X/f4.kzs"; f4=$?
 ok=0; [ $c -eq 0 ] && [ $f1 -eq 1 ] && [ $f2 -eq 1 ] && [ $f3 -eq 1 ] && [ $f4 -eq 1 ] || ok=1
-res "binding report (stub plan and bindings)" $ok "control rc $c; site not seen rc $f1; unsupported without reason rc $f2; other module id rc $f3; other manifest sha256 rc $f4"
+# with --file-hashes: units tied to their source sha256 through the basis FILE_HASHES
+mkdir -p "$X/w/app" "$X/w/core"; echo 'int f;' > "$X/w/app/a.c"; echo 'int h;' > "$X/w/core/c.c"
+FL2="-fplugin-arg-kzgcc-module=1:$X/w/app/ -fplugin-arg-kzgcc-default-module=2"
+{ echo "kzs-sites 1"; echo "# kzgcc 0.3 backend=gcc-plugin gcc=13 x unit=$X/w/app/a.c dumpbase=a"; echo "# manifest=m sha256=$msha module=1"
+  echo "bind 65552 site=1 backend=gcc-plugin module=1 at=\"a f\" status=bound vals=0x1"
+  echo "bind 65567 site=2 backend=gcc-plugin module=1 at=\"a g\" status=bound vals=0x1"
+  echo "# kzgcc 0.3 backend=gcc-plugin gcc=13 x unit=$X/w/core/c.c dumpbase=c"; echo "# manifest=m sha256=$msha module=2"
+  echo "bind 131120 site=3 backend=gcc-plugin module=2 at=\"c h\" status=bound vals=0x0"; } > "$X/s.kzs"
+mkfh() { printf 'section FILE_HASHES type=3 count=2 crc32=0x2\n  FILE_HASHES[0] path="%s" sha256=%s size=7 prov=none\n' "$X/w/app/a.c" "$(sha256sum < "$X/w/app/a.c" | cut -c1-64)"
+  [ "$1" = 1 ] && printf '  FILE_HASHES[1] path="%s" sha256=%s size=7 prov=none\n' "$X/w/core/c.c" "$(sha256sum < "$X/w/core/c.c" | cut -c1-64)"; true; }
+pbs() { python3 -I "$R/env/tools/plan_bindings.py" --manifest "$X/plan.kzs" --modules "$X/plan.mod" --bindings "$X/s.kzs" --module-flags "$FL2" --file-hashes "$1" -o "$X/reps.txt" > /dev/null 2>&1; }
+mkfh 1 > "$X/fh.txt"; pbs "$X/fh.txt"; s0=$?; sy=$(grep -c $'^sources\t.*\tyes$' "$X/reps.txt")
+mkfh 0 > "$X/fh0.txt"; pbs "$X/fh0.txt"; s1=$?
+mkfh 1 > "$X/fh3.txt"; echo 'int i;' >> "$X/w/app/a.c"; pbs "$X/fh3.txt"; s3=$?
+[ $s0 -eq 0 ] && [ "$sy" = 1 ] && [ $s1 -eq 1 ] && [ $s3 -eq 1 ] || ok=1
+res "binding report (stub plan and bindings)" $ok "control rc $c; site not seen rc $f1; unsupported without reason rc $f2; other module id rc $f3; other manifest sha256 rc $f4; sources tied rc $s0; unit not in FILE_HASHES rc $s1; source changed on disk rc $s3"
 
 # 13 chain checker, links of a generated plan
 X=$W/cc; mkdir -p "$X/b/exe/tx" "$X/inst/tx"

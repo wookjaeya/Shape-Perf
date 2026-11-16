@@ -966,3 +966,27 @@ kz-static 빌드가 없으므로 빌드 전 선언은 없다. 바뀌는 출력�
 - 경로 B 의 link 는 모두 unlinked 다: 계획이 사용의 읽은 주소를 적지 않는다(at-call 의 `field_value` 만). 같은 인스턴스를 보이려면 계획 규칙에 읽은 주소가 필요하다(다음 계획 개정의 일).
 - L-ABS(경로 A 부재 결과의 연결)는 lead 의 판단이고 PI 가 달리 정하면 바뀐다(판정은 바뀌지 않음, §7.3).
 - 다음으로: 실행 기록 45 가운데 실패 징후 둘(A21, B73 행위자 2)의 사건은 이 기록에 있다. B73 의 `CFE_EVS_APP_ILLEGAL_APP_ID` 가 무엇을 뜻하는지는 이 기록이 말하지 않는다 [미확인]. 사용 조건의 (c2)·(c3)·(c4)를 세우는 규칙(함수를 건너는 부재 평가, 순서 간선, 완전성 규칙)은 전체 단계의 일이다. C5(E6)는 생성 토큰과 공간 선택 뒤다. t_init 와 하네스 시각의 차이, 시작 동기화 지점의 여유는 [미확인] 그대로다.
+
+### 7.11 검토 뒤 고침
+
+기록: `../records/obs1-20261116-reviewfix/`. 출력: 저장소 밖 새 디렉터리 하나, `/home/user/work/redesign/obs1/c1pre_explain_reviewfix/`. 앞 단계의 출력(`c1pre_explain` 의 세 실행을 포함)과 기록 디렉터리는 읽기만 하고 바꾸지 않는다. 부팅하지 않는다(두 번째 부팅 없음). push 하지 않는다.
+
+#### 7.11.0 선언 (실제 기록에 다시 돌리기 전에 적고 커밋함) [D]
+
+- **범위**: 확인된 검토 지적 15개(provenance-01, provenance-03, provenance-04, samebuild-1, samebuild-2, samebuild-3, samebuild-5, samebuild-6, samebuild-7, judgement-1, judgement-2, judgement-3, judgement-4, judgement-5, judgement-7)만 고친다. 그 밖은 바꾸지 않는다.
+- **Kairos 도구**: 다시 빌드하지 않고 바꾸지 않는다. 정체성이 바뀌는 도구: 없음. 앞뒤 `build_record.sh pre|post`(MC), `tools_check.sh --deep`. `pre_mc.txt` 는 §7.8 의 `post_mc.txt` 와 HEAD·여유 줄 밖에서 같다 [M]. 플러그인의 단위 머리에 소스 sha256 을 넣는 것(samebuild-5 의 근본 고침)은 플러그인 변경이라 이번에 하지 않고 다음 단계의 열린 일로 적는다.
+- **스크립트**(이 선언과 함께 커밋; 모두 `kairos` 밖):
+  - `env/obs1/explain.py` 개정 2. (1) `link.status` 는 판정 규칙 3.2 축 1 을 적힌 대로 계산한다: established 는 읽기와 쓰기가 같은 객체 인스턴스에 닿았다는 실행 기록이 있을 때만이다(경로 A: 사용이 성공 상수 아래 읽은 out id = 묶인 게시자의 생성이 생성자의 성공 상수 아래 읽은 out id). 키 글이 같다는 것은 `instance_evidence` 에 적되 `admitted: false` 다("ID 문자열이 같다는 것"). 부재 결과(사용의 out 을 읽지 않음)는 인스턴스에 닿지 않았으므로 unlinked, `link_unlinked(absence outcome: the use reached no object instance)`. 전제 L-ABS 를 기록의 전제에서 뺀다. (2) 게시자의 out 은 그 callee 의 성공 상수 아래에서만 읽는다. 성공 상수는 행의 `callee-check: <callee> returns` 줄(relations 글이 사용의 callee 에 쓰는 같은 꼴)에서 실패 등급이 아닌 유일한 상수다. 없으면 원값(`raw`)만 적고 읽지 않는다. `link.resource_key.generation` 은 읽은 out id 가 없으면 null 이고 `record_insufficient(no success constant of the creator: the creator's out id is not read)` 를 `link.missing` 과 `generation_missing` 에 적는다. P 의 `met_state_only` 도 읽은 게시자 out 만 쓴다. (3) sidecar 의 `reason=` 은 이름과 짝이 맞는 괄호까지 읽는다(하위 사유의 빈칸 포함). 어휘 검사는 사유가 `name` 또는 `name(하위 사유)` 꼴이고 괄호의 짝이 맞는지도 본다. (4) `build_id.executables_plan`: 사슬 기록의 `exe` 연결이 이름 대는 계획의 실행 파일 모두를, run.meta 가 `list_sha256` 으로 이름 대는 인스턴스 목록(`--instance-list`, sha256 을 맞춰 봄; 다르면 결합 거부)의 sha256 으로 적는다. run.meta 의 `file` 줄은 그대로 둔다. (5) `budget.run`: 부팅의 예산 기록(`--boot-budget`, 아래)을 읽어 멈춤 예산의 값·출처·까닭·잘림·민감도를 싣고, 발동 여부는 run.meta 의 끝 줄(`stop=`, `tx_exit`, SIGKILL 줄 유무)에서, 미해결은 멈춤 사건 평가(`stop_eval.tsv`)에서 계산한다. 예산 기록이 없으면 `record_insufficient(no budget record of the boot given)`.
+  - `env/obs1/tests/test_explain.py`: 20 경우(앞의 17 에서 control·derived 두 경우의 기대를 규칙대로 바꾸고, 같은 인스턴스에 닿은 경우(established, met_state_only)를 생성자 상수가 있는 행으로, 생성자 상수가 없는 경우, 예산 기록이 없는 경우, run.meta 가 이름 대지 않은 인스턴스 목록을 더함; 짝이 맞지 않는 사유 `plan_missing(need` 를 `--check` 가 거부하는 변형을 더함; control 은 빈칸이 든 need·gap 사유를 통째로 읽는지 봄).
+  - `env/tools/plan_bindings.py`: `--file-hashes`(B′ basis 의 kz-dump 글). 단위마다 플러그인이 적은 단위 경로로 FILE_HASHES 의 sha256 을 찾고 디스크의 파일을 다시 해시해 나란히 적는다(없거나 다르면 실패). 주지 않으면 앞과 같다.
+  - `env/tools/tests/run_unit.sh`: 점검 11 에 (b)(facts 의 FILE_HASHES 차례가 달라 `tu=` 가 밀리는 경우와 TUS `flags` 의 `\"` 가 `only=` 아래 있는 경우 → 차이 0; 진짜 `tu=` 대상 변화, 빼는 칸 밖의 변화 → rc 1), 점검 12 에 `--file-hashes` 경우(묶임 → rc 0; FILE_HASHES 에 없는 단위, 디스크에서 바뀐 소스 → rc 1)를 더한다. 새 fixture 를 빌드 전 비교기(`a79aa6d`)에 돌리면 (b) 가 선언 밖 3 으로 실패하고 지금 비교기에서는 통과한다 [M, `comparator_fixtures.txt`, scratchpad].
+  - 기록 디렉터리의 `run_fix.sh`(단계 explain, copy, summary, rowsites, runtime-refs, cfe-assert, bindings), `summary.py` 개정 2(사유를 기록마다 바탕 이름의 집합으로 한 번 셈; 하위 사유의 나옴 수는 따로), `row_sites.py`(행의 site 를 sidecar 의 `map` 줄에서 읽고 site 마다 바인딩과 dump 의 사건 수), `boot_budget.tsv`(부팅 선언 §6.0 예산 2·4 를 옮겨 적은 것; 새 값 없음).
+- **입력**: §7.0 의 입력 그대로, 더하기 인스턴스 목록 `/home/user/work/redesign/obs1/c1pre_boot/tx/inst_files.sha256`(`4aac220a…`, run.meta 의 `list_sha256`)과 `boot_budget.tsv`. facts 글 보기는 `c1pre_explain/facts_view.txt` 를 읽기만 한다.
+- **무엇을 돌리는가**: `run_fix.sh explain`(새 출력 `c1pre_explain_reviewfix/explain_r4`, 공간 감시 `--need 30000000`), copy(색인, 입력, 거부, 관계 1 의 기록, 모든 기록의 sha256, r3 과 r4 의 칸별 차이), summary, rowsites, runtime-refs(B 와 B′ 의 basis.txt 요약 줄과 파생 트리의 실행 파일 일곱의 `nm -D --undefined-only` 중 `kz_` 기호), cfe-assert(파생 트리와 원래 기준 빌드의 `cfe_assert.so` 를 절마다 바이트로, 그리고 맵으로 경로를 되돌린 뒤의 문자열로 비교; 빌드 없음), bindings(소스 sha256 을 단 바인딩 보고). 같은 입력으로 explain 을 scratchpad 에 한 번 더 돌려 바이트 동일한지 본다. 단위 점검 `run_unit.sh`, `step2a_tests_unit.sh`.
+- **하지 않는 것과 까닭**: `cfe_assert.so` 를 같은 자리 기준 빌드에서 해시하는 것(검토의 권고)은 하지 않는다. 그 트리는 `derive_c1.sh` 가 해시 뒤 지웠고(§5.2), 다시 만들면 이 고침에서 선언하지 않은 파생 빌드가 된다. 대신 절 비교로 잰다. 결과가 경로 글 밖의 차이를 보이면 그대로 적는다.
+- **E3 의 보고**: §7.4 E3 은 빌드 전 목록 대비 26 을 그대로 적고 partial 로 고친다. 덧붙인 목록(`declared_diff_after.tsv`)을 선언의 정정으로 받을지는 lead 가 정한다(이 고침은 그 결정을 대신하지 않는다).
+- **바이트로 비교하는 것**: 입력 모두(장부 `ledger_check.sh` 전체; `OBS_c1pre_explain` 을 포함해 앞 단계 출력이 바뀌지 않음), 새 출력은 새 장부 행 `OBS_c1pre_explain_reviewfix` 로 더한다. MC 도구(`pre_mc`/`post_mc`).
+- **미리 기대하지 않음**: 축·판정·머리말은 잰 대로 적는다. 다만 규칙에서 읽으면 관계 1 의 `link` 는 unlinked 가 되고, 판정 규칙 3.3 의 표에서 odf 의 `failure_sign` 은 link 를 조건으로 쓰지 않는다 [I: 규칙에서 읽음].
+- **PI 의 선택이 되는 것**: 이 고침은 대상 소스·표·시작 스크립트·시작 구성, hold·gate, 권한, 공개, 바깥 출처의 어느 것도 하지 않는다.
+- **공간**: 하한 314,572,800 B. explain 은 공간 감시 아래. 시작 여유 3,709,788,160 B [M, `pre_mc.txt`].
+- **지우는 것**: scratchpad 에 이 고침이 만든 것(fixture 작업 디렉터리, 두 번째 explain 출력, 빌드 전 비교기의 사본)만.

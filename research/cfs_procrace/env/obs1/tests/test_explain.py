@@ -5,7 +5,11 @@
 
 Every fixture is a stub plan (sidecar, manifest, bindings), a stub relations row with its keys file, a stub facts view,
 and a stub boot (dump text, run.meta, chain record, startup script) written into a new directory under <work dir>; the
-script is run on it with python3 -I and its records are read back.  Covered: each need state of JR 3.5 (present,
+script is run on it with python3 -I and its records are read back.  Covered (revision 2, after review): the link by
+JR 3.2 axis 1 as written (an absence outcome stays unlinked; established only when the use's and the creator's out
+ids, each read under its success constant, are the same instance), the publisher's out kept raw without the creator's
+success constant, sidecar reasons with spaces read whole, the unbalanced-reason refusal, the stop budget in
+budget.run, the plan executables from the instance list run.meta names, and a refused instance list.  Also: each need state of JR 3.5 (present,
 value-missing, text-partial, not-reached, unknown-loss, unbound, not-planned, build-mismatch), each status of the link,
 use_cond, order and effect axes, the intervention status the stage can produce (unconfirmed), a repeated
 creation-argument value (both ties undetermined), and each JR 3.6 format rule (a record that breaks it is refused by
@@ -126,7 +130,11 @@ def base_events(order="use-first", pub_key="K1", use_status="0xffffffffffffffef"
     return E
 
 
-def make(case, row=ROW_PARTIAL, events=None, pool_dropped=0, unbind=(), mismatch=False, run=True, extra_need=True):
+ROW_DERIVED_CC = ROW_DERIVED.replace("      dependency:", "      callee-check: CREATE returns -5 [ERR_FULL], CREATE returns 0 [OK]\n      dependency:")
+
+
+def make(case, row=ROW_PARTIAL, events=None, pool_dropped=0, unbind=(), mismatch=False, run=True, extra_need=True,
+         budget=True, list_named=True):
     d = os.path.join(WORK, case)
     os.makedirs(d)
     side = ["kz-plan-sidecar 1", "input facts sha256=%s path=/stub/facts.kz" % FSHA,
@@ -138,6 +146,7 @@ def make(case, row=ROW_PARTIAL, events=None, pool_dropped=0, unbind=(), mismatch
             "map a1b2c3d4e5f60718 10 11 12 13 14 15 16"]
     if extra_need:
         side.append('need row a1b2c3d4e5f60718 wait-result not-planned reason=plan_missing(need not planned) note="stub"')
+        side.append('gap row a1b2c3d4e5f60718 "key text of LOOKUP parameter 1: stub" reason=record_insufficient(key text) rule=key-text')
     side += ["stop-event run-loop LOOP e.c:1 decl e.h:1", "stop-event app-exit EXIT e.c:2 decl e.h:2"]
     w(os.path.join(d, "plan.side"), "\n".join(side) + "\n")
     ss = sha(os.path.join(d, "plan.side"))
@@ -164,10 +173,23 @@ def make(case, row=ROW_PARTIAL, events=None, pool_dropped=0, unbind=(), mismatch
             dump.append("actor %d key=tid:%d overflow=0 partial=0 dropped_bytes=0" % (a, 100 + a))
         dump += E + ["format kzrt-dump 1.4 partial=0", "check ok (0 failures)"]
         w(os.path.join(d, "dump.txt"), "\n".join(dump) + "\n")
-        w(os.path.join(d, "run.meta"), "file tx/core sha256=%s (build x)\nmanifest %s/plan.kzs sha256=%s\nstop=stub\ntx_exit=0\n" % ("d" * 64, d, ms))
-        w(os.path.join(d, "chain.txt"), "manifest\tconfirmed\tstub\nbprime\tconfirmed\tbasis=%s\nsame_build\tunconfirmed(no build-id in dump)\tstub\nchain\tconfirmed\t3 links\n" % bs[:16])
+        w(os.path.join(d, "inst_files.sha256"), "%s  ./tx/core\n%s  ./tx/m.so\n%s  ./tx/scr\n" % ("d" * 64, "a" * 64, "b" * 64))
+        ls = sha(os.path.join(d, "inst_files.sha256")) if list_named else "0" * 64
+        w(os.path.join(d, "run.meta"), "file tx/core sha256=%s (build x)\nmanifest %s/plan.kzs sha256=%s\n"
+          "instance_files dir=i files=3 other=0 list=%s/inst_files.sha256 list_sha256=%s\nstop=stub (CI L1)\ntx_exit=0 rx_exit=0\n" % ("d" * 64, d, ms, d, ls))
+        w(os.path.join(d, "chain.txt"), "manifest\tconfirmed\tstub\nbprime\tconfirmed\tbasis=%s\n"
+          "exe exe/tx/core\tconfirmed\trecord=dddddddddddddddd run.meta[tx/core]=dddddddddddddddd inst_list[tx/core]=dddddddddddddddd\n"
+          "exe exe/tx/m.so\tconfirmed\trecord=aaaaaaaaaaaaaaaa inst_list[tx/m.so]=aaaaaaaaaaaaaaaa\n"
+          "same_build\tunconfirmed(no build-id in dump)\tstub\nchain\tconfirmed\t3 links\n" % bs[:16])
+        w(os.path.join(d, "stop_eval.tsv"), "# stub\napp\tentry\tfile\troot_sites\tactor\troot_ms\tstop_event\tstop_site\tstop_aseq\tstop_ms\tinside_window\tstatus\n"
+          "CAPP\tC_Main\tc\t1\t2\t1.2\tEXIT\t6\t7\t2.0\tyes\treached\nPAPP\tP_Main\tp\t2\t3\t1.3\t-\t-\t-\t-\t-\tnot-reached\nsummary\tx\n")
+        w(os.path.join(d, "boot_budget.tsv"), "# stub boot budget\nstop.value\t5 s + command + 5 s\nstop.source\tCI L1\nstop.reason\tstub\n"
+          "stop.truncation\tafter the process end\nstop.sensitivity\tnot measured\nstop.rule\tnever failure or normal\nrun.value\t1 boot\nrun.reason\tstub\nrun.sensitivity\tnot measured\n")
         w(os.path.join(d, "scr"), "CFE_APP, c, C_Main, CAPP, 1, 1, 0x0, 0;\nCFE_APP, p, P_Main, PAPP, 1, 1, 0x0, 0;\n!\n")
-        args += ["--dump-text", d + "/dump.txt", "--run-meta", d + "/run.meta", "--chain", d + "/chain.txt", "--startup-script", d + "/scr"]
+        args += ["--dump-text", d + "/dump.txt", "--run-meta", d + "/run.meta", "--chain", d + "/chain.txt", "--startup-script", d + "/scr",
+                 "--instance-list", d + "/inst_files.sha256", "--stop-eval", d + "/stop_eval.tsv"]
+        if budget:
+            args += ["--boot-budget", d + "/boot_budget.tsv"]
     p = subprocess.run(args, capture_output=True, text=True)
     recs = []
     rd = os.path.join(d, "out", "records")
@@ -196,16 +218,30 @@ def ax(r):
 
 
 os.makedirs(WORK, exist_ok=True)
-# --- control: present needs, established link (absence outcome), partial use condition, events only, failure sign
+# --- control: present needs, unlinked link (absence outcome, JR 3.2 axis 1 as written), partial use condition, events
+# only, failure sign; the sidecar reasons read whole; the stop budget and the plan executables in the record
 rc, R, d, out = make("control")
 r = R[0] if R else None
-ok = rc == 0 and len(R) == 1 and ax(r) == ("established", "partial", "events_only", "unconfirmed", "observed", "undetermined", "failure_sign") \
+ok = rc == 0 and len(R) == 1 and ax(r) == ("unlinked", "partial", "events_only", "unconfirmed", "observed", "undetermined", "failure_sign") \
+    and "link_unlinked(absence outcome: the use reached no object instance)" in r["link"]["missing"] \
+    and "record_insufficient(no success constant of the creator: the creator's out id is not read)" in r["link"]["missing"] \
+    and r["link"]["resource_key"]["generation"] is None and r["link"]["resource_key"]["name"] == "K1" \
+    and r["link"]["instance_evidence"][0]["admitted"] is False \
+    and r["order"]["publish_events"][0]["out"]["read"] is False and r["order"]["publish_events"][0]["out"]["raw"] == "0x30002" \
+    and "L-ABS" not in [p["id"] for p in r["premises"]] \
+    and [n["reason"] for n in r["incompleteness"]["needs"] if n["need"].startswith("wait-result")] == ["plan_missing(need not planned)"] \
+    and [g["reason"] for g in r["incompleteness"]["static_gaps"]] == ["record_insufficient(key text)"] \
+    and r["budget"]["run"]["stop"]["fired"].startswith("yes: run.meta 'stop=stub (CI L1)'") \
+    and r["budget"]["run"]["stop"]["unresolved"] == "applications without their stop event inside the window: PAPP" \
+    and r["budget"]["run"]["stop"]["value"] == "5 s + command + 5 s" and r["budget"]["run"]["run"]["value"] == "1 boot" \
+    and sorted(r["build_id"]["executables_plan"]) == ["tx/core", "tx/m.so"] and r["build_id"]["executables_plan"]["tx/m.so"]["sha256"] == "a" * 64 \
     and all(need_state(r, s) == "present" for s in (10, 11, 12, 13, 14, 15, 16)) \
     and any(n["state"] == "not-planned" for n in r["incompleteness"]["needs"]) and r["tool_verdict"]["headline"] == "실패 징후" \
     and r["order"]["use_events"][0]["out"]["read"] is False and r["order"]["use_events"][0]["key"]["pointer_equal_to_key_text_argument"] is True \
     and r["consumer_actor"]["creation_tie"]["status"] == "determined" and r["actor_pair_kind"] == {"3": "app-app"} \
     and r["effect"]["recovery"] == "not_attempted"
-case("control (present, not-planned; established/partial/events_only/unconfirmed/observed; undetermined, failure_sign)", ok,
+case("control (present, not-planned; unlinked(absence outcome)/partial/events_only/unconfirmed/observed; undetermined, failure_sign; "
+     "reasons read whole; stop budget; plan executables)", ok,
      "rc %d records %d %s" % (rc, len(R), ax(r) if r else out[-300:]))
 CONTROL = d
 # --- a 32-bit status recorded sign-extended against the row's unsigned constant
@@ -225,16 +261,28 @@ ok = rc == 0 and R and R[0]["consumer_actor"]["creation_tie"]["status"] == "unde
     and any("collision" in m for m in R[0]["link"]["missing"])
 case("repeated creation-argument value -> both ties undetermined, link unlinked", ok,
      (R[0]["consumer_actor"]["creation_tie"]["why"] if R else out[-300:]))
-# --- derived use condition, use before the create -> unmet_state_observed, violation observed
-rc, R, _, out = make("derived_unmet", row=ROW_DERIVED)
-ok = rc == 0 and R and ax(R[0])[:3] == ("established", "derived", "unmet_state_observed") and R[0]["tool_verdict"]["violation"]["value"] == "observed" \
-    and R[0]["tool_verdict"]["headline"] == "사용 조건 위반(관측)" and R[0]["tool_verdict"]["violation"]["kind"] == "order_basis_unknown"
-case("use_cond derived, use before the create -> order unmet_state_observed, violation observed", ok, str(ax(R[0])) if R else out[-300:])
-# --- derived, create before the use, use found the created id -> met_state_only, not_observed_in_runs
-rc, R, _, out = make("derived_met", row=ROW_DERIVED, events=base_events(order="pub-first", use_status="0x0", use_out="0x30002"))
+# --- derived use condition, use before the create -> unmet_state_observed; the absence outcome reaches no instance, so
+# the link stays unlinked (JR 3.2 axis 1) and the violation is undetermined, not observed
+rc, R, _, out = make("derived_unmet", row=ROW_DERIVED_CC)
+ok = rc == 0 and R and ax(R[0])[:3] == ("unlinked", "derived", "unmet_state_observed") and R[0]["tool_verdict"]["violation"]["value"] == "undetermined" \
+    and "link_unlinked(absence outcome: the use reached no object instance)" in R[0]["tool_verdict"]["violation"]["undetermined_reasons"] \
+    and R[0]["order"]["publish_events"][0]["out"]["read"] is True and R[0]["tool_verdict"]["headline"] == "실패 징후"
+case("use_cond derived, use before the create -> order unmet_state_observed; absence outcome -> link unlinked, violation undetermined", ok,
+     str(ax(R[0])) if R else out[-300:])
+# --- derived, create first, the use reads its id, the creator's out read under its success constant -> established,
+# met_state_only, not_observed_in_runs
+rc, R, _, out = make("derived_met", row=ROW_DERIVED_CC, events=base_events(order="pub-first", use_status="0x0", use_out="0x30002"))
 ok = rc == 0 and R and ax(R[0])[:3] == ("established", "derived", "met_state_only") and R[0]["tool_verdict"]["violation"]["value"] == "not_observed_in_runs" \
-    and R[0]["order"]["use_events"][0]["out"]["read"] is True
-case("use_cond derived, create first and the use reads its id -> met_state_only, not_observed_in_runs", ok, str(ax(R[0])) if R else out[-300:])
+    and R[0]["order"]["use_events"][0]["out"]["read"] is True and R[0]["link"]["resource_key"]["generation"] == "0x30002"
+case("same instance reached (both out ids read under their success constants) -> established, met_state_only, not_observed_in_runs", ok,
+     str(ax(R[0])) if R else out[-300:])
+# --- the same, but the row gives no success constant of the creator: its out is not read -> unlinked, record_insufficient
+rc, R, _, out = make("derived_met_nocc", row=ROW_DERIVED, events=base_events(order="pub-first", use_status="0x0", use_out="0x30002"))
+ok = rc == 0 and R and ax(R[0])[:3] == ("unlinked", "derived", "record_insufficient") \
+    and "record_insufficient(no success constant of the creator: the creator's out id is not read)" in R[0]["link"]["missing"] \
+    and R[0]["link"]["resource_key"]["generation"] is None
+case("no success constant of the creator: its out id is not read -> link unlinked, order record_insufficient", ok,
+     str(ax(R[0])) if R else out[-300:])
 # --- no run: static_only; derived -> candidate; partial -> order-dependence candidate
 rc, R, _, out = make("norun_derived", row=ROW_DERIVED, run=False)
 ok1 = rc == 0 and R and R[0]["order"]["status"] == "static_only" and R[0]["tool_verdict"]["violation"]["value"] == "candidate" \
@@ -275,6 +323,14 @@ case("need unbound (no binding of a planned site)", ok, str(need_state(R[0], 12)
 rc, R, _, out = make("none_in_window", events=base_events(after_use=False))
 ok = rc == 0 and R and R[0]["effect"]["status"] == "none_in_window" and R[0]["effect"]["missing"]
 case("effect none_in_window (no handling or stop event after the use)", ok, str(ax(R[0])) if R else out[-300:])
+# --- no boot budget record given: budget.run names it missing
+rc, R, _, out = make("no_budget", budget=False)
+ok = rc == 0 and R and R[0]["budget"]["run"].get("missing") == ["record_insufficient(no budget record of the boot given)"]
+case("no boot budget record -> budget.run missing with a reason", ok, str(R[0]["budget"]["run"]) if R else out[-300:])
+# --- an instance list run.meta does not name -> combination refused
+rc, R, _, out = make("list_not_named", list_named=False)
+ok = rc == 3 and R and "the instance list is not the one run.meta names" in R[0]["build_id"]["compat"]
+case("an instance list run.meta does not name -> combination refused, rc 3", ok, "rc %d %s" % (rc, R[0]["build_id"]["compat"] if R else out[-300:]))
 # --- build-mismatch
 rc, R, _, out = make("mismatch", mismatch=True)
 ok = rc == 3 and R and all(n["state"] == "build-mismatch" for n in R[0]["incompleteness"]["needs"] if n["need"].startswith("site ")) \
@@ -311,6 +367,7 @@ m = copy.deepcopy(base); m["use_cond"]["missing"] = []; muts.append(("7", m))
 m = copy.deepcopy(base)
 m["order"]["per_consumer"]["item2_uses_before_w_all_fail"]["events"].append({"actor": "9", "aseq": 1}); muts.append(("8", m))
 m = copy.deepcopy(base); m["link"]["missing"] = ["no_such_reason(x)"]; muts.append(("3.5", m))
+m = copy.deepcopy(base); m["incompleteness"]["needs"][-1]["reason"] = "plan_missing(need"; muts.append(("3.5", m))
 allok = rc0 == 0
 det = ["control rc %d" % rc0]
 for tag, m in muts:

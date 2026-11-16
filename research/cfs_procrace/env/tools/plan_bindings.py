@@ -2,6 +2,7 @@
 # did with every site of the plan, and whether each instrumented unit got the module id the plan's module table gives.
 #
 #   python3 -I plan_bindings.py --manifest PLAN.kzs --modules PLAN.mod --bindings MERGED.kzs --module-flags "FLAGS" -o OUT
+#       [--file-hashes BASIS_DUMP.txt]
 #
 #   --manifest      the generated manifest (kzs-sites 3): its "site N ..." and "module N name=X" lines
 #   --modules       the plan's module table (kz-static plan --modules-out): "<id>\t<name>\t<prefix>" lines and "default\t<id>"
@@ -9,6 +10,10 @@
 #                   and "# manifest=<path> sha256=<hex> module=<id>", then "bind <id> site=<n> ... status=<s> [reason=...]"
 #   --module-flags  the plugin's module options as the derive script passed them (derive_module_flags: the table's
 #                   prefixes through the path map): -fplugin-arg-kzgcc-module=<id>:<prefix> ... -fplugin-arg-kzgcc-default-module=<id>
+#   --file-hashes   optional: the kz-dump text of the derived build's basis (its FILE_HASHES records path="<p>"
+#                   sha256=<hex>); each unit is tied to the sha256 of its source file by the unit path the plugin wrote,
+#                   and the file on disk is hashed again beside it.  The plugin's unit header carries no source hash
+#                   (kzgcc 0.3), so this ties the binding file to the source through the basis.
 # Checks (each a line in OUT; rc 1 if one fails, rc 2 on a usage or input error):
 #   sites      every site of the manifest has at least one binding line: bound / inlined / duplicated, or removed /
 #              unsupported with the plugin's reason; a site no unit reported is "not-seen" (its unit was not compiled
@@ -17,6 +22,7 @@
 #   modules    the manifest's module statements and the table name the same ids and names; the flags carry the table's
 #              ids in its order with its default; every unit's module id is the one the plugin's rule gives for its path
 #              (the first prefix that starts the path, else the default; kzgcc.cpp start_unit)
+#   sources    (with --file-hashes) every unit's path is in the basis FILE_HASHES and the file on disk has that sha256
 # The plan states what to record, never what to expect: this report states what the plugin bound, not whether the
 # planned sites will fire.
 import argparse, collections, hashlib, re, sys
@@ -27,6 +33,7 @@ ap.add_argument('--modules', required=True)
 ap.add_argument('--bindings', required=True)
 ap.add_argument('--module-flags', required=True)
 ap.add_argument('-o', required=True)
+ap.add_argument('--file-hashes')
 a = ap.parse_args()
 
 
@@ -39,6 +46,7 @@ try:
     man = open(a.manifest, encoding='utf-8').read().split('\n')
     tab = open(a.modules, encoding='utf-8').read().split('\n')
     bnd = open(a.bindings, encoding='utf-8').read().split('\n')
+    fht = open(a.file_hashes, encoding='utf-8').read().split('\n') if a.file_hashes else None
 except OSError as e:
     sys.stderr.write('plan_bindings.py: %s\n' % e)
     sys.exit(2)
@@ -118,11 +126,36 @@ extra = sorted(s for s in binds if s not in sites)
 for s in extra:
     out.append('site\t%d\tnot in the manifest\t\t\tFAIL\t\t' % s)
     bad += 1
-# manifest sha per unit
+# manifest sha per unit; with --file-hashes the unit's source sha256 from the basis and from the file on disk
 mbad = [u for u in units if u[1] != msha]
+fhs = None
+if fht is not None:
+    fhs = {}
+    for line in fht:
+        m = re.match(r'\s*FILE_HASHES\[(\d+)\] path="([^"]*)" sha256=([0-9a-f]{64})', line)
+        if m:
+            fhs[m.group(2)] = (int(m.group(1)), m.group(3))
+sbad = []
 for u in units:
-    out.append('unit\t%s\tmanifest_sha256=%s\tmodule=%s' % (u[0], 'plan' if u[1] == msha else (u[1] or 'none'), u[2]))
+    src = ''
+    if fhs is not None:
+        e = fhs.get(u[0])
+        try:
+            disk = sha(u[0])
+        except OSError:
+            disk = None
+        if e is None:
+            src, ok = '\tsource_sha256=NOT-IN-FILE_HASHES\tdisk=%s' % (disk or 'unreadable'), False
+        else:
+            ok = disk == e[1]
+            src = '\tsource_sha256=%s\tfile_hashes=%d\tdisk=%s' % (e[1], e[0], 'same' if ok else (disk or 'unreadable'))
+        if not ok:
+            sbad.append(u[0])
+    out.append('unit\t%s\tmanifest_sha256=%s\tmodule=%s%s' % (u[0], 'plan' if u[1] == msha else (u[1] or 'none'), u[2], src))
 bad += len(mbad)
+if fhs is not None:
+    out.append('sources\tevery unit in the basis FILE_HASHES with the sha256 of the file on disk\t%s' % ('yes' if not sbad else 'NO (%d)' % len(sbad)))
+    bad += len(sbad)
 # modules
 modok = []
 modok.append(('manifest modules = table modules plus the default', set(mmods) == set(tmods) | ({tdef} if tdef else set())
@@ -146,13 +179,16 @@ for n, ok in modok:
 for u, got, want in ubad:
     out.append('modules\tunit %s module %s, rule gives %s' % (u, got, want))
 perunit = collections.Counter(u[2] for u in units)
-summary = ('summary\tsites %d: %s; units with sites %d (modules %s); manifest sha256 of the plan in %d of %d unit headers; failures %d'
+summary = ('summary\tsites %d: %s; units with sites %d (modules %s); manifest sha256 of the plan in %d of %d unit headers;%s failures %d'
            % (len(sites), ' '.join('%s=%d' % kv for kv in sorted(cnt.items())), len(units),
-              ' '.join('%s:%s=%d' % (i, mmods.get(i, '?'), n) for i, n in sorted(perunit.items())), len(units) - len(mbad), len(units), bad))
+              ' '.join('%s:%s=%d' % (i, mmods.get(i, '?'), n) for i, n in sorted(perunit.items())), len(units) - len(mbad), len(units),
+              (' source sha256 tied for %d of %d units;' % (len(units) - len(sbad), len(units))) if fhs is not None else '', bad))
 with open(a.o, 'w', encoding='utf-8') as fh:
     fh.write('# plan_bindings.py: manifest %s sha256 %s; module table %s sha256 %s; bindings %s sha256 %s\n'
              % (a.manifest, msha, a.modules, sha(a.modules), a.bindings, sha(a.bindings)))
     fh.write('# module flags: %s\n' % a.module_flags)
+    if a.file_hashes:
+        fh.write('# file hashes: %s sha256 %s\n' % (a.file_hashes, sha(a.file_hashes)))
     fh.write('\n'.join(out) + '\n' + summary + '\n')
 print(summary)
 sys.exit(1 if bad else 0)

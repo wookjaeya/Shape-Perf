@@ -1,0 +1,18 @@
+space_guard.sh: refused: free 900 < floor 500 + need 500
+space_guard.sh: stopped: free fell below the floor 500
+check 1 space guard (stub writer): PASS (control rc 0; refused rc 75; floor rc 76 after 5 of 20 writer steps; dip 500)
+check 2 build record (stub tree): PASS (control rc 0; missing tool rc 1)
+check 3 ledger (temp tree): PASS (control rc 0; missing file rc 1; changed byte rc 1; broken bundle part rc 1)
+check 4 tool registry (temp tree): PASS (control rc 0; changed tool byte rc 1; missing copy rc 1)
+check 5 single-build runner (stand-in kz-static): PASS (control rc 0; failing extract rc 1; failing relations rc 1; failing sha256 list rc 1; inputs table same as step2a_tests.sh: yes; non-empty OUT rc 2)
+check 6 chain checker (stub chain): PASS (consistent rc 0 (confirmed); changed executable byte rc 1; other manifest rc 1; missing B' rc 3)
+check 7 harness hashing (temp instance dir): PASS (control rc 0; existing list rc 64)
+check 8 derive-script arguments (stub module table): PASS (control rc 0 (derive script called: yes); no sidecar reference rc 64; other sidecar sha256 rc 64; missing --exes rc 64; no path map rc 64; executable list of another sidecar rc 64; manifest of another sidecar rc 64; module options as-table; partial plan derive_c1 rc 64 derive_c5 rc 64)
+check 9 path map (stub maps and plan tables): PASS (mapped: /w/b/a.c /w/s/c.c /w/s /w/ws/exe/tx/core-tx rel/p rc1:/other/y; malformed maps refused: yes; plan table mapped: yes; uncovered prefix rc 64; map without plan rc 64)
+check 10 single-build runner, derived workspace (stand-in kz-static): PASS (control rc 0; inputs mapped, recipe in place: yes; uncovered input rc 2; missing mapped input rc 2; malformed option rc 2)
+check 11 derived comparison (stand-in kz-dump): PASS (control rc 0 (declared findings 2); undeclared record rc 1; undeclared text line rc 1; path outside the map rc 1; (b) shifted tu= and escaped quotes rc 0 (undeclared 0); real tu= change rc 1; change outside the stripped fields rc 1)
+check 12 binding report (stub plan and bindings): PASS (control rc 0; site not seen rc 1; unsupported without reason rc 1; other module id rc 1; other manifest sha256 rc 1; sources tied rc 0; unit not in FILE_HASHES rc 1; source changed on disk rc 1)
+check 13 chain checker, generated-plan links (stub chain): PASS (consistent rc 0 (confirmed, 2 executables through the instance list); other sidecar rc 1; changed instance file rc 1; list not named rc 1; other parent rc 1; other dump rc 1)
+check 14 stop-event evaluation (stub plan, script and dump): PASS (control rc 0 (applications=2 reached_inside_window=2 libraries=1); actor never at a stop site rc 3; no root site rc 3; no RUN line rc 2)
+check 15 explanation records (synthetic fixtures): PASS (explain fixtures: 20 of 20 pass)
+unit checks: 15 of 15 pass

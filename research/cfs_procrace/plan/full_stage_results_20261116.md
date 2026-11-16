@@ -1142,3 +1142,9 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 336,981,82
    선언을 고친다: 섹션은 레코드 글자로 비교한다. `section_text_sha.py` 가 두 회차의 facts.kz 마다 섹션별 레코드 수와 레코드 줄(`section` 줄 빼고)의 sha256 을 적고(`section_text_old.txt`, `section_text_new.txt`), `compare_sections_text.py` 가 빌드마다 앞 회차의 모든 섹션이 같은 수·같은 레코드 글자임을, 다만 STRINGS 와 BASIS 는 다를 수 있고 새 섹션은 SEMANTICS 하나임을 본다(`compare/sections_text_on.txt`). 앞의 `section_sha_on.txt` 는 이 회차의 섹션 바이트 기록으로 그대로 둔다.
 
 두 가지를 `compare.sh extract_on_text` 한 단계로 다시 돌린다(새 스크립트 `check_head_sem.py` 는 `check_head.py` 의 사본에 `--allow-new-section` 만 더함; `check_head.py`, `section_sha.py`, `compare_sections.py` 와 앞 출력은 바꾸지 않음). 출력 `compare_extract_on_text.txt`. 여기서도 OK 가 아닌 줄이 나오면 다시 멈춘다.
+
+#### 8.0c 레코드 글자 비교 스크립트의 고침 (그 비교를 다시 돌리기 전에 적고 커밋함) [D][M]
+
+`compare.sh extract_on_text`(`compare_extract_on_text.txt`, rc 1): 머리는 다섯 빌드 모두 OK(허용 5, 다른 줄 0)다. 섹션은 빌드마다 앞 회차의 42 개 가운데 39 개가 같은 레코드 글자이고, STRINGS·BASIS 밖에 ARG_TYPES 가 달랐다(`compare/sections_text_on.txt`). 까닭은 스크립트에 있다: kz-dump 는 마지막 섹션 뒤에 머리 아닌 끝줄 `artifact_sha256=…` 을 적고, `section_text_sha.py` 는 `section` 줄 뒤의 비지 않은 줄을 다 그 섹션의 것으로 받아, 앞 회차에서는 마지막 섹션 ARG_TYPES 에, 이 회차에서는 SEMANTICS 에 그 줄을 넣었다(c5_642 의 ARG_TYPES 는 레코드 줄 7,459 개가 같고 앞 회차 쪽에 끝줄 하나만 더 있음). 8.0b 가 선언한 "레코드 줄만"과 다르게 짠 것이다.
+
+고침: `section_text_sha_2.py`(`section_text_sha.py` 의 사본, 두 칸 들여 쓴 레코드 줄만 받음)로 같은 비교를 다시 돌린다. `compare.sh` 의 `extract_on_text` 는 `TEXT_ROUND=_2` 일 때 그 사본을 쓰고 출력 이름에 `_2` 를 붙인다(`section_text_old_2.txt`, `section_text_new_2.txt`, `compare/sections_text_on_2.txt`, `compare/on_facts_head_sem_2_<b>.txt`, `compare_extract_on_text_2.txt`). 첫 실행의 스크립트와 출력은 그대로 둔다. 허용은 8.0b 그대로(STRINGS, BASIS, 새 섹션 SEMANTICS 하나)다.

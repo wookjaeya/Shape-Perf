@@ -43,7 +43,9 @@ except_line() { cmp -s <(sed "$1d" "$2") <(sed "$1d" "$3"); }
 C=$HERE/compare
 mkdir -p "$C"
 [ "${1:-}" = extract_on ] && : > "$HERE/section_sha_on.txt.partial"
-[ "${1:-}" = extract_on_text ] && : > "$HERE/section_text_old.txt.partial" && : > "$HERE/section_text_new.txt.partial"
+TR=${TEXT_ROUND:-}
+case "$TR" in ""|_2) ;; *) echo "TEXT_ROUND: unset or _2" >&2; exit 64 ;; esac
+[ "${1:-}" = extract_on_text ] && : > "$HERE/section_text_old${TR}.txt.partial" && : > "$HERE/section_text_new${TR}.txt.partial"
 for b in c1_pre_tx c1_post_tx r2_core c5_641 c5_642; do
   case "${1:-}" in
     relations)
@@ -119,8 +121,10 @@ for b in c1_pre_tx c1_post_tx r2_core c5_641 c5_642; do
       # results 8.0b: the two checks of extract_on that the declaration 8.0 wrote too narrowly, again with the allowance
       # the addendum declares (the header line sections= one more; sections compared by their record text)
       N=$O/sem_on_extract/$b/$b/NP; P=$O/objacc_on_extract/$b/$b/NP
-      python3 -I "$HERE/check_head_sem.py" "$KD" "$P/facts.kz" "$N/facts.kz" --allow-size --allow-new-section > "$C/on_facts_head_sem_$b.txt"; [ $? = 0 ] && ok "$b facts.kz header: $(head -1 "$C/on_facts_head_sem_$b.txt")" || bad "$b facts.kz header (compare/on_facts_head_sem_$b.txt)"
-      python3 -I "$HERE/section_text_sha.py" "$KD" "$P/facts.kz" >> "$HERE/section_text_old.txt.partial" && python3 -I "$HERE/section_text_sha.py" "$KD" "$N/facts.kz" >> "$HERE/section_text_new.txt.partial" || bad "$b section record text sha256" ;;
+      # TEXT_ROUND (results 8.0c): unset, the first run (section_text_sha.py); _2, the second (section_text_sha_2.py, the
+      # record lines only), into names with that suffix
+      python3 -I "$HERE/check_head_sem.py" "$KD" "$P/facts.kz" "$N/facts.kz" --allow-size --allow-new-section > "$C/on_facts_head_sem${TR}_$b.txt"; [ $? = 0 ] && ok "$b facts.kz header: $(head -1 "$C/on_facts_head_sem${TR}_$b.txt")" || bad "$b facts.kz header (compare/on_facts_head_sem${TR}_$b.txt)"
+      python3 -I "$HERE/section_text_sha${TR}.py" "$KD" "$P/facts.kz" >> "$HERE/section_text_old${TR}.txt.partial" && python3 -I "$HERE/section_text_sha${TR}.py" "$KD" "$N/facts.kz" >> "$HERE/section_text_new${TR}.txt.partial" || bad "$b section record text sha256" ;;
     *) echo "usage: compare.sh relations|order|extract|onextract|plans|extract_on|extract_on_text|onextract_on|plans_on|measure" >&2; exit 64 ;;
   esac
 done
@@ -129,7 +133,7 @@ if [ "${1:-}" = extract_on ]; then
   python3 -I "$HERE/compare_sections.py" "$PREV/section_sha_on.txt" "$HERE/section_sha_on.txt" > "$C/sections_on.txt"; [ $? = 0 ] && ok "sections: $(grep -c '^OK' "$C/sections_on.txt") builds, every section of the earlier on-round the same but STRINGS and BASIS, SEMANTICS new (compare/sections_on.txt)" || bad "sections (compare/sections_on.txt)"
 fi
 if [ "${1:-}" = extract_on_text ]; then
-  mv "$HERE/section_text_old.txt.partial" "$HERE/section_text_old.txt"; mv "$HERE/section_text_new.txt.partial" "$HERE/section_text_new.txt"
-  python3 -I "$HERE/compare_sections_text.py" "$HERE/section_text_old.txt" "$HERE/section_text_new.txt" > "$C/sections_text_on.txt"; [ $? = 0 ] && ok "sections by record text: $(grep -c '^OK' "$C/sections_text_on.txt") builds, every section of the earlier on-round the same record text but STRINGS and BASIS, SEMANTICS new (compare/sections_text_on.txt)" || bad "sections by record text (compare/sections_text_on.txt)"
+  mv "$HERE/section_text_old${TR}.txt.partial" "$HERE/section_text_old${TR}.txt"; mv "$HERE/section_text_new${TR}.txt.partial" "$HERE/section_text_new${TR}.txt"
+  python3 -I "$HERE/compare_sections_text.py" "$HERE/section_text_old${TR}.txt" "$HERE/section_text_new${TR}.txt" > "$C/sections_text_on${TR}.txt"; [ $? = 0 ] && ok "sections by record text: $(grep -c '^OK' "$C/sections_text_on${TR}.txt") builds, every section of the earlier on-round the same record text but STRINGS and BASIS, SEMANTICS new (compare/sections_text_on${TR}.txt)" || bad "sections by record text (compare/sections_text_on${TR}.txt)"
 fi
 exit $rc

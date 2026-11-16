@@ -1148,3 +1148,116 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 336,981,82
 `compare.sh extract_on_text`(`compare_extract_on_text.txt`, rc 1): 머리는 다섯 빌드 모두 OK(허용 5, 다른 줄 0)다. 섹션은 빌드마다 앞 회차의 42 개 가운데 39 개가 같은 레코드 글자이고, STRINGS·BASIS 밖에 ARG_TYPES 가 달랐다(`compare/sections_text_on.txt`). 까닭은 스크립트에 있다: kz-dump 는 마지막 섹션 뒤에 머리 아닌 끝줄 `artifact_sha256=…` 을 적고, `section_text_sha.py` 는 `section` 줄 뒤의 비지 않은 줄을 다 그 섹션의 것으로 받아, 앞 회차에서는 마지막 섹션 ARG_TYPES 에, 이 회차에서는 SEMANTICS 에 그 줄을 넣었다(c5_642 의 ARG_TYPES 는 레코드 줄 7,459 개가 같고 앞 회차 쪽에 끝줄 하나만 더 있음). 8.0b 가 선언한 "레코드 줄만"과 다르게 짠 것이다.
 
 고침: `section_text_sha_2.py`(`section_text_sha.py` 의 사본, 두 칸 들여 쓴 레코드 줄만 받음)로 같은 비교를 다시 돌린다. `compare.sh` 의 `extract_on_text` 는 `TEXT_ROUND=_2` 일 때 그 사본을 쓰고 출력 이름에 `_2` 를 붙인다(`section_text_old_2.txt`, `section_text_new_2.txt`, `compare/sections_text_on_2.txt`, `compare/on_facts_head_sem_2_<b>.txt`, `compare_extract_on_text_2.txt`). 첫 실행의 스크립트와 출력은 그대로 둔다. 허용은 8.0b 그대로(STRINGS, BASIS, 새 섹션 SEMANTICS 하나)다.
+
+### 8.1 바뀐 것 [F]
+
+- 커밋 차례: `40aa9f5`(범위 규칙 `kairos/docs/semantics_coverage.md` 개정 1, 구성 요소·닻 목록 `semantics_trees.tsv`, 훑기 `env/tools/semantics_scan.py`; 어떤 자료 파일보다 먼저), `0649a43`(자료 파일, 코드, fixture, 시험, 그때까지의 기록; 선언 전의 스냅숏, §8.7), `b02ff21`(선언 §8.0, 비교 스크립트, 빌드 전 목록; 빌드 전), `1db871f`(빌드 기록, 새 golden, 등록부 행, 덧붙임 8.0a; 다섯 빌드 전), `a1d86d9`(8.0a 의 자리 고침), `93800dc`(덧붙임 8.0b), `43b3d98`(덧붙임 8.0c), 그리고 이 절의 커밋.
+- 규모(`371ddb0` 에서 `43b3d98` 까지, `kairos/` 와 `env/tools/`): 36 파일, 7,344 줄 더함, 11 줄 지움. 새 `lib/llvm/semantics.cpp` 529 줄·`semantics.hpp` 83 줄(자료 읽기 `load_semantics_file`, 결합 `semantics_rows`, `semantics_revision()` = `semantics join revision 1 (2026-11-16)`), `relations.cpp` +41(머리 한 줄, layers 칸의 `sem-unverified(…)`; relations rules revision 9 그대로), `serialize.{hpp,cpp}` +30(SEMANTICS 는 다른 모든 문자열 뒤에 intern), `cmd_extract.cpp`·`main.cpp`(옵션 `--semantics`, 두 번 쓰기), `facts_text.cpp`(절 `semantics`), `rel_facts.{hpp,cpp}`(SEMANTICS 를 있으면 읽음), `tests/lint/kz_lint.cpp` +91(규칙 `semantics-names`, 선택 시험 다섯), 시험 `test_static_cli.cpp` +96, `static_golden.cpp`, fixture `semantics.c` 140 줄, 자료 `semantics_fixture/` 하나, golden `semantics_np.golden` 136 줄; 훑기 1,142 줄; 자료 `kairos/semantics/` 열셋(framework 의미 일곱 4,312 줄, 이름 공간 다섯 367 줄, P0 선언 105 줄); 문서 `semantics_coverage.md` 123 줄, `static_facts.md` §5t, `schema.md` 날짜 줄.
+- 바꾸지 않은 것: `include/`, `cmake/`, 최상위 CMakeLists, `runtime/`, `instrument/`, relations·order·plan 규칙 개정(9, 2, 2), `semantics/framework_api_roles.txt`, 판정 규칙·어휘, 설명 스크립트, `one_build.sh`.
+
+### 8.2 빌드 [M]
+
+MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,080), 모두 첫 시도에 rc 0. 사본 18:43:33Z, 빌드 시작 18:47:15Z(`build_start.txt`), 빌드 전 HEAD `b02ff21`, kairos 아래 커밋 안 된 줄 0(`post_mc.txt`).
+
+| 목표 | 때 (UTC) | dip (B) |
+|---|---|---|
+| `kz-static` | 18:47:15–18:49:14 | 31,846,400 |
+| `kz_lint` | 18:49:20–18:49:32 | 18,477,056 |
+| `all` | 18:49:32–18:52:44 | 7,970,816 |
+
+- 다시 링크된다고 적은 15 가운데 7 이 바뀌었고(`libkz-llvm.a`, kz-static, `test_static_reasons`, `test_static_plan`, `test_static_cli`, `static_golden`, kz_lint), 8 은 다시 링크되었으나 같은 바이트다(`test_static_{unroll,flow,elf32,wrappers,gitrev,link,recipe,expr}`; `relink_result.txt`). 선언은 15 모두 "바뀔 수 있음"으로 적었다. `not_relink.sha256` 109 OK.
+- 도구(`post_mc.txt`, `identity_kz-static.txt`): kz-static `88f529b1…` → `12a3970f91ce8b9dde10aac22978629d9786623f07b2e2c1b0fa8afb69339b1b`; `--identity` 의 `tool_sha256` `7dba5726…` → `cccffd9782b9c0de71426632192818a4eab24333480fe8d07cfeafcc0e7ff69e`, `tool_source` `d7ae60a8…` → `e4ed3acf1e94cef7336935078bf659ee668c5e5d3293b529834170fcc7b88029`; `core_source` `568e5061…`, `schema_revision=12`, `schema_fingerprint` `6fbff6c6…` 그대로(선언의 [I] 대로). kz_lint `5f62ec20…` → `3d4d5a8faf6995d367ba428412f3d373615d064f45e009e9fb3a907ec38e91e5`. kz, kz-dump, kz-phi, kz-rt-dump, kz-instr-clang 그대로. `CMakeCache.txt` `bc2f43b4…` 그대로.
+- 도구 보존: 빌드 전 kz-static `88f529b1`·kz_lint `5f62ec20` 을 `/home/user/work/preserve/tools-20261116-i/` 에 `kz-static.88f529b1.xz`(43,696,080 B), `kz_lint.5f62ec20.xz`(956,516 B)로 사본, 왕복 확인(`tool_copy/ROUNDTRIP.txt`). 등록부: 사본 직후 in-place+copy, 빌드 뒤 copy, 새 `12a3970f`·`3d4d5a8f` in-place(`tools_check_after_copy.txt`, `tools_check_after_build.txt` 43 행 실패 0).
+
+### 8.3 시험 [M]
+
+- 첫 ctest(`ctest_first.log`): 261 개 가운데 실패 1, 선언한 그것(`static_golden_semantics_np`, golden 없음). 건너뜀 1.
+- `KZ_GOLDEN_UPDATE=1` 로 그것만 썼다(`golden_update.log`). scratchpad 점검 빌드의 것과 같은 sha256(`golden_scratch.sha256` `bcdfb9a7…`). 다른 golden 은 바뀌지 않았다.
+- 갱신 뒤 전체 ctest(`ctest_full.log`): 261 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`).
+- 확인 수(`ctest_counts.log`): `test_static_cli` 1,058, `test_static_plan` 195, `test_static_reasons` 666(선언 660 은 8.0a 에서 고침), `test_core_schema` 34,017, `lint_selftest` 114 경우 실패 0, lint 시험 여덟(선택 시험과 규칙 일곱; 선언의 "규칙 7 → 8" 은 이 시험 수) 모두 통과, 규칙 일곱 모두 clean(`case-ids`, `case-ids-data`, `semantics-names`, `retired-term`, `banned-files`, `no-llvm`, `no-generated`).
+- 단위 점검 `run_unit.sh` 15/15(`unit_tools.txt`), `step2a_tests_unit.sh` 7/7(`unit_step2a.txt`).
+- 훑기의 출처 점검을 다섯 빌드 뒤에 다시: `scan_check_4.txt` PASS 13 파일 실패 0, `fixture_check_3.txt` PASS 1 파일.
+
+### 8.4 바이트 동일성 [M]
+
+| 비교 | 결과 |
+|---|---|
+| relations, T8CF facts (`compare_relations.txt`) | 15 OK: `relations.txt`·`keys.txt` 가 `objacc_relcheck` 와 바이트 동일, 로그 빈 파일 |
+| order, T8CF facts (`compare_order.txt`) | 25 OK: 두 번 같음, `objacc_order` 와 바이트 동일 |
+| 다시 뽑기 옵션 없음 vs `objacc_off_extract` (`compare_extract.txt`) | 45 OK: `basis.kz` 허용 2(도구 해시), `facts.kz` 전체 dump 허용 6(c1_pre_tx 162,142 줄), facts 보기 `extract.units_from` 한 줄만(149,111 줄), 나머지 선언대로 |
+| 그 facts 위 (`compare_onextract.txt`) | 40 OK |
+| 계획 (`compare_plans.txt`) | 열 모두 “only declared differences”(T8CF 위 다섯, 옵션 없는 다시 뽑기 위 다섯) |
+| 다시 뽑기 옵션 있음 vs `objacc_on_extract` (`compare_extract_on.txt`) | 40 OK, BAD 6: 머리 다섯과 섹션 바이트(선언 밖, §8.0b) |
+| 같은 것, 8.0b 의 허용으로 (`compare_extract_on_text.txt`) | 머리 5 OK; 섹션 BAD(스크립트 결함, §8.0c) |
+| 같은 것, 8.0c 의 고친 스크립트로 (`compare_extract_on_text_2.txt`) | 6 OK: 머리 다섯 허용 5 다른 줄 0; 섹션은 빌드마다 앞 회차의 42 가운데 40 이 같은 레코드 글, 다른 것 STRINGS·BASIS, 새 것 SEMANTICS 하나(`compare/sections_text_on_2.txt`) |
+| 그 facts 위 (`compare_onextract_on.txt`) | 40 OK |
+| 계획 (`compare_plans_on.txt`) | 다섯 “only declared differences” |
+
+- **옵션 없는 경로는 앞판과 같다**(위 첫 다섯 줄). 다른 것은 도구 정체성에서 오는 값과 계획의 생성기 정체성 줄뿐이다.
+- **옵션 있는 경로**: facts 보기는 빌드마다 `[semantics]` 절과 BASIS 새 항목 18 개뿐이고 그 밖의 절은 같다(`compare/on_<b>.txt`). relations 는 2 번째 줄, 새 머리 한 줄, 표지 붙은 layers 줄뿐이다(268/268/186/100/95 줄, 그 가운데 행 262/262/183/86/81, `namespace layers:` 줄 6/6/3/14/14; `compare/on_relations_<b>.txt`). order 의 `order.txt`·`edges.tsv`·`keys.txt` 는 앞 회차와 같다(2 번째 줄 밖). 계획 생성기는 layers 를 읽지 않으므로 계획도 허용 밖 차이가 없다.
+- **누적 목록과 등록부**: 빌드 전 `ledger_check_pre.txt` 94 행·`tools_check_pre.txt` 41 행 실패 0; 사본 뒤 `tools_check_after_copy.txt`; 빌드 뒤 `ledger_check_after_build.txt` 94 행, `tools_check_after_build.txt` 43 행 실패 0(deep); 장부 행 열을 더한 뒤 `ledger_check_end.txt` 104 행 실패 0(새 행 `OBS_sem_relcheck`, `OBS_sem_order`, `OBS_sem_off_extract`, `OBS_sem_off_order`, `OBS_sem_on_extract`, `OBS_sem_on_order`, `OBS_sem_plans`, `OBS_sem_plans_off`, `OBS_sem_plans_on`, `TOOLS_20261116i`), 행 설명 한 줄을 고친 뒤 `ledger_check_end_2.txt` 104 행 실패 0, `tools_check_end.txt` 43 행 실패 0(deep).
+- 바깥 이름 점검(`--tree`)은 아홉 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다(`name_check_tree.txt`, 11 모두 rc 0).
+
+### 8.5 측정 [M]
+
+옵션 있는 다시 뽑기(`sem_on_extract`), kz-static `12a3970f`. 수의 출처: `compare/measure_<b>.txt`(`measure_sem.py`), `compare/agreement_<b>.txt`, 자료 파일 수는 `scan_check_4.txt`. 측정이고 판정이 아니다. 모든 값이 선언 §8.0 의 scratchpad [I] 와 같다.
+
+**범위(자료).** framework 의미 항목 741(osal-f34759d 128/공개 선언 153, cfe-6cccb3f 129/182, osal-7.0.1 150/178, cfe-7.0.1 133/196, osal-4.1.1 55/118, cfe-6.4.1 73/131, cfe-6.4.2 73/131), 이름 공간 종류 37(osal-f34759d 11, osal-7.0.1 12, osal-4.1.1 10, cfe-6.4.1 2, cfe-6.4.2 2), P0 선언 85/85.
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| SEMANTICS 행 | 1,773 | 1,773 | 1,476 | 795 | 786 |
+| P0 층: 검증됨/행 (doc-collated, standard-collated, unverified) | 30/77 (28, 2, 47) | 30/77 (28, 2, 47) | 29/75 (27, 2, 46) | 28/68 (26, 2, 40) | 28/68 (26, 2, 40) |
+| framework 층: 검증됨/행 (body-derived, doc-collated, unverified) | 1,578/1,690 (999, 579, 112) | 1,578/1,690 | 1,303/1,395 (820, 483, 92) | 639/716 (429, 210, 77) | 632/707 (422, 210, 75) |
+| status-space 층 | 6/6 | 6/6 | 6/6 | 11/11 | 11/11 |
+| 적용된 framework 항목(정의로/선언으로) | cfe-6cccb3f 76 (76/0), osal-f34759d 82 (82/0) | 같음 | cfe-7.0.1 71, osal-7.0.1 66 | cfe-6.4.1 41 (41/0), cfe-6.4.2 41 (24/17), osal-4.1.1 33 | cfe-6.4.1 41 (24/17), cfe-6.4.2 41 (41/0), osal-4.1.1 31 |
+| 적용된 P0 선언(속성 행) | 35 (28) | 35 (28) | 35 (27) | 30 (26) | 30 (26) |
+| SEMANTICS 행이 있는 함수 P0 / framework | 36 / 158 | 36 / 158 | 35 / 137 | 30 / 74 | 30 / 72 |
+| 일치: 같음 / 문서가 본문이 돌려줄 수 없는 값을 적음 / 본문이 문서에 없는 값을 돌려줌 / 비교 못 함 | 21 / 2 / 23 / 112 | 21 / 2 / 23 / 112 | 19 / 2 / 24 / 92 | 28 / 8 / 2 / 77 | 28 / 8 / 2 / 75 |
+| 비교 못 함의 까닭: 본문의 집합이 서지 않음 / 문서 반환 없음 | 111 / 1 | 111 / 1 | 91 / 1 | 40 / 37 | 40 / 35 |
+| relations: framework 항목이 있는 함수를 이름 대는 행 / 그 가운데 검증 안 된 항목이 있는 행 | 274 / 262 | 274 / 262 | 193 / 183 | 147 / 86 | 142 / 81 |
+
+- **검증됨/전체 항목**: 빌드에 적용된 framework 항목은 c1 158/741, r2 137/741, c5_641 115/741(두 6.4 판 41 씩이 겹침, §8.7), c5_642 113/741. 적용되지 않은 판의 항목은 그 빌드에서 쓰이지 않는다(각 판의 "called but neither pin held" 수가 `count.semantics_entries[i]` 에 있음). 행 단위의 검증됨/전체는 위 표의 층별 값이다. framework 층의 `unverified` 는 모두 일치 칸의 "비교 못 함"이고, documented-return·arg-domain·arg-role 은 모두 doc-collated, success·failure·role 은 모두 body-derived 다.
+- **첫 관측 경로가 쓰는 항목**(C1 관계 1, 사용 지점 키 `17975444d83f6589`, c1_pre_tx 의 A21 행): 그 행이 이름 대는 함수 가운데 framework 항목이 있는 것 15(`CFE_ES_ExitApp`, `CFE_ES_ResetCFE`, `OS_BinSemCreate`, `OS_CondVarCreate`, `OS_CountSemCreate`, `OS_CountSemGetIdByName`, `OS_DirectoryOpen`, `OS_FileSysAddFixedMap`, `OS_ModuleLoad`, `OS_MutSemCreate`, `OS_OpenCreate`, `OS_QueueCreate`, `OS_SocketBind`, `OS_TaskCreate`, `OS_TimeBaseCreate`), P0 항목 6(`abort`, `dlsym`, `exit`, `memset`, `pthread_exit`, `strcmp`). 곧 적용된 158 framework 항목 가운데 15, 적용된 P0 선언 35 가운데 6. 그 15 가운데 13 은 unverified 칸이 하나씩 있다(일치를 비교 못 함). c1_post_tx 의 같은 키 행은 16 과 7 이다(`OS_TaskDelay`, `clock_nanosleep` 더함). c1_pre_tx 계획의 site 가 이름 대는 19 함수 가운데 framework 항목이 있는 것 11, P0 3(`memset`, `pthread_create`, `strncpy`). r2·c5 에는 그 키가 없다.
+- **`OS_CountSemGetIdByName`**(osal-f34759d, 첫 경로의 사용 호출): 문서 반환 {0, -2, -13, -17}, 본문은 그에 더해 -35, -16, -33(`OS_ObjectIdConvertToken` 을 거친 것)을 돌려준다: "the body returns a value the documentation omits". 본문 8 항목 body-derived, 문서 4 항목 doc-collated.
+- **비교 못 함의 큰 몫**은 본문이 돌려주는 값의 집합이 서지 않는 함수다(c1 111): 따라가지 못한 반환(간접 호출의 결과, 예: `OS_NotifyEvent` 가 `<indirect>` 의 결과를 돌려줌 — c1_pre_tx 에서 이 까닭을 적은 일치 행 16)이나, 상수가 뒤에 다시 정의되는 정의를 지나 반환에 닿는다고 보이지 않는 것(relations rules revision 9 와 같은 표시)이다. c5 의 문서 반환 없음 37/35 는 OSAL 4.1.1 에 함수별 문서가 없기 때문이다(규칙 §3).
+- **P0**: 검증된 P0 행은 선언 속성(doc-collated: 머리말의 `__attribute_pure__`, `__nonnull` 등)과 로컬 사본이 있는 `pthread_create` 의 두 줄(역할과 arg 0 의 out 동작, standard-collated)이다. 나머지 P0 행위 문장(역할, out 인자, 막힘)은 링크하는 판의 글이 이 환경에 없어 `unverified` 다.
+
+### 8.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 18:43:33 | 2,535,858,176 | 사본 시작(dip 44,679,168) |
+| 18:47:15 | 2,491,117,568 | `make kz-static`(가장 낮은 2,459,271,168, dip 31,846,400), `kz_lint`(18,477,056), `all`(7,970,816) |
+| 18:58:06–19:03:49 | 2,470,817,792 → 2,299,109,376 | relations(dip 7,675,904), order(14,209,024), 다시 뽑기 옵션 없음(47,161,344), 그 order(21,856,256), 계획 둘(987,136 씩), 다시 뽑기 옵션 있음(55,816,192), 그 order(22,020,096), 계획(991,232) |
+| 19:04:20–19:10:31 | 2,320,371,712 → 2,278,916,096 | 비교(facts 보기·dump 는 scratchpad, 끝에 지움; 가장 낮은 2,254,970,880, `extract_on` 의 dip 65,351,680) |
+| 이 절을 쓸 때 | 2,317,590,528 | 끝의 장부·등록부·이름 점검 뒤 |
+
+- 하한(314,572,800)을 넘지 않았다. 빌드 dip 은 필요량 안이었다.
+- 남긴 출력(장부 행): `sem_relcheck`, `sem_order`, `sem_off_extract`, `sem_off_order`, `sem_on_extract`, `sem_on_order`, `sem_plans`, `sem_plans_off`, `sem_plans_on` 합 149,472,264 B; 사본 44,652,596 B. 지운 것: scratchpad 의 점검 빌드와 그 출력(선언 전), 비교·측정의 facts 보기와 dump(scratchpad), order 의 둘째 실행 디렉터리(첫 실행과 같은 바이트임을 본 뒤, 앞 단계와 같은 관행)뿐이다.
+
+### 8.7 계획과 다르게 한 것
+
+- **선언 전의 스냅숏 커밋**: `0649a43`(자료 파일, 코드, fixture, 시험, 그때까지의 기록)이 선언 커밋 `b02ff21` 보다 먼저 들어갔다. 범위 규칙과 훑기는 그보다 앞선 `40aa9f5` 에 있고, 빌드·다섯 빌드 실행·비교는 모두 `b02ff21` 뒤다.
+- **P0 의미의 자리**: 설계 연구가 따로 두자고 한 P0 의미 섹션 대신 SEMANTICS 의 P0 층을 썼다(schema 개정 12 의 정의; 선언 §8.0 에 적음).
+- **문서 읽기의 자리**: 주석의 `@retval`·`\arg` 읽기를 추출기(`ast_tu.cpp`)가 아니라 훑기 스크립트가 한다. 추출기는 주석을 읽지 않고, 자료 파일의 file:line 과 sha256 으로 빌드에 잇는다.
+- **범위 규칙의 E2·E3**: 연구의 형 기준(E1)만으로는 여러 판의 상태·event-type 값이 정수형이어서 항목이 빠지므로 문서 기준(E2)과 본문 기준(E3)을 더했다(규칙 §3, 자료 전에 커밋).
+- **닻은 판마다 손으로 적었다**: `semantics_trees.tsv` 의 줄 범위·이름은 손으로 적고, 훑기가 그것을 file:line 으로 풀고 점검한다. 닻을 기계적으로 찾지는 않는다.
+- **P0 선언 파일을 한 번 다시 만들었다**(선언 전): 첫 판이 로컬 사본의 절대 경로를 담아 `case-ids-data` 에 걸렸다; 훑기가 파일 이름만 쓰도록 고쳤다.
+- **확인 수 하나**(8.0a): `test_static_reasons` 660 → 666. 그 덧붙임을 처음에 앞 절(6.0)에 잘못 넣어 `a1d86d9` 에서 옮겼다(글은 같음).
+- **다시 링크된 15 가운데 8 은 같은 바이트**였다. 선언은 바뀔 수 있다고만 적었다.
+- **옵션 켠 회차의 비교 둘**(8.0b): 머리의 `sections=` 줄과 섹션 바이트 비교를 선언이 너무 좁게 적었다. 문자열 풀이 정렬된 정규 풀이라 문자열이 더해지면 모든 섹션의 바이트가 바뀐다. 레코드 글 비교로 바꾸었고, 그 첫 스크립트가 dump 의 끝줄을 마지막 섹션에 넣는 결함이 있어(8.0c) 사본으로 고쳐 다시 돌렸다. 앞 스크립트와 출력은 그대로 남겼다.
+- **두 6.4 판의 항목이 c5 의 두 빌드 모두에 적용된다**: cfe-6.4.1 과 6.4.2 의 고정 파일 가운데 바이트가 같은 것이 있어, c5_641 에 6.4.2 항목 41(정의 파일로 24, 선언 머리말로 17)이, c5_642 에 6.4.1 항목 41(같은 갈래)이 함께 적용된다. 같은 API 에 판이 다른 두 줄이 생긴다(`component` 칸으로 구별). 선언의 [I] 에 적었지만 결합 규칙이 판 하나를 고르지 않는다는 것은 적지 않았다.
+- **가벼운 비교 여섯**(relations, order, onextract, plans, onextract_on, plans_on)은 공간 감시 없이 돌렸다. 기록 디렉터리에 글 파일만 쓰고(그 밖에는 order 의 둘째 실행 디렉터리를 지울 뿐) 그때 여유는 2,299,109,376 B 이상이었다. 무거운 비교 넷과 측정은 감시 아래 돌렸다(`df_compare_*.log`).
+
+### 8.8 열린 것
+
+- **이 층이 방법이 받아들이는 framework adapter 층인가**: 판이 고정된 framework 소스에서 기계적으로 만든 의미 자료(`framework-layer data`)다. 그 층인지는 PI 가 정할 물음이고, 이 단계는 그렇다고 가정하지 않았다(규칙 머리).
+- **P0 의 대조**: 행위 문장 47/77(c1) 등은 `unverified` 다. 링크하는 판의 글(로컬 사본 밖의 glibc 2.39 소스, POSIX 글)이 새 외부 자원이라 하지 않았다. 배포 패치도 대조하지 않았다(changelog 에 `pthread_create` 줄 1).
+- **범위 밖**: 플랫폼 지원 묶음과 응용, framework 의 단위 시험 stub. cFE 6.7.99(6cccb3f)·7.0.1 의 이름 공간은 저장된 이름이 필드 경로가 아니라 접근 함수로 닿아 규칙 T 가 잡지 못하고, 그 두 판의 이름 공간 파일은 없다(규칙 §7).
+- **이름 공간 자료는 kz-static 이 읽지 않는다**: 판정 규칙 8.2 조건 (가)의 입력으로 만들었고, 읽는 쪽(설명 스크립트의 다음 개정)은 다음 단계다 [I].
+- **읽기 전용 효과**(§7.8 첫 항목): `strcmp`·`strlen` 등의 pure 선언이 이제 doc-collated 로 SEMANTICS 에 있으나, writer 집합의 계산은 아직 그것을 쓰지 않는다. 쓰는 것은 뒤 단계다.
+- **문서와 본문이 다른 함수**: 문서가 본문이 돌려줄 수 없는 값을 적은 것 2/2/2/8/8, 본문이 문서에 없는 값을 돌려주는 것 23/23/24/2/2. 판정 규칙이 어느 쪽을 쓰는지(예: `OS_CountSemGetIdByName` 의 -35·-16·-33) 정해야 한다.
+- **두 6.4 판의 겹침**(§8.7): 결합이 빌드마다 판 하나를 고를지, 겹침을 그대로 둘지.
+- **루트 밖의 절대 키**(§7.8): 그대로다.
+- 이 회차는 중간 회차다: 섹션별 바이트 sha256(`section_sha_on.txt`)과 레코드 글 sha256(`section_text_new_2.txt`)을 남겼다. 앞 회차와의 비교는 레코드 글로 한다(8.0b).

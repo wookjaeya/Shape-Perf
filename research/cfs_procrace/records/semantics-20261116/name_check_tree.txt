@@ -1,0 +1,11 @@
+rc=0 /home/user/work/redesign/obs1/sem_relcheck
+rc=0 /home/user/work/redesign/obs1/sem_order
+rc=0 /home/user/work/redesign/obs1/sem_off_extract
+rc=0 /home/user/work/redesign/obs1/sem_off_order
+rc=0 /home/user/work/redesign/obs1/sem_on_extract
+rc=0 /home/user/work/redesign/obs1/sem_on_order
+rc=0 /home/user/work/redesign/obs1/sem_plans
+rc=0 /home/user/work/redesign/obs1/sem_plans_off
+rc=0 /home/user/work/redesign/obs1/sem_plans_on
+rc=0 /home/user/work/preserve/tools-20261116-i
+rc=0 /home/user/Shape-Perf/research/cfs_procrace/records/semantics-20261116

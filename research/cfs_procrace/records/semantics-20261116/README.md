@@ -22,3 +22,13 @@ No cFS boot.  No push.
 | `tool_copy/` | the copies' round trip before they are overwritten, and their space guard |
 | `tools_check_pre.txt`, `ledger_check_pre.txt` | the registry and the cumulative list before the build |
 | `df_scratch_*.log` | the space guard of the scratch check build (no evidence) |
+| `pre_mc.txt`, `post_mc.txt`, `build_start.txt`, `identity_kz-static.txt`, `relink_result.txt`, `make_*.log`, `df_build_*.log` | the build: the MC before and after, the new identity, which of the 15 relinked binaries changed, the space guard of each make |
+| `ctest_first.log`, `golden_update.log`, `ctest_full.log`, `ctest_counts.log`, `unit_tools.txt`, `unit_step2a.txt` | the tests: the first ctest (one declared failure), the golden written, the full ctest, the check counts, the unit checks |
+| `tools_check_after_copy.txt`, `tools_check_after_build.txt`, `ledger_check_after_build.txt` | the registry and the cumulative list after the copy and after the build |
+| `*_run.txt`, `df_rerun.log`, `df_order*.log`, `df_extract_*.log`, `df_plans*.log` | the five builds' runs and their space guard |
+| `compare_*.txt`, `compare/` | the comparisons (`compare.sh` steps); `compare_extract_on.txt` holds the two differences outside the declaration (results 8.0b), `compare_extract_on_text.txt` the first re-run (results 8.0c), `compare_extract_on_text_2.txt` the re-run that holds; `compare_measure.txt` and `compare/measure_<b>.txt`, `compare/agreement_<b>.txt` the measurements |
+| `check_head_sem.py`, `section_text_sha.py`, `section_text_sha_2.py`, `compare_sections_text.py` | the scripts of addenda 8.0b and 8.0c (copies; the scripts they replace are unchanged) |
+| `section_sha_on.txt`, `section_text_old*.txt`, `section_text_new*.txt` | the per-section sha256 of this intermediate option-on round (bytes) and the per-section record-text sha256 of both rounds |
+| `scan_check_4.txt`, `fixture_check_3.txt` | the provenance checks of the data files after the five builds |
+| `sem_*.sha256` | the file lists of the nine output directories (ledger rows `OBS_sem_*`) |
+| `ledger_check_end.txt`, `ledger_check_end_2.txt`, `tools_check_end.txt`, `name_check_tree.txt` | the end checks (the second ledger check after a row note was reworded) and the name check of the outputs, the copy and this directory |

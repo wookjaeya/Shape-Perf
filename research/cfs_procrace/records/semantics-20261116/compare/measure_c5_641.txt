@@ -1,0 +1,29 @@
+rows 795
+  layer P0: rows 68, collated 28 (doc-collated 26, standard-collated 2, unverified 40)
+  layer framework: rows 716, collated 639 (body-derived 429, doc-collated 210, unverified 77)
+  layer status-space: rows 11, collated 11 (doc-collated 11)
+  framework column agreement: body-derived 38, unverified 77
+  framework column arg-domain: doc-collated 6
+  framework column arg-role: doc-collated 6
+  framework column documented-return: doc-collated 198
+  framework column failure: body-derived 277
+  framework column role: body-derived 12
+  framework column success: body-derived 102
+  agreement: derived = documented 28
+  agreement: not compared 77
+  agreement: the body returns a value the documentation omits 2
+  agreement: the documentation lists a value the body cannot return 8
+functions with SEMANTICS rows: P0 30, framework 74
+entries count.semantics_entries[0] = cfe-6.4.1: entries 73, applied 41 for a function the build calls (by the definition 41, by the declaration 0), called but neither pin held 0  (unset)
+entries count.semantics_entries[1] = cfe-6.4.2: entries 73, applied 41 for a function the build calls (by the definition 24, by the declaration 17), called but neither pin held 0  (unset)
+entries count.semantics_entries[2] = cfe-6cccb3f: entries 129, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 38  (unset)
+entries count.semantics_entries[3] = cfe-7.0.1: entries 133, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 39  (unset)
+entries count.semantics_entries[4] = osal-4.1.1: entries 55, applied 33 for a function the build calls (by the definition 33, by the declaration 0), called but neither pin held 0  (unset)
+entries count.semantics_entries[5] = osal-7.0.1: entries 150, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 47  (unset)
+entries count.semantics_entries[6] = osal-f34759d: entries 128, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 47  (unset)
+entries count.semantics_entries[7] = glibc-2.39-headers: entries 85, applied 30 for a function the build calls (by the definition 0, by the declaration 30), called but neither pin held 0, declaration attribute rows 26  (unset)
+relations semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): rows 795 (collated / rows: P0 28/68, framework 639/716, status-space 11/11; collated: a verification state other than unverified); rows that name a function with framework semantics items 147, of them with items not verified 86 (sem-unverified(api:column) in the layers column; the P0 entries stay in P0-unverified)
+relations layers lines with sem-unverified 100 (rows 86)
+first path: key 17975444d83f6589 not in the keys listing
+plan sites: framework functions with SEMANTICS rows 9 of 14 named by the sites: CFE_ES_GetAppID, CFE_ES_GetAppName, CFE_EVS_SendEventWithAppID, OS_BinSemCreate, OS_BinSemFlush, OS_BinSemGive, OS_MutSemCreate, OS_MutSemGive, OS_MutSemTake
+plan sites: P0 functions with SEMANTICS rows 3 of 14 named by the sites: pthread_create, strcpy, strncpy

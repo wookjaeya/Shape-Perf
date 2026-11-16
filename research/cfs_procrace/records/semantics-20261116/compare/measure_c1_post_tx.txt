@@ -1,0 +1,30 @@
+rows 1773
+  layer P0: rows 77, collated 30 (doc-collated 28, standard-collated 2, unverified 47)
+  layer framework: rows 1690, collated 1578 (body-derived 999, doc-collated 579, unverified 112)
+  layer status-space: rows 6, collated 6 (doc-collated 6)
+  framework column agreement: body-derived 46, unverified 112
+  framework column arg-domain: doc-collated 3
+  framework column arg-role: doc-collated 3
+  framework column documented-return: doc-collated 573
+  framework column failure: body-derived 793
+  framework column role: body-derived 10
+  framework column success: body-derived 150
+  agreement: derived = documented 21
+  agreement: not compared 112
+  agreement: the body returns a value the documentation omits 23
+  agreement: the documentation lists a value the body cannot return 2
+functions with SEMANTICS rows: P0 36, framework 158
+entries count.semantics_entries[0] = cfe-6.4.1: entries 73, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 38  (unset)
+entries count.semantics_entries[1] = cfe-6.4.2: entries 73, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 38  (unset)
+entries count.semantics_entries[2] = cfe-6cccb3f: entries 129, applied 76 for a function the build calls (by the definition 76, by the declaration 0), called but neither pin held 2  (unset)
+entries count.semantics_entries[3] = cfe-7.0.1: entries 133, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 79  (unset)
+entries count.semantics_entries[4] = osal-4.1.1: entries 55, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 28  (unset)
+entries count.semantics_entries[5] = osal-7.0.1: entries 150, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 82  (unset)
+entries count.semantics_entries[6] = osal-f34759d: entries 128, applied 82 for a function the build calls (by the definition 82, by the declaration 0), called but neither pin held 0  (unset)
+entries count.semantics_entries[7] = glibc-2.39-headers: entries 85, applied 35 for a function the build calls (by the definition 0, by the declaration 35), called but neither pin held 1, declaration attribute rows 28  (unset)
+relations semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): rows 1773 (collated / rows: P0 30/77, framework 1578/1690, status-space 6/6; collated: a verification state other than unverified); rows that name a function with framework semantics items 274, of them with items not verified 262 (sem-unverified(api:column) in the layers column; the P0 entries stay in P0-unverified)
+relations layers lines with sem-unverified 268 (rows 262)
+first path row A21 (key 17975444d83f6589): framework functions with SEMANTICS rows named 16: CFE_ES_ExitApp (body-derived 3, doc-collated 2, unverified 1); CFE_ES_ResetCFE (body-derived 5, doc-collated 3); OS_BinSemCreate (body-derived 10, doc-collated 6, unverified 1); OS_CondVarCreate (body-derived 10, doc-collated 5, unverified 1); OS_CountSemCreate (body-derived 10, doc-collated 7, unverified 1); OS_CountSemGetIdByName (body-derived 8, doc-collated 4); OS_DirectoryOpen (body-derived 13, doc-collated 5, unverified 1); OS_FileSysAddFixedMap (body-derived 11, doc-collated 4, unverified 1); OS_ModuleLoad (body-derived 10, doc-collated 7, unverified 1); OS_MutSemCreate (body-derived 10, doc-collated 6, unverified 1); OS_OpenCreate (body-derived 13, doc-collated 7, unverified 1); OS_QueueCreate (body-derived 12, doc-collated 8, unverified 1); OS_SocketBind (body-derived 8, doc-collated 5, unverified 1); OS_TaskCreate (body-derived 12, doc-collated 8, unverified 1); OS_TaskDelay (body-derived 4, doc-collated 2); OS_TimeBaseCreate (body-derived 11, doc-collated 6, unverified 1)
+first path row A21 (key 17975444d83f6589): P0 functions with SEMANTICS rows named 7: abort (doc-collated 1, unverified 1); clock_nanosleep (unverified 1); dlsym (doc-collated 1, unverified 1); exit (doc-collated 1, unverified 1); memset (doc-collated 1, unverified 2); pthread_exit (doc-collated 1, unverified 1); strcmp (doc-collated 2, unverified 1)
+plan sites: framework functions with SEMANTICS rows 8 of 11 named by the sites: CFE_ES_CreateChildTask, CFE_ES_DeleteChildTask, CFE_ES_GetAppID, CFE_ES_GetAppName, CFE_ES_PoolCreateEx, CFE_ES_PutPoolBuf, CFE_EVS_SendEventWithAppID, CFE_SB_MessageStringSet
+plan sites: P0 functions with SEMANTICS rows 3 of 11 named by the sites: memset, pthread_create, strncpy

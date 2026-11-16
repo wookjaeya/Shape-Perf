@@ -1,0 +1,5 @@
+OK c1_pre_tx measured (compare/measure_c1_pre_tx.txt: rows 1773)
+OK c1_post_tx measured (compare/measure_c1_post_tx.txt: rows 1773)
+OK r2_core measured (compare/measure_r2_core.txt: rows 1476)
+OK c5_641 measured (compare/measure_c5_641.txt: rows 795)
+OK c5_642 measured (compare/measure_c5_642.txt: rows 786)

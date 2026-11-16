@@ -1,0 +1,5 @@
+OK c1_pre_tx: sections of the earlier round 42, the same record text 40, differing ['STRINGS', 'BASIS'], new ['SEMANTICS'] (SEMANTICS count 1773)
+OK c1_post_tx: sections of the earlier round 42, the same record text 40, differing ['STRINGS', 'BASIS'], new ['SEMANTICS'] (SEMANTICS count 1773)
+OK r2_core: sections of the earlier round 42, the same record text 40, differing ['STRINGS', 'BASIS'], new ['SEMANTICS'] (SEMANTICS count 1476)
+OK c5_641: sections of the earlier round 42, the same record text 40, differing ['STRINGS', 'BASIS'], new ['SEMANTICS'] (SEMANTICS count 795)
+OK c5_642: sections of the earlier round 42, the same record text 40, differing ['STRINGS', 'BASIS'], new ['SEMANTICS'] (SEMANTICS count 786)

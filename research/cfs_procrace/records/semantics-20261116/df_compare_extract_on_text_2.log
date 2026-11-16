@@ -1,0 +1,10 @@
+# space_guard.sh kind=compare need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/semantics-20261116/compare.sh extract_on_text
+start 2026-11-16T19:10:07.833Z free=2279579648 threshold=414572800
+sample 2026-11-16T19:10:07.836Z 2279575552
+sample 2026-11-16T19:10:09.843Z 2279567360
+sample 2026-11-16T19:10:11.849Z 2279550976
+sample 2026-11-16T19:10:13.855Z 2279546880
+sample 2026-11-16T19:10:15.861Z 2279526400
+sample 2026-11-16T19:10:17.868Z 2279510016
+sample 2026-11-16T19:10:19.873Z 2279477248
+end 2026-11-16T19:10:21.882Z kind=compare verdict=completed rc=0 free=2279464960 lowest=2279464960 dip=114688 change=-114688

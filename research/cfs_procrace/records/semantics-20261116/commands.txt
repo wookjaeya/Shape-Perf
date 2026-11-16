@@ -54,3 +54,10 @@ compare extract_on rc=1
 addendum 8.0b written before compare.sh extract_on_text (results 8.0b)
 compare extract_on_text rc=1
 addendum 8.0c written before TEXT_ROUND=_2 compare.sh extract_on_text (results 8.0c)
+TEXT_ROUND=_2 compare extract_on_text rc=0
+compare measure rc=0
+scan check after the five builds rc=0
+fixture check after the five builds rc=0
+ledger_check end rc=0
+ledger_check end (row note reworded) rc=0
+tools_check --deep end rc=0

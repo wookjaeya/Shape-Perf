@@ -969,3 +969,46 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 246,981,82
   - [I](scratchpad 점검 빌드, LLVM Release 구성, 감시 아래; 근거 아님, 지움): c1 두 빌드 `CFE_SB_MemParams_t::Partition.Data`·`CFE_TBL_BufParams_t::Partition.Data` 가 DISABLED(escape 2 / 1); `count.array_decay` c1 out-pointer 147·escape 74·element writer 34; OBJECT_ACCESS 6,711/6,711/3,729/4,128/4,130 행, FIELD_TYPES 1,816/1,816/1,222/911/910, ARG_TYPES 17,714/17,715/12,778/7,469/7,459(지배하는 읽기가 있는 문자 배열 c1 8); relations 행 키는 c1·r2 모두 같고 c5 두 빌드에서 경로 B 의 키 7 이 빠지고 1 이 더함; order 행 값 바뀜 c1 1(unknown → unordered), r2 1(hard_before → unknown), c5 0; c1_pre_tx 계획의 A21 사용 호출 키가 `string=validated bound=20`(`CF_ChannelConfig_t.sem_name`, 읽기 `cf_cfdp.c:991:46`), 계획 site 259 → 267.
 - **공간**: 각 빌드·사본·실행은 감시 아래(`env/tools/space_guard.sh`, 2 초마다, 하한 314,572,800). 빌드 필요량 = 앞 kz-static 빌드 dip 의 최대 123,981,824 + 새 출력 약 200 MB(다시 뽑기 둘 약 105 MB, order 넷과 둘째 실행 약 60 MB, relations 약 8 MB, 계획 셋 약 3 MB, 여유) + 한 시간 흐름 13 MB = 336,981,824 B. 사본은 필요량 100,000,000(도구 파일을 읽어 xz 를 씀; 사본에서 푸는 바이너리는 없음). 실행 단계는 필요량 100,000,000.
 - **스크립트**(이 선언과 함께 커밋, Python 은 `python3 -I`): `rerun.sh`, `order.sh`, `extract.sh`, `plans.sh`, `plan_one.sh`(앞 단계의 것을 옮김), `compare.sh`, `compare_on.py`, `name_stability.py`, `measure_on.py`, `section_sha.py`, `check_whole.py`·`check_head.py`(옮김), `compare_plans.py`(옮겨 개정 줄 1|2), `tool_copy/copy.sh`; 목록 `relink_expected.sha256`, `not_relink.sha256`, `golden_scratch.sha256`; 빌드 전 점검 `tools_check_pre.txt`, `ledger_check_pre.txt`; scratchpad 점검 빌드의 공간 감시 기록 `df_scratch_*.log`.
+
+### 7.1 바뀐 것 [F]
+
+- 커밋 `85dbdb5`(선언, 코드, fixture, 시험, 문서, 비교 스크립트, 빌드 전 목록·점검, 빌드 전). 규모: `lib/llvm/ast_fn.cpp` +약 400 줄(`object_access_of`, `path_text`, `note_array_decay`, `add_element_writer`, `decayed_target_arg`, `arg_type_of`, `note_field_types`, 호출·읽기·writer 의 수집), `ast_tu.cpp`(`name_file`, `object_key_for_name`, 이름 셈), `finalize.cpp`(`dominating_reads`, out 포인터 writer 의 바탕, 배열 탈출의 글), `serialize.cpp`(섹션 셋과 BASIS 여섯), `facts_text.cpp`(절 셋), `model.hpp`(`ObjAccess`, `FieldTypeFact`, `ArgTypeFact`, 셈), `plan_gen.cpp`(revision 2), `extract.hpp`·`spec.hpp`·`ast_reader.hpp`, `tools/kz-static/{cmd_extract.cpp,main.cpp}`; `test_static_cli.cpp` 확인 51 더, `test_static_plan.cpp` 확인 13 더, `static_golden.cpp` 사례 둘, fixture 둘, 자료 하나; `docs/static_facts.md` §5s, `docs/plan_manifest.md`, `docs/schema.md`.
+- 빌드 뒤: golden 셋(`objaccess.golden`, `objaccess_off.golden` 새로, `plangen_np.plan.golden` 두 줄), 이 절과 기록, 장부·등록부 행.
+
+### 7.2 빌드 [M]
+
+MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 336,981,824), 모두 첫 시도에 rc 0. 빌드 시작 17:04:54Z(`df_build_kz-static.log`), 빌드 전 HEAD `85dbdb5`(`pre_mc.txt`, kairos 아래 커밋 안 된 줄 0).
+
+| 목표 | 때 (UTC) | dip (B) | 링크 줄 |
+|---|---|---|---|
+| `kz-static` | 17:04:54–17:08:43 | 256,942,080 | 2 (`libkz-llvm.a`, kz-static) |
+| `all` | 17:08:43–17:12:17 | 38,322,176 | 12 (`libkz-llvm.a` 를 링크하는 시험 프로그램 열, `test_static_cli`, `static_golden`) |
+
+- 링크된 이름 14 = `relink_expected.sha256`, 14 모두 바이트가 바뀜(`relink_result.txt`). `sha256sum -c not_relink.sha256` 110 OK(kz `913fcd99…`, kz-dump `32a96ae7…`, kz-phi `df79fb82…`, kz-rt-dump `4390d4f1…`, kz_lint `5f62ec20…`, kz-instr-clang `28db4017…` 포함).
+- 도구(`post_mc.txt`, `identity_kz-static.txt`): kz-static `6adc1bdd…` → `88f529b1acd7091571fe4a391022f12ebd663a277762c14e07bd0af9084e5477`; `--identity` 의 `tool_sha256` `7dba57267cfbc6bb255431c0ac97cb518a2ad39399bfb78374df084fc614f187`, `tool_source` `d7ae60a805f03df3a609f8b18563b04f30442d85895b2cd5a5cab21b705617a9`; `core_source` `568e5061…`, `schema_revision=12`, schema fingerprint `6fbff6c6…` 그대로; 나머지 여섯 도구 그대로. `CMakeCache.txt` `bc2f43b4…` 그대로. 빌드 시작 뒤 바뀐 소스 파일 0(`find -newer`, kairos 의 lib·tools·include·cmake·tests·runtime).
+- 출력은 kz-static 이 새 `--identity` 를 적은 뒤에만 냈다.
+- 도구 보존: 빌드 전 kz-static `6adc1bdd` 를 `/home/user/work/preserve/tools-20261116-h/kz-static.6adc1bdd.xz`(43,317,232 B)로 사본, 왕복 확인(`tool_copy/ROUNDTRIP.txt`: `xz -t` OK, 스트림 sha256 같음, `cmp` 같음). 등록부: 사본 직후 `6adc1bdd` in-place+copy, 빌드 뒤 copy, `88f529b1` in-place(빌드 뒤 첫 점검 전에 고침).
+
+### 7.3 시험 [M]
+
+- 첫 ctest(`ctest_first.log`): 258 개 가운데 실패 3, 선언한 셋 그대로(`static_golden_objaccess`, `static_golden_objaccess_off`, `test_static_plan`). 건너뜀 1.
+- `KZ_GOLDEN_UPDATE=1` 로 셋을 다시 썼다(`golden_update.log`, 3 통과). 셋 모두 scratchpad 점검 빌드의 것과 `cmp` 같다(`golden_scratch.sha256`). `git status` 로 바뀐 golden 은 `plangen_np.plan.golden`(두 줄: manifest 머리와 sidecar `rules` 줄의 revision 1 → 2)과 새 파일 둘뿐이다.
+- 갱신 뒤 전체 ctest(`ctest_full.log`): 258 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음).
+- 확인 수(`ctest_counts.log`, `ctest -V`): `test_static_cli` 1014(963 + 51), `test_static_plan` 195(182 + 13), `test_static_reasons` 660, `test_core_schema` 34,017, `lint_selftest` 109 경우 실패 0, lint 7/7.
+- 단위 점검: `env/tools/tests/run_unit.sh` 15/15(점검 15 의 설명 fixture 22/22, `unit_tools.txt`), `env/redesign/step2a_tests_unit.sh` 7/7(`unit_step2a.txt`).
+
+### 7.4 바이트 동일성 [M]
+
+| 비교 | 결과 |
+|---|---|
+| relations, T8CF facts (`compare_relations.txt`) | 15 OK: 다섯 빌드 `relations.txt`·`keys.txt` 가 `revfix_relcheck` 와 바이트 동일, `relations.log` 빈 파일 |
+| order, T8CF facts (`compare_order.txt`) | 25 OK: 두 번 같은 바이트, `order.txt`·`edges.tsv` 가 `revfix_order` 와 바이트 동일, `order.log` 빈 파일 |
+| 다시 뽑기 옵션 없음 vs `revfix_extract` (`compare_extract.txt`, `compare/`) | 45 OK: `basis.kz` 레코드 단위 허용 2(도구 해시), `facts.kz` 전체 dump 에서 허용 6(머리 해시 넷, STRINGS crc32, `extract.units_from`; c1_pre_tx 162,142 줄), facts 보기는 `extract.units_from` 한 줄만(c1_pre_tx 149,111 줄), `extract.txt` 1 줄, `relations.txt` 2 줄, `basis.txt`·`sha256.txt` 해시 줄만, `args.txt`·`relations.log` 같음 |
+| 그 facts 위 (`compare_onextract.txt`) | 40 OK: order 두 번 같음, `order.txt` 는 `revfix_on_extract` 와 2 번째 줄만, `edges.tsv` 같음, `relations.txt` = 다시 뽑기의 것, `keys.txt` 2 번째 줄만, 로그 빈 파일 |
+| 계획 (`compare_plans.txt`) | 열 모두 “only declared differences”(T8CF 위 다섯, 옵션 없는 다시 뽑기 위 다섯; site 와 필요 줄 같음) |
+| 다시 뽑기 옵션 있음 vs 옵션 없음 (`compare_extract_on.txt`) | 42 OK: `basis.kz`·`basis.txt`·`relations.log` 같은 바이트, `args.txt` 는 extract-only 줄만, `sha256.txt` 는 facts.kz 줄만, facts 보기 다섯 모두 선언한 갈래만(`compare/on_<b>.txt`), c1 이름 점검 선언대로(`compare/names_c1.txt`) |
+| 그 facts 위 (`compare_onextract_on.txt`) | 30 OK: order 두 번 같음, `relations.txt` = 옵션 있는 다시 뽑기의 것, 로그 빈 파일, 측정 다섯(`compare/measure_<b>.txt`) |
+
+- **옵션 없는 경로는 앞판과 같다**: 위 첫 다섯 줄이 그 측정이다. 다른 것은 도구 정체성에서 오는 값(머리의 tool hash 와 그것을 덮는 해시, 그 basis 해시를 인용하는 `extract.units_from`)과 계획의 개정 글뿐이다.
+- **누적 목록과 등록부**(빌드마다 따로 남김): 빌드 전 `ledger_check_pre.txt` 84 행 실패 0, `tools_check_pre.txt` 40 행 실패 0; 빌드 뒤 `ledger_check_after_build.txt` 84 행 실패 0, `tools_check_after_build.txt` 41 행 실패 0(deep); 다섯 빌드 실행과 장부 행을 더한 뒤 `ledger_check_end.txt` 94 행 실패 0(새 행 열: `OBS_objacc_relcheck`, `OBS_objacc_order`, `OBS_objacc_off_extract`, `OBS_objacc_off_order`, `OBS_objacc_on_extract`, `OBS_objacc_on_order`, `OBS_objacc_plans`, `OBS_objacc_plans_off`, `OBS_objacc_plans_on`, `TOOLS_20261116h`), `tools_check_end.txt` 41 행 실패 0(deep).
+- 바깥 이름 점검(`--tree`)은 아홉 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다(`name_check_tree.txt`).

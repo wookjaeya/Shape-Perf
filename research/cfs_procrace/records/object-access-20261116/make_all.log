@@ -1,0 +1,145 @@
+[  8%] Built target kz-core
+[  9%] Built target kzrt-manifest
+[ 10%] Built target kz-instr-clang
+[ 18%] Built target kz-llvm
+[ 19%] Built target kz-predict
+[ 19%] Built target kzrt-decode
+[ 24%] Built target kz-trace
+[ 25%] Built target kz-anchor
+[ 26%] Built target kz-plan
+[ 27%] Built target kz-hold
+[ 29%] Built target kz-loader
+[ 30%] Built target kzrt
+[ 30%] Built target kzrt-posix
+[ 31%] Built target kzrt-posix-auto
+[ 32%] Built target kz-rt-dump
+[ 32%] Built target test_rt_bootstrap
+[ 32%] Built target test_rt_order
+[ 33%] Built target test_rt_loss
+[ 34%] Built target test_rt_serial
+[ 35%] Built target test_rt_gate
+[ 35%] Built target test_rt_holdsem
+[ 35%] Built target test_rt_manifest
+[ 36%] Built target test_rt_auto
+[ 37%] Built target test_rt_pool
+[ 38%] Built target test_rt_mode
+[ 39%] Built target kzrt-pool4
+[ 39%] Built target test_rt_pool4
+[ 40%] Built target kzrt-build-info-test
+[ 40%] Built target kzrt-build-info-bad
+[ 40%] Built target test_rt_auto_bad
+[ 41%] Built target test_rt_mode_api
+[ 42%] Built target test_rt_auto_bi
+[ 43%] Built target test_rt_plan
+[ 43%] Built target test_rt_plan_nb
+[ 44%] Built target test_rt_end
+[ 44%] Built target kz-dump
+[ 45%] Built target kz-phi
+[ 47%] Built target kz-static
+[ 50%] Built target kz
+[ 51%] Built target kz-testsupport
+[ 51%] Built target kz_schema_c99
+[ 52%] Built target kz_schema_c11
+[ 52%] Built target test_core_schema
+[ 52%] Built target test_core_identity
+[ 53%] Built target test_core_kzdump
+[ 53%] Built target test_core_container
+[ 54%] Built target test_core_container_corrupt
+[ 54%] Built target test_core_crc32
+[ 55%] Built target test_core_dump
+[ 56%] Built target test_core_eval
+[ 56%] Built target test_core_monitor
+[ 57%] Built target test_core_phi_allowed
+[ 58%] Built target test_core_phi_canonical
+[ 58%] Built target test_core_phi_check
+[ 59%] Built target test_core_phi_parser
+[ 59%] Built target test_core_phi_provenance
+[ 60%] Built target test_core_realrecord
+[ 61%] Built target test_core_replay
+[ 62%] Built target test_core_sha256
+[ 63%] Built target test_core_state_order
+[ 63%] Built target test_core_verdict
+[ 64%] Built target test_core_verify
+[ 64%] Built target test_core_vocab
+[ 64%] Built target kz_golden
+[ 65%] Built target kz_lint
+[ 65%] Built target test_trace_decode_fetch
+[ 66%] Built target test_trace_decode_merge
+[ 67%] Built target test_trace_decode_perf
+[ 67%] Built target test_trace_decode_real
+[ 68%] Built target test_trace_decode_sites
+[ 68%] Built target test_trace_hold_nctl
+[ 69%] Built target test_trace_identity
+[ 70%] Built target test_trace_key_separation
+[ 70%] Built target test_trace_merge_order
+[ 71%] Built target test_trace_neutral
+[ 71%] Built target test_trace_neutral_rev12
+[ 72%] Built target test_trace_occ_basis
+[ 73%] Built target test_trace_occ_match
+[ 73%] Built target test_trace_replay_out
+[ 74%] Built target test_trace_static_closure
+[ 75%] Built target test_trace_symbols
+[ 76%] Built target test_realrecord_derived
+[ 77%] Built target test_neutral_kzrt
+[ 77%] Built target test_kzrt_identity
+[ 78%] Built target test_kzrt_app_request
+[ 79%] Built target test_kzrt_recovered
+[ 80%] Built target target_prog
+[ 82%] Built target target_prog_variants
+[ 82%] Built target test_probe_anchor_compilers
+[ 83%] Built target test_probe_anchor_reached
+[ 84%] Built target test_probe_basis
+[ 84%] Built target test_probe_elf_dwarf
+[ 85%] Built target test_probe_golden
+[ 86%] Built target test_probe_observe
+[ 86%] Built target test_probe_profile
+[ 87%] Built target test_probe_record
+[ 87%] Built target hold_prog
+[ 88%] Built target test_hold_ptrace
+[ 89%] Built target hold_seq_prog
+[ 89%] Built target test_hold_sequence
+[ 90%] Built target test_hold_plan
+[ 91%] Built target test_rt_plan_convert
+[ 91%] Built target kz_phi_golden
+[ 91%] Built target test_phi_cli
+[ 92%] Built target test_predict_model
+[ 92%] Built target test_property_eval_agreement
+[ 92%] Building CXX object tests/static/CMakeFiles/static_golden.dir/static_golden.cpp.o
+[ 92%] Linking CXX executable static_golden
+[ 92%] Built target static_golden
+[ 93%] Building CXX object tests/static/CMakeFiles/test_static_expr.dir/test_static_expr.cpp.o
+[ 93%] Linking CXX executable test_static_expr
+[ 93%] Built target test_static_expr
+[ 93%] Building CXX object tests/static/CMakeFiles/test_static_flow.dir/test_static_flow.cpp.o
+[ 93%] Linking CXX executable test_static_flow
+[ 93%] Built target test_static_flow
+[ 93%] Linking CXX executable test_static_recipe
+[ 93%] Built target test_static_recipe
+[ 93%] Linking CXX executable test_static_gitrev
+[ 94%] Built target test_static_gitrev
+[ 95%] Building CXX object tests/static/CMakeFiles/test_static_unroll.dir/test_static_unroll.cpp.o
+[ 95%] Linking CXX executable test_static_unroll
+[ 95%] Built target test_static_unroll
+[ 95%] Building CXX object tests/static/CMakeFiles/test_static_wrappers.dir/test_static_wrappers.cpp.o
+[ 96%] Linking CXX executable test_static_wrappers
+[ 96%] Built target test_static_wrappers
+[ 96%] Built target kz_static_main_obj
+[ 96%] Built target kz_static_whole_member
+[ 97%] Built target kz_static_lazy_used
+[ 97%] Built target kz_static_lazy_unused
+[ 98%] Linking CXX executable test_static_link
+[ 98%] Built target test_static_link
+[ 98%] Linking CXX executable test_static_elf32
+[ 98%] Built target test_static_elf32
+[ 98%] Linking CXX executable test_static_reasons
+[ 99%] Built target test_static_reasons
+[ 99%] Building CXX object tests/static/CMakeFiles/test_static_plan.dir/test_static_plan.cpp.o
+[ 99%] Linking CXX executable test_static_plan
+[ 99%] Built target test_static_plan
+[ 99%] Building CXX object tests/static/CMakeFiles/test_static_cli.dir/test_static_cli.cpp.o
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_cli.cpp: In function 'int main(int, char**)':
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_cli.cpp:57:5: note: variable tracking size limit exceeded with '-fvar-tracking-assignments', retrying without
+   57 | int main(int argc, char** argv) {
+      |     ^~~~
+[100%] Linking CXX executable test_static_cli
+[100%] Built target test_static_cli

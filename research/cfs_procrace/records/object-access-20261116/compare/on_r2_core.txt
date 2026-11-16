@@ -1,0 +1,14 @@
+compare_on r2_core: only declared classes
+renamed absolute positions of type names (OFF -> the option's spelling): 0 occurrences of 0 paths
+atype-added	atype	4799
+basis-added	basis	6
+basis-changed	basis	1
+file-added	files	94
+fstatus-changed	fstatus	549
+locs-changed	locs	87
+loop-note	loops	1
+new-section	argtypes	12779
+new-section	ftypes	1223
+new-section	objaccess	3730
+outcall-added	outcalls	85
+writer-added	writers	41

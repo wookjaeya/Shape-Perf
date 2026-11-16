@@ -1,0 +1,113 @@
+# kz-static show --section basis --section locs of objacc_on_extract and objacc_off_extract (MC kz-static 88f529b1): the option's BASIS items and the FACT_LOCS rows of the fields the known limits named; 2026-11-16T17:23:14Z
+== c1_pre_tx off
+  target.CFE_SB_MemParams_t::Partition.Data = rule R-T1  (unset)
+  target.CFE_TBL_BufParams_t::Partition.Data = rule R-T1  (unset)
+  target.CF_ChannelConfig_t.sem_name = rule R-T1,R-T2  (unset)
+  count.sites = 37325  (unset)
+[locs] 341
+  CFE_SB_MemParams_t::Partition.Data writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  CFE_TBL_BufParams_t::Partition.Data writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  CF_ChannelConfig_t.sem_name DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=133 escape=4 cast=1 union=0 unknown-effect=0 init=0 unresolved-indirect=18
+locs writer-set-complete rows: 142
+locs DISABLED rows: 199
+== c1_pre_tx on
+  target.CFE_SB_MemParams_t::Partition.Data = rule R-T1  (unset)
+  target.CFE_TBL_BufParams_t::Partition.Data = rule R-T1  (unset)
+  target.CF_ChannelConfig_t.sem_name = rule R-T1,R-T2  (unset)
+  count.sites = 46005  (unset)
+  extract.object_access = types and object access (--object-access; kz_facts.h revision 10): OBJECT_ACCESS, FIELD_TYPES, ARG_TYPES; a target array field whose pointer is passed to a call is an out-pointer call, whose pointer leaves otherwise an address-escape hit, and a store to an element of it a writer row; a type name whose position lies outside the root is written by the file's source tree (static_facts.md 5s)  (unset)
+  count.object_access = 6711 rows (resolved 2376, partial 927, not resolved 3408)  (unset)
+  count.field_types = 1816  (unset)
+  count.arg_types = 17714 (character arrays read at a dominating point 8)  (unset)
+  count.array_decay = out-pointer calls 147, address-escape hits 74, element writer rows 34  (unset)
+  count.type_names_outside_root = by source tree 2, absolute (no source tree) 0  (unset)
+[locs] 341
+  CFE_SB_MemParams_t::Partition.Data DISABLED writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=133 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  CFE_TBL_BufParams_t::Partition.Data DISABLED writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=133 escape=1 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  CF_ChannelConfig_t.sem_name DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=133 escape=6 cast=1 union=0 unknown-effect=0 init=0 unresolved-indirect=18
+locs writer-set-complete rows: 81
+locs DISABLED rows: 260
+== c1_post_tx off
+  target.CFE_SB_MemParams_t::Partition.Data = rule R-T1  (unset)
+  target.CFE_TBL_BufParams_t::Partition.Data = rule R-T1  (unset)
+  target.CF_ChannelConfig_t.sem_name = rule R-T1,R-T2  (unset)
+  count.sites = 37327  (unset)
+[locs] 341
+  CFE_SB_MemParams_t::Partition.Data writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  CFE_TBL_BufParams_t::Partition.Data writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  CF_ChannelConfig_t.sem_name DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=133 escape=4 cast=1 union=0 unknown-effect=0 init=0 unresolved-indirect=18
+locs writer-set-complete rows: 142
+locs DISABLED rows: 199
+== c1_post_tx on
+  target.CFE_SB_MemParams_t::Partition.Data = rule R-T1  (unset)
+  target.CFE_TBL_BufParams_t::Partition.Data = rule R-T1  (unset)
+  target.CF_ChannelConfig_t.sem_name = rule R-T1,R-T2  (unset)
+  count.sites = 46007  (unset)
+  extract.object_access = types and object access (--object-access; kz_facts.h revision 10): OBJECT_ACCESS, FIELD_TYPES, ARG_TYPES; a target array field whose pointer is passed to a call is an out-pointer call, whose pointer leaves otherwise an address-escape hit, and a store to an element of it a writer row; a type name whose position lies outside the root is written by the file's source tree (static_facts.md 5s)  (unset)
+  count.object_access = 6711 rows (resolved 2376, partial 927, not resolved 3408)  (unset)
+  count.field_types = 1816  (unset)
+  count.arg_types = 17715 (character arrays read at a dominating point 8)  (unset)
+  count.array_decay = out-pointer calls 147, address-escape hits 74, element writer rows 34  (unset)
+  count.type_names_outside_root = by source tree 2, absolute (no source tree) 0  (unset)
+[locs] 341
+  CFE_SB_MemParams_t::Partition.Data DISABLED writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=133 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  CFE_TBL_BufParams_t::Partition.Data DISABLED writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=133 escape=1 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  CF_ChannelConfig_t.sem_name DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=133 escape=6 cast=1 union=0 unknown-effect=0 init=0 unresolved-indirect=18
+locs writer-set-complete rows: 81
+locs DISABLED rows: 260
+== r2_core off
+  target.CFE_SB_MemParams_t::Partition.Data = rule R-T1  (unset)
+  target.CFE_TBL_BufParams_t::Partition.Data = rule R-T1  (unset)
+  count.sites = 20640  (unset)
+[locs] 241
+  CFE_SB_MemParams_t::Partition.Data writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=7
+  CFE_TBL_BufParams_t::Partition.Data writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=7
+locs writer-set-complete rows: 111
+locs DISABLED rows: 130
+== r2_core on
+  target.CFE_SB_MemParams_t::Partition.Data = rule R-T1  (unset)
+  target.CFE_TBL_BufParams_t::Partition.Data = rule R-T1  (unset)
+  count.sites = 25457  (unset)
+  extract.object_access = types and object access (--object-access; kz_facts.h revision 10): OBJECT_ACCESS, FIELD_TYPES, ARG_TYPES; a target array field whose pointer is passed to a call is an out-pointer call, whose pointer leaves otherwise an address-escape hit, and a store to an element of it a writer row; a type name whose position lies outside the root is written by the file's source tree (static_facts.md 5s)  (unset)
+  count.object_access = 3729 rows (resolved 1543, partial 638, not resolved 1548)  (unset)
+  count.field_types = 1222  (unset)
+  count.arg_types = 12778 (character arrays read at a dominating point 7)  (unset)
+  count.array_decay = out-pointer calls 85, address-escape hits 43, element writer rows 18  (unset)
+  count.type_names_outside_root = by source tree 0, absolute (no source tree) 0  (unset)
+[locs] 241
+  CFE_SB_MemParams_t::Partition.Data DISABLED writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=99 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=7
+  CFE_TBL_BufParams_t::Partition.Data DISABLED writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=99 escape=1 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=7
+locs writer-set-complete rows: 67
+locs DISABLED rows: 174
+== c5_641 off
+  count.sites = 17985  (unset)
+[locs] 259
+locs writer-set-complete rows: 74
+locs DISABLED rows: 185
+== c5_641 on
+  count.sites = 21439  (unset)
+  extract.object_access = types and object access (--object-access; kz_facts.h revision 10): OBJECT_ACCESS, FIELD_TYPES, ARG_TYPES; a target array field whose pointer is passed to a call is an out-pointer call, whose pointer leaves otherwise an address-escape hit, and a store to an element of it a writer row; a type name whose position lies outside the root is written by the file's source tree (static_facts.md 5s)  (unset)
+  count.object_access = 4128 rows (resolved 2754, partial 465, not resolved 909)  (unset)
+  count.field_types = 911  (unset)
+  count.arg_types = 7469 (character arrays read at a dominating point 5)  (unset)
+  count.array_decay = out-pointer calls 165, address-escape hits 53, element writer rows 43  (unset)
+  count.type_names_outside_root = by source tree 0, absolute (no source tree) 0  (unset)
+[locs] 259
+locs writer-set-complete rows: 32
+locs DISABLED rows: 227
+== c5_642 off
+  count.sites = 18123  (unset)
+[locs] 261
+locs writer-set-complete rows: 74
+locs DISABLED rows: 187
+== c5_642 on
+  count.sites = 21578  (unset)
+  extract.object_access = types and object access (--object-access; kz_facts.h revision 10): OBJECT_ACCESS, FIELD_TYPES, ARG_TYPES; a target array field whose pointer is passed to a call is an out-pointer call, whose pointer leaves otherwise an address-escape hit, and a store to an element of it a writer row; a type name whose position lies outside the root is written by the file's source tree (static_facts.md 5s)  (unset)
+  count.object_access = 4130 rows (resolved 2756, partial 465, not resolved 909)  (unset)
+  count.field_types = 910  (unset)
+  count.arg_types = 7459 (character arrays read at a dominating point 5)  (unset)
+  count.array_decay = out-pointer calls 166, address-escape hits 53, element writer rows 43  (unset)
+  count.type_names_outside_root = by source tree 0, absolute (no source tree) 0  (unset)
+[locs] 261
+locs writer-set-complete rows: 32
+locs DISABLED rows: 229

@@ -1,0 +1,37 @@
+relations rows off 367 on 367; keys in both 367, only off 0, only on 0
+rows in both whose text differs: 239
+  line writers        differs in 239 rows
+  line dependency     differs in 45 rows
+  line incomplete     differs in 41 rows
+  line (other)        differs in 22 rows
+  line field          differs in 21 rows
+  line actors         differs in 9 rows
+  line feasibility    differs in 5 rows
+  line flip           differs in 4 rows
+  line creator        differs in 2 rows
+  line id holder      differs in 1 rows
+  line key            differs in 1 rows
+  line not a pair     differs in 1 rows
+rows by path (off -> on): A 63 -> 63, B 170 -> 170, C 134 -> 134
+order row values (off -> on), keys in both 367:
+  unknown -> unknown 74
+  unknown -> unordered 1
+  unordered -> unordered 292
+plan sites off 245 on 253; site lines only off 4, only on 12 (site numbers and label numbers masked)
+  only on  site label=use-call+writer op=call.CFE_ES_GetAppName phase=point tu=cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c func=CFE_TBL_GetTblRegData callee=CFE_ES_GetAppName line=301 place=after-call ref="row 152f17981365b27d; row cc073460235b0623; row cc073460235b0623 cfe/modules/tbl/fsw/src/cfe_tbl_task_cmd
+  only on  site label=use-call+writer op=call.CFE_ES_GetAppName phase=point tu=cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c func=CFE_TBL_GetTblRegData callee=CFE_ES_GetAppName line=301 place=at-call ref="row 152f17981365b27d; row cc073460235b0623; row cc073460235b0623 cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c
+  only on  site label=writer op=call.memset phase=point tu=cfe/modules/tbl/fsw/src/cfe_tbl_internal.c func=CFE_TBL_EarlyInit callee=memset line=52 place=after-call ref="row 152f17981365b27d cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5; row 299c8e07fe49d44b cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5; ro
+  only on  site label=writer op=call.memset phase=point tu=cfe/modules/tbl/fsw/src/cfe_tbl_internal.c func=CFE_TBL_EarlyInit callee=memset line=52 place=at-call ref="row 152f17981365b27d cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5; row 299c8e07fe49d44b cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5; row 6
+  only on  site label=writer op=store.CFE_TBL_CleanUpApp phase=effect tu=cfe/modules/tbl/fsw/src/cfe_tbl_internal.c func=CFE_TBL_CleanUpApp line=1267 place=store ref="row e74845731ffadce0 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:1267:17"
+  only on  site label=writer op=store.CFE_TBL_Load phase=effect tu=cfe/modules/tbl/fsw/src/cfe_tbl_api.c func=CFE_TBL_Load line=864 place=store ref="row 62696da28bd6b9b4 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:864:9"
+  only on  site label=writer op=store.CFE_TBL_Modified phase=effect tu=cfe/modules/tbl/fsw/src/cfe_tbl_api.c func=CFE_TBL_Modified line=1512 place=store ref="row 62696da28bd6b9b4 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:1512:9"
+  only on  site label=writer op=store.CFE_TBL_Register phase=effect tu=cfe/modules/tbl/fsw/src/cfe_tbl_api.c func=CFE_TBL_Register line=312 place=store ref="row e74845731ffadce0 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:312:21"
+  only on  site label=writer op=store.CFE_TBL_Register phase=effect tu=cfe/modules/tbl/fsw/src/cfe_tbl_api.c func=CFE_TBL_Register line=403 place=store ref="row 62696da28bd6b9b4 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:403:37"
+  only on  site label=writer op=store.CFE_TBL_Unregister phase=effect tu=cfe/modules/tbl/fsw/src/cfe_tbl_api.c func=CFE_TBL_Unregister line=637 place=store ref="row e74845731ffadce0 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:637:13"
+  only on  site label=writer op=store.CFE_TBL_UpdateInternal phase=effect tu=cfe/modules/tbl/fsw/src/cfe_tbl_internal.c func=CFE_TBL_UpdateInternal line=941 place=store ref="row 62696da28bd6b9b4 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:941:13"
+  only on  site label=writer op=store.CFE_TBL_UpdateInternal phase=effect tu=cfe/modules/tbl/fsw/src/cfe_tbl_internal.c func=CFE_TBL_UpdateInternal line=984 place=store ref="row 62696da28bd6b9b4 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:984:17"
+  only off site label=use-call op=call.CFE_ES_GetAppName phase=point tu=cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c func=CFE_TBL_GetTblRegData callee=CFE_ES_GetAppName line=301 place=after-call ref="row 152f17981365b27d"
+  only off site label=use-call op=call.CFE_ES_GetAppName phase=point tu=cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c func=CFE_TBL_GetTblRegData callee=CFE_ES_GetAppName line=301 place=at-call ref="row 152f17981365b27d"
+  only off site label=writer op=call.memset phase=point tu=cfe/modules/tbl/fsw/src/cfe_tbl_internal.c func=CFE_TBL_EarlyInit callee=memset line=52 place=after-call ref="row 152f17981365b27d cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5; row 299c8e07fe49d44b cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5; ro
+  only off site label=writer op=call.memset phase=point tu=cfe/modules/tbl/fsw/src/cfe_tbl_internal.c func=CFE_TBL_EarlyInit callee=memset line=52 place=at-call ref="row 152f17981365b27d cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5; row 299c8e07fe49d44b cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5; row 6
+key values at use and creator calls, off: {}; on: {}

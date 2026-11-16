@@ -1,0 +1,15 @@
+lib/llvm/libkz-llvm.a: changed
+tools/kz-static/kz-static: changed
+tests/static/test_static_reasons: changed
+tests/static/test_static_plan: changed
+tests/static/test_static_unroll: changed
+tests/static/test_static_flow: changed
+tests/static/test_static_elf32: changed
+tests/static/test_static_wrappers: changed
+tests/static/test_static_gitrev: changed
+tests/static/test_static_link: changed
+tests/static/test_static_recipe: changed
+tests/static/test_static_expr: changed
+tests/static/test_static_cli: changed
+tests/static/static_golden: changed
+sha256sum: WARNING: 14 computed checksums did NOT match

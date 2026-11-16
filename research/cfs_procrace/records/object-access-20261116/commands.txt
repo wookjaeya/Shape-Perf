@@ -12,3 +12,35 @@ scratch check build <scratch>/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_BUIL
   these outputs are scratch and no evidence; <scratch>/sbuild, x, v, t, names removed (16:5xZ) before the declaration
 tools_check.sh --deep -> tools_check_pre.txt (40 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (84 rows, 0 failing)
 relink_expected.sha256 (14) and not_relink.sha256 (110): sha256 of the MC binaries before the build
+## 1. tool copy and build (2026-11-16T17:02:22Z); HEAD 85dbdb5 (declaration commit)
+/dev/vda       270553174016 38609063936 2713444352  94% /
+copy rc=0
+make kz-static rc=0
+make all rc=0
+ctest first rc=8
+golden update rc=0
+ctest full rc=0
+run_unit rc=0
+step2a unit rc=0
+ledger after build rc=0
+tools after build rc=0
+## 2. the five builds (2026-11-16T17:15:50Z)
+rerun rc=0
+order rc=0
+extract off rc=0
+order off-extract rc=0
+plans t8cf rc=0
+plans off rc=0
+extract on rc=0
+order on-extract rc=0
+plans on rc=0
+## 3. comparisons (2026-11-16T17:22:11Z)
+compare relations rc=0
+compare order rc=0
+compare extract rc=0
+compare onextract rc=0
+compare plans rc=0
+compare extract_on rc=0
+compare onextract_on rc=0
+ledger end rc=0
+tools end rc=0

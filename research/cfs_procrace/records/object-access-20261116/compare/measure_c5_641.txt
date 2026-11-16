@@ -1,0 +1,25 @@
+relations rows off 178 on 172; keys in both 171, only off 7, only on 1
+  only off 28851b5c6bc45dc1 B|CFE_TBL_LoadBuff_t.DataSource|-|CFE_ES_WriteToSysLog#1|-
+  only off 4270fdd2f9ee52d3 B|CFE_TBL_RegistryRec_t.LastFileLoaded|-|CFE_PSP_MemCpy#1|-
+  only off 9b3af5f089c9b778 B|CFE_TBL_LoadBuff_t.DataSource|-|CFE_PSP_MemSet#0|-
+  only off a2a5771c66ae4bac B|CFE_TBL_LoadBuff_t.DataSource|-|OS_open#0|-
+  only off a467d7bc2e1c7378 B|CFE_TBL_LoadBuff_t.DataSource|-|CFE_TBL_DumpToFile#0|-
+  only off d2b2f9cd8b71a747 B|CFE_TBL_LoadBuff_t.DataSource|-|CFE_PSP_MemCpy#0|-
+  only off f945ac32ad82cf19 B|CFE_TBL_RegistryRec_t.Name|-|CFE_PSP_MemCpy#1|-
+  only on  d648e8fe6ae72e08 B|EVS_AppData_t.BinFilters|-|EVS_FindEventID#1|-
+rows in both whose text differs: 108
+  line writers        differs in 108 rows
+  line dependency     differs in 29 rows
+  line (other)        differs in 10 rows
+  line field          differs in 10 rows
+  line incomplete     differs in 5 rows
+  line actors         differs in 2 rows
+  line layers         differs in 2 rows
+  line flip           differs in 1 rows
+rows by path (off -> on): A 66 -> 66, B 73 -> 67, C 39 -> 39
+order row values (off -> on), keys in both 171:
+  hard_before -> hard_before 20
+  unknown -> unknown 62
+  unordered -> unordered 89
+plan sites off 147 on 147; site lines only off 0, only on 0 (site numbers and label numbers masked)
+key values at use and creator calls, off: {}; on: {}

@@ -1,0 +1,14 @@
+compare_on c5_642: only declared classes
+renamed absolute positions of type names (OFF -> the option's spelling): 0 occurrences of 0 paths
+atype-added	atype	3412
+basis-added	basis	6
+basis-changed	basis	1
+file-added	files	36
+fstatus-changed	fstatus	410
+locs-changed	locs	122
+loop-note	loops	0
+new-section	argtypes	7460
+new-section	ftypes	911
+new-section	objaccess	4131
+outcall-added	outcalls	166
+writer-added	writers	74

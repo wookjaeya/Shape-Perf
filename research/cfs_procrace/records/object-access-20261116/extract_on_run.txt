@@ -1,0 +1,10 @@
+one_build.sh c1_pre_tx: PASS -> /home/user/work/redesign/obs1/objacc_on_extract/c1_pre_tx/c1_pre_tx/NP
+c1_pre_tx rc=0
+one_build.sh c1_post_tx: PASS -> /home/user/work/redesign/obs1/objacc_on_extract/c1_post_tx/c1_post_tx/NP
+c1_post_tx rc=0
+one_build.sh r2_core: PASS -> /home/user/work/redesign/obs1/objacc_on_extract/r2_core/r2_core/NP
+r2_core rc=0
+one_build.sh c5_641: PASS -> /home/user/work/redesign/obs1/objacc_on_extract/c5_641/c5_641/NP
+c5_641 rc=0
+one_build.sh c5_642: PASS -> /home/user/work/redesign/obs1/objacc_on_extract/c5_642/c5_642/NP
+c5_642 rc=0

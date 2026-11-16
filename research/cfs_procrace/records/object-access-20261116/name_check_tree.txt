@@ -1,0 +1,11 @@
+objacc_relcheck rc=0
+objacc_order rc=0
+objacc_off_extract rc=0
+objacc_off_order rc=0
+objacc_on_extract rc=0
+objacc_on_order rc=0
+objacc_plans rc=0
+objacc_plans_off rc=0
+objacc_plans_on rc=0
+tools-20261116-h rc=0
+records rc=0

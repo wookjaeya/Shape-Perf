@@ -1,0 +1,3 @@
+names with a position: pre 17, post 17, in both 17, in one only 0 (by source tree 1, absolute 0, relative to the root 16)
+  both: item@<cf>/fsw/src/cf_cmd_c:945::type  [pre /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c, post /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd.c]
+name_stability: declared

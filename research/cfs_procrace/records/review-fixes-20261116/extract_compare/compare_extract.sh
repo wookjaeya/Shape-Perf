@@ -3,8 +3,8 @@
 # compare.sh extract, kept as it was with its record compare_extract.txt and compare/) after review, into this directory:
 # the same checks with compare_classes.py revision 2 (this directory: masks counted under the masks that act on a line;
 # an old "<anonymous>" line paired with its successors over the section, unpaired ones undeclared), facts_allow.tsv with
-# the declared fields of the pairs, relations_allow.tsv with the [C] head pattern tightened; extract.txt with the step's
-# extract_txt_allow.tsv.  The other checks (basis.kz, facts.kz header, basis.txt, sha256.txt, args.txt, relations.log)
+# the declared fields of the pairs, relations_allow.tsv with the [C] head pattern tightened; extract.txt with extract_txt_allow.tsv
+# (the step's rows and the pairs of its location lines, addendum 6.0 (가-1)).  The other checks (basis.kz, facts.kz header, basis.txt, sha256.txt, args.txt, relations.log)
 # are re-run unchanged with the step's check_head.py.  Facts views by the kz-static that made extfix_extract (c6aa4811,
 # checked first), written to SCRATCH and removed after.  No output directory is written.
 set -uo pipefail
@@ -30,7 +30,7 @@ for b in c1_pre_tx c1_post_tx r2_core c5_641 c5_642; do
   "$KS" show "$P/facts.kz" > "$SCRATCH/old_$b.txt" && "$KS" show "$N/facts.kz" > "$SCRATCH/new_$b.txt" || bad "$b show"
   cls "$SCRATCH/old_$b.txt" "$SCRATCH/new_$b.txt" --allow "$HERE/facts_allow.tsv" --build "$b" --list 40 > "$C/facts_$b.txt"; [ $? = 0 ] && ok "$b facts view: $(tail -1 "$C/facts_$b.txt")" || bad "$b facts view (compare/facts_$b.txt)"
   rm -f "$SCRATCH/old_$b.txt" "$SCRATCH/new_$b.txt"
-  cls "$P/extract.txt" "$N/extract.txt" --allow "$OLDREC/extract_txt_allow.tsv" --build "$b" > "$C/extract_txt_$b.txt"; [ $? = 0 ] && ok "$b extract.txt: $(tail -1 "$C/extract_txt_$b.txt")" || bad "$b extract.txt (compare/extract_txt_$b.txt)"
+  cls "$P/extract.txt" "$N/extract.txt" --allow "$HERE/extract_txt_allow.tsv" --build "$b" > "$C/extract_txt_$b.txt"; [ $? = 0 ] && ok "$b extract.txt: $(tail -1 "$C/extract_txt_$b.txt")" || bad "$b extract.txt (compare/extract_txt_$b.txt)"
   cls "$P/relations.txt" "$N/relations.txt" --allow "$HERE/relations_allow.tsv" --build "$b" > "$C/relations_$b.txt"; [ $? = 0 ] && ok "$b relations.txt: $(tail -1 "$C/relations_$b.txt")" || bad "$b relations.txt (compare/relations_$b.txt)"
   cmp -s <(sed -E 's/^basis [0-9a-f]{64}$/basis H/' "$P/basis.txt") <(sed -E 's/^basis [0-9a-f]{64}$/basis H/' "$N/basis.txt") && ok "$b basis.txt: only the basis hash line" || bad "$b basis.txt"
   cmp -s <(sed -E 's/^[0-9a-f]{64}  (basis\.kz|facts\.kz|\S+kz-static)$/H  \1/' "$P/sha256.txt") <(sed -E 's/^[0-9a-f]{64}  (basis\.kz|facts\.kz|\S+kz-static)$/H  \1/' "$N/sha256.txt") && ok "$b sha256.txt: only the basis.kz, facts.kz, kz-static hashes" || bad "$b sha256.txt"

@@ -421,3 +421,84 @@
 - **누적 바이트 동일성**: 빌드 뒤 `env/tools/ledger_check.sh` 전체(빌드 전 59 행)와 `env/tools/tools_check.sh --deep`(빌드 전 34 행), 모두 실패 0. 새 출력은 장부 행으로 더한다.
 - **공간**: 각 빌드와 사본은 감시 아래(`env/tools/space_guard.sh`, 2 초마다, 하한 314,572,800). 필요량 = 앞 kz-static 빌드 dip 의 최대 219,463,680 + 새 출력 약 160 MB(다시 뽑기 다섯 약 47 MB, order 둘과 둘째 실행 약 21 MB, relations 약 8 MB, 계획 약 1 MB, 회귀 약 10 MB, 여유) + 한 시간 흐름 13 MB = 392,463,680 B(감시 문턱 707,036,480). kz·kz-dump·kz-phi 의 dip 은 아직 재지 않았다 [미확인]; 같은 필요량을 쓴다. 사본은 필요량 150,000,000.
 - **스크립트**(이 선언과 함께 커밋, Python 은 `python3 -I`): `readback.sh`, `layout_check.py`, `identity_all.sh`, `convert_c1boot.sh`, `check_extract.py`, `compare.sh`, `compare_plans.py`, `rerun.sh`, `order.sh`, `extract.sh`, `plans.sh`, `extract_allow.tsv`; 목록 `relink_expected.sha256`, `not_relink.sha256`, `readback_pre.txt`.
+
+### 4.1 바뀐 것 [F]
+
+- 커밋 `2f24260`(선언, 스키마 머리말, 공개 구조, `--identity` 줄, 시험, 문서, 비교 스크립트, 빌드 전 읽기 표를 함께, 빌드 전). 규모: `kz_facts.h` 레코드 여덟·열거형 29·형식 61 줄, `kz_neutral.h` 레코드 일곱·열거형 21·형식 54 줄, `neutral.hpp` 구조 일곱과 기본값 함수 여섯, `neutral.cpp` +249 줄(기본값·검사·읽기·쓰기), 새 `run_analysis.hpp` 105 줄, 도구 넷의 `main.cpp`, 새 시험 `test_trace_neutral_rev12.cpp` 444 줄, `check_tool_schema_revision.cmake`, `docs/schema.md` §20.
+- 빌드 뒤: `tests/golden/data/layout.golden`, `records.golden` 갱신, 이 절과 기록, 장부·등록부 행.
+
+### 4.2 빌드 [M]
+
+목표별로 MC 에서 제자리, 각각 공간 감시 아래, 모두 첫 시도에 rc 0.
+
+| 목표 | 때 (UTC) | dip (B) | 링크 줄 |
+|---|---|---|---|
+| `kz` | 12:40:10–12:41:30 | 36,175,872 | 7 (`libkz-core.a`, `libkz-anchor.a`, `libkz-predict.a`, `libkz-trace.a`, `libkz-plan.a`, `libkz-loader.a`, kz) |
+| `kz-dump` | 12:41:35–12:41:37 | 106,496 | 1 |
+| `kz-phi` | 12:41:37–12:41:43 | 1,556,480 | 1 |
+| `kz-static` | 12:41:48–12:43:40 | 75,079,680 | 2 (`libkz-llvm.a`, kz-static) |
+| `all` | 12:43:45–12:46:56 | 48,418,816 | 72 (시험 프로그램 71 과 `libkz-testsupport.a`) |
+
+- 링크된 것 83 은 선언의 목록(`relink_expected.sha256` 75 와 정적 라이브러리 여덟)에 새 시험 `test_trace_neutral_rev12` 하나를 더한 것과 같다(이름 집합 비교). 75 가운데 68 은 sha256 이 바뀌었고 7 은 다시 링크되었으나 바이트가 같다(`test_hold_plan`, `test_hold_ptrace`, `test_hold_sequence`, `test_rt_plan_convert`, `test_core_crc32`, `test_core_phi_parser`, `test_core_sha256`: libkz-core 에서 끌어오는 목적 파일이 바뀌지 않음). 선언은 "다시 링크된다(sha256 이 바뀔 수 있다)" 였으므로 선언 안이다.
+- 다시 링크되지 않아야 하는 29 는 모두 sha256 이 같다(`sha256sum -c not_relink.sha256` 29 OK): kz-rt-dump `4390d4f1…`, kz_lint `5f62ec20…`, kz-instr-clang `28db4017…`, 런타임 라이브러리와 그 시험, `libkz-hold.a`, 시험 대상 프로그램 셋.
+- 도구(`post_mc.txt`): kz-static `b52db538…` → `5ae220d2a0963097611688a5e55f77be34bebc0c40a1d98a6581af70ac3fc3cf`, kz `931dd39c…` → `913fcd99064b5aeca3b2c52da6f6f9e72584680ea783e6edb2f959eeb22eccfa`, kz-dump `05623054…` → `32a96ae7138fd71c9efd63d0439021cae044c4045b6a9557b659e1e1911c0438`, kz-phi `7d34e6e2…` → `df79fb82f962e69fdd29493cf9fd664feae38e370aa3578697227109cf1d59e2`.
+- `--identity`(`identity_all.txt`): 넷 모두 `schema_revision=12`, `schema_fingerprint=6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd`(옛 `6d1471a2…`), `core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920`(옛 `f6e3c7b4…`). tool_sha256 / tool_source: kz-static `783c7cd7…` / `f73da08c…`, kz `c19937fd…` / `fb7f09f9…`, kz-dump `c5e70435…` / `21cc60f2…`, kz-phi `7792f19b…` / `4a234a89…`. kz 의 tool hash 는 scratchpad 점검 빌드의 것과 같다(같은 소스, 다른 트리 위치).
+- `CMakeCache.txt` `bc2f43b4…` 그대로, flags.make 목록 해시 `321b751c…` → `e8f06cbe…`. 빌드 시작 뒤 바뀐 소스 파일(`find -newer`, kairos 의 lib·tools·include·cmake·probe·instrument·runtime·tests) 0.
+- 혼합 상태는 생기지 않았다: 모든 목표가 감시 안에서 끝났고, 출력은 `identity_all.sh` 가 넷 모두 개정 12 를 적은 뒤에만 냈다.
+
+### 4.3 시험 [M]
+
+- 첫 ctest(`ctest_first.log`): 252 개 가운데 실패 2, 선언한 `golden_layout`, `golden_records` 그대로.
+- golden 갱신(`golden_update.log`): 두 파일이 scratchpad 점검 빌드로 미리 만든 것과 `cmp` 같다. `layout.golden` 3,715 줄(옛 3,070 줄이 순서대로 남고 644 줄이 더해짐, revision·fingerprint 두 줄 바뀜), `records.golden` 218 줄(새 레코드 30 줄, 바뀐 26 줄은 참조가 가리키는 섹션의 이름·번호만 다름: 섹션 참조를 가린 비교에서 다른 줄 0).
+- 갱신 뒤(`ctest_full.log`): 252 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음). 라벨 golden 62, static 55, unit 86, lint 7, runtime 66.
+- 확인 수(`ctest_counts.log`): `test_trace_neutral_rev12` 113, `test_core_schema` 34,017, `test_core_kzdump` 35, `test_static_cli` 911, `test_static_reasons` 655, `test_static_plan` 182, `lint_selftest` 109 경우 실패 0, lint 7/7, `tool_identity_schema_revision` "4 tools report schema revision 12". 단위 점검 15/15(`unit_tools.txt`), 7/7(`unit_step2a.txt`).
+
+### 4.4 바이트 동일성과 읽기 시험 [M]
+
+| 비교 | 결과 |
+|---|---|
+| 보존 컨테이너 열의 읽기(`readback_pre.txt` kz-dump `05623054` vs `readback_post.txt` 새 kz-dump) | 첫 줄 밖 바이트 동일(`readback_compare.txt` 빈 파일). 열 모두 `--check` rc 0, dump rc 0, 같은 artifact hash 와 같은 dump 텍스트 sha256·줄 수 |
+| `kz-dump --layout` 옛·새(`layout_check.txt`) | 옛 줄 3,070 이 모두 순서대로 남음, 더한 줄 644(record 15, field 205, enum·flags 50, item 244, section 15, format 115), revision 11 → 12, fingerprint `6d1471a2…` → `6fbff6c6…` |
+| 옛·새 kz(`regress_eid1.record`, 옛 = 사본에서 푼 kz `931dd39c`, kz-dump `05623054`) | 텍스트 비교 47 모두 "identity hash lines masked: 0 differ". convert 컨테이너(R2 F0 기록, 런타임 시험 dump 셋, W6 G-I 아홉)는 바이트 121–156(머리의 tool hash 와 header crc)만, replay 컨테이너는 그에 더해 머리의 해시와 REF_LISTS 의 부모 해시만 다름. 새 컨테이너에 NOWNER·개정 12 섹션 없음 |
+| W6 G-I 컨테이너 vs 옛 kz 가 같은 dump 로 만든 것(`w6_vs_old.txt`) | 아홉 모두 121–156 만 다름(W6 의 kz 와 `931dd39c` 의 tool hash). 회귀 기록의 "the old tool's container is the W6 one: NO" 는 이 tool hash 차이다 |
+| C1 부팅 dump 의 재변환(`convert_c1boot.txt`) | dump 텍스트 3,823 줄과 convert 로그가 tool hash 줄 밖에서 같음, `run.kzt` 는 121–156(36 B)만 다름, 개정 12 섹션 없음 |
+| relations 다섯 빌드 vs `orderrev1b_relcheck`, `relrev7_check` (`compare_relations.txt`) | 바이트 동일, `relations.log` 빈 파일(25 OK) |
+| order 다섯 빌드 두 번, vs `order_rev1b` (`compare_order.txt`) | 같은 바이트, `order_rev1b` 와 바이트 동일, `order.log` 빈 파일(25 OK) |
+| 다시 뽑기 다섯 빌드 vs T8CF (`compare_extract.txt`, `compare/check_extract_<b>.txt`, `compare/extract_<b>.{tsv,log}`) | `check_extract.py`: 다섯 모두 선언한 줄만 다름. 예 c1_pre_tx: facts.kz dump 161,911 줄 가운데 머리 4, STRINGS crc32 1, `extract.build_identity` 1, `extract.units_from` 1; basis.kz 518 줄 가운데 머리 2, STRINGS crc32 1, `front_end.build_identity` 1; basis.txt 의 `basis` 줄과 `front_end.build_identity` 줄; extract.txt 1 줄; sha256.txt 세 줄. `compare_build.py` 허용 밖 0. 다시 뽑기의 relations.txt 는 relations 재실행과 둘째 줄 밖 같음, 다시 뽑은 facts 의 order 는 둘째 줄 밖 같고 edges.tsv 는 같음(25 OK) |
+| 계획 다섯 빌드 vs `order_rev1b_plans` (`compare_plans.txt`) | 다섯 모두 선언한 줄만(sidecar 둘째 줄, manifest 둘째 줄, module 표·실행 파일 목록 첫 줄, args.txt 의 출력 디렉터리) |
+
+- **누적 목록**: `ledger_check.sh` 68 행, 실패 0(새 행 아홉: `OBS_schema12_readback`, `OBS_schema12_regress`, `OBS_schema12_c1boot_convert`, `OBS_schema12_relcheck`, `OBS_schema12_order`, `OBS_schema12_extract`, `OBS_schema12_onextract`, `OBS_schema12_plans`, `TOOLS_20261116e`). `tools_check.sh --deep` 38 행, 실패 0. 바깥 이름 점검(`--tree`)은 여덟 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다.
+- **도구 보존**(`tool_copy/ROUNDTRIP.txt`): kz `931dd39c`(17,478,556 B), kz-phi `7d34e6e2`(6,666,968 B), kz-static `b52db538`(42,449,724 B)의 사본을 빌드 전에 `/home/user/work/preserve/tools-20261116-e/` 에 만들고 왕복 확인했다(`xz -t` OK, 스트림 sha256 같음, `cmp` 같음). kz-dump `05623054` 의 기존 사본(`tools-20261109/kz-dump.05623054.xz`)의 왕복도 다시 확인했다. 등록부: 넷 모두 copy(대체되지 않음: 출력의 도구 정체성 줄이 다르다; kz-static 의 relations·키 목록·order 는 새 도구가 바이트 동일하게 다시 냈고, kz 의 변환은 tool hash 줄 밖에서 같다), 새 도구 넷 in-place. 회귀의 옛 쪽은 이 사본에서 푼 바이너리로 돌렸다(sha256 `931dd39c…`, `05623054…`).
+
+### 4.5 측정 [M]
+
+- 새 섹션의 크기와 수는 선언대로다(§4.0; `layout_check.txt`, `test_trace_neutral_rev12` 의 섹션 줄 확인). 실제 빌드의 어느 컨테이너에도 새 섹션은 없다(다시 뽑기 다섯, 변환 열하나, replay 열).
+- kz 의 dip 36,175,872 B 는 뒤 kz 빌드(manifest 개정 4 이후)의 선언 필요량의 실측 값이다. 이번 목표별 dip 의 최대는 kz-static 75,079,680 B 다.
+
+### 4.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 이 단계 처음 | 3,356,196,864 | 시작 |
+| scratchpad 점검 빌드 뒤 | 1,701,556,224 | 감시 없음(§4.7), 빌드 중 최저는 재지 않음 |
+| 점검 빌드 지운 뒤 | 3,352,174,592 | |
+| 12:39:51 | 3,284,942,848 | 사본 셋(dip 66,625,536) |
+| 12:46:56 | 3,166,244,864 | 목표별 빌드 다섯 끝 |
+| 12:54 | 3,079,839,744 | 회귀(dip 12,926,976), C1 재변환, relations, order, 다시 뽑기(47,058,944), 그 order, 계획 뒤 |
+
+- 하한을 넘지 않았다. 남긴 출력 84,197,659 B(여덟 디렉터리, 장부 행), 사본 셋 66,595,248 B. 지운 것: compare.sh 가 비교 뒤 지운 둘째 실행(`again/`), 그리고 이 단계 끝에 scratchpad 의 이 단계 작업 파일(점검 빌드, 옛 도구를 푼 바이너리, golden 사본, layout 사본)뿐이다.
+
+### 4.7 계획과 다르게 한 것
+
+- **scratchpad 점검 빌드를 감시 없이 돌렸다.** 선언 전에 LLVM 없는 구성으로 트리 전체를 scratchpad 에 빌드해 시험했다(1,642,433,500 B). 그때 여유는 빌드 뒤 1,701,556,224 B 였고 빌드 중의 최저는 재지 않았다. 증거로 쓰지 않았고 지웠다. 다음부터 점검 빌드도 감시 아래 둔다.
+- **kz-dump 는 새로 사본하지 않았다.** 이미 검증된 사본(PV)이 있어 그 왕복을 다시 확인했다.
+- **읽기 시험을 넓혔다.** 계획의 다섯 종류(T8CF facts, W6 run.kzt, C5 641 run.kzt, replay, C1 부팅 run.kzt)에 basis, F0 원 기록, F0 변환 기록, 둘째 replay, C5 facts 를 더해 열이다. 그리고 dump 로만 읽지 않고 kz 의 convert·replay(옛·새)와 kz-static 의 relations·order·계획·다시 뽑기로도 읽었다.
+- **공개 구조의 범위.** 계획은 "이 단계가 뒤에 더할 모든 공개 구조"를 이 `include/` 바뀜에 둔다고 했다. 정의한 것: 추출 섹션 여덟(객체 접근·형, 의미 표, 결과 흐름·효과, 루프 정의, 핸들 잠금 정체성), 중립 곁 표 일곱(토큰과 actor 끝·root, 수명, 같은 빌드 판정, 충분성, 반환 없는 호출, 순서 인스턴스, 관측 순서), 그 입력·결과 구조. 정의하지 않은 것: 런타임의 새 기록(SPAWN, SPAWN_RET, TBEGIN, AEXIT 의 끝 종류)과 manifest 개정 4 의 구조. 그것들은 `runtime/` 에 있어 `include/` 가 아니고(`runtime/include/kz_rt_format.h`, `runtime/tools/manifest`), 그 바뀜은 어차피 kz 의 정체성을 바꾼다(`lib/trace/CMakeLists.txt` 의 kzrt-decode·kzrt-manifest 링크). 함수 선언은 두지 않았다: 채우는 함수는 뒤 작업이 `lib/trace` 안에 둔다. 레이아웃이 뒤 작업의 쓰기에 맞는지는 쓰는 코드가 생길 때까지 [I] 다. 맞지 않으면 그때 선언한 `include/` 바뀜이 하나 더 생긴다.
+- **core_source 도 바뀐다.** 계획의 정체성 규칙 글은 도구 넷의 tool identity 를 말한다. `include/kz/schema` 는 libkz-core 의 identity 에도 들어가므로 넷의 `core_source` 가 함께 바뀌었다(선언에 적음).
+- **W6 컨테이너의 재현.** 옛 kz `931dd39c` 는 W6 의 G-I 컨테이너를 tool hash(121–156) 밖에서 바이트 동일하게 다시 낸다. W6 를 만든 kz 와 같은 바이트는 아니다(회귀 기록의 `NO`).
+
+### 4.8 열린 것
+
+- 새 섹션을 쓰는 코드는 없다. 각 레이아웃이 쓰는 쪽에 맞는지는 객체 접근·형(뒤 추출 단계), 의미 표, 결과 흐름·효과, 루프 정의와 잠금 정체성, 변환의 토큰 결합·같은 빌드 판정, 기록 분석(충분성, 수명, 순서 인스턴스)이 생길 때 잰다.
+- 런타임의 생성 토큰 기록과 manifest 개정 4 는 `runtime/` 의 바뀜이다(kz, kz-rt-dump, kz-hold, kz-instr-clang 과 시험의 재링크).
+- kz 의 dip 36,175,872 B 를 뒤 kz 빌드의 필요량에 쓴다.

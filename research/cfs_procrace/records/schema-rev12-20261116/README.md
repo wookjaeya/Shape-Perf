@@ -14,3 +14,11 @@
 | `compare.sh`, `compare_plans.py`, `rerun.sh`, `order.sh`, `extract.sh`, `plans.sh` | 다섯 빌드의 relations, order, 다시 뽑기, 계획과 그 비교 |
 | `relink_expected.sha256`, `not_relink.sha256` | 빌드 전 sha256: 다시 링크되는 것 75, 다시 링크되지 않아야 하는 것 29 |
 | `tool_copy/` | 덮기 전 사본의 왕복 확인과 공간 감시 |
+| `pre_mc.txt`, `post_mc.txt`, `build_start.txt`, `make_<목표>.log`, `df_build_<목표>.log` | 빌드 전·후 MC, 목표별 빌드 출력과 공간 감시 |
+| `identity_all.txt` | 빌드 뒤 도구 넷의 `--identity` |
+| `ctest_first.log`, `golden_update.log`, `ctest_full.log`, `ctest_counts.log`, `unit_tools.txt`, `unit_step2a.txt` | 시험 |
+| `readback_post.txt`, `readback_compare.txt`, `layout_check.txt` | 읽기 시험과 layout 비교의 결과 |
+| `regress_run.txt`, `regress_eid1.record`, `w6_vs_old.txt`, `convert_c1boot.txt` | 옛·새 kz 의 convert·replay, W6 컨테이너와 옛 kz, C1 부팅 재변환 |
+| `compare_*.txt`, `compare/`, `*_run.txt`, `df_*.log` | 다섯 빌드의 비교 결과, 다시 뽑기의 파일별·레코드별 비교, 실행 기록, 공간 감시 |
+| `<출력 디렉터리>.sha256` | 여덟 출력 디렉터리의 sha256 목록(장부 행) |
+| `tools_check_pre.txt`, `ledger_check_pre.txt`, `tools_check.txt`, `ledger_check.txt` | 빌드 전·뒤 등록부와 누적 목록 |

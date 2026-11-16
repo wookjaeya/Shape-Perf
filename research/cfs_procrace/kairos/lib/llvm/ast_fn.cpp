@@ -1348,10 +1348,10 @@ class FnWalker {
   //
   // For a poll or count-bounded loop whose condition exits read locals (FACT_LOOPS has no predicate), every local the
   // condition reads is resolved through its definitions, and the predicate is the condition with each local replaced:
-  //   flag   one definition before the loop by a constant c0 and one in the loop's own body by a constant c1 != c0 under
+  //   flag   one definition before the loop by a constant v_out and one in the loop's own body by a constant v_in != v_out under
   //          the guard G (no other definition inside the loop, the address never taken), every use of the local in the
-  //          condition a comparison with c0 or c1, and every exit that tests it either the loop condition or decided by one
-  //          condition directly in the body: `f == c1` is G (the guard that held when the definition ran), `f == c0` its
+  //          condition a comparison with v_out or v_in, and every exit that tests it either the loop condition or decided by one
+  //          condition directly in the body: `f == v_in` is G (the guard that held when the definition ran), `f == v_out` its
   //          negation;
   //   value  one definition in the loop's own body by a call result or an object read (a load of a field or a global, a
   //          subscript or a dereference of one), the address never taken, every use after it in the same iteration and
@@ -1407,16 +1407,16 @@ class FnWalker {
     if (a == e->a && b == e->b) return e;
     return pool().make(e->op, e->ref, e->value, e->name, a, b);
   }
-  // `f == c1` -> G, `f != c1` -> not G, `f == c0` -> not G, `f != c0` -> G; any other use of f stays (the caller refuses)
-  ExprRef subst_flag(ExprRef e, const std::string& name, int64_t c0, int64_t c1, ExprRef g, bool* other) {
+  // `f == v_in` -> G, `f != v_in` -> not G, `f == v_out` -> not G, `f != v_out` -> G; any other use of f stays (the caller refuses)
+  ExprRef subst_flag(ExprRef e, const std::string& name, int64_t v_out, int64_t v_in, ExprRef g, bool* other) {
     if (e == nullptr) return nullptr;
     auto is_f = [&](ExprRef x) { return x != nullptr && x->op == KZ_EXPR_OP_LOAD && x->ref == KZ_EXPR_REF_LOCAL && x->name == name; };
     auto is_c = [](ExprRef x) { return x != nullptr && x->op == KZ_EXPR_OP_CONST && x->a == nullptr; };
     if ((e->op == KZ_EXPR_OP_EQ || e->op == KZ_EXPR_OP_NE) && ((is_f(e->a) && is_c(e->b)) || (is_c(e->a) && is_f(e->b)))) {
       const int64_t v = is_c(e->b) ? e->b->value : e->a->value;
       const bool eq = e->op == KZ_EXPR_OP_EQ;
-      if (same_value(v, c1)) return eq ? g : pool().unary(KZ_EXPR_OP_NOT, g);
-      if (same_value(v, c0)) return eq ? pool().unary(KZ_EXPR_OP_NOT, g) : g;
+      if (same_value(v, v_in)) return eq ? g : pool().unary(KZ_EXPR_OP_NOT, g);
+      if (same_value(v, v_out)) return eq ? pool().unary(KZ_EXPR_OP_NOT, g) : g;
       *other = true;
       return e;
     }
@@ -1424,7 +1424,7 @@ class FnWalker {
       if (is_f(e)) *other = true;
       return e;
     }
-    ExprRef a = subst_flag(e->a, name, c0, c1, g, other), b = subst_flag(e->b, name, c0, c1, g, other);
+    ExprRef a = subst_flag(e->a, name, v_out, v_in, g, other), b = subst_flag(e->b, name, v_out, v_in, g, other);
     if (a == e->a && b == e->b) return e;
     if (e->op == KZ_EXPR_OP_NOT) return pool().unary(KZ_EXPR_OP_NOT, a);
     if (e->op == KZ_EXPR_OP_AND || e->op == KZ_EXPR_OP_OR) return pool().binary(e->op, a, b);
@@ -1534,7 +1534,7 @@ class FnWalker {
         uint16_t fl = 0;
         const LocalEvent* flag_ev = nullptr;
         const LocalEvent* value_ev = nullptr;
-        int64_t c0 = 0, c1 = 0;
+        int64_t v_out = 0, v_in = 0;
         ExprRef value = nullptr;
         if (var != nullptr && done.count(name) == 0 && budget.count(name) == 0) {
           std::vector<const LocalEvent*> in;
@@ -1567,8 +1567,8 @@ class FnWalker {
               if (!u.exit || !u.top_level) exits_ok = false;
             if (k1 && k0 && !same_value(v0, v1) && exits_ok) {
               flag_ev = ev;
-              c0 = v0;
-              c1 = v1;
+              v_out = v0;
+              v_in = v1;
             } else if (!k1) {
               ExprRef x = ld_expr(ev->rhs);
               const bool cr = x != nullptr && x->op == KZ_EXPR_OP_CALL_RESULT;
@@ -1586,7 +1586,7 @@ class FnWalker {
         if (flag_ev != nullptr) {
           ExprRef g = flag_ev->guard_inner != nullptr ? flag_ev->guard_inner : pool().constant(1);
           bool other = false;
-          ExprRef np = subst_flag(pred, name, c0, c1, g, &other);
+          ExprRef np = subst_flag(pred, name, v_out, v_in, g, &other);
           if (!other && !expr_mentions_local(np, name)) {
             pred = np;
             st = KZ_LOOPDEF_STATUS_RECOGNISED;

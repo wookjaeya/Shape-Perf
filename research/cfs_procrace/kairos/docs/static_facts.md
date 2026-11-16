@@ -746,6 +746,32 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 
 **알려진 한계.** event type·run status 의 등급을 쓰지 않는다(자료에 없음). 루프 출구의 지역 플래그 값(예산 출구 뒤 return 되는 지역)은 따라가지 않는다. 몸이 없는 함수의 매개변수 저장은 알 수 없음으로 둔다. 효과의 "닿음"은 CFG 경로이며 무한히 도는 루프는 따로 가르지 않는다.
 
+## 5v. 루프 플래그 술어와 핸들 단위 잠금 정체성: `extract --loop-defs`, `extract --lock-handles`, relations rules revision 11, order rules revision 4 (2026-11-16) [D]
+
+옵션 `kz-static extract --no-profile --loop-defs`, `--lock-handles` (프로필 없는 방식에서만; 프로필 방식은 종료 코드 2). 옵션이 없으면 추출의 출력은 앞판 그대로이고, relations 와 order 는 LOOP_DEFS·LOCK_HANDLES 가 없는 facts 에서 revision 10·3 의 바이트를 낸다. 규칙의 판: `loop flag predicate rules revision 1 (2026-11-16)` (BASIS `extract.loop_defs`), `lock handle rules revision 1 (2026-11-16)` (BASIS `extract.lock_handles`). 섹션은 schema revision 12 의 140·144 이고 레코드·열거형은 바뀌지 않는다(`include/` 그대로).
+
+**LOOP_DEFS (둘째 회차, `ast_fn.cpp` `emit_loop_defs`).** poll·count-bounded 루프 가운데 FACT_LOOPS 에 술어가 없고 조건 출구가 지역을 읽는 것마다. 예산 지역(FACT_LOOPS 의 예산, count-bounded 루프의 귀납 변수)은 조건이 아니다: 예산만 시험하는 출구와 conjunct 를 뺀 조건 출구의 합이 출발점이다. 그 합이 읽는 지역마다:
+- **flag**: 루프 앞에 상수 정의 하나(`v_out`), 루프 자신의 몸에 guard G 아래 다른 상수 정의 하나(`v_in`), 루프 안의 다른 정의 없음, 주소 취함 없음, 조건 안의 모든 사용이 `v_out`·`v_in` 과의 비교, 그 지역을 시험하는 출구가 모두 루프 조건이거나 몸 바로 아래 조건 하나로 정해지는 출구. 그러면 `f == v_in` 은 G(그 정의가 돌 때 참이던 guard), `f == v_out` 은 그 부정이다. 출구가 매 반복 시험되고 정의가 다시 바뀌지 않으므로, 루프가 조건 출구로 끝날 때 G 가 어느 반복에서 참이었다.
+- **value**: 루프 자신의 몸에 정의 하나(호출 결과, 또는 필드·전역의 읽기와 그 첨자·역참조), 주소 취함 없음, 모든 사용이 같은 반복의 그 정의 뒤에 있고 그 정의가 도는 조건들이 사용이 도는 조건들의 앞부분(같은 `if` 문, 포인터 같음)이며 루프 조건에서 읽히지 않음. 그러면 그 지역은 대입된 값이다.
+- G 나 대입된 값이 다른 지역을 읽으면 같은 규칙으로 푼다(세 단계까지). 선언만 있고 초기값이 없는 선언은 정의가 아니다.
+- 거절: 몸 안의 정의가 둘 이상(`refused-reset-in-body`), 주소 취함(`refused-address-taken`), 그 밖(`refused-unresolved`: 안쪽 루프의 정의, 상수가 아닌 flag, 꼴이 맞지 않는 사용, 루프 조건에서 읽히는 value). 조건 출구가 예산뿐이면 `not-examined`.
+- 행: 그렇게 본 지역마다 그 지역의 정의마다 한 행(`where` before-loop / in-body / in-condition / none, 값과 guard 의 FACT_EXPRS 뿌리, 그 지역의 상태, 형태 이름), 그리고 루프 자신의 행(`local` 빈칸; `guard_root` = 모든 지역을 바꾼 술어, `pred` = 쓴 형태 "flag", "value", "flag+value"). 깃발 `under-lock`(어휘의 잠금이 그 정의에서 잡혀 있음), `call-result`(value 가 호출 결과). FACT_LOOPS·AWAIT_L1 의 행은 바뀌지 않는다.
+
+**LOCK_HANDLES (`serialize.cpp`).** LOCK_OPS 의 acquire·release 가운데 잠금 정체성이 호출 결과 뒤로 사라진 것(정체성 글에 `?(`)마다 한 행. 사슬의 호출들(첫 호출은 LOCK_OPS 의 호출, 다음은 그 callee 안에서 다음 이름을 부르는 하나뿐인 호출) 가운데 SEMANTICS 의 인자 역할 `lock-object`(검증 상태가 unverified 가 아님)를 가진 callee 의 핸들 인자가 있는 호출, 없으면 핸들 값(필드·전역·매개변수·지역·원소·호출 결과의 값; 주소·문자열·함수·상수가 아님)을 하나만 넘기는 가장 깊은 호출이 핸들의 호출이다. 핸들이 부르는 함수의 매개변수이면 사슬을 거슬러 그 호출의 인자로 간다. 사슬에 핸들 호출이 없고 연산 함수 자신의 매개변수에 `lock-object` 항목이 있으면 그 매개변수가 핸들이다(`handle_root` 는 매개변수 읽기).
+- 상태: 핸들이 전역 객체의 필드이고 FIELD_STATUS 가 그 필드의 writer 집합을 per-field 완전, 한 번 도는 writer 하나(`one-instance-once`)라 하고 `lock-object` 항목이 있으면 `static-instance`(깃발 `one-writer`, `writer-runs-once`); 항목이 없으면 `semantics-unverified`; 완전하지 않으면 `writer-set-incomplete`; 그 밖(writer 인스턴스가 하나가 아님, 매개변수, 전역 객체의 필드가 아님, 핸들 없음)은 `not-static`. `writer` 는 그 필드의 하나뿐인 out-pointer writer, `lock_id` 는 같은 정체성의 LOCK_IDS 행, `premise` 는 판단의 글과 전제(“핸들이 가리키는 객체가 두 연산 사이에 지워지고 다시 만들어지지 않는다”; 실행이 확인할 수 있음).
+- 이 판의 의미 자료(`semantics/` 의 생성된 파일)는 인자 역할 `lock-object` 를 만들지 않는다(semantics coverage rule revision 1 은 status·event-type·run-status 만). 그래서 실제 빌드에서 `static-instance` 는 나올 수 없고, fixture 는 손으로 쓴 시험 자료 `tests/static/data/looplock_fixture/` 로 그 갈래를 시험한다.
+
+**relations rules revision 11** (LOCK_HANDLES 가 있을 때만; `rules` 줄은 revision 9 그대로, 머리에 `rules with lock handles:` 줄): 경로 C 에서 static instance 가 아닌 잠금이 spawn 과 쓰기들에 같은 획득으로 잡혀 있고 읽기가 잡고 있을 때, spawn 의 획득들과 읽기의 획득들이 모두 같은 핸들을 넘기고(획득 지점의 callee 의 LOCK_HANDLES acquire 행; 매개변수 핸들은 그 호출의 ARGFLOW 로 읽어 같은 기준으로 판단) 그 핸들이 `static-instance` 이면 static instance 처럼 읽는다(나머지 proven-impossible 조건은 그대로; 글에 `one mutex by its handle` 와 핸들의 전제). 같은 핸들이지만 다른 상태이면 undecidable 의 글에 그 핸들과 상태를 적는다.
+
+**order rules revision 4** (LOOP_DEFS·LOCK_HANDLES 가 있을 때만; 머리에 `rules with loop definitions and lock handles:` 줄):
+- 대기의 술어: FACT_LOOPS 에 술어가 없고 LOOP_DEFS 의 루프 행이 recognised 이면 그 술어(`predicate: through local definitions (LOOP_DEFS, form …)`); 기다리는 필드, 다른 스레드의 writer, 초기값에서의 조건 출구는 그 술어로. HB-await 의 hard 조건은 그대로(AWAIT_L1 의 per-field 인증이 await 이어야 함)이므로, LOOP_DEFS 의 술어에는 그 인증이 없어 간선은 conditional 이다.
+- 호출자 쪽 예산 값: 예산 출구가 루프를 벗어나 이어지고 루프의 술어가 flag 이면, 그 함수가 루프 뒤(루프 밖, 위치가 뒤)에서 돌려주는 값은 RETURNS 의 상수 대안들이고 flag 의 몸 안 정의로 정의된 대안은 뺀다(예산 출구에서는 조건 부분이 거짓이므로 flag 가 그 값을 갖지 않음). 상수가 아닌 return 이 있으면 정해지지 않음.
+- HB-lock 간선에 `lock identity source:` 줄(`must-static-instance (LOCK_IDS)` 또는 relations 행이 핸들을 적은 `handle (LOCK_HANDLES; …)`).
+
+**호출자에 기대는 spawn 규칙의 측정 (`kz-static order --caller-dependent-report FILE`).** order 글과 간선 목록은 바뀌지 않는다. 따로 쓰는 보고: 풀린 스레드가 있는 spawn 호출 수, 그 가운데 호출자에 기대는 것, 그 함수의 호출자와 그 가운데 풀린 entry 를 넘기지 않는 것(그 호출자를 코드에 가진 어느 스레드에서도 그 호출자의 `children_on` 이 비어 있음); 그리고 그런 호출자가 그 호출의 자기 스레드 모두를 만들 수 있다고 둔 둘째 닫힘(위 근사)에서 값이 달라지는 짝과 행. 둘째 닫힘은 실행이 순서를 주지 않는 짝도 순서 짓을 수 있으므로, 달라지는 짝의 수는 이 규칙이 unordered 로 남긴 짝의 위 한계다.
+
+**알려진 한계.** flag 규칙은 루프 앞의 정의 하나와 몸 안의 정의 하나만 본다(분기마다 다른 상수를 주는 꼴은 거절). value 규칙은 같은 `if` 문 안의 앞선 정의만 본다(goto 를 따로 보지 않음). LOOP_DEFS 의 술어에는 L1 인증이 없다. 핸들 정체성은 핸들 값이 같으면 같은 객체라는 의미 항목에 기대고, 그 항목이 자료에 없으면 쓰이지 않는다. 핸들의 writer 판단은 LOCK_IDS 의 값 읽기 규칙(per-field 완전, 한 번 도는 writer 하나)과 같다.
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).

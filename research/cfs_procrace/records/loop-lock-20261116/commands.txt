@@ -1,0 +1,20 @@
+sha256 of declared_before_build.txt: 5c74f47ee3d9ba3590574388421881012e8eafde70a6147b271affe1b8913fa4
+# commands of the loop flag and lock handle step (plan/full_stage_results_20261116.md section 10); <scratch> is this session's scratchpad
+# directory (one directory in it); times UTC
+## 0. before the declaration
+code (lib/llvm, tools/kz-static), fixture looplock.c, the hand-written test semantics data file, tests, static_facts.md 5v, schema.md dated line
+scratch check build <scratch>/ll/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_BUILD_LLVM_TOOLS=ON (the pinned LLVM), every cmake/make under env/tools/space_guard.sh
+  (df_scratch_cfg.log, df_scratch_build1..5.log); build1 failed on a -Wshadow error in relations.cpp (fixed), the rest rc 0
+  fixes during the check: a declaration without an initializer was counted as a definition (refused-reset-in-body; fixed), the
+  operation's own parameter as handle when a semantics item names it, the not-static count; the variables named like a case id
+  were renamed (lint case-ids)
+  test_static_cli 1151 checks; test_static_reasons 692 on the repository data, 731 with the two new goldens in a scratch copy of the
+  data directory; the 31 earlier goldens the same with the scratch tool; lint 8 rules clean; the two goldens kept in
+  <scratch>/ll/gkeep (golden_scratch.sha256)
+  one_build.sh with the scratch kz-static on the five builds with every option into <scratch>; relations, order with the
+  caller-dependent report, measure_ll.py, compare_ord_ll.py, compare_rel_ll.py, section_text_cmp_ll.py, compare_ll.py against the
+  rf_* outputs: the [I] values of 10.0; these outputs are scratch and no evidence; the scratch build and outputs removed before the
+  declaration
+tools_check.sh --deep -> tools_check_pre.txt (44 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (114 rows, 0 failing)
+relink_expected.sha256 (14) and not_relink.sha256 (110, the same bytes as the result flow step's list): sha256 of the MC binaries before the build
+a snapshot commit 08760d6 of the code written so far exists before this declaration commit

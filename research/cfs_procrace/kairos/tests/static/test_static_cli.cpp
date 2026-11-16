@@ -2256,7 +2256,7 @@ startup_script {
     KZ_CHECK(has(rel, "every acquisition of it at the spawn and at the read passes the handle Twice.mutex not-static"));
     // order rules revision 4: the predicate through LOOP_DEFS, the budget value through the flag, HB-lock by the handle
     KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "on.kz").string()) + " -o " + q((X / "ord.txt").string()), &out), 0);
-    KZ_CHECK(read_file((X / "ord.txt").string(), &ord));
+    ord = read(X / "ord.txt");
     KZ_CHECK(has(ord, "rules with loop definitions and lock handles: order rules revision 4 (2026-11-16), over LOOP_DEFS and LOCK_HANDLES"));
     KZ_CHECK(has(ord, "waits with a predicate through local definitions 2; caller-side budget values through a flag 1; HB-lock edges whose lock is identified by its handle 2"));
     KZ_CHECK(has(ord, "predicate: through local definitions (LOOP_DEFS, form flag+value) (and (ne (call-result task_by_context) 0)"));
@@ -2268,8 +2268,10 @@ startup_script {
     KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(fixtures + "/order.c") + " --root " + q(fixtures) + " -o " + q((X / "ord.kz").string()) + " -- -std=c99", &out), 0);
     KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "ord.kz").string()) + " -o " + q((X / "o1.txt").string()), &out), 0);
     KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "ord.kz").string()) + " -o " + q((X / "o2.txt").string()) + " --caller-dependent-report " + q((X / "cdr.txt").string()), &out), 0);
-    KZ_CHECK(read_file((X / "o1.txt").string(), &ord) && read_file((X / "o2.txt").string(), &ord2) && ord == ord2);
-    KZ_CHECK(read_file((X / "cdr.txt").string(), &cdr));
+    ord = read(X / "o1.txt");
+    ord2 = read(X / "o2.txt");
+    KZ_CHECK(!ord.empty() && ord == ord2);
+    cdr = read(X / "cdr.txt");
     KZ_CHECK(has(cdr, "kz-static order caller-dependent report (order rules revision 2 (2026-11-16);"));
     KZ_CHECK(has(cdr, "spawn calls with resolved threads 23, caller-dependent 5; their callers 7, passing on no resolved entry 0 (distinct caller calls 0)"));
     KZ_CHECK(has(cdr, "pairs whose value differs 0 (new pairs 0)"));

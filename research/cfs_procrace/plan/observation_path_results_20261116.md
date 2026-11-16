@@ -585,3 +585,85 @@ kz-static 빌드가 없으므로 빌드 전 선언은 없다. 바뀌는 출력�
 - **시험**: 바인딩 보고(모든 site 가 bound 이거나 이유가 있는 unsupported/removed; not-seen 0), `hookcheck` rc 0(계획의 목록), module id = 계획의 표, 점검한 실행 파일 = 계획의 목록(맵으로 옮긴 7개). 결과는 측정으로 적는다. 바인딩 수나 site 의 상태를 미리 기대하지 않는다.
 - **누적 바이트 동일성**: 뒤에 `ledger_check.sh` 전체(F1T, `641/b`, 플러그인 둘, kairos-build 도구, W6·C5 기록 묶음과 앞 단계의 출력 포함)와 `tools_check.sh --deep`. 이 단계의 새 출력은 장부 행으로 더한다. 바깥 이름 점검을 새 출력 디렉터리에 돌린다.
 - **지우는 것**: `derive_c1.sh` 가 같은 자리 기준 빌드 트리를 해시 뒤 지운다(다시 만들 수 있고 그 객체 해시는 남는다). 그 밖에 아무것도 지우지 않는다. 계획은 B 다시 뽑기(`plangen_bref`)를 이 비교 뒤 지운다고 했으나, 이 단계가 만든 scratch 가 아니므로 남긴다(지울지는 lead 가 정한다).
+
+### 5.1 바뀐 것 [F]
+
+- 커밋 `a79aa6d`(선언과 스크립트, 파생 빌드 전). 규모(`git diff --stat 21525ee a79aa6d`, 스크립트 여덟): `path_map.sh` 51줄(새), `compare_derived.py` 278줄(새), `plan_bindings.py` 158줄(새), `run_unit.sh` +128, `derive_args.sh` 46줄 바뀜, `derive_c1.sh` 37, `one_build.sh` 26, `derive_plan.sh` 24; 합 708줄 더함, 40줄 뺌.
+- 파생 빌드 뒤 비교기의 읽기 결함 둘을 고쳤다(이 절의 커밋; §5.3, §5.8): (1) facts 의 `tu=` 는 FILE_HASHES 의 번호다(`kairos/lib/llvm/serialize.cpp:175`, `:198`, `:314` `r.tu = fh_of(...)`). 처음 비교기는 `fh=` 만 경로로 바꿨다. (2) 따옴표 값 안의 `\"`(TUS 의 `flags`)를 `only=` 가 한 칸으로 읽지 못했다. 둘 다 판정 기준을 넓히지 않는다. 고친 뒤 `run_unit.sh` 12/12 [M].
+- 선언 목록의 덧붙임 `records/obs1-20261116-derived/declared_diff_after.tsv`(원래 목록 + 9줄, 첫 비교를 본 뒤; §5.3). 원래 목록 `declared_diff.tsv` 는 바꾸지 않았다.
+
+### 5.2 빌드 [M]
+
+공간 감시 아래, 모두 rc 0(`commands.txt`, `df_*.log`; 작업 공간의 작은 기록 사본은 `w/`).
+
+| 단계 (UTC) | 결과 |
+|---|---|
+| 런타임 트리 07:37:43–47 | `/home/user/work/redesign/obs1/c1pre_rt/rt`; backend "kzgcc 0.3 (gcc-plugin)", manifest `5f015c5a…`. `libkzrt.a` `718acdfd…`, `libkzrt-posix.a` `d0fbd6a4…`, `kz_rt_posix_auto.c.o` `4edb90c6…` 는 F1T `rt-pre` 와 같은 바이트, `kz_rt_build_info.c.o` `d4995fa5…`(manifest 가 다름), `kz-rt-dump` `eb12d09e…`(F1T `21550a70…`, MC `4390d4f1…` 와 다름; `kairos/runtime` 의 마지막 변경 `b73618d` 은 manifest 파서) |
+| prepare 07:39:23–25 | 복사본과 기준의 차이: bundle 0, `pre/src` 0, `bpxfer_defs` 는 D2 의 두 파일만. 맵 `path_map.tsv` `0cbb50e7…`: `c1_build/bundle_1df262a/` → `<W>/bundle_1df262a/`, `c1_build/pre/src/` → `<W>/src/`, `c1_build/pre/1df262a/` → `<W>/ws/` |
+| 같은 자리 기준 빌드 07:39:37–51 | 객체 261. 계획의 일곱 파일 가운데 bp.so, cf.so, ci_lab.so, sch_lab.so, to_lab.so 는 원래 기준과 같은 바이트, core-tx `50305b10…`(원래 `0052e7ab…`; D4 와 경로)와 bplib.so `f16c177c…`(원래 `1766ee36…`; 경로 글)는 다르다. 해시 뒤 트리를 지웠다(스크립트의 동작) |
+| 계측 빌드 07:40:06–24 | 플러그인 옵션 = 표의 module 여섯 줄과 기본을 맵으로 옮긴 것(`module_flags.txt`: `derive_module_flags` 의 출력이 `build_instr.record` D3 줄에 그대로 있음). core-tx `c2aa181b…`, bp.so `6789ff75…`, bplib.so `f16c177c…`(같은 자리 기준과 같음), cf.so `f5af74f7…`, ci_lab.so `d0c9adbe…`, sch_lab.so `9a6ae3c9…`, to_lab.so `ef83f6c2…`. 컴파일 경고 1(기준 빌드와 같은 수) |
+| check 07:40:31 | 객체 261 가운데 다른 것 35: 계측 단위 33(바인딩 파일 33개와 같음), D4 의 `cfe_build_env_table.c.o` 둘(tx, rx). UNEXPECTED 0, 바뀌지 않은 계측 단위 0 |
+| B′ basis·facts 07:40:55–07:41:21 | `one_build.sh c1_pre_tx /home/user/work/redesign/obs1/c1pre_bprime --path-map <W>/path_map.tsv`, kz-static `de1315b3`. basis `a57c227b2f9fd8dd…`, facts `6451f233ce73fef9…`, relations `03f1da462f576db6…`. basis 의 `binary.sha256` = 계측 core-tx `c2aa181b…`, `binary.build_id` `ca1ed0b1…` |
+
+- MC 는 바뀌지 않았다: `pre_mc.txt` 와 `post_mc.txt` 가 도구 일곱, 정체성, 정의, `CMakeCache.txt`, flags.make 목록에서 같다. 다른 줄은 HEAD(`21525ee` → `a79aa6d`)와 `kairos` 미커밋 줄 수(앞 기록은 선언 커밋 전에 적어 스크립트 232줄이 미커밋이었다)뿐이다.
+- B′ 의 성질(관측 효과): site 가 있는 단위 33(module 별: core-tx 23, cf 4, bp 3, ci_lab 1, sch_lab 1, to_lab 1; bplib 에는 site 가 없다), 링크된 hook 호출 315(core-tx 284, cf.so 21, bp.so 5, sch_lab.so 3, ci_lab.so 1, to_lab.so 1; `w/bincheck_basis.txt`), 링크된 런타임(basis 의 `link.inputs` 27 → 31, 아카이브 20 → 22), 생성 토큰 wrapper 없음. 설치 파일 31 가운데 원래 기준과 같은 바이트 15(표·시작 스크립트·host 도구·tinycbor.so), 다른 16(`w/install_inventory.tsv`).
+- GNU build-id 와 sha256(설치된 ELF 21개, `exe_buildids.tsv`): core-tx `ca1ed0b12f7c8941…`, core-rx `2d028ce2cb972313…`, cf.so `785444d2…`, bp.so `098b4e62…`(rx 와 tx 의 같은 이름 모듈은 같은 파일).
+
+### 5.3 시험 [M]
+
+- 바인딩 보고(`bindings_report.tsv`, `plan_bindings.py`): 계획의 site 301 모두 바인딩이 있다. bound 293, duplicated 6, inlined 2, unsupported 0, removed 0, not-seen 0. 단위 헤더 33개 모두 계획의 manifest sha256. module: manifest 의 module 문 = 표(이름, id, 기본 5 = core-tx), 옵션 = 표의 차례와 기본, 단위마다 id = 플러그인 규칙(`kzgcc.cpp` `start_unit`). duplicated 여섯은 `CFE_ES_InitializeFileSystems` 의 creator-call 둘(site 24, 26), `CFE_SB_BackgroundFileEventHandler` 의 use-call 둘(150, 153), `CFE_TBL_HousekeepingCmd` 의 creator-call 둘(262, 263), inlined 둘은 BP `initialize_throttling` 의 creator-call(279, 280: `bp_flow.c:132` 의 at-call·after-call).
+- 관계 1 의 행(사용 지점 키 `17975444d83f6589`)을 `ref` 로 가진 site 12개: 모두 바인딩됨(creator-call 2·3 SCH_LAB, 279·280 BP(inlined), key-text 272·273, handling-chain 284–287, 288(handling-chain 과 use-call 이 합쳐진 site), use-call 289). 공유하는 행위자·멈춤 사건 site 22개도 모두 bound.
+- `hookcheck`(계획의 목록 일곱 파일, 맵으로 옮김): rc 0, ok 301, missing·gap-called·undeclared 0. 점검한 실행 파일 = 계획의 목록(`install_inventory.tsv` 의 "in the plan's list" 7).
+- rx(`rx_check.txt`): `exe/rx` 의 ELF 9개, hook 호출 315, (함수, hook, id) 목록이 계획의 그룹과 같다. rx 의 모듈 여덟은 tx 의 같은 이름 파일과 같은 바이트다(같은 arch 객체에서 링크; core-rx 만 target 마다 따로 링크).
+- B 와 B′ 비교(`compare_derived.py`, B = `plangen_bref/c1_pre_tx/NP`):
+  - 첫 실행(요약 `compare_run1_summary.txt`): 선언 밖 3,650. 거의 모두(FACTS 2,721, FUNCS 860, FACT_CONSTS 37)가 `tu=` 번호의 차이였다. facts 의 `tu=` 는 FILE_HASHES 의 번호이고(§5.1) facts 의 FILE_HASHES 는 경로 차례다. 파생 작업 공간에서는 `<W>/src` 가 `<W>/ws/build` 앞에 와(기준에서는 `pre/1df262a/build` 가 `pre/src` 앞) 생성된 단위 여덟만큼 번호가 밀렸다. TUS 여섯은 `flags` 안의 `\"` 를 읽지 못한 것이다. 비교기를 고쳤다(§5.1).
+  - 고친 비교기, 원래 목록(요약 `compare_run2_summary.txt`, 선언 밖 레코드 모두): 선언 밖 26. 모두 선언한 갈래(플러그인 옵션, 링크된 런타임, D1 경로)의 결과인데 목록이 이름 대지 않은 레코드다: module 여섯의 `link.txt`(CMake 의 공유 모듈 링크 규칙이 `CMAKE_C_FLAGS` 를 싣는다; `apps/bp` 의 diff 에서 `-fplugin` 확인), FILE_HASHES 의 링크된 파일 일곱(core-tx 와 계측 모듈 다섯: `binary.sha256`, `link.output_is_the_loaded_file` 와 같은 파일; bplib.so 는 같은 자리 기준 빌드와 같은 바이트이므로 D1 경로 글), `closure.name_binding` 의 교차 참조 수 195 → 205(BASIS 와 `basis.txt`), facts BASIS 의 `extract.basis_deviation[...]` 넷(facts 가 basis 의 편차를 옮김)과 `relations.txt` 13행의 그 수(2 → 6), `basis.txt` 의 "objects without a compile command: 5" 와 런타임 객체 다섯의 경고 줄.
+  - 덧붙인 목록(`declared_diff_after.tsv`, `compare_after.tsv`): 선언 밖 0, rc 0. TUS 177 개가 플러그인 옵션으로 달라졌고 이는 `instrumentation.units_with_compiler_plugin` "177 of 177 units, 1 distinct option set(s)" 와 같은 수다.
+  - 맵의 내용 확인: B′ 의 FILE_HASHES 195 가운데 194 가 맵 뒤 B 의 경로와 같고 그중 178 은 sha256 도 같다. 다른 16 = `compile_commands.json`, `link.txt` 일곱, `cfe_build_env_table.c`(D4), 링크된 파일 일곱. 더해진 1 = 플러그인 파일. D2 의 `cfe_module_version_table.c` 는 내용까지 같다. 맵 뒤 남은 파생 경로 0(FILE_HASHES).
+  - facts: 39 절 가운데 레코드가 차례까지 같은 절 36(레코드를 찍지 않는 STRINGS 포함). 다른 셋: BASIS(basis 항목과 편차의 사본, `extract.units_from`), FILE_HASHES(위의 파일들; 차례는 경로 차례라 다름), GLOBAL_IMAGES 의 레코드 하나(`cfe_build_env_table.c` 의 `CFE_BUILD_ENV_TABLE[0].Value`, D4). FACTS, FUNCS, READS, RETURNS, LOCKSET, LOCK_PATHS 를 비롯한 그 밖의 절은 모두 같다. `relations.txt` 는 둘째 줄(facts 해시)과 13행(편차 수) 밖에서 같다. `extract.txt` 는 첫 줄 밖에서 같다.
+  - basis: PROVENANCE 같음. BASIS 의 다른 항목은 모두 선언 갈래. DEVIATIONS 에 플러그인 편차 하나가 더해졌다.
+- 단위 점검: 선언 전 `run_unit.sh` 12/12, `step2a_tests_unit.sh` 7/7. 비교기를 고친 뒤 `run_unit.sh` 12/12.
+- MC `ctest -R '^lint'` 7/7(빌드 없이 kz_lint `5f62ec20`). Kairos 도구를 빌드하지 않았으므로 전체 ctest 는 돌리지 않았다.
+
+### 5.4 바이트 동일성 [M]
+
+- 누적 목록: `ledger_check.sh` 40행, 실패 0(새 행 셋: `OBS_c1pre_derived` 3,957 파일, `OBS_c1pre_rt` 355 파일, `OBS_c1pre_bprime` 10 파일). F1T(16,444 파일), C5 `641/b`, 플러그인 둘, kairos-build 도구, W6·C5 기록 묶음, 앞 단계의 출력과 도구 사본 모두 같다.
+- 도구 등록부: `tools_check.sh --deep` 31행, 실패 0. 새 도구 행 없음(런타임 트리의 kz-rt-dump `eb12d09e` 는 장부 행 `OBS_c1pre_rt` 의 파일로 지킨다).
+- 바깥 이름 점검(`--tree`): 런타임 트리, B′ 출력, 기록 디렉터리는 깨끗하다. 파생 작업 공간에서는 upstream cFE 소스 사본(`cfe/modules/sb/fsw/src/cfe_sb_priv.c` 의 지역 변수 이름 하나와 그 쓰임 셋)과 문서 SVG 한 줄이 패턴에 걸린다. 둘 다 기준의 소스를 바이트 그대로 복사한 것이고(prepare 의 diff 0) 이 작업이 쓴 글이 아니다. 대상 소스를 바꾸는 것은 PI 의 선택이므로 손대지 않았다.
+
+### 5.5 rx 인스턴스 [D][M]
+
+- rx 는 같은 파생 트리다(까닭은 §5.0, 측정은 §5.3). 부팅 하네스의 tx 기록은 `<W>/ws/exe` 전체를 묶으므로 다음 부팅의 두 인스턴스 절차는 이 트리의 `exe/rx/core-rx`(build-id `2d028ce2…`)와 tx 와 같은 모듈 파일을 쓴다. rx 는 `KZ_RT_MODE=off` 로 돈다(`run_gi_c1.sh:68`).
+
+### 5.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 07:37:09 | 3,789,340,672 | 선언 커밋 전 |
+| 07:37:43–47 | → 3,782,864,896 | 런타임 트리(dip 6,467,584) |
+| 07:39:23–25 | → 3,755,446,272 | prepare(dip 27,279,360) |
+| 07:39:37–51 | 가장 낮은 점 3,741,085,696 | 같은 자리 기준 빌드(dip 14,348,288, 변화 −94,208: 해시 뒤 트리를 지움) |
+| 07:40:06–24 | → 3,736,080,384 | 계측 빌드(dip 19,234,816) |
+| 07:40:55–07:41:21 | → 3,722,616,832 | B′ basis·facts(dip 188,416 / 11,059,200 / 1,863,680) |
+| 07:46:44 | 3,682,033,664 | 비교·기록 뒤(이 세션 밖의 흐름 포함 [I: 파일별로 재지 않음]) |
+
+- 하한을 넘지 않았다. 감시 문턱(하한 + 필요량 100,000,000 = 414,572,800) 아래로 가지 않았다. 남긴 크기(블록): 파생 작업 공간 46,743,552 B(겉보기 33,032,031 B; F1T `c1/pre_1df262a` 46,329,856 B 와 비슷), 런타임 트리 6,463,488 B, B′ 13,135,872 B.
+- 지운 것: `derive_c1.sh` 가 같은 자리 기준 빌드 트리를 해시 뒤 지웠다(다시 만들 수 있고 객체 해시 `objects_ref.sha256` 이 남는다). 기록 디렉터리에 잠깐 복사한 바인딩 파일 사본 하나(원본은 작업 공간에 있고 장부가 지킨다), 앞의 두 비교의 전체 출력(요약을 남김, §5.8). 그 밖에 아무것도 지우지 않았다.
+
+### 5.7 다음 단계로 넘기는 것
+
+- 부팅에 쓸 kz-rt-dump: 이 런타임 트리의 `eb12d09e` 와 MC 의 `4390d4f1` 은 다른 파일이다. 어느 것을 쓰는지는 부팅 선언에서 정하고 적는다.
+- `run_gi_c1.sh` 의 run.meta `file` 줄은 고정 목록(core, cf.so, bp.so)이고 인스턴스의 모든 파일은 `inst_files.sha256` 에 있다. 이 빌드의 `build_instr.record` 해시 줄은 계획의 일곱 파일(tx)이다. 사슬 점검이 rx 파일을 빌드 기록에서 찾는다면 맞지 않는다 [미확인]: 부팅 전에 `chain_check.py` 의 입력을 확인한다.
+- 바인딩 파일 `<W>/binds_instr.kzs` `6a22b9ec9fe5dfcf…`(802 줄)가 dump 를 읽을 때의 두 번째 manifest 다.
+- 계획의 재생성 점검(생성기 사본)은 부팅 전에 다시 한다(§4.4 의 것은 07:08Z).
+- C5 의 파생 빌드는 아직 맵을 쓰지 않는다: `derive_c5.sh prepare` 는 맵을 쓰지 않고 `derive_plan.sh c5` 는 맵을 요구한다. C5 의 계획 모드는 그 맵의 출처(기준 `keep/` 과 파생 `b/` 의 짝)를 정한 뒤에 쓸 수 있다.
+- 교차 참조 수 195 → 205 의 열 개가 어느 이름인지 [미확인](basis 는 수만 적는다). 런타임 객체가 링크 멤버로 들어온 결과로 보인다 [I].
+
+### 5.8 계획과 다르게 한 것
+
+- 계획은 module 표와 실행 파일 목록을 인자로 넘기라고만 했다. 기준 빌드의 절대 경로를 옮기는 맵을 새 인자(`--path-map`)로 더했고, 맵은 `derive_c1.sh prepare` 가 자기 복사본에서 쓴다. `derive_plan.sh` 는 맵과, 실행 파일 목록·manifest 가 같은 sidecar 를 가리키는지도 본다.
+- 계획은 "FILE_HASHES 내용으로 경로를 짝짓는다"고 했다. 비교기는 작업 공간의 맵을 거꾸로 쓰고 FILE_HASHES 의 내용으로 그 맵을 확인한다(194 경로, 178 같은 sha256, 다른 16 은 모두 선언 갈래). 내용만으로 접두어를 거꾸로 구하면 같은 파일 짝의 공통 꼬리를 떼는 방식이라 `<W>` 하나가 `c1_build` 와 `c1_build/pre` 둘로 갈려 하나로 정해지지 않는다.
+- 비교기의 읽기 결함 둘(facts `tu=`, 따옴표 안의 `\"`)을 첫 비교 뒤 고쳤다(§5.1). 선언 목록이 이름 대지 않은 레코드 26개는 덧붙인 목록으로 이름 댔다(§5.3). 원래 목록과 두 번의 비교 결과를 요약으로 남겼다(`compare_run1_summary.txt`, `compare_run2_summary.txt`: 절·갈래별 수, 첫 실행은 절마다 세 줄, 둘째는 선언 밖 26줄 모두; 전체 출력 3,389,314 B 와 817,599 B 는 sha256 을 요약에 적고 지웠다. 같은 비교기와 목록으로 다시 만들 수 있다). 덧붙인 줄은 모두 선언의 갈래 안이고 새 갈래가 아니다. 선언이 레코드 이름을 빠뜨린 것은 선언 글의 빈틈이다(§4.8 의 B 다시 뽑기와 같은 종류).
+- 계획은 B 다시 뽑기(`plangen_bref`)를 이 비교 뒤 지운다고 했다. 이 단계가 만든 scratch 가 아니므로 남겼다(다시 만들 수 있다: 생성기 사본과 `one_build.sh`; 지울지는 lead 가 정한다).
+- 기록 사본 `w/` 에는 바인딩 파일을 넣지 않았다(약 100 KB; 원본은 장부가 지킨다).
+- 플러그인이 생성된 manifest 를 읽는지는 빌드 전에 scratchpad 의 작은 단위 하나로 봤다(rc 0). 그 출력은 근거가 아니다.

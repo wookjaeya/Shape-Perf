@@ -13,7 +13,10 @@ build trees are outside the repository (`/home/user/work/redesign/obs1/c1pre_rt/
 | `w/` | copies of the small records of the work space: `path_map.tsv`, `prepare.record`, `build_ref.record`, `build_instr.record`, `check.record`, `merge.txt`, `objects_differ.txt`, `hookcheck_basis.txt`, `bincheck_basis.txt`, `install_inventory.tsv`, `runtime.record` |
 | `module_flags.txt`, `bindings_report.tsv` | the plugin's module options and the binding report of every planned site |
 | `rx_files.txt`, `bincheck_rx.txt`, `rx_check.txt` | the rx instance of the same derived tree against the plan's group |
-| `bprime_run.txt`, `bprime.sha256` | B' basis and facts (single-build runner, derived-workspace mode) |
-| `compare.tsv` | B to B' record by record after the path map, every finding against `declared_diff.tsv` |
+| `bprime_run.txt`, `bprime.sha256`, `bprime_sha256.txt` | B' basis and facts (single-build runner, derived-workspace mode) |
+| `compare_run1_summary.txt` | summary of the first comparison against `declared_diff.tsv` (before the two reading fixes of the comparator: facts `tu=` as a file index, escaped quotes) |
+| `compare_run2_summary.txt` | summary (with every undeclared finding) of the fixed comparator against `declared_diff.tsv`: 26 findings not declared |
+| `declared_diff_after.tsv`, `compare_after.tsv` | the list with the addendum written after run 2 (nine lines, each in a declared category), and the comparison against it: 0 not declared |
+| `c1pre_derived.sha256`, `c1pre_rt.sha256`, `c1pre_bprime.sha256` | every file of the three output trees (ledger rows OBS_c1pre_derived, OBS_c1pre_rt, OBS_c1pre_bprime) |
 | `exe_buildids.tsv` | sha256 and GNU build-id of every installed ELF file of B' |
-| `unit_tools.txt`, `unit_step2a.txt`, `tools_check.txt`, `ledger_check.txt` | unit checks, registry and cumulative byte-identity list |
+| `unit_tools.txt`, `unit_tools_after.txt`, `unit_step2a.txt`, `tools_check.txt`, `ledger_check.txt` | unit checks, registry and cumulative byte-identity list |

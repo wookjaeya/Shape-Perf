@@ -1,0 +1,1 @@
+binds_instr.kzs: 301 bindings (    293 bound       6 duplicated       2 inlined)

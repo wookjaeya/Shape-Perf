@@ -14,15 +14,17 @@
 #                    both=RE   RE is found in the record on each side where it exists (B, B', or both)
 #                    new=RE    RE is found in the B' record (an added or changed record)
 #                    old=RE    RE is found in the B record (a removed or changed record)
-#                    only=F,G  a changed record: the two are equal once the fields F, G (name=value) are left out
+#                    only=F,G  a changed record: the two are equal once the fields F, G (name=value; a quoted value may
+#                              hold escaped quotes) are left out
 #                  A plain RE is both=RE.
 #
 # Steps:
 #   1. Path mapping.  Every derived prefix of MAP is replaced by its reference prefix in every record of BP (a prefix
 #      also matches the directory itself).  The map is then confirmed by content: every FILE_HASHES entry of B' maps to
 #      a FILE_HASHES path of B; the entries whose sha256 differs are listed (they must be declared like any other
-#      difference).  FILE_HASHES entries are matched by path, so a "fh=<n>" field of any record is compared as the path
-#      of FILE_HASHES[<n>] of its own file, and FILE_HASHES itself is compared as a set (whether its order is the same
+#      difference).  FILE_HASHES entries are matched by path, so a "fh=<n>" field of any record (and in facts a "tu=<n>"
+#      field, which is also a FILE_HASHES index: serialize.cpp:175, :198, :314) is compared as the path of
+#      FILE_HASHES[<n>] of its own file, and FILE_HASHES itself is compared as a set (whether its order is the same
 #      is recorded in the summary); any other section whose records are the same but in another order is a finding.
 #   2. Containers (kz-dump): header keys, section lines (count, crc32) and the records of each section in order.  A
 #      section whose records are equal in order is "same"; otherwise every record removed, added or changed (difflib on
@@ -81,7 +83,7 @@ for line in open(opts['--declared'], encoding='utf-8'):
 
 def strip_fields(r, fields):
     for f in fields:
-        r = re.sub(r'(^|\s)' + re.escape(f) + r'=("[^"]*"|\S*)', r'\1' + f + '=*', r)
+        r = re.sub(r'(^|\s)' + re.escape(f) + r'=("(?:[^"\\]|\\.)*"|\S*)', r'\1' + f + '=*', r)
     return r
 
 
@@ -140,8 +142,11 @@ def dump(path, mapped):
             continue
         recs[cur].append(re.sub(r'^\s*\S+\[\d+\] ', '', line))
     fh = [re.match(r'path="([^"]*)"', x).group(1) for x in recs.get('FILE_HASHES', [])]
+    # fields that hold a FILE_HASHES index: fh= in every container; in facts also tu= (the unit's main file,
+    # kairos/lib/llvm/serialize.cpp:175, :198, :314 r.tu = fh_of(...)); in basis tu= is the TUS ordinal and stays
+    idx = r'\b(fh|tu)=(\d+)' if head.get('container.kind') == 'facts' else r'\b(fh)=(\d+)'
     for s in recs:
-        recs[s] = [re.sub(r'\bfh=(\d+)', lambda m: 'fh=<%s>' % (fh[int(m.group(1))] if int(m.group(1)) < len(fh) else '?' + m.group(1)), x)
+        recs[s] = [re.sub(idx, lambda m: '%s=<%s>' % (m.group(1), fh[int(m.group(2))] if int(m.group(2)) < len(fh) else '?' + m.group(2)), x)
                    for x in recs[s]]
     return head, secline, recs
 

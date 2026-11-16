@@ -1,0 +1,37 @@
+# derive_c1.sh build pre 1df262a instr 2026-11-16T07:40:06Z user=root host gcc: gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+env CFS_APP_PATH=/home/user/work/redesign/obs1/c1pre_derived/src CMAKE_EXPORT_COMPILE_COMMANDS=ON CFLAGS=-Wno-error=restrict
+D3 arch CMAKE_C_FLAGS=-Wno-error=restrict -fplugin=/home/user/work/c5tools/plugin-build/kzgcc.so -fplugin-arg-kzgcc-manifest=/home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.kzs -fplugin-arg-kzgcc-out=/home/user/work/redesign/obs1/c1pre_derived/binds_instr -fplugin-arg-kzgcc-module=1:/home/user/work/redesign/obs1/c1pre_derived/src/bp/fsw/ -fplugin-arg-kzgcc-module=2:/home/user/work/redesign/obs1/c1pre_derived/src/bplib/ -fplugin-arg-kzgcc-module=3:/home/user/work/redesign/obs1/c1pre_derived/src/cf/fsw/src/ -fplugin-arg-kzgcc-module=4:/home/user/work/redesign/obs1/c1pre_derived/bundle_1df262a/apps/ci_lab/fsw/src/ -fplugin-arg-kzgcc-module=6:/home/user/work/redesign/obs1/c1pre_derived/bundle_1df262a/apps/sch_lab/fsw/src/ -fplugin-arg-kzgcc-module=7:/home/user/work/redesign/obs1/c1pre_derived/bundle_1df262a/apps/to_lab/fsw/src/ -fplugin-arg-kzgcc-default-module=5
+D3 arch CMAKE_EXE_LINKER_FLAGS=-Wl,--whole-archive /home/user/work/redesign/obs1/c1pre_rt/rt/libkzrt-posix.a /home/user/work/redesign/obs1/c1pre_rt/rt/libkzrt.a -Wl,--no-whole-archive /home/user/work/redesign/obs1/c1pre_rt/rt/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o /home/user/work/redesign/obs1/c1pre_rt/rt/CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o
+plugin sha256 27a49a6a7d7a561727bb4deeb3ff57026ec4e4dc13177645525e43f74aaf2e20 manifest sha256 5f015c5aa86bf642ac1a76cf49669c98520eac541868cf44e24966649d9d60ae
+runtime # build_runtime.sh 2026-11-16T07:37:47Z: kairos/runtime at /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime, standalone, /usr/bin/gcc
+runtime build identity: backend="kzgcc 0.3 (gcc-plugin)" compiler="gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0" target="x86_64-linux-gnu" manifest=/home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.kzs sha256 5f015c5aa86bf642ac1a76cf49669c98520eac541868cf44e24966649d9d60ae
+runtime tool capacities: the runtime defaults (KZ_RT_DEFINES empty; recorded in the dump's RUN/RUNX records)
+runtime cache CMAKE_BUILD_TYPE:STRING=
+runtime cache CMAKE_C_COMPILER:STRING=/usr/bin/gcc
+runtime cache CMAKE_C_FLAGS:STRING=
+runtime libkzrt.a sha256 718acdfd8d3dac2faad5f6cef7aa00242c8d4eba127e4402072bc8edd4d54af8
+runtime libkzrt-posix.a sha256 d0fbd6a47e6b6d1759352546ddbff14a3684319764f927bbc95fc94c6cb058ed
+runtime CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o sha256 4edb90c6e81aaa95ee8c2b29deda7a1f800fc4ef7b624884846697047d089f55
+runtime CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o sha256 d4995fa5e3a8c0499cb7ab076eefbd084a13ffac0c120d68c964d7ff4f0eafee
+runtime kz-rt-dump sha256 eb12d09ed2731a4de851510af30f0caa204f758bbf84a49fbf831ccfcfb44c99
+plan inputs: manifest /home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.kzs sha256 5f015c5aa86bf642ac1a76cf49669c98520eac541868cf44e24966649d9d60ae modules /home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.mod sha256 28180ed5d8c39c6373523b8cc250614a2b87da9626cba0a55e415cd390e9a891 exes /home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.exe sha256 09718829e381d2c8e1df233746a1a69ac1bdd00b5990e622ec70c5f428036d48 path map /home/user/work/redesign/obs1/c1pre_derived/path_map.tsv sha256 0cbb50e7a56100f0ed2089eba83c673836ac58c7378fdadae3c260e3f4345733
+cmake rc=0
+arch reconfigure rc=0
+make rc=0
+compiler warnings in the build log: 1
+arch cache CMAKE_BUILD_TYPE:STRING=Release
+arch cache CMAKE_C_FLAGS:STRING=-Wno-error=restrict -fplugin=/home/user/work/c5tools/plugin-build/kzgcc.so -fplugin-arg-kzgcc-manifest=/home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.kzs -fplugin-arg-kzgcc-out=/home/user/work/redesign/obs1/c1pre_derived/binds_instr -fplugin-arg-kzgcc-module=1:/home/user/work/redesign/obs1/c1pre_derived/src/bp/fsw/ -fplugin-arg-kzgcc-module=2:/home/user/work/redesign/obs1/c1pre_derived/src/bplib/ -fplugin-arg-kzgcc-module=3:/home/user/work/redesign/obs1/c1pre_derived/src/cf/fsw/src/ -fplugin-arg-kzgcc-module=4:/home/user/work/redesign/obs1/c1pre_derived/bundle_1df262a/apps/ci_lab/fsw/src/ -fplugin-arg-kzgcc-module=6:/home/user/work/redesign/obs1/c1pre_derived/bundle_1df262a/apps/sch_lab/fsw/src/ -fplugin-arg-kzgcc-module=7:/home/user/work/redesign/obs1/c1pre_derived/bundle_1df262a/apps/to_lab/fsw/src/ -fplugin-arg-kzgcc-default-module=5
+arch cache CMAKE_EXE_LINKER_FLAGS:STRING=-Wl,--whole-archive /home/user/work/redesign/obs1/c1pre_rt/rt/libkzrt-posix.a /home/user/work/redesign/obs1/c1pre_rt/rt/libkzrt.a -Wl,--no-whole-archive /home/user/work/redesign/obs1/c1pre_rt/rt/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o /home/user/work/redesign/obs1/c1pre_rt/rt/CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o
+mission cache CMAKE_BUILD_TYPE:STRING=Release
+mission cache CMAKE_C_FLAGS:STRING=-Wno-error=restrict
+mission cache CMAKE_EXE_LINKER_FLAGS:STRING=
+exe/tx/core-tx sha256 c2aa181b9922668423ca513040f271f4b59a4eebd28678dd275b88483a3a2d3c (reference 0052e7ab80d583e842162a27ca7e68029e981ca41ddaebbf5ee3b51c3f3ba6e9)
+exe/tx/cf/bp.so sha256 6789ff75c7d12818cdda4b1be9d8ff25c5339a41fc82f1e2c3b81ece1b244856 (reference 334b073b63dee85e1e16ed7d51594aaef7638ba909045a0926c1ae61ef94c75b)
+exe/tx/cf/bplib.so sha256 f16c177cf09e1e4d54eb1150962826c5ed9deceb14c1dca3d2cb4aa10647326b (reference 1766ee36c5c16afd26bf7071fc17bf74f48fbcb4ca096c714ebbf16de85d9214)
+exe/tx/cf/cf.so sha256 f5af74f7fc41b7706db46db6fa916e171a83427e0b480da043f8c007357ea875 (reference 1d27f27f2554dfed7c823e102dc4f807ffcf22e455d013e6bce6d092f67b0dee)
+exe/tx/cf/ci_lab.so sha256 d0c9adbe476f2eb1ab5630b0668b9b0b98fff95ac3da9314fce81521db3288d2 (reference f878c43e080e845eb8fc69be07db2e59993cddbc0ea05adf1d153176598834c7)
+exe/tx/cf/sch_lab.so sha256 9a6ae3c94d85d1efcc8706db0b27550127997e8fd20618b656376d188eba83dc (reference 7097d3d8fcce06a6f52785d15b17ad14fb73bdd226b98cbadd72b82439ca6992)
+exe/tx/cf/to_lab.so sha256 ef83f6c2ab1cc7771e5490467fa38cffa1b8d18bd0db73d2d971be7a78518119 (reference 395e1ca4f9b96f819b53da170b4b195afcbe93e203bf502b7c4ff9743eed8362)
+build/src/cfe_module_version_table.c sha256 c9f3362c6d22221a0c008a351c3970e24518c3eeb22153ac97298090cf07e4ab (reference c9f3362c6d22221a0c008a351c3970e24518c3eeb22153ac97298090cf07e4ab)
+build/src/cfe_build_env_table.c sha256 cb3136183c36a9c8a0ebf61121e5e7732ceb6e655f0d68355e27d25ae429a537 (reference 9ad6cf922e96e831c68e5a8d62faee4ec523183898baf18e6b6569a25e071d7f)
+objects: 261

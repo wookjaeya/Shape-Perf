@@ -9,3 +9,29 @@ MC ctest -R '^lint' (kz_lint 5f62ec20, no build) -> 7 of 7
 plugin 27a49a6a on one small unit in <scratch> with -fplugin-arg-kzgcc-manifest=<plan.kzs> -> rc 0 (the plugin reads kzs-sites 3)
 compare_derived.py B against B itself with declared_diff.tsv -> not declared 0 (self comparison, <scratch>)
 free before the commit of the declaration: 3789582336 (2026-11-16T07:37:09Z)
+## 1. declaration committed before the derived build: a79aa6d
+
+## 2. steps (run_derived.sh STEP; each under env/tools/space_guard.sh --need 100000000, logs df_<kind>.log)
+runtime   07:37:43Z-07:37:47Z rc 0 -> runtime.txt (build_runtime.sh /home/user/work/redesign/obs1/c1pre_rt/rt <plan.kzs> <kzgcc.so 27a49a6a>); dip 6467584
+prepare   07:39:23Z-07:39:25Z rc 0 -> prepare.txt (derive_c1.sh prepare pre 1df262a /home/user/work/redesign/obs1/c1pre_derived; path_map.tsv 0cbb50e7); dip 27279360
+ref       07:39:37Z-07:39:51Z rc 0 -> build_ref.txt (derive_plan.sh c1 build ... ref, the four plan inputs); dip 14348288; tree removed after the hashes
+instr     07:40:06Z-07:40:24Z rc 0 -> build_instr.txt (derive_plan.sh c1 build ... instr <kzgcc.so> <rt>); dip 19234816
+check     07:40:31Z rc 0 -> check.txt: objects differing 35 (33 instrumented units, 2 D4), 301 bindings (293 bound, 6 duplicated, 2 inlined), hookcheck basis rc 0 ok=301
+bindings  rc 0 -> module_flags.txt (in build_instr.record D3 line: yes), bindings_report.tsv (failures 0)
+rx        rc 0 -> rx_files.txt, bincheck_rx.txt, rx_check.txt (9 ELF files, 315 hook calls, same lists as the plan's group: yes)
+buildids  rc 0 -> exe_buildids.tsv (21 ELF files)
+bprime    07:40:55Z-07:41:21Z rc 0 -> bprime_run.txt (one_build.sh c1_pre_tx /home/user/work/redesign/obs1/c1pre_bprime --path-map <W>/path_map.tsv; MC kz-static de1315b3); PASS
+compare   rc 1 -> compare.tsv, renamed compare_run1.tsv (kept as compare_run1_summary.txt): not declared 3650 (facts tu= read as a number; escaped quotes in TUS flags)
+
+## 3. comparator fixes (env/redesign/compare_derived.py: facts tu= is a FILE_HASHES index, serialize.cpp:175/:198/:314; escaped quotes in only=)
+TMPDIR=<scratch> bash env/tools/tests/run_unit.sh -> 12 of 12
+compare   rc 1 -> compare.tsv, renamed compare_run2.tsv (kept as compare_run2_summary.txt): not declared 26 (records the list did not name; results 5.3)
+declared_diff_after.tsv = declared_diff.tsv + 9 addendum lines (written after run 2)
+python3 -I env/redesign/compare_derived.py MC/tools/kz-dump/kz-dump compare_after.tsv plangen_bref/c1_pre_tx/NP c1pre_bprime/c1_pre_tx/NP --path-map <W>/path_map.tsv --declared declared_diff_after.tsv -> rc 0, not declared 0
+
+## 4. after
+env/tools/build_record.sh post MC post_mc.txt -> the seven tools, identities, defines, CMakeCache.txt, flags.make list equal to pre_mc.txt (HEAD and uncommitted lines differ)
+records/LEDGER.tsv += OBS_c1pre_derived (3957 files), OBS_c1pre_rt (355), OBS_c1pre_bprime (10); ledger_check.sh -> 40 rows, 0 failing (ledger_check.txt)
+tools_check.sh --deep -> 31 rows, 0 failing (tools_check.txt)
+name_check.sh --tree: c1pre_rt, c1pre_bprime, this directory clean; c1pre_derived: hits only in byte copies of upstream sources (cfe_sb_priv.c, one SVG), results 5.4
+free 3682033664 (2026-11-16T07:46:44Z)

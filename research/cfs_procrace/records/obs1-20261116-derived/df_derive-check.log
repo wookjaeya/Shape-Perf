@@ -1,0 +1,4 @@
+# space_guard.sh kind=derive-check need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/scripts/derive_plan.sh c1 check pre 1df262a /home/user/work/redesign/obs1/c1pre_derived --manifest /home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.kzs --modules /home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.mod --exes /home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.exe --path-map /home/user/work/redesign/obs1/c1pre_derived/path_map.tsv
+start 2026-11-16T07:40:30.923Z free=3736023040 threshold=414572800
+sample 2026-11-16T07:40:30.927Z 3736018944
+end 2026-11-16T07:40:32.933Z kind=derive-check verdict=completed rc=0 free=3735855104 lowest=3735855104 dip=167936 change=-167936

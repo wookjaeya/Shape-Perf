@@ -1585,3 +1585,13 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **c5 의 대기**: 6.4.x 의 대기 다섯은 flag·value 규칙에 맞지 않는다(refused-unresolved 3, refused-address-taken 1, not-examined 1). 그 꼴(주소를 넘겨 채우는 지역, 여러 정의)을 받을지는 뒤 단계다.
 - 앞 단계에서 넘어온 열린 것(event type 의 등급, open 효과, c5 의 child without success, J?, 이름 결합)은 그대로다.
 - **마지막 facts**: `ll_final_extract` 가 뒤 단계의 입력이다(장부 `OBS_ll_final_extract`). 계획 생성기의 다음 판(manifest 개정 4)은 이 facts 를 읽는다.
+
+### 10.9 세션 재시작 뒤 확인 [M]
+
+이 절의 일을 한 세션이 결과를 돌려주기 직전에 다시 시작되었다. 일을 다시 하지 않고 기록과 디스크를 대조했다(`../records/loop-lock-20261116/verify_after_restart.txt`; 앞의 점검 출력은 그대로 두고 새 파일 이름에 씀).
+
+- MC 의 바이너리 일곱과 `CMakeCache.txt` 가 `post_mc.txt` 의 sha256 과 같다(kz-static `9eb1395f…`). `kz-static --identity` 가 `identity_kz-static.txt` 와 같다. 사본 `kz-static.499748bc.xz` 는 `xz -t` OK, sha256 `de44cdf4…` 로 `tool_copy/ROUNDTRIP.txt` 와 같다.
+- 출력 디렉터리 아홉(`ll_*`)이 `ll_*.sha256` 과 모두 같고 파일 수·바이트가 §10.6 의 장부 행과 같다.
+- `commands.txt` 의 실행과 비교가 모두 rc 0 이고 각 출력(`*_run.txt`, `compare_*.txt`, `compare/` 71 파일, 공간 감시 기록 `df_*.log` 모두 `verdict=completed`)이 있다. §10.3–10.6 의 수를 `ctest_*.log`·`compare/measure_<b>.txt` 와 대조해 다른 것이 없었다.
+- 다시 돌린 점검: `ledger_check_verify.txt` 124 행 실패 0, `tools_check_verify.txt` 45 행 실패 0(deep).
+- 빠졌던 것: 기록 디렉터리 `README.md` 의 표가 빌드 전 파일까지만 있었다. 빌드 뒤 파일의 줄과 이 확인의 줄을 더했다.

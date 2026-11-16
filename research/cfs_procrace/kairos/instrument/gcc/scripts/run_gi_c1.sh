@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# run_gi_c1.sh <W> <CFG pre|post> <CAND 1df262a|1b0b338> <INST tx|rx> <out dir> <kz-rt-dump>
+# run_gi_c1.sh <W> <CFG pre|post> <CAND 1df262a|1b0b338> <INST tx|rx> <out dir> <kz-rt-dump> [<site manifest>]
+# The site manifest defaults to the hand manifest kairos/profiles/c1-bp-b051eb0/instr/sites-cf<REV>.kzs (reruns of the
+# old records); a generated plan passes its manifest, the one its derived build was made with.
 # ONE pilot/dev boot of a stage D derived (kzgcc) C1 build in group G-I (KZ_RT_MODE=record: recording on, no gate;
 # SPEC rev 1.4 8.6, docs/event_semantics.md 8.2).  Not a main-experiment result.  Must run as root (setpriv), as the F0
 # scripts.  One record per instance (P7): the instance named by INST records, and the start/stop steps are those of the F0
@@ -24,8 +26,10 @@ case "$CAND" in 1df262a|1b0b338) ;; *) echo "cand 1df262a|1b0b338" >&2; exit 64 
 case "$INST" in tx|rx) ;; *) echo "inst tx|rx" >&2; exit 64 ;; esac
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KZ="$(cd "$HERE/../../.." && pwd)"
-SITES="$KZ/profiles/c1-bp-b051eb0/instr/sites-cf$REV.kzs"
+SITES=${7:-"$KZ/profiles/c1-bp-b051eb0/instr/sites-cf$REV.kzs"}
+[ -f "$SITES" ] || { echo "no site manifest $SITES" >&2; exit 64; }
 SNAP="$(cd "$KZ/../env/tools" && pwd)/persist_snapshot.sh"
+HASHI="$(cd "$KZ/../env/tools" && pwd)/hash_instance.sh"
 U=ubuntu
 [ "$(id -u)" = 0 ] || { echo "must run as root (setpriv)" >&2; exit 2; }
 [ ! -e "$OUT" ] || { echo "refusing to overwrite $OUT" >&2; exit 2; }
@@ -49,6 +53,8 @@ rm -f "$OUT/cfs.tar"
   echo "manifest $SITES sha256=$(sha256sum "$SITES" | cut -c1-64)"
   echo "bindings $W/binds_instr.kzs sha256=$(sha256sum "$W/binds_instr.kzs" | cut -c1-64)"
   echo "environment names of this script (values not recorded): $(env | sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' | sort | paste -sd' ')"; } > "$M"
+# every file of the instance tree (executables, modules, tables, startup scripts) before the start
+"$HASHI" "$OUT/inst" "$OUT/inst_files.sha256" >> "$M" || { echo "hashing the instance files failed" >&2; exit 5; }
 TB=$'\t'
 { echo "# conditions of the G-I boot $CFG/$CAND/$INST (pilot/dev; derived configuration of c1_build/$CFG/$CAND)"
   echo "item${TB}run.group${TB}G-I: KZ_RT_MODE=record for $INST (recording on, no gate, no plan)${TB}unset"

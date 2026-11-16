@@ -1,0 +1,15 @@
+# compare_build.py: /home/user/work/redesign/obs1/runner_check_c5_641/c5_641/NP against /home/user/work/redesign/step2a/tests_8c_fix/c5_641/NP; allowance records/obs1-20261116-ground/runner_check/allow.tsv
+# ONLY 3
+# same 8
+# not allowed 0
+same	args.txt	bytes	
+same	basis.kz	bytes	
+same	basis.txt	bytes	
+same	extract.txt	bytes	
+same	facts.kz	bytes	
+ONLY	facts.txt	only in ref	allowed
+same	relations.log	bytes	
+same	relations.txt	bytes	
+same	sha256.txt	bytes	
+ONLY	space_guard.log	only in new	allowed
+ONLY	status.txt	only in new	allowed

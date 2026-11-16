@@ -1,0 +1,48 @@
+# Two tables before a new boot (read 2026-11-16; files only, no boot)
+
+## 1. Startup-script applications: the first run-loop call and the exit call, in the facts and in the modules of the derived build
+# facts: T8CF = /home/user/work/redesign/step2a/tests_8c_fix/<build>/NP/facts.txt (kz-static 0024f192), section [calls], line in that file
+# module (C1): the module table of the W6 derived build pre/1df262a (derive_c1.sh fixed values: units under <W>/src/cf/ -> 2 (cf.so),
+#   under <W>/src/bp/ -> 3 (bp.so), every other unit -> default module 1); every unit of the arch build was compiled with the plugin
+#   (compile_commands.json of W/instr/gcc/f1/c1/pre_1df262a/ws/build/native/default: -fplugin=...kzgcc in each entry)
+# module (C5 6.4.1): derive_c5.sh fixed values: units under <T>/apps/sample_app/ -> 2, every other unit -> default 1;
+#   all compile lines carry LOCAL_COPTS with -fplugin (build_instr.log)
+# hook calls: bincheck of the derived build (C1: W/instr/gcc/f1/c1/pre_1df262a/bincheck_tx.txt; C5: W/c5tools/build/641/bincheck.txt)
+# hand manifest sites: C1 kairos/profiles/c1-bp-b051eb0/instr/sites-cf281a941.kzs; C5 kairos/profiles/c5-cfe-6.4.x/instr/sites-641.draft.kzs
+
+### c1_pre_tx (startup script W/instr/gcc/f1/c1/pre_1df262a/ws/exe/tx/cf/cfe_es_startup.scr: libs tinycbor, bplib; apps ci_lab, to_lab, sch_lab, cf, bp)
+app	entry	run-loop call (facts)	exit call (facts)	module of the unit	hook calls in the app's file	hand-manifest sites
+ci_lab	CI_Lab_AppMain	site 9325 apps/ci_lab/fsw/src/ci_lab_app.c:91:12 (facts.txt:11638)	site 9331 ci_lab_app.c:112:5 (:11653)	1 (default; the file is ci_lab.so)	0 (ci_lab.so: no kz_rt symbol)	none in the app; callee-side es.exit_app.entry (site 9, core) covers its exit
+to_lab	TO_LAB_AppMain	site 9461 apps/to_lab/fsw/src/to_lab_app.c:96:12 (:11951)	site 9467 to_lab_app.c:109:5 (:11963)	1 (default; to_lab.so)	0	as ci_lab
+sch_lab	SCH_Lab_AppMain	site 9412 apps/sch_lab/fsw/src/sch_lab_app.c:95:12 (:11829)	site 9420 sch_lab_app.c:141:5 (:11846)	1 (default; sch_lab.so)	0	as ci_lab
+cf	CF_AppMain	site 5541 <C1>/pre/src/cf/fsw/src/cf_app.c:338:12 (:8751)	site 5549 cf_app.c:366:5 (:8773)	2 (cf.so)	10 (cf.so)	at-call site 37 cf_exit_app_call.before (cf_app.c:366); no run-loop site
+bp	BP_AppMain	site 206 <C1>/pre/src/bp/fsw/src/bp_app.c:818:12 (:3266)	site 215 bp_app.c:844:5 (:3296)	3 (bp.so)	8 (bp.so)	no run-loop or exit site; callee-side site 9 covers the exit
+# core-tx: 24 hook calls.  Every app's run-loop call and exit call is in the facts.  No hand-manifest site is on a run-loop call.
+# Units of ci_lab, to_lab and sch_lab get module id 1, the core's id, though they are separate shared objects; whether a site placed in
+# them registers correctly under that id is [unverified] (no such site was ever built).
+
+### c5_641 (startup script W/c5tools/build/641/b/cFE-6.4.1-OSS-release/build/cpu1/exe/cf/apps/cfe_es_startup.scr: sample_lib (library init only), sample_app, ci_lab, to_lab, sch_lab)
+app	entry	run-loop call (facts)	exit call (facts)	module of the unit	hook calls in the app's file	hand-manifest sites
+sample_lib	SAMPLE_LibInit	- (library init function, no run loop)	-	1 (sample_lib.so)	0	-
+sample_app	SAMPLE_AppMain	site 95 apps/sample_app/fsw/src/sample_app.c:52:12 (facts.txt:1525)	site 100 sample_app.c:68:5 (:1538)	2 (sample_app.so)	1	see the manifest
+ci_lab	CI_Lab_AppMain	site 3 apps/ci_lab/fsw/src/ci_lab_app.c:103:12 (:1269)	site 9 ci_lab_app.c:124:5 (:1283)	1 (ci_lab.so)	0	-
+to_lab	TO_Lab_AppMain	site 146 apps/to_lab/fsw/src/to_lab_app.c:110:10 (:1662)	site 152 to_lab_app.c:123:4 (:1674)	1 (to_lab.so)	0	-
+sch_lab	SCH_Lab_AppMain	site 135 apps/sch_lab/fsw/src/sch_lab_app.c:101:12 (:1641)	site 142 sch_lab_app.c:137:5 (:1656)	1 (sch_lab.so)	0	-
+# core-linux.bin: 33 hook calls.  The core tasks (ES, EVS, SB, TBL, TIME) call CFE_ES_ExitApp too (facts.txt:4216, 5417, 5435, 7504, 7521, 8836, 8854, 9608, 9626).
+
+## 2. Startup timeout constants per build, and whether earlier natural records reached initialization inside them
+### c1_pre_tx and c1_post_tx (bundle 1df262a; platform configuration: build/native/default/inc/cfe_platform_cfg.h includes <build>/bpxfer_defs/default_platform_cfg.h)
+constant	value	defined at	used at
+CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC	1000	c1_build/pre/1df262a/bpxfer_defs/default_platform_cfg.h:1731 (post: same line, same value)	cfe/modules/es/fsw/src/cfe_es_apps.c:505 (CFE_ES_GetTaskFunction, per-task wait for its entry point); cfe_es_start.c:208 (LATE_INIT sync), :223 (RUNNING sync)
+CFE_PLATFORM_ES_STARTUP_SYNC_POLL_MSEC	50	default_platform_cfg.h:1689	cfe_es_apps.c:510, :530; cfe_es_start.c:921, :923; cfe_es_api.c:634, :636
+CFE_PLATFORM_CORE_MAX_STARTUP_MSEC	30000	default_platform_cfg.h:1713	cfe_es_start.c:811
+# Natural records (console_output.log of every instance): W/w6/run/c1nat/gi/{pre,post}_{1df262a,1b0b338}_{tx,rx} (12 logs) and
+# W/w6/run/c1nat/f0tx/{pre,post}_{1df262a,1b0b338} (8 logs): "Startup Sync failed" (cfe_es_start.c:210, :225) 0 times; "Unable to obtain
+# Entry Point" 0 times; "entering OPERATIONAL state" once in each.  So every earlier natural C1 record reached the RUNNING sync inside
+# the 1000 ms limits; how close to the limit is not recorded (no time stamps of the sync points) [unverified].
+### c5_641 (cFE 6.4.1; build/cpu1/inc/cfe_platform_cfg.h)
+# No startup-script timeout constant: ES of 6.4.1 has none (no STARTUP_SCRIPT_TIMEOUT, STARTUP_SYNC_POLL or CORE_MAX_STARTUP in
+# build/cpu1/inc or cfe/fsw/cfe-core/src/es).  CFE_ES_WaitForStartupSync(TimeOutMilliseconds) (cfe_es_api.c:676, timed wait :743) is
+# called by no unit under apps/ or cfe/fsw/cfe-core/src.  The earlier natural boot (W/c5run/641/run.meta:32-34) stopped on the
+# end-of-startup line "ES Startup: CFE Core Startup Complete" (cfe_es_start.c L315) read at 1095 ms, inside the harness limit 30000 ms
+# (a tool value of run_c5.sh, not a cFE constant).

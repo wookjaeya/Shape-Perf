@@ -15,8 +15,11 @@
 #      extract.build_identity; its policy changes too) -> fix3same rc 1
 #   6  the driver cannot start: no STEP -> rc 2; a single step into an OUT that holds a top-level sha256.txt (a
 #      finished output such as T/) -> rc 2; the control is the same step with STEP2A_OVERWRITE=1 -> rc 0
+#   7  the driver cannot start with a kz-static other than the pinned one (STEP2A_KS_PIN, default the file sha256 of
+#      the step-2a tool 0024f192): the stand-in with the default pin -> rc 2; control: the stand-in pinned -> rc 0
+# The stand-in kz-static is pinned (STEP2A_KS_PIN = its sha256) in every check except the fault of check 7.
 # Each check runs its control first (the same fixtures without the fault), which must give rc 0, so that the rc 1
-# (check 6: rc 2) comes from the fault.  One line per check; exit 0 only when all six pass.  A driver before the fix
+# (check 6: rc 2) comes from the fault.  One line per check; exit 0 only when all seven pass.  A driver before the fix
 # stage reads the table without the fields column; checks 4 and 5 then fail in their control.
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -111,6 +114,7 @@ drv() {
   local X=$1
   env KZB="$X/bin" EB="$X/eb" S4="$X/s4" S5="$X/s5" FIX1="$X/fix1" FIX2="$X/fix2" FIX3="$X/fix3" C1="$X/c1" \
     REF="$X/ref" CT="$X/ct" STEP2A_ALLOW_TABLE="$X/table" STEP2A_RUNS="$X/runs" STEP2A_OVERWRITE="${OVW:-}" \
+    STEP2A_KS_PIN="${PIN-$(sha256sum "$X/bin/kz-static/kz-static" | cut -c1-64)}" \
     bash "$DRIVER" "$3" "$2" > "$2.log" 2>&1
 }
 # why OUT: the first failure the driver recorded (status.txt), or what its log ends with
@@ -178,5 +182,10 @@ outs "$X/ok" "$X" && echo 'stand-in list' > "$X/ok/sha256.txt" && OVW=1 drv "$X"
 outs "$X/bad" "$X" && echo 'stand-in list' > "$X/bad/sha256.txt" && drv "$X" "$X/bad" s5same; f=$?
 env -u STEP2A_OVERWRITE KZB="$X/bin" STEP2A_RUNS="$X/runs" bash "$DRIVER" > "$X/nostep.log" 2>&1; f2=$?
 FAULT_RC=2 result 6 "no STEP, or OUT holds sha256.txt -> rc 2 (driver does not start)" "$c" "$f $f2" "$X/bad" "$X/nostep"
-echo "unit checks: $((6 - NFAIL)) of 6 pass"
+# 7 a kz-static other than the pinned one
+X=$W/w7; world "$X" || exit 2
+outs "$X/ok" "$X" && drv "$X" "$X/ok" s5same; c=$?
+outs "$X/bad" "$X" && PIN= drv "$X" "$X/bad" s5same; f=$?
+FAULT_RC=2 result 7 "kz-static not the pinned binary -> rc 2 (driver does not start)" "$c" "$f" "$X/bad"
+echo "unit checks: $((7 - NFAIL)) of 7 pass"
 exit $((NFAIL > 0))

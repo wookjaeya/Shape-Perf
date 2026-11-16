@@ -1,0 +1,7 @@
+# one_build.sh c5_641 2026-11-16T05:22:34Z
+kz-static /home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static sha256 0024f192980dfbd93e4a662666239c3b4082fcb65f3bd5d25a19fbbfc06d2431
+repo b4f106559b39d4398c7fffe3416289757da1780d
+basis rc=0
+extract rc=0
+relations rc=0
+result PASS

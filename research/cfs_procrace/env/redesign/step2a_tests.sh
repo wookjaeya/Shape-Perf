@@ -741,6 +741,12 @@ sha() {
 case "$STEP" in identity|npsame|run|s5same|fixsame|fix2same|fix3same|twice|count|sha|all) ;; *) echo "unknown step $STEP" >&2; exit 2 ;; esac
 KSH=$(sha256sum "$KS") || { echo "no kz-static at $KS" >&2; exit 2; }
 KDH=$(sha256sum "$KZD") || { echo "no kz-dump at $KZD" >&2; exit 2; }
+# The driver reproduces the step-2a outputs, whose last ones (tests_8c_fix) came from kz-static 0024f192 in the
+# merge-check tree.  That tree is rebuilt in place by later work, so the driver refuses any other kz-static binary
+# (sha256 of the file; `kz-static --identity` prints a tool_sha256 of its own, 3b7de5b7 for this binary, which is not
+# the file hash).  STEP2A_KS_PIN names another expected sha256 explicitly (the unit checks pin their stand-in).
+KS_PIN=${STEP2A_KS_PIN:-0024f192980dfbd93e4a662666239c3b4082fcb65f3bd5d25a19fbbfc06d2431}
+[ "${KSH%% *}" = "$KS_PIN" ] || { echo "refusing: kz-static $KS has sha256 ${KSH%% *}, not the pinned $KS_PIN (STEP2A_KS_PIN)" >&2; exit 2; }
 RUNS=${STEP2A_RUNS:-/home/user/work/redesign/step2a/tests_runs}
 if [ -z "$OUT" ]; then
   if [ "$STEP" = all ]; then
@@ -774,7 +780,7 @@ HEADREV=$(git -C "$R" rev-parse HEAD) || HEADREV=?
 {
   echo "# step2a_tests.sh $STEP $NOW"
   echo "out $OUT"
-  echo "kz-static $KS sha256 ${KSH%% *}"
+  echo "kz-static $KS sha256 ${KSH%% *} (pinned $KS_PIN)"
   echo "kz-dump $KZD sha256 ${KDH%% *}"
   echo "repo $HEADREV"
   echo "inputs EB=$EB S4=$S4 S5=$S5 FIX1=$FIX1 FIX2=$FIX2 FIX3=$FIX3 C1=$C1 REF=$REF CT=$CT"

@@ -1,0 +1,36 @@
+# Evidence ledger (2026-11-16): the cumulative byte-identity list. Every row is re-checked by env/tools/ledger_check.sh after every build.
+# Columns: id, kind, method, list, root, local, verified_copy, remote, published, note.
+#   method sha256c: (cd root && sha256sum -c list); list is relative to the research directory or absolute.
+#   method parts: (cd root && sha256sum -c PARTS.sha256) for a bundle directory.
+#   The four states are kept apart: local = the bytes are on this machine; verified_copy = a second copy checked by stream
+#   (bundle or xz copy, where); remote = a copy outside this machine (none yet: nothing is pushed); published = in the public repository.
+id	kind	method	list	root	local	verified_copy	remote	published	note
+T	output	sha256c	/home/user/work/redesign/step2a/tests/sha256.txt	/home/user/work/redesign/step2a/tests	yes	bundle step2a-20261109-tests	none	no	final step-2a outputs (T/)
+T_RV4	output	sha256c	/home/user/work/redesign/step2a/tests_rv4/sha256.txt	/home/user/work/redesign/step2a/tests_rv4	yes	none	none	no	step-2a re-run of 2026-11-09 (records/step2a-20261109-rv4rerun)
+T_8B	output	sha256c	/home/user/work/redesign/step2a/tests_8b/sha256.txt	/home/user/work/redesign/step2a/tests_8b	yes	none	none	no	tool 7ef1a28c gone
+T_8BF	output	sha256c	/home/user/work/redesign/step2a/tests_8b_fix/sha256.txt	/home/user/work/redesign/step2a/tests_8b_fix	yes	none	none	no	tool 3c5dfc56 gone
+T_8C	output	sha256c	/home/user/work/redesign/step2a/tests_8c/sha256.txt	/home/user/work/redesign/step2a/tests_8c	yes	none	none	no	tool ab482eab gone
+T8CF	output	sha256c	/home/user/work/redesign/step2a/tests_8c_fix/sha256.txt	/home/user/work/redesign/step2a/tests_8c_fix	yes	none	none	no	tool 0024f192 (in place; xz copy tools-20261116)
+PV	tool-copies	sha256c	/home/user/work/preserve/tools-20261109/XZ_SHA256	/home/user/work/preserve/tools-20261109	yes	the copies themselves (round trip records/local-20261109/pv)	none	no	first five copies
+PV_ADDED	tool-copies	sha256c	/home/user/work/preserve/tools-20261109/ADDED_XZ_SHA256	/home/user/work/preserve/tools-20261109	yes	the copies themselves	none	no	four added copies
+B_step2a-20261109-stages	bundle	parts	-	/home/user/work/preserve/bundles-20261109/step2a-20261109-stages	yes	stream-verified 2026-11-09 and 2026-11-16 (records/obs1-20261116-ground/scratch_third_copies/bundle_stream.txt)	none	no	local bundle, not pushed
+B_step2a-20261109-tests	bundle	parts	-	/home/user/work/preserve/bundles-20261109/step2a-20261109-tests	yes	stream-verified 2026-11-09 and 2026-11-16 (records/obs1-20261116-ground/scratch_third_copies/bundle_stream.txt)	none	no	local bundle, not pushed
+B_step2a-20261109-eb	bundle	parts	-	/home/user/work/preserve/bundles-20261109/step2a-20261109-eb	yes	stream-verified 2026-11-09 and 2026-11-16 (records/obs1-20261116-ground/scratch_third_copies/bundle_stream.txt)	none	no	local bundle, not pushed
+B_ck-20261109-rv3check	bundle	parts	-	/home/user/work/preserve/bundles-20261109/ck-20261109-rv3check	yes	stream-verified 2026-11-09 and 2026-11-16 (records/obs1-20261116-ground/scratch_third_copies/bundle_stream.txt)	none	no	local bundle, not pushed
+B_c5-20261109-regen-inputs	bundle	parts	-	/home/user/work/preserve/bundles-20261109/c5-20261109-regen-inputs	yes	stream-verified 2026-11-09 and 2026-11-16 (records/obs1-20261116-ground/scratch_third_copies/bundle_stream.txt)	none	no	local bundle, not pushed
+KB_TOOLS	tools	sha256c	records/obs1-20261116-ground/lists/kb_tools.sha256	/	yes	kz 5d64256a in PV	none	no	kairos-build (the W6 tree) tool hashes
+PLUGINS	tools	sha256c	records/obs1-20261116-ground/lists/plugins.sha256	/	yes	none	none	no	kzgcc 0.2 56a96b79, kzgcc 0.3 27a49a6a
+F1T	tree	sha256c	records/obs1-20261116-ground/lists/f1t.sha256	/home/user/work/instr/gcc/f1	yes	none	none	no	W6 derived C1 trees (16444 files)
+C5_641_B	tree	sha256c	records/obs1-20261116-ground/lists/c5_641_b.sha256	/home/user/work/c5tools/build/641/b	yes	none	none	no	C5 6.4.1 derived instrumented tree (1867 files)
+R_w6-20261029-c1-predict	record-bundle	parts	-	/home/user/Shape-Perf/research/cfs_procrace/records/w6-20261029-c1-predict	yes	bundle in the repository	none	yes	W6 records
+O_w6-20261029-c1-predict	originals	sha256c	records/w6-20261029-c1-predict/MANIFEST.sha256	/home/user/work/w6	yes	bundle records/w6-20261029-c1-predict	none	no	originals of the W6 records
+R_w6-20261029-replays	record-bundle	parts	-	/home/user/Shape-Perf/research/cfs_procrace/records/w6-20261029-replays	yes	bundle in the repository	none	yes	W6 records
+O_w6-20261029-replays	originals	sha256c	records/w6-20261029-replays/MANIFEST.sha256	/home/user/work/w6	yes	bundle records/w6-20261029-replays	none	no	originals of the W6 records
+R_w6-20261029-runs2	record-bundle	parts	-	/home/user/Shape-Perf/research/cfs_procrace/records/w6-20261029-runs2	yes	bundle in the repository	none	yes	W6 records
+O_w6-20261029-runs2	originals	sha256c	records/w6-20261029-runs2/MANIFEST.sha256	/home/user/work/w6	yes	bundle records/w6-20261029-runs2	none	no	originals of the W6 records
+R_w6-20261029-c1-runs	record-bundle	parts	-	/home/user/Shape-Perf/research/cfs_procrace/records/w6-20261029-c1-runs	yes	bundle in the repository	none	yes	W6 records; originals: run/campaign.log grew after this bundle, its later bytes are in w6-20261029-runs2 (originals not re-checked here)
+R_c5-20261029-boots	record-bundle	parts	-	/home/user/Shape-Perf/research/cfs_procrace/records/c5-20261029-boots	yes	bundle in the repository	none	yes	C5 boot records
+O_c5-20261029-boots	originals	sha256c	records/c5-20261029-boots/MANIFEST.sha256	/home/user/work	yes	bundle records/c5-20261029-boots	none	no	originals of the C5 boot records
+R_c5-20261029-replays	record-bundle	parts	-	/home/user/Shape-Perf/research/cfs_procrace/records/c5-20261029-replays	yes	bundle in the repository	none	yes	C5 replay records
+O_c5-20261029-replays	originals	sha256c	records/c5-20261029-replays/MANIFEST.sha256	/home/user/work/c5run	yes	bundle records/c5-20261029-replays	none	no	originals of the C5 replay records
+TOOLS_20261116	tool-copies	sha256c	/home/user/work/preserve/tools-20261116/XZ_SHA256	/home/user/work/preserve/tools-20261116	yes	the copies themselves (round trip records/obs1-20261116-ground/tool_copies/ROUNDTRIP.txt)	none	no	kz-static 0024f192, kz_lint b0f0d6a5, CMakeCache, flags.make

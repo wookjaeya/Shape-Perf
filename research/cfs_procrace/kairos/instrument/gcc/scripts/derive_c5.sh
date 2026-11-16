@@ -11,6 +11,10 @@
 #                                                      basis, CB section 10.5)
 #   derive_c5.sh build <V> <W> instr <kzgcc.so> <rt>   the derived build at <W>/b
 #   derive_c5.sh check <V> <W>                         object comparison, binding merge, link-time hook check
+# build instr and check take the plan inputs --manifest FILE --modules TABLE --exes LIST (derive_args.sh) after the other
+# arguments; a generated plan comes in through derive_plan.sh, which requires them.  Without them the fixed values
+# below (draft manifest, module 2:<T>/apps/sample_app/, default module 1, core-linux.bin and the five app modules)
+# stay, only for reruns of the old hand manifests.
 # V 1|2.  <rt>: build_runtime.sh -m32 <rt> <the V's manifest> <kzgcc.so>.  DL: the tarball directory (default
 # /home/user/work/c5/dl, hashes CB section 1.2).
 #
@@ -35,10 +39,16 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KZ="$(cd "$HERE/../../.." && pwd)"
 DL=${DL:-/home/user/work/c5/dl}
+POS=(); OPT=()
+for a in "$@"; do if [ ${#OPT[@]} -gt 0 ] || [ "${a#--}" != "$a" ]; then OPT+=("$a"); else POS+=("$a"); fi; done
+set -- "${POS[@]}"
+. "$HERE/derive_args.sh"
+derive_plan_args "${OPT[@]}"
 CMD=${1:?usage}; V=${2:?1|2}; W=${3:?work dir}
 case "$V" in 1|2) ;; *) echo "V is 1|2" >&2; exit 64 ;; esac
 REL=cFE-6.4.$V-OSS-release
 SITES="$KZ/profiles/c5-cfe-6.4.x/instr/sites-64$V.draft.kzs"
+[ "$PLAN_MODE" = 1 ] && SITES=$PLAN_MANIFEST
 REF_LIBS="-lm -lpthread -ldl -lrt"  # psp/fsw/pc-linux/make/link-rules.mak L26 (checked against the tree in build)
 tree_hash() { ( cd "$1" && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum ) | sha256sum | cut -c1-64; }
 
@@ -71,12 +81,18 @@ build)
   if [ "$VAR" = instr ]; then
     PLUGIN=${5:?kzgcc.so}; RT=${6:?runtime dir}
     OUT="$W/binds_instr"; rm -rf "$OUT"; mkdir -p "$OUT"
-    PF="-fplugin=$PLUGIN -fplugin-arg-kzgcc-manifest=$SITES -fplugin-arg-kzgcc-out=$OUT -fplugin-arg-kzgcc-module=2:$T/apps/sample_app/ -fplugin-arg-kzgcc-default-module=1"
+    if [ "$PLAN_MODE" = 1 ]; then
+      MF=$(derive_module_flags "$T") || exit 64
+      PF="-fplugin=$PLUGIN -fplugin-arg-kzgcc-manifest=$SITES -fplugin-arg-kzgcc-out=$OUT $MF"
+    else
+      PF="-fplugin=$PLUGIN -fplugin-arg-kzgcc-manifest=$SITES -fplugin-arg-kzgcc-out=$OUT -fplugin-arg-kzgcc-module=2:$T/apps/sample_app/ -fplugin-arg-kzgcc-default-module=1"
+    fi
     RTL="-Wl,--whole-archive $RT/libkzrt-posix.a $RT/libkzrt.a -Wl,--no-whole-archive $RT/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o $RT/CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o"
     MAKEVARS=("LOCAL_COPTS=$PF" "LIBS=$RTL $REF_LIBS")
     { echo "D3 make LOCAL_COPTS=$PF"; echo "D3' make LIBS=$RTL $REF_LIBS"
       echo "plugin sha256 $(sha256sum "$PLUGIN" | cut -c1-64) ($(strings "$PLUGIN" | grep -m1 '^kzgcc [0-9]')) manifest sha256 $(sha256sum "$SITES" | cut -c1-64)"
-      sed 's/^/runtime /' "$RT/runtime.record"; } >> "$R"
+      sed 's/^/runtime /' "$RT/runtime.record"
+      [ "$PLAN_MODE" = 0 ] || echo "plan inputs: manifest $SITES sha256 $(sha256sum "$SITES" | cut -c1-64) modules $PLAN_MODULES sha256 $(sha256sum "$PLAN_MODULES" | cut -c1-64) exes $PLAN_EXES sha256 $(sha256sum "$PLAN_EXES" | cut -c1-64)"; } >> "$R"
   fi
   ( cd "$T" && . ./setvars.sh && cd build/cpu1 &&
     { echo "## make config"; date -u +%FT%TZ; make config; echo "make config rc=$?"
@@ -88,7 +104,9 @@ build)
     echo "compile lines with -DEXCLUDE_CFE_TBL: $(grep -E '^gcc .* -c ' "$L" | grep -c -- '-DEXCLUDE_CFE_TBL')"
     echo "compile lines with -fplugin: $(grep -E '^gcc .* -c ' "$L" | grep -c -- '-fplugin=')"
     echo "core link line: $(grep -E '^gcc .* -o core-linux.bin ' "$L" | sed "s#$T#<T>#g")"
-    for f in build/cpu1/exe/core-linux.bin build/cpu1/exe/cf/apps/sample_app.so build/cpu1/exe/cf/apps/sample_lib.so build/cpu1/exe/cf/apps/ci_lab.so build/cpu1/exe/cf/apps/to_lab.so build/cpu1/exe/cf/apps/sch_lab.so; do
+    if [ "$PLAN_MODE" = 1 ]; then mapfile -t HL < <(derive_exe_paths)
+    else HL=(build/cpu1/exe/core-linux.bin build/cpu1/exe/cf/apps/sample_app.so build/cpu1/exe/cf/apps/sample_lib.so build/cpu1/exe/cf/apps/ci_lab.so build/cpu1/exe/cf/apps/to_lab.so build/cpu1/exe/cf/apps/sch_lab.so); fi
+    for f in "${HL[@]}"; do
       echo "$f sha256 $(sha256sum "$T/$f" | cut -c1-64) $(stat -c %s "$T/$f") B $(file -b "$T/$f" | cut -d, -f1-2)"; done
   } >> "$R"
   ( cd "$T/build/cpu1" && find . -name '*.o' -type f | LC_ALL=C sort | xargs sha256sum ) > "$W/objects_$VAR.sha256"
@@ -126,7 +144,12 @@ check)
       FNR == NR { if ($1 == "value") m[$2] += 2 ^ $3; next }
       $1 == "bind" { site = ""; vals = 0; for (i = 3; i <= NF; i++) { if ($i ~ /^site=/) site = substr($i, 6); if ($i ~ /^vals=/) vals = hex(substr($i, 6)) }
                      if (vals != m[site] + 0) printf "%s(site %s: vals %d, declared %d) ", $2, site, vals, m[site] }' "$SITES" binds_instr.kzs)"
+    if [ "$PLAN_MODE" = 1 ]; then
+      mapfile -t GF < <(derive_exe_paths "$(derive_exe_groups | head -1)" | sed "s|^|$T/|")
+      "$HERE/bincheck.sh" "${GF[@]}" > bincheck.txt
+    else
     "$HERE/bincheck.sh" "$T/build/cpu1/exe/core-linux.bin" "$T/build/cpu1/exe/cf/apps/sample_app.so" > bincheck.txt
+    fi
     echo "hook calls: $(wc -l < bincheck.txt) ($(awk '{print $1, $3}' bincheck.txt | sort | uniq -c | paste -sd';'))"
     "$HERE/hookcheck.sh" binds_instr.kzs bincheck.txt > hookcheck.txt; echo "hookcheck rc=$? $(tail -1 hookcheck.txt)"
     grep -vE '^(ok|gap|summary)' hookcheck.txt | sed 's/^/  /'

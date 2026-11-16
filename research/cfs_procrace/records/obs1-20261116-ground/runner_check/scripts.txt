@@ -1,0 +1,1 @@
+one_build.sh sha256 f33e2c37a2c5457e4320a8a2e1aa649a45671e3eb80c26a0563da321911c5efc; compare_build.py sha256 349f50b7b3cff5cc8ec4cfc68bfa1de3af96faededd7099caa5120f6f8e02083; run 2 (the final scripts); the first run with an earlier one_build.sh gave the same eight same and three ONLY

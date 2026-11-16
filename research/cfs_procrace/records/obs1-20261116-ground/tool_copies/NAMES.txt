@@ -1,0 +1,10 @@
+kz-static.0024f192.xz tools/kz-static/kz-static
+kz_lint.b0f0d6a5.xz tests/lint/kz_lint
+mc.CMakeCache.txt.bc2f43b4.xz CMakeCache.txt
+mc.kz-instr-clang.flags.make.b830e17e.xz instrument/clang/CMakeFiles/kz-instr-clang.dir/flags.make
+mc.kz-rt-dump.flags.make.8ca8b226.xz runtime/CMakeFiles/kz-rt-dump.dir/flags.make
+mc.kz_lint.flags.make.d0789908.xz tests/lint/CMakeFiles/kz_lint.dir/flags.make
+mc.kz-dump.flags.make.fb7a33e1.xz tools/kz-dump/CMakeFiles/kz-dump.dir/flags.make
+mc.kz-phi.flags.make.9000d373.xz tools/kz-phi/CMakeFiles/kz-phi.dir/flags.make
+mc.kz-static.flags.make.dd3744d4.xz tools/kz-static/CMakeFiles/kz-static.dir/flags.make
+mc.kz.flags.make.ab3540b3.xz tools/kz/CMakeFiles/kz.dir/flags.make

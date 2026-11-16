@@ -9,6 +9,10 @@
 #                                                              build tree is removed after the object hashes are written
 #   derive_c1.sh build <CFG> <CAND> <W> instr <kzgcc.so> <rt>  the derived build (G-I0/G-I/G-I-H are runtime modes of it)
 #   derive_c1.sh check <CFG> <CAND> <W>                        object comparison, binding merge, link-time hook check
+# build instr and check take the plan inputs --manifest FILE --modules TABLE --exes LIST (derive_args.sh) after the other
+# arguments; a generated plan comes in through derive_plan.sh, which requires them.  Without them the fixed values
+# below (hand manifest, modules 2:<W>/src/cf/ 3:<W>/src/bp/, default module 1 or 4, the six C1 executables) stay, only
+# for reruns of the old hand manifests.
 # CFG pre|post (CF 281a941 / 833fdbb), CAND 1df262a|1b0b338.  <rt>: build_runtime.sh <rt> <the CFG's manifest> <kzgcc.so>.
 #
 # The commands are those of c1_build/build_one.sh (nasa/bp b051eb0 build-run-bp-common.yml L45-L46, L127-L131) with its
@@ -27,10 +31,16 @@ set -uo pipefail
 REF=/home/user/work/procrace/c1_build
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KZ="$(cd "$HERE/../../.." && pwd)"
+POS=(); OPT=()
+for a in "$@"; do if [ ${#OPT[@]} -gt 0 ] || [ "${a#--}" != "$a" ]; then OPT+=("$a"); else POS+=("$a"); fi; done
+set -- "${POS[@]}"
+. "$HERE/derive_args.sh"
+derive_plan_args "${OPT[@]}"
 CMD=${1:?usage}; CFG=${2:?pre|post}; CAND=${3:?1df262a|1b0b338}; W=${4:?work dir}
 case "$CFG" in pre) REV=281a941 ;; post) REV=833fdbb ;; *) echo "CFG is pre|post" >&2; exit 64 ;; esac
 case "$CAND" in 1df262a) MOD=1 ;; 1b0b338) MOD=4 ;; *) echo "CAND is 1df262a|1b0b338" >&2; exit 64 ;; esac
 SITES="$KZ/profiles/c1-bp-b051eb0/instr/sites-cf$REV.kzs"
+[ "$PLAN_MODE" = 1 ] && SITES=$PLAN_MANIFEST
 RB="$REF/$CFG/$CAND"
 
 case "$CMD" in
@@ -71,19 +81,27 @@ build)
   if [ "$VAR" = instr ]; then
     PLUGIN=${6:?kzgcc.so}; RT=${7:?runtime dir}
     OUT="$W/binds_instr"; mkdir -p "$OUT"
-    PF="-fplugin=$PLUGIN -fplugin-arg-kzgcc-manifest=$SITES -fplugin-arg-kzgcc-out=$OUT -fplugin-arg-kzgcc-module=2:$W/src/cf/ -fplugin-arg-kzgcc-module=3:$W/src/bp/ -fplugin-arg-kzgcc-default-module=$MOD"
+    if [ "$PLAN_MODE" = 1 ]; then
+      MF=$(derive_module_flags "$W") || exit 64
+      PF="-fplugin=$PLUGIN -fplugin-arg-kzgcc-manifest=$SITES -fplugin-arg-kzgcc-out=$OUT $MF"
+    else
+      PF="-fplugin=$PLUGIN -fplugin-arg-kzgcc-manifest=$SITES -fplugin-arg-kzgcc-out=$OUT -fplugin-arg-kzgcc-module=2:$W/src/cf/ -fplugin-arg-kzgcc-module=3:$W/src/bp/ -fplugin-arg-kzgcc-default-module=$MOD"
+    fi
     LF="-Wl,--whole-archive $RT/libkzrt-posix.a $RT/libkzrt.a -Wl,--no-whole-archive $RT/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o $RT/CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o"
     { echo "## arch cache (D3)"; cmake -DCMAKE_C_FLAGS="$CFLAGS $PF" -DCMAKE_EXE_LINKER_FLAGS="$LF" build/native/default; echo "arch reconfigure rc=$?"; } >> "build_$VAR.log" 2>&1
     { echo "D3 arch CMAKE_C_FLAGS=$CFLAGS $PF"; echo "D3 arch CMAKE_EXE_LINKER_FLAGS=$LF"
       echo "plugin sha256 $(sha256sum "$PLUGIN" | cut -c1-64) manifest sha256 $(sha256sum "$SITES" | cut -c1-64)"
-      sed 's/^/runtime /' "$RT/runtime.record"; } >> "$R"
+      sed 's/^/runtime /' "$RT/runtime.record"
+      [ "$PLAN_MODE" = 0 ] || echo "plan inputs: manifest $SITES sha256 $(sha256sum "$SITES" | cut -c1-64) modules $PLAN_MODULES sha256 $(sha256sum "$PLAN_MODULES" | cut -c1-64) exes $PLAN_EXES sha256 $(sha256sum "$PLAN_EXES" | cut -c1-64)"; } >> "$R"
   fi
   { echo "## make"; date -u +%FT%TZ; ( cd build && make DESTDIR=$W/ws -j2 mission-install ); echo "make rc=$?"; date -u +%FT%TZ; } >> "build_$VAR.log" 2>&1
   grep -E '^(cmake|make|arch reconfigure) rc=' "build_$VAR.log" | tee -a "$R"
   echo "compiler warnings in the build log: $(grep -c 'warning:' "build_$VAR.log")" >> "$R"
   grep -E '^CMAKE_(C_FLAGS|EXE_LINKER_FLAGS|BUILD_TYPE):' build/native/default/CMakeCache.txt | sed 's/^/arch cache /' >> "$R"
   grep -E '^CMAKE_(C_FLAGS|EXE_LINKER_FLAGS|BUILD_TYPE):' build/CMakeCache.txt | sed 's/^/mission cache /' >> "$R"
-  for f in exe/tx/core-tx exe/rx/core-rx exe/tx/cf/cf.so exe/tx/cf/bp.so exe/rx/cf/cf.so exe/rx/cf/bp.so build/src/cfe_module_version_table.c build/src/cfe_build_env_table.c; do
+  if [ "$PLAN_MODE" = 1 ]; then mapfile -t HL < <(derive_exe_paths; echo build/src/cfe_module_version_table.c; echo build/src/cfe_build_env_table.c)
+  else HL=(exe/tx/core-tx exe/rx/core-rx exe/tx/cf/cf.so exe/tx/cf/bp.so exe/rx/cf/cf.so exe/rx/cf/bp.so build/src/cfe_module_version_table.c build/src/cfe_build_env_table.c); fi
+  for f in "${HL[@]}"; do
     echo "$f sha256 $(sha256sum "$f" | cut -c1-64) (reference $(sha256sum "$RB/$f" 2>/dev/null | cut -c1-64))"; done >> "$R"
   ( cd build/native/default && find . -name '*.o' -type f | sort | xargs sha256sum ) > "$W/objects_$VAR.sha256"
   echo "objects: $(wc -l < "$W/objects_$VAR.sha256")" >> "$R"
@@ -108,11 +126,24 @@ check)
     done < objects_differ.txt
     for u in $units; do grep -q "/$(basename "$u").o\$" objects_differ.txt || echo "instrumented unit with an unchanged object: $u"; done
     cat merge.txt
+    if [ "$PLAN_MODE" = 1 ]; then
+      G0=
+      for g in $(derive_exe_groups); do
+        mapfile -t GF < <(derive_exe_paths "$g" | sed 's|^|ws/|')
+        "$HERE/bincheck.sh" "${GF[@]}" > "bincheck_$g.txt"
+        echo "hook calls: $g $(wc -l < "bincheck_$g.txt")"
+        if [ -z "$G0" ]; then G0=$g
+        else echo "same (function, hook, id) lists $G0 $g: $(cmp -s <(awk '{print $2, $3, $4}' "bincheck_$G0.txt" | sort) <(awk '{print $2, $3, $4}' "bincheck_$g.txt" | sort) && echo yes || echo NO)"; fi
+      done
+      "$HERE/hookcheck.sh" binds_instr.kzs "bincheck_$G0.txt" > "hookcheck_$G0.txt"; echo "hookcheck $G0 rc=$? $(tail -1 "hookcheck_$G0.txt")"
+      grep -vE '^(ok|gap|summary)' "hookcheck_$G0.txt" | sed 's/^/  /'
+    else
     "$HERE/bincheck.sh" ws/exe/tx/core-tx ws/exe/tx/cf/cf.so ws/exe/tx/cf/bp.so > bincheck_tx.txt
     "$HERE/bincheck.sh" ws/exe/rx/core-rx ws/exe/rx/cf/cf.so ws/exe/rx/cf/bp.so > bincheck_rx.txt
     echo "hook calls: tx $(wc -l < bincheck_tx.txt), rx $(wc -l < bincheck_rx.txt); same (function, hook, id) lists: $(cmp -s <(awk '{print $2, $3, $4}' bincheck_tx.txt | sort) <(awk '{print $2, $3, $4}' bincheck_rx.txt | sort) && echo yes || echo NO)"
     "$HERE/hookcheck.sh" binds_instr.kzs bincheck_tx.txt > hookcheck_tx.txt; echo "hookcheck tx rc=$? $(tail -1 hookcheck_tx.txt)"
     grep -vE '^(ok|gap|summary)' hookcheck_tx.txt | sed 's/^/  /'
+    fi
   } > check.record
   cat check.record ;;
 *) echo "usage: derive_c1.sh prepare|build|check <CFG> <CAND> <W> [ref | instr <kzgcc.so> <rt>]" >&2; exit 64 ;;

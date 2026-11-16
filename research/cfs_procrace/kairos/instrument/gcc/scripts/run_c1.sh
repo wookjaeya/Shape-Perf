@@ -15,6 +15,7 @@ set -uo pipefail
 W=${1:?usage}; OUT=${2:?usage}; RTDUMP=${3:?kz-rt-dump}; EVENTS=${4:?kzgcc-events}
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SITES="$(cd "$HERE/../sites" && pwd)/c1_post_1df262a.kzs"
+HASHI="$(cd "$HERE/../../../../env/tools" && pwd)/hash_instance.sh"
 U=ubuntu
 [ "$(id -u)" = 0 ] || { echo "must run as root (setpriv)" >&2; exit 2; }
 [ ! -e "$OUT" ] || { echo "refusing to overwrite $OUT" >&2; exit 2; }
@@ -36,6 +37,7 @@ rm -f "$OUT/cfs-bpapp.tar"
   echo "kernel=$(uname -r) nproc=$(nproc) run_user=$U ($(id $U)) mqueue.msg_max=$(cat /proc/sys/fs/mqueue/msg_max)"
   for f in tx/core-tx tx/cf/cf.so tx/cf/bp.so rx/core-rx; do echo "file $f sha256=$(sha256sum "$OUT/inst/$f" | cut -c1-64)"; done
   echo "manifest $SITES sha256=$(sha256sum "$SITES" | cut -c1-64)"
+  "$HASHI" "$OUT/inst" "$OUT/inst_files.sha256" || { echo "hashing the instance files failed" >&2; exit 5; }
   echo "environment names of this script (values not recorded): $(env | sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' | sort | paste -sd' ')"
   echo "instances.start_utc=$(date -u +%FT%T.%NZ)"; } > "$M"
 ( cd "$OUT/inst/tx" && exec env KZ_RT_DUMP="$OUT/dump/tx.kzrt" KZ_RT_RUN_ID=1 KZ_RT_INSTANCE=1 "${AS[@]}" ./core-tx > console_output.log 2>&1 < /dev/null ) & TX=$!

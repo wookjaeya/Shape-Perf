@@ -54,6 +54,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; SELF="$HERE/$(basename "${
 KZ="$(cd "$HERE/../../.." && pwd)"
 SITES="$KZ/profiles/c1-bp-b051eb0/instr/sites-cf$REV.kzs"
 SNAP="$(cd "$KZ/../env/tools" && pwd)/persist_snapshot.sh"
+HASHI="$(cd "$KZ/../env/tools" && pwd)/hash_instance.sh"
 [ "$(id -u)" = 0 ] || { echo "must run as root (setpriv)" >&2; exit 2; }
 mkdir -p "$ROOT"; ROOT="$(cd "$ROOT" && pwd)"
 RUN="$ROOT/${TAG}_${CFG}_${CAND}_${INST}"
@@ -77,6 +78,8 @@ rm -f "$RUN/cfs.tar"
   echo "plan $KZH sha256=$(sha256sum "$KZH" | cut -c1-64) -> plan.kzrtp sha256=$(sha256sum "$RUN/plan.kzrtp" | cut -c1-64)"
   echo "kz $KZB sha256=$(sha256sum "$KZB" | cut -c1-64)"
   echo "environment names of this script (values not recorded): $(env | sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' | sort | paste -sd' ')"; } > "$M"
+# every file of the instance tree (executables, modules, tables, startup scripts) before the start
+"$HASHI" "$RUN/inst" "$RUN/inst_files.sha256" >> "$M" || { echo "hashing the instance files failed" >&2; exit 5; }
 TB=$'\t'
 { echo "# conditions of the G-I-H boot $CFG/$CAND/$INST (controlled, $LABEL; pilot/dev; derived configuration of c1_build/$CFG/$CAND)"
   echo "item${TB}run.group${TB}G-I-H: KZ_RT_MODE=control, KZ_RT_PLAN=plan.kzrtp (kz rtplan of $(basename "$KZH"))${TB}unset"

@@ -258,6 +258,8 @@ STORE=/dev/shm/kzrt-c5-64$V-$(date -u +%Y%m%dT%H%M%SZ).store; echo "$STORE" > "$
   echo "tool script: $(script --version) $(command -v script) sha256=$(sha256sum "$(command -v script)" | cut -c1-64); unshare $(command -v unshare) sha256=$(sha256sum "$(command -v unshare)" | cut -c1-64)"
   echo "tool shell for script -c: SHELL=${SHELL:-unset} ($(readlink -f "${SHELL:-/bin/sh}")); TERM=${TERM:-unset}"
   for f in "$EXE/core-linux.bin" "$EXE"/cf/apps/*; do echo "file ${f#$TREE/} sha256=$(sha256sum "$f" | cut -c1-64)"; done
+  # every file under the instance directory (the boot runs in place in exe/), before the start
+  "$R/env/tools/hash_instance.sh" "$EXE" "$OUT/inst_files.sha256" || { echo "hashing the instance files failed" >&2; exit 5; }
   echo "manifest $SITES sha256=$(sha256sum "$SITES" | cut -c1-64) (build_instr.record: $want)"
   echo "bindings $BINDS sha256=$(sha256sum "$BINDS" | cut -c1-64)"
   echo "kz-rt-dump (32-bit) $RTDUMP sha256=$(sha256sum "$RTDUMP" | cut -c1-64)"

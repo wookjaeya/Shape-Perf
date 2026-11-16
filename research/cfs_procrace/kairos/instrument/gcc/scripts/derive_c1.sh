@@ -9,8 +9,10 @@
 #                                                              build tree is removed after the object hashes are written
 #   derive_c1.sh build <CFG> <CAND> <W> instr <kzgcc.so> <rt>  the derived build (G-I0/G-I/G-I-H are runtime modes of it)
 #   derive_c1.sh check <CFG> <CAND> <W>                        object comparison, binding merge, link-time hook check
-# build instr and check take the plan inputs --manifest FILE --modules TABLE --exes LIST (derive_args.sh) after the other
-# arguments; a generated plan comes in through derive_plan.sh, which requires them.  Without them the fixed values
+# build instr and check take the plan inputs --manifest FILE --modules TABLE --exes LIST --path-map MAP (derive_args.sh)
+# after the other arguments; a generated plan comes in through derive_plan.sh, which requires them.  prepare writes
+# <W>/path_map.tsv: one line per tree it copies (reference directory, its copy in <W>), the map that carries the plan's
+# reference paths (module prefixes, executables) into <W> (path_map.sh).  Without the plan inputs the fixed values
 # below (hand manifest, modules 2:<W>/src/cf/ 3:<W>/src/bp/, default module 1 or 4, the six C1 executables) stay, only
 # for reruns of the old hand manifests.
 # CFG pre|post (CF 281a941 / 833fdbb), CAND 1df262a|1b0b338.  <rt>: build_runtime.sh <rt> <the CFG's manifest> <kzgcc.so>.
@@ -42,6 +44,7 @@ case "$CAND" in 1df262a) MOD=1 ;; 1b0b338) MOD=4 ;; *) echo "CAND is 1df262a|1b0
 SITES="$KZ/profiles/c1-bp-b051eb0/instr/sites-cf$REV.kzs"
 [ "$PLAN_MODE" = 1 ] && SITES=$PLAN_MANIFEST
 RB="$REF/$CFG/$CAND"
+rel_ws() { case "$1" in "$W/ws/"*) printf '%s\n' "${1#"$W/ws/"}" ;; *) printf '%s\n' "$1" ;; esac; }
 
 case "$CMD" in
 prepare)
@@ -50,6 +53,10 @@ prepare)
   ( cd "$REF" && tar --exclude=.git -cf - "bundle_$CAND" ) | ( cd "$W" && tar -xf - )
   ( cd "$REF/$CFG" && tar --exclude=.git -cf - src ) | ( cd "$W" && tar -xf - )
   ( cd "$RB" && tar -cf - bpxfer_defs ) | ( cd "$W/ws" && tar -xf - )
+  # the copies above, as a path map: the reference build directory (bpxfer_defs; build and exe are made at the same
+  # places under ws by the build steps below) and the two source trees
+  { echo "# kz path map; derive_c1.sh prepare $CFG $CAND: the reference directories and their copies in $W"
+    printf '%s/\t%s/\n' "$REF/bundle_$CAND" "$W/bundle_$CAND" "$REF/$CFG/src" "$W/src" "$RB" "$W/ws"; } > "$W/path_map.tsv"
   cp -p "$RB/build/src/cfe_module_version_table.c" "$W/ws/bpxfer_defs/ref_module_version_table.c"
   cat > "$W/ws/bpxfer_defs/generate_module_version.cmake" <<EOF
 # D2: installs the module version table of the reference build c1_build/$CFG/$CAND byte for byte (the copy has no
@@ -63,6 +70,7 @@ EOF
     echo "diff -r reference $CFG/src (excluding .git): $(diff -rq -x .git "$REF/$CFG/src" "$W/src" | wc -l) differences"
     echo "diff -r reference bpxfer_defs: $(diff -rq "$RB/bpxfer_defs" "$W/ws/bpxfer_defs" | tr '\n' ' ')"
     echo "ref_module_version_table.c sha256 $(sha256sum "$W/ws/bpxfer_defs/ref_module_version_table.c" | cut -c1-64)"
+    echo "path map $W/path_map.tsv sha256 $(sha256sum "$W/path_map.tsv" | cut -c1-64):"; grep -v '^#' "$W/path_map.tsv" | sed 's/^/  /'
   } > "$W/prepare.record"
   cat "$W/prepare.record" ;;
 build)
@@ -92,17 +100,22 @@ build)
     { echo "D3 arch CMAKE_C_FLAGS=$CFLAGS $PF"; echo "D3 arch CMAKE_EXE_LINKER_FLAGS=$LF"
       echo "plugin sha256 $(sha256sum "$PLUGIN" | cut -c1-64) manifest sha256 $(sha256sum "$SITES" | cut -c1-64)"
       sed 's/^/runtime /' "$RT/runtime.record"
-      [ "$PLAN_MODE" = 0 ] || echo "plan inputs: manifest $SITES sha256 $(sha256sum "$SITES" | cut -c1-64) modules $PLAN_MODULES sha256 $(sha256sum "$PLAN_MODULES" | cut -c1-64) exes $PLAN_EXES sha256 $(sha256sum "$PLAN_EXES" | cut -c1-64)"; } >> "$R"
+      [ "$PLAN_MODE" = 0 ] || echo "plan inputs: manifest $SITES sha256 $(sha256sum "$SITES" | cut -c1-64) modules $PLAN_MODULES sha256 $(sha256sum "$PLAN_MODULES" | cut -c1-64) exes $PLAN_EXES sha256 $(sha256sum "$PLAN_EXES" | cut -c1-64) path map ${PLAN_PATH_MAP:-none} sha256 $([ -n "$PLAN_PATH_MAP" ] && sha256sum "$PLAN_PATH_MAP" | cut -c1-64 || echo -)"; } >> "$R"
   fi
   { echo "## make"; date -u +%FT%TZ; ( cd build && make DESTDIR=$W/ws -j2 mission-install ); echo "make rc=$?"; date -u +%FT%TZ; } >> "build_$VAR.log" 2>&1
   grep -E '^(cmake|make|arch reconfigure) rc=' "build_$VAR.log" | tee -a "$R"
   echo "compiler warnings in the build log: $(grep -c 'warning:' "build_$VAR.log")" >> "$R"
   grep -E '^CMAKE_(C_FLAGS|EXE_LINKER_FLAGS|BUILD_TYPE):' build/native/default/CMakeCache.txt | sed 's/^/arch cache /' >> "$R"
   grep -E '^CMAKE_(C_FLAGS|EXE_LINKER_FLAGS|BUILD_TYPE):' build/CMakeCache.txt | sed 's/^/mission cache /' >> "$R"
-  if [ "$PLAN_MODE" = 1 ]; then mapfile -t HL < <(derive_exe_paths; echo build/src/cfe_module_version_table.c; echo build/src/cfe_build_env_table.c)
-  else HL=(exe/tx/core-tx exe/rx/core-rx exe/tx/cf/cf.so exe/tx/cf/bp.so exe/rx/cf/cf.so exe/rx/cf/bp.so build/src/cfe_module_version_table.c build/src/cfe_build_env_table.c); fi
-  for f in "${HL[@]}"; do
-    echo "$f sha256 $(sha256sum "$f" | cut -c1-64) (reference $(sha256sum "$RB/$f" 2>/dev/null | cut -c1-64))"; done >> "$R"
+  if [ "$PLAN_MODE" = 1 ]; then
+    # the plan's executables in this work space (path map) beside the reference file the plan names
+    mapfile -t HL < <(derive_exe_paths); mapfile -t HR < <(derive_exe_refs)
+    [ ${#HL[@]} = ${#HR[@]} ] || { echo "executable list: mapping failed" >&2; exit 64; }
+    HL+=(build/src/cfe_module_version_table.c build/src/cfe_build_env_table.c); HR+=("" "")
+  else HL=(exe/tx/core-tx exe/rx/core-rx exe/tx/cf/cf.so exe/tx/cf/bp.so exe/rx/cf/cf.so exe/rx/cf/bp.so build/src/cfe_module_version_table.c build/src/cfe_build_env_table.c); HR=(); fi
+  for i in "${!HL[@]}"; do
+    f=${HL[$i]}; rf=${HR[$i]:-}; case "$rf" in /*) ;; *) rf=$RB/$f ;; esac
+    echo "$(rel_ws "$f") sha256 $(sha256sum "$f" | cut -c1-64) (reference $(sha256sum "$rf" 2>/dev/null | cut -c1-64))"; done >> "$R"
   ( cd build/native/default && find . -name '*.o' -type f | sort | xargs sha256sum ) > "$W/objects_$VAR.sha256"
   echo "objects: $(wc -l < "$W/objects_$VAR.sha256")" >> "$R"
   if [ "$VAR" = ref ]; then
@@ -129,7 +142,7 @@ check)
     if [ "$PLAN_MODE" = 1 ]; then
       G0=
       for g in $(derive_exe_groups); do
-        mapfile -t GF < <(derive_exe_paths "$g" | sed 's|^|ws/|')
+        mapfile -t GF < <(derive_exe_paths "$g" | while IFS= read -r p; do case "$p" in /*) echo "$p" ;; *) echo "ws/$p" ;; esac; done)
         "$HERE/bincheck.sh" "${GF[@]}" > "bincheck_$g.txt"
         echo "hook calls: $g $(wc -l < "bincheck_$g.txt")"
         if [ -z "$G0" ]; then G0=$g
@@ -137,6 +150,14 @@ check)
       done
       "$HERE/hookcheck.sh" binds_instr.kzs "bincheck_$G0.txt" > "hookcheck_$G0.txt"; echo "hookcheck $G0 rc=$? $(tail -1 "hookcheck_$G0.txt")"
       grep -vE '^(ok|gap|summary)' "hookcheck_$G0.txt" | sed 's/^/  /'
+      # every installed file beside the reference build's file at the same place, and whether the plan's list names it
+      mapfile -t PL < <(derive_exe_paths)
+      ( cd ws/exe && find . -type f | LC_ALL=C sort ) | while IFS= read -r f; do
+        f=${f#./}; d=$(sha256sum "ws/exe/$f" | cut -c1-64); r=$(sha256sum "$RB/exe/$f" 2> /dev/null | cut -c1-64)
+        inplan=no; for p in "${PL[@]}"; do [ "$p" = "$W/ws/exe/$f" ] || [ "$p" = "exe/$f" ] && inplan=yes; done
+        printf 'exe/%s\t%s\t%s\t%s\t%s\n' "$f" "$d" "${r:--}" "$([ "$d" = "$r" ] && echo same || echo differs)" "$inplan"
+      done > install_inventory.tsv
+      echo "installed files: $(wc -l < install_inventory.tsv), same as the reference $(awk -F'\t' '$4 == "same"' install_inventory.tsv | wc -l), differing $(awk -F'\t' '$4 == "differs"' install_inventory.tsv | wc -l), in the plan's list $(awk -F'\t' '$5 == "yes"' install_inventory.tsv | wc -l) (install_inventory.tsv)"
     else
     "$HERE/bincheck.sh" ws/exe/tx/core-tx ws/exe/tx/cf/cf.so ws/exe/tx/cf/bp.so > bincheck_tx.txt
     "$HERE/bincheck.sh" ws/exe/rx/core-rx ws/exe/rx/cf/cf.so ws/exe/rx/cf/bp.so > bincheck_rx.txt

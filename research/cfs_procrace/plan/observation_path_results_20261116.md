@@ -539,3 +539,49 @@ kz-static 빌드가 없으므로 빌드 전 선언은 없다. 바뀌는 출력�
 - `need event-send` 는 경로 A 의 계획된 행마다 적었다(결과의 효과가 facts 에 없다). `cf_cfdp.c:997` 의 사건 전송(행의 처리 사슬에 없다)은 이 need 에 든다.
 - 앞 단계의 출력(relations 다섯 빌드의 재실행, 민감도 실행)은 이 단계의 도구가 바이트 동일하게 다시 만든 뒤에도 지우지 않았다. scratchpad 밖의 출력은 지우지 않는다. 공간은 넉넉하다(§4.7).
 - 정체성: `test_static_elf32` 도 `kz-llvm` 을 링크하는 여덟에 든다(선언의 "여덟"). 셈은 같다.
+
+## 5. 생성된 계획으로 만든 파생 C1 빌드 B′ (Kairos 도구 빌드 없음)
+
+기록: `../records/obs1-20261116-derived/`. 출력: 저장소 밖 새 디렉터리 셋, `/home/user/work/redesign/obs1/c1pre_rt/`(대상 런타임 트리), `/home/user/work/redesign/obs1/c1pre_derived/`(파생 작업 공간 W), `/home/user/work/redesign/obs1/c1pre_bprime/`(B′ 의 basis·facts). F1T(`/home/user/work/instr/gcc/f1`), W6 기록, T8CF, 앞 단계의 출력 디렉터리에는 쓰지 않는다. cFS 를 부팅하지 않는다. push 하지 않는다.
+
+### 5.0 선언 (파생 빌드 전에 적고 커밋함) [D]
+
+파생 빌드 전에 적었다. 아래 밖의 차이는 결함이다. 결함이면 다음으로 가기 전에 멈추고 까닭을 적는다(사례에 맞춘 고침은 하지 않는다).
+
+- **Kairos 도구**: 다시 빌드하지 않는다. MC 의 도구 일곱(kz-static `de1315b3`, kz `931dd39c`, kz-dump `05623054`, kz-rt-dump `4390d4f1`, kz-phi `7d34e6e2`, kz-instr-clang `28db4017`, kz_lint `5f62ec20`), 플러그인 둘(`56a96b79`, `27a49a6a`), kairos-build 도구의 sha256 은 이 단계 앞뒤에 같아야 한다(`build_record.sh pre|post`, `tools_check.sh --deep`). 정체성이 바뀌는 도구: 없음. 대상 런타임 트리(`build_runtime.sh`)는 `kairos/runtime` 소스를 새 디렉터리에서 대상 gcc 로 따로 빌드한 것이다. 그 안의 라이브러리·객체·kz-rt-dump 의 sha256 은 기록으로 둔다(도구 등록부의 도구를 덮지 않는다).
+- **스크립트**(이 선언과 함께 커밋; `kairos/instrument/gcc` 는 따로 된 CMake 프로젝트이고 `env/` 는 `kairos` 밖이라 어떤 도구의 정체성에도 들지 않는다, §1.1):
+  - `kairos/instrument/gcc/scripts/path_map.sh`(새): 기준 빌드의 절대 경로를 파생 작업 공간으로 옮기는 기계적 매핑. 맵 파일의 줄은 "기준 접두어 TAB 파생 접두어"(둘 다 절대 경로, `/` 로 끝남, 기준 접두어는 한 번). 가장 긴 기준 접두어가 이긴다. 상대 경로는 그대로 둔다. 어느 줄도 덮지 않는 절대 경로는 거부한다. 스크립트 안에 경로 값이 없다.
+  - `derive_c1.sh prepare`: 자기가 만든 복사본마다 한 줄씩 `<W>/path_map.tsv` 를 쓴다(`c1_build/bundle_1df262a/` → `<W>/bundle_1df262a/`, `c1_build/pre/src/` → `<W>/src/`, `c1_build/pre/1df262a/` → `<W>/ws/`; 마지막 줄은 기준 빌드 디렉터리이고 `build/`, `exe/` 가 `ws/` 아래 같은 자리에 만들어진다). 값은 prepare 가 복사한 원본과 대상에서 나오고 사례 값이 아니다.
+  - `derive_args.sh`: `--path-map FILE`. 주면 module 표의 절대 접두어와 실행 파일 목록의 절대 경로를 맵으로 옮기고, 덮이지 않으면 rc 64. `@ROOT/` 와 상대 경로는 그대로다. 계획 입력 셋 없이 맵만 주면 거부.
+  - `derive_plan.sh`: `--path-map` 을 요구한다(계획의 표가 기준 빌드의 경로를 적으므로). 실행 파일 목록의 첫 줄과 manifest 머리가 module 표와 같은 sidecar(경로와 sha256)를 가리키지 않으면 거부.
+  - `derive_c1.sh build|check`(계획 모드): 해시 줄은 맵으로 옮긴 파생 파일과 계획이 이름 댄 기준 파일을 나란히 적는다. check 는 계획의 실행 파일 목록으로 bincheck·hookcheck 를 하고, 설치 트리의 모든 파일을 기준 빌드의 같은 자리 파일과 나란히 적는다(`install_inventory.tsv`: 파생 sha256, 기준 sha256, 같음/다름, 계획의 목록에 있는지).
+  - `env/redesign/one_build.sh BUILD OUT --path-map MAP`: 단일 빌드 실행기의 파생 작업 공간 방식. 입력 표의 compile db, build dir, bundle root 를 맵으로 옮기고, 기준 recipe 는 제자리에서 읽는다(recipe 의 경로는 build dir 기준이다, `extract_baseline/inputs/c1_pre_tx.kzb:2`). 인자는 B 와 같다(basis·extract `--no-profile`, `--targets-rule R-T1,R-T2`, target 목록 없음). 덮이지 않는 입력, 없는 파생 입력은 rc 2. `args.txt` 에 맵과 그 sha256 한 줄.
+  - `env/redesign/compare_derived.py`(새, `python3 -I`): B 와 B′ 의 basis·facts(kz-dump)와 글 출력을 레코드마다 비교한다. B′ 의 모든 레코드에서 맵의 파생 접두어를 기준 접두어로 되돌린다. 맵은 FILE_HASHES 의 내용으로 확인한다(옮긴 경로마다 B 의 같은 경로와 sha256 비교; 다른 것은 차이로 나열). `fh=<n>` 은 그 파일 FILE_HASHES[n] 의 경로로 비교하고, FILE_HASHES 는 경로의 집합으로 비교한다(순서가 같은지는 요약에 적음). 그 밖의 절에서 순서만 다른 것도 차이다. 차이마다 선언 목록(`records/obs1-20261116-derived/declared_diff.tsv`, 조건 `both=`/`new=`/`old=`/`only=필드`)에 맞는지 본다. 맞지 않으면 rc 1.
+  - `env/tools/plan_bindings.py`(새, `python3 -I`): 바인딩 보고. manifest 의 site 마다 바인딩 줄이 있어야 한다(bound/inlined/duplicated, 또는 removed/unsupported 와 플러그인의 이유). 어느 단위도 보고하지 않은 site(`not-seen`)는 실패. 단위마다 바인딩 머리의 manifest sha256 = 계획의 것. module: manifest 의 `module` 문 = module 표(이름과 id, 기본), 플러그인 옵션 = 표의 id 차례와 기본, 단위마다 module id = 플러그인 규칙(`kzgcc.cpp` `start_unit`: 첫 접두어, 없으면 기본)이 주는 id.
+  - `env/tools/tests/run_unit.sh`: 점검 8 을 넓히고(맵 없음, 다른 sidecar 의 실행 파일 목록·manifest → rc 64) 9–12 를 더함(맵 함수; 파생 작업 공간 실행기; 비교기; 바인딩 보고). 선언 전에 12/12 [M], `step2a_tests_unit.sh` 7/7 [M].
+- **입력**(읽기만): 계획 c1_pre_tx(`/home/user/work/redesign/obs1/plangen/c1_pre_tx/`): manifest `5f015c5aa86bf642…`, sidecar `8f5f200cbe436f58…`, module 표 `plan.mod` `28180ed5d8c39c63…`, 실행 파일 목록 `plan.exe` `09718829e381d2c8…`. 플러그인 `27a49a6a…`(kzgcc 0.3, `/home/user/work/c5tools/plugin-build/kzgcc.so`; 생성된 `kzs-sites 3` manifest 를 읽는다: 작은 단위 하나로 rc 0 을 봤다 [M], scratchpad). 기준 빌드 `/home/user/work/procrace/c1_build/pre/1df262a`, `bundle_1df262a`, `pre/src`. 같은 도구의 기준 B: `/home/user/work/redesign/obs1/plangen_bref/c1_pre_tx/NP`(§4.4).
+- **단계**(모두 공간 감시 아래, `--need 100000000`; 계획의 추정 최고점 약 53 MB + 런타임 6.4 MB + B′ 13 MB + 한 시간 흐름 13 MB 를 올림):
+  1. `build_runtime.sh /home/user/work/redesign/obs1/c1pre_rt/rt <plan.kzs> <kzgcc.so 27a49a6a>`.
+  2. `derive_c1.sh prepare pre 1df262a /home/user/work/redesign/obs1/c1pre_derived`(맵을 씀).
+  3. `derive_plan.sh c1 build pre 1df262a <W> ref --manifest <plan.kzs> --modules <plan.mod> --exes <plan.exe> --path-map <W>/path_map.tsv`(같은 자리의 기준 빌드; 해시 뒤 지움, `derive_c1.sh` 의 기존 동작).
+  4. `derive_plan.sh c1 build pre 1df262a <W> instr <kzgcc.so> <rt> …같은 넷`.
+  5. `derive_plan.sh c1 check pre 1df262a <W> …같은 넷`.
+  6. `plan_bindings.py`(module 옵션은 `derive_module_flags` 를 맵과 함께 다시 계산한 글이고, 그것이 `build_instr.record` 의 D3 줄에 그대로 있어야 한다).
+  7. rx: 설치 트리 `exe/rx` 의 ELF 파일에 bincheck 를 돌려 (함수, hook, id) 목록을 계획의 그룹(tx)과 비교한다(측정; 계획의 입력이 아니다).
+  8. `one_build.sh c1_pre_tx /home/user/work/redesign/obs1/c1pre_bprime --path-map <W>/path_map.tsv`(MC kz-static `de1315b3`).
+  9. `compare_derived.py`(B = `plangen_bref/c1_pre_tx/NP`, B′ = 8 의 출력).
+  10. B′ 실행 파일의 GNU build-id(`readelf -n`)와 sha256 을 적는다.
+- **rx 인스턴스를 어떻게 만드는가(결정과 까닭)**: 같은 파생 트리다. 까닭: 두 인스턴스 기준 절차를 돌리는 하네스는 tx 기록에서 `<W>/ws/exe` 전체(tx, rx, host)를 묶어 풀고(`run_gi_c1.sh:47`) 그 안의 `./core-rx` 를 실행한다(`:68`). 그래서 rx 는 그 트리에 있어야 한다. `derive_c1.sh build` 는 `mission-install` 하나로 두 target 을 같은 arch 빌드(`build/native/default`)의 객체로 만들고 설치한다. 앞선 C1 G-I 부팅의 파생 트리도 그렇게 만들어졌다(F1T `c1/pre_1df262a/check.record`: "hook calls: tx 42, rx 42; same (function, hook, id) lists: yes"). 계획의 실행 파일 목록은 basis 의 것(tx 쪽)뿐이므로 hookcheck 는 tx 로 하고, rx 는 설치 목록과 7 의 비교로 적는다.
+- **B 와 B′ 사이에 허용하는 차이**(레코드·칸 수준; 조건 그대로는 `declared_diff.tsv`):
+  - (가) 객체: 계측된 단위(바인딩 파일이 있는 단위)의 객체와 D4 의 객체. `objects_differ.txt` 의 다른 객체는 결함(`derive_c1.sh check` 의 "UNEXPECTED").
+  - (나) 기록된 명령의 플러그인 옵션(`kairos/lib/llvm/basis.cpp:1065-1098`: 명령은 `-fplugin` 과 함께 기록되고 front end 는 그 옵션 없이 읽는다): BASIS 의 `instrumentation.*`, `front_end.arguments_removed`(새 항목), `units.distinct_flag_sets`(값), DEVIATIONS 의 새 레코드 하나("build-compiler plugin in the recorded commands"), TUS 의 `command_sha256`(과 플러그인 옵션이 든 `flags`), FILE_HASHES 의 `compile_commands.json`(sha256, size)과 새 플러그인 파일 항목.
+  - (다) 실행 파일에 링크된 런타임과 바인딩 자리의 런타임 호출(D3): core-tx 의 `link.txt`(sha256, size), BASIS 의 `link.*`(값, 새 `not_in_program[...]`·`members_without_command`), `binary.sha256`, `binary.build_id`, `closure.executable_exports`, `module[*]` 의 `undefined`·`unbound`·`bound[...]`·`link.output_is_the_loaded_file`·`resolved_by_its_link`(값 또는 새 항목), `basis.txt` 의 같은 줄과 요약 줄(link inputs, link members, module symbols bound, references across units).
+  - (라) D2: 기준 빌드의 module 판 표를 같은 바이트로 설치(`derive_c1.sh:18`, `:43-48`). FILE_HASHES 의 그 파일(내용은 기준의 것과 같을 것이다 [I]).
+  - (마) D4: 생성된 `cfe_build_env_table.c` 의 빌드 날짜·사용자·호스트 글. FILE_HASHES 의 그 파일, 그리고 그 파일을 이름 대는 facts 레코드.
+  - (바) 모든 절대 경로 글: 맵으로 되돌린 뒤 비교한다. 되돌린 뒤 남는 파생 경로는 (나)의 레코드(플러그인의 out 디렉터리와 manifest 경로)에만 있어야 한다.
+  - (사) 정체성 칸: 컨테이너 머리의 `basis_sha256`, `artifact_sha256`, `container.size`, `parent[0]`; 절 줄의 crc32(레코드는 하나씩 비교함)와 레코드가 더해지는 절(STRINGS, BASIS, FILE_HASHES, DEVIATIONS)의 count; facts BASIS 의 `extract.units_from`; `basis.txt`·`extract.txt`·`relations.txt` 의 해시 줄; `sha256.txt` 의 basis·facts·compile db 줄; `args.txt` 의 파생 작업 공간 줄.
+  - 그 밖은 모두 같아야 한다: facts 의 STRINGS·BASIS·FILE_HASHES 밖의 절 36개(PROVENANCE, FACTS, FUNCS, READS, RETURNS, … LOCK_PATHS)는 맵 뒤 레코드가 차례까지 같고((마)의 레코드 밖), basis 의 PROVENANCE 도 같고, `relations.txt` 는 둘째 줄 밖에서 같다.
+  - B′ 의 성질로 적는 관측 효과(차이가 아니라 B′ 의 속성): site 가 있는 단위, 실행 파일마다 hook 호출 수(bincheck), 링크된 런타임, wrapper 없음(이 주기에는 생성 토큰이 없다).
+- **시험**: 바인딩 보고(모든 site 가 bound 이거나 이유가 있는 unsupported/removed; not-seen 0), `hookcheck` rc 0(계획의 목록), module id = 계획의 표, 점검한 실행 파일 = 계획의 목록(맵으로 옮긴 7개). 결과는 측정으로 적는다. 바인딩 수나 site 의 상태를 미리 기대하지 않는다.
+- **누적 바이트 동일성**: 뒤에 `ledger_check.sh` 전체(F1T, `641/b`, 플러그인 둘, kairos-build 도구, W6·C5 기록 묶음과 앞 단계의 출력 포함)와 `tools_check.sh --deep`. 이 단계의 새 출력은 장부 행으로 더한다. 바깥 이름 점검을 새 출력 디렉터리에 돌린다.
+- **지우는 것**: `derive_c1.sh` 가 같은 자리 기준 빌드 트리를 해시 뒤 지운다(다시 만들 수 있고 그 객체 해시는 남는다). 그 밖에 아무것도 지우지 않는다. 계획은 B 다시 뽑기(`plangen_bref`)를 이 비교 뒤 지운다고 했으나, 이 단계가 만든 scratch 가 아니므로 남긴다(지울지는 lead 가 정한다).

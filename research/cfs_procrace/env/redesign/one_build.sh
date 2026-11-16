@@ -7,6 +7,13 @@
 #          env/tools/tests/run_unit.sh checks that the two tables are the same)
 #   OUT    a new or empty directory; the outputs go to OUT/<BUILD>/NP/ with the file names of the driver
 #          (args.txt basis.kz basis.txt extract.txt facts.kz relations.txt relations.log sha256.txt)
+#   --path-map MAP  (optional, third argument) derived-workspace mode: the basis and facts of a derived build of
+#          BUILD (for example derive_c1.sh in a work space <W>) instead of the reference build.  The compile database,
+#          the build directory and the bundle root of the inputs table are mapped by MAP
+#          (kairos/instrument/gcc/scripts/path_map.sh; C1: the <W>/path_map.tsv that derive_c1.sh prepare writes), the
+#          reference recipe is read in place (its paths are relative to the build directory), and the arguments are
+#          the same: basis and extract --no-profile, the same rule options, no target list.  A path the map does not
+#          cover, or a mapped input that does not exist, is refused (rc 2).  args.txt names the map and its sha256.
 # Options (environment):
 #   KZB             tool directory (default the merge-check tree /home/user/work/merge-check/kz-llvm/tools)
 #   ONE_BUILD_SHOW=1  also write facts.txt (kz-static show); off by default: the text view is written only when a check needs it
@@ -21,8 +28,12 @@
 # relations step never leaves a facts.kz or relations.txt that looks complete.  rc 2: the run could not start
 # (unknown build, OUT not new or empty, no tool, guard refused).
 set -uo pipefail
-B=${1:-}; OUT=${2:-}
-[ -n "$B" ] && [ -n "$OUT" ] || { echo "usage: one_build.sh BUILD OUT" >&2; exit 2; }
+B=${1:-}; OUT=${2:-}; PMAP=
+[ -n "$B" ] && [ -n "$OUT" ] || { echo "usage: one_build.sh BUILD OUT [--path-map MAP]" >&2; exit 2; }
+if [ $# -gt 2 ]; then
+  [ "$3" = --path-map ] && [ $# -eq 4 ] && [ -n "$4" ] || { echo "usage: one_build.sh BUILD OUT [--path-map MAP]" >&2; exit 2; }
+  PMAP=$4
+fi
 KZB=${KZB:-/home/user/work/merge-check/kz-llvm/tools}
 KS=$KZB/kz-static/kz-static
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -51,6 +62,15 @@ inputs_of() {
 # END inputs table
 X=$(inputs_of "$B") || { echo "unknown build $B" >&2; exit 2; }
 read -r CDB BD BR RC <<< "$X"
+MAPLINE=
+if [ -n "$PMAP" ]; then
+  . "$K/instrument/gcc/scripts/path_map.sh"
+  path_map_load "$PMAP" || exit 2
+  RCDB=$CDB; RBD=$BD; RBR=$BR
+  CDB=$(path_map_apply "$RCDB") && BD=$(path_map_apply "$RBD") && BR=$(path_map_apply "$RBR") || exit 2
+  for p in "$CDB" "$BD" "$BR"; do [ -e "$p" ] || { echo "refusing: mapped input $p does not exist" >&2; exit 2; }; done
+  MAPLINE="derived workspace: path map $PMAP sha256 $(sha256sum "$PMAP" | cut -c1-64); reference inputs compile db $RCDB, build dir $RBD, bundle root $RBR; recipe read in place"
+fi
 [ -x "$KS" ] || { echo "no kz-static at $KS" >&2; exit 2; }
 if [ -d "$OUT" ]; then
   shopt -s nullglob dotglob; E=("$OUT"/*); shopt -u nullglob dotglob
@@ -77,7 +97,7 @@ fail() {
   echo "result FAIL" >> "$ST"
   exit 1
 }
-printf '%s\n' "basis/extract args: --no-profile" "extract-only args: ${RULE[*]}" "compile db: $CDB" "build dir: $BD" "bundle root: $BR" "recipe: $RC" > "$D/args.txt.partial" || fail "write args.txt"
+printf '%s\n' "basis/extract args: --no-profile" "extract-only args: ${RULE[*]}" "compile db: $CDB" "build dir: $BD" "bundle root: $BR" "recipe: $RC" ${MAPLINE:+"$MAPLINE"} > "$D/args.txt.partial" || fail "write args.txt"
 guarded extract "$KS" basis --no-profile --compile-db "$CDB" --build-dir "$BD" --bundle-root "$BR" --recipe "$RC" --text -o "$D/basis.kz.partial" > "$D/basis.txt.partial" 2>&1
 x=$?; echo "basis rc=$x" >> "$ST"; [ $x -eq 0 ] || fail "basis (rc $x)"
 guarded extract "$KS" extract --no-profile --basis "$D/basis.kz.partial" "${RULE[@]}" -o "$D/facts.kz.partial" > "$D/extract.txt.partial" 2>&1

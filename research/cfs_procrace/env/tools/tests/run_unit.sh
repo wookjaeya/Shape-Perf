@@ -15,8 +15,22 @@
 #     manifest -> refused (1); missing B' (no tree, no basis) -> unconfirmed (3)
 #   7 harness hashing: every file listed with its sha256, a link in the other list; an existing list -> rc 64
 #   8 derive-script arguments on a stub module table: control passes the plan to the derive script; missing sidecar
-#     reference, a sidecar with another sha256, a missing plan input -> rc 64; the module options from the table;
-#     derive_c1.sh / derive_c5.sh refuse a partial plan (rc 64)
+#     reference, a sidecar with another sha256, a missing plan input, no path map, an executable list or a manifest
+#     that names another sidecar -> rc 64; the module options from the table; derive_c1.sh / derive_c5.sh refuse a
+#     partial plan (rc 64)
+#   9 path map (kairos/instrument/gcc/scripts/path_map.sh, derive_args.sh): longest prefix wins, a directory equal to a
+#     prefix maps, a relative path stays; an absolute path no line covers -> rc 1; malformed maps (relative prefix, no
+#     trailing '/', a prefix twice, a third field) are refused; module options and executable paths of a table with the
+#     reference build's absolute paths come out mapped, the list's own paths unchanged; an uncovered prefix -> rc 64
+#  10 single-build runner, derived-workspace mode (stand-in kz-static): compile db, build dir and bundle root mapped,
+#     recipe in place, args.txt names the map; a map that does not cover an input, a mapped input that does not exist,
+#     a malformed option -> rc 2
+#  11 derived comparison (env/redesign/compare_derived.py, stand-in kz-dump): B' records with the derived paths and a
+#     FILE_HASHES order of their own compare equal to B after the map; a declared difference -> rc 0 with it listed;
+#     an undeclared record difference, an undeclared text line, a path left outside the map -> rc 1
+#  12 binding report (env/tools/plan_bindings.py): every site bound or unsupported with a reason and the module ids
+#     of the plugin rule -> rc 0; a site no unit reported, an unsupported site without a reason, a unit with another
+#     module id, a unit header with another manifest sha256 -> rc 1 each
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../../.." && pwd)"
@@ -138,22 +152,118 @@ X=$W/d; mkdir -p "$X"
 echo "plan sidecar" > "$X/plan.sidecar"; sh_=$(sha256sum < "$X/plan.sidecar" | cut -c1-64)
 echo "site 1 x" > "$X/plan.kzs"
 printf '# kz module table; plan sidecar %s sha256=%s\n2\tcf\t@ROOT/src/cf/\n3\tbp\t@ROOT/src/bp/\ndefault\t1\n' "$X/plan.sidecar" "$sh_" > "$X/modules.tsv"
-printf 'tx\texe/tx/core-tx\ntx\texe/tx/cf/cf.so\n' > "$X/exes.tsv"
+printf '# kz plan\n# sidecar sha256=%s\nsite 1 x\n' "$sh_" > "$X/plan.kzs"
+printf '# kz executables to check; plan sidecar %s sha256=%s\ntx\texe/tx/core-tx\ntx\texe/tx/cf/cf.so\n' "$X/plan.sidecar" "$sh_" > "$X/exes.tsv"
+printf '/ref/\t/w/\n' > "$X/map.tsv"
 printf '#!/bin/sh\necho "derive stand-in: $*" > %s/called\n' "$X" > "$X/stub.sh"; chmod +x "$X/stub.sh"
 dp() { DERIVE_PLAN_SCRIPT="$X/stub.sh" bash "$GS/derive_plan.sh" c1 build pre 1df262a "$X/w" instr p rt "$@" > "$X/dp.log" 2>&1; }
-dp --manifest "$X/plan.kzs" --modules "$X/modules.tsv" --exes "$X/exes.tsv"; c=$?; called=$([ -s "$X/called" ] && echo yes || echo no)
+dp --manifest "$X/plan.kzs" --modules "$X/modules.tsv" --exes "$X/exes.tsv" --path-map "$X/map.tsv"; c=$?; called=$([ -s "$X/called" ] && echo yes || echo no)
 sed '1s/.*/# kz module table/' "$X/modules.tsv" > "$X/m_nohdr.tsv"; rm -f "$X/called"
-dp --manifest "$X/plan.kzs" --modules "$X/m_nohdr.tsv" --exes "$X/exes.tsv"; f1=$?
+dp --manifest "$X/plan.kzs" --modules "$X/m_nohdr.tsv" --exes "$X/exes.tsv" --path-map "$X/map.tsv"; f1=$?
 sed "1s/sha256=[0-9a-f]*/sha256=$(printf 0%.0s {1..64})/" "$X/modules.tsv" > "$X/m_badsha.tsv"
-dp --manifest "$X/plan.kzs" --modules "$X/m_badsha.tsv" --exes "$X/exes.tsv"; f2=$?
-dp --manifest "$X/plan.kzs" --modules "$X/modules.tsv"; f3=$?
+dp --manifest "$X/plan.kzs" --modules "$X/m_badsha.tsv" --exes "$X/exes.tsv" --path-map "$X/map.tsv"; f2=$?
+dp --manifest "$X/plan.kzs" --modules "$X/modules.tsv" --path-map "$X/map.tsv"; f3=$?
+dp --manifest "$X/plan.kzs" --modules "$X/modules.tsv" --exes "$X/exes.tsv"; f6=$?
+sed "1s/sha256=[0-9a-f]*/sha256=$(printf 0%.0s {1..64})/" "$X/exes.tsv" > "$X/e_badsha.tsv"
+dp --manifest "$X/plan.kzs" --modules "$X/modules.tsv" --exes "$X/e_badsha.tsv" --path-map "$X/map.tsv"; f7=$?
+sed "2s/sha256=[0-9a-f]*/sha256=$(printf 0%.0s {1..64})/" "$X/plan.kzs" > "$X/p_badsha.kzs"
+dp --manifest "$X/p_badsha.kzs" --modules "$X/modules.tsv" --exes "$X/exes.tsv" --path-map "$X/map.tsv"; f8=$?
 flags=$(PLAN_MODULES="$X/modules.tsv" bash -c ". '$GS/derive_args.sh'; PLAN_MODULES='$X/modules.tsv'; derive_module_flags /w")
 want="-fplugin-arg-kzgcc-module=2:/w/src/cf/ -fplugin-arg-kzgcc-module=3:/w/src/bp/ -fplugin-arg-kzgcc-default-module=1"
 bash "$GS/derive_c1.sh" check pre 1df262a "$X/w" --manifest "$X/plan.kzs" > /dev/null 2>&1; f4=$?
 bash "$GS/derive_c5.sh" check 1 "$X/w" --modules "$X/modules.tsv" > /dev/null 2>&1; f5=$?
 ok=0; [ $c -eq 0 ] && [ "$called" = yes ] && [ ! -e "$X/called" ] && [ $f1 -eq 64 ] && [ $f2 -eq 64 ] && [ $f3 -eq 64 ] && [ "$flags" = "$want" ] \
-  && [ $f4 -eq 64 ] && [ $f5 -eq 64 ] || ok=1
-res "derive-script arguments (stub module table)" $ok "control rc $c (derive script called: $called); no sidecar reference rc $f1; other sidecar sha256 rc $f2; missing --exes rc $f3; module options $([ "$flags" = "$want" ] && echo as-table || echo "DIFFER: $flags"); partial plan derive_c1 rc $f4 derive_c5 rc $f5"
+  && [ $f4 -eq 64 ] && [ $f5 -eq 64 ] && [ $f6 -eq 64 ] && [ $f7 -eq 64 ] && [ $f8 -eq 64 ] || ok=1
+res "derive-script arguments (stub module table)" $ok "control rc $c (derive script called: $called); no sidecar reference rc $f1; other sidecar sha256 rc $f2; missing --exes rc $f3; no path map rc $f6; executable list of another sidecar rc $f7; manifest of another sidecar rc $f8; module options $([ "$flags" = "$want" ] && echo as-table || echo "DIFFER: $flags"); partial plan derive_c1 rc $f4 derive_c5 rc $f5"
+
+# 9 path map
+X=$W/p; mkdir -p "$X"
+printf '# comment\n/ref/b/\t/w/b/\n/ref/b/s/\t/w/s/\n/ref/x/\t/w/ws/\n' > "$X/map.tsv"
+pm() { bash -c '. "$1/path_map.sh"; path_map_load "$2" || exit 9; shift 2; for p; do path_map_apply "$p" || echo "rc1:$p"; done' _ "$GS" "$@" 2> /dev/null; }
+got=$(pm "$X/map.tsv" /ref/b/a.c /ref/b/s/c.c /ref/b/s /ref/x/exe/tx/core-tx rel/p /other/y | paste -sd' ')
+want9="/w/b/a.c /w/s/c.c /w/s /w/ws/exe/tx/core-tx rel/p rc1:/other/y"
+bad=0
+printf 'ref/b/\t/w/b/\n' > "$X/m1.tsv"; printf '/ref/b\t/w/b/\n' > "$X/m2.tsv"; printf '/ref/b/\t/w/b/\n/ref/b/\t/w/c/\n' > "$X/m3.tsv"; printf '/ref/b/\t/w/b/\textra\n' > "$X/m4.tsv"
+for m in m1 m2 m3 m4; do pm "$X/$m.tsv" /ref/b/a > /dev/null; [ $? -eq 9 ] || bad=1; done
+echo "plan sidecar" > "$X/side"; shx=$(sha256sum < "$X/side" | cut -c1-64)
+printf '# kz module table; plan sidecar %s sha256=%s\n1\tbp\t/ref/b/s/\n2\tci\t/ref/b/apps/ci/\ndefault\t5\n' "$X/side" "$shx" > "$X/mod.tsv"
+printf '# kz executables to check; plan sidecar %s sha256=%s\nbasis\t/ref/x/exe/tx/core-tx\nbasis\t/ref/x/exe/tx/cf/bp.so\n' "$X/side" "$shx" > "$X/exe.tsv"
+echo m > "$X/plan.kzs"
+da() { bash -c '. "$1/derive_args.sh"; shift; derive_plan_args "$@"; echo "F $(derive_module_flags /root)"; echo "P $(derive_exe_paths | paste -sd" ")"; echo "R $(derive_exe_refs | paste -sd" ")"' _ "$GS" "$@" 2> /dev/null; }
+out=$(da --manifest "$X/plan.kzs" --modules "$X/mod.tsv" --exes "$X/exe.tsv" --path-map "$X/map.tsv")
+wf="F -fplugin-arg-kzgcc-module=1:/w/s/ -fplugin-arg-kzgcc-module=2:/w/b/apps/ci/ -fplugin-arg-kzgcc-default-module=5"
+wp="P /w/ws/exe/tx/core-tx /w/ws/exe/tx/cf/bp.so"; wr="R /ref/x/exe/tx/core-tx /ref/x/exe/tx/cf/bp.so"
+[ "$(printf '%s\n' "$out" | sed -n 1p)" = "$wf" ] && [ "$(printf '%s\n' "$out" | sed -n 2p)" = "$wp" ] && [ "$(printf '%s\n' "$out" | sed -n 3p)" = "$wr" ] || bad=1
+printf '/ref/x/\t/w/ws/\n' > "$X/short.tsv"
+da --manifest "$X/plan.kzs" --modules "$X/mod.tsv" --exes "$X/exe.tsv" --path-map "$X/short.tsv" > /dev/null; f1=$?
+da --path-map "$X/map.tsv" > /dev/null; f2=$?
+ok=0; [ "$got" = "$want9" ] && [ $bad -eq 0 ] && [ $f1 -eq 64 ] && [ $f2 -eq 64 ] || ok=1
+res "path map (stub maps and plan tables)" $ok "mapped: $got; malformed maps refused: $([ $bad -eq 0 ] && echo yes || echo NO); plan table mapped: $([ "$(printf '%s\n' "$out" | sed -n 1p)" = "$wf" ] && echo yes || echo NO); uncovered prefix rc $f1; map without plan rc $f2"
+
+# 10 single-build runner, derived-workspace mode
+X=$W/q; mkdir -p "$X/bin/kz-static" "$X/c1/pre/1df262a/build/native/default" "$X/c1/bundle_1df262a" "$X/eb/inputs" "$X/w/ws/build/native/default" "$X/w/bundle_1df262a"
+cp "$W/o/bin/kz-static/kz-static" "$X/bin/kz-static/kz-static"
+echo '[]' > "$X/c1/pre/1df262a/build/native/default/compile_commands.json"; echo '[]' > "$X/w/ws/build/native/default/compile_commands.json"; echo recipe > "$X/eb/inputs/c1_pre_tx.kzb"
+printf '%s/\t%s/\n' "$X/c1/bundle_1df262a" "$X/w/bundle_1df262a" "$X/c1/pre/1df262a" "$X/w/ws" > "$X/map.tsv"
+printf '%s/\t%s/\n' "$X/c1/pre/1df262a" "$X/w/ws" > "$X/nobundle.tsv"
+printf '%s/\t%s/\n' "$X/c1/bundle_1df262a" "$X/w/bundle_1df262a" "$X/c1/pre/1df262a" "$X/w/nows" > "$X/missing.tsv"
+run2() { env KZB="$X/bin" ONE_BUILD_GUARD=0 EB="$X/eb" C1="$X/c1" REF="$X/ref" CT="$X/ct" bash "$R/env/redesign/one_build.sh" c1_pre_tx "$@" > "$1.log" 2>&1; }
+run2 "$X/ok" --path-map "$X/map.tsv"; c=$?
+A=$X/ok/c1_pre_tx/NP/args.txt
+okargs=1; grep -qx "compile db: $X/w/ws/build/native/default/compile_commands.json" "$A" && grep -qx "build dir: $X/w/ws/build" "$A" && grep -qx "bundle root: $X/w/bundle_1df262a" "$A" \
+  && grep -qx "recipe: $X/eb/inputs/c1_pre_tx.kzb" "$A" && grep -q "^derived workspace: path map $X/map.tsv sha256 " "$A" && okargs=0
+run2 "$X/f1" --path-map "$X/nobundle.tsv"; f1=$?
+run2 "$X/f2" --path-map "$X/missing.tsv"; f2=$?
+run2 "$X/f3" --path-map; f3=$?
+ok=0; [ $c -eq 0 ] && [ $okargs -eq 0 ] && [ $f1 -eq 2 ] && [ $f2 -eq 2 ] && [ $f3 -eq 2 ] || ok=1
+res "single-build runner, derived workspace (stand-in kz-static)" $ok "control rc $c; inputs mapped, recipe in place: $([ $okargs -eq 0 ] && echo yes || echo NO); uncovered input rc $f1; missing mapped input rc $f2; malformed option rc $f3"
+
+# 11 derived comparison
+X=$W/x; mkdir -p "$X/B" "$X/P"
+printf '#!/bin/sh\ncat "$1"\n' > "$X/kzd"; chmod +x "$X/kzd"
+mk() { # DIR ROOT ORDER(ab|ba) BINARY EXTRA
+  local d=$1 r=$2 o=$3 bin=$4 ex=$5
+  { echo "kz-dump 1"; echo "container abi=1 kind=basis size=10"; echo "tool_sha256=t"
+    echo "section BASIS type=2 count=2 crc32=0x1"; echo "  BASIS[0] name=\"binary.sha256\" value=\"$bin\""; echo "  BASIS[1] name=\"build.dir\" value=\"$r/ws/build\"$ex"
+    echo "section FILE_HASHES type=3 count=2 crc32=0x2"
+    if [ "$o" = ab ]; then echo "  FILE_HASHES[0] path=\"$r/src/a.c\" sha256=aa size=1"; echo "  FILE_HASHES[1] path=\"$r/ws/build/b.c\" sha256=bb size=1"
+    else echo "  FILE_HASHES[0] path=\"$r/ws/build/b.c\" sha256=bb size=1"; echo "  FILE_HASHES[1] path=\"$r/src/a.c\" sha256=aa size=1"; fi
+    local fa=0; [ "$o" = ab ] || fa=1
+    echo "section FUNCS type=9 count=1 crc32=0x3"; echo "  FUNCS[0] fn=0 name=\"f\" file=\"$r/src/a.c\" fh=$fa"; } > "$d/basis.kz"
+  cp "$d/basis.kz" "$d/facts.kz"
+  printf 'basis x\n  build %s/ws/build\n' "$r" > "$d/basis.txt"; echo e > "$d/extract.txt"; echo rel > "$d/relations.txt"; : > "$d/relations.log"; echo a > "$d/args.txt"; echo s > "$d/sha256.txt"
+}
+mk "$X/B" /ref ab b1 ""; mk "$X/P" /w ba b2 ""
+printf '/ref/\t/w/\n' > "$X/map.tsv"
+printf 'basis.kz\tBASIS\tboth=name="binary\\.sha256";;only=value\tbuild output\nfacts.kz\tBASIS\tname="binary\\.sha256"\tbuild output\n' > "$X/decl.tsv"
+cd_() { python3 -I "$R/env/redesign/compare_derived.py" "$X/kzd" "$X/out.txt" "$X/B" "$1" --path-map "$X/map.tsv" --declared "$X/decl.tsv" > "$X/cd.log" 2>&1; }
+cd_ "$X/P"; c=$?; cl=$(grep -c $'\tdeclared:build output' "$X/out.txt")
+mkdir -p "$X/P2"; mk "$X/P2" /w ba b1 ' flags=x'; cd_ "$X/P2"; f1=$?
+mkdir -p "$X/P3"; mk "$X/P3" /w ba b1 ""; echo e2 > "$X/P3/extract.txt"; cd_ "$X/P3"; f2=$?
+mkdir -p "$X/P4"; mk "$X/P4" /v ba b1 ""; cd_ "$X/P4"; f3=$?
+ok=0; [ $c -eq 0 ] && [ "$cl" = 2 ] && [ $f1 -eq 1 ] && [ $f2 -eq 1 ] && [ $f3 -eq 1 ] || ok=1
+res "derived comparison (stand-in kz-dump)" $ok "control rc $c (declared findings $cl); undeclared record rc $f1; undeclared text line rc $f2; path outside the map rc $f3"
+
+# 12 binding report
+X=$W/b; mkdir -p "$X"
+printf '# kz plan\nkzs-sites 3\nmodule 1 name=app source=build\nmodule 2 name=core source=build\nsite 1 label=s0001.use-call tu=app/a.c func=f\nsite 2 label=s0002.key-text tu=app/a.c func=g\nsite 3 label=s0003.actor-root tu=core/c.c func=h\n' > "$X/plan.kzs"
+msha=$(sha256sum < "$X/plan.kzs" | cut -c1-64)
+printf '# kz module table; plan sidecar x sha256=y\n1\tapp\t/ref/app/\ndefault\t2\n' > "$X/plan.mod"
+FL="-fplugin-arg-kzgcc-module=1:/w/app/ -fplugin-arg-kzgcc-default-module=2"
+bf() { # FILE MSHA MODA REASON2 SITE3
+  { echo "kzs-sites 1"; echo "# kzgcc 0.3 backend=gcc-plugin gcc=13 x unit=/w/app/a.c dumpbase=a"; echo "# manifest=m sha256=$2 module=$3"
+    echo "bind 65552 site=1 backend=gcc-plugin module=$3 at=\"/w/app/a.c f -> f:1\" status=bound vals=0x1"
+    echo "bind 65567 site=2 backend=gcc-plugin module=$3 at=\"/w/app/a.c g\" status=unsupported$4"
+    if [ "$5" = 1 ]; then echo "# kzgcc 0.3 backend=gcc-plugin gcc=13 x unit=/w/core/c.c dumpbase=c"; echo "# manifest=m sha256=$msha module=2"
+      echo "bind 131120 site=3 backend=gcc-plugin module=2 at=\"/w/core/c.c h -> h:1\" status=bound vals=0x0"; fi; } > "$1"; }
+pb() { python3 -I "$R/env/tools/plan_bindings.py" --manifest "$X/plan.kzs" --modules "$X/plan.mod" --bindings "$1" --module-flags "$FL" -o "$X/rep.txt" > /dev/null 2>&1; }
+bf "$X/ok.kzs" "$msha" 1 ' reason="a line with two calls"' 1; pb "$X/ok.kzs"; c=$?
+bf "$X/f1.kzs" "$msha" 1 ' reason="a line with two calls"' 0; pb "$X/f1.kzs"; f1=$?
+bf "$X/f2.kzs" "$msha" 1 '' 1; pb "$X/f2.kzs"; f2=$?
+bf "$X/f3.kzs" "$msha" 2 ' reason="a line with two calls"' 1; pb "$X/f3.kzs"; f3=$?
+bf "$X/f4.kzs" "$(printf 0%.0s {1..64})" 1 ' reason="a line with two calls"' 1; pb "$X/f4.kzs"; f4=$?
+ok=0; [ $c -eq 0 ] && [ $f1 -eq 1 ] && [ $f2 -eq 1 ] && [ $f3 -eq 1 ] && [ $f4 -eq 1 ] || ok=1
+res "binding report (stub plan and bindings)" $ok "control rc $c; site not seen rc $f1; unsupported without reason rc $f2; other module id rc $f3; other manifest sha256 rc $f4"
 
 echo "unit checks: $((NC - NF)) of $NC pass"
 exit $((NF > 0))

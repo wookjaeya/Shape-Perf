@@ -1,0 +1,11 @@
+# declaration: sha256 of declared_before_build.txt (= the lines of section 5 of plan/observation_path_results_20261116.md up to the end of 5.0, before the derived build) = ecec5f2844b2d36a6b21b19a953e50a2b3f22fd74a0e4fe900112d80e1117b42 (2026-11-16T07:37:09Z; committed before the derived build)
+# obs1-20261116-derived: commands, rc and free space (df -B1 /, bytes available)
+
+## 0. before the declaration (no tool of MC changed, nothing built)
+TMPDIR=<scratch> bash env/tools/tests/run_unit.sh -> unit_tools.txt: 12 of 12 pass
+bash env/redesign/step2a_tests_unit.sh -> unit_step2a.txt: 7 of 7 pass
+env/tools/build_record.sh pre MC pre_mc.txt -> rc 0; equal to records/obs1-20261116-plangen/post_mc.txt except HEAD
+MC ctest -R '^lint' (kz_lint 5f62ec20, no build) -> 7 of 7
+plugin 27a49a6a on one small unit in <scratch> with -fplugin-arg-kzgcc-manifest=<plan.kzs> -> rc 0 (the plugin reads kzs-sites 3)
+compare_derived.py B against B itself with declared_diff.tsv -> not declared 0 (self comparison, <scratch>)
+free before the commit of the declaration: 3789582336 (2026-11-16T07:37:09Z)

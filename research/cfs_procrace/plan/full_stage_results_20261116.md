@@ -560,3 +560,113 @@
 - **선언 밖의 차이 하나** [M]. `compare.sh extract` 의 facts.kz 머리 비교(`check_head.py`)가 다섯 빌드 모두에서 한 줄을 더 보았다: kz-dump 의 둘째 줄 `container abi=1 kind=facts size=N` 의 N(컨테이너의 바이트 수). 선언(§5.0)은 머리에서 `tool_sha256`·`artifact_sha256`·`basis_sha256`·`parent[0]` 만 허용했다. 그 밖의 비교(basis.kz 전체, facts 의 섹션 보기, extract.txt, relations.txt, basis.txt, sha256.txt, args.txt, relations.log)는 선언 안이었다(`compare_extract.txt`). 그래서 여기서 멈추고 이 덧붙임을 먼저 커밋한다.
 - **까닭**: 컨테이너 크기는 내용의 바이트 수다. 선언이 허용한 내용의 차이(BASIS 항목 하나, 이름 바뀐 형의 새 행, 새 이름 문자열)가 크기를 바꾼다. 앞 단계(§4)의 다시 뽑기는 내용 길이가 같아 이 줄이 같았고, 이번 선언은 그 허용 목록을 그대로 옮겼다. 잰 크기(`facts_sizes.txt`, 옛 → 새, 차이): c1_pre_tx 10,980,952 → 10,996,136(+15,184), c1_post_tx 10,983,800 → 10,999,024(+15,224), r2_core 7,188,992 → 7,195,288(+6,296), c5_641 4,823,448 → 4,824,488(+1,040), c5_642 4,831,960 → 4,833,000(+1,040).
 - **고침**: `check_head.py` 에 `--allow-size`(facts 머리에서만): `container abi=1 kind=facts size=N` 의 N 만 다른 줄을 허용한다. basis.kz 는 그대로(`--whole`, 크기 줄 허용 없음; 다섯 모두 크기가 같다). 이 덧붙임 뒤 `compare.sh extract` 를 다시 돌린다(같은 출력 디렉터리, 출력은 바꾸지 않음; 비교 기록만 새로 씀).
+
+### 5.1 바뀐 것 [F]
+
+- 커밋 `6b8c784`(선언, 코드, fixture, 시험, 문서, 비교 스크립트와 허용 파일, 빌드 전 참조, 빌드 전). 규모: `lib/llvm` 열넷과 `tools/kz-static` 둘(+약 330 줄: 대조 블록·공유 함수 둘·`deviation_notes`, 이름 주기 약 90 줄, 잘린 이미지 약 30 줄, relations 사유·계층·머리 약 20 줄), `test_static_cli.cpp` +약 110 줄(확인 42 더), 새 `anonrec.c`, `docs/static_facts.md` §5q.
+- 커밋 `9a02643`(첫 빌드의 기록, golden 열하나, 덧붙임 §5.0a, `static_golden.cpp` 의 한 줄), 커밋 `172fc74`(둘째 빌드와 다섯 빌드 실행의 기록, 덧붙임 §5.0b, `check_head.py --allow-size`). 그 뒤 이 절과 비교 기록, 장부·등록부 행.
+
+### 5.2 빌드 [M]
+
+| 빌드 | 목표 | 때 (UTC) | dip (B) | 링크 줄 |
+|---|---|---|---|---|
+| 1 | `kz-static` | 13:46–13:48 | 123,981,824 | 2 (`libkz-llvm.a`, kz-static) |
+| 1 | `all` | 13:48–13:50 | 62,271,488 | 12 (`libkz-llvm.a` 를 링크하는 시험 열, `static_golden`, `test_static_cli`) |
+| 2 | `static_golden` | 13:53 | 778,240 | 1 |
+| 2 | `all` | 13:53 | 12,288 | 0 |
+
+- 빌드 1: 링크된 14 가 `relink_expected.sha256` 과 같고 14 모두 sha256 이 바뀌었다. 다시 링크되지 않아야 하는 110 은 모두 같다(kz `913fcd99…`, kz-dump `32a96ae7…`, kz-phi `df79fb82…`, kz-rt-dump `4390d4f1…`, kz_lint `5f62ec20…`, kz-instr-clang `28db4017…` 포함). 빌드 2: `static_golden` 만 바뀌었고 `after_build1.sha256` 13 과 110 은 같다.
+- kz-static `5ae220d2…` → `c6aa4811612f13bd79b826e53e1f104e3e759d4d97123029c232558a98c73507`; `--identity` `tool_sha256` `783c7cd7…` → `464d62b3583c61c62d1a3e168913fab8a76cdcbf24bbc26acbf6346182810a39`, `tool_source` `f73da08c…` → `3a8a7b8d0e980ff7edfdfcb2e448bc008b0b1b2db3cd16b6dcf002f66234fe34`; `core_source` `568e5061…`, `schema_revision=12`, `schema_fingerprint` `6fbff6c6…` 그대로.
+- `CMakeCache.txt` `bc2f43b4…` 그대로, flags.make 목록 해시 `e8f06cbe…` → `95916686…`(kz-static 의 정체성 define). 두 빌드 모두 시작 뒤 바뀐 소스 파일 0(`find -newer`). 출력은 kz-static 이 새 `--identity` 를 적은 뒤에만 냈다.
+
+### 5.3 시험 [M]
+
+- 빌드 1 의 첫 ctest(`ctest_first.log`): 254 개 가운데 실패 11, 선언한 그대로(golden 열과 `test_static_plan`). 갱신한 열하나는 scratchpad 점검 빌드의 것과 `cmp` 같다(`golden_update.log`).
+- 갱신 뒤 ctest(`ctest_full.log`): 실패 1, `test_static_reasons`(선언 밖): §5.0a 로 멈추고 고침.
+- 빌드 2 뒤(`ctest2_first.log`): 실패 둘(`static_golden_anonrec_np` 선언대로, 그 golden 을 갱신하기 전이라 `test_static_reasons` 도). `anonrec_np.golden` 갱신(`golden2_update.log`): 72 줄, 빌드 1 판의 1–72 줄과 같다. 선언(§5.0a)은 "1–73 줄"이라 적었으나 73 줄은 relations 부분 앞의 빈 줄이고 그것도 relations 부분이다(`static_golden.cpp` 가 `view + "\n# relations\n" + rel` 로 붙임). 선언의 줄 번호가 하나 어긋났을 뿐 바뀐 내용은 선언한 그 부분이다(§5.8).
+- 최종(`ctest2_full.log`): 254 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음). 확인 수: `test_static_cli` 953(911 + 42), `test_static_reasons` 660(앞 단계 655; 사유 표에 한 줄이 늘고 relations golden 의 줄이 둘 늘었다. 빌드 1 의 663 은 행 없는 relations golden 하나를 더 읽은 수), `test_static_plan` 182, `test_core_schema` 34,017, `lint_selftest` 109, lint 7/7. 단위 점검 15/15(`unit_tools.txt`), 7/7(`unit_step2a.txt`).
+
+### 5.4 바이트 동일성과 다섯 빌드 [M]
+
+| 비교 | 결과 |
+|---|---|
+| relations, T8CF facts (`compare_relations.txt`) | 다섯 빌드 `relations.txt`·`keys.txt` 가 `schema12_relcheck` 와 3 번째 줄(rules revision 8) 밖에서 바이트 동일, `relations.log` 빈 파일(15 OK) |
+| order, T8CF facts (`compare_order.txt`) | 두 번 같은 바이트, `order.txt` 는 3 번째 줄 밖에서 같음, `edges.tsv` 바이트 동일, `order.log` 빈 파일(25 OK) |
+| 다시 뽑기 (`compare_extract.txt`, `compare/`) | 다섯 빌드 45 OK: `basis.kz` 레코드 모두 같음(머리의 해시 둘만), `facts.kz` 머리는 해시 넷과 크기 줄(§5.0b), facts 의 보기·`extract.txt`·`relations.txt` 는 선언한 갈래만(`compare/facts_<b>.txt`, `extract_txt_<b>.txt`, `relations_<b>.txt`), `basis.txt`·`sha256.txt` 는 해시 줄만, `args.txt`·`relations.log` 같음 |
+| 다시 뽑은 facts 위 (`compare_onextract.txt`) | order 두 번 같음, `order.txt` 는 선언한 갈래만(facts 해시, relations 개정, 레코드 전체 쓰기의 짝 줄 5: c1 둘·r2), `edges.tsv` 바이트 동일, `relations.txt` 는 다시 뽑기의 것과 바이트 동일, 키 표(30 OK) |
+| 계획 (`compare_plans.txt`) | T8CF 위 다섯과 다시 뽑은 facts 위 다섯이 모두 "only declared differences"(site 와 필요 줄 같음) |
+
+- **누적 목록**: `ledger_check.sh` 76 행, 실패 0(새 행 여덟: `OBS_extfix_pre_onextract`, `OBS_extfix_relcheck`, `OBS_extfix_order`, `OBS_extfix_extract`, `OBS_extfix_onextract`, `OBS_extfix_plans`, `OBS_extfix_plans_onextract`, `TOOLS_20261116f`). `tools_check.sh --deep` 39 행, 실패 0. 바깥 이름 점검(`--tree`)은 일곱 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다.
+- **도구 보존**(`tool_copy/ROUNDTRIP.txt`): kz-static `5ae220d2` 를 빌드 전에 `/home/user/work/preserve/tools-20261116-f/kz-static.5ae220d2.xz`(42,454,428 B)로 사본하고 왕복 확인했다(`xz -t` OK, 스트림 sha256 같음, `cmp` 같음). 등록부: `5ae220d2` copy, `c6aa4811` in-place. 대체되지 않음: 새 도구의 출력은 개정 줄과 이름에서 다르다.
+
+### 5.5 측정: 영향 범위 [M]
+
+**이름 없는 레코드 형.** 다섯 빌드 모두 다시 뽑았다. 새 이름의 수(그 facts 보기에 있고 옛 보기에 없는 형 이름): c1_pre_tx 25, c1_post_tx 25, r2_core 22, c5_641 5, c5_642 5. facts 보기의 줄 갈래(`compare/facts_<b>.txt` 의 합):
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| renamed(이름만 바뀐 줄) | 141 | 141 | 75 | 3 | 3 |
+| added-named(새 이름으로 새로 맞은 행) | 276 | 276 | 123 | 38 | 38 |
+| removed-anon(`<anonymous>` 행이 갈라지거나 사라짐) | 54 | 54 | 42 | 24 | 24 |
+| BASIS 수·항목(change, insert) | 10, 2 | 10, 2 | 8, 1 | 2, 1 | 2, 1 |
+| CF `CF_CmdGetSetParam` entry-release 행(더해짐/빠짐) | 8 / 7 | 8 / 7 | 0 | 0 | 0 |
+| site 번호 등 움직인 번호만 다른 줄 | 43,564 | 43,577 | 21,255 | 117 | 117 |
+
+FACT_LOCS 와 FIELD_STATUS 의 그 형 행(`compare/names_<b>.txt`; 옛 → 새):
+
+| | c1_pre_tx, c1_post_tx | r2_core | c5_641, c5_642 |
+|---|---|---|---|
+| FACT_LOCS 행 | 3 → 4 | 2 → 3 | 0 → 0 |
+| 그 가운데 writer-set-complete | 3 → 3 | 2 → 3 | — |
+| 그 가운데 complete 이고 writers 0 | 2 → 0 | 1 → 0 | — |
+| FIELD_STATUS 행 | 10 → 21 | 6 → 13 | 0 → 0 |
+| 그 가운데 두 규칙 모두 complete | 10 → 11 | 6 → 8 | — |
+| 그 가운데 두 규칙 complete 이고 writers 0 | 9 → 1 | 5 → 1 | — |
+
+- C1 의 `<anonymous>.Data`(writers 0, complete)는 `CFE_SB_MemParams_t::Partition.Data` 와 `CFE_TBL_BufParams_t::Partition.Data` 둘로 갈라졌고, 각각 memset writer 하나(`cfe_sb_init.c:61:5`, `cfe_tbl_internal.c:52:5`)가 맞는다(FACT_LOCS complete writers 1; FIELD_STATUS 는 `array-element-stores-not-collected` 로 DISABLED, 앞의 규칙 그대로).
+- `<anonymous>.sys_timebase_id` 는 `PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type.sys_timebase_id` 이고 writer 가 1 → 2(memset `cfe_psp_soft_timebase.c:50:5` 가 더해짐). 앞판에서 빠진 까닭은 memset 의 대상 형을 이름 표로 찾는 `owners_contained_in`(`lib/llvm/ast_fn.cpp` 의 데이터 함수 처리)이 이름 표에 없는 형을 맞추지 못한 것이고, 이제 그 형이 이름 표에 있다.
+- C1 의 `<anonymous>.State`(writers 0, complete)는 `UnSock_Global@…/unsock_intf_c:85::type.State` 이고 memset writer 1(`unsock_intf.c:231:5`)과 untyped 133·escape 1 hit 로 DISABLED 다.
+- C5 에는 FACT_LOCS·FIELD_STATUS 의 그런 행이 없고, 바뀐 것은 FUNC_WRITES·LOCKSET·LOCK_PATHS 의 `record … .*` 이름이다(OSAL 4.1.1 의 이름 없는 레코드가 시스템 머리말 형 `__pthread_mutex_s::__elision_data` 등으로).
+- 시스템 머리말 형도 이름을 얻는다(`siginfo_t::_sifields::_sigfault.si_addr` 등). 같은 정의는 모든 단위에서 같은 이름이다.
+- 간접 호출 하나의 해석이 바뀌었다(c1 두 빌드): `cf_cmd.c:1014:18` 의 `item.fn(...)` 이 `incomplete-source`(지역 객체 `item` 의 memset 이 writer 로 맞음). 그래서 relations 가 인용하는 "풀리지 않은 간접 호출"의 수가 62 → 63 이고(행 383 줄), LOCK_PATHS 의 entry-release 행 15 가 그 호출을 거친다.
+
+**relations 와 키.** 다섯 빌드 모두 행 수와 판정 칸이 그대로다(relations 비교의 갈래는 머리 셋, 그 수 인용, `[B]`·`[C]` 머리, 이름 바뀐 줄 c1 2·r2 1). `[B]` 머리의 "left out: no writer / one actor only": c1 두 빌드 33/111 → 31/113, r2 11/17 → 9/19, c5 그대로. `[C]` 머리의 "record types written whole after a spawn … not paired": c1 380 → 383, r2 177 → 178, c5 102 그대로. **옛 키 → 새 키 표**(`key_map_<b>.tsv`): 다섯 빌드 모두 바뀌는 키 0(같음 367/367/295/178/175, renamed 0, 한쪽에만 0). relations 행의 키 글에 이름 없는 형이 든 행이 없기 때문이다. 표는 행마다 같은 키를 적는다.
+
+**order 와 계획.** order 의 간선 목록은 다섯 빌드 모두 바이트 동일하고, `order.txt` 에서 바뀐 것은 레코드 전체 쓰기의 짝 줄 5(c1 두 빌드, r2: `[<anonymous>.*]` → `[CFE_PSP_ExceptionStorage_t.*]` 등 다른 레코드 이름이 첫 자리)뿐이다. 계획은 다섯 빌드 모두 site 와 필요 줄이 같다.
+
+**읽기 옵션.** 다섯 빌드의 다시 뽑기는 모두 `extract.reading_options_vs_basis = same as basis front_end.arguments_added and front_end` 이다(`one_build.sh` 는 basis 와 extract 에 같은 옵션을 준다). basis.kz 가 레코드 단위로 같다는 것은 공유 함수가 앞판과 같은 글을 만든다는 측정이다. 다름·거부·`--accept-option-difference`·relations 의 사유와 계층 표시는 합성 시험(`test_static_cli`)에서만 보았다(실제 빌드는 다르지 않다).
+
+**잘린 이미지.** 다섯 빌드는 표시 잎이 0 이라(§5j, §5m) 펼치기와 PTR_FIELDS 의 고침이 닿는 행이 없다: LOOP_ITERS 의 호출 행 text 칸은 모두 비고, PTR_FIELDS 의 `resolved`/`may` 는 바뀌지 않았다(facts 보기 비교에 그 갈래 없음). 고침은 합성 시험(`test_static_cli`, `--image-budget 2` 대 기본 예산)에서 보았다.
+
+### 5.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 이 단계 처음 | 3,159,941,120 | 시작 |
+| scratchpad 점검 빌드(감시 아래) | dip 261,656,576(첫 make), 뒤에 시험까지 887 MB | 근거 아님, 지움 |
+| 13:41 | 3,147,706,368 | 빌드 전 참조(dip 8,589,312) |
+| 13:46 | 3,104,301,056 | 사본(dip 42,475,520) |
+| 13:50 | 3,037,876,224 | 빌드 1(kz-static dip 123,981,824, all 62,271,488) |
+| 13:53 | 3,038,326,784 | 빌드 2 |
+| 13:58 | 2,972,991,488 | 다시 뽑기(dip 48,410,624) |
+| 14:1x | 2,956,251,136 | relations, order, 계획, 비교 뒤, scratchpad 정리 뒤 |
+
+- 하한을 넘지 않았다. 남긴 출력: `extfix_pre_onextract` 8,452,020, `extfix_relcheck` 7,564,932, `extfix_order` 7,758,336, `extfix_extract` 46,902,429, `extfix_on_extract` 15,324,352, `extfix_plans` 886,411, `extfix_plans_on_extract` 886,913 B(합 87,775,393 B, 장부 행), 사본 42,454,428 B. 지운 것: compare.sh 가 비교 뒤 지운 둘째 실행(`again/`), facts 보기(scratchpad, 비교 뒤 바로), 그리고 이 단계의 scratchpad 작업 파일(점검 빌드, 점검 출력, golden 사본)뿐이다.
+- 이번 kz-static 빌드의 dip 123,981,824 B 는 앞 단계의 75,079,680 B 보다 크다(`lib/llvm` 열넷이 다시 컴파일됨).
+
+### 5.7 계획과 다르게 한 것
+
+- **다섯 빌드 모두 다시 뽑았다.** 계획은 c1_post_tx 와 r2_core 를 공간이 허락할 때만 다시 돌린다고 했다. 공간이 넉넉해 다섯을 모두 돌렸고 영향 범위는 다섯 빌드 전체다(부분이 아님).
+- **옛 키 → 새 키 표는 비었다.** 계획은 "이름이 바뀐 형의 행의 키가 바뀐다"고 했다 [I]. 잰 값은 0 이다: 다섯 빌드의 relations 행 어느 것도 키 글에 이름 없는 형을 담지 않았다(T8CF 의 relations 에도 `<anonymous>` 를 담은 행이 없다: `grep` 으로 그 글은 id holder 줄 둘에만 있다). 표는 행마다 같은 키로 남긴다.
+- **relations 규칙 개정을 8 로 올렸다.** 새 세부 사유와 계층 표시는 규칙의 바뀜이라 개정 글을 올렸다. 그 때문에 relations·키·order·계획의 개정 줄과 golden 여덟이 바뀌었다(선언 안).
+- **형 이름의 위치는 점 없이 쓴다**(파일의 `.` 를 `_`). 객체 키를 그대로 쓰면 `…cfe_psp_soft_timebase.c:44::type` 처럼 점이 들어가는데, `Type.field` 를 첫 점에서 나누고 둘째 점을 거부하는 곳(`spec.cpp:10`)이 있어 점 없는 쪽을 택했다. 객체 키(GLOBAL_IMAGES 의 객체 칸 등)는 그대로다.
+- **이름 있는 멤버의 형인 태그 없는 레코드는 제 형이다.** 그 형을 `<Outer>::<member>` 로 부르면 앞판의 `Unn.q` 같은 맞춤(감싼 레코드의 필드로)이 없어진다. §5k 가 성질로 적은 것을 바꾼 것이고, 선언과 `test_static_cli` 에 적었다.
+- **잘린 이미지의 펼치기 고침은 값이 아니라 글이다.** 찾지 못한 필드는 전에도 모름(상수 아님)이었다. 바뀐 것은 그 까닭(잘린 경로)을 적는 것이고, residual guard 의 까닭은 호출 행의 비어 있던 text 칸에 둔다(schema 개정 없이). `kz-static show` 가 그 칸을 보이도록 했다.
+- **선언 밖의 일 셋**: (1) `test_static_reasons` 의 실패(행 없는 relations golden; §5.0a 로 멈추고 고침, 둘째 빌드); (2) facts.kz 머리의 크기 줄(§5.0b 로 멈추고 허용을 덧붙인 뒤 비교를 다시 돌림; 출력은 바꾸지 않음); (3) §5.0a 의 줄 번호가 하나 어긋남(73 이 아니라 72; 빈 줄도 relations 부분, §5.3). (1)·(2) 는 각각 덧붙임을 커밋한 뒤에 다음을 돌렸고, (3) 은 갱신 뒤에 보아 덧붙임 없이 여기 적는다.
+- **scratchpad 점검 빌드**는 감시 아래 돌렸다(앞 단계의 다짐대로). LLVM Release 구성으로 만들어 MC 의 것과 바이트가 다르다. 증거로 쓰지 않았고 지웠다.
+
+### 5.8 열린 것
+
+- 이름 없는 형이 FACT_LOCS 에서 writer-set-complete 이면서 그 배열 원소 쓰기는 FIELD_STATUS 만 본다(`CFE_SB_MemParams_t::Partition.Data`: FACT_LOCS complete writers 1, FIELD_STATUS DISABLED `array-element-stores-not-collected`). FACT_LOCS 의 규칙(배열 원소 쓰기를 세지 않음)은 앞판 그대로다.
+- 읽기 옵션의 대조는 글의 비교다. 같은 글이 같은 읽기를 준다는 것은 같은 도구 판 안의 전제다. 다른 도구 판의 basis 로 추출하면 `front_end` 가 달라 거부된다(`--accept-option-difference` 로 편차를 적고 진행).
+- 이름 없는 형의 이름을 쓰는 다음 일: 객체 접근(OBJECT_ACCESS)의 바탕 객체와 형 단위 대신 객체 단위의 writer 집합(뒤 추출 단계). 이번 이름은 형을 갈랐을 뿐 같은 형의 두 객체를 가르지 않는다.

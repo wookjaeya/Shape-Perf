@@ -49,3 +49,10 @@ order.sh extfix_extract extfix_on_extract (df_order_extract.log, order_extract_r
 compare.sh extract -> compare_extract_first.txt: 40 OK, 5 BAD: the facts.kz header line `container abi=1 kind=facts size=N` (not declared) -- stopped; addendum 5.0b (check_head.py --allow-size for the facts header) written and committed before the comparison is run again; facts_sizes.txt
 compare.sh onextract -> compare_onextract.txt: 30 OK (two runs same, order.txt only declared classes, edges.tsv same, relations.txt same as the re-extraction's, key maps: 0 keys change)
 compare.sh plans -> compare_plans.txt: ten "only declared differences"
+compare.sh extract (after 172fc74) -> compare_extract.txt: 45 OK (basis.kz whole, facts.kz header with the size line, facts view, extract.txt, relations.txt, basis.txt, sha256.txt, args.txt, relations.log; five builds); compare/ holds the per-build class counts and names_<b>.txt
+
+## 5. lists and checks
+sha256 lists of the seven output directories (<dir>.sha256); records/LEDGER.tsv +8 rows (seven OBS_extfix_*, TOOLS_20261116f); records/TOOLS.tsv: 5ae220d2 -> copy, c6aa4811 in-place
+env/tools/ledger_check.sh -> ledger_check.txt: 76 rows, 0 failing; env/tools/tools_check.sh --deep -> tools_check.txt: 39 rows, 0 failing
+name_check.sh --tree over the seven output directories, the copy directory and this record directory: clean
+scratch removed at the end: <scratch>/m10 (scratch goldens, stamps, logs copied here)

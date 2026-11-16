@@ -14,3 +14,8 @@
 | `golden_scratch.sha256`, `df_scratch_*.log` | scratchpad 점검 빌드의 golden sha256 과 공간 감시(근거 아님) |
 | `tool_copy/` | 덮기 전 사본의 왕복 확인과 공간 감시 |
 | `tools_check_pre.txt`, `ledger_check_pre.txt` | 빌드 전 등록부와 누적 목록 |
+| `pre_mc.txt`, `post_mc.txt`, `post_mc_build2.txt`, `build_start.txt`, `build2_start.txt`, `make_*.log`, `make2_*.log`, `df_build*.log`, `after_build1.sha256` | 빌드 1·2 전·후 MC, 빌드 출력과 공간 감시 |
+| `ctest_first.log`, `golden_update.log`, `ctest_full.log`, `ctest2_first.log`, `golden2_update.log`, `ctest2_full.log`, `ctest_counts.log`, `unit_tools.txt`, `unit_step2a.txt` | 시험 |
+| `compare_*.txt`, `compare_extract_first.txt`, `compare/`, `key_map_<b>.tsv`, `facts_sizes.txt`, `*_run.txt`, `df_*.log` | 다섯 빌드의 비교(첫 다시 뽑기 비교는 §5.0b 전), 옛 키 → 새 키 표, 실행 기록 |
+| `<출력 디렉터리>.sha256` | 일곱 출력 디렉터리의 sha256 목록(장부 행) |
+| `tools_check.txt`, `ledger_check.txt` | 빌드 뒤 등록부와 누적 목록 |

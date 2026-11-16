@@ -1,4 +1,4 @@
-# kz plan written by kz-static plan (plan rules revision 1 (2026-11-16); relations rules revision 7 (2026-11-16))
+# kz plan written by kz-static plan (plan rules revision 1 (2026-11-16); relations rules revision 8 (2026-11-16))
 # sidecar sha256=<sha256>
 # every site: a label from the sorted site keys with its rule names, a ref to the facts it came from; the plan states what to record, never what to expect
 kzs-sites 3
@@ -62,7 +62,7 @@ generator tool=kz-static tool_sha256=<sha256> tool_source=<sha256> core_source=<
 input facts sha256=<sha256> path=<path>
 input framework-layer-data sha256=<sha256> path=<path>
 facts-artifact <sha256>
-rules plan rules revision 1 (2026-11-16); relations rules revision 7 (2026-11-16)
+rules plan rules revision 1 (2026-11-16); relations rules revision 8 (2026-11-16)
 selection observation-set: every row of the relations (method document 3.1, the revised rule: no label and no proof of a row removes it)
 priority method-priority: method priority port revision 1 (2026-11-16): label, order class, reach mark and disposition of the method document's S1 rule over the row text; tier 1 = disposition D07 (label R or J, counterpart, order class RELOC), tier 2 = the other rows of order class RELOC, tier 3 = the rest; within a tier the order of the relations text
 classes rows 4 tier1 4 tier2 0 tier3 0

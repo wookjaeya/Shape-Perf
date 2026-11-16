@@ -108,7 +108,7 @@ facts-view 1
 
 # order
 kz-static order (order rules revision 1 (2026-11-16))
-relations relations rules revision 7 (2026-11-16)
+relations relations rules revision 8 (2026-11-16)
 kinds: hard: every execution in which both instances occur has them in this order, under the premises; conditional: only when the condition holds; observed-only: no rule of this revision orders them, a run record may show an order
 closure: hard_before and fixed_early_proved follow hard edges only; a conditional edge makes the path conditional (conditional_before, fixed_early_candidate) and is never in the hard closure; observed-only edges are not followed
 values: hard_before, conditional_before (the write or creation before the use), fixed_early_proved, fixed_early_candidate (the use before it), unordered (no path either way between two threads of resolved roots), unknown (why)

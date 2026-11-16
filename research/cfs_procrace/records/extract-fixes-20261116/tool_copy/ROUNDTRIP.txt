@@ -1,0 +1,7 @@
+# round trip of the tool copy before the build of the extractor fixes (2026-11-16T13:44:05Z)
+copy: /home/user/work/preserve/tools-20261116-f/kz-static.5ae220d2.xz (42454428 B)
+xz -t: OK
+sha256 of the xz file: 98511db38986990af1dfd24e14ddb03db07c460d3176a54554624e032362b471
+xz -dc | sha256sum: 5ae220d2a0963097611688a5e55f77be34bebc0c40a1d98a6581af70ac3fc3cf
+in place: 5ae220d2a0963097611688a5e55f77be34bebc0c40a1d98a6581af70ac3fc3cf
+xz -dc | cmp in place: SAME

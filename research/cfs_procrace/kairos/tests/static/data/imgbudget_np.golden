@@ -44,10 +44,10 @@ facts-view 1
   img_small.a int 1 at imgbudget.c:66:30 {object-written} reach={argument} field=ImgSmall.a
   img_small.b int 2 at imgbudget.c:66:33 {object-written} reach={argument} field=ImgSmall.b
   img_small.c int 3 at imgbudget.c:66:36 {object-written} reach={argument} field=ImgSmall.c
-  img_union.s.a int 1 at imgbudget.c:33:30 {image-truncated,object-written} reach={argument} field=<anonymous>.a
-  img_union.s.b int 2 at imgbudget.c:33:33 {image-truncated,object-written} reach={argument} field=<anonymous>.b
-  img_union.s.c int 3 at imgbudget.c:33:36 {image-truncated,object-written} reach={argument} field=<anonymous>.c
-  img_union.s.d int 4 at imgbudget.c:33:39 {image-truncated,object-written} reach={argument} field=<anonymous>.d
+  img_union.s.a int 1 at imgbudget.c:33:30 {image-truncated,object-written} reach={argument} field=ImgUnion::s.a
+  img_union.s.b int 2 at imgbudget.c:33:33 {image-truncated,object-written} reach={argument} field=ImgUnion::s.b
+  img_union.s.c int 3 at imgbudget.c:33:36 {image-truncated,object-written} reach={argument} field=ImgUnion::s.c
+  img_union.s.d int 4 at imgbudget.c:33:39 {image-truncated,object-written} reach={argument} field=ImgUnion::s.d
   img_union.s.e... non-constant at imgbudget.c:33:16 {image-truncated,object-written} reach={argument}
   img_wide.a int 1 at imgbudget.c:18:28 {image-truncated,object-written} reach={argument} field=ImgWide.a
   img_wide.b int 2 at imgbudget.c:18:31 {image-truncated,object-written} reach={argument} field=ImgWide.b

@@ -1,0 +1,99 @@
+extract
+  translation units          1
+  functions                  6 (bodies read 3, in system headers skipped 0)
+  call sites                 6
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                0 (entry resolved 0)
+  loops                      0 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 1
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location ArInner.ix   writers 2 (direct 2, data function 0, out-pointer 0, initial values 2), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location ArSbParams_t::Partition.Data   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location ArTable::rows.key   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location ArTblParams_t::Partition.Data   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location ar_global@anonrec_c:41::type.count   writers 2 (direct 1, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location ar_global@anonrec_c:41::type.sys_id   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 1, cast 0, union 0, unknown effect 0  -> DISABLED
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 3, control-flow graphs 3, call-graph components 3 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 0 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               6 (R-T1 1, R-T2 6, both 1; left out, reached only through an unshared base: R-T1 0, R-T2 0)
+facts-view 1
+[functions] 6
+  fn 0 ar_create anonrec.c:60 params=1 {}
+  fn 1 ar_init anonrec.c:63-87 params=0 {defined}
+  fn 2 ar_main anonrec.c:91-94 params=0 {defined}
+  fn 3 ar_read anonrec.c:89-89 params=0 {defined}
+  fn 4 ar_use anonrec.c:61 params=1 {}
+  fn 5 memset /usr/include/string.h:61 params=3 {builtin}
+[writers] 6
+  ArInner.ix assign at anonrec.c:69:3 in ar_init value=const 3 [3] key=ar_outer.in {} n/a
+  ArInner.ix assign at anonrec.c:70:3 in ar_init value=const 4 [4] key=ar_inner {} n/a
+  ArTable::rows.key assign at anonrec.c:71:3 in ar_init value=const 7 [7] key=ar_table.rows[1] {} n/a
+  ar_global@anonrec_c:41::type.count memset at anonrec.c:64:3 in ar_init value=const 0 [fill 0] key=&ar_global {covers-more-than-the-field} n/a
+  ar_global@anonrec_c:41::type.count assign at anonrec.c:66:3 in ar_init value=const 1 [1] key=ar_global {} n/a
+  ar_global@anonrec_c:41::type.sys_id memset at anonrec.c:64:3 in ar_init value=const 0 [fill 0] key=&ar_global {covers-more-than-the-field} n/a
+[locs] 6
+  ArInner.ix writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=2 unresolved-indirect=0
+  ArSbParams_t::Partition.Data writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  ArTable::rows.key writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  ArTblParams_t::Partition.Data writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  ar_global@anonrec_c:41::type.count writer-set-complete writers=2 (direct 1, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  ar_global@anonrec_c:41::type.sys_id DISABLED writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=1 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+[fwrites] 10
+  ar_init field <global>.ar_global at anonrec.c:64
+  ar_init address-argument <global>.ar_global at anonrec.c:64
+  ar_init field ArInner.ix at anonrec.c:69
+  ar_init field ArLocal@anonrec_c:73.v at anonrec.c:76
+  ar_init field ArOuter.in at anonrec.c:69
+  ar_init field ArTable::rows.key at anonrec.c:71
+  ar_init record ar_global@anonrec_c:41::type.* at anonrec.c:64
+  ar_init field ar_global@anonrec_c:41::type.count at anonrec.c:66
+  ar_init address-argument ar_global@anonrec_c:41::type.sys_id at anonrec.c:65
+  ar_init field check@anonrec_c:83::type.w at anonrec.c:84
+[gimages] 1
+  ar_global@anonrec.c:41 int 0 at anonrec.c:41:3 {zero-initialized,object-written} reach={argument}
+[fstatus] 9
+  ArInner.ix per-field=writer-set-complete type-level=writer-set-complete writers=2 (direct 2, data 0, out-pointer 0, init 2) instances=2 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 0 {several-instances} by ar_init
+  ArSbParams_t::Partition.Align per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 0 {}
+  ArSbParams_t::Partition.Data per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 0 {array-element-stores-not-collected}
+  ArTable::rows.key per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 0 {} by ar_init
+  ArTable::rows.value per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 0 {}
+  ArTblParams_t::Partition.Align per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 0 {}
+  ArTblParams_t::Partition.Data per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 0 {array-element-stores-not-collected}
+  ar_global@anonrec_c:41::type.count per-field=writer-set-complete type-level=writer-set-complete writers=2 (direct 1, data 1, out-pointer 0, init 1) instances=2 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 1; untyped sites 0 {sibling-exposed,several-instances} by ar_init
+  ar_global@anonrec_c:41::type.sys_id per-field=DISABLED type-level=DISABLED writers=1 (direct 0, data 1, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 1, cast 0, union 0, unknown 0, other fields 0; untyped sites 0 {} by ar_init
+
+# relations
+kz-relations 1
+rules relations rules revision 8 (2026-11-16)
+mode profile-free
+  extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
+  extract.profile = kz-static-builtin-minimal / 
+  extract.p0_table = P0 table revision 3 (2026-10-30), 72 entries
+  extract.p0_table_scope = families of this revision: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread or process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Of a family the members that take, release, wait, signal, sleep, end, name a thread, bind or create a key, push or pop a handler, load or look up, or store memory are entries; a family is not listed whole where this list names members left out.  Not in this revision: read-write locks (pthread_rwlock_*; their shared acquisitions are not read by the lock-set analysis, so the family is left out whole and its acquisitions are no lock operations), barriers (pthread_barrier_*), one-time initialization (pthread_once, call_once), thread cancellation of another thread (pthread_cancel and the cancellation state functions), signals (kill, raise, pthread_kill, sigwait), dlclose, dlerror and dladdr, functions a compiler or a fortify wrapper calls without a call in the source (__stack_chk_fail, __chk_fail and the *_chk functions); thread join and detach (pthread_join, pthread_tryjoin_np, pthread_timedjoin_np, pthread_detach, thrd_join, thrd_detach); POSIX timers (timer_create, timer_settime, timer_gettime, timer_getoverrun, timer_delete; a timer with SIGEV_THREAD notification starts its function on a new thread, which is no actor here); I/O multiplexing (select, pselect, poll, ppoll); the initialization, destruction, attribute and query members of the mutex, spin lock, semaphore and condition variable families and of thread creation (pthread_mutex_init, pthread_mutex_destroy, pthread_mutexattr_*, pthread_spin_init, pthread_spin_destroy, sem_init, sem_destroy, sem_open, sem_close, sem_unlink, sem_getvalue, pthread_cond_init, pthread_cond_destroy, pthread_condattr_*, mtx_init, mtx_destroy, cnd_init, cnd_destroy, pthread_attr_*); scheduling (sched_*, pthread_setschedparam, pthread_getschedparam, pthread_setschedprio); data functions not in this revision (stpcpy, stpncpy, strlcpy and strlcat (glibc 2.38 and later), mempcpy, memccpy, explicit_bzero, and the wide-character members); formatted input, which stores through its arguments (sscanf, vsscanf, fscanf, vfscanf, scanf, vscanf); handlers registered for process exit (atexit, at_quick_exit, on_exit)
+  extract.derivation_rules = wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  extract.targets_rule = R-T1,R-T2 (target rules revision 1): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)
+  extract.reading_options_vs_basis = not compared: no basis (--source)
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
+run order: no record given (this revision reads no run record; the column says so in every row)
+functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
+actors: roots 0 (process 0, spawn-entry 0, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 0
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
+summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition in another actor 0, key-matched 0) B 0 (with a callee check 0) C 0 (self-identity reads 0); flip static-possible 0, static-undetermined 0, none 0; feasibility proven-impossible 0, possible 0, undecidable 0, not graded 0
+summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 0, creators 0; lookup rows with the membership unresolved 0; lookup rows without a creator of their partition 0 []
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no rows; reasons of the whole facts on every row: none
+[A] 0 (namespaces 0, key comparisons 0; left out: searches over no global table 0)
+[B] 0 (field-argument groups 0; left out: no writer 0, one actor only 0)
+[C] 0 (spawn calls 0, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 0, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)

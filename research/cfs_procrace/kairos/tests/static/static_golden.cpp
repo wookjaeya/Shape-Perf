@@ -96,7 +96,8 @@ const std::vector<Case>& cases() {
       {"order_np", "order.c", {"--targets-rule", "R-T1,R-T2"}, kPathSections, true, false, true},
       // the names of record types without a file-scope tag or typedef name and the writers they let the rules match
       // (static_facts.md 5q): anonrec.c
-      {"anonrec_np", "anonrec.c", {"--targets-rule", "R-T1,R-T2"}, kNameSections, true, true},
+      // (no relations: the fixture has no threads, so relations has no row; test_static_reasons wants rows in a relations golden)
+      {"anonrec_np", "anonrec.c", {"--targets-rule", "R-T1,R-T2"}, kNameSections, true},
   };
   return all;
 }

@@ -13,11 +13,14 @@
 #include <set>
 #include <sstream>
 #include <tuple>
+#include <utility>
+#include <vector>
 
 #include "kz/core/dump.hpp"
 #include "kz/core/registry.hpp"
 #include "kz/core/sha256.hpp"
 #include "p0.hpp"
+#include "rel_facts.hpp"
 
 namespace kzs {
 
@@ -34,11 +37,6 @@ struct Val {
 };
 Val known(int64_t v) { return Val{true, v}; }
 
-// The functions of the C library that return twice (ISO C 7.13 setjmp and the names it is spelled as in glibc 2.39,
-// POSIX sigsetjmp, the ucontext getcontext, vfork): a non-local jump (longjmp, siglongjmp, setcontext) or the second
-// return may come back to such a call in an order and under locks the control-flow graph does not have.
-const char* const kReturnsTwice[] = {"setjmp", "_setjmp", "__setjmp", "sigsetjmp", "__sigsetjmp", "savectx", "getcontext", "vfork"};
-
 // Substitution for evaluating a condition: field loads and parameters with a value, call results with a value (by the
 // callee's name; "<indirect>" for an indirect call), calls whose result is known not to be zero (a comparison call that
 // does not match: only `== 0` and `!= 0` against it are decided), and nodes with a forced value.
@@ -50,123 +48,54 @@ struct Subst {
   std::map<uint32_t, int64_t> forced;  // FACT_EXPRS node -> value
 };
 
-class Rel {
- public:
-  explicit Rel(const kz::Container& c) : c_(c) {}
+// The lines of the row being written: line(name) starts a line (the stream takes its text, without the indentation
+// and the newline) and closes the one before; done() closes the last one.
+struct RowLines {
+  explicit RowLines(RelRow* r) : row(r) {}
+  RowLines(const RowLines&) = delete;
+  RowLines& operator=(const RowLines&) = delete;
+  ~RowLines() { done(); }
+  std::ostream& line(const char* name, uint8_t indent = 6) {
+    done();
+    open = true;
+    cur_name = name;
+    cur_indent = indent;
+    cur.str("");
+    cur.clear();
+    return cur;
+  }
+  void done() {
+    if (!open) return;
+    row->lines.push_back(RelLine{cur_name, cur.str(), cur_indent});
+    open = false;
+  }
+  RelRow* row;
+  std::ostringstream cur;
+  std::string cur_name;
+  uint8_t cur_indent = 6;
+  bool open = false;
+};
 
-  kz::Status run(std::string* out) {
-    kz::Status s = load();
+class Rel : public RelFacts {
+ public:
+  explicit Rel(const kz::Container& c) : RelFacts(c) { file_notes_ = &row_files_; }
+
+  kz::Status run(RelReport* out) {
+    kz::Status s = prepare();
     if (!s.ok()) return s;
-    index();
-    actors();
-    std::ostringstream body_a, body_b, body_c;
-    path_a(body_a);
-    path_b(body_b);
-    path_c(body_c);
+    RelReport rep;
+    path_a(&rep);
+    path_b(&rep);
+    path_c(&rep);
     std::ostringstream os;
     header(os);
-    os << body_a.str() << body_b.str() << body_c.str();
-    *out = os.str();
+    rep.header = os.str();
+    rep.facts = kz::to_hex(c_.artifact_hash());
+    *out = std::move(rep);
     return kz::Status::success();
   }
 
  private:
-  // ---------------------------------------------------------------- loading
-  template <class T>
-  kz::Status read(uint32_t id, std::vector<T>* v) {
-    return c_.read_section(id, v);
-  }
-  kz::Status load() {
-    for (uint32_t need : {KZ_SEC_READS, KZ_SEC_RETURNS, KZ_SEC_ARGFLOW, KZ_SEC_PARAM_FLOW, KZ_SEC_LOCKSET, KZ_SEC_LOCK_IDS, KZ_SEC_FIELD_STATUS})
-      if (c_.find_section(need) == nullptr)
-        return kz::Status::error(kz::Err::Invalid,
-                                 "the facts have no extended facts (section " + std::to_string(need) +
-                                     "): extract them with --no-profile, or with --extended-facts in the profile-driven mode");
-    if (c_.find_section(KZ_SEC_LOCK_PATHS) == nullptr)
-      return kz::Status::error(kz::Err::Invalid,
-                               "the facts have no LOCK_PATHS section (facts schema revision 11, written with the extended facts): extract them again with this kz-static");
-    kz::Status s;
-    if (!(s = read(KZ_SEC_BASIS, &basis_)).ok()) return s;
-    if (!(s = read(KZ_SEC_FUNCS, &funcs_)).ok()) return s;
-    if (!(s = read(KZ_SEC_FACTS, &calls_)).ok()) return s;
-    if (!(s = read(KZ_SEC_FACT_EXPRS, &exprs_)).ok()) return s;
-    if (!(s = read(KZ_SEC_FACT_LOOPS, &loops_)).ok()) return s;
-    if (!(s = read(KZ_SEC_FACT_INIT, &inits_)).ok()) return s;
-    if (!(s = read(KZ_SEC_WRITERS, &writers_)).ok()) return s;
-    if (!(s = read(KZ_SEC_CALL_TARGETS, &targets_)).ok()) return s;
-    if (!(s = read(KZ_SEC_TERMINALS, &terminals_)).ok()) return s;
-    if (!(s = read(KZ_SEC_LOOP_ITERS, &iters_)).ok()) return s;
-    if (!(s = read(KZ_SEC_FUNC_WRITES, &fwrites_)).ok()) return s;
-    if (!(s = read(KZ_SEC_P0_TABLE, &p0_)).ok()) return s;
-    if (!(s = read(KZ_SEC_OP_DERIV, &opderiv_)).ok()) return s;
-    if (!(s = read(KZ_SEC_SPAWN_WRAP, &spawnw_)).ok()) return s;
-    if (!(s = read(KZ_SEC_READS, &reads_)).ok()) return s;
-    if (!(s = read(KZ_SEC_RETURNS, &returns_)).ok()) return s;
-    if (!(s = read(KZ_SEC_RET_CONSTS, &retconsts_)).ok()) return s;
-    if (!(s = read(KZ_SEC_LOOP_EXITS, &loopexits_)).ok()) return s;
-    if (!(s = read(KZ_SEC_ARGFLOW, &argflow_)).ok()) return s;
-    if (!(s = read(KZ_SEC_PARAM_FLOW, &pflow_)).ok()) return s;
-    if (!(s = read(KZ_SEC_PTR_FIELDS, &ptrfields_)).ok()) return s;
-    if (!(s = read(KZ_SEC_GLOBAL_IMAGES, &gimages_)).ok()) return s;
-    if (!(s = read(KZ_SEC_LOCK_IDS, &lockids_)).ok()) return s;
-    if (!(s = read(KZ_SEC_LOCKSET, &lockset_)).ok()) return s;
-    if (!(s = read(KZ_SEC_FIELD_STATUS, &fstatus_)).ok()) return s;
-    if (!(s = read(KZ_SEC_AWAIT_L1, &awaits_)).ok()) return s;
-    if (!(s = read(KZ_SEC_LOCK_PATHS, &lockpaths_)).ok()) return s;
-    return kz::Status::success();
-  }
-
-  std::string str(const kz_str& s) const {
-    std::string out;
-    c_.string(s, &out);
-    return out;
-  }
-  static std::string base_name(const std::string& key) {
-    const size_t at = key.find('@');
-    return at == std::string::npos ? key : key.substr(0, at);
-  }
-  std::string fname(uint32_t fn) const {
-    if (fn == kN || fn >= funcs_.size()) return "-";
-    if (defined(fn)) note_file(str(funcs_[fn].file));
-    std::string n = str(funcs_[fn].name);
-    if (funcs_[fn].flags & KZ_FUNC_FLAG_STATIC) n += "@" + str(funcs_[fn].file) + ":" + std::to_string(funcs_[fn].line);
-    return n;
-  }
-  static std::string join(const std::vector<std::string>& v, const char* sep) {
-    std::string t;
-    for (const std::string& x : v) t += (t.empty() ? "" : sep) + x;
-    return t;
-  }
-  std::string short_fname(uint32_t fn) const { return fn == kN || fn >= funcs_.size() ? "-" : str(funcs_[fn].name); }
-  bool defined(uint32_t fn) const { return fn != kN && fn < funcs_.size() && (funcs_[fn].flags & KZ_FUNC_FLAG_DEFINED) != 0; }
-  // a position; the file is noted for the row being written (the basis deviations of its unit)
-  void note_file(const std::string& f) const {
-    if (!f.empty()) row_files_.insert(f);
-  }
-  std::string pos(const std::string& file, uint32_t line, uint32_t col) const {
-    note_file(file);
-    std::string p = file + ":" + std::to_string(line);
-    if (col != 0) p += ":" + std::to_string(col);
-    return p;
-  }
-  std::string call_pos(uint32_t ci) const { return pos(str(calls_[ci].file), calls_[ci].line, calls_[ci].col); }
-  static std::string written_flags(uint32_t f) {
-    std::string t;
-    if (f & KZ_GIMAGE_FLAG_OBJECT_WRITTEN) t += "object-written";
-    if (f & KZ_GIMAGE_FLAG_FIELD_WRITTEN) t += std::string(t.empty() ? "" : ", ") + "field-written";
-    if (f & KZ_GIMAGE_FLAG_RECORD_WRITTEN) t += std::string(t.empty() ? "" : ", ") + "record-written";
-    return t;
-  }
-  std::string enum_text(const char* name, uint64_t v) const {
-    const kz::EnumDesc* d = kz::find_enum(name);
-    if (d == nullptr) return std::to_string(v);
-    const char* t = kz::enum_display(*d, v);
-    return t != nullptr ? t : "#" + std::to_string(v);
-  }
-  static bool before(const std::string& fa, uint32_t la, uint32_t ca, const std::string& fb, uint32_t lb, uint32_t cb) {
-    return fa == fb && (la < lb || (la == lb && ca < cb));
-  }
-
   // ---------------------------------------------------------------- expressions
   // the text of a tree as `kz-static show` writes it (with its 40-level print limit)
   std::string ex(uint32_t root, int depth = 0) const {
@@ -320,506 +249,6 @@ class Rel {
     }
   }
 
-  // ---------------------------------------------------------------- indices
-  void index() {
-    for (const kz_basis_item& b : basis_) basis_map_[str(b.name)] = str(b.value);
-    for (const kz_basis_item& b : basis_)
-      if (b.policy == KZ_POLICY_DECLARED && b.prov != kN) {
-        const std::string n = str(b.name);
-        if (n.compare(0, 3, "op.") == 0 || n.compare(0, 7, "target.") == 0) ++hand_entered_vocabulary_;
-      }
-    profile_free_ = basis_map_.count("extract.mode") != 0 && basis_map_["extract.mode"].compare(0, 12, "profile-free") == 0;
-    for (size_t i = 0; i < funcs_.size(); ++i) fn_by_name_[str(funcs_[i].name)].push_back(static_cast<uint32_t>(i));
-    succ_.assign(funcs_.size(), {});
-    callers_.assign(funcs_.size(), {});
-    for (size_t i = 0; i < calls_.size(); ++i) {
-      const kz_fact_call& c = calls_[i];
-      call_by_site_[c.site] = static_cast<uint32_t>(i);
-      if (c.caller_fn < funcs_.size()) calls_of_[c.caller_fn].push_back(static_cast<uint32_t>(i));
-      if (c.caller_fn < funcs_.size() && defined(c.callee_fn)) {
-        succ_[c.caller_fn].push_back({c.callee_fn, false});
-        callers_[c.callee_fn].push_back(static_cast<uint32_t>(i));
-      }
-    }
-    for (const kz_fact_target& t : targets_) {
-      auto it = call_by_site_.find(t.site);
-      if (it == call_by_site_.end()) continue;
-      const uint32_t caller = calls_[it->second].caller_fn;
-      if (t.kind == KZ_CALL_TARGET_KIND_INDIRECT && defined(t.fn) && caller < funcs_.size()) {
-        succ_[caller].push_back({t.fn, true});
-        indirect_callers_[t.fn].push_back(it->second);
-        itargets_[t.site].insert(t.fn);
-      }
-      if (t.kind == KZ_CALL_TARGET_KIND_INDIRECT && !defined(t.fn)) {
-        unresolved_sites_.insert(t.site);
-        unresolved_why_[t.site] = enum_text("KZ_CALL_TARGET_REASON", t.reason);
-      }
-      if (t.kind == KZ_CALL_TARGET_KIND_SPAWN_ENTRY) spawn_entries_[t.site].insert(t.fn);
-    }
-    // an indirect call with no resolved target, or with a target the flow graph does not resolve, may call any function
-    for (const kz_fact_call& c : calls_)
-      if (c.kind == KZ_CALL_KIND_INDIRECT && itargets_.count(c.site) == 0 && unresolved_sites_.insert(c.site).second) unresolved_why_[c.site] = "no-function-flows-to-it";
-    for (auto& v : succ_) {
-      std::sort(v.begin(), v.end());
-      v.erase(std::unique(v.begin(), v.end()), v.end());
-    }
-    for (const kz_fact_iter& it : iters_)
-      if (it.spawn != KZ_ITER_SPAWN_NONE && it.site != kN && defined(it.fn)) {
-        spawn_entries_[it.site].insert(it.fn);
-        iter_spawn_[it.site][it.fn] = it.iter;
-        iter_loop_[it.site] = it.loop;
-      }
-    for (const kz_fact_spawnw& w : spawnw_)
-      if (w.kind == KZ_SPAWNW_KIND_SCRIPT_ENTRY) {
-        spawn_entries_[w.site].insert(w.entry_fn);
-        if (defined(w.entry_fn)) script_entries_.insert(w.entry_fn);
-      }
-    for (size_t i = 0; i < argflow_.size(); ++i) argflow_at_[{argflow_[i].site, argflow_[i].arg_index}] = static_cast<uint32_t>(i);
-    for (size_t i = 0; i < reads_.size(); ++i) reads_of_field_[str(reads_[i].type) + "." + str(reads_[i].field)].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < returns_.size(); ++i) returns_of_[returns_[i].fn].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < retconsts_.size(); ++i) retconsts_of_[retconsts_[i].fn].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < loopexits_.size(); ++i) loopexits_of_[loopexits_[i].loop].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < pflow_.size(); ++i) pflow_of_[{pflow_[i].fn, pflow_[i].param}].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < lockset_.size(); ++i) {
-      const kz_fact_lockset& r = lockset_[i];
-      if (r.kind == KZ_LOCKSET_KIND_CALL) lockset_call_[r.site] = static_cast<uint32_t>(i);
-      else if (r.kind == KZ_LOCKSET_KIND_READ) lockset_read_[r.read] = static_cast<uint32_t>(i);
-      else if (r.kind == KZ_LOCKSET_KIND_WRITE) lockset_writes_of_[r.fn].push_back(static_cast<uint32_t>(i));
-    }
-    for (size_t i = 0; i < fstatus_.size(); ++i) fstatus_of_[str(fstatus_[i].type) + "." + str(fstatus_[i].field)] = static_cast<uint32_t>(i);
-    for (size_t i = 0; i < writers_.size(); ++i) writers_of_[str(writers_[i].loc_type) + "." + str(writers_[i].loc_field)].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < inits_.size(); ++i) inits_of_[str(inits_[i].loc_type) + "." + str(inits_[i].loc_field)].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < fwrites_.size(); ++i)
-      if (fwrites_[i].kind != KZ_FWRITE_KIND_UNTYPED) fwrites_of_[str(fwrites_[i].type) + "." + str(fwrites_[i].field)].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < terminals_.size(); ++i) terminals_of_[terminals_[i].fn].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < opderiv_.size(); ++i) opderiv_of_[opderiv_[i].fn].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < ptrfields_.size(); ++i)
-      if (ptrfields_[i].kind == KZ_PTRF_KIND_READ) ptrread_of_[ptrfields_[i].read] = static_cast<uint32_t>(i);
-    for (size_t i = 0; i < gimages_.size(); ++i) gimages_of_[base_name(str(gimages_[i].object))].push_back(static_cast<uint32_t>(i));
-    for (size_t i = 0; i < loops_.size(); ++i) loop_by_index_[loops_[i].loop] = static_cast<uint32_t>(i);
-    for (size_t i = 0; i < awaits_.size(); ++i) awaits_of_[awaits_[i].fn].push_back(static_cast<uint32_t>(i));
-    for (const kz_fact_p0& p : p0_) {
-      p0_kind_[str(p.name)] = p.kind;
-      if (str(p.source) == "unverified") p0_unverified_.insert(str(p.name));
-    }
-    for (const P0CompareEntry& e : p0_compare_table()) {
-      compare_names_.insert(e.name);
-      if (std::string(e.source) == "unverified") p0_unverified_.insert(e.name);
-    }
-    // the lock primitives of P0 the program calls: the lock sets rest on their semantics
-    for (const kz_fact_call& c : calls_) {
-      if (defined(c.callee_fn)) continue;
-      auto pk = p0_kind_.find(str(c.callee));
-      if (pk != p0_kind_.end() && (pk->second == KZ_P0_KIND_MUTEX_ACQUIRE || pk->second == KZ_P0_KIND_MUTEX_RELEASE || pk->second == KZ_P0_KIND_COND_WAIT))
-        lock_prims_.insert(pk->first);
-    }
-    // the P0 primitive a startup-script entry is resolved through (the symbol lookup the spawn operation reaches)
-    for (const kz_fact_spawnw& w : spawnw_)
-      if (w.kind == KZ_SPAWNW_KIND_SCRIPT_ENTRY && defined(w.entry_fn)) {
-        auto cit = call_by_site_.find(w.call_site);
-        if (cit != call_by_site_.end()) script_prim_[w.entry_fn].insert(str(calls_[cit->second].callee));
-      }
-    for (const kz_fact_lockpath& p : lockpaths_) {
-      if (p.kind == KZ_LOCKPATH_KIND_AFTER_SPAWN) after_spawn_[p.site].insert(p.row);
-      else if (p.kind == KZ_LOCKPATH_KIND_ENTRY_RELEASE && entry_release_.count(p.row) == 0) entry_release_[p.row] = p.site;
-    }
-    // the deviations of the basis the extraction copied (extract.basis_deviation[<item>]); a unit's own deviations
-    // (an item whose name has the unit's file in its first [...]) mark the rows that name a position of that file
-    const std::string dev = "extract.basis_deviation[";
-    for (const auto& [k, v] : basis_map_) {
-      if (k.compare(0, dev.size(), dev) != 0 || k.back() != ']') continue;
-      const std::string item = k.substr(dev.size(), k.size() - dev.size() - 1);
-      deviations_.push_back(item);
-      const size_t a = item.find('['), b = a == std::string::npos ? std::string::npos : item.find(']', a);
-      if (b != std::string::npos) deviation_files_[item.substr(a + 1, b - a - 1)].insert(item);
-    }
-    for (const kz_basis_item& b : basis_)
-      if (b.policy == KZ_POLICY_DECLARED && str(b.name).compare(0, 7, "assume.") == 0) assumptions_.insert(str(b.name));
-    // the calls that may call a function back: a function passed as an argument to a callee without a body that is no
-    // P0 entry (the rule of call_runs), by the function passed
-    for (size_t ci = 0; ci < calls_.size(); ++ci)
-      for (uint32_t f : callback_args(static_cast<uint32_t>(ci))) callback_callers_[f].push_back(static_cast<uint32_t>(ci));
-    // the calls of a function that returns twice (a non-local jump may come back to them), by caller
-    for (size_t ci = 0; ci < calls_.size(); ++ci) {
-      const kz_fact_call& c = calls_[ci];
-      if (defined(c.callee_fn) || !defined(c.caller_fn)) continue;
-      for (const char* n : kReturnsTwice)
-        if (str(c.callee) == n) returns_twice_[c.caller_fn].push_back(static_cast<uint32_t>(ci));
-    }
-    thread_end_code();
-    global_address_functions();
-    image_entries();
-  }
-
-  // The code of the program a thread may run after its entry function has returned: the destructors of the
-  // thread-specific keys (P0 key creation with a destructor argument that is not a null constant) and the cleanup
-  // handlers (P0 cleanup push; conservatively every push of the program).
-  void thread_end_code() {
-    for (size_t ci = 0; ci < calls_.size(); ++ci) {
-      const kz_fact_call& c = calls_[ci];
-      if (defined(c.callee_fn)) continue;
-      const std::string callee = str(c.callee);
-      for (const kz_fact_p0& p : p0_) {
-        if (str(p.name) != callee) continue;
-        if (p.kind == KZ_P0_KIND_TSD_KEY_CREATE && p.entry_param != kN) {
-          auto af = argflow_at_.find({c.site, p.entry_param});
-          const bool null = af != argflow_at_.end() && argflow_[af->second].src == KZ_ARGSRC_CONST && argflow_[af->second].value == 0;
-          (null ? keys_null_dtor_ : keys_dtor_)
-              .push_back(callee + " at " + call_pos(static_cast<uint32_t>(ci)) + (af != argflow_at_.end() ? " (arg " + std::to_string(p.entry_param) + " [" + str(argflow_[af->second].text) + "])" : ""));
-        }
-        if (p.kind == KZ_P0_KIND_CLEANUP_PUSH) cleanup_pushes_.push_back(callee + " at " + call_pos(static_cast<uint32_t>(ci)));
-      }
-    }
-  }
-
-  // The entries of a spawn call whose entry argument is read from a global table with a static image: the function
-  // leaves of that image at the field the argument reads (GLOBAL_IMAGES), for the spawn calls the facts leave without
-  // a resolved entry.  The entry argument is the P0 entry parameter of a thread-creation primitive, or the parameter a
-  // derived spawn operation passes on (SPAWN_WRAP).  No creation order is read from the image.  The image is the run-time
-  // value only when nothing writes the member: the member's writer set must be complete with no writer instance under
-  // both completeness rules of FIELD_STATUS (typed, data-function and out-pointer writes; an escape, a cast, a union or
-  // an unknown effect makes it not complete), and no leaf used may be marked as written (object-, field- or
-  // record-written: a store to the object, the field or a whole record of its type); otherwise the spawn stays
-  // unresolved, with the reason.
-  // Why the static image of a member is not taken as its run-time value ("" when it is): a leaf of the image is marked
-  // written (object-, field- or record-written, GLOBAL_IMAGES), FIELD_STATUS has no row of the member, its writer set
-  // is not complete under both rules, or it has writers at run time.  The rule of the static-image entries and of the
-  // image keys of path A.
-  std::string image_value_why(const std::string& type, const std::string& field, uint16_t written) const {
-    if (written != 0) return "a leaf of the image is marked " + written_flags(written) + " (GLOBAL_IMAGES): the run-time value may differ from the image";
-    auto fsit = fstatus_of_.find(type + "." + field);
-    if (fsit == fstatus_of_.end()) return "FIELD_STATUS has no row of " + type + "." + field + ": that nothing writes it is not known";
-    const kz_fact_fstatus& f = fstatus_[fsit->second];
-    if (f.status_field != KZ_LOC_STATUS_COMPLETE || f.status_type != KZ_LOC_STATUS_COMPLETE)
-      return "the writer set of " + type + "." + field + " is not complete (FIELD_STATUS per-field " + enum_text("KZ_LOC_STATUS", f.status_field) + ", type-level " +
-             enum_text("KZ_LOC_STATUS", f.status_type) + ")";
-    if (f.n_direct + f.n_data_fn + f.n_outptr != 0)
-      return type + "." + field + " has writers at run time (FIELD_STATUS: direct " + std::to_string(f.n_direct) + ", data function " + std::to_string(f.n_data_fn) +
-             ", out-pointer " + std::to_string(f.n_outptr) + ")";
-    return "";
-  }
-  void image_entries() {
-    std::map<uint32_t, uint32_t> entry_param_of;  // spawn operation (function) -> its entry parameter
-    for (const kz_fact_spawnw& w : spawnw_)
-      if (w.param != kN && (w.kind == KZ_SPAWNW_KIND_ENTRY_ARG || w.kind == KZ_SPAWNW_KIND_CALLED_BY_ENTRY || w.kind == KZ_SPAWNW_KIND_SCRIPT_ENTRY) &&
-          entry_param_of.count(w.fn) == 0)
-        entry_param_of[w.fn] = w.param;
-    for (size_t ci = 0; ci < calls_.size(); ++ci) {
-      const kz_fact_call& c = calls_[ci];
-      if ((c.flags & KZ_CALL_FLAG_SPAWN_OP) == 0 || !defined(c.caller_fn)) continue;
-      auto se = spawn_entries_.find(c.site);
-      bool resolved = false;
-      if (se != spawn_entries_.end())
-        for (uint32_t e : se->second)
-          if (defined(e)) resolved = true;
-      if (resolved) continue;
-      uint32_t k = kN;
-      if (defined(c.callee_fn)) {
-        auto it = entry_param_of.find(c.callee_fn);
-        if (it != entry_param_of.end()) k = it->second;
-      } else {
-        for (const kz_fact_p0& p : p0_)
-          if (str(p.name) == str(c.callee) && p.kind == KZ_P0_KIND_THREAD_CREATE) k = p.entry_param;
-      }
-      const std::string where = call_pos(static_cast<uint32_t>(ci)) + " in " + fname(c.caller_fn) + " -> " + str(c.callee);
-      if (k == kN) {
-        unresolved_spawns_.push_back(where + ": no entry parameter of the spawn operation is known");
-        continue;
-      }
-      auto af = argflow_at_.find({c.site, k});
-      if (af == argflow_at_.end()) {
-        unresolved_spawns_.push_back(where + ": no ARGFLOW row of the entry argument " + std::to_string(k));
-        continue;
-      }
-      const kz_fact_argflow& a = argflow_[af->second];
-      const std::string object = base_name(str(a.object)), field = str(a.field), type = str(a.type);
-      if (a.src != KZ_ARGSRC_FIELD || object.empty() || field.empty() || (a.base != KZ_ARGBASE_GLOBAL && a.base != KZ_ARGBASE_GLOBAL_ELEMENT)) {
-        unresolved_spawns_.push_back(where + ": the entry argument " + std::to_string(k) + " [" + str(a.text) + "] is no field of a global table");
-        continue;
-      }
-      auto git = gimages_of_.find(object);
-      std::set<uint32_t> found;
-      std::set<std::string> others;  // the members of the image leaves of functions whose name is not the field read
-      std::map<uint32_t, std::set<std::string>> paths;  // entry -> its image paths
-      uint16_t written = 0;
-      if (git != gimages_of_.end())
-        for (uint32_t gi : git->second) {
-          const kz_fact_gimage& g = gimages_[gi];
-          if (g.kind != KZ_IMAGE_KIND_FUNC || !defined(g.fn)) continue;
-          const std::string path = str(g.path), owner = str(g.owner), gfield = str(g.field);
-          const size_t dot = path.rfind('.');
-          if (dot == std::string::npos) continue;
-          if (path.substr(dot + 1) != field) {
-            others.insert(path.substr(dot + 1));
-            continue;
-          }
-          if (!gfield.empty() && (gfield != field || owner != type)) continue;
-          found.insert(g.fn);
-          paths[g.fn].insert(path);
-          written |= g.flags & (KZ_GIMAGE_FLAG_OBJECT_WRITTEN | KZ_GIMAGE_FLAG_FIELD_WRITTEN | KZ_GIMAGE_FLAG_RECORD_WRITTEN);
-        }
-      if (found.empty()) {
-        std::string o;
-        for (const std::string& x : others) o += (o.empty() ? "" : ", ") + x;
-        unresolved_spawns_.push_back(where + ": the entry argument " + std::to_string(k) + " [" + str(a.text) + "] reads " + type + "." + field + " of " + object +
-                                     ", and the static image has no function leaf of that member" +
-                                     (o.empty() ? "" : " (its function leaves are of " + o + ": a read through another member of a union is not resolved in this revision)"));
-        continue;
-      }
-      // the image is the run-time value: no write of the member
-      const std::string why = image_value_why(type, field, written);
-      if (!why.empty()) {
-        unresolved_spawns_.push_back(where + ": the entry argument " + std::to_string(k) + " [" + str(a.text) + "] reads " + type + "." + field + " of " + object +
-                                     ", whose static image is not taken as its value: " + why);
-        continue;
-      }
-      image_spawn_[c.site] = found;
-      image_member_[c.site] = type + "." + field;
-      // relations rules revision 5: the elements of the image whose member is not a function leaf of the member read
-      // (a non-constant leaf covering it, or a function leaf of another member of its record: a union may hold that
-      // value) give the member read another value; that the spawn reads only the elements found is the spawn's guard,
-      // which this rule does not read, so the threads of the spawn rest on it
-      {
-        auto shape = [](const std::string& p) {
-          std::string out;
-          for (size_t i = 0; i < p.size(); ++i) {
-            if (p[i] == '[') {
-              const size_t j = p.find(']', i);
-              if (j == std::string::npos) break;
-              out += "[]";
-              i = j;
-              continue;
-            }
-            out += p[i];
-          }
-          return out;
-        };
-        std::set<std::string> containers;  // the shape of the path up to the member read ("[].FuncPtrUnion")
-        for (const auto& [e, ps] : paths)
-          for (const std::string& pth : ps) containers.insert(shape(pth.substr(0, pth.rfind('.'))));
-        std::vector<std::string> nonconst, sibling;
-        size_t n_nonconst = 0, n_sibling = 0;
-        for (uint32_t gi : git->second) {
-          const kz_fact_gimage& g = gimages_[gi];
-          const std::string pth = str(g.path), sh = shape(pth);
-          if (g.kind == KZ_IMAGE_KIND_NONCONST) {
-            bool covers = false;
-            for (const std::string& ct : containers)
-              if (ct == sh || ct.compare(0, sh.size() + 1, sh + ".") == 0 || ct.compare(0, sh.size() + 1, sh + "[") == 0) covers = true;
-            if (covers) {
-              ++n_nonconst;
-              if (nonconst.size() < 3) nonconst.push_back(object + pth);
-            }
-          } else if (g.kind == KZ_IMAGE_KIND_FUNC) {
-            const size_t d2 = pth.rfind('.');
-            if (d2 == std::string::npos || pth.substr(d2 + 1) == field) continue;
-            if (containers.count(shape(pth.substr(0, d2))) == 0) continue;
-            ++n_sibling;
-            if (sibling.size() < 3) sibling.push_back(object + pth + " " + fname(g.fn));
-          }
-        }
-        if (n_nonconst + n_sibling != 0) {
-          std::string t = "besides the function leaves of " + type + "." + field + ", the image of " + object + " has";
-          if (n_nonconst != 0) t += " " + std::to_string(n_nonconst) + " non-constant leaf/leaves covering that member (" + join(nonconst, ", ") + (n_nonconst > nonconst.size() ? ", ..." : "") + ")";
-          if (n_nonconst != 0 && n_sibling != 0) t += " and";
-          if (n_sibling != 0)
-            t += " " + std::to_string(n_sibling) + " function leaf/leaves of another member of its record (" + join(sibling, ", ") + (n_sibling > sibling.size() ? ", ..." : "") +
-                 "; a union member read gives that value)";
-          t += ": that the spawn reads only the elements whose " + field + " is a function leaf rests on its guard, which this revision does not read";
-          image_premise_[c.site] = t;
-        }
-      }
-      for (const auto& [e, ps] : paths) image_paths_[c.site][e] = join(std::vector<std::string>(ps.begin(), ps.end()), ", ");
-      for (uint32_t e : found) spawn_entries_[c.site].insert(e);
-    }
-  }
-
-  // the functions whose every return value is the address of (a part of) a global object or null
-  // (target_rules.cpp, the same rule over the records)
-  void global_address_functions() {
-    std::set<std::string> globals;
-    for (const kz_fact_read& r : reads_)
-      if (r.root_kind == KZ_READ_ROOT_GLOBAL) globals.insert(str(r.root));
-    for (const kz_fact_argflow& a : argflow_) {
-      const std::string o = str(a.object);
-      if (!o.empty()) globals.insert(base_name(o));
-    }
-    auto innermost = [&](uint32_t r) -> const kz_fact_expr* {
-      while (r != kN && r < exprs_.size() && exprs_[r].op != KZ_EXPR_OP_LOAD) r = exprs_[r].a;
-      return r != kN && r < exprs_.size() ? &exprs_[r] : nullptr;
-    };
-    auto written_global = [&](const std::string& text) {
-      if (text.size() < 2 || text[0] != '&') return false;
-      size_t i = 1;
-      while (i < text.size() && (std::isalnum(static_cast<unsigned char>(text[i])) || text[i] == '_')) ++i;
-      if (i < text.size() && text[i] != '.' && text[i] != '[') return false;
-      return globals.count(text.substr(1, i - 1)) != 0;
-    };
-    std::map<std::string, std::vector<uint32_t>> by_fn;
-    for (size_t i = 0; i < returns_.size(); ++i) by_fn[base_name(fname(returns_[i].fn))].push_back(static_cast<uint32_t>(i));
-    for (bool changed = true; changed;) {
-      changed = false;
-      for (const auto& [fn, rows] : by_fn) {
-        if (gaf_.count(fn) != 0) continue;
-        bool all = true, address = false;
-        for (uint32_t ri : rows) {
-          const kz_fact_return& r = returns_[ri];
-          if (r.vkind == KZ_RET_VALUE_CONST && r.value == 0) continue;
-          if (r.vkind == KZ_RET_VALUE_ADDR) {
-            const kz_fact_expr* in = innermost(r.value_root);
-            if ((in != nullptr && (in->flags == KZ_EXPR_REF_GLOBAL || in->flags == KZ_EXPR_REF_ELEM)) || written_global(str(r.text))) {
-              address = true;
-              continue;
-            }
-          }
-          if (r.vkind == KZ_RET_VALUE_CALL && r.value_root < exprs_.size() && exprs_[r.value_root].op == KZ_EXPR_OP_CALL_RESULT &&
-              gaf_.count(str(exprs_[r.value_root].name)) != 0) {
-            address = true;
-            continue;
-          }
-          all = false;
-          break;
-        }
-        if (all && address) {
-          gaf_.insert(fn);
-          changed = true;
-        }
-      }
-    }
-  }
-  bool shared_base(const kz_fact_argflow& a) const {
-    switch (a.base) {
-      case KZ_ARGBASE_GLOBAL:
-      case KZ_ARGBASE_GLOBAL_ELEMENT:
-      case KZ_ARGBASE_GLOBAL_POINTER:
-        return true;
-      case KZ_ARGBASE_FIELD_POINTER:
-        return !str(a.object).empty();
-      case KZ_ARGBASE_CALL_RESULT:
-        return gaf_.count(str(a.root)) != 0;
-      default:
-        return false;
-    }
-  }
-
-  // ---------------------------------------------------------------- actors (static, may)
-  // Roots: the process root (`main`), the resolved entries of spawn calls (CALL_TARGETS spawn-entry, the
-  // unrolled table-walk iterations, the startup-script entries of SPAWN_WRAP, the function leaves of the static
-  // image a spawn's entry argument is read from).  A root's code is what it reaches over the call graph (direct
-  // calls and resolved indirect targets) without entering another root.  A root other than the process root is a
-  // trampoline -- no actor of its own, its code belongs to the roots it calls (transitively through other
-  // trampolines) -- when it dispatches only: it enters other roots, only through indirect calls, and its own body
-  // reads no field or global through a shared root (READS: a global, or the result of a function that returns
-  // global addresses only) and writes no global object (LOCKSET write rows of `<global>`).  The record-field writes
-  // of its body are not read: a typed write carries no base in these facts.  The roots a trampoline stands for are
-  // those its own code enters through resolved indirect calls (field-based flow graph), and the entries resolved at
-  // the calls of every derived spawn operation that passes the trampoline as the entry of its inner spawn (SPAWN_WRAP
-  // called-by-entry): a thread that operation starts runs the trampoline and, through it, the entry its caller passed.
-  // An entry not resolved at such a call is missing (an under-approximation, named in the header).
-  bool own_shared_access(uint32_t r) const {
-    for (const kz_fact_read& rd : reads_)
-      if (rd.fn == r && (rd.root_kind == KZ_READ_ROOT_GLOBAL || (rd.root_kind == KZ_READ_ROOT_CALL && gaf_.count(str(rd.root)) != 0))) return true;
-    auto it = lockset_writes_of_.find(r);
-    if (it != lockset_writes_of_.end())
-      for (uint32_t li : it->second)
-        if (str(lockset_[li].type) == "<global>") return true;
-    return false;
-  }
-  void actors() {
-    for (uint32_t fn : fn_by_name_["main"])
-      if (defined(fn)) root_kind_[fn] = "process";
-    for (const auto& [site, entries] : spawn_entries_)
-      for (uint32_t e : entries)
-        if (defined(e) && root_kind_.count(e) == 0)
-          root_kind_[e] = script_entries_.count(e) != 0 ? "script-entry"
-                          : iter_spawn_.count(site) != 0 ? "table-walk-entry"
-                          : image_spawn_.count(site) != 0 ? "table-image-entry"
-                                                          : "spawn-entry";
-    std::map<uint32_t, std::set<uint32_t>> calls_roots, calls_roots_direct;
-    for (const auto& [r, kind] : root_kind_) {
-      std::set<uint32_t>& reach = reach_[r];
-      std::vector<uint32_t> stack{r};
-      reach.insert(r);
-      while (!stack.empty()) {
-        const uint32_t x = stack.back();
-        stack.pop_back();
-        for (const auto& [y, indirect] : succ_[x]) {
-          if (y != r && root_kind_.count(y) != 0) {
-            calls_roots[r].insert(y);
-            if (!indirect) calls_roots_direct[r].insert(y);
-            continue;
-          }
-          if (reach.insert(y).second) stack.push_back(y);
-        }
-      }
-    }
-    for (const auto& [r, kind] : root_kind_) {
-      if (kind == "process" || calls_roots[r].empty()) continue;
-      if (!calls_roots_direct[r].empty()) kept_direct_.insert(r);
-      else if (own_shared_access(r)) kept_shared_.insert(r);
-      else trampolines_.insert(r);
-    }
-    // the entries resolved at the calls of a derived spawn operation that passes a trampoline to its inner spawn
-    for (const kz_fact_spawnw& w : spawnw_) {
-      if (w.kind != KZ_SPAWNW_KIND_CALLED_BY_ENTRY || trampolines_.count(w.entry_fn) == 0 || !defined(w.fn)) continue;
-      std::vector<uint32_t> in;
-      for (uint32_t ci : callers_[w.fn]) in.push_back(ci);
-      auto ic = indirect_callers_.find(w.fn);
-      if (ic != indirect_callers_.end()) in.insert(in.end(), ic->second.begin(), ic->second.end());
-      for (uint32_t ci : in) {
-        auto se = spawn_entries_.find(calls_[ci].site);
-        if (se == spawn_entries_.end()) {
-          via_op_missing_[w.entry_fn].insert(call_pos(ci) + " in " + fname(calls_[ci].caller_fn) + " -> " + fname(w.fn));
-          continue;
-        }
-        bool any = false;
-        for (uint32_t e : se->second)
-          if (defined(e) && root_kind_.count(e) != 0 && e != w.entry_fn) {
-            via_op_[w.entry_fn][e].insert(fname(w.fn));
-            any = true;
-          }
-        if (!any) via_op_missing_[w.entry_fn].insert(call_pos(ci) + " in " + fname(calls_[ci].caller_fn) + " -> " + fname(w.fn));
-      }
-    }
-    // what a trampoline stands for, through other trampolines
-    std::function<void(uint32_t, std::set<uint32_t>*, std::set<uint32_t>*)> expand = [&](uint32_t t, std::set<uint32_t>* out, std::set<uint32_t>* seen) {
-      if (!seen->insert(t).second) return;
-      std::set<uint32_t> ys = calls_roots[t];
-      auto vo = via_op_.find(t);
-      if (vo != via_op_.end())
-        for (const auto& [e, ops] : vo->second) ys.insert(e);
-      for (uint32_t y : ys) {
-        if (y == t) continue;
-        if (trampolines_.count(y) != 0) expand(y, out, seen);
-        else out->insert(y);
-      }
-    };
-    for (uint32_t t : trampolines_) {
-      std::set<uint32_t> seen;
-      expand(t, &delegates_[t], &seen);
-    }
-    for (const auto& [r, reach] : reach_) {
-      std::set<uint32_t> as;
-      if (trampolines_.count(r) != 0) as = delegates_[r];
-      else as.insert(r);
-      for (uint32_t f : reach) actors_of_[f].insert(as.begin(), as.end());
-    }
-  }
-  std::set<uint32_t> actor_set(uint32_t fn) const {
-    auto it = actors_of_.find(fn);
-    return it == actors_of_.end() ? std::set<uint32_t>{} : it->second;
-  }
-  // the actors a set of spawned entries stands for
-  std::set<uint32_t> entry_actors(const std::set<uint32_t>& entries) const {
-    std::set<uint32_t> out;
-    for (uint32_t e : entries) {
-      if (!defined(e)) continue;
-      auto it = delegates_.find(e);
-      if (trampolines_.count(e) != 0 && it != delegates_.end()) out.insert(it->second.begin(), it->second.end());
-      else out.insert(e);
-    }
-    return out;
-  }
   // The threads a spawn call starts: the actors of its resolved entries (a trampoline stands for its roots), and, in
   // turn, the threads the code of those starts at its own spawn calls (descendants), with the code they all run (the
   // call graph from their roots, direct calls and resolved indirect targets, not stopping at another root: a root the
@@ -1141,12 +570,101 @@ class Rel {
     else ++n_flip_none_;
   }
   void tally_feas(const std::string& grade) {
+    last_feas_grade_ = grade;
     if (grade == "proven-impossible") ++n_feas_impossible_;
     else if (grade == "possible") ++n_feas_possible_;
     else if (grade == "not-graded") ++n_feas_not_graded_;
     else ++n_feas_undecidable_;
   }
   static std::string violation_text() { return "unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given"; }
+
+  // the lines of a text (each with its indentation and a newline) as lines of the row, all named `name`
+  static void add_lines(RelRow* r, const std::string& text, const char* name) {
+    size_t at = 0;
+    while (at < text.size()) {
+      size_t end = text.find('\n', at);
+      if (end == std::string::npos) end = text.size();
+      const std::string l = text.substr(at, end - at);
+      size_t ind = 0;
+      while (ind < l.size() && l[ind] == ' ') ++ind;
+      r->lines.push_back(RelLine{name, l.substr(ind), static_cast<uint8_t>(ind)});
+      at = end + 1;
+    }
+  }
+
+  // ---------------------------------------------------------------- use-site keys (docs/static_facts.md §5l)
+  // A key names where the row's use is in the program, not what the rules found there: no line or column, no
+  // creator, writer, partition, counter or verdict.  It reads names only and notes no file (it is no part of the text).
+  // A function: its name, and for a function of internal linkage the file it is defined in.
+  std::string key_fn(uint32_t fn) const {
+    if (fn == kN || fn >= funcs_.size()) return "-";
+    std::string n = str(funcs_[fn].name);
+    if (funcs_[fn].flags & KZ_FUNC_FLAG_STATIC) n += "@" + str(funcs_[fn].file);
+    return n;
+  }
+  // the callee of a call: the function it calls, or the name the call gives (a function without a body, an indirect call)
+  std::string key_callee(uint32_t ci) const {
+    const kz_fact_call& c = calls_[ci];
+    return defined(c.callee_fn) ? key_fn(c.callee_fn) : str(c.callee);
+  }
+  // the n-th call (from 1) of the same callee among the calls of the caller, in source order (file, line, column; the
+  // site number orders two calls at one position)
+  uint32_t call_ordinal(uint32_t ci) const {
+    const kz_fact_call& c = calls_[ci];
+    auto it = calls_of_.find(c.caller_fn);
+    if (it == calls_of_.end()) return 0;
+    const std::string callee = key_callee(ci);
+    std::vector<std::tuple<std::string, uint32_t, uint32_t, uint32_t>> same;
+    for (uint32_t x : it->second)
+      if (key_callee(x) == callee) same.emplace_back(str(calls_[x].file), calls_[x].line, calls_[x].col, calls_[x].site);
+    std::sort(same.begin(), same.end());
+    const auto me = std::make_tuple(str(c.file), c.line, c.col, c.site);
+    return static_cast<uint32_t>(std::lower_bound(same.begin(), same.end(), me) - same.begin()) + 1;
+  }
+  // the n-th read (from 1) of the same field among the reads of the reading function, in source order (the READS row
+  // orders two reads at one position)
+  uint32_t read_ordinal(uint32_t ri) const {
+    const kz_fact_read& u = reads_[ri];
+    auto it = reads_of_field_.find(str(u.type) + "." + str(u.field));
+    if (it == reads_of_field_.end()) return 0;
+    std::vector<std::tuple<std::string, uint32_t, uint32_t, uint32_t>> same;
+    for (uint32_t x : it->second)
+      if (reads_[x].fn == u.fn) same.emplace_back(str(reads_[x].file), reads_[x].line, reads_[x].col, x);
+    std::sort(same.begin(), same.end());
+    const auto me = std::make_tuple(str(u.file), u.line, u.col, ri);
+    return static_cast<uint32_t>(std::lower_bound(same.begin(), same.end(), me) - same.begin()) + 1;
+  }
+  static void set_key(RelRow* r, const std::string& text) {
+    r->key_text = text;
+    r->key = kz::to_hex(kz::sha256(text)).substr(0, 16);
+  }
+  // path A: the namespace, the function of the lookup call, the key-parameter function and parameter, the n-th call
+  void key_a(RelRow* r) const {
+    set_key(r, "A|" + r->subject + "|" + key_fn(r->caller_fn) + "|" + key_fn(r->callee_fn) + "#" + std::to_string(r->param) + "|" + std::to_string(call_ordinal(r->call)));
+  }
+  // path B: a row is one field passed as one argument of one callee (its sites are row content); each site has a key
+  // of its own in the listing (site_key)
+  void key_b(RelRow* r) const { set_key(r, "B|" + r->subject + "|-|" + key_fn(r->callee_fn) + "#" + std::to_string(r->param) + "|-"); }
+  std::string site_key_text(const RelRow& r, uint32_t ci) const {
+    return "B-site|" + r.subject + "|" + key_fn(calls_[ci].caller_fn) + "|" + key_fn(r.callee_fn) + "#" + std::to_string(r.param) + "|" + std::to_string(call_ordinal(ci));
+  }
+  // path C: the field, the creator, the spawn call's callee and its n-th call in the creator, the reading function and
+  // the n-th read of the field in it, and the context (itself, entry, unresolved; or a call of the reading function:
+  // its kind, the calling function, the callee as the call names it and the n-th such call)
+  void key_c(RelRow* r) const {
+    std::string ctx = r->context_kind;
+    if (r->context_call != kN)
+      ctx += " " + key_fn(calls_[r->context_call].caller_fn) + " " + key_callee(r->context_call) + " " + std::to_string(call_ordinal(r->context_call));
+    set_key(r, "C|" + r->subject + "|" + key_fn(r->caller_fn) + "|" + key_callee(r->call) + "|" + std::to_string(call_ordinal(r->call)) + "|read " + key_fn(r->read_fn) + " " +
+                   std::to_string(read_ordinal(r->read)) + "|" + ctx);
+  }
+  // the keys of the sites of a path B row, for the listing
+  void site_keys(RelRow* r) const {
+    for (uint32_t ci : r->site_calls) {
+      const std::string t = site_key_text(*r, ci);
+      r->site_keys.push_back(kz::to_hex(kz::sha256(t)).substr(0, 16) + " " + t);
+    }
+  }
 
   // ---------------------------------------------------------------- shared helpers
   struct WriterRow {
@@ -1413,7 +931,7 @@ class Rel {
   }
 
   // ---------------------------------------------------------------- path B
-  void path_b(std::ostream& os) {
+  void path_b(RelReport* rep) {
     std::map<std::tuple<std::string, uint32_t, uint32_t>, std::vector<uint32_t>> groups;
     for (size_t i = 0; i < argflow_.size(); ++i) {
       const kz_fact_argflow& a = argflow_[i];
@@ -1426,7 +944,7 @@ class Rel {
       if (c.kind != KZ_CALL_KIND_DIRECT || !defined(c.callee_fn)) continue;
       groups[{type + "." + field, c.callee_fn, a.arg_index}].push_back(static_cast<uint32_t>(i));
     }
-    std::ostringstream rows;
+    RelGroup out;
     uint32_t no_writer = 0, same_actor = 0;
     for (const auto& [key, afs] : groups) {
       const auto& [tf, callee, argi] = key;
@@ -1460,23 +978,35 @@ class Rel {
       ++n_b_;
       const std::vector<Check> checks = checks_on_param(callee, argi);
       if (!checks.empty()) ++n_b_check_;
-      rows << "  B" << n_b_ << " " << tf << " -> " << fname(callee) << "#" << argi << " sites=" << afs.size() << " callee-check=" << (checks.empty() ? "none" : "yes") << "\n";
+      RelRow r;
+      r.path = 'B';
+      r.number = n_b_;
+      r.subject = tf;
+      r.callee_fn = callee;
+      r.param = argi;
+      RowLines L(&r);
+      {
+        std::ostringstream h;
+        h << tf << " -> " << fname(callee) << "#" << argi << " sites=" << afs.size() << " callee-check=" << (checks.empty() ? "none" : "yes");
+        r.head = h.str();
+      }
       std::map<std::string, uint32_t> handling;
       for (uint32_t ai : afs) {
         const uint32_t ci = call_by_site_.at(argflow_[ai].site);
+        r.site_calls.push_back(ci);
         const std::string use = result_use(ci);
         ++handling[use];
-        rows << "      site " << call_pos(ci) << " in " << fname(calls_[ci].caller_fn) << " [" << str(argflow_[ai].text) << "] base=" << enum_text("KZ_ARGBASE", argflow_[ai].base)
-             << " hops=" << argflow_[ai].hops << " result=" << use << "\n";
+        L.line("site") << "site " << call_pos(ci) << " in " << fname(calls_[ci].caller_fn) << " [" << str(argflow_[ai].text) << "] base=" << enum_text("KZ_ARGBASE", argflow_[ai].base)
+                       << " hops=" << argflow_[ai].hops << " result=" << use;
       }
       int64_t iv = 0;
       std::string itext;
       const bool has_init = init_value(tf, &iv, &itext);
-      rows << "      field: " << (has_init ? itext : "no INIT row") << "; writers " << ws.size() << " from " << wsource << "\n";
+      L.line("field") << "field: " << (has_init ? itext : "no INIT row") << "; writers " << ws.size() << " from " << wsource;
       for (const WriterRow& w : ws)
-        rows << "        " << w.kind << " at " << w.where << " value=" << w.value_text << (w.guard.empty() || w.guard == "-" ? "" : " guard=" + w.guard) << "\n";
-      rows << "      actors: readers " << actors_text(ra) << "; writers " << actors_text(wa) << (undetermined ? " (undetermined)" : " (inter-actor)") << "\n";
-      for (const Check& ck : checks) rows << "      callee-check: " << fname(callee) << " returns " << ck.value << " [" << ck.text << "] when " << ck.cond << "\n";
+        L.line("writer", 8) << w.kind << " at " << w.where << " value=" << w.value_text << (w.guard.empty() || w.guard == "-" ? "" : " guard=" + w.guard);
+      L.line("actors") << "actors: readers " << actors_text(ra) << "; writers " << actors_text(wa) << (undetermined ? " (undetermined)" : " (inter-actor)");
+      for (const Check& ck : checks) L.line("callee-check") << "callee-check: " << fname(callee) << " returns " << ck.value << " [" << ck.text << "] when " << ck.cond;
       // one level into the calls the check's conditions make with the parameter
       std::set<std::string> deeper;
       for (const Check& ck : checks)
@@ -1485,15 +1015,21 @@ class Rel {
         });
       for (const std::string& g : deeper) {
         const std::string rc = retconsts_text(g);
-        if (!rc.empty()) rows << "      callee-check (called with the parameter): " << g << " returns " << rc << "\n";
+        if (!rc.empty()) L.line("callee-check (called with the parameter)") << "callee-check (called with the parameter): " << g << " returns " << rc;
       }
-      rows << "      handling: discarded " << handling["discarded"] << ", used " << handling["used"] << ", tested " << handling["tested"] << "\n";
-      rows << "      dependency: path B: the shared field " << tf << " is read as argument " << argi << " of " << fname(callee) << " at " << afs.size()
-           << " sites; its writers run in " << (undetermined ? "an undetermined actor" : "another actor") << (checks.empty() ? "" : "; the callee's constant returns depend on the argument") << "\n";
-      rows << "      run-order: no record given\n";
+      L.line("handling") << "handling: discarded " << handling["discarded"] << ", used " << handling["used"] << ", tested " << handling["tested"];
+      L.done();
+      {
+        std::ostringstream d;
+        d << "path B: the shared field " << tf << " is read as argument " << argi << " of " << fname(callee) << " at " << afs.size() << " sites; its writers run in "
+          << (undetermined ? "an undetermined actor" : "another actor") << (checks.empty() ? "" : "; the callee's constant returns depend on the argument");
+        r.dependency = d.str();
+      }
+      r.run_order = "no record given";
       const std::string feas = b_feasibility(ra, wa);
-      rows << "      feasibility: " << feas << "\n";
-      rows << "      violation: " << violation_text() << "\n";
+      r.feasibility = feas;
+      r.feasibility_grade = last_feas_grade_;
+      r.violation = violation_text();
       // flip: the check's conditions with the argument at the initial value and at each written constant
       std::string grade = "none", why = "no callee check depends on the argument";
       if (!checks.empty()) {
@@ -1536,11 +1072,18 @@ class Rel {
         }
       }
       tally_flip(grade);
-      rows << "      flip: " << grade << ": " << why << "\n";
+      r.flip_grade = grade;
+      r.flip = grade + ": " + why;
       bool l0 = uses_script_root(ra) || uses_script_root(wa);
-      rows << "      layers: " << layers_text(true, l0, wsource.compare(0, 7, "WRITERS") == 0 ? "(writers: rule targets)" : "") << "\n";
+      r.layers = layers_text(true, l0, wsource.compare(0, 7, "WRITERS") == 0 ? "(writers: rule targets)" : "");
+      key_b(&r);
+      site_keys(&r);
+      out.rows.push_back(std::move(r));
     }
-    os << "[B] " << n_b_ << " (field-argument groups " << groups.size() << "; left out: no writer " << no_writer << ", one actor only " << same_actor << ")\n" << rows.str();
+    std::ostringstream os;
+    os << "[B] " << n_b_ << " (field-argument groups " << groups.size() << "; left out: no writer " << no_writer << ", one actor only " << same_actor << ")\n";
+    out.text = os.str();
+    rep->groups.push_back(std::move(out));
   }
   // creation order between actors (unrolled table-walk spawns) and an await after the creation; roots resolved from a
   // static image get no order in this revision (the image index is not read as an iteration order)
@@ -1685,6 +1228,8 @@ class Rel {
     bool unresolved = false;   // indirect calls the facts do not resolve that may call the reading function
     bool open_reach = false;   // not reached, but an unresolved indirect call of the threads may run its function (revision 5)
     uint32_t call_fn = kN;     // the function that makes the call of the context
+    std::string kind = "itself";  // the context in the use-site key: itself, entry, call, indirect-call, callback, unresolved
+    uint32_t ci = kN;             // the call of the context (FACTS row), or kN
   };
   // the facts path C's feasibility reads besides the lock sets
   struct CExtra {
@@ -1700,8 +1245,8 @@ class Rel {
     uint32_t spawn_ci = kN;             // the spawn call (index into FACTS)
     uint32_t read_fn = kN, ctx_fn = kN; // the reading function, the function of the call of the context
   };
-  void path_c(std::ostream& os) {
-    std::ostringstream rows;
+  void path_c(RelReport* rep) {
+    RelGroup grp;
     uint32_t unresolved = 0, spawn_calls = 0, no_paths = 0, callee_only_fields = 0, record_only_fields = 0, not_reached_ctx = 0;
     for (const auto& [site, entries] : spawn_entries_) {
       auto cit = call_by_site_.find(site);
@@ -1942,8 +1487,11 @@ class Rel {
           if (own_static) {
             ctxs.push_back(Ctx{"the read itself", urow, kN, false, false});
           } else {
-            if (threads.count(u.fn) != 0 || resolved.count(u.fn) != 0)
-              ctxs.push_back(Ctx{"the read run as the entry of the spawned thread, under no lock of a caller", urow, kN, true, false});
+            if (threads.count(u.fn) != 0 || resolved.count(u.fn) != 0) {
+              Ctx c{"the read run as the entry of the spawned thread, under no lock of a caller", urow, kN, true, false};
+              c.kind = "entry";
+              ctxs.push_back(c);
+            }
             std::vector<std::pair<uint32_t, int>> calls;  // (call, 0 direct / 1 resolved indirect / 2 a callee without a body it is passed to)
             for (uint32_t ci : callers_[u.fn]) calls.push_back({ci, 0});
             auto ic = indirect_callers_.find(u.fn);
@@ -1961,6 +1509,8 @@ class Rel {
                     urow, cr == lockset_call_.end() ? kN : cr->second, false, !cc};
               c.callback = how == 2;
               c.call_fn = calls_[ci].caller_fn;
+              c.kind = how == 1 ? "indirect-call" : how == 2 ? "callback" : "call";
+              c.ci = ci;
               c.open_reach = !cc && !cs.unres.empty() && at_reach(calls_[ci].caller_fn);
               ctxs.push_back(c);
             }
@@ -1980,6 +1530,7 @@ class Rel {
                           (n_open > open.size() ? "; ... (" + std::to_string(n_open) + " calls)" : ""),
                       urow, kN, false, false};
                 c.unresolved = true;
+                c.kind = "unresolved";
                 ctxs.push_back(c);
               }
             }
@@ -2013,20 +1564,40 @@ class Rel {
             if (cx.not_reached && cs.incomplete.empty() && cx.open_reach) ++n_c_open_reach_ctx_;
             if (cx.callback) ++n_c_callback_ctx_;
             if (cx.unresolved) ++n_c_unresolved_ctx_;
-            rows << "  C" << n_c_ << " spawn " << call_pos(si) << " in " << fname(P) << " -> " << fname(s.callee_fn == kN ? s.caller_fn : s.callee_fn) << "; field " << tf
-                 << "; read " << pos(str(u.file), u.line, u.col) << " in " << fname(u.fn) << " (" << cx.where << ")" << (self.empty() ? "" : " self-identity") << "\n";
-            rows << "      spawn: callee " << str(s.callee) << ", entries";
-            for (uint32_t e : resolved) rows << " " << fname(e);
-            rows << (image_spawn_.count(site) != 0 ? " (from the static image of the table the entry argument is read from)" : "");
-            rows << "; child actors " << actors_text(child);
-            if (!cs.descendants.empty()) rows << "; threads the child's code starts (descendants) " << actors_text(cs.descendants);
-            rows << "; creator identity: " << (identity.empty() ? "none found" : identity) << "; locks held " << s_held << "\n";
+            RelRow r;
+            r.path = 'C';
+            r.number = n_c_;
+            r.subject = tf;
+            r.call = si;
+            r.caller_fn = P;
+            r.callee_fn = s.callee_fn;
+            r.read = ri;
+            r.read_fn = u.fn;
+            r.context_kind = cx.kind;
+            r.context_call = cx.ci;
+            RowLines L(&r);
+            {
+              std::ostringstream h;
+              h << "spawn " << call_pos(si) << " in " << fname(P) << " -> " << fname(s.callee_fn == kN ? s.caller_fn : s.callee_fn) << "; field " << tf << "; read "
+                << pos(str(u.file), u.line, u.col) << " in " << fname(u.fn) << " (" << cx.where << ")" << (self.empty() ? "" : " self-identity");
+              r.head = h.str();
+            }
+            {
+              std::ostream& sl = L.line("spawn");
+              sl << "spawn: callee " << str(s.callee) << ", entries";
+              for (uint32_t e : resolved) sl << " " << fname(e);
+              sl << (image_spawn_.count(site) != 0 ? " (from the static image of the table the entry argument is read from)" : "");
+              sl << "; child actors " << actors_text(child);
+              if (!cs.descendants.empty()) sl << "; threads the child's code starts (descendants) " << actors_text(cs.descendants);
+              sl << "; creator identity: " << (identity.empty() ? "none found" : identity) << "; locks held " << s_held;
+            }
             for (const WriteCtx& wc : wrows) {
               if (wc.spawn_arg != kN) {
                 auto aa = argflow_at_.find({site, wc.spawn_arg});
-                rows << "      write after the spawn by the spawn operation: " << fname(wc.fn) << " stores through arg " << wc.spawn_arg << " ["
-                     << (aa != argflow_at_.end() ? str(argflow_[aa->second].text) : std::string("?")) << "] inside the call at " << call_pos(si)
-                     << " (PARAM_FLOW out-store; its order to the thread creation inside the call is not read) locks not known\n";
+                L.line("write after the spawn by the spawn operation")
+                    << "write after the spawn by the spawn operation: " << fname(wc.fn) << " stores through arg " << wc.spawn_arg << " ["
+                    << (aa != argflow_at_.end() ? str(argflow_[aa->second].text) : std::string("?")) << "] inside the call at " << call_pos(si)
+                    << " (PARAM_FLOW out-store; its order to the thread creation inside the call is not read) locks not known";
                 continue;
               }
               const kz_fact_lockset& w = lockset_[wc.row];
@@ -2041,28 +1612,33 @@ class Rel {
                                       : wc.how == "covers" ? " (a write of " + str(w.type) + "." + str(w.field) + " whose size may reach " + tf + ": covers-more-than-the-field)"
                                                            : "";
               if (wc.call_row == kN) {
-                rows << "      write after the spawn: " << pos(str(w.file), w.line, w.col) << key << how << " locks " << held_text(wc.row) << "\n";
+                L.line("write after the spawn") << "write after the spawn: " << pos(str(w.file), w.line, w.col) << key << how << " locks " << held_text(wc.row);
               } else {
                 const kz_fact_lockset& c = lockset_[wc.call_row];
-                rows << "      write after the spawn in " << fname(w.fn) << " (through the call " << pos(str(c.file), c.line, c.col) << "): " << pos(str(w.file), w.line, w.col) << key << how
-                     << " locks " << held_text(wc.row) << "; at the call " << held_text(wc.call_row);
-                if (!wc.first_level) rows << " (not composed: the write is more than one call below the creator)";
-                else if (entry_release_.count(wc.row) != 0) rows << " (not composed: " << release_text(wc.row) << ")";
-                rows << "\n";
+                std::ostream& wl = L.line("write after the spawn in a callee");
+                wl << "write after the spawn in " << fname(w.fn) << " (through the call " << pos(str(c.file), c.line, c.col) << "): " << pos(str(w.file), w.line, w.col) << key << how
+                   << " locks " << held_text(wc.row) << "; at the call " << held_text(wc.call_row);
+                if (!wc.first_level) wl << " (not composed: the write is more than one call below the creator)";
+                else if (entry_release_.count(wc.row) != 0) wl << " (not composed: " << release_text(wc.row) << ")";
               }
             }
-            if (!unknown.empty()) rows << "      calls after the spawn whose targets are not resolved (they may write " << tf << " under no known lock): " << join(unknown, "; ") << "\n";
-            rows << "      read: [" << str(u.text) << "] use=" << enum_text("KZ_READ_USE", u.use) << " index=" << ex(u.index_root) << " guard=" << ex(u.guard_root)
-                 << " locks " << (cx.row == kN ? "{} (no LOCKSET row)" : held_text(cx.row));
-            if (cx.call_row != kN) {
-              rows << "; at the call " << held_text(cx.call_row);
-              if (cx.row != kN && entry_release_.count(cx.row) != 0) rows << " (not composed: " << release_text(cx.row) << ")";
+            if (!unknown.empty())
+              L.line("calls after the spawn whose targets are not resolved")
+                  << "calls after the spawn whose targets are not resolved (they may write " << tf << " under no known lock): " << join(unknown, "; ");
+            {
+              std::ostream& rl = L.line("read");
+              rl << "read: [" << str(u.text) << "] use=" << enum_text("KZ_READ_USE", u.use) << " index=" << ex(u.index_root) << " guard=" << ex(u.guard_root) << " locks "
+                 << (cx.row == kN ? "{} (no LOCKSET row)" : held_text(cx.row));
+              if (cx.call_row != kN) {
+                rl << "; at the call " << held_text(cx.call_row);
+                if (cx.row != kN && entry_release_.count(cx.row) != 0) rl << " (not composed: " << release_text(cx.row) << ")";
+              }
             }
-            rows << "\n";
-            if (!self.empty()) rows << "      read subscript: the reader's own identity: " << self << "\n";
-            rows << "      dependency: path C: the creator writes " << tf << " after the spawn; code the spawned entry reaches reads it" << (self.empty() ? "" : " at the subscript of its own identity")
-                 << "; that the two identities are equal is not decided statically\n";
-            rows << "      run-order: no record given\n";
+            if (!self.empty()) L.line("read subscript") << "read subscript: the reader's own identity: " << self;
+            L.done();
+            r.dependency = "path C: the creator writes " + tf + " after the spawn; code the spawned entry reaches reads it" + (self.empty() ? "" : " at the subscript of its own identity") +
+                           "; that the two identities are equal is not decided statically";
+            r.run_order = "no record given";
             std::string feas;
             // the lock primitives of P0: a row that names a lock, and every grade the lock sets give, rest on their semantics
             bool names_lock = s_held.compare(0, 2, "{}") != 0 || (cx.row != kN && !held(cx.row).empty()) || (cx.call_row != kN && !held(cx.call_row).empty());
@@ -2098,8 +1674,9 @@ class Rel {
               xc.ctx_fn = cx.call_row != kN ? lockset_[cx.call_row].fn : kN;
               feas = c_feasibility(lsit == lockset_call_.end() ? kN : lsit->second, wrows, cx, xc);
             }
-            rows << "      feasibility: " << feas << "\n";
-            rows << "      violation: " << violation_text() << "\n";
+            r.feasibility = feas;
+            r.feasibility_grade = last_feas_grade_;
+            r.violation = violation_text();
             // flip: the reader's constant returns that depend on the field, before and after the write
             std::string grade = "none", why = "the reader's function returns no constant that depends on " + tf;
             const std::vector<Check> checks = checks_on_field(u.fn, tf);
@@ -2186,8 +1763,11 @@ class Rel {
               }
             }
             tally_flip(grade);
-            rows << "      flip: " << grade << ": " << why << "\n";
-            rows << "      layers: " << layers_text(true, uses_script_root(child) || uses_script_root(cs.descendants) || uses_script_root(ua)) << "\n";
+            r.flip_grade = grade;
+            r.flip = grade + ": " + why;
+            r.layers = layers_text(true, uses_script_root(child) || uses_script_root(cs.descendants) || uses_script_root(ua));
+            key_c(&r);
+            grp.rows.push_back(std::move(r));
           }
         }
       }
@@ -2198,6 +1778,7 @@ class Rel {
         if (!any) ++record_only_fields;
       }
     }
+    std::ostringstream os;
     os << "[C] " << n_c_ << " (spawn calls " << spawn_calls << ", with no resolved entry " << unresolved << ", with no event after them on their control-flow graph " << no_paths
        << "; fields written after a spawn only in the functions the creator calls, not paired in this revision: " << callee_only_fields
        << "; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: " << record_only_fields
@@ -2206,8 +1787,9 @@ class Rel {
        << ", such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): " << n_c_open_reach_ctx_
        << " (reads taken in only so: " << n_c_open_reach_reads_ << ")"
        << "; contexts called back from a function without a body: " << n_c_callback_ctx_ << "; contexts through indirect calls the facts do not resolve: "
-       << n_c_unresolved_ctx_ << ")\n"
-       << rows.str();
+       << n_c_unresolved_ctx_ << ")\n";
+    grp.text = os.str();
+    rep->groups.push_back(std::move(grp));
   }
   // the WRITERS rows of a field that are data functions on another field whose size may reach it (covers-more), by place
   std::set<std::tuple<uint32_t, std::string, uint32_t, uint32_t>> covers_of(const std::string& tf) const {
@@ -2217,35 +1799,6 @@ class Rel {
     for (uint32_t i : wit->second)
       if (writers_[i].flags & KZ_WRITER_FLAG_COVERS_MORE) out.insert({writers_[i].fn, str(writers_[i].file), writers_[i].line, writers_[i].col});
     return out;
-  }
-  // the functions a call may run: its defined callee, its resolved indirect targets, and the functions passed as
-  // arguments to a callee without a body that is no P0 entry (it may call them back)
-  std::set<uint32_t> call_runs(uint32_t ci) const {
-    std::set<uint32_t> t;
-    const kz_fact_call& c = calls_[ci];
-    if (defined(c.callee_fn)) t.insert(c.callee_fn);
-    auto itg = itargets_.find(c.site);
-    if (itg != itargets_.end()) t.insert(itg->second.begin(), itg->second.end());
-    const std::set<uint32_t> cb = callback_args(ci);
-    t.insert(cb.begin(), cb.end());
-    return t;
-  }
-  // the defined functions a call passes as arguments to a callee without a body that is no P0 entry (it may call them
-  // back during the call)
-  std::set<uint32_t> callback_args(uint32_t ci) const {
-    std::set<uint32_t> t;
-    const kz_fact_call& c = calls_[ci];
-    const std::string callee = str(c.callee);
-    if (defined(c.callee_fn) || c.kind == KZ_CALL_KIND_INDIRECT || p0_kind_.count(callee) != 0 || compare_names_.count(callee) != 0) return t;
-    for (uint32_t k = 0; k < c.nargs; ++k) {
-      auto af = argflow_at_.find({c.site, k});
-      if (af == argflow_at_.end() || argflow_[af->second].src != KZ_ARGSRC_FUNCTION) continue;
-      auto fit = fn_by_name_.find(base_name(str(argflow_[af->second].root)));
-      if (fit != fn_by_name_.end())
-        for (uint32_t f : fit->second)
-          if (defined(f)) t.insert(f);
-    }
-    return t;
   }
   // the functions a function may run (call_runs, transitively), itself included
   const std::set<uint32_t>& closure(uint32_t g) {
@@ -2951,7 +2504,7 @@ class Rel {
     return out;
   }
 
-  void path_a(std::ostream& os) {
+  void path_a(RelReport* rep) {
     std::vector<KeyCmp> cmps;
     key_comparisons(&cmps);
     std::map<std::string, Namespace> spaces;
@@ -2992,7 +2545,8 @@ class Rel {
             if ((e.op != KZ_EXPR_OP_EQ && e.op != KZ_EXPR_OP_NE) || e.b == kN || e.b >= exprs_.size() || exprs_[e.b].op != KZ_EXPR_OP_CONST) continue;
             (e.op == KZ_EXPR_OP_EQ ? in_use_ : empty_)[tf].insert(exprs_[e.b].value);
           }
-    std::ostringstream rows;
+    const size_t heading = rep->groups.size();
+    rep->groups.emplace_back();
     uint32_t no_table = 0;
     for (auto& [key, n] : spaces) {
       // a registration table is shared: the searches read the record type from a global object
@@ -3001,6 +2555,8 @@ class Rel {
         continue;
       }
       ++n_ns_;
+      std::ostringstream rows;  // the lines of the namespace (no row)
+      RelGroup g;
       begin_row();
       rows << "  namespace " << key << " (record type " << n.type << "; tables";
       if (n.tables.empty()) rows << " none found";
@@ -3067,9 +2623,13 @@ class Rel {
       }
       // the spawn operations that write the table: what runs when the entry they start returns
       lifecycle_entry_paths(n, rows);
-      path_a_uses(n, rows);
+      path_a_uses(n, rows, &g.rows);
+      g.text = rows.str();
+      rep->groups.push_back(std::move(g));
     }
-    os << "[A] " << n_a_ << " (namespaces " << n_ns_ << ", key comparisons " << cmps.size() << "; left out: searches over no global table " << no_table << ")\n" << rows.str();
+    std::ostringstream os;
+    os << "[A] " << n_a_ << " (namespaces " << n_ns_ << ", key comparisons " << cmps.size() << "; left out: searches over no global table " << no_table << ")\n";
+    rep->groups[heading].text = os.str();
   }
 
   // for a function that both writes a field of the namespace and passes the entry of a spawn: whether the
@@ -3116,7 +2676,7 @@ class Rel {
     }
   }
 
-  void path_a_uses(const Namespace& n, std::ostream& rows) {
+  void path_a_uses(const Namespace& n, std::ostream& rows, std::vector<RelRow>* out) {
     // the functions that reach a write of the key (direct calls): a use of one is a creator
     std::set<uint32_t> writer_fns;
     {
@@ -3210,11 +2770,24 @@ class Rel {
         }
       ++n_a_;
       const kz_fact_call& c = calls_[u.ci];
-      rows << "  A" << n_a_ << " lookup " << call_pos(u.ci) << " in " << fname(c.caller_fn) << " -> " << fname(u.callee) << "#" << u.param << " namespace " << n.key << " partition {"
-           << u.part << "} key " << u.key.status << "\n";
-      if (!u.part_desc.empty()) rows << "      partition: " << u.part_desc << "\n";
-      rows << "      key: " << u.key.text << "\n";
-      rows << "      actors: " << actors_text(u.actors) << "; result=" << result_use(u.ci) << "\n";
+      RelRow r;
+      r.path = 'A';
+      r.number = n_a_;
+      r.subject = n.key;
+      r.call = u.ci;
+      r.caller_fn = c.caller_fn;
+      r.callee_fn = u.callee;
+      r.param = u.param;
+      RowLines L(&r);
+      {
+        std::ostringstream h;
+        h << "lookup " << call_pos(u.ci) << " in " << fname(c.caller_fn) << " -> " << fname(u.callee) << "#" << u.param << " namespace " << n.key << " partition {" << u.part
+          << "} key " << u.key.status;
+        r.head = h.str();
+      }
+      if (!u.part_desc.empty()) L.line("partition") << "partition: " << u.part_desc;
+      L.line("key") << "key: " << u.key.text;
+      L.line("actors") << "actors: " << actors_text(u.actors) << "; result=" << result_use(u.ci);
       std::vector<std::string> paired, excluded, probes;
       bool any_inter = false, any_match = false, any_unres = false;
       uint32_t n_probe = 0, n_differ = 0, n_same_actor = 0;
@@ -3314,11 +2887,13 @@ class Rel {
       }
       if (any_inter) ++n_a_paired_;
       if (any_match) ++n_a_keymatch_;
-      for (const std::string& p : paired) rows << "      creator: " << p << "\n";
-      for (const std::string& x : excluded) rows << "      not a pair: " << x << "\n";
+      for (const std::string& p : paired) L.line("creator") << "creator: " << p;
+      for (const std::string& x : excluded) L.line("not a pair") << "not a pair: " << x;
       // handling of the result
-      rows << a_handling(u.ci);
-      for (const std::string& pc : probes) rows << "      handling: probe-create: on the lookup's failure result the same function creates the same key: " << pc << "\n";
+      L.done();
+      add_lines(&r, a_handling(u.ci), "handling");
+      for (const std::string& pc : probes) L.line("handling") << "handling: probe-create: on the lookup's failure result the same function creates the same key: " << pc;
+      L.done();
       std::string dep;
       if (!paired.empty()) {
         dep = std::to_string(paired.size()) + " creator(s) of this partition in other actors";
@@ -3328,8 +2903,8 @@ class Rel {
         dep = "no creator left after exclusions (probe-create " + std::to_string(n_probe) + ", key constants differ " + std::to_string(n_differ) + ", same actor only " +
               std::to_string(n_same_actor) + ")";
       }
-      rows << "      dependency: path A: " << dep << "\n";
-      rows << "      run-order: no record given\n";
+      r.dependency = "path A: " + dep;
+      r.run_order = "no record given";
       std::string feas;
       if (paired.empty()) {
         feas = "undecidable: no pair";
@@ -3337,8 +2912,9 @@ class Rel {
         feas = "undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)";
       }
       tally_feas("undecidable");
-      rows << "      feasibility: " << feas << "\n";
-      rows << "      violation: " << violation_text() << "\n";
+      r.feasibility = feas;
+      r.feasibility_grade = last_feas_grade_;
+      r.violation = violation_text();
       std::string grade, why;
       if (any_match) {
         grade = "static-possible";
@@ -3353,9 +2929,12 @@ class Rel {
       const std::string fails = search_failures(n);
       if (!fails.empty()) why += "; " + fails;
       tally_flip(grade);
-      rows << "      flip: " << grade << ": " << why << "\n";
+      r.flip_grade = grade;
+      r.flip = grade + ": " + why;
       bool l0 = uses_script_root(u.actors);
-      rows << "      layers: " << layers_text(true, l0) << "\n";
+      r.layers = layers_text(true, l0);
+      key_a(&r);
+      out->push_back(std::move(r));
     }
   }
   // the constant returns of the searches of a namespace: the failure constant (returned when no
@@ -3467,91 +3046,13 @@ class Rel {
   }
 
   // ---------------------------------------------------------------- state
-  const kz::Container& c_;
-  std::vector<kz_basis_item> basis_;
-  std::vector<kz_fact_func> funcs_;
-  std::vector<kz_fact_call> calls_;
-  std::vector<kz_fact_expr> exprs_;
-  std::vector<kz_fact_loop> loops_;
-  std::vector<kz_fact_init> inits_;
-  std::vector<kz_fact_writer> writers_;
-  std::vector<kz_fact_target> targets_;
-  std::vector<kz_fact_terminal> terminals_;
-  std::vector<kz_fact_iter> iters_;
-  std::vector<kz_fact_fwrite> fwrites_;
-  std::vector<kz_fact_p0> p0_;
-  std::vector<kz_fact_opderiv> opderiv_;
-  std::vector<kz_fact_spawnw> spawnw_;
-  std::vector<kz_fact_read> reads_;
-  std::vector<kz_fact_return> returns_;
-  std::vector<kz_fact_retconst> retconsts_;
-  std::vector<kz_fact_loopexit> loopexits_;
-  std::vector<kz_fact_argflow> argflow_;
-  std::vector<kz_fact_pflow> pflow_;
-  std::vector<kz_fact_ptrfield> ptrfields_;
-  std::vector<kz_fact_gimage> gimages_;
-  std::vector<kz_fact_lockid> lockids_;
-  std::vector<kz_fact_lockset> lockset_;
-  std::vector<kz_fact_fstatus> fstatus_;
-  std::vector<kz_fact_await> awaits_;
-  std::vector<kz_fact_lockpath> lockpaths_;
-
-  struct BasisMap : std::map<std::string, std::string> {
-    std::string at_or(const std::string& k) const {
-      auto it = find(k);
-      return it == end() ? std::string("?") : it->second;
-    }
-  } basis_map_;
-  bool profile_free_ = false;
-  uint32_t hand_entered_vocabulary_ = 0;
-  std::map<std::string, std::vector<uint32_t>> fn_by_name_;
-  std::vector<std::vector<std::pair<uint32_t, bool>>> succ_;
-  std::vector<std::vector<uint32_t>> callers_;  // direct calls into a function
-  std::map<uint32_t, std::vector<uint32_t>> indirect_callers_;
-  std::map<uint32_t, uint32_t> call_by_site_;
-  std::map<uint32_t, std::vector<uint32_t>> calls_of_;
-  std::map<uint32_t, std::set<uint32_t>> spawn_entries_;  // spawn site -> entries (kN: unresolved)
-  std::map<uint32_t, std::map<uint32_t, uint32_t>> iter_spawn_;  // spawn site -> entry -> iteration
-  std::map<uint32_t, uint32_t> iter_loop_;
-  std::set<uint32_t> script_entries_;
-  std::map<std::pair<uint32_t, uint32_t>, uint32_t> argflow_at_;
-  std::map<std::string, std::vector<uint32_t>> reads_of_field_;
-  std::map<uint32_t, std::vector<uint32_t>> returns_of_, retconsts_of_, loopexits_of_, lockset_writes_of_, terminals_of_, opderiv_of_, awaits_of_;
-  std::map<std::pair<uint32_t, uint32_t>, std::vector<uint32_t>> pflow_of_;
-  std::map<uint32_t, uint32_t> lockset_call_, lockset_read_, ptrread_of_, loop_by_index_;
-  std::map<std::string, uint32_t> fstatus_of_;
-  std::map<std::string, std::vector<uint32_t>> writers_of_, inits_of_, fwrites_of_, gimages_of_;
-  std::map<std::string, uint8_t> p0_kind_;
-  std::set<std::string> compare_names_;
-  std::set<std::string> gaf_;
-  std::map<uint32_t, std::string> root_kind_;
-  std::map<uint32_t, std::set<uint32_t>> reach_, delegates_, actors_of_;
-  std::set<uint32_t> trampolines_, kept_direct_, kept_shared_;
-  std::map<uint32_t, std::set<uint32_t>> after_spawn_;  // spawn site -> LOCKSET rows after it (LOCK_PATHS)
-  std::map<uint32_t, uint32_t> entry_release_;           // LOCKSET row -> the call site (LOCK_PATHS entry-release)
-  std::map<uint32_t, std::set<uint32_t>> itargets_;      // indirect call site -> resolved targets
-  std::map<uint32_t, std::set<uint32_t>> image_spawn_;   // spawn site -> entries from a static image
-  std::map<uint32_t, std::string> image_member_;          // spawn site -> the member the entry argument reads (Type.field)
-  std::map<uint32_t, std::string> image_premise_;         // spawn site -> what its entries from the image rest on (relations rules revision 5)
-  std::map<uint32_t, std::string> unresolved_why_;        // indirect call site -> the reason of its unresolved row (CALL_TARGETS)
   std::set<uint32_t> at_reach_;                           // the functions an address-taken function may run (call_runs, transitively)
   bool at_reach_done_ = false;
-  std::map<uint32_t, std::map<uint32_t, std::string>> image_paths_;  // spawn site -> entry -> its image paths
-  std::map<uint32_t, std::map<uint32_t, std::set<std::string>>> via_op_;  // trampoline -> root -> the derived spawn operations
-  std::map<uint32_t, std::set<std::string>> via_op_missing_;  // trampoline -> calls of such an operation with no resolved entry
-  std::set<uint32_t> unresolved_sites_;                  // indirect calls with a target the flow graph does not resolve
-  std::set<std::string> p0_unverified_, lock_prims_;
-  std::map<uint32_t, std::set<std::string>> script_prim_;  // script entry -> the P0 symbol lookup it is resolved through
   std::map<uint32_t, std::set<uint32_t>> closure_;
-  std::map<uint32_t, std::vector<uint32_t>> callback_callers_;  // function -> calls that pass it to a callee without a body
-  std::map<uint32_t, std::vector<uint32_t>> returns_twice_;     // function -> its calls of a function that returns twice
   std::map<uint32_t, ChildSet> child_sets_;  // spawn site -> its child set
   uint32_t n_c_incomplete_ctx_ = 0, n_c_descendant_ctx_ = 0, n_c_callback_ctx_ = 0, n_c_unresolved_ctx_ = 0, n_c_open_reach_ctx_ = 0, n_c_open_reach_reads_ = 0;
-  std::vector<std::string> deviations_;
-  std::map<std::string, std::set<std::string>> deviation_files_;
-  std::set<std::string> assumptions_;
-  std::vector<std::string> keys_dtor_, keys_null_dtor_, cleanup_pushes_, unresolved_spawns_;
   mutable std::set<std::string> row_files_, row_tags_, row_p0_;
+  std::string last_feas_grade_;  // the grade tally_feas counted last (the row's feasibility grade)
   std::map<std::string, std::set<int64_t>> in_use_, empty_;
   uint32_t n_a_ = 0, n_ns_ = 0, n_a_paired_ = 0, n_a_keymatch_ = 0, n_b_ = 0, n_b_check_ = 0, n_c_ = 0, n_c_self_ = 0;
   uint32_t n_flip_possible_ = 0, n_flip_undet_ = 0, n_flip_none_ = 0, n_feas_impossible_ = 0, n_feas_possible_ = 0, n_feas_undecidable_ = 0, n_feas_not_graded_ = 0;
@@ -3559,11 +3060,77 @@ class Rel {
 
 }  // namespace
 
-kz::Status relations_report(const kz::Container& facts, const RelationsOptions& options, std::string* out) {
+kz::Status relations_rows(const kz::Container& facts, const RelationsOptions& options, RelReport* out) {
   (void)options;
   if (facts.header().artifact_kind != KZ_ARTIFACT_FACTS) return kz::Status::error(kz::Err::Invalid, "not a facts container");
   Rel r(facts);
   return r.run(out);
+}
+
+std::string render_row(const RelRow& r) {
+  std::string t = "  ";
+  t += r.path;
+  t += std::to_string(r.number) + " " + r.head + "\n";
+  for (const RelLine& l : r.lines) t += std::string(l.indent, ' ') + l.text + "\n";
+  t += "      dependency: " + r.dependency + "\n";
+  t += "      run-order: " + r.run_order + "\n";
+  t += "      feasibility: " + r.feasibility + "\n";
+  t += "      violation: " + r.violation + "\n";
+  t += "      flip: " + r.flip + "\n";
+  t += "      layers: " + r.layers + "\n";
+  return t;
+}
+
+std::string render_relations(const RelReport& rep) {
+  std::string t = rep.header;
+  for (const RelGroup& g : rep.groups) {
+    t += g.text;
+    for (const RelRow& r : g.rows) t += render_row(r);
+  }
+  return t;
+}
+
+std::string relation_keys_text(const RelReport& rep) {
+  std::map<std::string, std::vector<std::string>> by_key;
+  std::map<std::string, std::set<std::string>> texts;
+  size_t rows = 0;
+  std::string body;
+  for (const RelGroup& g : rep.groups)
+    for (const RelRow& r : g.rows) {
+      ++rows;
+      const std::string id = std::string(1, r.path) + std::to_string(r.number);
+      by_key[r.key].push_back(id);
+      texts[r.key].insert(r.key_text);
+      body += id + " " + r.key + " " + r.key_text + "\n";
+      for (const std::string& sk : r.site_keys) body += id + ".site " + sk + "\n";
+    }
+  size_t shared = 0, distinct_texts_sharing = 0;
+  std::string coll;
+  for (const auto& [k, ids] : by_key) {
+    if (ids.size() < 2) continue;
+    shared += ids.size();
+    if (texts[k].size() > 1) ++distinct_texts_sharing;
+    coll += "collision " + k + (texts[k].size() > 1 ? " (different key texts)" : " (one key text)") + ":";
+    for (const std::string& id : ids) coll += " " + id;
+    coll += "\n";
+  }
+  std::string t = "kz-relation-keys 1\n";
+  t += "facts " + rep.facts + "\n";
+  t += std::string("rules ") + relations_rules_revision() + "\n";
+  t += "key: the first 16 hex digits of the sha256 of the key text (docs/static_facts.md §5l): path|subject|caller|callee#parameter|n-th call; path C adds |read <function> <n-th read>|<context>\n";
+  t += "rows " + std::to_string(rows) + ", distinct keys " + std::to_string(by_key.size()) + ", rows that share a key " + std::to_string(shared) +
+       ", keys shared by different key texts " + std::to_string(distinct_texts_sharing) + "\n";
+  t += coll;
+  t += body;
+  return t;
+}
+
+kz::Status relations_report(const kz::Container& facts, const RelationsOptions& options, std::string* out) {
+  RelReport rep;
+  const kz::Status s = relations_rows(facts, options, &rep);
+  if (!s.ok()) return s;
+  *out = render_relations(rep);
+  return kz::Status::success();
 }
 
 }  // namespace kzs

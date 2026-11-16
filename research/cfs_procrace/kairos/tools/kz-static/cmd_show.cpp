@@ -71,11 +71,11 @@ int cmd_reach(int argc, char** argv) {
 }
 
 // The relations of a facts container (relations.hpp).  It takes no field, callee or case name: the facts
-// file and the output file only.
+// file, the output file and the file of the use-site key listing only.
 int cmd_relations(int argc, char** argv) {
   Args args;
   std::string err;
-  if (!parse_args(argc, argv, 2, {"-o"}, {}, &args, &err) || args.positional.size() != 1) {
+  if (!parse_args(argc, argv, 2, {"-o", "--keys"}, {}, &args, &err) || args.positional.size() != 1) {
     std::fprintf(stderr, "kz-static relations: %s\n", err.empty() ? "expected one facts file" : err.c_str());
     return 2;
   }
@@ -85,9 +85,18 @@ int cmd_relations(int argc, char** argv) {
     std::fprintf(stderr, "kz-static relations: %s is not a facts container\n", args.positional[0].c_str());
     return 2;
   }
-  std::string text;
-  const kz::Status s = kzs::relations_report(c, kzs::RelationsOptions{}, &text);
+  kzs::RelReport rep;
+  const kz::Status s = kzs::relations_rows(c, kzs::RelationsOptions{}, &rep);
   if (!s.ok()) return fail("relations", s.describe());
+  const std::string text = kzs::render_relations(rep);
+  if (args.has("--keys")) {
+    const std::string keys = kzs::relation_keys_text(rep);
+    const kz::Status w = kz::write_whole_file(args.one("--keys"), kz::Bytes(keys.begin(), keys.end()));
+    if (!w.ok()) {
+      std::fprintf(stderr, "kz-static relations: %s\n", w.describe().c_str());
+      return 2;
+    }
+  }
   if (args.has("-o")) {
     const kz::Status w = kz::write_whole_file(args.one("-o"), kz::Bytes(text.begin(), text.end()));
     if (!w.ok()) {

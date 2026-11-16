@@ -1,0 +1,3 @@
+# declaration: sha256 of declared_before_build.txt (= the lines of section 2 of plan/observation_path_results_20261116.md up to the end of 2.0, before the build) = 5b067dbfcb4d397ae957a88537d016bf44f4e6245eb54b7aef4ce6dafcd9431b (2026-11-16T05:41:07Z; committed before the build)
+# obs1-20261116-relrows: commands, rc and free space (df -B1 /, bytes available)
+start: 2026-11-16T05:41:07Z, free 529895424

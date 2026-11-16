@@ -90,3 +90,35 @@ kz-static 빌드가 없으므로 빌드 전 선언은 없다. 바뀌는 출력�
 
 - 지금 여유 534,102,016 B(05:22:56Z), 하한 위 219.5 MB. 가장 최근의 kz-static 제자리 빌드는 74,153,984 B 내려갔다(`records/step2a-20261110-8cfix/commands.txt` 6절: 662,728,704 → 588,574,720) [F].
 - 이 단계는 공간·도구 덮어쓰기·빌드 트리·정지 규칙에 대한 결정을 하지 않았다. 그 질문은 lead가 측정값과 함께 PI에게 올린다.
+
+## 2. relations 행의 기록, 사용 지점 키, 공유 적재기 (kz-static 빌드 하나, 동작 변화 없음)
+
+기록: `../records/obs1-20261116-relrows/`. 출력: 저장소 밖 `/home/user/work/redesign/obs1/relrows_check/`(새 디렉터리). T8CF(`/home/user/work/redesign/step2a/tests_8c_fix`)와 앞선 출력 디렉터리에는 쓰지 않는다. cFS를 부팅하지 않는다. push하지 않는다.
+
+### 2.0 선언 (빌드 전에 적고 커밋함) [D]
+
+빌드 전에 적었다. 아래 밖의 차이는 결함이다. 결함이면 다음으로 가기 전에 고친다.
+
+- **코드**(설계, `kairos/`):
+  - `lib/llvm/rel_facts.hpp`, `lib/llvm/rel_facts.cpp`(새 파일): facts 섹션 읽기(`load`), 색인(`index`과 그것이 부르는 `thread_end_code`, `image_entries`, `image_value_why`, `global_address_functions`, `callback_args`), 정적 행위자(`actors`, `own_shared_access`, `actor_set`, `entry_actors`), `call_runs`, `shared_base`, 작은 도움 함수(`str`, `fname`, `pos`, `call_pos`, `enum_text` 등)와 그 상태를 `relations.cpp`의 `Rel`에서 그대로 옮긴다(`RelFacts`). 규칙 글은 바꾸지 않는다. 바뀌는 것은 하나다: 위치·함수 이름을 적을 때 그 파일을 행의 기록에 적는 일을 `Rel`의 멤버 집합에 바로 하지 않고 `file_notes_`가 가리키는 집합(=`Rel`의 그 집합)에 한다. 같은 집합에 같은 차례로 들어간다.
+  - `lib/llvm/relations.hpp`, `relations.cpp`: 행을 기록(`RelRow`: 경로, 번호, 첫 줄, 줄들, 칸 여섯, 등급, 사실 참조, 사용 지점 키)으로 만들고, 텍스트는 그 기록에서 그린다(`relations_rows`, `render_row`, `render_relations`). 행이 아닌 줄은 묶음(`RelGroup`)의 글이다. `relations_report`는 `relations_rows` + `render_relations`다. 사용 지점 키(`key_a`, `key_b`, `key_c`)와 그 목록(`relation_keys_text`). 키의 정의는 `docs/static_facts.md` §5l. relations rules revision 5 그대로(개정 문자열 그대로).
+  - `tools/kz-static/cmd_show.cpp`, `main.cpp`: `kz-static relations <facts> [-o OUT] [--keys KEYS]`. `--keys`가 없으면 앞과 같다.
+  - `lib/llvm/CMakeLists.txt`: `rel_facts.cpp`를 더하고 머리 주석 두 줄.
+  - `tests/static/test_static_cli.cpp`: 사용 지점 키 블록(줄이 밀림, creator가 바뀜, 구획이 바뀜에도 A 행 키가 같음; 한 줄 두 호출의 키가 다름; `--keys`가 텍스트를 바꾸지 않음; fixture `relations.c`의 다섯 행 키). 다른 확인 글은 고치지 않는다.
+  - `docs/static_facts.md`: §5l(새 절), §5e의 명령 줄에 §5l 가리킴 한 문장.
+  - 하지 않는 것: 규칙, 행의 차례와 번호, 등급, 칸 글, facts schema(`include/` 그대로), golden, 2a 드라이버와 그 허용표.
+- **도구 해시와 정체성**(`cmake/KzSourceIdentity.cmake:77-116`의 규칙: 도구의 정체성은 그 도구가 링크하는 대상들의 소스 디렉터리와 `include/`, `cmake/`, 최상위 `CMakeLists.txt`다):
+  - kz-static: 파일 sha256, `--identity`의 `tool_sha256`, `tool_source`가 바뀐다(`lib/llvm`, `tools/kz-static`이 바뀜). `core_source` `f6e3c7b4…`는 그대로다 [I: `lib/core`, `include/`를 고치지 않음].
+  - kz `931dd39c…`, kz-dump `05623054…`, kz-rt-dump `4390d4f1…`, kz-phi `7d34e6e2…`, kz-instr-clang `28db4017…`, kz_lint `b0f0d6a5…`: 다시 빌드·링크되지 않아야 한다 [I: 어느 것도 `kz-llvm`을 링크하지 않는다(`grep -rn kz-llvm --include=CMakeLists.txt`: `tools/kz-static`과 `tests/static`뿐); `include/`, `cmake/`, 최상위 `CMakeLists.txt`, `runtime/`, `tests/lint/`를 고치지 않는다]. 빌드 전 sha256은 `pre_mc.txt`에 적고 뒤와 비교한다. `flags.make`의 정체성 정의는 kz-static 것만 바뀌고 kz, kz-phi, kz-dump 것은 그대로다.
+  - 다시 링크되는 시험 프로그램: `kz-llvm`을 링크하는 것(`test_static_expr`, `test_static_flow`, `test_static_recipe`, `test_static_gitrev`, `test_static_unroll`, `test_static_wrappers`, `test_static_link`, `test_static_elf32`)과 `test_static_cli`(소스가 바뀜). `static_golden`은 `kz-core`만 링크하므로 다시 링크되지 않아도 된다(다시 링크되어도 결함이 아니다: kz-static에 대한 `add_dependencies`).
+  - `CMakeCache.txt` `bc2f43b4…`는 그대로다 [I]. flags.make 목록의 해시(`pre_mc.txt`의 sorted-list 줄)는 kz-static의 `flags.make` 하나 때문에 바뀐다.
+- **golden**: 바뀌는 파일도 새 파일도 없다(`tests/static/data`, `tests/golden/data`, `tests/phi/data`). relations가 나오는 golden 넷(`relations`, `relations_np`, `relpaths_np`, `relsound_np`와 그 밖에 relations를 그리는 것)은 같은 바이트여야 한다. 다르면 결함이다.
+- **relations 다섯 빌드 재실행**(새 도구, T8CF의 facts 그대로, facts는 다시 뽑지 않음): `kz-static relations <T8CF>/<b>/NP/facts.kz -o relations.txt > relations.log 2>&1`, 그리고 `--keys`를 더한 둘째 실행. 다섯 빌드 모두 둘 다 `relations.txt`가 T8CF와 바이트 동일해야 한다: c1_pre_tx `936cd6c8…`, c1_post_tx `00b57eb2…`, r2_core `fc8ea8da…`, c5_641 `1d4af508…`, c5_642 `34ac45f1…`. `relations.log`는 T8CF처럼 빈 파일이다. 둘째 줄 `facts <hash>`도 같다(facts가 같으므로).
+  - 이 단계가 다시 돌리지 않는 것: basis, extract, NP2, identity, count, twice, 드라이버 비교. 새 도구로는 "확인하지 않음"이다("같음"이 아니다).
+- **새 출력**: 빌드마다 사용 지점 키 목록(`keys.txt`, 옆 파일). 남겨 둔다(합 약 1 MB 이하 [I]). 재실행의 `relations.txt`·`relations.log`는 비교를 적은 뒤 지운다(T8CF와 같으므로 다시 만들 수 있다).
+- **측정(판정이 아님)**: 빌드마다 행 수, 서로 다른 키 수, 키를 나누는 행(있으면 그 행들을 적는다), B 사이트 키의 겹침. c1_pre_tx의 A21과 c1_post_tx의 `cf_cfdp.c:1003:23` 행의 키가 같은지 [I: 구조가 같으므로 같다].
+- **소비자**: 2a 드라이버(`env/redesign/step2a_tests.sh`)는 이 단계에서 돌리지 않는다. kz-static 파일 sha256이 `0024f192…`가 아니면 시작하지 않는다(rc 2). 그 허용표와 `step2a_tests_count.py`의 셈(행 정규식 `:51`, `summary `·`feasibility: ` 줄)은 kz-static `0024f192`까지의 도구를 말한다. 탐침 `s1_rev1.py`, `clauseB_rev1.py`(`--row`, `clauseB_rev1.py:676`)는 다시 돌리지 않는다. 그 행 id는 T8CF의 것이다. 새 relations에 다시 돌리면 행을 사용 지점 키로 맞춘다.
+- **시험**: 전체 ctest 239개 그대로(새 ctest 없음), 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음). `test_static_cli`의 확인 수는 는다(뒤에 적음). lint 6/6. 단위 점검 `env/tools/tests/run_unit.sh` 8/8, `env/redesign/step2a_tests_unit.sh` 7/7.
+- **누적 바이트 동일성**: 빌드 뒤 `env/tools/ledger_check.sh` 전체(T/, T_RV4, T_8B, T_8BF, T_8C, T8CF, PV, 11-09 묶음, kairos-build 도구, 플러그인 둘, F1T, C5 641 `b/`, W6·C5 기록, 앞 단계의 도구 사본)와 `tools_check.sh --deep`. 모두 같아야 한다.
+- **도구 보존**: kz-static `0024f192`는 이 빌드가 제자리에서 덮는다. 사본은 앞 단계에서 만들었다(`/home/user/work/preserve/tools-20261116/kz-static.0024f192.xz`, 왕복 확인됨). 새 도구는 그 도구의 남은 출력 가운데 relations 다섯만 다시 만든다. basis·facts는 다시 만들지 않으므로 `0024f192`를 "대체됨"으로 적지 않는다. 등록부의 상태는 `copy`가 된다.
+- **공간**: 시작 전 여유 ≥ 하한 314,572,800 + 필요량. 필요량 = 가장 큰 kz-static 제자리 빌드 dip 92.6 MB + 새 출력 1 MB + 한 시간 흐름 13 MB = 106,600,000 B. 감시(`env/tools/space_guard.sh --kind kz-static`, 2초마다)가 하한을 넘으면 멈추고 보고한다. 재실행도 감시 아래 돌린다(`--kind relations`).

@@ -1356,6 +1356,104 @@ startup_script {
     KZ_CHECK(has(pr, "dependency: path A: 1 creator(s) of this partition in other actors"));
   }
 
+  // ---- relation rows as records: the use-site key (docs/static_facts.md §5l) -------------------------------------
+  // A lookup API over a table (with a constant partition argument), two lookups on one line, a creator in another
+  // thread.  The key of each row stays when lines move, when the creators change and when the partition changes; two
+  // calls of one callee on one line get different keys (the n-th call); the text with --keys is the text without it.
+  {
+    const fs::path X = work / "usekeys";
+    fs::create_directories(X);
+    auto source = [](const std::string& top, int kind, const std::string& more_creators) {
+      return top +
+             "#include <pthread.h>\n#include <string.h>\n#define KIND " + std::to_string(kind) + "\n"
+             "typedef struct { int used; char name[16]; } KSlot;\nstatic KSlot kslots[4];\n"
+             "int k_find(int kind, const char *name) {\n  int i;\n  (void)kind;\n  for (i = 0; i < 4; i++) {\n"
+             "    if (kslots[i].used == 1 && strcmp(kslots[i].name, name) == 0) return i;\n  }\n  return -17;\n}\n"
+             "int k_create(int kind, const char *name) {\n  int i;\n  (void)kind;\n  for (i = 0; i < 4; i++) {\n"
+             "    if (kslots[i].used == 1 && strcmp(kslots[i].name, name) == 0) return -5;\n  }\n"
+             "  for (i = 0; i < 4; i++) {\n    if (kslots[i].used == 0) {\n      strncpy(kslots[i].name, name, 15);\n      kslots[i].used = 1;\n      return i;\n"
+             "    }\n  }\n  return -17;\n}\n"
+             "int t_find(const char *name) { return k_find(KIND, name); }\n"
+             "int t_create(const char *name) { return k_create(KIND, name); }\n"
+             "void *user_main(void *arg) {\n  (void)arg;\n  return (void *)(long)(t_find(\"a\") + t_find(\"b\"));\n}\n"
+             "void *maker_main(void *arg) {\n  (void)arg;\n  (void)t_create(\"a\");\n" + more_creators + "  return 0;\n}\n"
+             "int main(void) {\n  pthread_t a, b;\n  pthread_create(&a, 0, user_main, 0);\n  pthread_create(&b, 0, maker_main, 0);\n  return 0;\n}\n";
+    };
+    struct Variant {
+      const char* name;
+      std::string text;
+    };
+    const std::vector<Variant> variants = {
+        {"base", source("", 3, "")},
+        {"moved", source("/* three lines more */\n\n\n", 3, "")},
+        {"creators", source("", 3, "  (void)t_create(\"b\");\n  (void)t_create(\"c\");\n")},
+        {"partition", source("", 4, "")},
+    };
+    std::vector<std::string> rels, keys;
+    for (const Variant& v : variants) {
+      const fs::path src = X / (std::string(v.name) + ".c");
+      write(src, v.text);
+      const std::string kz = (X / (std::string(v.name) + ".kz")).string();
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src.string()) + " --root " + q(X.string()) + " -o " + q(kz) +
+                          " -- -std=c99 -pedantic",
+                      &out),
+                  0);
+      std::string rel, rel_k;
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q(kz), &rel), 0);
+      const fs::path kf = X / (std::string(v.name) + ".keys");
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q(kz) + " --keys " + q(kf.string()), &rel_k), 0);
+      KZ_CHECK_EQ(rel_k, rel);  // the listing changes no byte of the text
+      rels.push_back(rel);
+      // the rows' key lines ("A1 <key> <text>"), without the header lines
+      std::string k;
+      std::istringstream ks(read(kf));
+      std::string line;
+      while (std::getline(ks, line))
+        if (line.size() > 1 && line[0] == 'A' && line[1] >= '1' && line[1] <= '9') k += line + "\n";
+      keys.push_back(k);
+    }
+    // the base: two lookups on one line, each its own key (the first and the second call of t_find in user_main)
+    KZ_CHECK(has(rels[0], "  A1 lookup "));
+    KZ_CHECK(has(rels[0], "  A2 lookup "));
+    KZ_CHECK(!has(rels[0], "  A3 "));
+    KZ_CHECK(has(keys[0], " A|KSlot.name|user_main|t_find#0|1\n"));
+    KZ_CHECK(has(keys[0], " A|KSlot.name|user_main|t_find#0|2\n"));
+    const std::string listing = read(X / "base.keys");
+    KZ_CHECK(has(listing, "kz-relation-keys 1\n"));
+    KZ_CHECK(has(listing, "rows 2, distinct keys 2, rows that share a key 0, keys shared by different key texts 0\n"));
+    KZ_CHECK(!has(listing, "collision "));
+    // the text differs where the variants differ, the keys do not
+    KZ_CHECK(has(rels[0], "lookup base.c:"));
+    KZ_CHECK(rels[1] != rels[0]);
+    KZ_CHECK(has(rels[0], "partition {3}"));
+    KZ_CHECK(has(rels[3], "partition {4}"));
+    KZ_CHECK(!has(rels[3], "partition {3}"));
+    size_t c0 = 0, c2 = 0;
+    for (size_t at = 0; (at = rels[0].find("      creator: ", at)) != std::string::npos; ++at) ++c0;
+    for (size_t at = 0; (at = rels[2].find("      creator: ", at)) != std::string::npos; ++at) ++c2;
+    KZ_CHECK(c0 != 0);
+    KZ_CHECK(c2 > c0);
+    KZ_CHECK(!keys[0].empty());
+    KZ_CHECK_EQ(keys[1], keys[0]);
+    KZ_CHECK_EQ(keys[2], keys[0]);
+    KZ_CHECK_EQ(keys[3], keys[0]);
+    // the fixture relations.c: one key per row, the sites of a path B row in the listing, and the same text
+    const std::string rf = (work / "relations" / "both.kz").string();
+    std::string r1, r2;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rf), &r1), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rf) + " --keys " + q((X / "relations.keys").string()) + " -o " + q((X / "relations.txt").string()), &r2), 0);
+    KZ_CHECK_EQ(read(X / "relations.txt"), r1);
+    const std::string rk = read(X / "relations.keys");
+    KZ_CHECK(has(rk, "rows 5, distinct keys 5, rows that share a key 0"));
+    KZ_CHECK(has(rk, "\nB1 "));
+    KZ_CHECK(has(rk, " B|Service.self_id|-|notify#0|-\n"));
+    KZ_CHECK(has(rk, "\nB1.site "));
+    KZ_CHECK(has(rk, " B-site|Service.self_id|client_main|notify#0|2\n"));
+    KZ_CHECK(has(rk, "\nC1 "));
+    KZ_CHECK(has(rk, "|read task_check 1|itself\n"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rf) + " --keys", &out), 2);
+  }
+
   // ---- 8c (RV3A 6.3 O2, O12): command-line targets no unit declares, the target recorded once, the reading options
   {
     const fs::path X = work / "8c";

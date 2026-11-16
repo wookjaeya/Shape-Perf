@@ -326,7 +326,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - 규칙 대상은 사람이 넣은 입력이 아니다: BASIS `target.T.f = rule R-T1` 등은 정책 `unset`, 출처 행 없음으로 적는다(명령줄 `--target` 은 지금처럼 `declared-assumption`, 출처 `researcher`). BASIS `extract.targets_rule` 과 `count.targets_rule*` 를 더한다.
 - 옵션은 `--no-profile` 과만 쓴다. 옵션이 없으면 프로필 없는 추출은 앞과 같이 대상이 없다. 새 섹션은 없다(S5 때 facts schema 개정 10; LOCK_PATHS 를 더한 개정 11은 §5f).
 
-**`kz-static relations <facts> [-o OUT]`** [D]. facts 컨테이너 하나를 읽어 텍스트를 낸다(`lib/llvm/relations.cpp`, "relations rules revision 1"; 개정 2에서 바뀐 규칙은 §5f). 필드·callee·사례 이름을 받지 않는다. 확장 사실(READS … AWAIT_L1)이 없는 facts 는 이유와 함께 거부한다. 같은 컨테이너는 같은 바이트를 낸다.
+**`kz-static relations <facts> [-o OUT]`** [D]. facts 컨테이너 하나를 읽어 텍스트를 낸다(`lib/llvm/relations.cpp`, "relations rules revision 1"; 개정 2에서 바뀐 규칙은 §5f). 필드·callee·사례 이름을 받지 않는다. 확장 사실(READS … AWAIT_L1)이 없는 facts 는 이유와 함께 거부한다. 같은 컨테이너는 같은 바이트를 낸다. 행의 기록, 사용 지점 키(`--keys`)와 공유 적재기는 §5l.
 - **머리**: facts 해시, 모드, 내장 프로필·P0 표·유도 규칙·대상 규칙의 판, P0 비교 표의 판과 항목(판 표기, 원문 대조), 입력 계층, 행위자 root 와 트램펄린, 경로별 행 수와 등급별 수.
 - **입력 계층**: 행마다 B(빌드), P0(P0 표: spawn·잠금·지연·종료의 유도와 비교 함수), L0(행이 시작 스크립트 진입 root 에 기댈 때), R(규칙)을 붙인다. 프로필 추출의 facts 이면 `case:profile(<이름>)`, 명령줄 어휘가 있으면 `hand-entered:command-line(<n> items; G0 or other names, not automatic)` 를 모든 행에 붙인다.
 - **P0 비교 표**(`p0_compare_table`, "P0 comparison table revision 1"): 바이트 문자열 비교 묶음(`memcmp`, `strcmp`, `strcoll`, `strncmp`, `strcasecmp`, `strncasecmp`)과 스레드 id 비교 묶음(`pthread_equal`). 추출은 이 표를 쓰지 않으므로 P0 표와 facts 의 P0_TABLE 은 그대로다. 프로그램이 같은 이름의 본문을 정의하면(inline 이 아닌 본문) 그 호출은 비교로 읽지 않는다.
@@ -531,6 +531,32 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - `poll_fns`(프로필 observe 규칙의 poll 함수, `--poll-fn`)는 옛 경로 전용이고 추출이 소비하지 않는다. 남겨 둔다. `--poll-fn` 은 BASIS 에 사람이 넣은 항목(`op.poll function.<이름>`)으로 기록될 뿐이다. 프로필 observe 규칙의 poll 함수는 프로필 해시에만 든다.
 
 **시험** [M]: `test_static_cli` 의 8c 블록. fixture `writers.c` 에 없는 대상 셋(`NoSuch_t.nofield`, `Slot.nofield`, `Cell.nofield`)이 `unknown-target` 이고, 프로필 대상 `Cell.id` 는 전과 같다. BASIS 의 `unknown_target.*`, 대상 기록 하나, `extract.resource_dir`, `extract.extra_arg`(없음과 둘), relations 의 수 1 을 본다. 8c 블록의 `--target Cell.id` 는 프로필 대상을 다시 준 경우다. 8c 수정 단계 블록: 프로필에 없는 선언된 명령줄 대상(`Cell.aux`, writer-set-complete), `Cell` 이 없는 소스에서 `--target Cell.id`(unknown-target, 기록은 프로필 출처), 중첩 태그 `Inner.ix`(unknown-target, 남는 결함), `--target` 없는 `Cell.id`(프로필 규칙 그대로, 남는 결함), `extract.resource_dir` 의 네 꼴(내장 기본값, `--resource-dir`, `--extra-arg -resource-dir=`, `--resource-dir ""` 의 none).
+
+## 5l. relations 행의 기록, 사용 지점 키, 공유 적재기 (2026-11-16) [D][M]
+
+결과는 `plan/observation_path_results_20261116.md`. 규칙은 relations rules revision 5 그대로다. 개정 문자열, 행의 차례와 번호, 텍스트의 바이트를 바꾸지 않는다. facts schema 도 개정 11 그대로다.
+
+**행은 기록이다** [D]. `kz-static relations` 는 행을 먼저 기록(`RelRow`, `lib/llvm/relations.hpp`)으로 만들고 텍스트를 그 기록에서 그린다(`render_relations`). 그래서 행을 읽는 도구는 텍스트가 말하는 것을 그대로 읽는다.
+- 칸: 경로(`A`/`B`/`C`), 번호, 첫 줄, 첫 줄과 칸 사이의 줄(줄마다 이름·글·들여쓰기), 칸 여섯(`dependency`, `run-order`, `feasibility`, `violation`, `flip`, `layers`; 이름표 없는 값), 요약 줄이 센 등급(`feasibility_grade`, `flip_grade`).
+- 사실 참조(섹션의 행 번호; 없으면 `KZ_NONE32`): A 는 lookup 호출(FACTS), 그 함수, 키 매개변수 함수(FUNCS)와 매개변수. B 는 callee 와 인자 위치, 사이트의 호출들. C 는 spawn 호출, 생성자, spawn 호출의 callee(본문 없는 P0 기본 연산이면 없음), 읽기(READS)와 읽는 함수, 맥락의 종류와 호출.
+- 행이 아닌 줄(경로의 머리 줄, 경로 A 의 이름 공간 블록)은 묶음(`RelGroup`)의 글로 둔다. 머리(`RelReport::header`)는 앞과 같은 글이다.
+
+**사용 지점 키** [D]. 행의 사용이 프로그램의 어디에 있는지를 이름으로 적은 글(key text)과 그 sha256 의 앞 16 hex 자리(key)다(`relations.cpp` 의 `key_a`, `key_b`, `key_c`).
+- 넣는 것: 경로, 이름 공간 또는 필드, 호출하는 함수, callee 와 키 매개변수 위치, 그 callee 의 n 번째 호출.
+- 넣지 않는 것: 줄·열 번호, creator, writer, 구획(partition), 계수, 판정. 이것들은 행의 내용이다.
+- 함수는 이름이다. 내부 연결(static) 함수이면 정의된 파일을 `@` 뒤에 붙인다(줄은 붙이지 않는다). 본문 없는 함수와 간접 호출은 호출이 적은 이름이다.
+- n 번째: 호출하는 함수 안에서 같은 callee 를 부르는 호출들을 소스 차례(파일, 줄, 열; 한 자리의 두 호출은 사이트 번호)로 세운 차례(1부터). 그래서 한 줄의 두 호출은 키가 다르다.
+- A: `A|<이름 공간>|<lookup 을 부르는 함수>|<키 매개변수 함수>#<매개변수>|<n>`.
+- B: 행은 (필드, callee, 인자 위치) 하나다. 사이트는 행의 내용이다. 키는 `B|<필드>|-|<callee>#<인자>|-` 이다. 사이트마다의 키 `B-site|<필드>|<부르는 함수>|<callee>#<인자>|<n>` 를 목록에 따로 둔다.
+- C: `C|<필드>|<생성자>|<spawn 호출의 callee>|<n>|read <읽는 함수> <그 함수 안 같은 필드 읽기의 n>|<맥락>`. 맥락은 `itself`, `entry`, `unresolved`, 또는 읽는 함수의 호출(`call`, `indirect-call`, `callback`)과 그 호출의 부르는 함수, callee, n 이다.
+- 키는 텍스트의 바이트가 아니다. 키를 만드는 동안 파일을 적지 않는다(행의 `layers` 칸이 기대는 파일 기록을 바꾸지 않는다).
+- 한계 [I]: 같은 함수 안에서 같은 callee 의 호출이 앞에 더해지거나 빠지면 뒤의 n 이 바뀐다. 함수·필드 이름이 바뀌면 키가 바뀐다. 열을 적지 않는 사실(열 0)에서는 한 줄의 두 호출을 사이트 번호로 가른다. 사이트 번호는 추출의 차례다.
+
+**`kz-static relations <facts> [-o OUT] [--keys KEYS]`** [D]. `--keys` 는 사용 지점 키의 목록을 KEYS 에 쓴다. 텍스트(표준 출력 또는 `-o`)의 바이트는 `--keys` 가 있든 없든 같다. 목록: `kz-relation-keys 1`, facts 해시, 규칙 개정, 키의 정의 한 줄, 수 한 줄(`rows`, `distinct keys`, `rows that share a key`, `keys shared by different key texts`), 키를 나누는 행마다 `collision <key> (one key text | different key texts): <행들>`, 그다음 행마다 `<행> <key> <key text>`, B 행의 사이트마다 `<행>.site <key> <key text>`.
+
+**공유 적재기** [D]. facts 의 섹션 읽기, 색인, 정적 행위자(root, 그 코드, 트램펄린)를 `RelFacts`(`lib/llvm/rel_facts.hpp`, `rel_facts.cpp`)로 옮겼다. relations.cpp 에 있던 코드 그대로다(`load`, `index`, `actors` 와 그것들이 부르는 함수). relations 의 행은 그것 위에 선다. 같은 facts 를 같은 방식으로 읽는 다른 도구도 그것을 쓴다. 위치와 함수 이름을 적을 때 그 파일을 행의 기록에 적는 일은 `file_notes_` 가 가리키는 집합으로 한다(relations 만 설정한다).
+
+**시험** [M]: `test_static_cli` 의 사용 지점 키 블록. 표를 찾는 lookup API(상수 구획 인자가 있음)를 한 줄에서 두 번 부르고 다른 스레드가 만든다. 줄이 밀리거나, creator 가 늘거나, 구획 상수가 바뀌어도 A 행 키는 같다. 그 사이 텍스트는 바뀐다. 한 줄의 두 호출은 키가 다르다(n 번째). `--keys` 가 텍스트를 바꾸지 않는다. fixture `relations.c` 의 다섯 행은 키가 서로 다르고, B 행 사이트의 키가 목록에 있다. golden 은 바뀌지 않는다.
 
 ## 6. core-cpu1 결과 [M]
 

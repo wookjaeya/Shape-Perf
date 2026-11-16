@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-ctest need=200000000 floor=314572800 interval=2 cmd=ctest -R static_fixture_compile_planv4 --output-on-failure
+start 2026-11-16T23:41:40.908Z free=1362939904 threshold=514572800
+sample 2026-11-16T23:41:40.913Z 1362935808
+end 2026-11-16T23:41:42.920Z kind=scratch-ctest verdict=completed rc=0 free=1362927616 lowest=1362927616 dip=12288 change=-12288

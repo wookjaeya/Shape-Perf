@@ -30,6 +30,16 @@
 //                   file and the definition line in the facts).
 // Wait and lock results are not planned in this revision: each planned row names them as needs not planned.
 //
+// Plan rules revision 3 (`--manifest 4`, docs/plan_manifest.md section 8): the same rules and order, and a manifest
+// "kzs-sites 4" (plan header, site keys, rows, columns and ordinals, loads, need and gap statements, the spawn binding at
+// the thread-creation calls with the spawn-token reader); the path A control selection (section 7) planned apart from
+// the tier order under its own recorded budget; value requests (a sidecar of their own, listed and hashed); the wait
+// rule (the condition reads of a wait the row's sites follow and the exits taken, from FACT_LOOPS, LOOP_DEFS and
+// AWAIT_L1); the object rules (path C: the load of the field read, the calls of the subscripts of its OBJECT_ACCESS
+// index root, the lock calls of the creator and the reader; path A: the deletes and retires of the object kinds the
+// namespace data names for the row's lookup and creators); the effect calls of RESULT_EFFECT with the argument the
+// SEMANTICS rows give a role.  Without --manifest 4 the output is that of revision 2.
+//
 // Output: a site manifest "kzs-sites 3" (the plugin kzgcc 0.3 and the runtime 1.4 read it: source, module, site, value
 // statements; no identity, control or bind statements) whose comment header carries the sha256 of the sidecar; the
 // sidecar (the plan header with every input file and its sha256, the generator identity, the rules and priority
@@ -50,6 +60,9 @@
 namespace kzs {
 
 const char* plan_rules_revision();
+const char* plan_rules_v4_revision();       // plan rules revision 3: the generator of manifest revision 4
+const char* plan_control_revision();        // the path A control selection rule
+const char* plan_requests_revision();       // the value requests rule
 const char* plan_priority_revision();
 
 // One input file of the generator: what it is, the path as given and the sha256 of the bytes read.
@@ -66,6 +79,12 @@ struct PlanOptions {
   std::string generator;         // the generator identity line (the tool, its identity hashes), given by the tool
   std::vector<PlanInputFile> inputs;  // every file the tool opened, in the order opened
   std::string sidecar_path;      // where the sidecar is written (the module table's first line names it)
+  // plan rules revision 3 (manifest revision 4); 3 = the output of revision 2
+  uint32_t manifest_revision = 3;
+  std::string control_budget;         // "all" | "rows:<n>" (manifest revision 4)
+  std::string control_budget_reason;  // recorded verbatim
+  std::vector<std::pair<std::string, std::string>> namespace_data;  // (path as given, text) of each namespace data file
+  std::string requests_path;          // where the value requests are written (the sidecar names it with its sha256)
 };
 
 // The method priority of one row (the port of the rule): label, order class, reach mark, disposition, why.
@@ -81,6 +100,7 @@ std::vector<PlanPriority> plan_priorities(const RelReport& report);
 
 struct PlanOutput {
   std::string manifest, sidecar, modules, exes;
+  std::string requests;  // manifest revision 4: the value requests
 };
 
 // facts: the facts container; basis: its basis container (nullptr for facts extracted without one); framework: the text

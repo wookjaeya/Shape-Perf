@@ -1,13 +1,16 @@
-// kz_rt_manifest.hpp -- the site manifest "kzs-sites 3" (also reads "kzs-sites 1" and "2"; host side;
+// kz_rt_manifest.hpp -- the site manifest "kzs-sites 4" (also reads "kzs-sites 1", "2" and "3" as before; host side;
 // event_semantics.md section 3).
 //
 // One text format, line oriented ('#' starts a comment outside quotes; tokens are separated by white
 // space; a double-quoted part of a token may contain white space and '#'; the quotes are removed).
 // Several files may be read into one Manifest (the logical sites written from the profile, then a
 // backend's binding list, then identity reads); every file starts with the header line, and each file may
-// have any version.  Version 3 adds only identity readers (below); a file of version 1 or 2 reads as before.
+// have any version.  Version 3 adds only identity readers (below); a file of version 1 or 2 reads as before.  Version 4
+// (2026-11-16, the generated plan of plan rules revision 3, docs/plan_manifest.md) adds the plan header, site keys and
+// positions, loads, need and gap statements and the spawn binding (below); a file of version 1, 2 or 3 reads exactly
+// as before, and none of the version 4 words is accepted in it.
 //
-//   kzs-sites 1|2|3
+//   kzs-sites 1|2|3|4
 //   source <name> rev=<revision> [ref=<text>]
 //   module <id> name=<text> source=<source-name>
 //   site <id> label=<label> op=<operation> phase=before|effect|after|exit|point tu=<path> func=<function>
@@ -66,6 +69,29 @@
 //   owner-check     phase=point|effect  owner= another value of the same request instance that must agree with
 //                                 the published one (a cross-check only: it never names an owner, a disagreement
 //                                 withdraws it)
+// Version 4 (2026-11-16):
+//   plan <id> facts=<sha256> relrules=<text> obsrules=<text> semantics=<text> select=<text> budget=<text>
+//        [control=<text>] [ref=<text>]
+//                  at most one per manifest, before the first site of its file: the plan the sites come from; id is
+//                  16 hex digits (derived by the generator from the facts and the rules, selection and budgets)
+//   site ... [skey=<16 hex>] [row=<key>[,<key>...]] [col=<n>] [nth=<k>] [field=<Type.field>]
+//                  skey: the site key (unique per manifest); row: the use-site keys of the relation rows the site serves
+//                  (16 hex digits each); col: the column of the call (needs callee=); nth: the k-th call of callee= in
+//                  func= in source order (needs callee=); field: with place=load only
+//   place=load     (version 4) right after each load of field= on line= in func= (needs field= and line=, no callee=,
+//                  phase=point): operand0 = the value loaded, operand1 = the address loaded from
+//   need <id> subject=<text> what=<text> state=planned|not-planned [sites=<site-id>[,...]] [reason=<text>] [note=<text>]
+//                  what a judgement axis needs and whether the plan records it: planned needs sites= (declared sites),
+//                  not-planned needs reason= (the reason vocabulary of the judgement rules)
+//   gap <id> subject=<text> what=<text> reason=<text> [rule=<text>]
+//                  a row element the plan cannot observe, with its reason
+//   spawn <site-id> wrapper=<function> start=arg<k> arg=arg<k> [out=arg<k>] [ref=<text>]
+//                  the call of an at-call site (callee=) is made through the runtime's creation wrapper with the same
+//                  arguments: start= the start routine, arg= the creation argument, out= the thread handle out parameter;
+//                  at most one per site
+//   identity <site-id> decoder=spawn-token
+//                  (version 4) the creation token the wrapper of the site's spawn statement records (declare the spawn
+//                  statement first; no slot)
 // A closing record (spawn-return, request-return) is paired with its opening record by the event's `link`
 // (the aseq of the opening record of the same call instance): the binding must give the opening identity
 // site's record as the link.  An owner-publish or owner-check record is paired with its app-request the same way:
@@ -111,11 +137,24 @@ struct Identity {
   int line = 0;
 };
 
+// The creation wrapper of a site (kzs-sites 4).  Argument positions are -1 where not given.
+struct Spawn {
+  std::string wrapper, ref;
+  int start_arg = -1, arg_arg = -1, out_arg = -1;
+  int line = 0;
+};
+
 struct Site {
   uint32_t id = 0;
   std::string label, op, phase, tu, func, callee, ref;
-  std::string place;  // kzs-sites 2: at-call | after-call | line-start | store, or empty
+  std::string place;  // kzs-sites 2: at-call | after-call | line-start | store; kzs-sites 4: load; or empty
   uint32_t src_line = 0;
+  // kzs-sites 4 (empty or 0 where not given)
+  std::string skey, field;
+  std::vector<std::string> rows;
+  uint32_t col = 0, nth = 0;
+  bool has_spawn = false;
+  Spawn spawn;
   std::vector<Value> values;
   bool has_control = false;
   std::string ctx, ctl_ref, ctl_note;
@@ -140,8 +179,25 @@ struct Equiv {
   int line = 0;
 };
 
+// The plan a manifest's sites come from (kzs-sites 4).
+struct Plan {
+  std::string id, facts, relrules, obsrules, semantics, select, budget, control, ref;
+  int line = 0;
+};
+
+// A need or gap statement (kzs-sites 4).  A gap has state "gap".
+struct Need {
+  uint32_t id = 0;
+  std::string subject, what, state, reason, note, rule;
+  std::vector<uint32_t> sites;
+  int line = 0;
+};
+
 struct Manifest {
-  uint32_t version = 0;  // the highest header version of the files read (1, 2 or 3)
+  uint32_t version = 0;  // the highest header version of the files read (1, 2, 3 or 4)
+  bool has_plan = false;
+  Plan plan;
+  std::vector<Need> needs, gaps;
   std::vector<Source> sources;
   std::vector<Module> modules;
   std::vector<Site> sites;
@@ -149,6 +205,8 @@ struct Manifest {
   std::vector<Equiv> equivs;
   std::map<uint32_t, size_t> site_index, bind_index, module_index;
   std::map<std::string, size_t> label_index;
+  std::map<std::string, size_t> skey_index;
+  std::map<uint32_t, size_t> need_index, gap_index;
 
   const Site* site(uint32_t id) const;
   const Site* site_by_label(const std::string& label) const;
@@ -161,7 +219,7 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
 
 // True for the reader names of an identity statement (of any version).
 bool identity_decoder_known(const std::string& name);
-// The first header version that has the reader (2 or 3; 0 if unknown).
+// The first header version that has the reader (2, 3 or 4; 0 if unknown).
 uint32_t identity_decoder_version(const std::string& name);
 
 // KZ_RT_CTX_* for a ctx= word; 0 if unknown.

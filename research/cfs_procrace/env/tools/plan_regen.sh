@@ -10,6 +10,9 @@
 # directory, and compares: the manifest and the sidecar byte for byte; the module table and the executable list byte for
 # byte after their first line, and the first line except the sidecar path it names (the path written there is the one
 # given on the command line).  rc 0 = identical, 1 = a difference (named), 2 = usage or a run failure.
+# (2026-11-16, manifest revision 4) A plan of `--manifest 4` names its value requests file (--requests-out): it is
+# written into the scratch dir under the same file name (the sidecar names it by that name) and compared byte for
+# byte; the original is never written.
 set -uo pipefail
 GEN=${1:?generator}; ARGS=${2:?args file}; SC=${3:-$(mktemp -d)}
 mkdir -p "$SC" || exit 2
@@ -31,6 +34,11 @@ while [ $i -lt ${#A[@]} ]; do
       ORIG[$a]=${A[$((i + 1))]}
       NEW+=("$a" "$SC/out${a//-/_}")
       i=$((i + 2)); continue ;;
+    --requests-out)
+      ORIG[$a]=${A[$((i + 1))]}
+      mkdir -p "$SC/req" || exit 2
+      NEW+=("$a" "$SC/req/$(basename "${A[$((i + 1))]}")")
+      i=$((i + 2)); continue ;;
   esac
   NEW+=("$a"); i=$((i + 1))
 done
@@ -41,6 +49,11 @@ for k in -o --sidecar; do
   if cmp -s "${ORIG[$k]}" "$SC/out${k//-/_}"; then echo "same      $k ${ORIG[$k]} sha256 $(sha256sum "${ORIG[$k]}" | cut -c1-64)"
   else echo "DIFFERENT $k ${ORIG[$k]}"; rc=1; fi
 done
+if [ -n "${ORIG[--requests-out]:-}" ]; then
+  r=${ORIG[--requests-out]}
+  if cmp -s "$r" "$SC/req/$(basename "$r")"; then echo "same      --requests-out $r sha256 $(sha256sum "$r" | cut -c1-64)"
+  else echo "DIFFERENT --requests-out $r"; rc=1; fi
+fi
 for k in --modules-out --exes-out; do
   o=${ORIG[$k]}; n=$SC/out${k//-/_}
   l1o=$(head -1 "$o" | sed 's/plan sidecar .* sha256=/plan sidecar <path> sha256=/'); l1n=$(head -1 "$n" | sed 's/plan sidecar .* sha256=/plan sidecar <path> sha256=/')

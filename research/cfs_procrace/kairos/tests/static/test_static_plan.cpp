@@ -25,7 +25,19 @@
 //     extract --object-access the key at the use is a validated string bounded by the array's extent (ARG_TYPES), without
 //     them a pointer; the same sites otherwise;
 //   - the text of the plan (manifest and sidecar, the sha256 values and the work path masked) against
-//     data/plangen_np.plan.golden (KZ_GOLDEN_UPDATE=1 rewrites it).
+//     data/plangen_np.plan.golden (KZ_GOLDEN_UPDATE=1 rewrites it);
+//   - plan rules revision 3 (--manifest 4, docs/plan_manifest.md sections 7-8) on planv4.c (facts of --object-access,
+//     --semantics with data/planv4_fixture/, --result-flow, --loop-defs): without --manifest the output equals that of
+//     --manifest 3; the kzs-sites 4 manifest parses with the host parser (plan header with the facts' artifact hash,
+//     unique site keys, call columns and ordinals, row keys, the load of the path C read, the spawn binding with the
+//     spawn-token reader, need and gap statements whose sites are declared); the sidecar's control budget line comes
+//     before the row lines and names the control rows (the probe-create row as a, the rows with creator sites as b,
+//     planned with the tier budget rows:0 too); a control budget of rows:1 cuts the rest (complete=no, need lines); the
+//     creators excluded by key constants are creator sites; the wait rule (the call result the retry tests, the break),
+//     the object rules (the subscript call of the read, the lock calls, the delete function and its retire call of the
+//     namespace data), the effect call with the argument the semantics data names; the value requests are written and
+//     named with their sha256; refusals (no control budget, a revision-3 option with --manifest 3, a namespace data
+//     line that is no statement); the text of the revision-3 plan against data/planv4_np.plan.golden.
 #include <sys/wait.h>
 
 #include <cstdio>
@@ -356,6 +368,184 @@ int main(int argc, char** argv) {
     for (const kzrt::Site& st : mon.sites) son.insert(st.func + "|" + st.place + "|" + st.callee + "|" + std::to_string(st.src_line));
     for (const kzrt::Site& st : moff.sites) soff.insert(st.func + "|" + st.place + "|" + st.callee + "|" + std::to_string(st.src_line));
     KZ_CHECK(son == soff);
+  }
+
+  // ---- plan rules revision 3 (manifest revision 4) on planv4.c
+  {
+    const fs::path vd = data / "planv4_fixture";
+    const std::string vext = q(tool) + " extract --no-profile --source " + q((fixtures / "planv4.c").string()) + " --root " + q(fixtures.string()) +
+                             " --targets-rule R-T1,R-T2 --object-access --semantics " + q((vd / "framework_semantics_fixture-plan.txt").string()) +
+                             " --result-flow --loop-defs -o " + q((work / "planv4.kz").string()) + " -- -std=c99 -pedantic";
+    KZ_CHECK_EQ(run(vext, &log), 0);
+    const fs::path vfw = data / "planv4_framework.txt";
+    const fs::path vns = vd / "framework_namespaces_fixture-plan.txt";
+    auto v4cmd = [&](const fs::path& out, const std::string& budget, const std::string& control) {
+      return q(tool) + " plan " + q((work / "planv4.kz").string()) + " --framework " + q(vfw.string()) + " --select observation-set --order method-priority --budget " + budget +
+             " --budget-reason 'the test budget' --manifest 4 --control-budget " + control + " --control-budget-reason 'the test control budget' --namespaces " +
+             q(vns.string()) + " --requests-out " + q((out / "plan.req").string()) + " -o " + q((out / "plan.kzs").string()) + " --sidecar " +
+             q((out / "plan.side").string()) + " --modules-out " + q((out / "plan.mod").string()) + " --exes-out " + q((out / "plan.exe").string());
+    };
+    // the default is revision 2's output: no --manifest equals --manifest 3
+    Plan d3, e3;
+    KZ_CHECK(generate(plan_cmd(tool, work / "planv4.kz", vfw, work / "v3a"), work / "v3a", &d3));
+    KZ_CHECK(generate(plan_cmd(tool, work / "planv4.kz", vfw, work / "v3b", " --manifest 3"), work / "v3b", &e3));
+    KZ_CHECK(d3.manifest == e3.manifest);
+    KZ_CHECK(d3.sidecar == e3.sidecar);
+    KZ_CHECK(has(d3.manifest, "\nkzs-sites 3\n") && !has(d3.manifest, " skey=") && !has(d3.sidecar, "control-budget"));
+    // two generations of revision 3, the same bytes
+    Plan v, w;
+    fs::create_directories(work / "v4a");
+    fs::create_directories(work / "v4b");
+    KZ_CHECK(generate(v4cmd(work / "v4a", "all", "all"), work / "v4a", &v));
+    KZ_CHECK(generate(v4cmd(work / "v4b", "all", "all"), work / "v4b", &w));
+    KZ_CHECK(v.manifest == w.manifest);
+    const std::string vreq = read(work / "v4a" / "plan.req");
+    KZ_CHECK(vreq == read(work / "v4b" / "plan.req"));
+    KZ_CHECK(has(v.sidecar, "\nrequests sha256=" + kz::to_hex(kz::sha256(vreq)) + " file=plan.req rows="));
+    KZ_CHECK(has(v.sidecar, "kz-plan-sidecar 2\n") && has(v.sidecar, "\nmanifest-revision 4 (kzs-sites 4)\n") && has(v.sidecar, "plan rules revision 3 (2026-11-16)"));
+    KZ_CHECK(vreq.compare(0, 19, "kz-plan-requests 1\n") == 0 && has(vreq, "\nend rows="));
+    KZ_CHECK(has(v.sidecar, "\ninput namespace-data sha256=" + kz::to_hex(kz::sha256(read(vns))) + " path="));
+    // the control budget line before the first row line
+    KZ_CHECK(v.sidecar.find("\ncontrol-budget value=all ") != std::string::npos && v.sidecar.find("\ncontrol-budget ") < v.sidecar.find("\nrow "));
+    KZ_CHECK(has(v.sidecar, " rows=3 (a 1, b 2) planned=3 cut=0 complete=yes "));
+    KZ_CHECK(std::regex_search(v.sidecar, std::regex(R"(\nrow [0-9a-f]{16} A3 [^\n]* control=a\+b control-state=planned )")));
+    KZ_CHECK(std::regex_search(v.sidecar, std::regex(R"(\nrow [0-9a-f]{16} A1 [^\n]* control=b control-state=planned )")));
+    // the manifest of revision 4 parses with the host parser
+    kzrt::Manifest mv;
+    std::string ve;
+    KZ_CHECK(kzrt::parse_manifest(v.manifest, "planv4.kzs", &mv, &ve));
+    if (!ve.empty()) std::fprintf(stderr, "%s\n", ve.c_str());
+    KZ_CHECK_EQ(mv.version, 4u);
+    KZ_CHECK(mv.has_plan && mv.plan.obsrules.find("plan rules revision 3") == 0 && mv.plan.control == "all" && mv.plan.budget == "all");
+    {
+      kz::Container fc;
+      KZ_CHECK(kz::Container::read_file((work / "planv4.kz").string(), &fc).ok());
+      KZ_CHECK(mv.plan.facts == kz::to_hex(fc.artifact_hash()));
+    }
+    KZ_CHECK(mv.skey_index.size() == mv.sites.size());
+    const kzrt::Site* vload = nullptr;
+    const kzrt::Site* vcreate = nullptr;
+    bool calls_have_col = true;
+    for (const kzrt::Site& st : mv.sites) {
+      if ((st.place == "at-call" || st.place == "after-call") && (st.col == 0 || st.nth == 0)) calls_have_col = false;
+      if (st.place == "load") vload = &st;
+      if (st.has_spawn) vcreate = &st;
+    }
+    KZ_CHECK(calls_have_col);
+    // path C: the load of the read field, the subscript call, the lock calls of the creator and the reader
+    KZ_CHECK(vload != nullptr && vload->field == "Task.owner" && vload->func == "own_owner" && vload->rows.size() == 1u);
+    auto vsite = [&](const std::string& func, const std::string& place, const std::string& callee) {
+      for (const kzrt::Site& st : mv.sites)
+        if (st.func == func && st.place == place && st.callee == callee) return &st;
+      return static_cast<const kzrt::Site*>(nullptr);
+    };
+    KZ_CHECK(vsite("own_owner", "after-call", "task_index") != nullptr && has(vsite("own_owner", "after-call", "task_index")->label, "object-index"));
+    KZ_CHECK(vsite("own_owner", "after-call", "pthread_mutex_lock") != nullptr && vsite("own_owner", "at-call", "pthread_mutex_unlock") != nullptr);
+    KZ_CHECK(vsite("start_app", "after-call", "pthread_mutex_lock") != nullptr && vsite("start_app", "at-call", "pthread_mutex_unlock") != nullptr);
+    // the spawn binding at the thread-creation call, with the spawn-token reader
+    KZ_CHECK(vcreate != nullptr && vcreate->callee == "pthread_create" && vcreate->spawn.wrapper == "kz_rt_posix_create" && vcreate->spawn.start_arg == 2 &&
+             vcreate->spawn.arg_arg == 3 && vcreate->spawn.out_arg == 0 && vcreate->has_identity && vcreate->identity.decoder == "spawn-token");
+    // the wait: the call result the retry tests and its break statement
+    const kzrt::Site* wcall = vsite("one_main", "after-call", "reg_find");
+    KZ_CHECK(wcall != nullptr && has(wcall->label, "wait-cond"));
+    bool wexit = false;
+    for (const kzrt::Site& st : mv.sites)
+      if (st.func == "one_main" && st.place == "line-start" && has(st.label, "wait-exit")) wexit = true;
+    KZ_CHECK(wexit);
+    // the delete function of the namespace data and its retire call
+    KZ_CHECK(vsite("reg_delete", "after-call", "reg_retire") != nullptr);
+    bool del_entry = false;
+    for (const kzrt::Site& st : mv.sites)
+      if (st.func == "reg_delete" && st.phase == "before" && has(st.label, "object-delete")) del_entry = true;
+    KZ_CHECK(del_entry);
+    KZ_CHECK(has(v.sidecar, "\nlifetime FIXTURE_REG delete reg_delete planv4.c:83 data "));
+    // the effect call with the argument the semantics data names (event-type, argument 1)
+    const kzrt::Site* ev = vsite("one_init", "at-call", "send_event");
+    KZ_CHECK(ev != nullptr && ev->value(0) != nullptr && ev->value(0)->role == "event-type" && ev->value(0)->from == "arg1");
+    // the creates excluded by key constants are creator sites of the rows (8.12 (ㅁ)): the create of "plum" is planned
+    bool plum = false;
+    for (const kzrt::Site& st : mv.sites)
+      if (st.func == "two_main" && st.callee == "reg_create" && st.src_line == 180 && has(st.label, "creator-call")) plum = true;
+    KZ_CHECK(plum);
+    // need and gap statements: a planned need names declared sites; the reasons are in the plan's table
+    KZ_CHECK(!mv.needs.empty() && !mv.gaps.empty());
+    for (const kzrt::Need& n : mv.needs) {
+      if (n.state == "planned") KZ_CHECK(!n.sites.empty());
+      else KZ_CHECK(!n.reason.empty());
+    }
+    bool need_wait = false, need_delete = false, need_lock = false;
+    for (const kzrt::Need& n : mv.needs) {
+      if (n.what.compare(0, 12, "wait-result ") == 0 && n.state == "planned") need_wait = true;
+      if (n.what == "object-delete" && n.state == "planned") need_delete = true;
+      if (n.what == "lock-result" && n.state == "planned") need_lock = true;
+    }
+    KZ_CHECK(need_wait && need_delete && need_lock);
+    // the value requests of the T? row: the result at the after-call and the effect's event type
+    KZ_CHECK(std::regex_search(vreq, std::regex(R"(\nrequest \d+ row=[0-9a-f]{16} id=A1 label=T\? value=result state=planned site=\d+ slot=ret )")));
+    KZ_CHECK(std::regex_search(vreq, std::regex(R"(\nrequest \d+ row=[0-9a-f]{16} id=A1 label=T\? value=effect state=planned site=\d+ slot=arg1 )")));
+    KZ_CHECK(std::regex_search(vreq, std::regex(R"(\nrequest \d+ row=[0-9a-f]{16} id=A1 label=T\? value=branch state=not-planned )")));
+    // the control rows are planned apart from the tier order: with the tier budget rows:0 the control rows are still planned
+    Plan z;
+    fs::create_directories(work / "v4z");
+    KZ_CHECK(generate(v4cmd(work / "v4z", "rows:0", "all"), work / "v4z", &z));
+    KZ_CHECK(has(z.sidecar, " planned=0 truncation=4 ") && has(z.sidecar, " rows=3 (a 1, b 2) planned=3 cut=0 complete=yes "));
+    KZ_CHECK(std::regex_search(z.sidecar, std::regex(R"(\nrow [0-9a-f]{16} A3 [^\n]* state=cut control=a\+b control-state=planned )")));
+    // a row the tier budget cuts but the control selection plans carries no budget need line
+    {
+      std::smatch m3;
+      KZ_CHECK(std::regex_search(z.sidecar, m3, std::regex(R"(\nrow ([0-9a-f]{16}) A3 )")));
+      KZ_CHECK(!has(z.sidecar, "\nneed row " + m3[1].str() + " observation not-planned"));
+    }
+    {
+      kzrt::Manifest mz;
+      std::string ze;
+      KZ_CHECK(kzrt::parse_manifest(z.manifest, "z.kzs", &mz, &ze));
+      bool use3 = false;
+      for (const kzrt::Site& st : mz.sites)
+        if (st.func == "three_main" && st.callee == "reg_find" && st.place == "after-call") use3 = true;
+      KZ_CHECK(use3);
+    }
+    // a control budget of rows:1 holds the probe-create row only
+    Plan c1;
+    fs::create_directories(work / "v4c");
+    KZ_CHECK(generate(v4cmd(work / "v4c", "rows:0", "rows:1"), work / "v4c", &c1));
+    KZ_CHECK(has(c1.sidecar, " rows=3 (a 1, b 2) planned=1 cut=2 complete=no "));
+    KZ_CHECK(std::regex_search(c1.sidecar, std::regex(R"(\nneed row [0-9a-f]{16} control not-planned reason=budget_not_run\(control row outside the control budget\))")));
+    // refusals: no output is written
+    {
+      const fs::path rf = work / "v4r";
+      fs::create_directories(rf);
+      std::string base = v4cmd(rf, "tier:D07", "all");
+      KZ_CHECK(run(std::regex_replace(base, std::regex(" --control-budget all --control-budget-reason 'the test control budget'"), ""), &log) == 2);
+      KZ_CHECK(has(log, "--control-budget"));
+      KZ_CHECK(run(plan_cmd(tool, work / "planv4.kz", vfw, rf, " --control-budget all"), &log) == 2);
+      KZ_CHECK(has(log, "need --manifest 4"));
+      KZ_CHECK(run(std::regex_replace(base, std::regex(" --control-budget all "), " --control-budget some "), &log) == 2);
+      write(rf / "bad_ns.txt", "semantics-data 1\nnot a statement\n");
+      KZ_CHECK(run(std::regex_replace(base, std::regex(" --namespaces \\S+"), " --namespaces " + q((rf / "bad_ns.txt").string())), &log) == 2);
+      KZ_CHECK(has(log, "is no statement of the namespace data"));
+      KZ_CHECK(!fs::exists(rf / "plan.kzs") && !fs::exists(rf / "plan.side") && !fs::exists(rf / "plan.req"));
+    }
+    // the text of the revision-3 plan
+    {
+      std::string got = mask(v.manifest + "\n# sidecar\n" + v.sidecar + "\n# requests\n" + vreq, (work / "").string());
+      // the data directory is named in the namespace data refs: masked as the work directory is
+      const std::string dd = (data / "").string();
+      for (size_t at = got.find(dd); at != std::string::npos; at = got.find(dd)) got.replace(at, dd.size(), "<data>/");
+      const fs::path golden = data / "planv4_np.plan.golden";
+      const char* upd = std::getenv("KZ_GOLDEN_UPDATE");
+      if (upd != nullptr && std::strcmp(upd, "1") == 0) {
+        write(golden, got);
+        std::printf("updated %s\n", golden.string().c_str());
+      } else {
+        const std::string want = read(golden);
+        if (want != got) {
+          write(work / "planv4_np.plan.actual", got);
+          kztest::fail(__FILE__, __LINE__, "the plan differs from " + golden.string() + " (actual in " + (work / "planv4_np.plan.actual").string() + ")");
+        }
+        ++kztest::state().checks;
+      }
+    }
   }
 
   // ---- the golden text

@@ -1,4 +1,4 @@
-// kz_rt_manifest.cpp -- see kz_rt_manifest.hpp ("kzs-sites 1", "kzs-sites 2" and "kzs-sites 3").
+// kz_rt_manifest.cpp -- see kz_rt_manifest.hpp ("kzs-sites 1", "kzs-sites 2", "kzs-sites 3" and "kzs-sites 4").
 #include "kz_rt_manifest.hpp"
 
 #include <cerrno>
@@ -100,6 +100,44 @@ std::string get(const std::map<std::string, std::string>& kv, const std::string&
 
 bool one_of(const std::string& v, const std::set<std::string>& s) { return s.count(v) != 0; }
 
+bool hex_digits(const std::string& v, size_t n) {
+  if (v.size() != n) return false;
+  for (char c : v)
+    if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) return false;
+  return true;
+}
+
+// "arg<k>" with k in 0..31 -> k, else -1
+int arg_position(const std::string& v) {
+  if (v.size() < 4 || v.compare(0, 3, "arg") != 0) return -1;
+  uint32_t k = 0;
+  if (!parse_u32(v.substr(3), 0, 31, &k)) return -1;
+  return static_cast<int>(k);
+}
+
+// a C identifier
+bool identifier(const std::string& v) {
+  if (v.empty() || (v[0] >= '0' && v[0] <= '9')) return false;
+  for (char c : v)
+    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')) return false;
+  return true;
+}
+
+// "1,2,3" -> ids (each 1..max); false on an empty list or a bad id
+bool id_list(const std::string& v, uint32_t max, std::vector<uint32_t>* out) {
+  out->clear();
+  size_t a = 0;
+  while (a <= v.size()) {
+    size_t b = v.find(',', a);
+    if (b == std::string::npos) b = v.size();
+    uint32_t x = 0;
+    if (!parse_u32(v.substr(a, b - a), 1, max, &x)) return false;
+    out->push_back(x);
+    a = b + 1;
+  }
+  return !out->empty();
+}
+
 }  // namespace
 
 const Value* Site::value(uint32_t slot) const {
@@ -134,6 +172,7 @@ const Module* Manifest::module(uint32_t id) const {
 uint32_t identity_decoder_version(const std::string& name) {
   if (one_of(name, {"spawn-create", "spawn-return", "spawn-id", "thread-entry", "owner-request", "child-request", "request-return"})) return 2;
   if (one_of(name, {"app-request", "owner-publish", "owner-check"})) return 3;
+  if (name == "spawn-token") return 4;
   return 0;
 }
 
@@ -165,6 +204,7 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
   static const uint32_t kMaxId = 2147483647u;
   int ln = 0;
   bool header = false;
+  bool sites_in_file = false;  // a site statement of this file was read (kzs-sites 4: the plan statement comes before)
   uint32_t version = 0;
   std::vector<std::string> t;
   auto fail = [&](const std::string& msg) {
@@ -185,10 +225,10 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
       continue;
     }
     if (!header) {
-      if (t.size() != 2 || t[0] != "kzs-sites" || (t[1] != "1" && t[1] != "2" && t[1] != "3"))
-        return fail("the first statement must be 'kzs-sites 1', 'kzs-sites 2' or 'kzs-sites 3'");
+      if (t.size() != 2 || t[0] != "kzs-sites" || (t[1] != "1" && t[1] != "2" && t[1] != "3" && t[1] != "4"))
+        return fail("the first statement must be 'kzs-sites 1', 'kzs-sites 2', 'kzs-sites 3' or 'kzs-sites 4'");
       header = true;
-      version = t[1] == "3" ? 3u : t[1] == "2" ? 2u : 1u;
+      version = t[1] == "4" ? 4u : t[1] == "3" ? 3u : t[1] == "2" ? 2u : 1u;
       if (version > m->version) m->version = version;
       continue;
     }
@@ -223,7 +263,10 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
     } else if (kw == "site") {
       Site s;
       if (t.size() < 2 || !parse_u32(t[1], 1, kMaxId, &s.id)) return fail("site <id 1..2147483647>");
-      if (!attrs(t, 2, &kv, &bad) || !only(kv, {"label", "op", "phase", "tu", "func", "callee", "line", "place", "ref"}, &bad)) return fail(bad);
+      if (!attrs(t, 2, &kv, &bad) || !only(kv, {"label", "op", "phase", "tu", "func", "callee", "line", "place", "ref", "skey", "row", "col", "nth", "field"}, &bad))
+        return fail(bad);
+      for (const char* v4 : {"skey", "row", "col", "nth", "field"})
+        if (kv.count(v4) != 0 && version < 4) return fail(std::string(v4) + "= needs 'kzs-sites 4'");
       s.label = get(kv, "label");
       s.op = get(kv, "op");
       s.phase = get(kv, "phase");
@@ -238,19 +281,57 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
         // version 2: the statement a point or effect site is bound to (event_semantics.md section 3)
         s.place = get(kv, "place");
         if (version < 2) return fail("place= needs 'kzs-sites 2'");
-        if (!one_of(s.place, {"at-call", "after-call", "line-start", "store"})) return fail("place is at-call|after-call|line-start|store");
+        if (s.place == "load" && version < 4) return fail("place=load needs 'kzs-sites 4'");
+        if (!one_of(s.place, {"at-call", "after-call", "line-start", "store", "load"}))
+          return fail(version >= 4 ? "place is at-call|after-call|line-start|store|load" : "place is at-call|after-call|line-start|store");
         if (!one_of(s.phase, {"point", "effect", "exit"})) return fail("place= needs phase=point|effect|exit");
         const bool at_call = s.place == "at-call" || s.place == "after-call";
         if (at_call && s.callee.empty()) return fail("place=" + s.place + " needs callee=");
         if (!at_call && !s.callee.empty()) return fail("place=" + s.place + " takes no callee=");
         if (!at_call && s.src_line == 0) return fail("place=" + s.place + " needs line=");
+        if (s.place == "load" && s.phase != "point") return fail("place=load needs phase=point");
+        if (s.place == "load" && kv.count("field") == 0) return fail("place=load needs field=<Type.field>");
+      }
+      if (version >= 4) {
+        if (kv.count("field") != 0) {
+          s.field = get(kv, "field");
+          const size_t dot = s.field.find('.');
+          if (s.place != "load") return fail("field= is only for place=load");
+          if (dot == std::string::npos || dot == 0 || dot + 1 == s.field.size()) return fail("field=<Type.field>");
+        }
+        if (kv.count("skey") != 0) {
+          s.skey = get(kv, "skey");
+          if (!hex_digits(s.skey, 16)) return fail("skey=<16 hex digits>");
+          if (m->skey_index.count(s.skey) != 0) return fail("site key " + s.skey + " declared twice");
+        }
+        if (kv.count("row") != 0) {
+          const std::string rv = get(kv, "row");
+          size_t a = 0;
+          while (a <= rv.size()) {
+            size_t b = rv.find(',', a);
+            if (b == std::string::npos) b = rv.size();
+            const std::string k = rv.substr(a, b - a);
+            if (!hex_digits(k, 16)) return fail("row=<16 hex digits>[,<16 hex digits>...]");
+            s.rows.push_back(k);
+            a = b + 1;
+          }
+        }
+        for (const char* pk : {"col", "nth"}) {
+          if (kv.count(pk) == 0) continue;
+          uint32_t x = 0;
+          if (!parse_u32(get(kv, pk), 1, kMaxId, &x)) return fail(std::string(pk) + "=<n>");
+          if (s.callee.empty()) return fail(std::string(pk) + "= needs callee=");
+          (std::string(pk) == "col" ? s.col : s.nth) = x;
+        }
       }
       if (m->site_index.count(s.id) != 0) return fail("site id " + t[1] + " declared twice");
       if (m->label_index.count(s.label) != 0) return fail("site label '" + s.label + "' declared twice");
       s.line = ln;
       m->site_index[s.id] = m->sites.size();
       m->label_index[s.label] = m->sites.size();
+      if (!s.skey.empty()) m->skey_index[s.skey] = m->sites.size();
       m->sites.push_back(s);
+      sites_in_file = true;
     } else if (kw == "value") {
       uint32_t sid = 0;
       Value v;
@@ -349,9 +430,22 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
       idn.decoder = get(kv, "decoder");
       idn.ref = get(kv, "ref");
       if (!identity_decoder_known(idn.decoder))
-        return fail("decoder is spawn-create|spawn-return|spawn-id|thread-entry|owner-request|child-request|request-return"
-                    "|app-request|owner-publish|owner-check");
-      if (identity_decoder_version(idn.decoder) > version) return fail("decoder=" + idn.decoder + " needs 'kzs-sites 3'");
+        return fail(version >= 4 ? "decoder is spawn-create|spawn-return|spawn-id|thread-entry|owner-request|child-request|request-return"
+                                   "|app-request|owner-publish|owner-check|spawn-token"
+                                 : "decoder is spawn-create|spawn-return|spawn-id|thread-entry|owner-request|child-request|request-return"
+                                   "|app-request|owner-publish|owner-check");
+      if (identity_decoder_version(idn.decoder) > version)
+        return fail("decoder=" + idn.decoder + " needs 'kzs-sites " + std::to_string(identity_decoder_version(idn.decoder)) + "'");
+      if (idn.decoder == "spawn-token") {
+        // the token the creation wrapper of the site's spawn statement records: no slot
+        if (!s.has_spawn) return fail("decoder=spawn-token needs the site's spawn statement first");
+        if (kv.count("id") != 0 || kv.count("owner") != 0 || kv.count("status") != 0 || kv.count("ok") != 0) return fail("decoder=spawn-token takes no slot");
+        idn.line = ln;
+        s.identity = idn;
+        s.has_identity = true;
+        if (nl == text.size()) break;
+        continue;
+      }
       const bool opening = one_of(idn.decoder, {"spawn-create", "thread-entry", "owner-request", "child-request", "app-request"});
       const bool closing = one_of(idn.decoder, {"spawn-return", "request-return"});
       const bool published = one_of(idn.decoder, {"owner-publish", "owner-check"});
@@ -419,6 +513,89 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
       idn.line = ln;
       s.identity = idn;
       s.has_identity = true;
+    } else if (kw == "plan") {
+      if (version < 4) return fail("plan needs 'kzs-sites 4'");
+      if (m->has_plan) return fail("plan declared twice (one per manifest)");
+      if (sites_in_file) return fail("plan comes before the first site of its file");
+      Plan p;
+      if (t.size() < 2 || !hex_digits(t[1], 16)) return fail("plan <id: 16 hex digits> facts=... ");
+      if (!attrs(t, 2, &kv, &bad) || !only(kv, {"facts", "relrules", "obsrules", "semantics", "select", "budget", "control", "ref"}, &bad)) return fail(bad);
+      for (const char* need : {"facts", "relrules", "obsrules", "semantics", "select", "budget"})
+        if (get(kv, need).empty()) return fail(std::string("plan needs ") + need + "=");
+      if (!hex_digits(get(kv, "facts"), 64)) return fail("facts=<sha256: 64 hex digits>");
+      p.id = t[1];
+      p.facts = get(kv, "facts");
+      p.relrules = get(kv, "relrules");
+      p.obsrules = get(kv, "obsrules");
+      p.semantics = get(kv, "semantics");
+      p.select = get(kv, "select");
+      p.budget = get(kv, "budget");
+      p.control = get(kv, "control");
+      p.ref = get(kv, "ref");
+      p.line = ln;
+      m->plan = p;
+      m->has_plan = true;
+    } else if (kw == "need" || kw == "gap") {
+      if (version < 4) return fail(kw + " needs 'kzs-sites 4'");
+      Need n;
+      if (t.size() < 2 || !parse_u32(t[1], 1, kMaxId, &n.id)) return fail(kw + " <id 1..2147483647> ...");
+      const bool is_need = kw == "need";
+      if (!attrs(t, 2, &kv, &bad) ||
+          !only(kv, is_need ? std::set<std::string>{"subject", "what", "state", "sites", "reason", "note"} : std::set<std::string>{"subject", "what", "reason", "rule"}, &bad))
+        return fail(bad);
+      n.subject = get(kv, "subject");
+      n.what = get(kv, "what");
+      n.reason = get(kv, "reason");
+      if (n.subject.empty() || n.what.empty()) return fail(kw + " needs subject= and what=");
+      if (is_need) {
+        n.state = get(kv, "state");
+        n.note = get(kv, "note");
+        if (!one_of(n.state, {"planned", "not-planned"})) return fail("state is planned|not-planned");
+        if (kv.count("sites") != 0) {
+          if (!id_list(get(kv, "sites"), kMaxId, &n.sites)) return fail("sites=<site id>[,<site id>...]");
+          for (uint32_t sid : n.sites)
+            if (m->site(sid) == nullptr) return fail("need names an undeclared site " + std::to_string(sid));
+        }
+        if (n.state == "planned" && n.sites.empty()) return fail("state=planned needs sites=");
+        if (n.state == "not-planned" && n.reason.empty()) return fail("state=not-planned needs reason=");
+        if (m->need_index.count(n.id) != 0) return fail("need id " + t[1] + " declared twice");
+        n.line = ln;
+        m->need_index[n.id] = m->needs.size();
+        m->needs.push_back(n);
+      } else {
+        n.state = "gap";
+        n.rule = get(kv, "rule");
+        if (n.reason.empty()) return fail("gap needs reason=");
+        if (m->gap_index.count(n.id) != 0) return fail("gap id " + t[1] + " declared twice");
+        n.line = ln;
+        m->gap_index[n.id] = m->gaps.size();
+        m->gaps.push_back(n);
+      }
+    } else if (kw == "spawn") {
+      if (version < 4) return fail("spawn needs 'kzs-sites 4'");
+      uint32_t sid = 0;
+      if (t.size() < 2 || !parse_u32(t[1], 1, kMaxId, &sid)) return fail("spawn <site-id> wrapper=...");
+      auto it = m->site_index.find(sid);
+      if (it == m->site_index.end()) return fail("spawn of an undeclared site " + t[1]);
+      Site& s = m->sites[it->second];
+      if (!attrs(t, 2, &kv, &bad) || !only(kv, {"wrapper", "start", "arg", "out", "ref"}, &bad)) return fail(bad);
+      if (s.has_spawn) return fail("spawn of site " + t[1] + " declared twice");
+      if (s.place != "at-call" || s.callee.empty()) return fail("spawn needs a site of place=at-call with callee=");
+      Spawn sp;
+      sp.wrapper = get(kv, "wrapper");
+      sp.ref = get(kv, "ref");
+      if (!identifier(sp.wrapper)) return fail("spawn needs wrapper=<function name>");
+      sp.start_arg = arg_position(get(kv, "start"));
+      sp.arg_arg = arg_position(get(kv, "arg"));
+      if (sp.start_arg < 0 || sp.arg_arg < 0) return fail("spawn needs start=arg<k> and arg=arg<k>");
+      if (kv.count("out") != 0) {
+        sp.out_arg = arg_position(get(kv, "out"));
+        if (sp.out_arg < 0) return fail("out=arg<k>");
+      }
+      if (sp.start_arg == sp.arg_arg || sp.start_arg == sp.out_arg || sp.arg_arg == sp.out_arg) return fail("spawn: start=, arg= and out= name different arguments");
+      sp.line = ln;
+      s.spawn = sp;
+      s.has_spawn = true;
     } else {
       return fail("unknown statement '" + kw + "'");
     }

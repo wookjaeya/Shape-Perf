@@ -147,3 +147,61 @@ The rule.
   `control-state=planned|cut`; its tier state is unchanged (a row may be planned by both).
 - The rule reads the row lines only.  Expectations per control row are [I] until a run, and are committed before the
   boot whose plan holds them, not here.
+
+## 8. Plan rules revision 3 (manifest revision 4, `--manifest 4`, 2026-11-16)
+
+```
+kz-static plan <facts> ... --manifest 4 --control-budget all|rows:<n> --control-budget-reason TEXT --requests-out REQUESTS
+               [--namespaces F]...
+```
+
+Without `--manifest 4` (or with `--manifest 3`) the output is that of revision 2, byte for byte apart from the generator
+identity; the revision-3 options are refused there.  With it the same selection, priority, budget and observation rules
+of sections 2-3 apply, and:
+
+- **Manifest `kzs-sites 4`** (`runtime/tools/manifest/kz_rt_manifest.hpp`; versions 1-3 parse as before): a `plan`
+  statement (id = the first 16 hex digits of the sha256 of the facts artifact hash, the rule revisions, selection,
+  order, budgets and the facts' semantics join; `facts=` the facts artifact hash); per site `skey=` (the first 16 hex
+  digits of the sha256 of the site key), `row=` (the use-site keys of the rows the site serves), and for a call site
+  `col=` (the call's column) and `nth=` (its ordinal among the calls of the callee in the function, in source order),
+  so that two calls of one callee on one line are two sites, not a gap; `place=load field=Type.field` for a read;
+  `need` and `gap` statements (the sidecar's need and gap lines; a planned need names its sites); at the at-call of each
+  thread-creation call the actor rule plans, a `spawn` statement (`wrapper=kz_rt_posix_create`, the start routine,
+  creation argument and thread handle positions of the P0 entry) and `identity … decoder=spawn-token`.  The wrapper is
+  the runtime's creation wrapper, which the runtime step after this one provides [I]; kzgcc 0.3 does not read
+  `kzs-sites 4` (the plugin of the step after it does).
+- **Control selection** (section 7) with its `control-budget` line, `control=`/`control-state=` on the row lines and
+  `need row <key> control not-planned reason=budget_not_run(control row outside the control budget)`.
+- **Creator sites** of every planned path A row: the create calls of its `creator:` lines and of its
+  `not a pair: key constants differ` lines, and in a probe-create row of its `not a pair: probe-create` lines.
+- **Wait rule** (`wait-cond`, `wait-exit`): for every poll or count-bounded loop (FACT_LOOPS) at or before a site of the
+  row in the site's function: when FACT_LOOPS has a predicate form or LOOP_DEFS recognises one, the after-call of the
+  calls whose results the condition reads (FACT_LOOPS exit tree, the in-body and in-condition definitions of LOOP_DEFS)
+  and the loads of the fields it reads (the exit tree outside call arguments, AWAIT_L1's relevant loads), and the
+  `line-start` of each break, return or goto exit; a condition exit is no statement
+  (`gap … record_insufficient(the exit is no statement)`).  Otherwise
+  `need … wait-result <loop> not-planned reason=plan_missing(wait predicate not recognised)`.
+- **Object rules**: path C: `read-load` (the load of the read field at the read), `object-index` (the after-call of each
+  call whose result is a subscript of the read's access path: the OBJECT_ACCESS index root of the read, else its READS
+  index root), `lock-call` (the after-call of each acquisition or wait and the at-call of each release of a lock
+  operation of LOCK_OPS called in the creator's or the reader's function, with its first argument).  Path A:
+  `object-delete` and `object-retire` from the namespace data given (`--namespaces`, `semantics/framework_namespaces_*.txt`):
+  an entry (a `kind` or `table`) whose lookup, create, copy or create-check function is the callee of the row's use or
+  of one of its creator calls, and whose operation applies to the build (the facts hold the file of its `def=` with the
+  data's sha256 and define the function on that line); for each `delete` of the entry, the entry of the function with
+  its parameters and the after-call of the calls on the line of its `at=` (the retire call); for each `clear`, the
+  store at its `at=` line.  No entry: `need … object-delete not-planned reason=plan_missing(no namespace data entry)`.
+  The sidecar's `lifetime` lines list each operation and whether it applies.  No API or kind name is in the generator:
+  they come from the data file, which the lint keeps free of case identifiers.
+- **Effect calls** (`effect-call`): for the use of a planned path A or B row, the at-call of each event send, system log,
+  application exit or terminal effect of RESULT_EFFECT that has a call, with the argument a SEMANTICS arg-role row
+  names for its callee (the role's first word).  A path A row's `event-send` need names those sites.
+- **Value requests** (`--requests-out`, `kz-plan-requests 1`; the sidecar line `requests sha256=… file=… rows=…
+  requests=… planned=…` names it): for a planned path A or B row whose handling label is T?, J? or F, or whose `absence:`
+  line has an open effect: the result and out values at the use's after-call, each effect call with its role argument
+  (complete or open with the reason), and the branch taken (`not-planned`: a branch is no site kind).
+- The sidecar header is `kz-plan-sidecar 2`, with `manifest-revision 4`, `plan-id`, the `control`, `control-budget`,
+  `requests` and `namespace-data` lines, and `spawn` lines.  It names no output path (only the requests file's name).
+
+Not planned in revision 3, each named: the lock calls of path A and B rows
+(`plan_missing(no rule of this revision)`), the branch taken, an effect with no call.

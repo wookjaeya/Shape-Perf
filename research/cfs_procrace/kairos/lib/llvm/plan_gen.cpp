@@ -17,6 +17,11 @@
 namespace kzs {
 
 const char* plan_rules_revision() { return "plan rules revision 2 (2026-11-16)"; }
+const char* plan_rules_v4_revision() {
+  return "plan rules revision 3 (2026-11-16): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules";
+}
+const char* plan_control_revision() { return "control selection rule revision 1 (2026-11-16)"; }
+const char* plan_requests_revision() { return "value requests rule revision 1 (2026-11-16)"; }
 const char* plan_priority_revision() {
   return "method priority port revision 1 (2026-11-16): label, order class, reach mark and disposition of the method document's S1 rule over the row text";
 }
@@ -32,6 +37,12 @@ const std::vector<RelReason>& plan_reasons() {
       {"link_unlinked", "no creation-argument channel", "a thread-creation call whose creation argument is one constant for several roots: the argument does not tie a thread to its creation"},
       {"actor_not_extracted", "no creation site resolved", "an actor root whose SPAWN_WRAP chain reaches no thread-creation primitive call"},
       {"truncated", "source path not unique", "a site whose translation unit path suffix names more than one unit of the basis"},
+      // plan rules revision 3 (manifest revision 4)
+      {"budget_not_run", "control row outside the control budget", "a row of the path A control selection that the control budget cuts: it is listed by key, with no site"},
+      {"plan_missing", "wait predicate not recognised", "a wait the row's sites follow whose predicate neither FACT_LOOPS nor LOOP_DEFS recognises: its condition reads are not planned"},
+      {"plan_missing", "no namespace data entry", "a planned path A row whose lookup and creators match no applying entry of the namespace data given: the deletes and retires of its object kind are not planned"},
+      {"plan_missing", "no rule of this revision", "a need of a path the rules of this revision do not plan (the lock calls of path A and B rows, a branch taken, an effect without a call)"},
+      {"record_insufficient", "the exit is no statement", "a condition exit of a wait loop: the point after the loop is not in the facts, the exit taken is recorded by its condition reads only"},
   };
   return table;
 }
@@ -43,7 +54,7 @@ constexpr uint32_t kSlots = 4;      // values per event bound by the plugin (kzg
 constexpr uint32_t kStrMax = 64;    // KZ_RT_STR_MAX (runtime/include/kz_rt.h:82)
 
 std::string reason(size_t i) { return reason_text(plan_reasons()[i]); }
-enum R { kBudget, kNotPlanned, kKeyText, kTwoCalls, kSlotsFull, kNoPos, kNoChannel, kNoCreation, kPathNotUnique };
+enum R { kBudget, kNotPlanned, kKeyText, kTwoCalls, kSlotsFull, kNoPos, kNoChannel, kNoCreation, kPathNotUnique, kControlCut, kWaitPred, kNoNamespace, kNoRule, kExitNoStmt };
 
 std::string quoted(const std::string& s) {
   std::string t;
@@ -249,14 +260,49 @@ struct Site {
   std::set<std::string> rules, refs;
   std::vector<Val> vals;
   uint32_t id = 0;
-  std::string key() const { return tu + "|" + func + "|" + phase + "|" + place + "|" + callee + "|" + std::to_string(line); }
+  // manifest revision 4: the column and ordinal of a call, the field of a load (0 / empty: none; revision 2 sets none)
+  uint32_t col = 0, nth = 0;
+  std::string field;
+  std::string key() const {
+    std::string k = tu + "|" + func + "|" + phase + "|" + place + "|" + callee + "|" + std::to_string(line);
+    if (col != 0 || nth != 0) k += "|col=" + std::to_string(col) + "|nth=" + std::to_string(nth);
+    if (!field.empty()) k += "|field=" + field;
+    return k;
+  }
 };
 
 struct Need {
   std::string subject, what, state, why, note;
+  std::set<std::string> sites;  // manifest revision 4: the site keys of a planned need
+};
+
+// A value request (manifest revision 4): what value would decide a row the method cannot label from the facts.
+struct Request {
+  std::string row, id, label, value, what, state, site, slot, why, note;
 };
 
 class Gen : public RelFacts {
+ public:
+ private:
+  struct NsOp {
+    std::string what, fn, def_file, at_file;
+    uint32_t def_line = 0, at_line = 0;
+    int line = 0;
+  };
+  struct NsEntry {
+    std::string name;
+    std::vector<NsOp> ops;
+    int line = 0;
+  };
+  struct NsFile {
+    std::string path;
+    std::map<std::string, std::string> sha;
+    std::vector<NsEntry> entries;
+  };
+  struct SpawnBind {
+    uint32_t start = 0, arg = 0, out = KZ_NONE32;
+    std::string ref;
+  };
  public:
   Gen(const kz::Container& facts, const kz::Container* basis, const std::string& framework, const PlanOptions& o)
       : RelFacts(facts), basis_c_(basis), framework_(framework), o_(o) {}
@@ -275,6 +321,17 @@ class Gen : public RelFacts {
     }
     if (!(s = read_framework()).ok()) return s;
     if (!(s = read_basis()).ok()) return s;
+    if (v4_) {
+      if (!(s = read_namespaces()).ok()) return s;
+      if (!(s = c_.read_section(KZ_SEC_OBJECT_ACCESS, &objacc_)).ok()) return s;
+      for (const kz_fact_sem& m : sem_)
+        if (m.column == KZ_SEM_COLUMN_ARG_ROLE && m.pos != kN) {
+          // the role is the item's first word (the item may name how it was read after it)
+          const std::string item = str(m.item);
+          const std::string role = item.substr(0, item.find(' '));
+          if (!role.empty()) arg_roles_[str(m.api)].emplace(m.pos, role);
+        }
+    }
     for (size_t i = 0; i < calls_.size(); ++i) call_at_[{str(calls_[i].file), calls_[i].line, calls_[i].col}] = static_cast<uint32_t>(i);
     if (!(s = relations_rows(c_, RelationsOptions{}, &rep_)).ok()) return s;
     // the priority order and the budget
@@ -295,9 +352,20 @@ class Gen : public RelFacts {
       position_[order[pos]] = static_cast<uint32_t>(pos + 1);
       if (pos < limit) planned_.push_back(order[pos]);
     }
-    for (size_t i : planned_) plan_row(i);
+    if (!v4_) {
+      for (size_t i : planned_) plan_row(i);
+    } else {
+      select_controls();
+      std::set<size_t> done;
+      for (size_t i : planned_)
+        if (done.insert(i).second) plan_row(i);
+      for (size_t i : control_planned_)
+        if (done.insert(i).second) plan_row(i);
+      rows_planned_ = done;
+    }
     plan_actors();
     plan_stop_events();
+    if (v4_) plan_object_lifetimes();
     finish_sites();
     write(out);
     return kz::Status::success();
@@ -316,6 +384,20 @@ class Gen : public RelFacts {
       budget_kind_ = "rows", budget_rows_ = static_cast<uint32_t>(std::strtoul(b.c_str() + 5, nullptr, 10));
     else return kz::Status::error(kz::Err::Invalid, "--budget is tier:D07, tier:directed, all or rows:<n>");
     if (o_.budget_reason.empty()) return kz::Status::error(kz::Err::Invalid, "--budget-reason is required (a budget is recorded with its reason)");
+    if (o_.manifest_revision != 3 && o_.manifest_revision != 4) return kz::Status::error(kz::Err::Invalid, "--manifest is 3 or 4");
+    v4_ = o_.manifest_revision == 4;
+    if (!v4_) {
+      if (!o_.control_budget.empty() || !o_.control_budget_reason.empty() || !o_.namespace_data.empty() || !o_.requests_path.empty())
+        return kz::Status::error(kz::Err::Invalid, "--control-budget, --control-budget-reason, --namespaces and --requests-out need --manifest 4");
+      return kz::Status::success();
+    }
+    const std::string& cb = o_.control_budget;
+    if (cb == "all") control_rows_ = UINT32_MAX;
+    else if (starts(cb, "rows:") && cb.size() > 5 && cb.find_first_not_of("0123456789", 5) == std::string::npos)
+      control_rows_ = static_cast<uint32_t>(std::strtoul(cb.c_str() + 5, nullptr, 10));
+    else return kz::Status::error(kz::Err::Invalid, "--control-budget is all or rows:<n> (with --manifest 4)");
+    if (o_.control_budget_reason.empty()) return kz::Status::error(kz::Err::Invalid, "--control-budget-reason is required (a budget is recorded with its reason)");
+    if (o_.requests_path.empty()) return kz::Status::error(kz::Err::Invalid, "--requests-out is required with --manifest 4");
     return kz::Status::success();
   }
 
@@ -343,6 +425,62 @@ class Gen : public RelFacts {
       e.version = m[9].str();
       e.line = n;
       fw_.push_back(e);
+    }
+    return kz::Status::success();
+  }
+
+  // The namespace data files (semantics/framework_namespaces_*.txt, written by the research scan env/tools/semantics_scan.py):
+  // the statements below and comments; nothing else (the file names no other file).  Of an entry (a `kind` of the
+  // object-id generation or a `table` of the table-copy generation) the generator keeps the functions that look up or
+  // create (lookup, create, copy, create-check) and those that delete or retire (delete, clear) with their positions.
+  kz::Status read_namespaces() {
+    static const std::regex re_file(R"(^file (\S+) sha256=([0-9a-f]{64})$)");
+    static const std::regex re_op(R"(^  (lookup|create|copy|create-check|delete|clear) (\S+) def=(\S+):(\d+)(?: at=(\S+):(\d+))?(?: public=\S+)?$)");
+    static const std::set<std::string> other = {"semantics-data", "layer", "component", "rule", "generation", "compare", "chain-status", "end"};
+    static const std::set<std::string> other_sub = {"stored-name", "extent", "other-store", "compare"};
+    for (size_t fi = 0; fi < o_.namespace_data.size(); ++fi) {
+      const auto& [path, text] = o_.namespace_data[fi];
+      std::istringstream in(text);
+      std::string l;
+      int n = 0;
+      NsFile f;
+      f.path = path;
+      NsEntry* cur = nullptr;
+      while (std::getline(in, l)) {
+        ++n;
+        if (l.empty() || l[0] == '#') continue;
+        std::smatch m;
+        if (std::regex_match(l, m, re_file)) {
+          f.sha[m[1].str()] = m[2].str();
+          continue;
+        }
+        const std::string w = l.substr(0, l.find(' '));
+        if (w == "kind" || w == "table") {
+          f.entries.push_back(NsEntry{});
+          cur = &f.entries.back();
+          cur->name = l.substr(w.size() + 1);
+          cur->name = cur->name.substr(0, cur->name.find(' '));
+          cur->line = n;
+          continue;
+        }
+        if (std::regex_match(l, m, re_op)) {
+          if (cur == nullptr) return kz::Status::error(kz::Err::Invalid, "namespace data " + path + " line " + std::to_string(n) + ": an operation before its kind or table");
+          NsOp op;
+          op.what = m[1].str();
+          op.fn = m[2].str();
+          op.def_file = m[3].str();
+          op.def_line = static_cast<uint32_t>(std::strtoul(m[4].str().c_str(), nullptr, 10));
+          op.at_file = m[5].str();
+          op.at_line = m[6].matched ? static_cast<uint32_t>(std::strtoul(m[6].str().c_str(), nullptr, 10)) : 0;
+          op.line = n;
+          cur->ops.push_back(op);
+          continue;
+        }
+        const std::string sub = l.size() > 2 && l[0] == ' ' && l[1] == ' ' ? l.substr(2, l.find(' ', 2) - 2) : std::string();
+        if (other.count(w) != 0 || (!sub.empty() && other_sub.count(sub) != 0)) continue;
+        return kz::Status::error(kz::Err::Invalid, "namespace data " + path + " line " + std::to_string(n) + " is no statement of the namespace data; the generator reads no other file");
+      }
+      ns_.push_back(f);
     }
     return kz::Status::success();
   }
@@ -537,12 +675,22 @@ class Gen : public RelFacts {
   Site* call_site(uint32_t ci, bool after, const std::string& rule, const std::string& ref) {
     const kz_fact_call& c = calls_[ci];
     if (c.kind == KZ_CALL_KIND_INDIRECT || str(c.callee).empty()) return nullptr;
-    for (uint32_t o : calls_of_.count(c.caller_fn) != 0 ? calls_of_.at(c.caller_fn) : std::vector<uint32_t>{})
-      if (o != ci && calls_[o].line == c.line && str(calls_[o].callee) == str(c.callee)) {
+    // revision 2 binds by line and reports a second call of the callee on the line; revision 3 names the call by its
+    // column and its ordinal among the calls of the callee in the function (source order)
+    uint32_t nth = 0;
+    for (uint32_t o : calls_of_.count(c.caller_fn) != 0 ? calls_of_.at(c.caller_fn) : std::vector<uint32_t>{}) {
+      if (str(calls_[o].callee) != str(c.callee)) continue;
+      if (v4_ && (calls_[o].line < c.line || (calls_[o].line == c.line && calls_[o].col <= c.col))) ++nth;
+      if (!v4_ && o != ci && calls_[o].line == c.line) {
         gap(call_pos(ci), (after ? "after-call " : "at-call ") + str(c.callee) + " in " + plain(c.caller_fn), reason(kTwoCalls), rule);
         return nullptr;
       }
+    }
     Site s;
+    if (v4_) {
+      s.col = c.col;
+      s.nth = nth;
+    }
     s.tu = tu_text(file_path(c.tu));
     if (!tu_unique(s.tu)) {
       gap(call_pos(ci), "unit " + s.tu, reason(kPathNotUnique), rule);
@@ -560,9 +708,9 @@ class Gen : public RelFacts {
     return p;
   }
   // at-call with the arguments (those asked for first, then the others in order, up to the slots)
-  void at_call(uint32_t ci, const std::string& rule, const std::string& ref, const std::vector<Val>& asked = {}) {
+  Site* at_call(uint32_t ci, const std::string& rule, const std::string& ref, const std::vector<Val>& asked = {}) {
     Site* s = call_site(ci, false, rule, ref);
-    if (s == nullptr) return;
+    if (s == nullptr) return nullptr;
     for (const Val& v : asked) add_val(s, v);
     for (uint32_t k = 0; k < calls_[ci].nargs && s->vals.size() < kSlots; ++k) {
       Val v;
@@ -570,10 +718,12 @@ class Gen : public RelFacts {
       v.from = "arg" + std::to_string(k);
       add_val(s, v);
     }
+    return s;
   }
-  void after_call(uint32_t ci, const std::string& rule, const std::string& ref, const std::set<uint32_t>& outs = {}) {
+  Site* after_call(uint32_t ci, const std::string& rule, const std::string& ref, const std::set<uint32_t>& outs = {}, const std::vector<Val>& asked = {}) {
     Site* s = call_site(ci, true, rule, ref);
-    if (s == nullptr) return;
+    if (s == nullptr) return nullptr;
+    for (const Val& v : asked) add_val(s, v);
     if (returns_value(ci)) {
       Val v;
       v.role = "status";
@@ -588,14 +738,15 @@ class Gen : public RelFacts {
       v.from = "out" + std::to_string(k);
       add_val(s, v);
     }
+    return s;
   }
-  void entry_site(uint32_t fn, const std::string& rule, const std::string& ref, bool params) {
-    if (!defined(fn)) return;
+  Site* entry_site(uint32_t fn, const std::string& rule, const std::string& ref, bool params) {
+    if (!defined(fn)) return nullptr;
     Site s;
     s.tu = tu_text(file_path(funcs_[fn].tu));
     if (!tu_unique(s.tu)) {
       gap(fname(fn), "unit " + s.tu, reason(kPathNotUnique), rule);
-      return;
+      return nullptr;
     }
     s.func = plain(fn);
     s.phase = "before";
@@ -610,14 +761,15 @@ class Gen : public RelFacts {
         v.from = "arg" + std::to_string(k);
         add_val(p, v);
       }
+    return p;
   }
-  void store_site(uint32_t fn, uint32_t line, const std::string& rule, const std::string& ref) {
-    if (!defined(fn) || line == 0) return;
+  Site* store_site(uint32_t fn, uint32_t line, const std::string& rule, const std::string& ref) {
+    if (!defined(fn) || line == 0) return nullptr;
     Site s;
     s.tu = tu_text(file_path(funcs_[fn].tu));
     if (!tu_unique(s.tu)) {
       gap(ref, "unit " + s.tu, reason(kPathNotUnique), rule);
-      return;
+      return nullptr;
     }
     s.func = plain(fn);
     s.phase = "effect";
@@ -634,13 +786,68 @@ class Gen : public RelFacts {
     v1.from = "operand1";
     add_val(p, v0);
     add_val(p, v1);
+    return p;
+  }
+  // manifest revision 4: right after each load of field (Type.field) on the line in fn: the value and the address
+  Site* load_site(uint32_t fn, uint32_t line, const std::string& field, const std::string& rule, const std::string& ref) {
+    if (!defined(fn) || line == 0 || field.find('.') == std::string::npos) return nullptr;
+    Site s;
+    s.tu = tu_text(file_path(funcs_[fn].tu));
+    if (!tu_unique(s.tu)) {
+      gap(ref, "unit " + s.tu, reason(kPathNotUnique), rule);
+      return nullptr;
+    }
+    s.func = plain(fn);
+    s.phase = "point";
+    s.place = "load";
+    s.line = line;
+    s.field = field;
+    s.op = "load." + s.func;
+    Site* p = site_for(s);
+    p->rules.insert(rule);
+    p->refs.insert(ref);
+    Val v0, v1;
+    v0.role = "value";
+    v0.from = "operand0";
+    v1.role = "address";
+    v1.from = "operand1";
+    v1.type = "ptr";
+    add_val(p, v0);
+    add_val(p, v1);
+    return p;
+  }
+  // the first statement of each run of the line's statements in fn (a wait's exit statement)
+  Site* line_site(uint32_t fn, uint32_t line, const std::string& rule, const std::string& ref) {
+    if (!defined(fn) || line == 0) return nullptr;
+    Site s;
+    s.tu = tu_text(file_path(funcs_[fn].tu));
+    if (!tu_unique(s.tu)) {
+      gap(ref, "unit " + s.tu, reason(kPathNotUnique), rule);
+      return nullptr;
+    }
+    s.func = plain(fn);
+    s.phase = "point";
+    s.place = "line-start";
+    s.line = line;
+    s.op = "line." + s.func;
+    Site* p = site_for(s);
+    p->rules.insert(rule);
+    p->refs.insert(ref);
+    return p;
   }
   // need and gap lines, each once, in the order first written
-  void need(const std::string& subject, const std::string& what, const std::string& state, const std::string& why, const std::string& note) {
-    if (seen_.insert("n|" + subject + "|" + what + "|" + state + "|" + why + "|" + note).second) needs_.push_back(Need{subject, what, state, why, note});
+  void need(const std::string& subject, const std::string& what, const std::string& state, const std::string& why, const std::string& note,
+            const std::set<std::string>& sites = {}) {
+    if (seen_.insert("n|" + subject + "|" + what + "|" + state + "|" + why + "|" + note).second) needs_.push_back(Need{subject, what, state, why, note, sites});
+  }
+  // a planned need (manifest revision 4) with the keys of the sites that record it, or the not-planned need
+  void need_sites(const std::string& subject, const std::string& what, const std::set<std::string>& sites, R why_not, const std::string& note_not,
+                  const std::string& note = "") {
+    if (!sites.empty()) need(subject, what, "planned", "-", note, sites);
+    else need(subject, what, "not-planned", reason(why_not), note_not);
   }
   void gap(const std::string& subject, const std::string& what, const std::string& why, const std::string& rule) {
-    if (seen_.insert("g|" + subject + "|" + what + "|" + why + "|" + rule).second) gaps_.push_back(Need{subject, what, "gap", why, rule});
+    if (seen_.insert("g|" + subject + "|" + what + "|" + why + "|" + rule).second) gaps_.push_back(Need{subject, what, "gap", why, rule, {}});
   }
 
   // ---------------------------------------------------------------- rules over a row
@@ -696,7 +903,7 @@ class Gen : public RelFacts {
     }
     const bool string_key = kparam != kN && defined(kfn) && reaches_compare(kfn, kparam);
     at_call(ci, rule, rowref, kparam != kN ? std::vector<Val>{key} : std::vector<Val>{});
-    after_call(ci, rule, rowref, out_params(ci));
+    if (Site* a = after_call(ci, rule, rowref, out_params(ci))) last_after_.insert(a->key());
     if (!string_key) return;
     // key-text: the first call (by position) the key parameter reaches at depth 0 under a non-null test of it
     uint32_t best = kN, best_n = 0;
@@ -768,12 +975,24 @@ class Gen : public RelFacts {
       }
     }
     const size_t before = sites_.size();
+    bool probe = false;
+    for (const std::string& l : lines) probe = probe || starts(l, "handling: probe-create");
+    std::set<std::string> use_after;  // manifest revision 4: the after-call sites of the row's use
     if (r.path == 'A') {
+      last_after_.clear();
       if (r.call != kN) key_call(r.call, r.callee_fn, r.param, "use-call", rowref);
+      use_after = last_after_;
       for (const std::string& l : lines) {
-        if (starts(l, "creator:")) {
+        // revision 3: the creates the row's not-a-pair lines exclude by key constants (and, in a probe-create row, the
+        // row's own create) are creator sites as well (control selection rule, docs/plan_manifest.md section 7)
+        const bool creator_line = starts(l, "creator:") ||
+                                  (v4_ && (starts(l, "not a pair: key constants differ") || (probe && starts(l, "not a pair: probe-create"))));
+        if (creator_line) {
           std::vector<std::tuple<std::string, uint32_t, uint32_t>> ps = positions(l);
-          const uint32_t ci = ps.empty() ? kN : call_of(ps[0]);
+          uint32_t ci = ps.empty() ? kN : call_of(ps[0]);
+          if (v4_)
+            for (size_t k = 1; ci == kN && k < ps.size(); ++k) ci = call_of(ps[k]);
+          if (v4_ && ci != kN) row_creators_[i].insert(ci);
           if (ci == kN) {
             gap(rowref, "creator position", reason(kNoPos), "creator-call");
             continue;
@@ -791,14 +1010,15 @@ class Gen : public RelFacts {
           handling(l.substr(10), r, rowref);
         }
       }
-      need(rowref, "event-send", "not-planned", reason(kNotPlanned), "the effects of a result (an event or a message sent on it) are not in the facts of this revision");
+      if (!v4_)
+        need(rowref, "event-send", "not-planned", reason(kNotPlanned), "the effects of a result (an event or a message sent on it) are not in the facts of this revision");
     } else if (r.path == 'B') {
       for (uint32_t ci : r.site_calls) {
         Val v;
         v.role = "field_value";
         v.from = "arg" + std::to_string(r.param);
         at_call(ci, "use-call", rowref, r.param != kN ? std::vector<Val>{v} : std::vector<Val>{});
-        after_call(ci, "use-call", rowref);
+        if (Site* a = after_call(ci, "use-call", rowref)) use_after.insert(a->key());
       }
       static const std::regex re_w(R"(^(assign|inc-dec|aggregate-assign|memset|memcpy|out-pointer|external|unknown_effect) at (\S+) in (\S+))");
       for (const std::string& l : lines) {
@@ -817,11 +1037,390 @@ class Gen : public RelFacts {
           if (ps.empty() || r.caller_fn == kN) continue;
           store_site(r.caller_fn, std::get<1>(ps[0]), "writer-after-spawn", rowref + " " + pos_text(ps[0]));
         }
-      need(rowref, "read-value", "not-planned", reason(kNotPlanned), "a read of a field is no site kind of the manifest revision 3 (loads are not bound)");
+      if (!v4_) need(rowref, "read-value", "not-planned", reason(kNotPlanned), "a read of a field is no site kind of the manifest revision 3 (loads are not bound)");
+      else read_rules(r, rowref);
     }
-    need(rowref, "wait-result", "not-planned", reason(kNotPlanned), "rule added in the manifest revision 4");
-    need(rowref, "lock-result", "not-planned", reason(kNotPlanned), "rule added in the manifest revision 4");
-    (void)before;
+    if (!v4_) {
+      need(rowref, "wait-result", "not-planned", reason(kNotPlanned), "rule added in the manifest revision 4");
+      need(rowref, "lock-result", "not-planned", reason(kNotPlanned), "rule added in the manifest revision 4");
+      (void)before;
+      return;
+    }
+    // ---- plan rules revision 3
+    if (r.path != 'C') need_sites(rowref, "use-result", use_after, kNoPos, "no after-call site of the row's use (see the gap lines)");
+    if (r.path != 'C') requests_for(i, r, rowref, lines);
+    // the waits the row's sites follow in their functions
+    std::vector<std::pair<uint32_t, uint32_t>> anchors;
+    auto anchor_call = [&](uint32_t ci) {
+      if (ci != kN && ci < calls_.size()) anchors.emplace_back(calls_[ci].caller_fn, calls_[ci].line);
+    };
+    if (r.path == 'A') {
+      anchor_call(r.call);
+      for (uint32_t ci : row_creators_[i]) anchor_call(ci);
+    } else if (r.path == 'B') {
+      for (uint32_t ci : r.site_calls) anchor_call(ci);
+    } else {
+      if (r.read != kN && r.read < reads_.size()) anchors.emplace_back(reads_[r.read].fn, reads_[r.read].line);
+      anchor_call(r.call);
+    }
+    waits_for(rowref, anchors);
+    if (r.path != 'C') need(rowref, "lock-result", "not-planned", reason(kNoRule), "the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)");
+    else lock_rules(r, rowref);
+  }
+
+  // ---------------------------------------------------------------- plan rules revision 3: path C reads and locks
+  // the load of the field the row reads, and the calls whose results are the subscripts on the read's access path
+  // (OBJECT_ACCESS index root; READS index root when the facts have no OBJECT_ACCESS row for the read)
+  void read_rules(const RelRow& r, const std::string& rowref) {
+    std::set<std::string> keys;
+    if (r.read == kN || r.read >= reads_.size()) {
+      need(rowref, "read-value", "not-planned", reason(kNoPos), "the row names no READS row");
+      return;
+    }
+    const kz_fact_read& rd = reads_[r.read];
+    const std::string field = str(rd.type) + "." + str(rd.field);
+    const std::string rref = rowref + " read " + pos(str(rd.file), rd.line, rd.col);
+    if (Site* s = load_site(rd.fn, rd.line, field, "read-load", rref)) keys.insert(s->key());
+    need_sites(rowref, "read-value", keys, kNoPos, "the read's position names no defined function of the facts");
+    uint32_t ir = kN;
+    std::string src;
+    for (const kz_fact_objacc& o : objacc_)
+      if (o.read == r.read && o.index_root != kN) {
+        ir = o.index_root;
+        src = "OBJECT_ACCESS";
+        break;
+      }
+    if (ir == kN && rd.index_root != kN) ir = rd.index_root, src = "READS";
+    std::set<std::string> callees;
+    collect_calls(ir, &callees, 0);
+    std::set<std::string> ik;
+    for (const std::string& x : callees) {
+      // the call of x in the reading function at or before the read's line, the last such call
+      uint32_t best = kN;
+      for (uint32_t ci : calls_of_.count(rd.fn) != 0 ? calls_of_.at(rd.fn) : std::vector<uint32_t>{})
+        if (str(calls_[ci].callee) == x && calls_[ci].line <= rd.line && (best == kN || calls_[ci].line > calls_[best].line ||
+                                                                         (calls_[ci].line == calls_[best].line && calls_[ci].col > calls_[best].col)))
+          best = ci;
+      if (best == kN) {
+        gap(rowref, "subscript call " + x + " of the read: no call of it in " + plain(rd.fn) + " before the read", reason(kNoPos), "object-index");
+        continue;
+      }
+      if (Site* s = after_call(best, "object-index", rref + " subscript (" + src + ") " + x)) ik.insert(s->key());
+    }
+    if (ir == kN) need(rowref, "read-subscript", "not-planned", reason(kNoRule), "the read's access path has no subscript (OBJECT_ACCESS, READS)");
+    else need_sites(rowref, "read-subscript", ik, kNoRule, "no subscript of the read is a call result (" + src + " index root " + ex(ir) + ")");
+  }
+  // the call-result names of an expression
+  void collect_calls(uint32_t root, std::set<std::string>* out, int depth) const {
+    if (root == kN || root >= exprs_.size() || depth > 40) return;
+    const kz_fact_expr& e = exprs_[root];
+    if (e.op == KZ_EXPR_OP_CALL_RESULT && !str(e.name).empty()) out->insert(base_name(str(e.name)));
+    collect_calls(e.a, out, depth + 1);
+    collect_calls(e.b, out, depth + 1);
+  }
+  // the field loads (Type.field) of an expression, outside the arguments of a call result (the call's after-call
+  // records its result; its arguments are no read of the condition)
+  void collect_fields(uint32_t root, std::set<std::string>* out, int depth) const {
+    if (root == kN || root >= exprs_.size() || depth > 40) return;
+    const kz_fact_expr& e = exprs_[root];
+    if (e.op == KZ_EXPR_OP_CALL_RESULT) return;
+    if (e.op == KZ_EXPR_OP_LOAD && e.flags == KZ_EXPR_REF_FIELD && str(e.name).find('.') != std::string::npos) out->insert(str(e.name));
+    collect_fields(e.a, out, depth + 1);
+    collect_fields(e.b, out, depth + 1);
+  }
+  // the lock calls of the creator's and the reader's functions: the calls of a lock operation of LOCK_OPS (a primitive of
+  // the P0 vocabulary or an operation derived from one), after-call of an acquisition or a wait (its result and its first
+  // argument), at-call of a release
+  void lock_rules(const RelRow& r, const std::string& rowref) {
+    std::map<std::string, uint8_t> op_kind;
+    for (const kz_fact_lockop& o : lockops_)
+      if (o.fn != kN && o.fn < funcs_.size() && o.kind != KZ_LOCKOP_KIND_NONE) op_kind.emplace(str(funcs_[o.fn].name), o.kind);
+    std::set<std::string> keys;
+    for (uint32_t fn : {r.caller_fn, r.read_fn}) {
+      if (fn == kN || calls_of_.count(fn) == 0) continue;
+      for (uint32_t ci : calls_of_.at(fn)) {
+        const auto it = op_kind.find(str(calls_[ci].callee));
+        if (it == op_kind.end()) continue;
+        const std::string lref = rowref + " lock " + enum_text("KZ_LOCKOP_KIND", it->second) + " " + call_pos(ci);
+        Val v;
+        v.role = "lock";
+        v.from = "arg0";
+        const std::vector<Val> lv = calls_[ci].nargs > 0 ? std::vector<Val>{v} : std::vector<Val>{};
+        Site* st = it->second == KZ_LOCKOP_KIND_RELEASE ? at_call(ci, "lock-call", lref, lv) : after_call(ci, "lock-call", lref, {}, lv);
+        if (st != nullptr) keys.insert(st->key());
+      }
+    }
+    need_sites(rowref, "lock-result", keys, kNotPlanned, "no call of a lock operation of LOCK_OPS in the creator's or the reader's function");
+  }
+
+  // ---------------------------------------------------------------- plan rules revision 3: waits
+  void waits_for(const std::string& rowref, const std::vector<std::pair<uint32_t, uint32_t>>& anchors) {
+    std::set<uint32_t> ws;
+    for (const auto& [fn, line] : anchors)
+      for (size_t w = 0; w < loops_.size(); ++w) {
+        const kz_fact_loop& L = loops_[w];
+        if (fn == kN || L.fn != fn || L.line > line) continue;
+        if (L.kind != KZ_LOOP_KIND_POLL && L.kind != KZ_LOOP_KIND_COUNT_BOUNDED) continue;
+        ws.insert(static_cast<uint32_t>(w));
+      }
+    if (ws.empty()) {
+      need(rowref, "wait-result", "not-planned", reason(kNotPlanned), "no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions");
+      return;
+    }
+    for (uint32_t w : ws) plan_wait(w, rowref);
+  }
+  bool in_loop(uint32_t loop_index, uint32_t l) const {
+    for (int d = 0; l != kN && d < 64; ++d) {
+      if (l == loop_index) return true;
+      auto it = loop_by_index_.find(l);
+      if (it == loop_by_index_.end()) return false;
+      l = loops_[it->second].parent;
+    }
+    return false;
+  }
+  void plan_wait(uint32_t w, const std::string& rowref) {
+    const kz_fact_loop& L = loops_[w];
+    const std::string wpos = pos(str(L.file), L.line, L.col);
+    const std::string what = "wait-result " + wpos;
+    const std::string wref = rowref + " wait " + wpos;
+    std::string form = L.pred_form != KZ_PRED_FORM_NONE ? "FACT_LOOPS " + enum_text("KZ_PRED_FORM", L.pred_form) : std::string();
+    auto hit = loopdef_head_.find(L.site);
+    const bool by_defs = hit != loopdef_head_.end() && loopdefs_[hit->second].status == KZ_LOOPDEF_STATUS_RECOGNISED;
+    if (form.empty() && by_defs) form = "LOOP_DEFS " + str(loopdefs_[hit->second].pred);
+    if (form.empty()) {
+      const std::string ld = hit == loopdef_head_.end() ? std::string("no LOOP_DEFS row") : "LOOP_DEFS " + enum_text("KZ_LOOPDEF_STATUS", loopdefs_[hit->second].status);
+      need(rowref, what, "not-planned", reason(kWaitPred), "FACT_LOOPS predicate form none; " + ld);
+      return;
+    }
+    std::set<std::string> keys;
+    const uint32_t fn = L.fn;
+    // the calls whose results the condition reads, and the fields it loads
+    std::set<std::string> callees, fields;
+    collect_calls(L.exit_root, &callees, 0);
+    collect_fields(L.exit_root, &fields, 0);
+    if (by_defs)
+      for (const kz_fact_loopdef& d : loopdefs_) {
+        // the definitions in the body and in the condition: those the predicate reads in an iteration
+        if (d.loop != L.site || str(d.local).empty() || d.value_root == kN) continue;
+        if (d.where != KZ_LOOPDEF_WHERE_IN_BODY && d.where != KZ_LOOPDEF_WHERE_IN_CONDITION) continue;
+        std::set<std::string> dc, dfl;
+        collect_calls(d.value_root, &dc, 0);
+        collect_fields(d.value_root, &dfl, 0);
+        for (uint32_t ci : calls_of_.count(fn) != 0 ? calls_of_.at(fn) : std::vector<uint32_t>{})
+          if (calls_[ci].line == d.line && dc.count(base_name(str(calls_[ci].callee))) != 0)
+            if (Site* s = after_call(ci, "wait-cond", wref + " definition " + pos(str(L.file), d.line, d.col))) keys.insert(s->key());
+        for (const std::string& f : dfl)
+          if (Site* s = load_site(fn, d.line, f, "wait-cond", wref + " definition " + pos(str(L.file), d.line, d.col))) keys.insert(s->key());
+      }
+    auto ait = awaits_of_.find(fn);
+    if (ait != awaits_of_.end())
+      for (uint32_t a : ait->second)
+        if (awaits_[a].loop == L.site) collect_fields(awaits_[a].relevant_root, &fields, 0);
+    for (uint32_t ci : calls_of_.count(fn) != 0 ? calls_of_.at(fn) : std::vector<uint32_t>{})
+      if (in_loop(L.loop, calls_[ci].loop) && callees.count(base_name(str(calls_[ci].callee))) != 0)
+        if (Site* s = after_call(ci, "wait-cond", wref)) keys.insert(s->key());
+    for (const kz_fact_read& rd : reads_) {
+      if (rd.fn != fn || !in_loop(L.loop, rd.loop)) continue;
+      const std::string f = str(rd.type) + "." + str(rd.field);
+      if (fields.count(f) != 0)
+        if (Site* s = load_site(fn, rd.line, f, "wait-cond", wref)) keys.insert(s->key());
+    }
+    // the exits taken: the exit statements (break, return, goto); a condition exit is no statement
+    auto eit = loopexits_of_.find(L.loop);
+    if (eit != loopexits_of_.end())
+      for (uint32_t e : eit->second) {
+        const kz_fact_loopexit& x = loopexits_[e];
+        if (x.exit == kN) continue;
+        if (x.kind == KZ_LOOPEXIT_KIND_BREAK || x.kind == KZ_LOOPEXIT_KIND_RETURN || x.kind == KZ_LOOPEXIT_KIND_GOTO) {
+          if (Site* s = line_site(fn, x.line, "wait-exit", wref + " exit " + std::to_string(x.exit) + " " + enum_text("KZ_LOOPEXIT_KIND", x.kind))) keys.insert(s->key());
+        } else {
+          gap(wref, "exit " + std::to_string(x.exit) + " (" + enum_text("KZ_LOOPEXIT_KIND", x.kind) + ") at " + pos(str(x.file), x.line, x.col), reason(kExitNoStmt), "wait-exit");
+        }
+      }
+    need_sites(rowref, what, keys, kWaitPred, "the predicate (" + form + ") names no call or field load of the loop in the facts", "predicate " + form);
+  }
+
+  // ---------------------------------------------------------------- plan rules revision 3: effects and value requests
+  // The effect calls of the row's use (RESULT_EFFECT rows of the call with an event send, a system log, an application
+  // exit or a terminal and its call), at-call with the argument a SEMANTICS arg-role row names; and, for a row the method
+  // cannot label from the facts (handling label T?, J? or F, or an open effect of its absence line), the value requests:
+  // what value of the record would decide it and which site records it.
+  void requests_for(size_t i, const RelRow& r, const std::string& rowref, const std::vector<std::string>& lines) {
+    std::string label;
+    bool open = false;
+    for (const std::string& l : lines) {
+      if (starts(l, "handling_label: ")) {
+        label = l.substr(16);
+        label = label.substr(0, label.find(' '));
+      }
+      if (starts(l, "absence:") && l.find(" open") != std::string::npos) open = true;
+    }
+    const std::string lab = label.empty() ? prio_[i].label : label;
+    const bool asked = lab == "T?" || lab == "J?" || lab == "F" || open;
+    const std::vector<uint32_t> uses = r.path == 'A' ? (r.call != kN ? std::vector<uint32_t>{r.call} : std::vector<uint32_t>{}) : r.site_calls;
+    const std::string id = std::string(1, r.path) + std::to_string(r.number);
+    const std::string why = "label " + lab + (open ? ", an open effect in its absence line" : "");
+    std::set<std::string> effect_keys;
+    if (asked) ++request_rows_;
+    auto request = [&](const std::string& value, const std::string& what, const std::string& state, const std::string& site, const std::string& slot,
+                       const std::string& reason_text, const std::string& note) {
+      if (asked) requests_.push_back(Request{r.key, id, lab, value, what, state, site, slot, reason_text, note + (note.empty() ? "" : "; ") + why});
+    };
+    for (uint32_t ci : uses) {
+      if (ci == kN || ci >= calls_.size()) continue;
+      const std::string cpos = call_pos(ci);
+      // the result and the out values at the after-call of the use (planned by the use-call rule)
+      Site* a = find_call_site(ci, true);
+      if (a == nullptr) request("result", "the result of " + str(calls_[ci].callee) + " at " + cpos, "not-planned", "-", "-", reason(kNoPos), "no after-call site of the use");
+      else
+        for (const Val& v : a->vals) request(v.from == "ret" ? "result" : v.from, v.role + " of " + str(calls_[ci].callee) + " at " + cpos, "planned", a->key(), v.from, "-", "");
+      auto eit = reffect_of_site_.find(calls_[ci].site);
+      if (eit != reffect_of_site_.end())
+        for (uint32_t e : eit->second) {
+          const kz_fact_reffect& x = reffect_[e];
+          if (x.effect != KZ_REFF_EFFECT_EVENT_SEND && x.effect != KZ_REFF_EFFECT_SYSLOG && x.effect != KZ_REFF_EFFECT_EXIT_APP && x.effect != KZ_REFF_EFFECT_TERMINAL)
+            continue;
+          const std::string ek = enum_text("KZ_REFF_EFFECT", x.effect);
+          const std::string otext = enum_text("KZ_REFF_OUTCOME", x.outcome) + " " + std::to_string(x.outcome_value);
+          auto cit = x.effect_site == kN ? call_by_site_.end() : call_by_site_.find(x.effect_site);
+          if (cit == call_by_site_.end()) {
+            request("effect", ek + " on the outcome " + otext, "not-planned", "-", "-", reason(kNoRule), "the effect has no call in the facts");
+            continue;
+          }
+          const uint32_t ec = cit->second;
+          std::vector<Val> asked_vals;
+          std::string slot = "-";
+          auto rit = arg_roles_.find(str(calls_[ec].callee));
+          if (rit != arg_roles_.end())
+            for (const auto& [k, role] : rit->second) {
+              Val v;
+              v.role = role;
+              v.from = "arg" + std::to_string(k);
+              asked_vals.push_back(v);
+              if (slot == "-") slot = v.from;
+            }
+          const std::string eref = rowref + " effect " + ek + " " + call_pos(ec) + " on " + otext + " of " + cpos +
+                                   (x.status == KZ_REFF_STATUS_OPEN ? " (open: " + str(x.reason) + ")" : std::string());
+          Site* es = at_call(ec, "effect-call", eref, asked_vals);
+          if (es == nullptr) {
+            request("effect", ek + " " + call_pos(ec), "not-planned", "-", "-", reason(kNoPos), "no at-call site of the effect call (see the gap lines)");
+            continue;
+          }
+          if (x.effect == KZ_REFF_EFFECT_EVENT_SEND || x.effect == KZ_REFF_EFFECT_SYSLOG) effect_keys.insert(es->key());
+          request("effect", ek + " " + str(calls_[ec].callee) + " at " + call_pos(ec) + " on the outcome " + otext, "planned", es->key(), slot, "-",
+                  x.status == KZ_REFF_STATUS_OPEN ? "open: " + str(x.reason) : "complete");
+        }
+      request("branch", "the branch the result takes at " + cpos, "not-planned", "-", "-", reason(kNoRule),
+              "a branch is no site kind of the manifest; the result and the effect calls reached stand for it");
+    }
+    if (r.path == 'A')
+      need_sites(rowref, "event-send", effect_keys, kNotPlanned, "no event send or system log of RESULT_EFFECT with a call for the row's use");
+  }
+  // the site of a call already planned (nullptr when none)
+  Site* find_call_site(uint32_t ci, bool after) {
+    const kz_fact_call& c = calls_[ci];
+    for (auto& [k, st] : sites_)
+      if (st.place == (after ? "after-call" : "at-call") && st.func == plain(c.caller_fn) && st.callee == str(c.callee) && st.line == c.line && (!v4_ || st.col == c.col))
+        return &st;
+    return nullptr;
+  }
+
+  // ---------------------------------------------------------------- plan rules revision 3: the path A control selection
+  // (docs/plan_manifest.md section 7): (a) the rows with a probe-create handling line, (b) the rows with a creator site
+  // (a creator line, or a not-a-pair line of key constants), in the order of the relations text, under the control budget
+  void select_controls() {
+    std::vector<size_t> a, b;
+    for (size_t i = 0; i < rows_.size(); ++i) {
+      const RelRow& r = *rows_[i];
+      if (r.path != 'A') continue;
+      bool probe = false;
+      size_t sites = 0;
+      std::istringstream in(render_row(r));
+      std::string l;
+      while (std::getline(in, l)) {
+        const size_t f = l.find_first_not_of(' ');
+        if (f == std::string::npos) continue;
+        l = l.substr(f);
+        if (starts(l, "handling: probe-create")) probe = true;
+        if (starts(l, "creator:") || starts(l, "not a pair: key constants differ")) ++sites;
+      }
+      if (probe) a.push_back(i);
+      else if (sites > 0) b.push_back(i);
+      if (probe || sites > 0) control_kind_[i] = probe && sites > 0 ? "a+b" : probe ? "a" : "b";
+    }
+    control_order_ = a;
+    control_order_.insert(control_order_.end(), b.begin(), b.end());
+    for (size_t k = 0; k < control_order_.size(); ++k)
+      if (k < control_rows_) control_planned_.push_back(control_order_[k]);
+  }
+
+  // ---------------------------------------------------------------- plan rules revision 3: deletes and retires
+  // The namespace data entries whose lookup or create functions are the callee of a planned path A row's use or
+  // creator calls; for each, the delete functions that apply to the build (the entry of the function with its
+  // parameters, the after-call of the calls on the line of its retire call) and the retire stores (clear), so that a
+  // delete or retire of the name between the use and the create can be observed (judgement rules 8.2 (마)).
+  bool op_applies(const NsFile& f, const NsOp& op, uint32_t* fn_out) const {
+    auto sit = f.sha.find(op.def_file);
+    if (sit == f.sha.end()) return false;
+    for (size_t i = 0; i < files_.size(); ++i) {
+      const std::string p = str(files_[i].path);
+      const bool tail = p == op.def_file || (p.size() > op.def_file.size() && p.compare(p.size() - op.def_file.size(), op.def_file.size(), op.def_file) == 0 &&
+                                              p[p.size() - op.def_file.size() - 1] == '/');
+      if (!tail || kz::to_hex(files_[i].sha256, 32) != sit->second) continue;
+      for (uint32_t fn : fn_by_name_.count(op.fn) != 0 ? fn_by_name_.at(op.fn) : std::vector<uint32_t>{})
+        if (defined(fn) && funcs_[fn].line == op.def_line && str(funcs_[fn].file) == p) {
+          *fn_out = fn;
+          return true;
+        }
+    }
+    return false;
+  }
+  void plan_object_lifetimes() {
+    for (size_t i : rows_planned_) {
+      const RelRow& r = *rows_[i];
+      if (r.path != 'A') continue;
+      const std::string rowref = "row " + r.key;
+      std::set<std::string> names;
+      if (r.call != kN) names.insert(str(calls_[r.call].callee));
+      for (uint32_t ci : row_creators_[i]) names.insert(str(calls_[ci].callee));
+      std::set<std::string> keys;
+      bool entry_found = false;
+      for (const NsFile& f : ns_)
+        for (const NsEntry& e : f.entries) {
+          bool match = false;
+          for (const NsOp& op : e.ops)
+            if ((op.what == "lookup" || op.what == "create" || op.what == "copy" || op.what == "create-check") && names.count(op.fn) != 0) {
+              uint32_t fn = kN;
+              if (op_applies(f, op, &fn)) match = true;
+            }
+          if (!match) continue;
+          entry_found = true;
+          for (const NsOp& op : e.ops) {
+            if (op.what != "delete" && op.what != "clear") continue;
+            uint32_t fn = kN;
+            const std::string dref = "namespace data " + f.path + " line " + std::to_string(op.line) + ": " + e.name + " " + op.what + " " + op.fn;
+            std::string state = "applies";
+            if (!op_applies(f, op, &fn)) {
+              state = "does not apply (no file of that sha256 or no definition on that line)";
+            } else if (op.what == "delete") {
+              if (Site* st = entry_site(fn, "object-delete", dref, true)) keys.insert(st->key());
+              for (uint32_t ci : calls_of_.count(fn) != 0 ? calls_of_.at(fn) : std::vector<uint32_t>{})
+                if (calls_[ci].line == op.at_line)
+                  if (Site* st = after_call(ci, "object-delete", dref + " retire call " + call_pos(ci))) keys.insert(st->key());
+            } else {
+              if (Site* st = store_site(fn, op.at_line, "object-retire", dref + " at " + op.at_file + ":" + std::to_string(op.at_line))) keys.insert(st->key());
+            }
+            lifetimes_.insert(e.name + " " + op.what + " " + op.fn + " " + op.def_file + ":" + std::to_string(op.def_line) + " data " + f.path + " line " +
+                              std::to_string(op.line) + ": " + state);
+          }
+        }
+      if (!entry_found) need(rowref, "object-delete", "not-planned", reason(kNoNamespace), "the row's lookup and creators: " + [&] {
+        std::string t;
+        for (const std::string& n : names) t += (t.empty() ? "" : " ") + n;
+        return t;
+      }());
+      else need_sites(rowref, "object-delete", keys, kNoNamespace, "an entry matches but none of its deletes and retires applies to the build");
+    }
   }
 
   // a writer line of path B: "<kind> at <pos> in <function>[ via <callee>] ..."
@@ -1032,7 +1631,19 @@ class Gen : public RelFacts {
         v.from = "arg" + std::to_string(p0->arg_param);
         asked.push_back(v);
       }
-      at_call(pc, "actor-create", pref, asked);
+      Site* cs = at_call(pc, "actor-create", pref, asked);
+      // revision 3: the creation call is made through the runtime's creation wrapper (the spawn binding), whose token
+      // the spawn-token reader reads
+      if (v4_ && cs != nullptr) {
+        if (p0 != nullptr && p0->entry_param != kN && p0->arg_param != kN && p0->entry_param != p0->arg_param)
+          spawns_[cs->key()] = SpawnBind{p0->entry_param, p0->arg_param, p0->out_param,
+                                        "P0 thread-creation entry " + str(p0->name) + ": start routine argument " + std::to_string(p0->entry_param) +
+                                            ", creation argument " + std::to_string(p0->arg_param) +
+                                            (p0->out_param != kN ? ", thread handle out argument " + std::to_string(p0->out_param) : std::string()) +
+                                            " (P0_TABLE)"};
+        else
+          gap(pref, "spawn binding", reason(kNoCreation), "actor-create");
+      }
       std::set<uint32_t> outs;
       if (p0 != nullptr && p0->out_param != kN) outs.insert(p0->out_param);
       after_call(pc, "actor-create", pref, outs);
@@ -1179,12 +1790,37 @@ class Gen : public RelFacts {
 
     // ---- the sidecar
     std::ostringstream sc;
-    sc << "kz-plan-sidecar 1\n";
+    // ---- revision 3: the value requests first (the sidecar names their sha256)
+    std::string req_sha;
+    size_t req_planned = 0;
+    if (v4_) {
+      std::ostringstream rq;
+      rq << "kz-plan-requests 1\n";
+      rq << "# value requests of the planned rows: what value of a record would decide a row the method cannot label from the facts, and which site of the plan records it\n";
+      rq << "rule " << plan_requests_revision() << ": rows of path A and B with the handling label T?, J? or F, or an open effect in their absence line; the result and out values at the use's after-call, the effect calls of RESULT_EFFECT with the argument a SEMANTICS arg-role row names, the branch taken (no site kind)\n";
+      rq << "facts-artifact " << kz::to_hex(c_.artifact_hash()) << "\n";
+      size_t n = 0;
+      for (const Request& q : requests_) {
+        const auto it = sites_.find(q.site);
+        if (q.state == "planned") ++req_planned;
+        rq << "request " << ++n << " row=" << q.row << " id=" << q.id << " label=" << q.label << " value=" << q.value << " state=" << q.state
+           << " site=" << (it == sites_.end() ? std::string("-") : std::to_string(it->second.id)) << " slot=" << q.slot << " reason=" << q.why << " what=" << quoted(q.what)
+           << " note=" << quoted(q.note) << "\n";
+      }
+      rq << "end rows=" << request_rows_ << " requests=" << requests_.size() << " planned=" << req_planned << "\n";
+      out->requests = rq.str();
+      req_sha = kz::to_hex(kz::sha256(out->requests));
+    }
+    sc << (v4_ ? "kz-plan-sidecar 2\n" : "kz-plan-sidecar 1\n");
     sc << "generator " << o_.generator << "\n";
     for (const PlanInputFile& f : o_.inputs) sc << "input " << f.role << " sha256=" << f.sha256 << " path=" << f.path << "\n";
     sc << "facts-artifact " << kz::to_hex(c_.artifact_hash()) << "\n";
     if (basis_c_ != nullptr) sc << "basis-artifact " << kz::to_hex(basis_c_->artifact_hash()) << "\n";
-    sc << "rules " << plan_rules_revision() << "; " << relations_rules_revision() << "\n";
+    sc << "rules " << (v4_ ? plan_rules_v4_revision() : plan_rules_revision()) << "; " << relations_rules_revision() << "\n";
+    if (v4_) {
+      sc << "manifest-revision 4 (kzs-sites 4)\n";
+      sc << "plan-id " << plan_id() << "\n";
+    }
     sc << "selection " << o_.select << ": every row of the relations (method document 3.1, the revised rule: no label and no proof of a row removes it)\n";
     sc << "priority " << o_.order << ": " << plan_priority_revision() << "; tier 1 = disposition D07 (label R or J, counterpart, order class RELOC), tier 2 = the other rows of order class RELOC, tier 3 = the rest; within a tier the order of the relations text\n";
     size_t n1 = 0, n2 = 0, n3 = 0;
@@ -1194,6 +1830,22 @@ class Gen : public RelFacts {
        << " planned=" << planned_.size() << " truncation=" << (prio_.size() - planned_.size()) << " rows cut (row lines with state cut)"
        << " unresolved=" << quoted(planned_.size() < prio_.size() ? "whether the rows cut fit the record pool (no event volume measured)" : "none")
        << " sensitivity=" << quoted("not measured") << "\n";
+    if (v4_) {
+      sc << "control " << plan_control_revision() << ": (a) path A rows with a probe-create handling line, (b) path A rows with a creator site (creator lines and not-a-pair lines of key constants), (a) then (b) in the order of the relations text; planned apart from the tier order (docs/plan_manifest.md section 7)\n";
+      size_t na = 0, nb = 0;
+      for (const auto& [i, k] : control_kind_) (k == "b" ? nb : na)++;
+      sc << "control-budget value=" << o_.control_budget << " reason=" << quoted(o_.control_budget_reason) << " rows=" << control_order_.size() << " (a " << na << ", b " << nb
+         << ") planned=" << control_planned_.size() << " cut=" << (control_order_.size() - control_planned_.size())
+         << " complete=" << (control_planned_.size() == control_order_.size() ? "yes" : "no") << " unresolved="
+         << quoted("whether the control rows fit the record pool (no event volume measured)") << " sensitivity=" << quoted("not measured") << "\n";
+      // the file by its name only: the sidecar names no output path (the regeneration check compares it byte for byte)
+      sc << "requests sha256=" << req_sha << " file=" << o_.requests_path.substr(o_.requests_path.rfind('/') + 1) << " rows=" << request_rows_ << " requests=" << requests_.size() << " planned=" << req_planned << "\n";
+      for (const auto& [path, text] : o_.namespace_data) sc << "namespace-data " << path << " entries=" << [&] {
+        for (const NsFile& f : ns_)
+          if (f.path == path) return f.entries.size();
+        return static_cast<size_t>(0);
+      }() << "\n";
+    }
     sc << "bound string KZ_RT_STR_MAX=" << kStrMax << " source=runtime/include/kz_rt.h:82 reason=" << quoted("the runtime's copy bound; a key text is bounded by the program's own constant length check where the facts show one")
        << " truncation=" << quoted("the runtime flags a cut string per value") << "\n";
     if (!argtype_.empty())
@@ -1208,8 +1860,13 @@ class Gen : public RelFacts {
       const PlanPriority& p = prio_[i];
       const bool in = std::find(planned_.begin(), planned_.end(), i) != planned_.end();
       sc << "row " << p.key << " " << p.id << " tier=" << p.tier << " position=" << position_.at(i) << " label=" << p.label << " class=" << p.label_class
-         << " order=" << p.order_class << " reach=" << p.reach << " disposition=" << p.disposition << " state=" << (in ? "planned" : "cut") << " why=" << quoted(p.why) << "\n";
-      if (!in) sc << "need row " << p.key << " observation not-planned reason=" << reason(kBudget) << "\n";
+         << " order=" << p.order_class << " reach=" << p.reach << " disposition=" << p.disposition << " state=" << (in ? "planned" : "cut");
+      const auto ck = control_kind_.find(i);
+      const bool cin = std::find(control_planned_.begin(), control_planned_.end(), i) != control_planned_.end();
+      if (v4_ && ck != control_kind_.end()) sc << " control=" << ck->second << " control-state=" << (cin ? "planned" : "cut");
+      sc << " why=" << quoted(p.why) << "\n";
+      if (!in && !(v4_ && cin)) sc << "need row " << p.key << " observation not-planned reason=" << reason(kBudget) << "\n";
+      if (v4_ && ck != control_kind_.end() && !cin) sc << "need row " << p.key << " control not-planned reason=" << reason(kControlCut) << "\n";
     }
     for (const auto& [k, s] : sites_) {
       sc << "site " << s.id << " " << label(s) << " key=" << quoted(k) << " refs=";
@@ -1227,10 +1884,29 @@ class Gen : public RelFacts {
       for (uint32_t id : ids) sc << " " << id;
       sc << "\n";
     }
-    for (const Need& n : needs_) sc << "need " << n.subject << " " << n.what << " " << n.state << " reason=" << n.why << " note=" << quoted(n.note) << "\n";
+    for (const Need& n : needs_) {
+      sc << "need " << n.subject << " " << n.what << " " << n.state << " reason=" << n.why << " note=" << quoted(n.note);
+      if (v4_ && !n.sites.empty()) {
+        std::set<uint32_t> sid;
+        for (const std::string& k2 : n.sites) {
+          const auto it = sites_.find(k2);
+          if (it != sites_.end()) sid.insert(it->second.id);
+        }
+        sc << " sites=";
+        std::string ids;
+        for (uint32_t id2 : sid) ids += (ids.empty() ? "" : ",") + std::to_string(id2);
+        sc << ids;
+      }
+      sc << "\n";
+    }
     for (const Need& n : gaps_) sc << "gap " << n.subject << " " << quoted(n.what) << " reason=" << n.why << " rule=" << n.note << "\n";
     for (const std::string& c : creations_) sc << "creation " << c << "\n";
     for (const std::string& s : stops_) sc << "stop-event " << s << "\n";
+    for (const std::string& l : lifetimes_) sc << "lifetime " << l << "\n";
+    for (const auto& [k, b] : spawns_) {
+      const auto it = sites_.find(k);
+      if (it != sites_.end()) sc << "spawn " << it->second.id << " wrapper=" << kSpawnWrapper << " " << b.ref << "\n";
+    }
     for (const std::string& m : mod_lines) sc << "module " << m << "\n";
     sc << "default-module " << id_of[core] << " " << core << "\n";
     for (const std::string& e : exes) sc << "exe " << e << "\n";
@@ -1239,10 +1915,14 @@ class Gen : public RelFacts {
 
     // ---- the manifest
     std::ostringstream m;
-    m << "# kz plan written by kz-static plan (" << plan_rules_revision() << "; " << relations_rules_revision() << ")\n";
+    m << "# kz plan written by kz-static plan (" << (v4_ ? plan_rules_v4_revision() : plan_rules_revision()) << "; " << relations_rules_revision() << ")\n";
     m << "# sidecar sha256=" << side_sha << "\n";
     m << "# every site: a label from the sorted site keys with its rule names, a ref to the facts it came from; the plan states what to record, never what to expect\n";
-    m << "kzs-sites 3\n";
+    m << (v4_ ? "kzs-sites 4\n" : "kzs-sites 3\n");
+    if (v4_)
+      m << "plan " << plan_id() << " facts=" << kz::to_hex(c_.artifact_hash()) << " relrules=" << quoted(relations_rules_revision()) << " obsrules=" << quoted(plan_rules_v4_revision())
+        << " semantics=" << quoted(semantics_text()) << " select=" << o_.select << " budget=" << quoted(o_.budget) << " control=" << quoted(o_.control_budget)
+        << " ref=" << quoted("sidecar sha256 " + side_sha) << "\n";
     const std::string rev = basis_c_ != nullptr ? "basis-" + kz::to_hex(basis_c_->artifact_hash()) : "facts-" + kz::to_hex(c_.artifact_hash());
     m << "source build rev=" << rev << " ref="
       << quoted(basis_c_ != nullptr ? "the analysis basis: every source file read is hashed in its FILE_HASHES; no source tree revision checked (basis source.worktree_state)"
@@ -1254,6 +1934,20 @@ class Gen : public RelFacts {
       if (!s.callee.empty()) m << " callee=" << s.callee;
       if (s.line != 0) m << " line=" << s.line;
       if (!s.place.empty()) m << " place=" << s.place;
+      if (v4_) {
+        m << " skey=" << skey(k);
+        std::set<std::string> rows;
+        for (const std::string& x : s.refs)
+          if (starts(x, "row ") && x.size() >= 20) rows.insert(x.substr(4, 16));
+        if (!rows.empty()) {
+          std::string rl;
+          for (const std::string& x : rows) rl += (rl.empty() ? "" : ",") + x;
+          m << " row=" << rl;
+        }
+        if (s.col != 0) m << " col=" << s.col;
+        if (s.nth != 0) m << " nth=" << s.nth;
+        if (!s.field.empty()) m << " field=" << s.field;
+      }
       std::string r;
       for (const std::string& x : s.refs) r += (r.empty() ? "" : "; ") + x;
       if (r.size() > 400) r = r.substr(0, 400) + " ...(sidecar)";
@@ -1266,6 +1960,32 @@ class Gen : public RelFacts {
         if (!v.ref.empty()) m << " ref=" << quoted(v.ref);
         m << "\n";
       }
+      const auto sp = spawns_.find(k);
+      if (v4_ && sp != spawns_.end()) {
+        m << "spawn " << s.id << " wrapper=" << kSpawnWrapper << " start=arg" << sp->second.start << " arg=arg" << sp->second.arg;
+        if (sp->second.out != kN) m << " out=arg" << sp->second.out;
+        m << " ref=" << quoted(sp->second.ref) << "\n";
+        m << "identity " << s.id << " decoder=spawn-token\n";
+      }
+    }
+    if (v4_) {
+      uint32_t n = 0;
+      for (const Need& x : needs_) {
+        m << "need " << ++n << " subject=" << quoted(x.subject) << " what=" << quoted(x.what) << " state=" << x.state;
+        std::string ids;
+        std::set<uint32_t> sid;
+        for (const std::string& k2 : x.sites) {
+          const auto it = sites_.find(k2);
+          if (it != sites_.end()) sid.insert(it->second.id);
+        }
+        for (uint32_t id2 : sid) ids += (ids.empty() ? "" : ",") + std::to_string(id2);
+        if (!ids.empty()) m << " sites=" << ids;
+        if (x.state != "planned") m << " reason=" << quoted(x.why);
+        if (!x.note.empty()) m << " note=" << quoted(x.note);
+        m << "\n";
+      }
+      n = 0;
+      for (const Need& x : gaps_) m << "gap " << ++n << " subject=" << quoted(x.subject) << " what=" << quoted(x.what) << " reason=" << quoted(x.why) << " rule=" << quoted(x.note) << "\n";
     }
     out->manifest = m.str();
 
@@ -1279,6 +1999,38 @@ class Gen : public RelFacts {
     for (const std::string& e : exes) ex << e << "\n";
     out->exes = ex.str();
   }
+
+  // ---- revision 3 helpers
+  static std::string skey(const std::string& key) { return kz::to_hex(kz::sha256(key)).substr(0, 16); }
+  std::string semantics_text() const {
+    auto it = basis_map_.find("extract.semantics");
+    if (it == basis_map_.end()) return "none (the facts have no SEMANTICS section)";
+    const std::string& v = it->second;
+    return v.substr(0, v.find(':'));
+  }
+  std::string plan_id() const {
+    const std::string t = "facts=" + kz::to_hex(c_.artifact_hash()) + "|obsrules=" + plan_rules_v4_revision() + "|relrules=" + relations_rules_revision() +
+                          "|select=" + o_.select + "|order=" + o_.order + "|budget=" + o_.budget + "|control=" + o_.control_budget + "|controlrule=" +
+                          plan_control_revision() + "|requests=" + plan_requests_revision() + "|semantics=" + semantics_text();
+    return kz::to_hex(kz::sha256(t)).substr(0, 16);
+  }
+  // the runtime's creation wrapper the spawn binding names (the runtime step that adds it records SPAWN, SPAWN_RET and
+  // TBEGIN with the creation token; docs/plan_manifest.md section 8)
+  static constexpr const char* kSpawnWrapper = "kz_rt_posix_create";
+  bool v4_ = false;
+  uint32_t control_rows_ = 0;
+  std::vector<NsFile> ns_;
+  std::vector<kz_fact_objacc> objacc_;
+  std::map<std::string, std::map<uint32_t, std::string>> arg_roles_;  // api -> argument position -> SEMANTICS arg role
+  std::map<size_t, std::string> control_kind_;                        // row -> a | b | a+b
+  std::vector<size_t> control_order_, control_planned_;
+  std::set<size_t> rows_planned_;
+  std::map<size_t, std::set<uint32_t>> row_creators_;                 // row -> its creator calls (creator and not-a-pair lines)
+  std::set<std::string> last_after_;
+  std::vector<Request> requests_;
+  size_t request_rows_ = 0;
+  std::set<std::string> lifetimes_;
+  std::map<std::string, SpawnBind> spawns_;  // site key -> its spawn binding
 
   struct FwEntry {
     std::string role, function, def_file, def_sha, decl, version;

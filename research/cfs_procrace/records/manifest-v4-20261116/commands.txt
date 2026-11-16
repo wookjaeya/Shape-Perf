@@ -1,0 +1,16 @@
+sha256 of declared_before_build.txt: 477099f63bbfa82dcbd3dd6ff394d3e7024d4aad0b2dc17f4db031401c3031f7
+# commands of the manifest revision 4 step (plan/full_stage_results_20261116.md section 11); <scratch> is this session's scratchpad
+# directory (one directory in it); times UTC
+## 0. before the declaration
+control selection rule text: kairos/docs/plan_manifest.md section 7, committed alone as 037c047 before any code that reads it was built or any plan was generated
+code (runtime/tools/manifest, runtime/tests, lib/llvm/plan_gen, tools/kz-static), fixture planv4.c and its hand-written data, tests, documents, env/tools/plan_regen.sh and run_unit.sh check 17
+two syntax and compile checks of the parser with g++ in <scratch> before the guard helper existed (no build tree; a few hundred kB), then every compile, build, extract, plan and test run under env/tools/space_guard.sh (scratch_guard/)
+scratch check build <scratch>/mv/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_BUILD_LLVM_TOOLS=ON (the pinned LLVM); targets kz-static, test_static_plan, test_rt_manifest, kz-rt-dump, test_static_reasons, test_static_cli, kz_lint
+  build 1 failed (a type used before its declaration in the class; a missing initializer), fixed; then rc 0
+  fixes during the check: the wait rule took definitions before the loop and the argument loads of the call results (now: the in-body and in-condition definitions, no loads under a call result); the lock rule read LOCK_OPS rows by their call (now: the calls of a LOCK_OPS operation in the function); the semantics role is the item's first word; the sidecar names the requests file by its name only (no output path)
+  fixture planv4.c adjusted three times until its relations had a probe-create row and a path C row (a start function that writes after the spawn; the read in a branch)
+  ctest in scratch: rt_manifest, lint_* (7), test_static_reasons 751 checks, test_static_cli, static_fixture_compile_planv4 pass; test_static_plan 275 checks with the golden written into a scratch copy of the data directory; plangen_np.plan.golden byte-identical with the new tool; the golden kept in <scratch>/mv/gkeep (golden_scratch.sha256)
+  the scratch tool on the five builds (ll_final_extract facts) into <scratch>: the default path equals ll_plans_final under masking; plans v4 and v4all, measure_v4.py: the [I] values of 11.0; the regression printers on 129 groups: 129 same; run_unit.sh 17 of 17 (TMPDIR in <scratch>)
+  these outputs are scratch and no evidence; the scratch build and outputs are removed before the build
+relink set: make -n all in the MC tree (dry run) names the recompiled sources; the relinked binaries are counted from the link.txt files that name libkzrt-manifest.a, libkz-llvm.a, libkz-trace.a or libkz-hold.a (50); the rest of the 124 of the earlier lists: 74
+tools_check.sh --deep -> tools_check_pre.txt (45 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (124 rows, 0 failing)

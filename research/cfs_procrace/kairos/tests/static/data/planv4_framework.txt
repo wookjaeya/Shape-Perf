@@ -1,0 +1,5 @@
+# The framework-layer data of the fixture planv4.c (the format of semantics/framework_api_roles.txt): its run loop and
+# its app exit, defined and declared in the fixture itself.  The sha256 is that of fixtures/planv4.c; a change of the
+# fixture changes it (test_static_plan fails until this line is updated).
+role run-loop function=run_loop def=planv4.c:91 def_sha256=fa49d889fe919497d7072b4c73ba1d0fb249d0c9987ad7512c9255d7c80b3e6f decl=planv4.c:91 decl_sha256=fa49d889fe919497d7072b4c73ba1d0fb249d0c9987ad7512c9255d7c80b3e6f version="fixture planv4.c"
+role app-exit function=app_exit def=planv4.c:93 def_sha256=fa49d889fe919497d7072b4c73ba1d0fb249d0c9987ad7512c9255d7c80b3e6f decl=planv4.c:93 decl_sha256=fa49d889fe919497d7072b4c73ba1d0fb249d0c9987ad7512c9255d7c80b3e6f version="fixture planv4.c"

@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-run need=100000000 floor=314572800 interval=2 cmd=bash regress_tools.sh /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/mv/rt_try
+start 2026-11-16T23:38:56.237Z free=1373081600 threshold=414572800
+sample 2026-11-16T23:38:56.241Z 1373077504
+end 2026-11-16T23:38:58.247Z kind=scratch-run verdict=completed rc=0 free=1371590656 lowest=1371590656 dip=1490944 change=-1490944

@@ -1,7 +1,9 @@
-// test_rt_manifest <data-dir> -- the "kzs-sites 1" / "kzs-sites 2" / "kzs-sites 3" parser accepts the example and
-// rejects what the format forbids (each with its line); version 2 adds identity reads, the place of a point or effect
-// site and parameter values, which a version 1 file cannot have; version 3 adds the readers of a request that
-// publishes its application after the spawn (app-request, owner-publish, owner-check, request-return status).
+// test_rt_manifest <data-dir> -- the "kzs-sites 1" / "kzs-sites 2" / "kzs-sites 3" / "kzs-sites 4" parser accepts the
+// example and rejects what the format forbids (each with its line); version 2 adds identity reads, the place of a point
+// or effect site and parameter values, which a version 1 file cannot have; version 3 adds the readers of a request that
+// publishes its application after the spawn (app-request, owner-publish, owner-check, request-return status); version 4
+// adds the plan header, site keys, rows, columns, ordinals and loads, need and gap statements, the spawn binding and
+// the spawn-token reader, none of which a version 1-3 file can have.
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -78,7 +80,7 @@ int main(int argc, char** argv) {
   {
     kzrt::Manifest m2;
     CHECK(!kzrt::parse_manifest("site 1 label=a\n", "nohdr", &m2, &err) && err.find("kzs-sites 1") != std::string::npos);
-    CHECK(!kzrt::parse_manifest("kzs-sites 4\n", "v4", &m2, &err) && err.find("kzs-sites 3") != std::string::npos);
+    CHECK(!kzrt::parse_manifest("kzs-sites 5\n", "v5", &m2, &err) && err.find("kzs-sites 4") != std::string::npos);
   }
   CHECK(m.version == 1u);
 
@@ -181,8 +183,109 @@ int main(int argc, char** argv) {
     CHECK(rejects(pt + "identity 3 decoder=request-return ok=0\n", "together", "3"));
     CHECK(rejects(pt + "identity 2 decoder=owner-publish owner=0 status=0 ok=0\n", "or to a request-return", "3"));
   }
+  // version 4: the plan header, site keys and positions, loads, need and gap, the spawn binding and its token reader
+  int v4_rejected = 0;
+  {
+    kzrt::Manifest m4;
+    const std::string v4 =
+        "kzs-sites 4\n"
+        "plan 0123456789abcdef facts=" + std::string(64, 'a') + " relrules=\"relations rules revision 9\" obsrules=\"plan rules revision 3\" semantics=none "
+        "select=observation-set budget=tier:D07 control=\"rows:3\"\n"
+        "source build rev=abc\nmodule 1 name=m source=build\n"
+        "site 1 label=s0001.use-call op=call.lookup phase=point tu=a.c func=init callee=lookup line=12 place=at-call skey=00000000000000a1 row=17975444d83f6589 col=19 nth=1\n"
+        "value 1 0 role=key from=arg1 type=ptr\n"
+        "site 2 label=s0002.use-call op=call.lookup phase=point tu=a.c func=init callee=lookup line=12 place=after-call skey=00000000000000a2 row=17975444d83f6589,35f07539e7606e2e col=19 nth=1\n"
+        "value 2 0 role=status from=ret type=s64\n"
+        "site 3 label=s0003.read op=load.reader phase=point tu=b.c func=reader line=861 place=load field=Rec_t.used skey=00000000000000a3\n"
+        "value 3 0 role=value from=operand0 type=u64\nvalue 3 1 role=address from=operand1 type=ptr\n"
+        "site 4 label=s0004.actor-create op=call.pthread_create phase=point tu=c.c func=create callee=pthread_create line=40 place=at-call skey=00000000000000a4\n"
+        "value 4 0 role=start_routine from=arg2 type=u64\n"
+        "spawn 4 wrapper=kz_rt_posix_create start=arg2 arg=arg3 out=arg0 ref=\"P0 thread creation\"\n"
+        "identity 4 decoder=spawn-token\n"
+        "need 1 subject=\"row 17975444d83f6589\" what=wait-result state=not-planned reason=\"plan_missing(need not planned)\"\n"
+        "need 2 subject=\"row 17975444d83f6589\" what=use-result state=planned sites=2\n"
+        "gap 1 subject=\"row 17975444d83f6589\" what=\"key text\" reason=\"record_insufficient(key text)\" rule=key-text\n";
+    if (!kzrt::parse_manifest(v4, "v4", &m4, &err)) std::fprintf(stderr, "%s\n", err.c_str());
+    CHECK(m4.version == 4u && m4.has_plan && m4.plan.id == "0123456789abcdef" && m4.plan.control == "rows:3" && m4.plan.semantics == "none");
+    CHECK(m4.site(1)->skey == "00000000000000a1" && m4.site(1)->col == 19u && m4.site(1)->nth == 1u && m4.site(1)->rows.size() == 1u);
+    CHECK(m4.site(2)->rows.size() == 2u && m4.site(2)->rows[1] == "35f07539e7606e2e");
+    CHECK(m4.site(3)->place == "load" && m4.site(3)->field == "Rec_t.used" && m4.site(3)->src_line == 861u);
+    CHECK(m4.site(4)->has_spawn && m4.site(4)->spawn.wrapper == "kz_rt_posix_create" && m4.site(4)->spawn.start_arg == 2 && m4.site(4)->spawn.arg_arg == 3 &&
+          m4.site(4)->spawn.out_arg == 0);
+    CHECK(m4.site(4)->has_identity && m4.site(4)->identity.decoder == "spawn-token" && m4.site(4)->identity.id_slot == -1);
+    CHECK(m4.needs.size() == 2u && m4.needs[1].sites.size() == 1u && m4.needs[1].sites[0] == 2u && m4.gaps.size() == 1u && m4.gaps[0].rule == "key-text");
+    CHECK(m4.skey_index.size() == 4u);
+    // a version 4 file of a backend's bindings (no plan) adds to the same manifest
+    CHECK(kzrt::parse_manifest("kzs-sites 4\nbind 7 site=1 backend=b module=1 at=\"a.c:12\" status=bound\n", "binds4", &m4, &err));
+    // none of the version 4 words in a version 3 file
+    const char* v3only[] = {
+        "site 2 label=b op=o phase=point tu=t.c func=f callee=g line=3 place=at-call skey=00000000000000a1\n",
+        "site 2 label=b op=o phase=point tu=t.c func=f callee=g line=3 place=at-call col=4\n",
+        "site 2 label=b op=o phase=point tu=t.c func=f callee=g line=3 place=at-call nth=1\n",
+        "site 2 label=b op=o phase=point tu=t.c func=f callee=g line=3 place=at-call row=17975444d83f6589\n",
+        "site 2 label=b op=o phase=point tu=t.c func=f line=3 place=load\n",
+        "plan 0123456789abcdef facts=x\n",
+        "need 1 subject=s what=w state=planned sites=1\n",
+        "gap 1 subject=s what=w reason=r\n",
+        "spawn 1 wrapper=w start=arg0 arg=arg1\n",
+    };
+    for (const char* b : v3only) { CHECK(rejects(b, "needs 'kzs-sites 4'", "3")); ++v4_rejected; }
+    const std::string at = "site 2 label=c op=o phase=point tu=t.c func=f callee=pthread_create line=3 place=at-call\nvalue 2 0 role=r from=arg2 type=u64\n";
+    CHECK(rejects(at + "identity 2 decoder=spawn-token\n", "needs 'kzs-sites 4'", "3"));
+    ++v4_rejected;
+    struct Bad {
+      std::string body;
+      const char* expect;
+    };
+    const std::string pl = "plan 0123456789abcdef facts=" + std::string(64, 'a') + " relrules=r obsrules=o semantics=none select=s budget=b\n";
+    const Bad bad[] = {
+        {"site 2 label=b op=o phase=point tu=t.c func=f line=3 place=load\n", "needs field="},
+        {"site 2 label=b op=o phase=point tu=t.c func=f line=3 place=store field=T.f\n", "only for place=load"},
+        {"site 2 label=b op=o phase=point tu=t.c func=f line=3 place=load field=Tf\n", "field=<Type.field>"},
+        {"site 2 label=b op=o phase=point tu=t.c func=f callee=g line=3 place=load field=T.f\n", "takes no callee="},
+        {"site 2 label=b op=o phase=effect tu=t.c func=f line=3 place=load field=T.f\n", "needs phase=point"},
+        {"site 2 label=b op=o phase=point tu=t.c func=f line=3 place=store col=4\n", "needs callee="},
+        {"site 2 label=b op=o phase=point tu=t.c func=f callee=g line=3 place=at-call skey=XYZ\n", "skey=<16 hex digits>"},
+        {"site 2 label=b op=o phase=point tu=t.c func=f callee=g line=3 place=at-call row=17975444d83f658\n", "row=<16 hex digits>"},
+        {"site 2 label=b op=o phase=point tu=t.c func=f callee=g line=3 place=at-call col=0\n", "col=<n>"},
+        {"site 2 label=b op=o phase=point tu=t.c func=f callee=g line=3 place=at-call skey=00000000000000a1\nsite 3 label=c op=o phase=point tu=t.c func=f callee=g line=4 place=at-call skey=00000000000000a1\n", "declared twice"},
+        {pl, "before the first site"},
+        {"need 1 subject=s what=w state=planned\n", "needs sites="},
+        {"need 1 subject=s what=w state=not-planned\n", "needs reason="},
+        {"need 1 subject=s what=w state=maybe reason=r\n", "state is"},
+        {"need 1 subject=s what=w state=planned sites=9\n", "undeclared site"},
+        {"need 1 subject=s what=w state=planned sites=1\nneed 1 subject=s what=w state=planned sites=1\n", "declared twice"},
+        {"gap 1 subject=s what=w\n", "needs reason="},
+        {"gap 1 what=w reason=r\n", "subject="},
+        {"spawn 1 wrapper=w start=arg0 arg=arg1\n", "place=at-call"},
+        {at + "spawn 2 wrapper=w start=arg2\n", "start=arg<k> and arg=arg<k>"},
+        {at + "spawn 2 wrapper=\"w x\" start=arg2 arg=arg3\n", "wrapper=<function name>"},
+        {at + "spawn 2 wrapper=w start=arg2 arg=arg2\n", "different arguments"},
+        {at + "spawn 2 wrapper=w start=arg2 arg=arg3\nspawn 2 wrapper=w start=arg2 arg=arg3\n", "declared twice"},
+        {at + "identity 2 decoder=spawn-token\n", "spawn statement first"},
+        {at + "spawn 2 wrapper=w start=arg2 arg=arg3\nidentity 2 decoder=spawn-token id=0\n", "takes no slot"},
+    };
+    for (const Bad& b : bad) { CHECK(rejects(b.body, b.expect, "4")); ++v4_rejected; }
+    // the plan statement: once per manifest, its fields
+    {
+      kzrt::Manifest mp;
+      const std::string head = "kzs-sites 4\n" + pl;
+      CHECK(kzrt::parse_manifest(head, "p1", &mp, &err));
+      CHECK(!kzrt::parse_manifest(head, "p2", &mp, &err) && err.find("declared twice") != std::string::npos);
+      ++v4_rejected;
+      kzrt::Manifest mq;
+      CHECK(!kzrt::parse_manifest("kzs-sites 4\nplan 0123456789abcdef facts=abc relrules=r obsrules=o semantics=none select=s budget=b\n", "p3", &mq, &err) &&
+            err.find("64 hex digits") != std::string::npos);
+      ++v4_rejected;
+      kzrt::Manifest mr;
+      CHECK(!kzrt::parse_manifest("kzs-sites 4\nplan 0123456789abcdef facts=" + std::string(64, 'a') + " relrules=r obsrules=o select=s budget=b\n", "p4", &mr, &err) &&
+            err.find("semantics=") != std::string::npos);
+      ++v4_rejected;
+    }
+  }
   std::printf("manifest: example accepted (%zu sites, %zu bindings), 18 malformed inputs rejected; version 2: 8 identity reads accepted, 18 rejected; "
-              "5 placed sites accepted, 7 rejected; version 3: 4 identity reads accepted, 13 rejected\n",
-              m.sites.size(), m.binds.size());
+              "5 placed sites accepted, 7 rejected; version 3: 4 identity reads accepted, 13 rejected; version 4: a plan with 4 sites, 2 needs, 1 gap "
+              "and a spawn binding accepted, %d rejected\n",
+              m.sites.size(), m.binds.size(), v4_rejected);
   return 0;
 }

@@ -46,6 +46,9 @@
 #  16 offline probe revision 2 (plan/ovm_rev1_20261116/probe/s1_rev2.py) on a stub relations text: one path A row whose
 #     label comes from its text (T?) without the line handling_label, from the fact with `handling_label: R`, from the
 #     text again with `handling_label: none`; a row with `handling_label: T` and a relocation counterpart is D14
+#  17 plan regeneration with a value requests file (env/tools/plan_regen.sh, manifest revision 4, stand-in generator):
+#     the requests file is regenerated into the scratch dir and compared (rc 0); another requests text -> rc 1; the
+#     original requests file is not written
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../../.." && pwd)"
@@ -389,6 +392,25 @@ row "$X/c.txt" "handling_label: none (no failure value to follow)"; c=$(lab "$X/
 row "$X/d.txt" "handling_label: T (over the absence value -17) T: returns 0"; d=$(lab "$X/d.txt")
 ok=0; [ "$a" = "T?/T?/text/D11" ] && [ "$b" = "R/T?/fact/D07" ] && [ "$c" = "T?/T?/text/D11" ] && [ "$d" = "T/T?/fact/D14" ] || ok=1
 res "offline probe revision 2 (stub relations rows)" $ok "no line $a; R line $b; none line $c; T line $d (label/text label/source/disposition)"
+
+# 17 plan regeneration with a value requests file (env/tools/plan_regen.sh, manifest revision 4): a stand-in generator
+X=$W/rg; mkdir -p "$X/o"
+cat > "$X/gen" <<'GEN'
+#!/usr/bin/env bash
+# stand-in generator: writes fixed files to the four outputs and the requests file (the requests text from $RG_REQ)
+while [ $# -gt 0 ]; do case "$1" in
+  -o) echo m > "$2"; shift 2 ;; --sidecar) echo s > "$2"; shift 2 ;; --modules-out|--exes-out) printf '# x plan sidecar %s sha256=0\nl\n' "$2" > "$2"; shift 2 ;;
+  --requests-out) echo "${RG_REQ:-r}" > "$2"; shift 2 ;; *) shift ;; esac; done
+GEN
+chmod +x "$X/gen"
+printf '%s\n' plan f.kz -o "$X/o/plan.kzs" --sidecar "$X/o/plan.side" --modules-out "$X/o/plan.mod" --exes-out "$X/o/plan.exe" --requests-out "$X/o/plan.req" > "$X/args.txt"
+"$X/gen" $(cat "$X/args.txt") > /dev/null 2>&1
+h0=$(sha256sum < "$X/o/plan.req")
+bash "$HERE/../plan_regen.sh" "$X/gen" "$X/args.txt" "$X/s1" > "$X/c.log" 2>&1; c=$?
+RG_REQ=other bash "$HERE/../plan_regen.sh" "$X/gen" "$X/args.txt" "$X/s2" > "$X/f.log" 2>&1; f1=$?
+h1=$(sha256sum < "$X/o/plan.req")
+ok=0; [ $c -eq 0 ] && grep -q '^same      --requests-out ' "$X/c.log" && [ $f1 -eq 1 ] && grep -q '^DIFFERENT --requests-out ' "$X/f.log" && [ "$h0" = "$h1" ] || ok=1
+res "plan regeneration with a value requests file (stand-in generator)" $ok "control rc $c, other requests rc $f1, the original requests file unchanged: $([ "$h0" = "$h1" ] && echo yes || echo no)"
 
 echo "unit checks: $((NC - NF)) of $NC pass"
 exit $((NF > 0))

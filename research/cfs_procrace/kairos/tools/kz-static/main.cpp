@@ -121,6 +121,9 @@ int usage() {
       "                         -o MANIFEST --sidecar SIDECAR --modules-out TABLE --exes-out LIST\n"
       "                         (an observation plan derived by rule: the method's observation set in the order of its\n"
       "                         priority under the budget, as a kzs-sites 3 manifest with a sidecar; docs/plan_manifest.md)\n"
+      "                         [--manifest 4 --control-budget all|rows:<n> --control-budget-reason TEXT --requests-out REQUESTS\n"
+      "                         [--namespaces F]...]   (plan rules revision 3: kzs-sites 4, the path A control selection,\n"
+      "                         value requests, the wait and object rules)\n"
       "       kz-static --identity\n",
       stderr);
   return 2;

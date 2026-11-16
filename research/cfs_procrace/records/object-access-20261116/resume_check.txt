@@ -1,0 +1,13 @@
+# after the session restart (2026-11-16T17:38:00Z): the MC tools on disk against post_mc.txt and identity_kz-static.txt, the 110 not-relinked binaries, the run status files of the nine output directories
+post_mc.txt: same (8 lines)
+identity_kz-static.txt: same
+not_relink.sha256: 110 OK
+one_build status files: 10, with result PASS: 10
+objacc_relcheck builds: c1_post_tx c1_pre_tx c5_641 c5_642 r2_core 
+objacc_order builds: c1_post_tx c1_pre_tx c5_641 c5_642 r2_core 
+objacc_off_order builds: c1_post_tx c1_pre_tx c5_641 c5_642 r2_core 
+objacc_on_order builds: c1_post_tx c1_pre_tx c5_641 c5_642 r2_core 
+objacc_plans builds: c1_post_tx c1_pre_tx c5_641 c5_642 r2_core 
+objacc_plans_off builds: c1_post_tx c1_pre_tx c5_641 c5_642 r2_core 
+objacc_plans_on builds: c1_post_tx c1_pre_tx c5_641 c5_642 r2_core 
+ledger rows of the nine directories and the copy: ledger_check_final.txt

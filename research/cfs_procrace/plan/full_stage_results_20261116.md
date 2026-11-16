@@ -1012,3 +1012,66 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 336,981,82
 - **옵션 없는 경로는 앞판과 같다**: 위 첫 다섯 줄이 그 측정이다. 다른 것은 도구 정체성에서 오는 값(머리의 tool hash 와 그것을 덮는 해시, 그 basis 해시를 인용하는 `extract.units_from`)과 계획의 개정 글뿐이다.
 - **누적 목록과 등록부**(빌드마다 따로 남김): 빌드 전 `ledger_check_pre.txt` 84 행 실패 0, `tools_check_pre.txt` 40 행 실패 0; 빌드 뒤 `ledger_check_after_build.txt` 84 행 실패 0, `tools_check_after_build.txt` 41 행 실패 0(deep); 다섯 빌드 실행과 장부 행을 더한 뒤 `ledger_check_end.txt` 94 행 실패 0(새 행 열: `OBS_objacc_relcheck`, `OBS_objacc_order`, `OBS_objacc_off_extract`, `OBS_objacc_off_order`, `OBS_objacc_on_extract`, `OBS_objacc_on_order`, `OBS_objacc_plans`, `OBS_objacc_plans_off`, `OBS_objacc_plans_on`, `TOOLS_20261116h`), `tools_check_end.txt` 41 행 실패 0(deep).
 - 바깥 이름 점검(`--tree`)은 아홉 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다(`name_check_tree.txt`).
+- 세션이 다시 시작된 뒤(17:38Z) 디스크의 MC 를 기록과 다시 맞댔다(`resume_check.txt`): `post_mc.txt` 8 줄 같음, `--identity` 가 `identity_kz-static.txt` 와 같음, `not_relink.sha256` 110 OK, 다시 뽑기의 `status.txt` 10 개 모두 `result PASS`, 나머지 일곱 출력 디렉터리에 다섯 빌드 모두. 반쯤 끝난 빌드·실행은 없었고 다시 빌드하거나 다시 돌린 것은 없다. 끝의 점검을 새 이름으로 한 번 더 남겼다: `ledger_check_final.txt` 94 행 실패 0, `tools_check_final.txt` 41 행 실패 0(deep).
+
+### 7.5 측정 [M]
+
+옵션 없는 다시 뽑기(`objacc_off_extract`)와 옵션 있는 다시 뽑기(`objacc_on_extract`), 같은 도구(kz-static `88f529b1`). 수의 출처: BASIS 항목(`measure_basis.txt`), 위치의 상태(`status_change.txt`, `status_change.py`), relations·order·계획(`compare/measure_<b>.txt`, `order_changed.txt`, `order_changed_rows.txt`), 섹션별 sha256(`section_compare.txt`).
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| OBJECT_ACCESS 행(resolved / partial / not resolved) | 6,711 (2,376 / 927 / 3,408) | 6,711 (2,376 / 927 / 3,408) | 3,729 (1,543 / 638 / 1,548) | 4,128 (2,754 / 465 / 909) | 4,130 (2,756 / 465 / 909) |
+| FIELD_TYPES 행 | 1,816 | 1,816 | 1,222 | 911 | 910 |
+| ARG_TYPES 행(지배하는 읽기가 있는 문자 배열) | 17,714 (8) | 17,715 (8) | 12,778 (7) | 7,469 (5) | 7,459 (5) |
+| `count.array_decay`: out-pointer 호출 / 주소 탈출 / 원소 writer | 147 / 74 / 34 | 147 / 74 / 34 | 85 / 43 / 18 | 165 / 53 / 43 | 166 / 53 / 43 |
+| `count.type_names_outside_root`: 소스 트리 / 절대 | 2 / 0 | 2 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| `count.sites` 옵션 없음 → 있음 | 37,325 → 46,005 | 37,327 → 46,007 | 20,640 → 25,457 | 17,985 → 21,439 | 18,123 → 21,578 |
+| 대상 위치의 writer-set-complete 옵션 없음 → 있음 | 142 → 81 | 142 → 81 | 111 → 67 | 74 → 32 | 74 → 32 |
+| complete → DISABLED (새 탈출이 있음 / 새 탈출 없이 형 단위로 드러남) | 61 (42 / 19) | 61 (42 / 19) | 44 (40 / 4) | 42 (15 / 27) | 42 (15 / 27) |
+| A-TYPE 주소 탈출 줄 옵션 없음 → 있음(더해진 줄 가운데 호출 인자 / 정수 변환) | 993 → 1,526 (131 / 1) | 993 → 1,526 (131 / 1) | 626 → 1,069 (70 / 1) | 1,357 → 2,122 (129 / 0) | 1,359 → 2,125 (130 / 0) |
+| relations 행(같은 키 / 옵션 없음에만 / 있음에만) | 367 (367 / 0 / 0) | 367 (367 / 0 / 0) | 295 (295 / 0 / 0) | 178 → 172 (171 / 7 / 1) | 175 → 169 (168 / 7 / 1) |
+| 두 쪽에 있는 행 가운데 글이 다른 행(그 가운데 `writers` 줄) | 239 (239) | 239 (239) | 178 (178) | 108 (108) | 108 (108) |
+| order 행 값이 바뀐 행 | 1 (A20 unknown → unordered) | 1 (A20 unknown → unordered) | 1 (B111 hard_before → unknown) | 0 | 0 |
+| 계획 site 옵션 없음 → 있음 | 259 → 267 | 245 → 253 | 42 → 42 | 147 → 147 | 139 → 139 |
+
+- **선언의 [I] 와**: OBJECT_ACCESS·FIELD_TYPES·ARG_TYPES 의 수, `count.array_decay`, relations 행 키(c1·r2 같음, c5 경로 B 키 7 빠짐·1 더함), order 행 값의 바뀜(c1 1, r2 1, c5 0), A21 의 `bound=20` 과 c1_pre_tx 의 계획 site 259 → 267 이 모두 scratchpad 점검 빌드의 [I] 와 같다. `compare/on_<b>.txt` 의 `new-section` 수가 BASIS 의 수보다 하나씩 많은 것은 그 절의 머리 줄을 센 것이다.
+- **§6.9 첫 항목(배열의 포인터 변환)**: c1 두 빌드와 r2_core 에서 `CFE_SB_MemParams_t::Partition.Data` 는 `writer-set-complete writers=1` 에서 `DISABLED`(escape 2: `cfe_sb_init.c:104:12` 에서 `CFE_ES_PoolCreateEx` 로 넘어가 `cfe_es_mempool.c:313:41` 의 형 변환에 쓰임, `cfe_sb_init.c:111:30` 에서 정수로 바뀜), `CFE_TBL_BufParams_t::Partition.Data` 는 `DISABLED`(escape 1: `cfe_tbl_internal.c:105:14` 의 `CFE_ES_PoolCreate` 를 거쳐 `CFE_ES_PoolCreateEx`)로 바뀌었다(`measure_basis.txt`). 그 두 행에 writer-set-complete 를 더는 말하지 않는다.
+- **위치 상태의 큰 움직임**: complete 에서 DISABLED 로 간 위치가 61/61/44/42/42 다. 두 갈래다. (가) 새 주소 탈출이 생긴 위치(42/42/40/15/15): 더해진 탈출 줄의 호출 상대는 c1 에서 35 종이고 `CFE_EVS_SendEventWithAppID` 25, `CFE_EVS_SendEvent` 20, `CFE_ES_WriteToSysLog` 15, `strncmp` 10, `CFE_SB_MessageStringSet` 8, `strcmp` 6, `OS_strnlen` 5, `snprintf` 5 가 많다(`status_change.txt`). 이들은 본문이 닫힌 프로그램에 없거나(가변 인자의 이벤트·로그 호출, C 라이브러리) 본문이 그런 함수로 인자를 넘기는 호출이라, 선언 2 의 규칙(“탈출·본문 없음·간접 호출이면 주소 탈출”)대로 탈출이다. 호출 인자 밖의 더해진 줄(c1 401)은 레코드 배열 필드가 포인터에 대입·초기화·반환되는 것(`RegRecPtr`, `AccessDescPtr` 등)이고, 앞판의 `&x.f` 탈출과 같이 그 형의 대상 필드 모두에 붙는다. (나) 새 탈출 없이 DISABLED 가 된 위치(19/19/4/27/27): 같은 형의 다른 필드가 탈출해 형 단위 상태가 DISABLED 가 되고, 그러면 프로그램의 형 없는 쓰기(c1 133, r2 99)가 그 위치에도 세어진다(`untyped 0->133`). 두 갈래 모두 앞판의 형 단위 규칙을 바꾸지 않은 결과다.
+- **C1 의 A20**(사전 시험의 대조 행, §6.10 의 2): 옵션 없이 A20 의 키는 `known`(정적 이미지 `BP_Throttles[0].Name = "BP0_tsem"`, `[1] = "BP1_tsem"`, 전제는 `BP_Throttle_t.Name` 의 writer 0 과 writer-set-complete)이었고, SCH_LAB 의 `OS_CountSemCreate`(`sch_lab_app.c:168:16`, 키 `"SCH_LAB"`)는 `not a pair: key constants differ` 로 빠졌다. 옵션 있이 `BP_Throttle_t.Name` 은 escape 6(`bp_flow.c:126:13` 의 `OS_CountSemGetIdByName` → `OS_ObjectIdFindByName`…, `:132:18` 의 `OS_CountSemCreate` → `memchr` 본문 없음, `:129`·`:135`·`:140`·`:165` 의 `CFE_EVS_SendEvent` 본문 없음)으로 DISABLED 이고, 그래서 이미지를 실행 값으로 받지 않아 키가 `unresolved`, SCH_LAB 생성이 다른 행위자의 생성자로 남아 order 가 `unordered`(짝 1)가 되었다(`order_changed_rows.txt`). 넘겨진 호출들은 그 글을 읽기만 하는 것으로 보이나, 이 도구는 본문 없는 함수의 읽기 전용 효과를 사실로 갖지 않는다 [미확인]. 이 행의 해석은 §7.8.
+- **R2 의 B111**: 옵션 있이 `CFE_TBL_TblRegPacket_Payload_t.OwnerAppName` 에 사용 호출 자신(`cfe_tbl_task_cmds.c:326:9` 의 `CFE_ES_GetAppName`, `cfe_es_api.c:829` strncpy·`:830`·`:835` 원소 저장)이 out-pointer writer 셋으로 더해졌고, order 는 그 writer 와 같은 호출의 사용을 한 스레드의 짝 `unknown` 으로 세어 행 값이 hard_before → unknown 이 되었다(`order_changed_rows.txt`). 같은 호출 안의 쓰기와 그 호출의 사용을 짝으로 볼지는 order 규칙의 일이다(§7.8).
+- **c5 의 relations 행**: 빠진 경로 B 키 7 은 `CFE_TBL_LoadBuff_t.DataSource`(5), `CFE_TBL_RegistryRec_t.LastFileLoaded`, `CFE_TBL_RegistryRec_t.Name` 이고, 더한 1 은 `EVS_AppData_t.BinFilters` → `EVS_FindEventID#1` 이다(`compare/measure_c5_641.txt`). c1·r2 의 행 키는 바뀌지 않았다.
+- **계획**: c1 두 빌드에서 site 가 8 늘었다(옵션 있음에만 12 줄, 없음에만 4 줄; `CFE_TBL_GetTblRegData` 의 `CFE_ES_GetAppName` 이 use-call+writer 로, `CFE_TBL_EarlyInit` 의 memset 두 site 의 참조가 늘고, 새 site 여덟은 `CFE_TBL_*` 의 저장 writer 다: `cfe_tbl_internal.c:1267`, `:941`, `:984`, `cfe_tbl_api.c:864`, `:1512`, `:312`, `:403`, `:637`). r2·c5 는 site 줄이 같다.
+- **키 글의 상한**(plan rules revision 2): c1_pre_tx 의 계획에서 A21 의 사용 호출(`cf_cfdp.c:993`, `OS_CountSemGetIdByName` 인자 1)의 키 값이 `string=pointer-only` 에서 `string=validated bound=20` 이 되었다. 참조 글: `CF_ChannelConfig_t.sem_name`, 크기 20(`cf_tbldefs.h:74`), 읽기 `cf_cfdp.c:991:46` 이 호출을 지배; sidecar 에 `bound string-extent source=ARG_TYPES` 한 줄(`plan_key_c1.txt`). 옵션 없는 facts 의 계획은 개정 줄 밖에서 앞판과 같다(`compare_plans.txt`). c1_post_tx 의 계획에는 옵션 없음·있음 모두 키 값이 있는 사용·생성 호출이 없다(`compare/measure_c1_post_tx.txt`).
+- **같은 정의는 같은 이름**(`compare/names_c1.txt`, `names_c1_off.txt`): 옵션 있이 위치가 붙은 형 이름 pre 17, post 17, 공통 17, 한쪽에만 0(소스 트리 1, 루트 기준 16). 옵션 없이는 공통 16, 한쪽에만 2(`item@/home/user/work/procrace/c1_build/{pre,post}/src/cf/fsw/src/cf_cmd_c:945::type`). 옵션 있는 쪽의 이름은 `item@<cf>/fsw/src/cf_cmd_c:945::type` 이고 두 빌드의 facts 에 각각 66 줄로 있다(`names_in_dump_c1.txt`). BASIS 의 `count.type_names_outside_root` 는 `by source tree 2` 인데 facts 의 dump 에 든 서로 다른 이름은 1 이다(§7.7).
+- **회차의 섹션별 sha256**(`section_compare.txt`): 옵션 없는 회차 섹션 39, 옵션 있는 회차 42(새 셋), 같은 섹션은 c1·c5 3, r2 1. 나머지가 다른 것은 site 번호(`count.sites` 가 늘어남)와 문자열 표의 위치가 섹션의 레코드와 crc32 에 들기 때문이다; 뜻의 비교는 facts 보기의 갈래 비교(`compare/on_<b>.txt`)가 했다. 이 둘은 중간 회차이고, 마지막 옵션 회차가 섹션 단위로 견준다.
+
+### 7.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 17:02:22 | 2,713,444,352 | 사본 시작(dip 43,347,968) |
+| 17:04:54 | 2,670,075,904 | `make kz-static` 시작(가장 낮은 2,413,133,824, dip 256,942,080) |
+| 17:08:43 | 2,664,148,992 | `make all` 시작(dip 38,322,176) |
+| 17:15:50–17:21:55 | 2,646,081,536 → 2,476,085,248 | relations(dip 7,675,904), order(14,209,024), 다시 뽑기 옵션 없음(47,161,344), 그 order(21,856,256), 계획 둘(987,136 씩), 다시 뽑기 옵션 있음(54,165,504), 그 order(21,946,368), 계획(991,232) |
+| 17:22:11–17:22:58 | 2,483,159,040 → 2,490,040,320 | 비교(facts 보기는 scratchpad, 끝에 지움; 옵션 비교의 dip 117,391,360) |
+| 17:36 | 2,496,573,440 | 측정용 facts 보기(scratchpad, 약 200 MB)를 지운 뒤 |
+| 이 절을 쓸 때 | 2,496,471,040 | 끝의 장부·등록부 점검 뒤 |
+
+- 하한(314,572,800)을 넘지 않았다. `make kz-static` 의 dip 256,942,080 은 필요량(336,981,824) 안이지만 필요량 계산에 넣은 앞 kz-static 빌드 dip 의 최대(123,981,824)보다 컸다(§7.7).
+- 남긴 출력(장부 행): `objacc_relcheck`, `objacc_order`, `objacc_off_extract`, `objacc_off_order`, `objacc_on_extract`, `objacc_on_order`, `objacc_plans`, `objacc_plans_off`, `objacc_plans_on` 합 147,744,408 B, 사본 `kz-static.6adc1bdd.xz` 43,317,232 B. 지운 것: scratchpad 의 점검 빌드와 그 출력(선언 전), 비교와 측정의 facts 보기(scratchpad)뿐이다.
+
+### 7.7 계획과 다르게 한 것
+
+- **세션이 끊겨 이어서 했다.** 빌드·시험·golden·다섯 빌드 실행·비교는 lead 의 스냅숏 커밋 `61f1122` 에 들었고, 이어 받은 뒤 디스크의 도구와 출력이 기록과 같음을 확인했다(`resume_check.txt`). 다시 빌드하거나 다시 돌린 것은 없다. 이어 받은 뒤에 더한 것: `status_change.py`·`status_change.txt`, `order_changed.txt`, `order_changed_rows.txt`, `a20_keys.txt`, `names_in_dump_c1.txt`, `resume_check.txt`, `ledger_check_final.txt`, `tools_check_final.txt`, 이 §7.4 끝 줄과 §7.5–§7.8. 측정 스크립트 `status_change.py` 는 선언에 없던 것이며, 판정이 아니라 선언의 측정(“허용 목록 없이 잰다”)을 위치 상태로 넓힌 것이다.
+- **빌드 dip 이 필요량 계산의 바탕보다 컸다**: `make kz-static` 256,942,080 B 대 앞 최대 123,981,824 B. 그 까닭은 재지 않았다 [미확인]. 선언한 필요량(336,981,824) 과 감시 문턱(651,554,624) 안이었다. 다음 kz-static 빌드의 필요량은 이 값을 바탕으로 한다.
+- **BASIS `count.type_names_outside_root` 의 수**가 facts 에 든 이름의 수와 다르다(2 대 1, `names_in_dump_c1.txt`). 그 셈은 이름을 만든 차례마다 집합에 넣으므로(`lib/llvm/ast_tu.cpp:251-253`) facts 에 쓰이지 않는 이름도 든다 [미확인: 다른 하나가 무엇인지 남긴 출력으로 보이지 않음]. 선언은 이 항목의 값을 정하지 않았으므로 선언 밖의 차이는 아니고, 항목의 뜻은 `docs/static_facts.md` §5s 의 “둘을 센다”보다 넓다.
+- 선언 밖의 차이는 없었다. 덧붙임은 없다.
+
+### 7.8 열린 것
+
+- **본문 없는 함수의 읽기 전용 효과**: 더해진 주소 탈출의 다수는 글을 읽기만 하는 것으로 보이는 호출(`strcmp`, `strncmp`, `strlen`, `OS_strnlen`, `printf`, 가변 인자의 이벤트·로그 호출)이다. 이 효과를 사실로 가지면(C 라이브러리 함수의 효과는 P0 표의 비교 갈래와 함께) writer-set-complete 의 일부와 C1 A20 의 `known` 키가 돌아올 수 있다. 효과의 대조는 링크한 C 라이브러리 판의 글이 필요하고 그 글은 이 작업 환경에 없다(새 외부 자원, `unverified`). 자리: 의미와 확인 상태 단계(P0 항목의 의미).
+- **A20 의 대조**(§6.10 의 2, (가)): 옵션 있는 facts 의 A20 은 키 `unresolved` 이고 SCH_LAB 생성과 `unordered` 짝을 갖는다. 사전 시험의 대조 선택 규칙(manifest 개정 4 의 생성기)은 이 행을 (가)로 넣지만, 기대([I])를 커밋할 때 이 facts 를 쓰면 키 글의 기대가 옵션 없는 facts 와 다르다. 어느 facts 로 기대를 적는지는 마지막 옵션 회차 뒤에 정한다.
+- **같은 호출 안의 out-pointer 쓰기와 그 호출의 사용**(R2 B111): order 가 이를 한 스레드의 `unknown` 짝으로 센다. 같은 호출의 쓰기를 사용의 일부로 볼지 order 규칙에 정할 일이다.
+- **함수·객체 키의 절대 위치**: 형 이름만 소스 트리 기준이 되었고, 루트 밖 함수의 키(`initialize_throttling@/home/user/work/procrace/c1_build/pre/…`)와 위치는 절대 경로다. 그래서 같은 관계의 키가 c1_pre_tx 와 c1_post_tx 에서 다르다(A20 `35f07539e7606e2e` 대 `bdcc6978b9a41c8c`; 키 글 `A|OS_common_record_t.name_entry|initialize_throttling@/home/user/work/procrace/c1_build/{pre,post}/src/bp/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1`, `a20_keys.txt`). 빌드 사이 비교 단계가 이 키를 쓰기 전에 정한다. 계획의 ARG_TYPES 참조 글에도 절대 위치가 든다(`plan_key_c1.txt`).
+- **`count.type_names_outside_root` 의 뜻**(§7.7): facts 에 쓰인 이름만 세도록 할지, 문서의 글을 고칠지.
+- 이 회차의 출력은 중간 회차다. 마지막 옵션 회차(루프 술어·잠금 정체성 단계)가 섹션 단위로 견주고, 같으면 이 회차를 “뒤 회차로 다시 만들 수 있음”으로 적는다.

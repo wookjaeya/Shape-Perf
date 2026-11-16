@@ -1,0 +1,7 @@
+# distinct type names with a source-tree position ("@<tree>/") in the kz-dump text of the option-on facts, with the number of lines that hold them; and the BASIS item count.type_names_outside_root; 2026-11-16T17:36:06Z
+== c1_pre_tx
+     66 item@<cf>/fsw/src/cf_cmd_c:945::type
+count.type_names_outside_root" value="by source tree 2, absolute (no source tree) 0" policy=unset prov=none deviation=none
+== c1_post_tx
+     66 item@<cf>/fsw/src/cf_cmd_c:945::type
+count.type_names_outside_root" value="by source tree 2, absolute (no source tree) 0" policy=unset prov=none deviation=none

@@ -1,0 +1,9 @@
+# rows of order.txt whose order.static value differs between objacc_off_order and objacc_on_order (same key), 2026-11-16T17:34:36Z
+c1_pre_tx key 35f07539e7606e2e off A20 unknown on A20 unordered
+c1_pre_tx changed 1
+c1_post_tx key bdcc6978b9a41c8c off A20 unknown on A20 unordered
+c1_post_tx changed 1
+r2_core key cc073460235b0623 off B111 hard_before on B111 unknown
+r2_core changed 1
+c5_641 changed 0
+c5_642 changed 0

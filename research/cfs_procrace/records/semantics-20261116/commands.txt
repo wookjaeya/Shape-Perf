@@ -1,0 +1,19 @@
+sha256 of declared_before_build.txt: b7b4657d3ab51ea07b515c4423b4de9f613c751e84ef326205bda56c3ce203ae
+# commands of the semantics step (plan/full_stage_results_20261116.md section 8); <scratch> is this session's scratchpad
+# directory (one directory in it); times UTC
+## 0. before the declaration
+coverage rule, component list with anchors and scan committed: 40aa9f5 (18:03:39Z), before any data file
+semantics_scan.py generate -> kairos/semantics (scan_generate_1.txt, 18:03:55Z); lint case-ids-data -> lint_data_1.txt (1 violation: the absolute path of the local
+  C library copy in the P0 declarations file); the scan writes the copy's file name only; the 13 generated files removed (not committed), generate again
+  -> scan_generate_2.txt, check -> scan_check_2.txt PASS, lint -> lint_data_2.txt clean; the check of the source line added -> scan_check_3.txt PASS
+fixture: fixture_trees.tsv, generate -> fixture_generate_1.txt; the fixture comment reworded (lint no-generated); generate again -> fixture_generate_2.txt, check -> fixture_check_2.txt PASS
+c_library_headers.txt: dpkg-query of the C library packages, sha256 and package of the pinned headers, the changelog lines naming pthread_create
+scratch check build <scratch>/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_BUILD_LLVM_TOOLS=ON (the pinned LLVM), every make under env/tools/space_guard.sh
+  (df_scratch_cfg.log, df_scratch_build1..7.log), all rc 0; fixes during the check: status-space rows' declaration line, nonnull attributes split outside
+  parentheses, constants not shown to reach the return marked; ctest -L 'static|lint': 71 tests, 1 failing (static_golden_semantics_np: no golden yet);
+  test_static_cli 1058 checks, lint_selftest 114; the golden semantics_np written into a scratch copy of the data directory (golden_scratch.sha256)
+  -> one_build.sh with the scratch kz-static on the five builds with --object-access and the eight --semantics files into <scratch>/x; compare_sem.py,
+  compare_rel_sem.py against objacc_on_extract, plans, relations with keys, measure_sem.py: the [I] values of 8.0; these outputs are scratch and no
+  evidence; <scratch>/sbuild, x, pl and the views removed before the declaration
+tools_check.sh --deep -> tools_check_pre.txt (41 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (94 rows, 0 failing)
+relink_expected.sha256 (15) and not_relink.sha256 (109): sha256 of the MC binaries before the build

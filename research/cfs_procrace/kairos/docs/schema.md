@@ -403,6 +403,7 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
   - ARG_TYPES(139, `kz_fact_argtype` 44 B): 호출 인자마다 선언 형의 종류, 문자 배열의 크기와 선언 위치, 호출을 지배하는 지점에서 그 메모리를 읽는지.
   - LOOP_DEFS(140, `kz_fact_loopdef` 48 B): 루프 조건이 읽는 지역의 정의와 플래그 술어의 인식 여부. 인식한 술어는 이 섹션에만 적는다(FACT_LOOPS·AWAIT_L1 의 행은 그대로).
   - SEMANTICS(141, `kz_fact_sem` 72 B): 이 빌드에 이은 의미 표, (api, 칸 항목)마다 한 행, 층(P0·프레임워크·상태 공간), 출처, 검증 상태.
+    (2026-11-16 덧붙임: `kz-static extract --semantics` 가 이 레코드 그대로 쓴다; 필드를 더하거나 바꾸지 않음. `docs/static_facts.md` §5t.)
   - RESULT_FLOW(142, `kz_fact_rflow` 76 B): 결과가 있는 호출마다 그 결과가 닿는 사용(분기·반환·인자·저장·루프 탈출)과 정의의 유일성.
   - RESULT_EFFECT(143, `kz_fact_reffect` 72 B): (호출, 결과 부류)마다 그 부류가 가는 경로의 효과와 `complete` / `open`(이유).
   - LOCK_HANDLES(144, `kz_fact_lockh` 56 B): 핸들 식으로 정한 잠금 정체성, 핸들의 writer 와 그것이 기대는 의미 항목, 전제.

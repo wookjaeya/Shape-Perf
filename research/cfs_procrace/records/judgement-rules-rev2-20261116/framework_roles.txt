@@ -1,0 +1,3 @@
+framework-layer data sha256 e2a39203bac0b9a5
+      4 app-exit function=CFE_ES_ExitApp
+      4 run-loop function=CFE_ES_RunLoop

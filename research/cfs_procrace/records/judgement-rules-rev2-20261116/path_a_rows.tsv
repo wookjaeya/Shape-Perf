@@ -1,0 +1,6 @@
+build	relations_sha256	A_rows	A_rows_in_plan	A_rows_planned	planned_A
+c1_pre_tx	7c7396d2c7c10626	127	127	5	A21,A22,A23,A50,A51
+c1_post_tx	0a3bf6d9c9483c20	127	127	4	A22,A23,A50,A51
+r2_core	3a6fcf81f41a7795	68	68	0	-
+c5_641	b62fd1f24a49515f	66	66	0	-
+c5_642	996d32bd1debc868	66	66	0	-

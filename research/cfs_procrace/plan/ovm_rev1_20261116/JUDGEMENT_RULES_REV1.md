@@ -2,6 +2,8 @@
 
 이 문서는 cFS 애플리케이션 사이의 order violation을 찾는 방법 문서(아래 "OVM")의 판정 조항을 고치는 안이다. 무엇을 "위반"이라고 부르는지, 그 판정이 어떤 자동 근거를 필요로 하는지, 근거가 모자랄 때 무엇이라고 보고하는지를 정한다.
 
+(2026-11-16 덧붙임) 개정 2(경로 A 부재 결과의 이름 결합)는 8절에 날짜를 붙여 덧붙였다. 0–7절의 개정 1 글은 그대로 두고, 개정 2 가 바꾸는 조항은 8.1 의 변경표에 적었다.
+
 ## 0. 이 문서의 지위와 읽는 법
 
 ### 0.1 지위
@@ -656,3 +658,211 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 - 한 것: OVM의 판정 조항을 줄 번호로 짚어 개정안을 적었다. 관계 행 다섯(A21, B65, C31, C30, 그리고 B64의 머리·처리·평가 줄)과 탐침 둘(`clauseB.py`, `s1.py`), 탐침 출력 하나(`clauseB.out`)를 직접 읽어 인용했다. 다섯 사례를 새 서식으로 다시 적었다.
 - 하지 않은 것: cFS의 빌드와 부팅, 탐침의 재실행, OVM의 수정, 규칙의 구현. 과거 실행의 수치는 모두 문서 보고다. 결정 검토서의 원문은 이 환경에 없어 대조하지 못했다. 논문 원문도 이번에 다시 대조하지 않았다.
 - 이 문서로 주장할 수 있는 것은 "같은 자료에 대해 규칙, 탐침의 계산, 사례의 예상 판정이 서로 어긋나지 않게 하려면 판정 조항을 이렇게 고쳐야 한다"까지다. 탐지 성과는 주장하지 않는다.
+
+## 8. 개정 2 (2026-11-16): 경로 A 부재 결과의 이름 결합
+
+### 8.0 지위, 범위, 내력
+
+- **지위.** 이 절은 따로 표시하지 않는 한 [보강 제안]이다. 개정 1 의 글(0–7절과 그 안의 날짜 붙은 덧붙임·정정)은 지우거나 고치지 않는다. 개정 2 가 바꾸는 조항은 8.1 의 변경표에 적고, 개정 1 의 글과 개정 2 가 어긋나면 8.1 의 표가 정한 쪽을 따른다. 이 개정은 문서만 바꾼다. 도구, 설명 스크립트, 어휘 자료는 바꾸지 않았다(8.7, 8.10).
+- **범위.** 축 1(연결)의 증거에 **이름 결합**(name binding)을 더하고, 그것이 주는 상태, 빠진 조건마다의 값, 같은 조건 위의 refuted 규칙, 서식 검사, 대조 실행의 요구를 정한다. 3.3 의 판정 표의 조건 글은 바꾸지 않는다(8.5).
+- **출발점.** lead 의 결정(`plan/observation_path_results_20261116.md` §7.12 항목 2, 2026-11-16): 옛 L-ABS 물음을 PI 결정이 아니라 같은 객체 연결의 기술 문제로 다루고, 다섯 조건의 이름 결합을 판정 규칙의 개정으로 정의하며, 하나라도 빠지면 `unlinked` 로 둔다. 이 절은 그 다섯 조건을 규칙의 글로 옮기고, 조건마다 1차 근거와 빠질 때의 값을 붙인 것이다.
+- **이 정의는 C1 기록을 본 뒤에 썼다.** 파생 C1 빌드의 자연 부팅 하나(결과 문서 §6–§7)에서 CF 의 조회(행위자 12, t_init 뒤 1556.926 ms)는 -17 `OS_ERR_NAME_NOT_FOUND` 를 받았고, 같은 키 글 "BP0_tsem" 의 BP 생성(행위자 13)은 9.943 ms 뒤였다(결과 문서 §7.3). 개정 1 의 축 1 을 적힌 대로 쓰면 경로 A 의 부재 결과는 언제나 `unlinked` 다(§7.11.7). 이 규칙은 그 기록을 보고 나서 그 빈자리를 메우려고 정의한 것이므로, C1 에 맞춘 규칙이 될 위험이 있다. 그 위험을 다음으로 다룬다. (1) 조건의 입력은 프레임워크 계층 자료, 판 고정 소스, 정적 사실, 실행 기록뿐이고, 규칙에 사례의 앱·함수·키·행 이름이 없다(D3). (2) 같은 규칙을 C1 관계 밖의 경로 A 행에 돌려 결과를 함께 낸다: BP 자신의 존재 탐침 행을 같은 행위자 대조로, 다른 빌드의 경로 A 행을 같은 규칙의 적용으로(8.6). (3) 이 주기의 C1 기록에 이 규칙을 돌린 결과는 "규칙을 정하기 전에 본 기록"으로 따로 표시하고, 사전에 정한 규칙의 시험으로 세지 않는다. 사전 시험으로 세는 것은 이 개정의 커밋 뒤에 처음 얻는 기록이다(8.6). (4) 대조의 기대는 실행 전에 [I] 로 여기 적는다(8.6).
+- **이 주기의 기록은 바뀌지 않는다.** §7.12 항목 2 대로 이 주기의 기록은 축 1 을 적힌 대로 쓴 값(`link = unlinked`)이다. 이 개정이 요구하는 입력이 아직 없으므로(8.7) 개정 2 로 읽어도 관계 1 의 연결은 `unlinked` 다(8.8). 기록을 다시 내지 않는다.
+
+### 8.1 변경표
+
+| 번호 | 조항 | 개정 1 | 개정 2 | 1차 근거 (8.9) |
+|---|---|---|---|---|
+| N01 | 3.2 축 1, 인정하는 증거 | 생성 관계, 소속 앱의 생성 이력, 같은 빌드의 실행에서 읽기와 쓰기가 같은 객체 인스턴스에 닿았다는 기록 | 더함: **이름 결합**(8.2, 새 4.3 G-NAME). 경로 A 에서 객체를 찾지 못한 사용과 게시자의 생성 사이에서만, 기초 요건과 다섯 조건이 모두 설 때 | G1, G2 |
+| N02 | 3.2 축 1, 인정하지 않는 것 | "ID 문자열이 같다는 것" | 글 그대로. 같은 이름 글은 이름 결합의 한 항목(기초 요건 5, 조건 (나))으로만 쓰이고, 그것만으로는 여전히 증거가 아니다 | G3 |
+| N03 | 3.2 축 1, 필드 | `link.resource_key` 등 | 더함: `link.basis`(`instance` 또는 `name_binding`; status 가 `established` 일 때만 있음), `link.name_binding`(쌍마다: 기초 요건 여섯과 조건 다섯 각각의 `held`·`missing`·`contradicted`, 근거, 하위 사유; 쌍의 결과 `bound`·`refuted`·`unlinked`), `link.refuted_scope` | G4 |
+| N04 | 3.2 축 1, status | `established`, `refuted`, `unlinked` | 값은 셋 그대로다. `established` 아래에 바탕 둘을 둔다: `instance`(개정 1 의 같은 인스턴스 기록), `name_binding`(8.2). `refuted` 의 규칙은 8.3 | G4, G11 |
+| N05 | 3.3 의 세 표 | — | 조건 글을 바꾸지 않는다. `established` 는 두 바탕을 함께 뜻한다. 머리말의 꼬리표, 바탕별 집계, `odf = shown` 의 단서는 8.5 | G4 |
+| N06 | 3.1 `actor_pair_kind` | 앱–앱, 코어–코어, 생성자–앱, 같은 앱의 주 작업–자식 작업, `unknown` | 더함: `same_actor`. 같은 행위자 대조 기록(8.6)에만 쓰고, 3.4 의 탐지 모집단에 넣지 않는다 | G12 |
+| N07 | 3.5 | 하위 사유 표기 | 이름 결합의 하위 사유 표(8.4)를 더한다. 새 바탕 사유는 없다(8.10) | G14 |
+| N08 | 3.6 | 검사 1–8 | 더함: 검사 9–11(8.5) | G4, G11, G13 |
+| N09 | 4.2 표, 경로 A 행 | "키의 실행 값과 같은 이름 객체의 연결이 더해져야 한다" | 그 연결의 정의가 8.2 다. 이름 결합은 축 1 의 것이고 (c1)–(c4) 를 대신하지 않는다 | G2 |
+| N10 | 4.3 (새) | 없음 | G-NAME 이름 결합: 8.2 를 4.1 의 서식(입력 사실, 전제, 출처, 보장 범위, 미해결 조건, 반례)으로 읽는다 | 8.9 |
+| N11 | 5.1 C1, 연결 | `unlinked` | 값 그대로. 개정 2 로 읽은 빠진 것은 8.8 의 표 | G13 |
+| N12 | 6절 | 1–7 | 더함: 8.11 의 8–13 | — |
+
+### 8.2 이름 결합 (새 4.3, G-NAME)
+
+**적용 대상.** 경로 A 의 기록 하나(빌드, 행, 소비 행위자) 안에서, 소비자의 사용 사건 u(행의 사용 호출 site 의 at-call 과 after-call)와, 행의 생성자 site 에 사건이 있는 게시 행위자의 생성 사건 c(생성 호출의 at-call 과 after-call)의 쌍. 이름 결합은 u 가 **부재 결과**(객체를 찾지 못함)일 때만 정의한다. u 가 객체를 찾아 out id 를 읽었으면 축 1 은 개정 1 의 인스턴스 증거로 정하고 이 규칙을 쓰지 않는다.
+
+**기초 요건.** 개정 1 의 축과 설명 스크립트 개정 2 가 이미 요구하는 것이다. 하나라도 없으면 그 사유로 그 쌍은 `unlinked` 다.
+
+| 요건 | 내용 | 없을 때의 사유 |
+|---|---|---|
+| 기초 1 | 같은 빌드·같은 실행·같은 프로세스: 3.1 의 결합이 거부되지 않음. `compat` 의 글은 기록에 그대로 싣는다 | `build_mismatch` 또는 `no_run` |
+| 기초 2 | 소비자와 그 게시자의 생성 인자 묶기와 root 묶기가 `determined` | 기존 `link_unlinked(consumer creation tie …)` 등(설명 스크립트 개정 2 의 글) |
+| 기초 3 | u 의 반환이 그 이름 공간의 **부재 상수**다: 행의 `search returns` 가 주는 상수 가운데, 조건 (나)의 의미가 "그 표에 맞는 기록이 없음"으로만 생긴다고 정한 것 | `link_unlinked(name binding: the use's status is not the absence constant of the namespace)` |
+| 기초 4 | c 의 반환이 생성자 callee 의 성공 상수(행의 `callee-check: <생성자 callee> returns` 줄에서 실패 등급이 아닌 유일한 상수)이고, c 의 out id 를 그 아래에서 읽었다 | 기존 `record_insufficient(no success constant of the creator: the creator's out id is not read)` |
+| 기초 5 | u 와 c 의 키 글이 기록에 있고 잘림 표지가 없다 | 기존 `record_insufficient(key text)` |
+| 기초 6 | c 가 관측 구간(RUN 의 t_init–t_stop) 안에 있고, c 의 at-call 이 u 의 after-call 뒤다(겹치지 않음) | `link_unlinked(name binding: the create is not after the use)`; c 가 u 앞에 끝났으면 아래의 모순 규칙 |
+
+**다섯 조건.** lead 결정의 (가)–(마) 그대로이고, 조건마다 무엇이 증거이고 무엇이 증거가 아닌지를 정한다. 조건의 근거로 받는 출처는 프레임워크 계층 자료의 항목, 도구가 낸 정적 사실과 관계 행, 실행 기록뿐이다. 아래의 "판의 읽기"는 이 개정을 쓰면서 소스를 직접 읽은 것이고, 자료가 어떤 내용을 담아야 하는지를 보이는 예다. 그 읽기 자체는 사람의 읽기라서 조건의 근거가 되지 않는다(D3, D6).
+
+**(가) 이름 공간이 프레임워크 계층 자료가 판과 원문 줄로 정한 한 표다.**
+- 증거: 프레임워크 계층 자료(`kairos/semantics/` 의 판 붙은 자료)의 **이름 공간 항목** 하나가 이 빌드에 적용된다. 항목은 객체 종류, 표(기록 형과 키 필드, 종류를 고르는 값), 그 표를 쓰는 조회·생성·삭제·회수 API, 프레임워크의 판 문자열, 원문 줄(정의 파일:줄과 그 파일의 판 고정 sha256)을 적는다. 항목이 빌드에 적용되는 규칙은 지금 자료의 역할 항목과 같다: 그 빌드의 facts 가 정의 파일을 그 sha256 으로 갖고 그 줄에서 함수를 정의할 때(`kairos/semantics/framework_api_roles.txt:7-8`). 항목의 범위는 판 고정 헤더의 기계적 훑기로 정하고 사례의 API 로 정하지 않는다(D3, 4.2 항목 2).
+- 증거가 아닌 것: 관계 행의 `namespace` 칸만(정적 추출이 키 필드로 묶은 이름이지 프레임워크의 판이 정한 표가 아니다), 사람이 사례를 보고 적은 표.
+- 빠질 때: `link_unlinked(name binding: no namespace entry in the framework-layer data)`.
+- 오늘 [직접 확인: `records/judgement-rules-rev2-20261116/framework_roles.txt`]: 프레임워크 계층 자료 `e2a39203…` 의 항목은 run-loop 넷과 app-exit 넷(판 넷)뿐이다. 이름 공간 항목은 없다.
+
+**(나) 이름 비교의 의미(비교 함수와 한도)를 판이 고정된 소스에서 읽었고, 양쪽 키 글이 검증되었고 잘리지 않았다.**
+- 증거: (1) 이름 공간 항목이 비교 함수(정의 파일:줄, sha256)와 비교의 종류(예: NUL 까지의 바이트 전체 비교), 키의 한도(상수 이름과 그 빌드의 설정 헤더에서의 값과 줄), 저장되는 이름이 주어진 글과 같다는 것(저장 복사의 크기와 한도의 관계), 부재 상수와 그 상수를 내는 모든 경로를 적는다. 비교 함수가 부르는 C 라이브러리 함수의 P0 항목은 그 빌드가 링크한 판의 소스와 대조된 상태다. (2) u 와 c 의 키 글이 모두 그 한도 안에서 NUL 로 끝나고(길이 < 한도) 잘림 표지가 없음을 기록이 보인다.
+- 판의 읽기 [직접 확인: C1 의 bundle 1df262a 소스, OSAL 5.0.99 (`osapi-version.h:37-45`)]: 비교는 `OS_ObjectNameMatch` 의 `strcmp((const char *)ref, obj->name_entry) == 0`(`osal/src/os/shared/src/osapi-idmap.c:269-272`). 저장은 `strncpy(ref->namefield, nameval, sizeof(ref->namefield) - 1)` 뒤 `name_entry = ref->namefield`(`osal/src/os/shared/inc/os-shared-idmap.h:105-110`)이고 그 필드는 `char obj_name[OS_MAX_API_NAME]`(`os-shared-countsem.h:35`)이다. 생성은 `OS_CHECK_APINAME`(`osapi-countsem.c:91` → `os-shared-globaldefs.h:128-140`, `LENGTHCHECK` 는 `memchr(str, '\0', len)` `osapi-macros.h:137`)으로, 조회는 `LENGTHCHECK(name, OS_MAX_API_NAME, OS_ERR_NAME_TOO_LONG)`(`osapi-idmap.c:973`)으로 길이를 본다. 그래서 두 검사를 통과한 이름은 한도보다 짧고, 저장 복사는 잘리지 않는다. 한도 `OS_MAX_API_NAME` 은 파생 작업 공간의 `build/osal_public_api/inc/osconfig.h:163` 에서 20 이다. 부재 상수 -17 을 내는 경로는 일치 없음(`OS_ObjectIdFindNextMatch` 의 초기값 `osapi-idmap.c:545`, 검색 루프 `:550-567`)과 NULL 이름(`ARGCHECK(name, OS_ERR_NAME_NOT_FOUND)` `:972`)이고, 이 API 에서는 NULL 이 `OS_CHECK_POINTER(sem_name)`(`osapi-countsem.c:210`)에서 먼저 막혀 -17 에 닿지 않는다. 항목은 이런 경로를 모두 적어야 기초 3 이 선다.
+- 증거가 아닌 것: 비교 함수가 있다는 것만, 사람이 읽은 한도, 런타임이 복사한 바이트 수만으로 한 검증(아래 "오늘"의 조회 쪽).
+- 빠질 때: 의미가 없으면 `link_unlinked(name binding: comparison semantics not read from the pinned source)`; 한도로 검증되지 않은 키 글은 `link_unlinked(name binding: key text not validated against the namespace bound)`; 잘린 키 글은 `record_insufficient(key text)`.
+- 오늘 [직접 확인]: 비교 의미의 항목은 없다. P0 비교 표의 `strcmp` 는 "byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified" 다(`relations.txt:11`, 입력 sha256 `7c7396d2…`). 계획은 생성 쪽 키 글을 facts 에서 읽은 한도 20 으로 검증하도록 놓았고(`plan.kzs:903` `string=validated bound=20`, "bound memchr of the parameter with the length 20 at osapi-countsem.c:91:5"), 기록의 그 사건은 arg2 = 0x14 다(`c1_record_sites.txt`). 조회 쪽 키 글은 런타임 복사 한도 64 로만 검증된다(`plan.kzs:907`, `KZ_RT_STR_MAX 64u` `kairos/runtime/include/kz_rt.h:82`). 이름 공간의 한도로 본 검증은 아니다.
+
+**(다) 그 표에 별칭이나 다른 이름 대응이 없다는 근거가 소스에 있다.**
+- 뜻: 그 종류의 기록에서 키 필드가 담는 글은 생성이 받은 이름뿐이고, 생성 뒤 그 글을 다른 이름으로 바꾸거나, 다른 글을 같은 기록으로 이끄는 대응(별칭 표, 접두어, 대소문자 접기, 경로 정규화 같은 것)이 없다.
+- 증거: 그 종류의 키 필드의 writer 가 완전한 writer 집합(FIELD_STATUS 의 complete)으로 나오고 객체 종류마다 나뉘어 있으며, 그 종류의 writer 가 생성의 이름 복사와 지우기뿐이다. 조회 경로는 키 글을 바꾸지 않고 비교 함수에 넘긴다(인자 흐름).
+- 판의 읽기 [직접 확인]: 관계 출력의 이름 공간 블록 `OS_common_record_t.name_entry` 는 writer 18 을 적는다(`relations.txt:365-383`). count semaphore 종류에 닿는 것은 `OS_CountSemCreate` 의 `OS_OBJECT_INIT`(`:368`, `osapi-countsem.c:100`)과 지우기(`:373` `OS_ObjectIdInit` 의 memset, `:374` `OS_ObjectIdFindNextFree` 의 NULL)다. 다른 종류에는 생성 뒤 다른 필드의 글을 키로 쓰는 writer 가 있다: `OS_SocketBind` 의 `record->name_entry = stream->stream_name`(`:379`, `osapi-sockets.c:188`), `OS_SocketAccept`(`:380`, `osapi-sockets.c:272`). 그래서 (다)는 종류마다 따로 보여야 하고, 키 필드 하나의 writer 목록을 통째로 쓰지 않는다.
+- 증거가 아닌 것: 키 필드의 이름이 같다는 것(축 1 의 "타입과 필드 이름이 같다는 것"), 종류로 나누지 않은 writer 목록, 완전성이 전제로만 있는 writer 집합.
+- 빠질 때: `link_unlinked(name binding: a name mapping into the table is not excluded)`.
+
+**(라) 조회와 생성이 같은 객체 종류의 표를 쓴다.**
+- 증거: u 의 조회와 c 의 생성이 넘기는 종류 선택 값이 같다. 정적으로는 표 선택에 닿는 상수만 partition 으로 받는 관계 규칙에서, 실행으로는 두 쪽의 종류 값이 기록에 있을 때.
+- 판의 읽기 [직접 확인]: 검색은 `OS_common_table[OS_GetBaseForObjectType(token->obj_type)]` 에서 그 종류의 수만큼만 돈다(`osapi-idmap.c:546-547`, `:554`). 생성의 이름 중복 검사도 같은 종류의 표에서만 한다(`OS_ObjectIdAllocateNew` `:1146-1180`). 그러니 이름은 종류마다 하나이고, 다른 종류의 같은 이름은 다른 객체다.
+- 오늘 [직접 확인]: 행 A21 의 partition 줄은 `3 [LOCAL_OBJID_TYPE] as OS_ObjectIdFindByName arg 0 at osapi-countsem.c:212:19` 이고(`relations.txt:441`), 기록의 조회 안 사건(site 273)의 arg0 은 0x3 이다(`c1_record_sites.txt`). 생성 쪽의 종류 값은 기록에 없다(site 272 는 `memchr` 의 at-call). 지금의 partition 규칙은 표 선택이 아닌 상수도 받는다: 행 A22 의 partition {1,11} 의 1 은 잠금 방식이다(`relations.txt:457`; `OS_ObjectIdGetBySearch(OS_lock_mode_t lock_mode, …)` `osapi-idmap.c:910`). 그래서 지금의 partition 칸은 (라)의 증거가 아니다.
+- 빠질 때: `link_unlinked(name binding: the object kind of the lookup and the create is not shown the same)`. 종류가 다르다고 보이면 그 쌍은 결합하지 않는다. 그것으로 refuted 를 내지는 않는다(8.3 은 키 글의 차이만 쓴다).
+
+**(마) 사용과 생성 사이에 그 이름의 삭제·회수가 관측 구간 안에서 없다.**
+- 뜻: u 의 at-call 부터 c 의 after-call 까지, 그 이름 공간에서 그 이름을 가진 기록을 없애거나 되돌리는 연산(삭제, 실패한 생성의 되돌림, 소유 앱 정리의 삭제)이 성공한 사건이 없다.
+- 증거: 이름 공간 항목이 그 종류의 삭제·회수 연산을 공통 경로까지 모두 적고, 계획이 그 자리를 관측하며(필요 상태 present 또는 not-reached, 손실 표지 없음), 삭제 사건이 그 이름이나 그 생성의 out id 를 싣고, 기록 분석이 그 이름의 수명(생성 세대와 그 끝)을 낸다.
+- 판의 읽기 [직접 확인]: `OS_CountSemDelete`(`osapi-countsem.c:118`)는 `OS_ObjectIdFinalizeDelete`(`osapi-idmap.c:871-895`, 성공이면 id 를 비우고 삭제 알림)를 거친다. 앱 정리는 `CFE_ES_CleanupObjectCallback`(`cfe/modules/es/fsw/src/cfe_es_apps.c:1560`)에서 그 앱의 count semaphore 를 `OS_CountSemDelete(ObjectId)`(`:1583`)로 지운다. 실패한 생성은 `OS_ObjectIdFinalizeNew`(`osapi-idmap.c:828-855`)가 id 를 비운다. 같은 종류에 그 이름이 이미 있으면 생성은 `OS_ERR_NAME_TAKEN` 이므로(`:1177-1180`), 한 이름의 두 성공한 생성 사이에는 삭제가 있어야 한다.
+- 오늘 [직접 확인]: C1 계획에 삭제 경로(`OS_ObjectIdFinalizeDelete`, `OS_CountSemDelete`)의 site 가 0 이다(`c1_record_sites.txt`). 이름의 수명을 내는 기록 분석은 없다.
+- 빠질 때: `link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)`. 그 사이의 삭제·회수가 관측되었으면 결합하지 않고 `link_unlinked(name binding: the name was deleted or retired between the use and the create)`.
+
+**결과.** 기초 요건 여섯과 조건 다섯이 모두 서면 그 쌍은 `bound` 이고 그 기록은 `link.status = established`, `link.basis = name_binding` 이다. `link.resource_key` 는 (객체 종류, 이름 공간 항목, 이름 = u 의 키 글, 세대 = c 의 out id)이고, u 가 본 세대는 "없음(부재)"이다. `link.grounds` 에는 다섯 조건의 근거(자료 항목의 파일·줄·sha256, 관계 행의 줄, 기록 사건의 aseq)를 적는다.
+
+**모순과 여럿.**
+- c 가 u 의 at-call 앞에 끝났고(c 의 after-call < u 의 at-call), 다섯 조건이 서고, 그 사이에 삭제·회수가 없는데 u 가 부재 결과면, 의미 읽기와 기록이 어긋난다. 결합하지 않고 `link_unlinked(name binding: absence after a live create of the same name)` 를 적는다. 이것은 다섯 조건 가운데 어느 것이 틀렸다는 표지이므로 따로 센다.
+- 한 u 에 둘 이상의 c 가 `bound` 이면(다섯 조건 아래에서는 (마)와 이름 중복 거부 때문에 생기지 않아야 한다) 어느 것도 결합하지 않고 `link_unlinked(name binding: more than one create bound to the name)`.
+
+**보장 범위.** "u 가 찾은 이름 있는 자원은 c 가 만든 그 세대이고, u 때에는 그 세대가 아직 없었다"까지다. 그 순서가 강제되었는지, 다른 스케줄에서 어떤지는 말하지 않는다(축 3). 사용 조건은 따로다. 이름 결합이 서도 (c3) 이 없으면 `violation` 은 `undetermined` 다(3.3).
+
+**반례(대조로 쓴다).** BP 의 "조회한 뒤 없으면 생성"(행 A20): 같은 행위자 안의 조회와 생성 사이에 이름 결합이 서도 필요한 순서는 없다(개정 1 R01 의 이유, G-CLASS 의 반례, 4.2 의 (c3) 에 붙인 [검토 판단]). 이름 결합은 연결만 준다.
+
+### 8.3 refuted 규칙 (같은 다섯 조건 위에서)
+
+- **쌍의 refuted.** 기초 요건 1, 2, 4, 5 와 조건 다섯이 서고, 조건 (나)의 비교 의미로 두 키 글이 같지 않으면, 그 쌍의 c 는 u 가 찾은 객체가 아니다(`refuted`). 기초 3 과 6 은 쓰지 않는다: 이름이 다르면 u 의 결과나 두 사건의 순서와 상관없이 다른 객체다. 조건 (마)도 요구한다(lead 결정의 "같은 다섯 조건"; 생성 뒤의 이름 바꿈은 (다)와 (마)가 함께 막는다).
+- **기록의 refuted**(`link.status = refuted`, 그래서 `violation = refuted_link`). 셋이 모두 설 때만이다. (1) 행의 생성자 site 에 사건이 있는 모든 게시 행위자의 모든 생성 사건이 refuted 쌍이다. (2) 행의 생성자 site 가 모두 계획되었고, 그 키 글과 반환의 필요가 present 또는 not-reached 이며, 손실 표지가 없다. (3) 행의 생성자 집합에 `writer_set_incomplete` 나 풀리지 않은 간접 호출의 사유가 없다. 범위는 "이 실행의 관측 구간 안"이고 `link.refuted_scope` 에 적는다. 하나라도 빠지면 기록은 `unlinked` 이고 refuted 쌍은 `link.name_binding` 의 쌍 목록에 남는다(`link_unlinked(name binding: refuted for some creates only)`).
+- **키 글의 차이만으로는 refuted 를 내지 않는다.** 설명 스크립트 개정 2 의 갈래(`env/obs1/explain.py:970-973`: 행의 모든 게시 사건이 다른 키 글을 가지면 refuted)는 이 규칙에 맞지 않는다. 그 갈래가 낸 refuted 는 개정 2 로 읽으면 `unlinked` 다. 이 주기의 45 기록에서 refuted 는 0 이라(`records/obs1-20261116-reviewfix/index.tsv`의 link 칸: unlinked 45) 기록의 값은 바뀌지 않는다 [직접 확인]. 스크립트를 고치는 것은 이름 결합을 구현하는 다음 판의 일이다(8.7).
+
+### 8.4 빠진 조건마다의 값 (3.5 에 더하는 하위 사유)
+
+쌍마다 빠진 것을 **모두** 적는다(첫째만 적지 않는다). 그 기록의 `link.status` 는 `unlinked` 다. 인스턴스 증거가 없다는 기존 사유 `link_unlinked(absence outcome: the use reached no object instance)` 는 그대로 앞에 두고, 이름 결합의 사유를 뒤에 둔다. 새 바탕 사유는 없다(8.10). 하위 사유의 글에는 `;` 와 괄호를 쓰지 않는다(3.5 의 꼴과 도구 표의 규칙).
+
+| 빠진 것 | 기록에 쓰는 사유 |
+|---|---|
+| 기초 3 (u 의 반환이 부재 상수가 아님) | `link_unlinked(name binding: the use's status is not the absence constant of the namespace)`. 부재 상수의 뜻이 정해지지 않은 것은 (나)의 사유로만 적는다 |
+| 기초 4 (생성자 성공 상수 없음) | `record_insufficient(no success constant of the creator: the creator's out id is not read)` (기존) |
+| 기초 5 (키 글 없음·잘림) | `record_insufficient(key text)` (기존) |
+| 기초 6 (생성이 사용 뒤가 아님·겹침) | `link_unlinked(name binding: the create is not after the use)` |
+| (가) | `link_unlinked(name binding: no namespace entry in the framework-layer data)` |
+| (나) 의미 | `link_unlinked(name binding: comparison semantics not read from the pinned source)` |
+| (나) 한도 검증 | `link_unlinked(name binding: key text not validated against the namespace bound)` |
+| (다) | `link_unlinked(name binding: a name mapping into the table is not excluded)` |
+| (라) | `link_unlinked(name binding: the object kind of the lookup and the create is not shown the same)` |
+| (마) 배제되지 않음 | `link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)` |
+| (마) 관측됨 | `link_unlinked(name binding: the name was deleted or retired between the use and the create)` |
+| 모순 | `link_unlinked(name binding: absence after a live create of the same name)` |
+| 여럿 | `link_unlinked(name binding: more than one create bound to the name)` |
+| refuted 의 범위 부족 | `link_unlinked(name binding: refuted for some creates only)` |
+
+기초 1, 2 의 사유는 기존 글 그대로다(8.2 의 표).
+
+### 8.5 3.3 과 3.6 의 바뀜
+
+- **3.3 (1) `violation`.** 표의 글은 그대로다. `established` 가 두 바탕을 함께 뜻하므로, 바탕 `name_binding` 에서도 `observed` 는 `use_cond = derived` 이고 `order = unmet_state_observed` 일 때 나온다. `not_observed_in_runs` 는 바탕 `name_binding` 에서 나오지 않는다: 이름 결합은 부재 결과에만 정의되고, 경로 A 의 축 3 규칙은 부재 결과에서 `met_state_only` 를 내지 않는다(결과 문서 §7.0 의 `order.status` 규칙). 그래서 표를 바꾸지 않아도 두 줄이 서로 맞는다.
+- **3.3 (2) `odf`.** `shown` 의 `link.status = established` 는 이 개정에서 바탕 `instance` 만 받는다. 이름 결합을 R08 (2)(두 실행에서 자원 인스턴스가 대응함)에 쓰는 규칙은 이 개정이 정하지 않는다. 개입을 하는 단계에서 따로 정한다 [보강 제안, 미정]. `failure_sign` 은 바뀌지 않는다(연결을 쓰지 않음, 3.2 축 1 의 2026-11-16 정정).
+- **머리말과 집계.** 바탕 `name_binding` 인 기록은 머리말 뒤에 "(이름 결합)"을 붙인다. 집계는 바탕별로 따로 센다. `same_actor` 대조 기록은 3.4 의 어느 모집단에도 넣지 않는다.
+- **`tool_verdict.inputs`** 에 `link.basis` 를 더한다(판정은 여전히 축의 상태만 읽는다).
+- **3.6 에 더하는 검사.**
+  9. `link.status = established` 이고 `link.basis = name_binding` 이면: `path = A`; u 의 반환이 `link.name_binding` 의 부재 상수와 같다; 기초 요건 여섯과 조건 다섯이 모두 `held` 이고 각각의 근거가 비어 있지 않다; c 의 반환이 생성자 성공 상수이고 out 을 읽었다; c 의 at-call 이 u 의 after-call 뒤다.
+  10. `link.status = refuted` 이면: refuted 쌍마다 기초 요건 1, 2, 4, 5 와 조건 다섯이 `held` 이고 두 키 글이 잘리지 않고 서로 다르다; 8.3 의 (1)–(3) 이 있고 `link.refuted_scope` 가 비어 있지 않다.
+  11. `link.basis` 는 `established` 일 때만 있다. 조건의 근거는 자료 파일, 도구 출력, 실행 기록 가운데 하나를 sha256 과 함께 가리킨다. 사람의 읽기(이 절의 "판의 읽기")는 근거로 받지 않는다(D6).
+
+### 8.6 같은 규칙을 C1 관계 밖에 돌리는 요구 (대조)
+
+- **요구.** 이름 결합을 구현한 첫 설명 스크립트 판은 같은 입력에서 아래 (a)–(c) 모두에 **같은 규칙**을 돌리고, 결과를 관계 1 의 기록과 함께 낸다. 규칙에 행·키·앱 이름을 넣지 않는다. 대조를 위해 규칙을 바꾸면 관계 1 의 결과도 다시 낸다.
+  - (a) **같은 행위자 대조: BP 의 존재 탐침 행 A20**(c1_pre_tx; 조회 `bp_flow.c:126:13`, 같은 함수의 생성 `:132:18`; 관계 행은 "not a pair: probe-create" 로 짝을 만들지 않는다, `relations.txt:424-428`). 소비자와 게시자가 같은 행위자이므로 `actor_pair_kind = same_actor` 로 따로 적는다. 기대 [I]: 기초 요건과 다섯 조건이 서면 BP 의 "BP0_tsem", "BP1_tsem" 조회와 바로 뒤의 생성은 `bound` 다(규칙이 행위자에 기대지 않음을 보인다). 그래도 `violation` 은 `observed` 가 아니다: 사용 조건 (c3)(iii)의 "다른 경로 없음"이 자기 생성으로 서지 않는다(행의 `handling: probe-create`, `relations.txt:432`). 이름 결합이 위반을 만들지 않음을 보이는 대조다. 같은 기록에서 SCH_LAB 의 생성("SCH_LAB")과의 쌍은 refuted 쌍이 기대된다 [I].
+  - (b) **C1 의 다른 경로 A 행**: 계획된 A22, A23, A50, A51. 이 기록에는 사용 사건이 없어 규칙에 닿기 전에 `target_not_reached` 다 [직접 확인: 결과 문서 §7.5].
+  - (c) **다른 빌드의 경로 A 행**: c1_post_tx 127 행(계획된 것 넷: A22, A23, A50, A51), r2_core 68, c5_641 66, c5_642 66(계획된 것 0) [직접 확인: `records/judgement-rules-rev2-20261116/path_a_rows.tsv`]. 실행 기록이 생기는 대로 같은 규칙을 돌린다. 실행 기록이 없으면 `no_run` 이다.
+- **계획에 없는 행은 대조할 수 없다.** A20 은 C1 계획에서 잘렸다(`plan.side:56` `tier=3 … state=cut`) [직접 확인]. 이 주기의 기록에는 BP 행위자 13 의 조회 API 안 키 글(site 273, aseq 11 "BP0_tsem", aseq 15 "BP1_tsem")과 생성 API 안 키 글(site 272, aseq 13, 17)이 있으나, BP 의 조회 반환(`bp_flow.c:126` 의 after-call)은 계획에 없어 기초 3 이 서지 않는다(`c1_record_sites.txt`). 대조를 하려면 그 행을 넣는 계획(예산의 다음 층이나 대조의 예산)이 있어야 하고, 그 예산은 D5 대로 값·이유·잘림·미해결·민감도를 적는다.
+- **사전 시험으로 세는 것.** 이 개정의 커밋 뒤에 얻는 첫 기록(다음 C1 부팅, 다른 빌드의 부팅)에 규칙을 돌린 결과다. 이 주기의 C1 기록에 돌린 결과는 "규칙을 정하기 전에 본 기록"으로 표시한다.
+- **셈.** 행·소비자마다 `bound`, refuted 쌍, `unlinked`(하위 사유별)를 세고, 대조(`same_actor`)와 탐지를 섞지 않는다.
+
+### 8.7 규칙의 입력과 그것을 주는 뒤 단계, 그때까지의 값
+
+| 입력 | 쓰는 곳 | 지금 | 주는 단계 |
+|---|---|---|---|
+| 이름 공간 항목: 객체 종류, 표, 키 필드, 종류 선택 값, 비교 함수, 한도와 그 설정 줄, 부재 상수와 그 경로, 조회·생성·삭제·회수 API, 판, 원문 줄 | (가), (나), 기초 3, (마)의 연산 목록 | 없음(역할 항목 여덟뿐) | 공통 의미 단계: 검증 상태가 붙은 의미 자료와 판 고정 헤더의 기계적 훑기(범위 규칙을 자료보다 먼저 정함). 프레임워크 계층 자료를 넓힌다 |
+| P0 `strcmp` 의 소스 대조 | (나) | "source unverified"(`relations.txt:11`) | 같은 단계. 빌드가 링크한 C 라이브러리 판과 대조한다. 로컬 사본 밖의 판과의 대조는 새 외부 자원이 필요하다(PI 의 선택) |
+| 종류별로 나뉜 키 필드 writer 와 그 완전성, 표 선택 상수만 받는 partition, 이름 공간 소속을 넘겨진 비교 콜백으로 정하는 규칙 | (다), (라) | partition 이 잠금 방식 상수를 받음(`relations.txt:457`) | relations 규칙 개정 7(객체 정체성과 writer 전제) |
+| 생성자 callee 의 성공 상수를 행에 냄 | 기초 4 | 경로 A 행에 생성자의 `callee-check:` 줄이 없음(결과 문서 §7.11.7 (b)) | relations 규칙의 개정(생성자 callee 의 반환 상수를 행에) |
+| 삭제·회수 site 의 계획, 삭제 사건이 이름이나 out id 를 실음 | (마) | 삭제 경로 site 0(`c1_record_sites.txt`) | 관측 계획 생성기의 다음 판(객체 규칙: 생성·삭제 연산을 자료에서 읽음) |
+| 이름의 수명(생성 세대와 끝), 삭제 사건의 기록 분석 | (마) | 없음 | 기록 분석 단계(수명, 순서 인스턴스) |
+| 이름 결합을 구현하고 8.3 대로 refuted 갈래를 고친 설명 스크립트 판 | 전부 | 개정 2 에는 이름 결합이 없음 | 위 입력이 있은 뒤 |
+
+- **그때까지의 값.** 지금의 설명 스크립트(`env/obs1/explain.py` 개정 2)는 경로 A 의 부재 결과를 `unlinked` 로 둔다(`link_unlinked(absence outcome: the use reached no object instance)`). 8.4 의 하위 사유는 규칙을 구현한 판부터 쓴다. 그 판은 빠진 입력을 8.4 의 하위 사유로 모두 적고, 입력이 일부만 갖춰진 동안에도 `unlinked` 를 넘지 않는다.
+
+### 8.8 오늘의 입력으로 읽은 관계 1 (종이 적용, 도구 출력이 아님)
+
+기록 `records/obs1-20261116-reviewfix/records/c1_pre_tx.A21.17975444d83f6589.actor-12.json`(sha256 `743a56a6…`)과 이 절의 측정(`records/judgement-rules-rev2-20261116/`)을 사람이 규칙에 대 본 것이다. [검토 판단]이고 기록의 값이 아니다.
+
+| 요건·조건 | 쌍 (u = 행위자 12 의 조회 aseq 25–27, c = 행위자 13 의 생성 호출 aseq 12–14, API 안 키 글 aseq 13 "BP0_tsem") | 근거 |
+|---|---|---|
+| 기초 1 | 선다(결합 거부 없음; compat "chain confirmed; same_build unconfirmed(no build-id in dump)" 를 단서로 싣는다) | 결과 문서 §7.2 |
+| 기초 2 | 선다(12 ↔ 행위자 1 aseq 452, 13 ↔ 1/459; root CF_AppMain, BP_AppMain) | §7.3 |
+| 기초 3 | 서지 않는다. 상수 -17 은 행에 있고(`relations.txt:454`) u 의 반환도 -0x11 이지만, 그 상수가 "일치 없음"으로만 생긴다는 뜻은 (나)의 항목에 달렸다(사유는 (나)의 것) | §7.3 |
+| 기초 4 | 서지 않는다(생성자 성공 상수 없음; after-call aseq 14 의 반환 0 과 out 원값 `0x30002` 를 읽은 값으로 쓰지 않음) | §7.3, §7.11.2, `tx.dump.txt`(`1290a5f6…`) |
+| 기초 5 | 선다(u 의 키 글 "BP0_tsem" aseq 26 잘림 없음, c 의 키 글 aseq 13 잘림 없음) | `c1_record_sites.txt` |
+| 기초 6 | 선다(u 의 after-call aseq 27 뒤 9.942 ms 에 c 의 at-call aseq 12; 두 시각은 RUN 의 한 시계, 전제 P-CLOCK) | §7.3, `tx.dump.txt` 의 두 사건의 `t` |
+| (가) | 서지 않는다 | 8.2 (가)의 "오늘" |
+| (나) | 서지 않는다(의미 항목 없음, `strcmp` 미대조, 조회 쪽 한도 검증 없음) | 8.2 (나)의 "오늘" |
+| (다) | 서지 않는다(종류별 writer 의 완전성이 도구 출력에 없음) | 8.2 (다) |
+| (라) | 서지 않는다(지금의 partition 칸은 증거가 아님; 생성 쪽 종류 값 없음) | 8.2 (라)의 "오늘" |
+| (마) | 서지 않는다(삭제 site 없음, 수명 분석 없음) | 8.2 (마)의 "오늘" |
+
+- 결과: 연결은 `unlinked`. 개정 2 를 구현한 판이 이 기록에 낼 사유는 기존 `link_unlinked(absence outcome: the use reached no object instance)`, `record_insufficient(no success constant of the creator: the creator's out id is not read)` 에 더해 (가)–(마)의 하위 사유 여섯((나)는 의미와 한도 검증의 둘)이다 [I: 규칙에서 읽음]. 판정은 바뀌지 않는다: `violation` 은 이미 `use_cond = partial` 로 `undetermined` 이고, `odf = failure_sign` 은 연결을 쓰지 않는다(3.3).
+- 같은 기록의 다른 쌍: 행위자 13 의 "BP1_tsem" 생성(aseq 16–18), 행위자 14 의 "SCH_LAB" 생성(API 안 키 글 aseq 4, u 보다 앞)은 키 글이 다르다. 다섯 조건이 서지 않으므로 refuted 쌍이 아니고 `unlinked` 다(8.3).
+
+### 8.9 규칙과 1차 근거
+
+| 번호 | 규칙 | 1차 근거 |
+|---|---|---|
+| G1 | 이름 결합을 축 1 의 기술 규칙으로 정의함; 하나라도 빠지면 unlinked | lead 의 결정(결과 문서 §7.12 항목 2). 대상 범위·목표·공개·유일 증거·외부 자원을 바꾸지 않는 기술 판단이라 PI 께 따로 여쭙지 않았다고 그 결정이 적는다 |
+| G2 | 축 1 에 더함; 4.2 의 경로 A 행이 남긴 일 | 개정 1 3.2 축 1 의 자원 키(객체 종류·이름 공간·이름·생성 세대), 4.2 표의 경로 A 행 "키의 실행 값과 같은 이름 객체의 연결이 더해져야 한다" |
+| G3 | 같은 이름 글은 그것만으로 증거가 아님 | 개정 1 3.2 축 1 "인정하지 않는 것"; PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함) D2(공유 객체 하나만으로 위반이 확정되지 않음) |
+| G4 | established 의 하위 종류로 둠; 3.3 표의 글을 그대로 둠; not_observed_in_runs 가 나오지 않음 | 개정 1 3.3 (1) 의 `observed`·`not_observed_in_runs` 가 `established` 를 요구함; 결과 문서 §7.0 의 경로 A `order.status` 규칙(부재 결과에서 met_state_only 가 나오지 않음) |
+| G5 | (가) 자료의 항목, 판과 원문 줄, 기계적 훑기 | PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함) D3, D4; 개정 1 4.2 의 "읽을 것" 2(표는 사례와 무관한 범위로); `kairos/semantics/framework_api_roles.txt:1-12`(자료의 꼴: 판, 정의 줄, sha256, 훑기와 점검) |
+| G6 | (나) 비교 의미, 한도, 저장 복사, 부재 상수의 경로 | `osapi-idmap.c:269-272`, `:545`, `:550-567`, `:972-973`; `os-shared-idmap.h:105-110`; `os-shared-countsem.h:35`; `osapi-countsem.c:91`, `:210`; `os-shared-globaldefs.h:128-140`; `osapi-macros.h:137`; `osconfig.h:163`(값 20); `relations.txt:11`(P0 `strcmp` 미대조); `plan.kzs:903`, `:907`; `kz_rt.h:82` |
+| G7 | (다) 종류별 writer, 이름 대응 없음 | `relations.txt:365-383`(name_entry 의 writer 18); `osapi-sockets.c:188`, `:272`(생성 뒤 다른 필드의 글을 키로); 개정 1 G-ALIGN 의 미해결 조건("문자열 키의 별칭과 이름 공간") |
+| G8 | (라) 같은 종류의 표 | `osapi-idmap.c:546-547`, `:554`, `:1146-1180`; `relations.txt:441`, `:457`; `osapi-idmap.c:910` |
+| G9 | (마) 삭제·회수의 배제 | `osapi-countsem.c:118`; `osapi-idmap.c:828-855`, `:871-895`, `:1177-1180`; `cfe_es_apps.c:1560`, `:1583`; C1 계획의 삭제 site 0. 문헌: J. H. Saltzer, "Naming and Binding of Objects", *Operating Systems: An Advanced Course*, LNCS 60, Springer, 1978 — 이름의 뜻은 그것을 푸는 맥락(이름 공간)에 상대적이고, 이름과 객체의 결합은 시간에 따라 바뀐다 [1차 문헌, 이번에 원문을 다시 대조하지 않음] |
+| G10 | 기초 4 (생성자 out 은 성공 상수 아래에서만) | `env/obs1/explain.py:27-30`; 결과 문서 §7.11.2 judgement-2; `osapi-idmap.c:828-855`(실패한 생성은 id 를 비움) |
+| G11 | refuted 는 같은 다섯 조건 위에서, 행의 생성자 자리를 덮을 때만 | 개정 1 3.2 축 1 의 `refuted`("다른 객체임이 입증됨"), 3.3 (1) 의 `refuted_link`, 0.2 의 [미확인](빈칸을 정상으로 바꿔 읽지 않음); lead 결정 §7.12 항목 2 의 마지막 문장 |
+| G12 | 같은 행위자 대조, 다른 행과 빌드에 같은 규칙 | lead 결정 §7.12 항목 2; 개정 1 R01 이유와 G-CLASS 반례(BP 자신의 조회가 두 순서 모두에서 -17), 4.2 (c3) 의 [검토 판단](BP 의 조회 뒤 생성); `relations.txt:424-432`(A20 의 probe-create); `plan.side:56`(A20 잘림) |
+| G13 | 사후 정의의 공개, 사전 시험의 구분, 사람의 읽기는 근거가 아님 | 결과 문서 §7.3, §7.11.7; PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함) D6 |
+| G14 | 하위 사유로만 더함, 어휘 자료를 바꾸지 않음 | 개정 1 3.5 의 "하위 사유의 표기"(하위 사유는 새 사유가 아니고, 표에 없는 까닭은 가장 가까운 사유의 하위 사유로); `kairos/tests/static/data/reason_vocabulary.txt:1-4`; `kairos/tests/static/test_static_reasons.cpp:64`; 측정 `vocab_test.txt` |
+
+C1 소스의 경로는 `/home/user/work/procrace/c1_build/bundle_1df262a/` 아래이고(`osal/src/os/shared/src/`, `osal/src/os/shared/inc/`, `osal/src/os/inc/`, `cfe/modules/es/fsw/src/`), 설정 헤더는 `/home/user/work/redesign/obs1/c1pre_derived/ws/build/osal_public_api/inc/osconfig.h` 다. 그 sha256 앞 16자리: `osapi-idmap.c` `706e2f7f33750149`, `osapi-countsem.c` `5b37b81ed01e3d5f`, `os-shared-idmap.h` `8e68948e1b599e36`. `relations.txt` 는 `/home/user/work/redesign/obs1/plangen_relcheck/c1_pre_tx/relations.txt`(`7c7396d2…`), `plan.kzs`·`plan.side` 는 `/home/user/work/redesign/obs1/plangen/c1_pre_tx/`(`5f015c5a…`, `8f5f200c…`)다.
+
+### 8.10 어휘 자료에 대하여
+
+- 이 개정은 새 바탕 사유를 만들지 않는다. 빠진 조건은 모두 "자원이나 주체의 실행 내 식별이 없음"(`link_unlinked`)의 구체적 까닭이므로 3.5 의 하위 사유 규칙대로 그 하위 사유로 쓰고, 기존 `record_insufficient` 의 두 하위 사유는 그대로 쓴다. 그래서 어휘 자료 `kairos/tests/static/data/reason_vocabulary.txt`(`4b964d34…`)는 바꾸지 않는다. 그 자료는 바탕 사유만 담고(머리 줄 1–4), 설명 스크립트의 어휘 검사도 바탕 이름과 `name(하위 사유)` 꼴만 본다(`env/obs1/explain.py:113-127`).
+- 잰 것 [직접 확인: `records/judgement-rules-rev2-20261116/vocab_test.txt`]: 그 자료를 읽는 시험 `test_static_reasons`(MC 바이너리 `900e48cd…`)는 지금 자료로 612 점검을 통과한다. 바탕 사유 한 줄을 더한 scratchpad 사본으로 돌리면 `test_static_reasons.cpp:64` 의 줄 수 점검(22)에서 614 가운데 1 이 실패한다(rc 1). 자료에 바탕 사유를 더하려면 시험 소스를 함께 바꾸고 빌드해야 하며, 문서만 바꾸는 이 개정의 범위 밖이다.
+- 바탕 사유가 따로 필요하다고 정해지면(예: 이름 결합의 사유를 바탕 이름으로 세고 싶을 때), 2026-11-16 의 세 덧붙임과 같은 차례를 따른다: 3.5 에 먼저 적고 그 까닭을 쓰고, 자료와 시험의 줄 수는 그 사유를 내는 코드와 같은 선언된 빌드에서 함께 바꾼다.
+
+### 8.11 남은 문제 (6절에 더함)
+
+8. **이름 공간 항목의 범위를 정하는 훑기의 규칙**(어떤 API 를 한 표의 조회·생성·삭제·회수로 볼지)은 아직 없다. 사례의 API 로 범위를 정하면 D3 에 어긋난다.
+9. **실행 사이의 이름 대응**(R08 (2))은 정하지 않았다(8.5). 개입 단계에서 정한다.
+10. **compat 가 `same_build unconfirmed` 인 기록**에서 이름 공간 항목이 그 실행의 바이너리에 맞는다는 것은 전제로만 남는다. 이 개정은 결합 거부가 없으면 기초 1 이 선다고 보고 그 단서를 싣는다. build-id 가 기록에 들어가면 이 전제를 지운다.
+11. **관측 구간 밖.** (마)는 구간 안만 본다. 구간 밖의 삭제·재생성은 이름 결합에 닿지 않지만(u 가 부재를 보았고 c 가 구간 안에서 성공했으므로), refuted 의 범위는 구간 안으로 좁다(8.3).
+12. **사후 정의.** 이 정의는 C1 기록을 본 뒤에 나왔다. 사전 시험(8.6)의 결과가 나올 때까지 이 규칙의 결과를 "사전에 정한 규칙의 탐지"로 보고하지 않는다.
+13. **조회 쪽 키 글의 한도 검증.** 지금 계획은 조회 API 의 호출에서 런타임 복사 한도 64 로만 검증한다(8.2 (나)). 이름 공간의 한도로 검증하려면 그 한도가 자료(이름 공간 항목)에서 계획으로 와야 한다.

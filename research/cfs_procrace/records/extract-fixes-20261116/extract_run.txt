@@ -1,0 +1,2 @@
+one_build.sh c1_pre_tx: PASS -> /home/user/work/redesign/obs1/extfix_extract/c1_pre_tx/c1_pre_tx/NP
+c1_pre_tx rc=0

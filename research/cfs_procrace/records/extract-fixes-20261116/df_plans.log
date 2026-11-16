@@ -1,0 +1,5 @@
+# space_guard.sh kind=plans need=30000000 floor=314572800 interval=2 cmd=bash records/extract-fixes-20261116/plans.sh
+start 2026-11-16T13:56:40.568Z free=3021201408 threshold=344572800
+sample 2026-11-16T13:56:40.573Z 3021197312
+sample 2026-11-16T13:56:42.578Z 3020353536
+end 2026-11-16T13:56:44.586Z kind=plans verdict=completed rc=0 free=3020206080 lowest=3020206080 dip=995328 change=-995328

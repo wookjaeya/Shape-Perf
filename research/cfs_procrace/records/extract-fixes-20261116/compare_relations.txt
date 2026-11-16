@@ -1,0 +1,15 @@
+OK c1_pre_tx relations.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK c1_pre_tx keys.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK c1_pre_tx relations.log empty
+OK c1_post_tx relations.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK c1_post_tx keys.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK c1_post_tx relations.log empty
+OK r2_core relations.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK r2_core keys.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK r2_core relations.log empty
+OK c5_641 relations.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK c5_641 keys.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK c5_641 relations.log empty
+OK c5_642 relations.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK c5_642 keys.txt same as schema12_relcheck apart from line 3 (rules revision 8)
+OK c5_642 relations.log empty

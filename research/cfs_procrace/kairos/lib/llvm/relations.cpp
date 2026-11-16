@@ -27,6 +27,10 @@
 namespace kzs {
 
 const char* relations_rules_revision() { return "relations rules revision 9 (2026-11-16)"; }
+// Revision 10 adds to revision 9 only what facts with RESULT_FLOW and RESULT_EFFECT carry (static_facts.md 5u): on path A
+// rows the lines absence and handling_label, on the creators the lines callee-check (result flow), on path B rows the line
+// handling_label.  Without those sections the rows are revision 9's to the byte, and the line `rules` names revision 9.
+const char* relations_result_flow_revision() { return "relations rules revision 10 (2026-11-16)"; }
 
 namespace {
 
@@ -683,6 +687,13 @@ class Rel : public RelFacts {
       os << "semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): " << basis_map_.at_or("count.semantics")
          << "; rows that name a function with framework semantics items " << n_sem_rows_ << ", of them with items not verified " << n_sem_unverified_rows_
          << " (sem-unverified(api:column) in the layers column; the P0 entries stay in P0-unverified)\n";
+    if (result_flow_) {
+      os << "rules with result flow: " << relations_result_flow_revision() << ", over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): "
+         << basis_map_.at_or("count.result_flow") << "; " << basis_map_.at_or("count.result_effect") << "\n";
+      os << "handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows:";
+      for (const auto& [k, n] : n_lab_) os << " " << k << " " << n;
+      os << "\n";
+    }
     os << "run order: no record given (this revision reads no run record; the column says so in every row)\n";
     os << "functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): ";
     for (size_t i = 0; i < sizeof kReturnsTwice / sizeof kReturnsTwice[0]; ++i) os << (i == 0 ? "" : ", ") << kReturnsTwice[i];
@@ -1382,6 +1393,7 @@ class Rel : public RelFacts {
         if (!rc.empty()) L.line("callee-check (called with the parameter)") << "callee-check (called with the parameter): " << g << " returns " << rc;
       }
       L.line("handling") << "handling: discarded " << handling["discarded"] << ", used " << handling["used"] << ", tested " << handling["tested"];
+      if (result_flow_) b_result_flow(L, r.site_calls, checks);
       L.done();
       {
         std::ostringstream d;
@@ -3580,6 +3592,7 @@ class Rel : public RelFacts {
         else
           L.line("callee-check (set)") << "callee-check (set): " << fname(F) << ": not established (" << open.size() << " returns not followed, " << marked
                                        << " constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them";
+        if (result_flow_) creator_result_flow(L, F);
       }
       // relations rules revision 7 (O4): the writer sets the row uses -- the key, the active fields, and the fields the keys
       // are read from in a static image -- with their rule statuses, premises and what they do not cover
@@ -3594,6 +3607,15 @@ class Rel : public RelFacts {
       add_lines(&r, a_handling(u.ci), "handling");
       for (const std::string& pc : probes) L.line("handling") << "handling: probe-create: on the lookup's failure result the same function creates the same key: " << pc;
       L.done();
+      if (result_flow_) {
+        std::string nm_via;
+        const std::set<int64_t> nm = nomatch_values(n, calls_[u.ci].callee_fn, nullptr, &nm_via);
+        std::set<int64_t> absence;
+        for (int64_t v : nm)
+          if (rf_fail(v)) absence.insert(v);
+        a_result_flow(L, u.ci, absence, nm_via, !probes.empty());
+        L.done();
+      }
       std::string dep;
       bool unread_writes = false;
       if (!paired.empty()) {
@@ -3714,6 +3736,265 @@ class Rel : public RelFacts {
     for (const std::string& s : out) t += (t.empty() ? "" : ", ") + s;
     return t.empty() ? "" : "search returns: " + t;
   }
+  // ---------------------------------------------------------------- relations rules revision 10 (result flow)
+  // Only for facts with RESULT_FLOW and RESULT_EFFECT (extract --result-flow, static_facts.md 5u); without them nothing
+  // below runs and the rows are those of revision 9.  The handling label of a row (judgement rules 3.4: a processing
+  // fact, never a verdict) is read from the RESULT_EFFECT rows of the row's call for the failure value it follows (the
+  // absence value of a lookup, the callee-check failure values of a field argument), and through the returns of failure
+  // class up to the callers' calls (a fixed point over the call graph with a visited set; no numeric bound).
+  //   R   a terminal or an application exit reached on a decided path, or a failure value returned up to a root;
+  //   H   the call runs again on that value (a retry), or a probe-create;
+  //   T?  an effect that is open (a branch the value does not decide, a value not enumerated, an exit after a call that
+  //       may change the stored status, a result neither tested nor returned), or an event send only: the semantics data
+  //       give an event type's domain constants, not their rank, so an event send alone does not decide R;
+  //   J   the failure value reaches a call whose result is discarded (J? when the absence value is not evaluated);
+  //   T   nothing but returns of values not of failure class, stores and the join (checked and continued).
+  static constexpr int kLabR = 1, kLabH = 2, kLabOpen = 4, kLabEvent = 8, kLabJ = 16, kLabT = 32;
+  struct Lab {
+    int f = 0;
+    std::vector<std::string> why;
+    void add(int flag, const std::string& w) {
+      f |= flag;
+      if (why.size() < 64) why.push_back(w);
+    }
+  };
+  static bool rf_same(int64_t a, int64_t b) {
+    if (a == b) return true;
+    auto fits = [](int64_t x) { return x >= -2147483648LL && x <= 4294967295LL; };
+    return fits(a) && fits(b) && (static_cast<uint64_t>(a) & 0xFFFFFFFFu) == (static_cast<uint64_t>(b) & 0xFFFFFFFFu);
+  }
+  static bool rf_fail(int64_t v) { return v < 0 || (v >= 0xC0000000LL && v <= 0xFFFFFFFFLL); }
+  std::string reff_pos(const kz_fact_reffect& e) const {
+    if (e.effect_site != kN) {
+      auto it = call_by_site_.find(e.effect_site);
+      if (it != call_by_site_.end()) return call_pos(it->second);
+    }
+    // an effect without a call is in the function of the call (a return or a store of that body)
+    if (e.effect_line != 0 && e.fn != kN && e.fn < funcs_.size()) return pos(str(funcs_[e.fn].file), e.effect_line, 0);
+    return "-";
+  }
+  // the rows of the value v at a call site (the complement rows when v is not enumerated there)
+  std::vector<uint32_t> reff_rows(uint32_t site, int64_t v, bool* complement) const {
+    std::vector<uint32_t> out, comp;
+    *complement = false;
+    auto it = reffect_of_site_.find(site);
+    if (it == reffect_of_site_.end()) return out;
+    for (uint32_t i : it->second) {
+      const kz_fact_reffect& e = reffect_[i];
+      if (e.reach == KZ_REFF_REACH_NONE) comp.push_back(i);
+      else if (rf_same(e.outcome_value, v)) out.push_back(i);
+    }
+    if (out.empty() && !comp.empty()) {
+      *complement = true;
+      return comp;
+    }
+    return out;
+  }
+  void lab_of(uint32_t site, int64_t v, std::set<std::pair<uint32_t, int64_t>>* seen, Lab* out) const {
+    if (!seen->insert({site, v}).second) return;
+    auto cit = call_by_site_.find(site);
+    const std::string at = cit != call_by_site_.end() ? call_pos(cit->second) : "site " + std::to_string(site);
+    if (cit != call_by_site_.end() && result_use(cit->second) == "discarded") {
+      out->add(kLabJ, "J: the result of the call at " + at + " is discarded");
+      return;
+    }
+    bool comp = false;
+    const std::vector<uint32_t> rows = reff_rows(site, v, &comp);
+    if (rows.empty()) {
+      out->add(kLabOpen, "T?: no RESULT_EFFECT row for the value " + std::to_string(v) + " at " + at + " (the result is neither tested nor returned in its function)");
+      return;
+    }
+    if (comp) out->add(kLabOpen, "T?: the value " + std::to_string(v) + " is not among the values enumerated at " + at);
+    for (uint32_t i : rows) {
+      const kz_fact_reffect& e = reffect_[i];
+      const bool complete = e.status == KZ_REFF_STATUS_COMPLETE;
+      const std::string where = reff_pos(e), d = str(e.detail);
+      switch (e.effect) {
+        case KZ_REFF_EFFECT_TERMINAL:
+        case KZ_REFF_EFFECT_EXIT_APP:
+          if (complete) out->add(kLabR, "R: " + enum_text("KZ_REFF_EFFECT", e.effect) + " at " + where + " [" + d + "] (" + str(e.chain) + ")");
+          else out->add(kLabOpen, "T?: " + enum_text("KZ_REFF_EFFECT", e.effect) + " at " + where + " is open: " + str(e.reason));
+          break;
+        case KZ_REFF_EFFECT_RETRY:
+          // a recovery action in the code (judgement rules R05): also on a path through a branch the value does not decide
+          // (a retry loop's own bound is such a branch)
+          out->add(kLabH, "H: " + d + " (" + str(e.chain) + (complete ? "" : "; " + str(e.reason)) + ")");
+          break;
+        case KZ_REFF_EFFECT_EVENT_SEND:
+          out->add(kLabEvent | (complete ? 0 : kLabOpen), "event: " + d + " at " + where + (complete ? "" : " (open: " + str(e.reason) + ")"));
+          break;
+        case KZ_REFF_EFFECT_RETURN_RESULT:
+        case KZ_REFF_EFFECT_RETURN_CONST: {
+          const int64_t c = e.effect == KZ_REFF_EFFECT_RETURN_CONST ? e.effect_value : v;
+          if (!complete) out->add(kLabOpen, "T?: the return at " + where + " is on a path that is open: " + str(e.reason));
+          if (!rf_fail(c)) {
+            out->add(kLabT, "T: " + fname(e.fn) + " returns " + std::to_string(c) + " at " + where + " (not of failure class)");
+            break;
+          }
+          const uint32_t g = e.fn;
+          const bool direct = g < callers_.size() && !callers_[g].empty();
+          const bool indirect = indirect_callers_.count(g) != 0;
+          if (!direct && !indirect) {
+            // up to the root of an actor: the failure is what that thread's entry returns
+            if (root_kind_.count(g) != 0) out->add(complete ? kLabR : kLabOpen, std::string(complete ? "R" : "T?") + ": the failure value " + std::to_string(c) + " is returned up to the root " + fname(g) + " (" + root_kind_.at(g) + ") at " + where);
+            else out->add(kLabOpen, "T?: the failure value " + std::to_string(c) + " is returned by " + fname(g) + ", which no call of these facts calls and which is no root (at " + where + ")");
+            break;
+          }
+          if (indirect) out->add(kLabOpen, "T?: " + fname(g) + " is also called through a function pointer; those callers are not followed");
+          if (direct)
+            for (uint32_t x : callers_[g]) lab_of(calls_[x].site, c, seen, out);
+          break;
+        }
+        case KZ_REFF_EFFECT_STORE:
+        case KZ_REFF_EFFECT_FALLTHROUGH:
+          if (complete) out->add(kLabT, "T: " + enum_text("KZ_REFF_EFFECT", e.effect) + (d.empty() ? std::string() : " [" + d + "]") + " at " + where);
+          else out->add(kLabOpen, "T?: " + enum_text("KZ_REFF_EFFECT", e.effect) + " at " + where + " is open: " + str(e.reason));
+          break;
+        default:
+          out->add(kLabOpen, "T?: " + (str(e.reason).empty() ? std::string("an effect not followed") : str(e.reason)) + " at " + where);
+      }
+    }
+  }
+  static std::string lab_text(const Lab& l) {
+    if (l.f & kLabR) return "R";
+    if (l.f & kLabH) return "H";
+    if (l.f & (kLabOpen | kLabEvent)) return "T?";
+    if (l.f & kLabJ) return "J";
+    return "T";
+  }
+  // the reasons a label names: those of the deciding flag first
+  static std::string lab_why(const Lab& l, const std::string& label) {
+    std::vector<std::string> first, rest;
+    const std::string pre = label == "T?" ? "T?:" : label + ":";
+    for (const std::string& w : l.why) (w.compare(0, pre.size(), pre) == 0 || (label == "T?" && w.compare(0, 6, "event:") == 0) ? first : rest).push_back(w);
+    if (label == "T?" && (l.f & kLabEvent) && !(l.f & kLabOpen)) first.insert(first.begin(), "T?: an event send only (the semantics data give the event type's domain constants, not their rank)");
+    std::string t;
+    for (size_t i = 0; i < first.size() && i < 3; ++i) t += (i == 0 ? "" : "; ") + first[i];
+    if (first.size() > 3) t += "; and " + std::to_string(first.size() - 3) + " more";
+    return t;
+  }
+  // the effects of the value at the call itself (not composed), for the row
+  std::string effects_text(uint32_t site, int64_t v) const {
+    bool comp = false;
+    const std::vector<uint32_t> rows = reff_rows(site, v, &comp);
+    std::vector<std::string> out;
+    for (uint32_t i : rows) {
+      const kz_fact_reffect& e = reffect_[i];
+      const std::string d = str(e.detail);
+      std::string t = enum_text("KZ_REFF_EFFECT", e.effect);
+      if (e.effect == KZ_REFF_EFFECT_EVENT_SEND || e.effect == KZ_REFF_EFFECT_EXIT_APP || e.effect == KZ_REFF_EFFECT_TERMINAL || e.effect == KZ_REFF_EFFECT_STORE) t += " [" + d + "]";
+      if (e.effect == KZ_REFF_EFFECT_RETURN_CONST) t += " " + std::to_string(e.effect_value);
+      t += " at " + reff_pos(e) + " " + enum_text("KZ_REFF_STATUS", e.status);
+      out.push_back(t);
+    }
+    std::sort(out.begin(), out.end());
+    out.erase(std::unique(out.begin(), out.end()), out.end());
+    if (out.empty()) return "none";
+    std::string t = (comp ? "(the value is not enumerated; the rows of the other values) " : "");
+    for (size_t i = 0; i < out.size() && i < 8; ++i) t += (i == 0 ? "" : "; ") + out[i];
+    if (out.size() > 8) t += "; and " + std::to_string(out.size() - 8) + " more";
+    return t;
+  }
+  // a path A row: the absence line and the handling label (the absence values of the lookup, else its failure values)
+  void a_result_flow(RowLines& L, uint32_t ci, const std::set<int64_t>& absence, const std::string& via, bool probe) {
+    const kz_fact_call& c = calls_[ci];
+    std::set<int64_t> values = absence;
+    std::string over = "the absence value";
+    if (absence.empty()) {
+      auto it = reffect_of_site_.find(c.site);
+      if (it != reffect_of_site_.end())
+        for (uint32_t i : it->second)
+          if (reffect_[i].reach != KZ_REFF_REACH_NONE && reffect_[i].outcome == KZ_REFF_OUTCOME_FAILURE) values.insert(reffect_[i].outcome_value);
+      over = "the failure values (the absence value is not evaluated)";
+    }
+    if (absence.empty()) L.line("absence") << "absence: unevaluated (the lookup's no-match value is not established in these facts)";
+    else
+      for (int64_t v : absence) {
+        bool comp = false;
+        const std::vector<uint32_t> rows = reff_rows(c.site, v, &comp);
+        std::string reach = comp || rows.empty() ? "not enumerated at the call" : enum_text("KZ_REFF_REACH", reffect_[rows.front()].reach);
+        L.line("absence") << "absence: " << v << " (no match: " << via << ") at the call " << call_pos(ci) << ": " << reach << "; effects: " << effects_text(c.site, v);
+      }
+    std::string label, why;
+    if (probe) {
+      label = "H";
+      why = "H: a probe-create on the lookup's failure result";
+    } else if (result_use(ci) == "discarded") {
+      label = absence.empty() ? "J?" : "J";
+      why = std::string(label) + ": the result is discarded" + (absence.empty() ? " and the absence value is not evaluated" : "");
+    } else if (values.empty()) {
+      L.line("handling_label") << "handling_label: none (no failure value to follow at " << call_pos(ci) << ")";
+      ++n_lab_["none"];
+      return;
+    } else {
+      Lab l;
+      std::set<std::pair<uint32_t, int64_t>> seen;
+      for (int64_t v : values) lab_of(c.site, v, &seen, &l);
+      label = lab_text(l);
+      why = lab_why(l, label);
+    }
+    std::string vs;
+    for (int64_t v : values) vs += (vs.empty() ? "" : ", ") + std::to_string(v);
+    L.line("handling_label") << "handling_label: " << label << " (over " << over << (vs.empty() ? "" : " " + vs) << ") " << why;
+    ++n_lab_[label];
+  }
+  // a path B row: the label of each site over the callee-check failure values
+  void b_result_flow(RowLines& L, const std::vector<uint32_t>& sites, const std::vector<Check>& checks) {
+    std::set<int64_t> values;
+    for (const Check& ck : checks)
+      if (rf_fail(ck.value)) values.insert(ck.value);
+    if (values.empty()) {
+      L.line("handling_label") << "handling_label: none (" << (checks.empty() ? "no callee check" : "no callee-check value of failure class") << ")";
+      ++n_lab_["none"];
+      return;
+    }
+    std::map<std::string, uint32_t> per;
+    std::string first_why;
+    std::string best;
+    for (uint32_t ci : sites) {
+      Lab l;
+      std::set<std::pair<uint32_t, int64_t>> seen;
+      for (int64_t v : values) lab_of(calls_[ci].site, v, &seen, &l);
+      const std::string lb = lab_text(l);
+      ++per[lb];
+      if (first_why.empty() || lb == "R") first_why = call_pos(ci) + ": " + lab_why(l, lb);
+    }
+    for (const char* k : {"R", "H", "T?", "J", "T"})
+      if (best.empty() && per.count(k) != 0) best = k;
+    std::string ps;
+    for (const auto& [k, n] : per) ps += (ps.empty() ? "" : ", ") + k + " " + std::to_string(n);
+    std::string vs;
+    for (int64_t v : values) vs += (vs.empty() ? "" : ", ") + std::to_string(v);
+    L.line("handling_label") << "handling_label: " << best << " (sites: " << ps << "; over the callee-check failure values " << vs << ") " << first_why;
+    ++n_lab_[best];
+  }
+  // a creator's callee: the values the RESULT_EFFECT rows of its calls show to reach its returns, and its success constants
+  void creator_result_flow(RowLines& L, uint32_t F) const {
+    std::map<int64_t, std::pair<std::string, bool>> vals;  // value -> (first text, shown: complete and reached)
+    for (const kz_fact_reffect& e : reffect_) {
+      if (e.fn != F || (e.effect != KZ_REFF_EFFECT_RETURN_RESULT && e.effect != KZ_REFF_EFFECT_RETURN_CONST)) continue;
+      if (e.effect == KZ_REFF_EFFECT_RETURN_RESULT && e.reach == KZ_REFF_REACH_NONE) continue;
+      const int64_t v = e.effect == KZ_REFF_EFFECT_RETURN_CONST ? e.effect_value : e.outcome_value;
+      const bool shown = e.status == KZ_REFF_STATUS_COMPLETE && (e.effect == KZ_REFF_EFFECT_RETURN_CONST || e.reach == KZ_REFF_REACH_REACHED);
+      auto cit = call_by_site_.find(e.site);
+      const std::string t = (e.effect == KZ_REFF_EFFECT_RETURN_CONST ? str(e.detail) + " (a constant returned at " + reff_pos(e) + ")"
+                                                                     : "the value of " + (cit != call_by_site_.end() ? str(calls_[cit->second].callee) + " at " + call_pos(cit->second) : std::string("a call")) +
+                                                                           " reaches the return at " + reff_pos(e) + " [" + str(e.detail) + "]") +
+                            (shown ? "" : " (" + std::string(e.status == KZ_REFF_STATUS_COMPLETE ? "present-only" : "open") + ")");
+      auto it = vals.find(v);
+      if (it == vals.end()) vals[v] = {t, shown};
+      else if (shown && !it->second.second) it->second = {t, true};
+    }
+    std::vector<std::string> succ;
+    for (const auto& [v, p] : vals) {
+      L.line("callee-check (result flow)") << "callee-check (result flow): " << fname(F) << " returns " << v << ": " << p.first;
+      if (p.second && !rf_fail(v) && !(v >= 0x40000000LL && v < 0x80000000LL)) succ.push_back(std::to_string(v));
+    }
+    L.line("callee-check (result flow, success)") << "callee-check (result flow, success): " << fname(F) << ": "
+                                                  << (succ.empty() ? std::string("no value of success class is shown to reach the return") : "shown to reach the return: " + join(succ, ", "))
+                                                  << " (the values RESULT_EFFECT shows to reach a return of " << fname(F) << ", not all it returns: callee-check (set) says whether that set is complete)";
+  }
+
   // what the caller does with a lookup's result: a retry loop around it, and where the failure leads
   std::string a_handling(uint32_t ci) const {
     std::ostringstream os;
@@ -3819,6 +4100,7 @@ class Rel : public RelFacts {
   std::map<uint32_t, uint32_t> sem_items_;                   // function -> its framework SEMANTICS rows
   std::map<uint32_t, std::set<std::string>> sem_unverified_;  // function -> "api:column" of its rows not verified
   uint32_t n_sem_rows_ = 0, n_sem_unverified_rows_ = 0;
+  std::map<std::string, uint32_t> n_lab_;  // relations rules revision 10: rows per handling label
   mutable std::set<uint32_t> row_inc_;          // the incompleteness reasons of the row being written (Inc)
   std::set<uint32_t> global_inc_;               // the reasons of the whole facts (global_reasons)
   std::map<uint32_t, uint32_t> inc_rows_;       // reason (Inc) -> rows that carry it

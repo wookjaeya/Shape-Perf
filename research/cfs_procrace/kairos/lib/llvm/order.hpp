@@ -40,6 +40,7 @@
 namespace kzs {
 
 const char* order_rules_revision();
+const char* order_result_flow_revision();  // order rules revision 3: what facts with RESULT_FLOW and RESULT_EFFECT add
 
 struct OrderOptions {
   // nothing yet: the query has no parameter that selects what it reports

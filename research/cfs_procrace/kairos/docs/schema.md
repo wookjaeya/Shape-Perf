@@ -406,6 +406,7 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
     (2026-11-16 덧붙임: `kz-static extract --semantics` 가 이 레코드 그대로 쓴다; 필드를 더하거나 바꾸지 않음. `docs/static_facts.md` §5t.)
   - RESULT_FLOW(142, `kz_fact_rflow` 76 B): 결과가 있는 호출마다 그 결과가 닿는 사용(분기·반환·인자·저장·루프 탈출)과 정의의 유일성.
   - RESULT_EFFECT(143, `kz_fact_reffect` 72 B): (호출, 결과 부류)마다 그 부류가 가는 경로의 효과와 `complete` / `open`(이유).
+    (2026-11-16 덧붙임: RESULT_FLOW 와 RESULT_EFFECT 는 `kz-static extract --no-profile --result-flow` 가 이 레코드 그대로 쓴다; RESULT_FLOW 의 def_kind·use_kind 가 둘 다 none 인 행은 guard 행(호출이 도는 조건)이다. `docs/static_facts.md` §5u.)
   - LOCK_HANDLES(144, `kz_fact_lockh` 56 B): 핸들 식으로 정한 잠금 정체성, 핸들의 writer 와 그것이 기대는 의미 항목, 전제.
 - 새 중립 층 섹션(필드 단위 직렬화 범위 100–119 안의 112–118; 모두 버전 1, `kz_neutral.h` 에 뜻; actor·사건·site·레코드 번호로 잇는 곁 표이고 기존 NACTORS 등은 그대로다):
   - NACTOR_TOKEN(112, `kz_ntoken` 80 B): 생성 토큰(만드는 쪽 런타임 actor id 와 spawn 기록의 aseq)과 spawn·spawn 반환·첫 기록·끝 기록, 결합 결과, 스스로 알린 id 의 대조(결합을 만들지 않는다), 정적 root.

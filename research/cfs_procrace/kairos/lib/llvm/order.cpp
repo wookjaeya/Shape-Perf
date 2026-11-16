@@ -27,6 +27,11 @@
 namespace kzs {
 
 const char* order_rules_revision() { return "order rules revision 2 (2026-11-16)"; }
+// Revision 3 adds to revision 2 only what facts with RESULT_FLOW and RESULT_EFFECT carry (static_facts.md 5u): child without
+// success read from the effects of the inner spawn call's success value, and the uses a wait's caller makes under the
+// result of the wait's function (its guard rows) with their HB-await edges.  Without those sections the output is
+// revision 2's to the byte.
+const char* order_result_flow_revision() { return "order rules revision 3 (2026-11-16)"; }
 
 namespace {
 
@@ -199,6 +204,10 @@ class Ord : public RelFacts {
       case KZ_EXPR_OP_CONST:
         return ret(e.value);
       case KZ_EXPR_OP_LOAD: {
+        if (e.flags == KZ_EXPR_REF_LOCAL) {  // order rules revision 3: a local named by its definition ("local:" keys)
+          auto lt = fields.find("local:" + str(e.name));
+          return lt == fields.end() ? -1 : ret(lt->second);
+        }
         if (e.flags != KZ_EXPR_REF_FIELD) return -1;
         auto it = fields.find(str(e.name));
         return it == fields.end() ? -1 : ret(it->second);
@@ -479,6 +488,42 @@ class Ord : public RelFacts {
   bool positional_only(const kz_fact_return& r) const {
     return (r.flags & KZ_RET_FLAG_REDEFINED) != 0 || (r.cond_root != kN && !refs(r.cond_root, KZ_EXPR_REF_LOCAL).empty());
   }
+  // order rules revision 3: the witnesses of child without success from the RESULT_EFFECT rows of the inner call x of the
+  // spawn operation g: a return of failure class that a success value of x reaches (the thread exists: x succeeded), and,
+  // when x itself may report a failure after its thread started (its own flag is not "not found"), the failure values it
+  // passes on.  A row on a path through a branch the value does not decide is still a path of the CFG that x's value
+  // allows (the branch tests something else): it is a witness.  A row of a value x's callee is not shown to return, or a
+  // return not followed, is no shown witness.  False when x has no success row (the rule of revision 2 then applies).
+  template <class Put>
+  bool cws_result_flow(uint32_t x, uint32_t g, bool inner_clean, const std::string& sub, int sub_strength, const std::string& via, Put& put) const {
+    const kz_fact_call& xc = calls_[x];
+    auto it = reffect_of_site_.find(xc.site);
+    if (it == reffect_of_site_.end()) return false;
+    bool any_success = false;
+    for (uint32_t i : it->second)
+      if (reffect_[i].outcome == KZ_REFF_OUTCOME_SUCCESS && reffect_[i].reach != KZ_REFF_REACH_NONE) any_success = true;
+    if (!any_success) return false;
+    const std::string inner_name = defined(xc.callee_fn) ? str(funcs_[xc.callee_fn].name) : str(xc.callee);
+    for (uint32_t i : it->second) {
+      const kz_fact_reffect& e = reffect_[i];
+      const bool success = e.outcome == KZ_REFF_OUTCOME_SUCCESS && e.reach != KZ_REFF_REACH_NONE;
+      if (!success && inner_clean) continue;  // x creates no thread when it fails
+      std::string where = "-";
+      if (e.effect_line != 0) where = pos(str(funcs_[g].file), e.effect_line, 0);
+      const int strength = success ? (e.reach == KZ_REFF_REACH_REACHED ? 2 : 1) : (e.reach == KZ_REFF_REACH_NONE ? 0 : sub_strength);
+      const std::string after = (success ? "after " + inner_name + " at " + call_pos(x) + " returned " + std::to_string(e.outcome_value) + " (its success value)"
+                                         : "after " + inner_name + " at " + call_pos(x) + " returned " + (e.reach == KZ_REFF_REACH_NONE ? std::string("a value not enumerated") : std::to_string(e.outcome_value)) + via);
+      if (e.effect == KZ_REFF_EFFECT_RETURN_CONST && fail_class(e.effect_value))
+        put(strength, fname(g) + " returns " + std::to_string(e.effect_value) + " [" + str(e.detail) + "] at " + where + " " + after + " (result flow" +
+                          (e.status == KZ_REFF_STATUS_COMPLETE ? std::string() : ": " + str(e.reason)) + ")");
+      else if (e.effect == KZ_REFF_EFFECT_RETURN_RESULT && (e.reach == KZ_REFF_REACH_NONE || fail_class(e.outcome_value)) && !success)
+        put(strength, fname(g) + " returns the result of " + inner_name + " at " + where + " " + after + " (result flow)");
+      else if (e.effect == KZ_REFF_EFFECT_NONE && e.status == KZ_REFF_STATUS_OPEN && str(e.reason).find("neither a constant nor this result") != std::string::npos)
+        put(0, fname(g) + " " + str(e.reason) + " at " + where + " " + after + " (result flow; not followed)");
+    }
+    (void)sub;
+    return true;
+  }
   std::string child_without_success(uint32_t ci, std::set<uint32_t>* seen, std::string* chain) const {
     const kz_fact_call& c = calls_[ci];
     if (!defined(c.callee_fn)) {
@@ -520,6 +565,12 @@ class Ord : public RelFacts {
       const std::map<int64_t, std::string> succ = success_of(x, &stext);
       const kz_fact_call& xc = calls_[x];
       const std::string inner_name = defined(xc.callee_fn) ? str(funcs_[xc.callee_fn].name) : str(xc.callee);
+      // order rules revision 3: the effects of the inner call's values (RESULT_EFFECT) in place of the source position
+      if (result_flow_ && cws_result_flow(x, g, inner_clean, sub, sub_strength, via, put)) {
+        inner_text.push_back(sub);
+        ++n_cws_rf_inner_;
+        continue;
+      }
       auto rit = returns_of_.find(g);
       if (rit == returns_of_.end()) continue;
       for (uint32_t ri : rit->second) {
@@ -783,7 +834,87 @@ class Ord : public RelFacts {
   struct Use {
     Ev e;
     std::string what, consequence;
+    uint32_t fn = KZ_NONE32;  // a caller-side use (order rules revision 3): the caller, whose threads run it
   };
+  // order rules revision 3: the uses the caller of a wait's function makes under that function's result.  The budget
+  // exit's values are the constants the function returns at a budget exit that is a return (RETURNS at its position); the
+  // uses are the calls whose guard rows (RESULT_FLOW) read the result of the call x, named by its definition, or the call
+  // result itself; each guard is evaluated at every budget value: false at all of them, the use is skipped on the budget
+  // exit (skip); true at all, it runs after it (continue); else not decided.  False with `note` when that is not given.
+  bool caller_side_uses(uint32_t fn, const std::vector<uint32_t>& exit_rows, const std::set<std::string>& budget, uint32_t x, std::vector<Use>* out, std::string* note) const {
+    std::set<int64_t> B;
+    bool falls = false;
+    for (uint32_t xr : exit_rows) {
+      const kz_fact_loopexit& X = loopexits_[xr];
+      std::vector<Dj> ds;
+      disjuncts(X.aux_root, &ds);
+      bool is_budget = false;
+      for (const Dj& d : ds) {
+        const std::set<std::string> loc = refs(d.n, KZ_EXPR_REF_LOCAL);
+        bool only = !loc.empty() && refs(d.n, KZ_EXPR_REF_FIELD).empty() && call_results(d.n).empty() && refs(d.n, KZ_EXPR_REF_GLOBAL).empty();
+        for (const std::string& l : loc)
+          if (budget.count(l) == 0) only = false;
+        if (only) is_budget = true;
+      }
+      if (!is_budget) continue;
+      if (X.kind != KZ_LOOPEXIT_KIND_RETURN) {
+        falls = true;
+        continue;
+      }
+      auto rit = returns_of_.find(fn);
+      if (rit != returns_of_.end())
+        for (uint32_t ri : rit->second) {
+          const kz_fact_return& r = returns_[ri];
+          if (r.line == X.line && str(r.file) == str(X.file) && r.vkind == KZ_RET_VALUE_CONST) B.insert(r.value);
+        }
+    }
+    if (falls || B.empty()) {
+      *note = falls ? "a budget exit leaves the loop and goes on: the value the function returns after it is not followed" : "no constant return at a budget exit";
+      return false;
+    }
+    const kz_fact_call& c = calls_[x];
+    std::set<std::string> names;  // the definition of x's result in its caller, by the qualified name
+    auto fit = rflow_of_site_.find(c.site);
+    if (fit != rflow_of_site_.end())
+      for (uint32_t i : fit->second) {
+        const kz_fact_rflow& f = rflow_[i];
+        if (f.def_kind == KZ_RFLOW_DEF_LOCAL_DEF) names.insert(str(f.local) + "@def:" + std::to_string(f.def_line) + ":" + std::to_string(f.def_col));
+      }
+    const std::string gname = str(funcs_[fn].name);
+    std::string bs;
+    for (int64_t b : B) bs += (bs.empty() ? "" : ", ") + std::to_string(b);
+    size_t n = 0;
+    auto cit = calls_of_.find(c.caller_fn);
+    if (cit != calls_of_.end())
+      for (uint32_t u : cit->second) {
+        auto git = rflow_of_site_.find(calls_[u].site);
+        if (git == rflow_of_site_.end()) continue;
+        for (uint32_t i : git->second) {
+          const kz_fact_rflow& f = rflow_[i];
+          if (f.def_kind != KZ_RFLOW_DEF_NONE || f.use_kind != KZ_RFLOW_USE_NONE || f.cond_root == kN) continue;
+          std::string qn;
+          bool direct = false;
+          visit(f.cond_root, [&](const kz_fact_expr& e) {
+            if (e.op == KZ_EXPR_OP_LOAD && e.flags == KZ_EXPR_REF_LOCAL && names.count(str(e.name)) != 0) qn = str(e.name);
+            if (e.op == KZ_EXPR_OP_CALL_RESULT && str(e.name) == gname) direct = true;
+          });
+          if (qn.empty() && !direct) continue;
+          int r0 = -2;
+          for (int64_t b : B) {
+            std::map<std::string, int64_t> fl, cl;
+            if (!qn.empty()) fl["local:" + qn] = b;
+            if (direct) cl[gname] = b;
+            const int r = eval(f.cond_root, fl, cl);
+            r0 = r0 == -2 ? r : (r0 == r ? r0 : -1);
+          }
+          const std::string cons = r0 == 0 ? "skip" : r0 == 1 ? "continue" : "unknown(the guard is not decided by the budget value " + bs + ")";
+          out->push_back(Use{Ev{'c', u}, "caller-side: " + ev_text(Ev{'c', u}) + " in " + fname(c.caller_fn) + " under " + ex(f.cond_root) + " (the result of " + gname + " at " + call_pos(x) + ")", cons, c.caller_fn});
+          ++n;
+        }
+      }
+    *note = std::to_string(n) + " uses under its result; budget exit returns " + bs;
+    return true;
+  }
   struct Wait {
     uint32_t loop = kN;
     std::string id, head;
@@ -933,10 +1064,16 @@ class Ord : public RelFacts {
           const uint32_t fl = calls_[x].flags;
           const std::string use = (fl & KZ_CALL_FLAG_RESULT_TESTED) ? "tested" : (fl & KZ_CALL_FLAG_RESULT_USED) ? "used" : "discarded";
           std::string cons;
+          std::vector<Use> side;
           if (budget_consequence == "no-budget") cons = "no-budget";
           else if (use == "discarded") cons = "continue";
-          else cons = "unknown(the caller " + std::string(use == "tested" ? "tests" : "uses") + " the result; the conditions of its calls are not in these facts)";
+          else if (result_flow_) {  // order rules revision 3
+            std::string note;
+            cons = caller_side_uses(L.fn, exit_rows, budget, x, &side, &note) ? "caller-side(" + note + ")" : "unknown(" + note + ")";
+          } else cons = "unknown(the caller " + std::string(use == "tested" ? "tests" : "uses") + " the result; the conditions of its calls are not in these facts)";
           w.uses.push_back(Use{Ev{'c', x}, "the call of " + fname(L.fn) + " " + call_pos(x) + " in " + fname(calls_[x].caller_fn) + " (result " + use + ")", cons});
+          n_caller_side_ += side.size();
+          for (Use& su : side) w.uses.push_back(std::move(su));
         }
       }
       for (const Use& u : w.uses) ++use_count_[u.consequence.substr(0, u.consequence.find('('))];
@@ -947,7 +1084,10 @@ class Ord : public RelFacts {
           for (const Use& u : w.uses) {
             if (u.consequence == "inside" || u.what.compare(0, 12, "the call of ") == 0) continue;
             const bool hard = l1 && complete && writers.size() == 1 && init_ok == 1 && (u.consequence == "skip" || u.consequence == "no-budget");
-            for (uint32_t qa : as) {
+            if (u.consequence.compare(0, 7, "unknown") == 0 && u.fn != kN) continue;  // a caller-side use the budget value does not decide
+            const std::set<uint32_t> qas = u.fn != kN ? actor_set(u.fn) : as;
+            if (u.fn != kN) n_await_caller_side_ += qas.size();
+            for (uint32_t qa : qas) {
               Edge e;
               e.rule = "HB-await";
               e.kind = hard ? "hard" : "conditional";
@@ -1311,6 +1451,9 @@ class Ord : public RelFacts {
     os << "kz-static order (" << order_rules_revision() << ")\n";
     os << "facts " << kz::to_hex(c_.artifact_hash()) << "\n";
     os << "relations " << relations_rules_revision() << "\n";
+    if (result_flow_)
+      os << "rules with result flow: " << order_result_flow_revision() << ", over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects "
+         << n_cws_rf_inner_ << "; caller-side uses of waits " << n_caller_side_ << ", HB-await edges to them " << n_await_caller_side_ << "\n";
     os << "kinds: hard: every execution in which both instances occur has them in this order, under the premises; conditional: only when the condition holds; "
           "observed-only: no rule of this revision orders them, a run record may show an order\n";
     os << "closure: hard_before and fixed_early_proved follow hard edges only; a conditional edge makes the path conditional (conditional_before, "
@@ -1407,6 +1550,8 @@ class Ord : public RelFacts {
   mutable std::set<uint32_t> chain_sites_;
   mutable std::map<std::pair<uint32_t, uint32_t>, std::set<uint32_t>> children_on_;
   size_t n_spawn_calls_ = 0, n_cws_possible_ = 0, n_cws_none_ = 0, n_cws_unknown_ = 0, n_cws_positional_ = 0, n_poll_ = 0, n_bounded_ = 0, n_recognised_ = 0;
+  mutable size_t n_cws_rf_inner_ = 0;  // order rules revision 3: inner spawn calls read from their RESULT_EFFECT rows
+  size_t n_caller_side_ = 0, n_await_caller_side_ = 0;  // order rules revision 3: caller-side uses of waits, and their HB-await edges
 };
 
 }  // namespace

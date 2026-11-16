@@ -186,6 +186,10 @@ struct RelFacts {
   std::vector<kz_fact_await> awaits_;
   std::vector<kz_fact_lockpath> lockpaths_;
   std::vector<kz_fact_sem> sem_;  // SEMANTICS (extract --semantics, static_facts.md 5t); empty without the section
+  std::vector<kz_fact_rflow> rflow_;      // RESULT_FLOW (extract --result-flow, static_facts.md 5u); empty without it
+  std::vector<kz_fact_reffect> reffect_;  // RESULT_EFFECT; empty without it
+  bool result_flow_ = false;              // the facts carry RESULT_FLOW and RESULT_EFFECT
+  std::map<uint32_t, std::vector<uint32_t>> rflow_of_site_, reffect_of_site_;  // call site -> rows
 
   struct BasisMap : std::map<std::string, std::string> {
     std::string at_or(const std::string& k) const {

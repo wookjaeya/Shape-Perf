@@ -24,6 +24,8 @@
 #                                                   kinds and premises and the static order of each row
 #   semantics                                       no Clang types: the semantics data files and the SEMANTICS
 #                                                   rows they give a build (extract --semantics)
+#   result_flow                                     no Clang types: the values each function may return, for the
+#                                                   outcome classes of extract --result-flow
 #   ast_*                                           the Clang front end of the extraction
 #   basis_*                                         the analysis basis B (SPEC 1.7)
 add_library(kz-llvm STATIC
@@ -41,6 +43,7 @@ add_library(kz-llvm STATIC
   rel_facts.cpp
   relations.cpp
   semantics.cpp
+  result_flow.cpp
   plan_gen.cpp
   order.cpp
   unroll.cpp

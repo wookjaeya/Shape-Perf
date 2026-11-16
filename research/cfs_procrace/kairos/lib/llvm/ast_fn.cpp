@@ -18,7 +18,9 @@
 //     control-flow graph gives them.
 // Nothing here knows a framework: every name comes from the ExtractSpec.
 #include <algorithm>
+#include <cstdlib>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <tuple>
@@ -260,6 +262,7 @@ class FnWalker {
     m_.summaries[fkey_] = summary_;
     if (spec_.collect_wrapper_inputs) record_cfg();
     if (ext_) emit_returns();
+    if (ext_ && spec_.result_flow) emit_result_flow();
     if (ext_) finish_flow_facts();
     if (ext_) record_lock_cfg();
   }
@@ -1768,6 +1771,7 @@ class FnWalker {
   void visit_return(const ReturnStmt* s) {
     for (auto& lc : loops_) note_exit(lc.get(), s, KZ_LOOPEXIT_KIND_RETURN);
     if (ext_ && s->getRetValue() != nullptr) returns_.push_back(PendingReturn{s, guard_from(0), loops_.empty() ? std::string() : m_.loops[loops_.back()->index].key});
+    if (ext_ && spec_.result_flow && s->getRetValue() != nullptr) rf_guards_[s] = guards_;
     if (ext_ && s->getRetValue() != nullptr) {
       std::set<const VarDecl*> seen;
       const Src src = trace_source(s->getRetValue(), &seen);
@@ -2205,6 +2209,10 @@ class FnWalker {
     CallFact cf;
     cf.pos = tu_.pos_of(ce->getBeginLoc());
     const std::string ckey = tu_.next_key(cf.pos, fkey_, &cf.ordinal);
+    if (ext_ && spec_.result_flow) {
+      rf_guards_[ce] = guards_;
+      if (!loops_.empty()) rf_in_loop_.insert(ce);
+    }
     if (ext_) {
       ext_call_keys_[ce] = ckey;
       std::vector<LockId>& ids = m_.call_arg_idents[ckey];
@@ -4999,6 +5007,1073 @@ class FnWalker {
     const Expr* cond;
     bool polarity;
   };
+
+  // ---- result flow and effects (--result-flow; kz_facts.h revision 10 sections RESULT_FLOW and RESULT_EFFECT;
+  // static_facts.md 5u) --------------------------------------------------------------------------------------
+  // Every pass with the option records the parameters a return gives back unchanged and, per call argument, its
+  // constant or the call whose result it is (the first pass's return values are built from them, result_values.cpp).
+  // The second pass, which has those values (spec_.result_values), writes the rows: the uses each call result reaches
+  // (reaching definitions of locals on the body's CFG), the guard rows of calls that run under a test of a call result,
+  // and per (call, value the callee may return) what that value leads to in the body.
+  static constexpr uint32_t kRfNone = 0xFFFFFFFFu;
+  struct RfUse {
+    uint8_t kind = KZ_RFLOW_USE_OTHER;
+    const Expr* cond = nullptr;      // branch: the condition
+    const CallExpr* call = nullptr;  // arg: the call and the position
+    uint32_t pos = kRfNone;
+    const ReturnStmt* ret = nullptr;
+    std::string target;              // store: "local:x", "global:x", "field:T.f", "deref"
+    const VarDecl* local = nullptr;  // store into a local: the local, and the definition it is
+    const void* def_key = nullptr;
+    bool cast_void = false, discarded = false;
+  };
+  // the location an lvalue or a value names ("local:", "global:", "field:"), "" when none; `addr`: `&` of it
+  std::string rf_loc_of(const Expr* e, bool* addr) {
+    *addr = false;
+    if (e == nullptr) return "";
+    e = e->IgnoreParenCasts();
+    if (const auto* uo = dyn_cast<UnaryOperator>(e); uo != nullptr && uo->getOpcode() == UO_AddrOf) {
+      *addr = true;
+      e = uo->getSubExpr()->IgnoreParenCasts();
+    }
+    if (const auto* d = dyn_cast<DeclRefExpr>(e)) {
+      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl())) {
+        if (vd->hasGlobalStorage()) return "global:" + vd->getNameAsString();
+        if (isa<ParmVarDecl>(vd)) return "param:" + vd->getNameAsString();
+        return "local:" + lid(vd);
+      }
+      return "";
+    }
+    if (const auto* me = dyn_cast<MemberExpr>(e))
+      if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl())) return "field:" + field_type_name(fl) + "." + fl->getNameAsString();
+    return "";
+  }
+  RfUse rf_use_of(const Expr* e) {
+    RfUse u;
+    const Stmt* cur = e;
+    for (int n = 0; n < 256; ++n) {
+      const Stmt* p = parent_stmt(cur);
+      if (p == nullptr) {
+        if (const VarDecl* vd = parent_var(cur)) {
+          u.kind = KZ_RFLOW_USE_STORE;
+          if (vd->hasGlobalStorage()) {
+            u.target = "global:" + vd->getNameAsString();
+          } else {
+            u.local = vd;
+            u.def_key = vd;
+            u.target = "local:" + lid(vd);
+          }
+          return u;
+        }
+        u.kind = KZ_RFLOW_USE_NONE;
+        u.discarded = true;
+        return u;
+      }
+      if (isa<ParenExpr>(p) || isa<ImplicitCastExpr>(p)) {
+        cur = p;
+        continue;
+      }
+      if (const auto* cs = dyn_cast<CStyleCastExpr>(p)) {
+        if (cs->getCastKind() == CK_ToVoid) {
+          u.kind = KZ_RFLOW_USE_NONE;
+          u.cast_void = true;
+          return u;
+        }
+        cur = p;
+        continue;
+      }
+      if (const auto* ce = dyn_cast<CallExpr>(p)) {
+        for (unsigned i = 0; i < ce->getNumArgs(); ++i)
+          if (ce->getArg(i) == cur) {
+            u.kind = KZ_RFLOW_USE_ARG;
+            u.call = ce;
+            u.pos = i;
+            return u;
+          }
+        u.kind = KZ_RFLOW_USE_OTHER;
+        return u;
+      }
+      if (const auto* rs = dyn_cast<ReturnStmt>(p)) {
+        u.kind = KZ_RFLOW_USE_RETURN;
+        u.ret = rs;
+        return u;
+      }
+      if (const auto* bo = dyn_cast<BinaryOperator>(p)) {
+        if (bo->isAssignmentOp()) {
+          if (bo->getRHS() != cur || bo->getOpcode() != BO_Assign) {
+            u.kind = KZ_RFLOW_USE_OTHER;
+            return u;
+          }
+          u.kind = KZ_RFLOW_USE_STORE;
+          const Expr* lhs = bo->getLHS()->IgnoreParenImpCasts();
+          if (const auto* d = dyn_cast<DeclRefExpr>(lhs))
+            if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && !vd->hasGlobalStorage()) {
+              u.local = vd;
+              u.def_key = bo;
+              u.target = "local:" + lid(vd);
+              return u;
+            }
+          bool addr = false;
+          u.target = rf_loc_of(lhs, &addr);
+          if (u.target.empty()) u.target = "deref";
+          return u;
+        }
+        if (bo->getOpcode() == BO_Comma && bo->getLHS() == cur) {
+          u.kind = KZ_RFLOW_USE_NONE;
+          u.discarded = true;
+          return u;
+        }
+        cur = p;  // a comparison, a logical or arithmetic operator: the value goes on into the enclosing expression
+        continue;
+      }
+      if (const auto* uo = dyn_cast<UnaryOperator>(p)) {
+        if (uo->getOpcode() == UO_AddrOf || uo->isIncrementDecrementOp() || uo->getOpcode() == UO_Deref) {
+          u.kind = KZ_RFLOW_USE_OTHER;
+          return u;
+        }
+        cur = p;
+        continue;
+      }
+      if (const auto* co = dyn_cast<ConditionalOperator>(p)) {
+        if (co->getCond() == cur) {
+          u.kind = KZ_RFLOW_USE_BRANCH;
+          u.cond = co->getCond();
+          return u;
+        }
+        cur = p;
+        continue;
+      }
+      const Expr* c = nullptr;
+      if (const auto* s1 = dyn_cast<IfStmt>(p)) c = s1->getCond();
+      else if (const auto* s2 = dyn_cast<WhileStmt>(p)) c = s2->getCond();
+      else if (const auto* s3 = dyn_cast<DoStmt>(p)) c = s3->getCond();
+      else if (const auto* s4 = dyn_cast<ForStmt>(p)) c = s4->getCond();
+      else if (const auto* s5 = dyn_cast<SwitchStmt>(p)) c = s5->getCond();
+      if (c != nullptr && c == cur) {
+        u.kind = KZ_RFLOW_USE_BRANCH;
+        u.cond = c;
+        return u;
+      }
+      if (isa<Expr>(p)) {
+        u.kind = KZ_RFLOW_USE_OTHER;
+        return u;
+      }
+      u.kind = KZ_RFLOW_USE_NONE;  // a statement of its own: the value is not used
+      u.discarded = true;
+      return u;
+    }
+    u.kind = KZ_RFLOW_USE_OTHER;
+    return u;
+  }
+  std::string rf_pos_text(SourceLocation l) {
+    const Pos p = tu_.pos_of(l);
+    return std::to_string(p.line) + ":" + std::to_string(p.col);
+  }
+  // the name of a local in a condition with the definitions that reach the condition: "x@def:L:C" (one), "x@defs:L:C|...
+  // [|undef]" (several; undef: a path from the entry with none), "x@undef" (none)
+  std::string rf_qual_name(const VarDecl* v, const std::vector<const void*>& defs, bool undef) {
+    std::string n = lid(v);
+    if (defs.empty()) return n + "@undef";
+    std::vector<std::string> ps;
+    for (const void* d : defs) ps.push_back(rf_pos_text(def_loc(d, v)));
+    std::sort(ps.begin(), ps.end());
+    ps.erase(std::unique(ps.begin(), ps.end()), ps.end());
+    if (ps.size() == 1 && !undef) return n + "@def:" + ps[0];
+    std::string t = n + "@defs:";
+    for (size_t i = 0; i < ps.size(); ++i) t += (i == 0 ? "" : "|") + ps[i];
+    if (undef) t += "|undef";
+    return t;
+  }
+  static bool rf_is_local(const VarDecl* vd) { return vd != nullptr && vd->isLocalVarDecl() && !vd->isStaticLocal(); }
+  ExprRef rf_rename(ExprRef e, const std::map<std::string, std::string>& q) {
+    if (e == nullptr) return e;
+    if (e->op == KZ_EXPR_OP_LOAD && e->ref == KZ_EXPR_REF_LOCAL && e->a == nullptr) {
+      auto it = q.find(e->name);
+      return it == q.end() ? e : pool().load(KZ_EXPR_REF_LOCAL, it->second, e->value);
+    }
+    ExprRef a = rf_rename(e->a, q), b = rf_rename(e->b, q);
+    if (a == e->a && b == e->b) return e;
+    return pool().make(e->op, e->ref, e->value, e->name, a, b);
+  }
+  // the condition with each local named by the definitions that reach it there
+  ExprRef rf_qualified(const Expr* cond, bool polarity) {
+    const auto key = std::make_pair(cond, polarity);
+    auto it = rf_qcache_.find(key);
+    if (it != rf_qcache_.end()) return it->second;
+    ExprRef e = cond_expr(cond, polarity);
+    CfgIndex* ix = ext_cfg();
+    if (ix != nullptr) {
+      struct V : RecursiveASTVisitor<V> {
+        std::vector<const DeclRefExpr*> refs;
+        bool VisitDeclRefExpr(DeclRefExpr* d) {
+          refs.push_back(d);
+          return true;
+        }
+      } vis;
+      vis.TraverseStmt(const_cast<Expr*>(cond));
+      std::map<const VarDecl*, std::pair<std::vector<const void*>, bool>> found;  // lookup only
+      std::vector<const VarDecl*> order;
+      for (const DeclRefExpr* d : vis.refs) {
+        const auto* vd = dyn_cast<VarDecl>(d->getDecl());
+        if (!rf_is_local(vd)) continue;
+        auto at = ix->at.find(d);
+        if (at == ix->at.end()) continue;
+        bool undef = false;
+        const std::vector<DefAt> defs = reaching_defs(*ix, vd, at->second.first, at->second.second, &undef);
+        auto& f = found[vd];
+        if (f.first.empty() && !f.second) order.push_back(vd);
+        for (const DefAt& x : defs)
+          if (std::find(f.first.begin(), f.first.end(), x.key) == f.first.end()) f.first.push_back(x.key);
+        f.second = f.second || undef;
+      }
+      std::map<std::string, std::string> q;
+      for (const VarDecl* vd : order) {
+        const auto& f = found[vd];
+        const std::string qn = rf_qual_name(vd, f.first, f.second);
+        q[lid(vd)] = qn;
+        for (const void* d : f.first) {
+          const Expr* val = def_value(d, vd);
+          if (val != nullptr && isa<CallExpr>(val->IgnoreParenCasts())) rf_call_valued_.insert(qn);
+        }
+      }
+      e = rf_rename(e, q);
+    }
+    rf_qcache_[key] = e;
+    return e;
+  }
+  ExprRef rf_qual_guard(const std::vector<Guard>& gs) {
+    std::vector<ExprRef> terms;
+    for (const Guard& g : gs) terms.push_back(rf_qualified(g.cond, g.polarity));
+    return pool().conj(KZ_EXPR_OP_AND, terms);
+  }
+  // does the expression read a call result: a call-result node, or a local some definition of which is a call
+  bool rf_reads_call_result(ExprRef e, bool* all_unique) {
+    if (e == nullptr) return false;
+    bool r = false;
+    if (e->op == KZ_EXPR_OP_CALL_RESULT) r = true;
+    if (e->op == KZ_EXPR_OP_LOAD && e->ref == KZ_EXPR_REF_LOCAL && rf_call_valued_.count(e->name) != 0) {
+      r = true;
+      if (e->name.find("@def:") == std::string::npos) *all_unique = false;
+    }
+    const bool a = rf_reads_call_result(e->a, all_unique), b = rf_reads_call_result(e->b, all_unique);
+    return r || a || b;
+  }
+  static bool rf_has_cut(ExprRef e) {
+    if (e == nullptr) return false;
+    if (e->op == KZ_EXPR_OP_TOP && e->name == "too deep") return true;
+    return rf_has_cut(e->a) || rf_has_cut(e->b);
+  }
+  // the reads of a local (rvalue uses), in source order
+  const std::vector<const DeclRefExpr*>& rf_reads_of(const VarDecl* v) {
+    auto it = rf_reads_.find(v);
+    if (it != rf_reads_.end()) return it->second;
+    struct V : RecursiveASTVisitor<V> {
+      const VarDecl* var = nullptr;
+      std::vector<const DeclRefExpr*> out;
+      bool VisitDeclRefExpr(DeclRefExpr* d) {
+        if (d->getDecl() == var) out.push_back(d);
+        return true;
+      }
+    } vis;
+    vis.var = v;
+    vis.TraverseStmt(const_cast<Stmt*>(fd_->getBody()));
+    std::vector<const DeclRefExpr*> reads;
+    for (const DeclRefExpr* d : vis.out) {
+      const Stmt* p = parent_stmt(d);
+      bool lhs = false;
+      if (const auto* bo = dyn_cast_or_null<BinaryOperator>(p); bo != nullptr && bo->isAssignmentOp() && bo->getLHS()->IgnoreParens() == d) lhs = true;
+      if (const auto* uo = dyn_cast_or_null<UnaryOperator>(p); uo != nullptr && (uo->isIncrementDecrementOp() || uo->getOpcode() == UO_AddrOf)) lhs = true;
+      if (!lhs) reads.push_back(d);
+    }
+    std::sort(reads.begin(), reads.end(), [&](const DeclRefExpr* a, const DeclRefExpr* b) {
+      return sm_.getExpansionLoc(a->getLocation()).getRawEncoding() < sm_.getExpansionLoc(b->getLocation()).getRawEncoding();
+    });
+    return rf_reads_[v] = reads;
+  }
+  // the local's unique reaching definition at an element, or null
+  const void* rf_unique_def(const CfgIndex& ix, const VarDecl* v, const Stmt* at_stmt) {
+    auto at = ix.at.find(at_stmt);
+    if (at == ix.at.end()) return nullptr;
+    bool undef = false;
+    const std::vector<DefAt> defs = reaching_defs(ix, v, at->second.first, at->second.second, &undef);
+    return defs.size() == 1 && !undef ? defs.front().key : nullptr;
+  }
+  // per call argument: its constant, or the call whose result it is (directly, or through a local whose one reaching
+  // definition is that call or a constant)
+  void rf_note_args(const CallExpr* ce, const std::string& key) {
+    CfgIndex* ix = ext_cfg();
+    for (unsigned i = 0; i < ce->getNumArgs(); ++i) {
+      const Expr* a = ce->getArg(i)->IgnoreParenCasts();
+      int64_t c = 0;
+      if (!isa<CallExpr>(a) && tu_.eval_int(a, &c)) {
+        m_.rf_arg_consts[key][i] = c;
+        continue;
+      }
+      if (const auto* t = dyn_cast<CallExpr>(a)) {
+        auto kt = ext_call_keys_.find(t);
+        if (kt != ext_call_keys_.end()) m_.rf_arg_calls[key][i] = kt->second;
+        continue;
+      }
+      const auto* d = dyn_cast<DeclRefExpr>(a);
+      const auto* vd = d != nullptr ? dyn_cast<VarDecl>(d->getDecl()) : nullptr;
+      if (ix == nullptr || !rf_is_local(vd)) continue;
+      auto lit = locals_.find(vd);
+      if (lit != locals_.end() && lit->second.addr_taken) continue;
+      const void* dk = rf_unique_def(*ix, vd, d);
+      const Expr* val = dk != nullptr ? def_value(dk, vd) : nullptr;
+      if (val == nullptr) continue;
+      val = val->IgnoreParenCasts();
+      if (const auto* t = dyn_cast<CallExpr>(val)) {
+        auto kt = ext_call_keys_.find(t);
+        if (kt != ext_call_keys_.end()) m_.rf_arg_calls[key][i] = kt->second;
+      } else if (tu_.eval_int(val, &c)) {
+        m_.rf_arg_consts[key][i] = c;
+      }
+    }
+  }
+
+  // ---- the values a call may return (the first pass's RfVals, parameters resolved by this call's arguments)
+  void rf_merge(RfVals* out, const RfVals& in, const std::string& via) {
+    for (const RfVal& v : in.vals) {
+      bool dup = false;
+      for (RfVal& o : out->vals)
+        if (o.v == v.v) {
+          dup = true;
+          o.present_only = o.present_only && v.present_only;
+        }
+      if (!dup) {
+        RfVal x = v;
+        if (!via.empty()) x.via = via + (x.via.empty() ? "" : "; " + x.via);
+        out->vals.push_back(x);
+      }
+    }
+    for (const std::string& o : in.open) out->open.push_back(o);
+    if (in.complement != 0 && out->complement == 0) {
+      out->complement = in.complement;
+      out->complement_why = in.complement_why;
+    }
+  }
+  RfVals rf_values_at(const CallExpr* ce, int depth) {
+    RfVals out;
+    const FunctionDecl* fdc = ce->getDirectCallee();
+    if (fdc == nullptr) {
+      out.open.push_back("an indirect call");
+      return out;
+    }
+    const std::string ck = tu_.func_key(fdc->getDefinition() != nullptr ? fdc->getDefinition() : fdc);
+    auto it = spec_.result_values->by_fn.find(ck);
+    if (it == spec_.result_values->by_fn.end()) {
+      out.open.push_back(fdc->getNameAsString() + " has no return in these facts");
+      return out;
+    }
+    const RfVals& f = it->second;
+    out.vals = f.vals;
+    out.open = f.open;
+    out.complement = f.complement;
+    out.complement_why = f.complement_why;
+    CfgIndex* ix = ext_cfg();
+    for (uint32_t k : f.params) {
+      const std::string via = fdc->getNameAsString() + " returns its parameter " + std::to_string(k) + " unchanged";
+      if (k >= ce->getNumArgs()) {
+        out.open.push_back(via + ": no such argument");
+        continue;
+      }
+      const Expr* a = ce->getArg(k)->IgnoreParenCasts();
+      int64_t c = 0;
+      if (!isa<CallExpr>(a) && tu_.eval_int(a, &c)) {
+        rf_merge(&out, RfVals{{RfVal{c, tu_.source_text(a->getSourceRange(), 60), false, via}}, {}, {}, 0, ""}, "");
+        continue;
+      }
+      const CallExpr* t = dyn_cast<CallExpr>(a);
+      if (t == nullptr) {
+        const auto* d = dyn_cast<DeclRefExpr>(a);
+        const auto* vd = d != nullptr ? dyn_cast<VarDecl>(d->getDecl()) : nullptr;
+        if (ix != nullptr && rf_is_local(vd)) {
+          auto lit = locals_.find(vd);
+          const void* dk = lit != locals_.end() && lit->second.addr_taken ? nullptr : rf_unique_def(*ix, vd, d);
+          const Expr* val = dk != nullptr ? def_value(dk, vd) : nullptr;
+          if (val != nullptr) {
+            val = val->IgnoreParenCasts();
+            if (!isa<CallExpr>(val) && tu_.eval_int(val, &c)) {
+              rf_merge(&out, RfVals{{RfVal{c, tu_.source_text(val->getSourceRange(), 60), false, via}}, {}, {}, 0, ""}, "");
+              continue;
+            }
+            t = dyn_cast<CallExpr>(val);
+          }
+        }
+      }
+      if (t == nullptr || depth >= 16) {
+        out.open.push_back(via + " and the argument at " + rf_pos_text(ce->getBeginLoc()) + " is not followed");
+        continue;
+      }
+      rf_merge(&out, rf_values_at(t, depth + 1), via + " (the argument is the result of " + callee_text(t) + " at " + rf_pos_text(t->getBeginLoc()) + ")");
+    }
+    return out;
+  }
+  static bool rf_fail_class(int64_t v) { return v < 0 || (v >= 0xC0000000LL && v <= 0xFFFFFFFFLL); }
+  static uint8_t rf_class(int64_t v) {
+    if (rf_fail_class(v)) return KZ_REFF_OUTCOME_FAILURE;
+    if (v >= 0x40000000LL && v < 0x80000000LL) return KZ_REFF_OUTCOME_OTHER;
+    return KZ_REFF_OUTCOME_SUCCESS;
+  }
+
+  // ---- the exploration of one outcome on the CFG
+  struct RfOutcome {
+    int64_t v = 0;
+    bool complement = false;  // a value outside `excluded`
+    std::set<int64_t> excluded;
+    uint8_t cls = 0, reach = 0;
+    std::string text;
+  };
+  struct RfVal3 {
+    int k = 0;  // 0 unknown, 1 known, 2 the complement outcome
+    int64_t v = 0;
+  };
+  static bool rf_eq(int64_t a, int64_t b) {
+    if (a == b) return true;
+    auto fits = [](int64_t x) { return x >= -2147483648LL && x <= 4294967295LL; };
+    return fits(a) && fits(b) && (static_cast<uint64_t>(a) & 0xFFFFFFFFu) == (static_cast<uint64_t>(b) & 0xFFFFFFFFu);
+  }
+  struct RfCtx {
+    const CallExpr* S = nullptr;
+    const VarDecl* v = nullptr;
+    const void* def_key = nullptr;
+    const RfOutcome* o = nullptr;
+  };
+  RfVal3 rf_eval(const Expr* e, const RfCtx& c, bool live, int depth = 0) {
+    RfVal3 u;
+    if (e == nullptr || depth > 32) return u;
+    e = e->IgnoreParenCasts();
+    auto self = [&]() {
+      rf_used_ = true;
+      RfVal3 r;
+      if (c.o->complement) r.k = 2;
+      else {
+        r.k = 1;
+        r.v = c.o->v;
+      }
+      return r;
+    };
+    if (e == c.S) return self();
+    if (const auto* d = dyn_cast<DeclRefExpr>(e))
+      if (c.v != nullptr && d->getDecl() == c.v) return live ? self() : u;
+    int64_t k = 0;
+    if (!isa<CallExpr>(e) && tu_.eval_int(e, &k)) return RfVal3{1, k};
+    if (const auto* uo = dyn_cast<UnaryOperator>(e)) {
+      const RfVal3 a = rf_eval(uo->getSubExpr(), c, live, depth + 1);
+      if (uo->getOpcode() == UO_LNot) {
+        if (a.k == 1) return RfVal3{1, a.v == 0 ? 1 : 0};
+        if (a.k == 2 && c.o->excluded.count(0) != 0) return RfVal3{1, 0};
+        return u;
+      }
+      if (uo->getOpcode() == UO_Minus && a.k == 1) return RfVal3{1, -a.v};
+      return u;
+    }
+    if (const auto* bo = dyn_cast<BinaryOperator>(e)) {
+      const BinaryOperatorKind op = bo->getOpcode();
+      if (op == BO_LAnd || op == BO_LOr) {
+        const RfVal3 a = truth(rf_eval(bo->getLHS(), c, live, depth + 1), c);
+        if (a.k == 1 && op == BO_LAnd && a.v == 0) return RfVal3{1, 0};
+        if (a.k == 1 && op == BO_LOr && a.v != 0) return RfVal3{1, 1};
+        const RfVal3 b = truth(rf_eval(bo->getRHS(), c, live, depth + 1), c);
+        if (b.k == 1 && op == BO_LAnd && b.v == 0) return RfVal3{1, 0};
+        if (b.k == 1 && op == BO_LOr && b.v != 0) return RfVal3{1, 1};
+        if (a.k == 1 && b.k == 1) return RfVal3{1, op == BO_LAnd ? (a.v != 0 && b.v != 0) : (a.v != 0 || b.v != 0)};
+        return u;
+      }
+      const RfVal3 a = rf_eval(bo->getLHS(), c, live, depth + 1), b = rf_eval(bo->getRHS(), c, live, depth + 1);
+      if (op == BO_EQ || op == BO_NE) {
+        int r = -1;
+        if (a.k == 1 && b.k == 1) r = rf_eq(a.v, b.v) ? 1 : 0;
+        else if (a.k == 2 && b.k == 1) r = c.o->excluded.count(b.v) != 0 ? 0 : -1;
+        else if (a.k == 1 && b.k == 2) r = c.o->excluded.count(a.v) != 0 ? 0 : -1;
+        if (r < 0) return u;
+        return RfVal3{1, op == BO_EQ ? r : 1 - r};
+      }
+      if (a.k != 1 || b.k != 1) return u;
+      switch (op) {
+        case BO_LT: return RfVal3{1, a.v < b.v};
+        case BO_LE: return RfVal3{1, a.v <= b.v};
+        case BO_GT: return RfVal3{1, a.v > b.v};
+        case BO_GE: return RfVal3{1, a.v >= b.v};
+        case BO_And: return RfVal3{1, a.v & b.v};
+        case BO_Or: return RfVal3{1, a.v | b.v};
+        case BO_Add: return RfVal3{1, a.v + b.v};
+        case BO_Sub: return RfVal3{1, a.v - b.v};
+        default: return u;
+      }
+    }
+    return u;
+  }
+  static RfVal3 truth(RfVal3 a, const RfCtx& c) {
+    if (a.k == 1) return RfVal3{1, a.v != 0};
+    if (a.k == 2 && c.o->excluded.count(0) != 0) return RfVal3{1, 1};
+    return RfVal3{};
+  }
+  struct RfItem {
+    int kind = 0;  // 1 call, 2 store, 3 return
+    unsigned block = 0;
+    bool decided = true, live = false;
+    const Stmt* st = nullptr;
+    std::string via;  // a definition of the local the value passed through
+    int ret_known = 0;  // a return of another local: 1 a constant assigned to it on this path, 2 a non-constant, 0 none
+    int64_t ret_val = 0;
+  };
+  struct RfWalk {
+    std::set<unsigned> blocks;
+    std::vector<RfItem> items;
+    bool retry = false, retry_decided = true;
+    std::vector<std::string> decided_at;  // the branches this value decided, in the order met (positions)
+  };
+  // a definition of the local that keeps the value: v = g(..., v, ...) where g returns that parameter unchanged and nothing
+  // else (the first pass's values)
+  bool rf_keeps(const void* def, const VarDecl* v, std::string* via) {
+    const Expr* val = def_value(def, v);
+    const auto* t = val != nullptr ? dyn_cast<CallExpr>(val->IgnoreParenCasts()) : nullptr;
+    if (t == nullptr || t->getDirectCallee() == nullptr) return false;
+    const FunctionDecl* g = t->getDirectCallee();
+    auto it = spec_.result_values->by_fn.find(tu_.func_key(g->getDefinition() != nullptr ? g->getDefinition() : g));
+    if (it == spec_.result_values->by_fn.end()) return false;
+    const RfVals& f = it->second;
+    if (!f.vals.empty() || !f.open.empty() || f.params.size() != 1 || f.complement != 0) return false;
+    const uint32_t k = f.params.front();
+    if (k >= t->getNumArgs()) return false;
+    const auto* d = dyn_cast<DeclRefExpr>(t->getArg(k)->IgnoreParenCasts());
+    if (d == nullptr || d->getDecl() != v) return false;
+    *via = g->getNameAsString() + " at " + rf_pos_text(t->getBeginLoc()) + " returns its parameter " + std::to_string(k) + " unchanged";
+    return true;
+  }
+  RfWalk rf_explore(const CfgIndex& ix, const RfCtx& c) {
+    RfWalk w;
+    auto sat = ix.at.find(c.S);
+    if (sat == ix.at.end()) return w;
+    const unsigned sb = sat->second.first, si = sat->second.second;
+    struct St {
+      unsigned b, from;
+      bool live, decided;
+      std::string via;
+      std::map<const VarDecl*, int64_t> k;  // the other locals assigned a constant on this path since the call
+      std::set<const VarDecl*> nk;          // and those assigned something else
+    };
+    std::vector<St> work{{sb, si + 1, c.v == nullptr, true, "", {}, {}}};
+    std::set<std::tuple<unsigned, bool, bool, std::string>> seen;
+    auto kstr = [&](const St& x) {
+      std::string t;
+      for (const auto& [vd, val] : x.k) t += lid(vd) + "=" + std::to_string(val) + ";";
+      for (const VarDecl* vd : x.nk) t += lid(vd) + "=?;";
+      return t;
+    };
+    size_t steps = 0;
+    while (!work.empty() && steps < 200000) {
+      St s = work.back();
+      work.pop_back();
+      ++steps;
+      const CFGBlock* blk = s.b < ix.blocks.size() ? ix.blocks[s.b] : nullptr;
+      if (blk == nullptr) continue;
+      w.blocks.insert(s.b);
+      bool stop = false;
+      for (unsigned k = s.from; k < blk->size() && !stop; ++k) {
+        const std::optional<CFGStmt> cs = (*blk)[k].getAs<CFGStmt>();
+        if (!cs) continue;
+        const Stmt* st = cs->getStmt();
+        if (st == c.S) {
+          // the call runs again: a retry on this value
+          w.retry = true;
+          w.retry_decided = w.retry_decided && s.decided;
+          stop = true;
+          break;
+        }
+        if (c.v != nullptr) {
+          const void* d = def_of((*blk)[k], c.v);
+          if (d != nullptr) {
+            if (d == c.def_key) {
+              s.live = true;
+            } else {
+              std::string via;
+              if (s.live && rf_keeps(d, c.v, &via)) s.via = s.via.empty() ? via : s.via + "; " + via;
+              else s.live = false;
+            }
+          }
+        }
+        if (const auto* ce = dyn_cast<CallExpr>(st); ce != nullptr && ce != c.S && ext_call_keys_.count(ce) != 0)
+          w.items.push_back(RfItem{1, s.b, s.decided, s.live, st, s.via});
+        if (const auto* bo = dyn_cast<BinaryOperator>(st); bo != nullptr && bo->isAssignmentOp())
+          if (const auto* ld = dyn_cast<DeclRefExpr>(bo->getLHS()->IgnoreParenImpCasts()))
+            if (const auto* lv = dyn_cast<VarDecl>(ld->getDecl()); rf_is_local(lv) && lv != c.v) {
+              int64_t kv = 0;
+              if (bo->getOpcode() == BO_Assign && tu_.eval_int(bo->getRHS()->IgnoreParenCasts(), &kv) && !isa<CallExpr>(bo->getRHS()->IgnoreParenCasts())) {
+                s.k[lv] = kv;
+                s.nk.erase(lv);
+              } else {
+                s.k.erase(lv);
+                s.nk.insert(lv);
+              }
+            }
+        if (const auto* bo = dyn_cast<BinaryOperator>(st); bo != nullptr && bo->getOpcode() == BO_Assign) {
+          bool addr = false;
+          const std::string t = rf_loc_of(bo->getLHS(), &addr);
+          const bool to_own = c.v != nullptr && t == "local:" + lid(c.v);
+          int64_t cv = 0;
+          const bool local_const = t.compare(0, 6, "local:") == 0 && tu_.eval_int(bo->getRHS()->IgnoreParenCasts(), &cv);
+          if (!to_own && !t.empty() && t.compare(0, 6, "param:") != 0 && (t.compare(0, 6, "local:") != 0 || local_const))
+            w.items.push_back(RfItem{2, s.b, s.decided, s.live, st, s.via});
+        }
+        if (const auto* rs = dyn_cast<ReturnStmt>(st)) {
+          RfItem it{3, s.b, s.decided, s.live, st, s.via, 0, 0};
+          const Expr* rv = rs->getRetValue();
+          if (const auto* rd = rv != nullptr ? dyn_cast<DeclRefExpr>(rv->IgnoreParenCasts()) : nullptr)
+            if (const auto* rvd = dyn_cast<VarDecl>(rd->getDecl())) {
+              auto kit = s.k.find(rvd);
+              if (kit != s.k.end()) {
+                it.ret_known = 1;
+                it.ret_val = kit->second;
+              } else if (s.nk.count(rvd) != 0) {
+                it.ret_known = 2;
+              }
+            }
+          w.items.push_back(it);
+        }
+      }
+      if (stop) continue;
+      // the successors: a branch this value decides takes one
+      std::vector<std::pair<const CFGBlock*, bool>> next;  // (block, decided)
+      const Stmt* term = blk->getTerminatorStmt();
+      const Stmt* cond_s = blk->getTerminatorCondition();
+      const Expr* cond = cond_s != nullptr ? dyn_cast<Expr>(cond_s) : nullptr;
+      std::vector<const CFGBlock*> succ;
+      for (const CFGBlock::AdjacentBlock& a : blk->succs()) succ.push_back(a.getReachableBlock());
+      if (cond != nullptr && term != nullptr && isa<SwitchStmt>(term)) {
+        rf_used_ = false;
+        const RfVal3 r = rf_eval(cond, c, s.live);
+        if (r.k == 1) {
+          const CFGBlock* pick = nullptr;
+          const CFGBlock* dflt = nullptr;
+          for (const CFGBlock* b : succ) {
+            if (b == nullptr) continue;
+            const Stmt* lab = b->getLabel();
+            if (const auto* cs = dyn_cast_or_null<CaseStmt>(lab)) {
+              int64_t lv = 0;
+              if (cs->getLHS() != nullptr && tu_.eval_int(cs->getLHS(), &lv) && rf_eq(lv, r.v)) pick = b;
+            } else if (lab != nullptr && isa<DefaultStmt>(lab)) {
+              dflt = b;
+            }
+          }
+          if (pick == nullptr) pick = dflt != nullptr ? dflt : (succ.empty() ? nullptr : succ.back());
+          if (pick != nullptr) next.push_back({pick, s.decided});
+          if (rf_used_) w.decided_at.push_back(rf_pos_text(term->getBeginLoc()));
+        } else {
+          for (const CFGBlock* b : succ) next.push_back({b, false});
+        }
+      } else if (cond != nullptr && succ.size() == 2) {
+        rf_used_ = false;
+        const RfVal3 r = truth(rf_eval(cond, c, s.live), c);
+        if (r.k == 1) {
+          next.push_back({succ[r.v != 0 ? 0 : 1], s.decided});
+          if (rf_used_) w.decided_at.push_back(rf_pos_text(cond->getBeginLoc()));
+        } else {
+          for (const CFGBlock* b : succ) next.push_back({b, false});
+        }
+      } else {
+        for (const CFGBlock* b : succ) next.push_back({b, s.decided});
+      }
+      for (const auto& [b, dec] : next) {
+        if (b == nullptr) continue;
+        if (!seen.insert({b->getBlockID(), s.live, dec, kstr(s)}).second) continue;
+        work.push_back(St{b->getBlockID(), 0, s.live, dec, s.via, s.k, s.nk});
+      }
+    }
+    // one item per (kind, statement, live): reached on a decided path if any path that reaches it is decided
+    std::vector<RfItem> one;
+    std::map<std::tuple<int, const Stmt*, bool, int, int64_t>, size_t> at;  // lookup only
+    for (const RfItem& it : w.items) {
+      auto k = std::make_tuple(it.kind, it.st, it.live, it.ret_known, it.ret_val);
+      auto f = at.find(k);
+      if (f == at.end()) {
+        at[k] = one.size();
+        one.push_back(it);
+      } else {
+        one[f->second].decided = one[f->second].decided || it.decided;
+      }
+    }
+    w.items = std::move(one);
+    std::sort(w.decided_at.begin(), w.decided_at.end(), [](const std::string& a, const std::string& b) {
+      return std::make_pair(std::atol(a.c_str()), std::atol(a.c_str() + a.find(':') + 1)) < std::make_pair(std::atol(b.c_str()), std::atol(b.c_str() + b.find(':') + 1));
+    });
+    w.decided_at.erase(std::unique(w.decided_at.begin(), w.decided_at.end()), w.decided_at.end());
+    return w;
+  }
+
+  // After the walk, with --result-flow.
+  void emit_result_flow() {
+    const uint32_t cut_before = m_.stats.expr_depth_cut;
+    // the parameters a return gives back unchanged
+    for (const PendingReturn& pr : returns_) {
+      const Expr* rv = pr.stmt->getRetValue();
+      const auto* d = rv != nullptr ? dyn_cast<DeclRefExpr>(rv->IgnoreParenCasts()) : nullptr;
+      const auto* pv = d != nullptr ? dyn_cast<ParmVarDecl>(d->getDecl()) : nullptr;
+      if (pv != nullptr && param_unmodified(pv)) m_.rf_param_returns[fkey_].insert({tu_.pos_of(pr.stmt->getBeginLoc()).str(), pv->getFunctionScopeIndex()});
+    }
+    // the calls in key order (the order of the rows does not depend on pointer values)
+    std::vector<std::pair<std::string, const CallExpr*>> calls;
+    for (const auto& [ce, key] : ext_call_keys_) calls.push_back({key, ce});
+    std::sort(calls.begin(), calls.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+    for (const auto& [key, ce] : calls) rf_note_args(ce, key);
+    if (spec_.result_values == nullptr) {
+      m_.stats.expr_depth_cut = cut_before;
+      return;
+    }
+    CfgIndex* ix = ext_cfg();
+    std::map<const CallExpr*, int> first_branch;  // lookup only
+    std::set<const CallExpr*> explore;            // lookup only
+    std::map<const CallExpr*, std::pair<const VarDecl*, const void*>> def_of_call;  // lookup only
+    auto qual_guard_at = [&](const std::map<const void*, std::vector<Guard>>& m, const void* k) -> ExprRef {
+      auto it = m.find(k);
+      return it == m.end() ? nullptr : rf_qual_guard(it->second);
+    };
+    auto fill_use = [&](RFlowFact* r, const RfUse& u) {
+      r->use_kind = u.kind;
+      if (u.kind == KZ_RFLOW_USE_BRANCH) r->cond = rf_qualified(u.cond, true);
+      if (u.kind == KZ_RFLOW_USE_ARG) {
+        auto kt = ext_call_keys_.find(u.call);
+        if (kt != ext_call_keys_.end()) r->use_call_key = kt->second;
+        r->pos = u.pos;
+        r->target = callee_text(u.call);
+        r->cond = qual_guard_at(rf_guards_, u.call);
+      }
+      if (u.kind == KZ_RFLOW_USE_RETURN) r->cond = qual_guard_at(rf_guards_, u.ret);
+      if (u.kind == KZ_RFLOW_USE_STORE) r->target = u.target;
+      if (rf_has_cut(r->cond)) r->flags |= KZ_RFLOW_FLAG_EXPR_TRUNCATED;
+    };
+    for (const auto& [key, ce] : calls) {
+      if (ce->getType()->isVoidType()) continue;
+      ++m_.rf_stats.calls_with_result;
+      RFlowFact base;
+      base.call_key = key;
+      base.func_key = fkey_;
+      base.def = base.use = tu_.pos_of(ce->getBeginLoc());
+      if (rf_in_loop_.count(ce) != 0) base.flags |= KZ_RFLOW_FLAG_IN_LOOP;
+      const RfUse u = rf_use_of(ce);
+      const size_t first_row = m_.rflows.size();
+      if (u.kind == KZ_RFLOW_USE_STORE && u.local != nullptr) {
+        const VarDecl* v = u.local;
+        base.def_kind = KZ_RFLOW_DEF_LOCAL_DEF;
+        base.local = lid(v);
+        base.def = tu_.pos_of(def_loc(u.def_key, v));
+        def_of_call[ce] = {v, u.def_key};
+        auto lit = locals_.find(v);
+        if (lit != locals_.end() && lit->second.addr_taken) {
+          RFlowFact r = base;
+          r.use_kind = KZ_RFLOW_USE_OTHER;
+          r.reach = KZ_RFLOW_REACH_NOT_COMPUTED;
+          r.flags |= KZ_RFLOW_FLAG_ADDR_TAKEN_LOCAL;
+          m_.rflows.push_back(r);
+          continue;
+        }
+        if (ix == nullptr) {
+          RFlowFact r = base;
+          r.use_kind = KZ_RFLOW_USE_NONE;
+          r.reach = KZ_RFLOW_REACH_NOT_COMPUTED;
+          r.flags |= KZ_RFLOW_FLAG_NO_CFG;
+          m_.rflows.push_back(r);
+          continue;
+        }
+        bool any = false;
+        for (const DeclRefExpr* rd : rf_reads_of(v)) {
+          auto at = ix->at.find(rd);
+          if (at == ix->at.end()) continue;
+          bool undef = false;
+          const std::vector<DefAt> defs = reaching_defs(*ix, v, at->second.first, at->second.second, &undef);
+          if (std::none_of(defs.begin(), defs.end(), [&](const DefAt& d) { return d.key == u.def_key; })) continue;
+          any = true;
+          RFlowFact r = base;
+          r.use = tu_.pos_of(rd->getLocation());
+          fill_use(&r, rf_use_of(rd));
+          if (defs.size() == 1) r.reach = undef ? KZ_RFLOW_REACH_UNDEF_PATH : KZ_RFLOW_REACH_UNIQUE;
+          else r.reach = KZ_RFLOW_REACH_SHARED;
+          r.n_other = static_cast<uint32_t>(defs.size() - 1);
+          std::vector<std::string> others;
+          for (const DefAt& d : defs)
+            if (d.key != u.def_key) others.push_back(rf_pos_text(def_loc(d.key, v)));
+          std::sort(others.begin(), others.end());
+          if (undef) others.push_back("undef");
+          for (size_t i = 0; i < others.size(); ++i) r.other_defs += (i == 0 ? "" : "; ") + others[i];
+          m_.rflows.push_back(r);
+        }
+        if (!any) {
+          RFlowFact r = base;
+          r.use_kind = KZ_RFLOW_USE_NONE;
+          r.reach = KZ_RFLOW_REACH_UNIQUE;
+          m_.rflows.push_back(r);
+        }
+      } else if (u.cast_void) {
+        RFlowFact r = base;
+        r.def_kind = KZ_RFLOW_DEF_CAST_VOID;
+        r.use_kind = KZ_RFLOW_USE_NONE;
+        m_.rflows.push_back(r);
+      } else if (u.discarded) {
+        RFlowFact r = base;
+        r.def_kind = KZ_RFLOW_DEF_DISCARDED;
+        r.use_kind = KZ_RFLOW_USE_NONE;
+        m_.rflows.push_back(r);
+      } else if (u.kind == KZ_RFLOW_USE_STORE) {
+        RFlowFact r = base;
+        r.def_kind = u.target == "deref" ? KZ_RFLOW_DEF_OUT_STORE : KZ_RFLOW_DEF_FIELD_STORE;
+        r.reach = KZ_RFLOW_REACH_UNIQUE;
+        fill_use(&r, u);
+        m_.rflows.push_back(r);
+      } else {
+        RFlowFact r = base;
+        r.def_kind = KZ_RFLOW_DEF_DIRECT;
+        r.reach = KZ_RFLOW_REACH_UNIQUE;
+        fill_use(&r, u);
+        m_.rflows.push_back(r);
+      }
+      for (size_t i = first_row; i < m_.rflows.size(); ++i) {
+        const uint8_t k = m_.rflows[i].use_kind;
+        if (k == KZ_RFLOW_USE_BRANCH && first_branch.count(ce) == 0) first_branch[ce] = static_cast<int>(i);
+        if (k == KZ_RFLOW_USE_BRANCH || k == KZ_RFLOW_USE_RETURN) explore.insert(ce);
+      }
+    }
+    // the guard rows: the calls that run under a condition that reads a call result
+    for (const auto& [key, ce] : calls) {
+      auto g = rf_guards_.find(ce);
+      if (g == rf_guards_.end() || g->second.empty()) continue;
+      const ExprRef q = rf_qual_guard(g->second);
+      bool unique = true;
+      if (!rf_reads_call_result(q, &unique)) continue;
+      RFlowFact r;
+      r.call_key = key;
+      r.func_key = fkey_;
+      r.def = r.use = tu_.pos_of(ce->getBeginLoc());
+      r.def_kind = KZ_RFLOW_DEF_NONE;
+      r.use_kind = KZ_RFLOW_USE_NONE;
+      r.reach = unique ? KZ_RFLOW_REACH_UNIQUE : KZ_RFLOW_REACH_SHARED;
+      r.cond = q;
+      r.target = callee_text(ce);
+      if (rf_in_loop_.count(ce) != 0) r.flags |= KZ_RFLOW_FLAG_IN_LOOP;
+      if (rf_has_cut(q)) r.flags |= KZ_RFLOW_FLAG_EXPR_TRUNCATED;
+      m_.rflows.push_back(r);
+    }
+    // the effects of each value a tested or returned call result may take
+    if (ix != nullptr)
+      for (const auto& [key, ce] : calls) {
+        if (explore.count(ce) == 0) continue;
+        ++m_.rf_stats.calls_explored;
+        const RfVals V = rf_values_at(ce, 0);
+        std::vector<RfOutcome> outs;
+        std::set<int64_t> known;
+        for (const RfVal& x : V.vals) {
+          RfOutcome o;
+          o.v = x.v;
+          o.cls = rf_class(x.v);
+          o.reach = x.present_only ? KZ_REFF_REACH_PRESENT_ONLY : KZ_REFF_REACH_REACHED;
+          o.text = x.text + (x.via.empty() ? "" : " (" + x.via + ")");
+          outs.push_back(o);
+          known.insert(x.v);
+        }
+        if (!V.open.empty() || V.complement != 0) {
+          RfOutcome o;
+          o.complement = true;
+          o.excluded = known;
+          o.cls = V.complement != 0 ? V.complement : static_cast<uint8_t>(KZ_REFF_OUTCOME_OTHER);
+          o.reach = KZ_REFF_REACH_NONE;
+          std::string ks;
+          for (int64_t k : known) ks += (ks.empty() ? "" : ", ") + std::to_string(k);
+          o.text = "a value other than " + (ks.empty() ? std::string("those listed (none)") : ks) +
+                   (V.complement != 0 ? " (" + V.complement_why + ")" : " (the returns not followed: " + V.open.front() + (V.open.size() > 1 ? "; and " + std::to_string(V.open.size() - 1) + " more" : "") + ")");
+          outs.push_back(o);
+        }
+        const int flow = first_branch.count(ce) != 0 ? first_branch.at(ce) : -1;
+        const std::string head = "call " + callee_text(ce) + " at " + rf_pos_text(ce->getBeginLoc());
+        auto dit = def_of_call.find(ce);
+        const VarDecl* v = dit != def_of_call.end() ? dit->second.first : nullptr;
+        const void* dk = dit != def_of_call.end() ? dit->second.second : nullptr;
+        const std::string defs = v != nullptr ? " -> def " + lid(v) + " at " + rf_pos_text(def_loc(dk, v)) : std::string();
+        if (outs.empty()) {
+          REffFact e;
+          e.call_key = key;
+          e.func_key = fkey_;
+          e.outcome = KZ_REFF_OUTCOME_OTHER;
+          e.effect = KZ_REFF_EFFECT_NONE;
+          e.status = KZ_REFF_STATUS_OPEN;
+          e.reason = "the values the callee returns are not known: " + (V.open.empty() ? std::string("no return") : V.open.front());
+          e.chain = head + defs;
+          e.flow = flow;
+          m_.reffects.push_back(e);
+          continue;
+        }
+        std::vector<RfWalk> walks;
+        for (const RfOutcome& o : outs) walks.push_back(rf_explore(*ix, RfCtx{ce, v, dk, &o}));
+        m_.rf_stats.outcomes += static_cast<uint32_t>(outs.size());
+        std::set<unsigned> common = walks.front().blocks;
+        for (size_t i = 1; i < walks.size(); ++i) {
+          std::set<unsigned> x;
+          std::set_intersection(common.begin(), common.end(), walks[i].blocks.begin(), walks[i].blocks.end(), std::inserter(x, x.begin()));
+          common = std::move(x);
+        }
+        for (size_t oi = 0; oi < outs.size(); ++oi) {
+          const RfOutcome& o = outs[oi];
+          const RfWalk& w = walks[oi];
+          std::string decided;
+          for (size_t i = 0; i < w.decided_at.size() && i < 4; ++i) decided += (i == 0 ? "" : ", ") + w.decided_at[i];
+          if (w.decided_at.size() > 4) decided += " and " + std::to_string(w.decided_at.size() - 4) + " more";
+          const std::string chain0 = head + defs + " -> value " + (o.complement ? std::string("(other)") : std::to_string(o.v)) +
+                                     (decided.empty() ? std::string(" -> no branch decided by it") : " -> branches decided by it at " + decided);
+          auto base = [&](uint8_t effect, const RfItem* it) {
+            REffFact e;
+            e.call_key = key;
+            e.func_key = fkey_;
+            e.outcome_value = o.complement ? 0 : o.v;
+            e.outcome = o.cls;
+            e.reach = o.reach;
+            e.effect = effect;
+            e.flow = flow;
+            e.status = it == nullptr || it->decided ? KZ_REFF_STATUS_COMPLETE : KZ_REFF_STATUS_OPEN;
+            if (it != nullptr && !it->decided) e.reason = "on a path through a branch this value does not decide";
+            if (o.complement) {
+              e.status = KZ_REFF_STATUS_OPEN;
+              e.reason = std::string(e.reason.empty() ? "" : e.reason + "; ") + "the outcome is " + o.text;
+            }
+            if (it != nullptr) e.effect_pos = tu_.pos_of(it->st->getBeginLoc());
+            e.chain = chain0 + (it != nullptr ? " -> " + rf_pos_text(it->st->getBeginLoc()) : std::string()) + (it != nullptr && !it->via.empty() ? " (" + it->via + ")" : "");
+            if (!o.complement) e.detail = o.text;
+            return e;
+          };
+          bool specific = false;
+          for (const RfItem& it : w.items) {
+            const bool own = common.count(it.block) == 0;
+            // a call that takes the value itself as an argument, wherever the value's paths reach it (an exit or a
+            // terminal it may be: serialize.cpp classifies it)
+            if (it.kind == 1 && v != nullptr && it.live && !o.complement) {
+              const auto* arg_call = cast<CallExpr>(it.st);
+              bool reads = false;
+              for (unsigned a = 0; a < arg_call->getNumArgs(); ++a) {
+                const auto* d = dyn_cast<DeclRefExpr>(arg_call->getArg(a)->IgnoreParenCasts());
+                if (d != nullptr && d->getDecl() == v) reads = true;
+              }
+              if (reads) {
+                REffFact x = base(KZ_REFF_EFFECT_NONE, &it);
+                x.raw = REffFact::kExitViaStore;
+                x.effect_call_key = ext_call_keys_.at(arg_call);
+                x.store_target = "local:" + lid(v);
+                x.store_value = "the value of the call";
+                x.effect_value = o.v;
+                x.chain += " (the call's result " + lid(v) + " is its argument)";
+                m_.reffects.push_back(x);
+              }
+            }
+            if (it.kind == 1 && own) {
+              specific = true;
+              REffFact e = base(KZ_REFF_EFFECT_NONE, &it);
+              e.raw = REffFact::kCall;
+              e.effect_call_key = ext_call_keys_.at(cast<CallExpr>(it.st));
+              m_.reffects.push_back(e);
+            }
+            if (it.kind == 2 && own) {
+              specific = true;
+              const auto* bo = cast<BinaryOperator>(it.st);
+              bool addr = false;
+              const std::string t = rf_loc_of(bo->getLHS(), &addr);
+              int64_t cv = 0;
+              const bool is_const = tu_.eval_int(bo->getRHS()->IgnoreParenCasts(), &cv);
+              const std::string vt = tu_.source_text(bo->getRHS()->getSourceRange(), 60);
+              REffFact e = base(KZ_REFF_EFFECT_STORE, &it);
+              e.detail = t + " := " + vt;
+              if (is_const) e.effect_value = cv;
+              m_.reffects.push_back(e);
+              // a later call that passes the stored location by value: an exit or a terminal it may be (serialize.cpp)
+              for (const RfItem& later : w.items) {
+                if (later.kind != 1) continue;
+                const auto* later_call = cast<CallExpr>(later.st);
+                bool reads = false;
+                for (unsigned a = 0; a < later_call->getNumArgs(); ++a) {
+                  bool ad = false;
+                  if (rf_loc_of(later_call->getArg(a), &ad) == t && !ad) reads = true;
+                }
+                if (!reads) continue;
+                REffFact x = base(KZ_REFF_EFFECT_NONE, &later);
+                x.raw = REffFact::kExitViaStore;
+                x.effect_call_key = ext_call_keys_.at(later_call);
+                x.store_target = t;
+                x.store_value = vt;
+                if (is_const) x.effect_value = cv;
+                for (const RfItem& between : w.items) {
+                  if (between.kind != 1 || between.st == later.st) continue;
+                  const auto* between_call = cast<CallExpr>(between.st);
+                  for (unsigned a = 0; a < between_call->getNumArgs(); ++a) {
+                    bool ad = false;
+                    if (rf_loc_of(between_call->getArg(a), &ad) == t && ad) x.address_passes.push_back({ext_call_keys_.at(between_call), a});
+                  }
+                }
+                x.chain += " (the store at " + rf_pos_text(bo->getBeginLoc()) + " of " + t + " := " + vt + " is its argument)";
+                m_.reffects.push_back(x);
+              }
+            }
+            if (it.kind == 3) {
+              const auto* rs = cast<ReturnStmt>(it.st);
+              const Expr* rv = rs->getRetValue();
+              if (rv == nullptr) continue;
+              const Expr* b = rv->IgnoreParenCasts();
+              const auto* d = dyn_cast<DeclRefExpr>(b);
+              int64_t cv = 0;
+              if (b == ce || (d != nullptr && v != nullptr && d->getDecl() == v && it.live)) {
+                REffFact e = base(KZ_REFF_EFFECT_RETURN_RESULT, &it);
+                m_.reffects.push_back(e);
+              } else if (!isa<CallExpr>(b) && tu_.eval_int(b, &cv)) {
+                REffFact e = base(KZ_REFF_EFFECT_RETURN_CONST, &it);
+                e.effect_value = cv;
+                e.detail = tu_.source_text(b->getSourceRange(), 60);
+                m_.reffects.push_back(e);
+              } else if (it.ret_known == 1) {
+                REffFact e = base(KZ_REFF_EFFECT_RETURN_CONST, &it);
+                e.effect_value = it.ret_val;
+                e.detail = tu_.source_text(b->getSourceRange(), 60) + " = " + std::to_string(it.ret_val) + " (the constant assigned to it on this path)";
+                m_.reffects.push_back(e);
+              } else {
+                // every return this value reaches, also one all values reach: what it returns is not known here
+                REffFact e = base(KZ_REFF_EFFECT_NONE, &it);
+                e.status = KZ_REFF_STATUS_OPEN;
+                e.reason = std::string(e.reason.empty() ? "" : e.reason + "; ") + "returns " + tu_.source_text(rv->getSourceRange(), 60) + ", neither a constant nor this result" +
+                           (it.ret_known == 2 ? " (assigned a value that is not a constant on this path)" : "");
+                m_.reffects.push_back(e);
+              }
+            }
+          }
+          if (w.retry) {
+            REffFact e = base(KZ_REFF_EFFECT_RETRY, nullptr);
+            if (!w.retry_decided) {
+              e.status = KZ_REFF_STATUS_OPEN;
+              e.reason = "on a path through a branch this value does not decide";
+            }
+            std::string delays;
+            for (const RfItem& it : w.items)
+              if (it.kind == 1)
+                if (const FunctionDecl* f = cast<CallExpr>(it.st)->getDirectCallee()) {
+                  const std::string fk = tu_.func_key(f->getDefinition() != nullptr ? f->getDefinition() : f);
+                  if (spec_.delay_keys.count(fk) != 0 || spec_.delay_ops.count(f->getNameAsString()) != 0) delays += (delays.empty() ? "" : ", ") + f->getNameAsString() + " at " + rf_pos_text(it.st->getBeginLoc());
+                }
+            e.detail = "the call runs again" + (delays.empty() ? std::string() : "; delay " + delays);
+            e.chain = chain0 + " -> " + head;
+            m_.reffects.push_back(e);
+          }
+          if (!specific && !w.retry) {
+            REffFact e = base(KZ_REFF_EFFECT_FALLTHROUGH, nullptr);
+            e.detail = "nothing before the paths of the values join";
+            m_.reffects.push_back(e);
+          }
+        }
+      }
+    m_.rf_stats.depth_cut += m_.stats.expr_depth_cut - cut_before;
+    m_.stats.expr_depth_cut = cut_before;
+  }
+
+  // --result-flow (static_facts.md 5u)
+  std::map<const void*, std::vector<Guard>> rf_guards_;                 // a call or a return -> the conditions it runs under, lookup only
+  std::set<const CallExpr*> rf_in_loop_;                                // lookup only
+  std::map<std::pair<const Expr*, bool>, ExprRef> rf_qcache_;           // lookup only
+  std::set<std::string> rf_call_valued_;                                // qualified local names a definition of which is a call
+  std::map<const VarDecl*, std::vector<const DeclRefExpr*>> rf_reads_;  // lookup only
+  bool rf_used_ = false;                                                // rf_eval read the outcome's value
 
   TuReader& tu_;
   Model& m_;

@@ -61,6 +61,8 @@ const std::vector<std::string> kPathSections = {"functions", "lockpaths"};
 const std::vector<std::string> kObjectSections = {"functions", "writers", "atype", "locs", "outcalls", "fstatus", "objaccess", "ftypes", "argtypes"};
 // Semantics with a verification state (--semantics, static_facts.md 5t): the section SEMANTICS and the facts it is joined from.
 const std::vector<std::string> kSemSections = {"functions", "retconsts", "semantics"};
+// Result flow and effects (--result-flow, static_facts.md 5u): the two sections and the returns they are built on.
+const std::vector<std::string> kResultFlowSections = {"functions", "returns", "resultflow", "resulteffect"};
 const std::vector<std::string> kObjectTargets = {"--extended-facts", "--target", "Mem.pool", "--target", "Mem.buf", "--target", "Mem.label", "--target", "Mem.tag",
                                                  "--target", "Mem.data", "--target", "Mem.raw", "--target", "Mem.count", "--target", "Chan.name"};
 std::vector<std::string> with_option(std::vector<std::string> v, const std::string& o) {
@@ -115,6 +117,10 @@ const std::vector<Case>& cases() {
       // semantics with a verification state (static_facts.md 5t): semantics.c with the data file the coverage scan generates for
       // it (an option value "@data/..." names a file of the golden data directory), and the relations rows that name its functions
       {"semantics_np", "semantics.c", {"--targets-rule", "R-T1,R-T2", "--semantics", "@data/semantics_fixture/framework_semantics_fixture-sem.txt"}, kSemSections, true, true},
+      // result flow and effects (static_facts.md 5u): resultflow.c, with the relations rows of revision 10 and, apart, the order
+      // of revision 3 over the same facts
+      {"resultflow_np", "resultflow.c", {"--targets-rule", "R-T1,R-T2", "--result-flow"}, kResultFlowSections, true, true},
+      {"resultflow_order_np", "resultflow.c", {"--targets-rule", "R-T1,R-T2", "--result-flow"}, kPathSections, true, false, true},
   };
   return all;
 }

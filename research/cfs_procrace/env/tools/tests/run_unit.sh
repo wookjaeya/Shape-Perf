@@ -43,6 +43,9 @@
 #  15 explanation records (env/obs1/explain.py, fixtures env/obs1/tests/test_explain.py): each need state of the
 #     judgement rules 3.5, each status of the link, use_cond, order and effect axes, a repeated creation-argument value
 #     (both ties undetermined), a refused combination (rc 3), and a broken record for each format rule of 3.6 (rc 4)
+#  16 offline probe revision 2 (plan/ovm_rev1_20261116/probe/s1_rev2.py) on a stub relations text: one path A row whose
+#     label comes from its text (T?) without the line handling_label, from the fact with `handling_label: R`, from the
+#     text again with `handling_label: none`; a row with `handling_label: T` and a relocation counterpart is D14
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../../.." && pwd)"
@@ -367,6 +370,25 @@ python3 -I "$R/env/obs1/tests/test_explain.py" "$R/env/obs1/explain.py" "$R/kair
 sm=$(tail -1 "$W/ex.log")
 ok=0; [ $c -eq 0 ] || { ok=1; grep '^FAIL' "$W/ex.log" | head -5; }
 res "explanation records (synthetic fixtures)" $ok "$sm"
+
+# 16 offline probe revision 2
+X=$W/pr; mkdir -p "$X"
+PR=$R/plan/ovm_rev1_20261116/probe/s1_rev2.py
+row() { # FILE EXTRA-LINE
+  { echo 'kz-relations 1'; echo '[A] lookups'
+    echo '  A1 lookup a.c:1:1 in f -> look#1 namespace T.name partition {} key known'
+    echo '      actors: {f (spawn-entry)}; result=tested'
+    echo '      dependency: path A: 1 creator(s) of this partition in other actors'
+    echo '      feasibility: undecidable: the facts give no static order'
+    echo '      flip: static-undetermined: search returns: s returns -17 [E_NF], s returns 0 [OK]'
+    [ -n "$2" ] && echo "      $2"; } > "$1"; }
+lab() { python3 -I "$PR" "$1" --tsv "$1.tsv" > /dev/null 2>&1; awk -F'\t' 'NR==2 {print $4 "/" $5 "/" $6 "/" $15}' "$1.tsv"; }
+row "$X/a.txt" ""; a=$(lab "$X/a.txt")
+row "$X/b.txt" "handling_label: R (over the absence value -17) R: terminal"; b=$(lab "$X/b.txt")
+row "$X/c.txt" "handling_label: none (no failure value to follow)"; c=$(lab "$X/c.txt")
+row "$X/d.txt" "handling_label: T (over the absence value -17) T: returns 0"; d=$(lab "$X/d.txt")
+ok=0; [ "$a" = "T?/T?/text/D11" ] && [ "$b" = "R/T?/fact/D07" ] && [ "$c" = "T?/T?/text/D11" ] && [ "$d" = "T/T?/fact/D14" ] || ok=1
+res "offline probe revision 2 (stub relations rows)" $ok "no line $a; R line $b; none line $c; T line $d (label/text label/source/disposition)"
 
 echo "unit checks: $((NC - NF)) of $NC pass"
 exit $((NF > 0))

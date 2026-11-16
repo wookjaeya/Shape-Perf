@@ -10,6 +10,7 @@
 #include "finalize.hpp"
 #include "kz/core/registry.hpp"
 #include "p0.hpp"
+#include "result_flow.hpp"
 #include "target_rules.hpp"
 
 namespace kzs {
@@ -1117,6 +1118,7 @@ bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSp
                           Model* model, ExtractSpec* spec, Derivation* derivation, std::string* error) {
   FieldStatusTable fields;
   std::vector<FieldRef> first_fields;
+  std::shared_ptr<const ResultValues> result_values;
   std::vector<TargetField> rule_fields;
   {
     ExtractSpec first_spec = base;
@@ -1137,6 +1139,8 @@ bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSp
     derivation->lock_vocabulary.insert(ld.lock_keys.begin(), ld.lock_keys.end());
     derivation->lock_vocabulary.insert(ld.unlock_keys.begin(), ld.unlock_keys.end());
     derivation->completeness_targets = fields.targets;
+    // --result-flow (static_facts.md 5u): the values each function may return, for the outcome classes of the second pass
+    if (base.result_flow) result_values = build_result_values(first);
     if (!base.targets_rule.empty()) {
       TargetRules rules;
       if (!parse_target_rules(base.targets_rule, &rules, error)) return false;
@@ -1152,6 +1156,7 @@ bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSp
   }
   *spec = base;
   apply_derivation(*derivation, spec);
+  spec->result_values = result_values;
   // the rule targets (none without --targets-rule): the second pass extracts their writer sets
   for (const TargetField& t : rule_fields)
     if (!spec->has_field(t.field)) spec->fields.push_back(t);

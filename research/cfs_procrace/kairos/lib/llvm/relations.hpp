@@ -49,6 +49,7 @@
 namespace kzs {
 
 const char* relations_rules_revision();
+const char* relations_result_flow_revision();  // relations rules revision 10: what facts with RESULT_FLOW and RESULT_EFFECT add
 
 struct RelationsOptions {
   // nothing yet: the query has no parameter that selects what it reports

@@ -20,7 +20,7 @@ constexpr uint32_t kViewElements = 64;
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
                                  "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits",
-                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits", "lockpaths", "objaccess", "ftypes", "argtypes", "semantics"};
+                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits", "lockpaths", "objaccess", "ftypes", "argtypes", "semantics", "resultflow", "resulteffect"};
 
 class View {
  public:
@@ -56,7 +56,8 @@ class View {
                  {"fstatus", KZ_SEC_FIELD_STATUS, &View::fstatus},    {"awaits", KZ_SEC_AWAIT_L1, &View::awaits},
                  {"lockpaths", KZ_SEC_LOCK_PATHS, &View::lockpaths},
                  {"objaccess", KZ_SEC_OBJECT_ACCESS, &View::objaccess}, {"ftypes", KZ_SEC_FIELD_TYPES, &View::ftypes},
-                 {"argtypes", KZ_SEC_ARG_TYPES, &View::argtypes},      {"semantics", KZ_SEC_SEMANTICS, &View::semantics}};
+                 {"argtypes", KZ_SEC_ARG_TYPES, &View::argtypes},      {"semantics", KZ_SEC_SEMANTICS, &View::semantics},
+                 {"resultflow", KZ_SEC_RESULT_FLOW, &View::resultflow}, {"resulteffect", KZ_SEC_RESULT_EFFECT, &View::resulteffect}};
     for (const auto& t : added)
       if (c_.find_section(t.id) != nullptr && (o_.sections.empty() || o_.sections.count(t.name) != 0)) (this->*t.fn)(os);
     *out = os.str();
@@ -111,6 +112,8 @@ class View {
     if (!(s = read(KZ_SEC_FIELD_TYPES, &ftypes_)).ok()) return s;
     if (!(s = read(KZ_SEC_ARG_TYPES, &argtypes_)).ok()) return s;
     if (!(s = read(KZ_SEC_SEMANTICS, &sem_)).ok()) return s;
+    if (!(s = read(KZ_SEC_RESULT_FLOW, &rflow_)).ok()) return s;
+    if (!(s = read(KZ_SEC_RESULT_EFFECT, &reffect_)).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_by_site_[calls_[i].site] = i;
     for (size_t i = 0; i < loops_.size(); ++i) loop_by_site_[loops_[i].site] = i;
     return kz::Status::success();
@@ -731,6 +734,44 @@ class View {
       os << "\n";
     }
   }
+  // RESULT_FLOW (--result-flow, static_facts.md 5u): the call, how its result is defined, the use, whether that
+  // definition alone reaches it, the condition with the locals named by their definitions; a guard row (def none, use
+  // none) is the call with the conditions it runs under
+  void resultflow(std::ostream& os) {
+    os << "[resultflow] " << rflow_.size() << "\n";
+    for (size_t i = 0; i < rflow_.size(); ++i) {
+      const kz_fact_rflow& r = rflow_[i];
+      const bool guard = r.def_kind == KZ_RFLOW_DEF_NONE && r.use_kind == KZ_RFLOW_USE_NONE;
+      os << "  #" << i << " " << site_text(r.site) << " in " << fn_name(r.fn) << (guard ? " guard" : " " + enum_text("KZ_RFLOW_DEF", r.def_kind));
+      const std::string local = str(r.local);
+      if (!local.empty()) os << " " << local << "@" << r.def_line << ":" << r.def_col;
+      if (!guard) os << " -> " << enum_text("KZ_RFLOW_USE", r.use_kind) << " at " << r.use_line << ":" << r.use_col;
+      if (r.use_site != KZ_NONE32) os << " of " << site_text(r.use_site) << " arg " << r.pos;
+      const std::string t = str(r.target);
+      if (!t.empty()) os << " [" << t << "]";
+      os << " " << enum_text("KZ_RFLOW_REACH", r.reach);
+      if (r.n_other != 0) os << " (others " << r.n_other << ": " << str(r.other_defs) << ")";
+      if (r.cond_root != KZ_NONE32) os << " cond " << expr(r.cond_root);
+      os << " " << flags_text("KZ_RFLOW_FLAG", r.flags) << "\n";
+    }
+  }
+  // RESULT_EFFECT (--result-flow): per call and value of its callee, one effect, complete or open with its reason
+  void resulteffect(std::ostream& os) {
+    os << "[resulteffect] " << reffect_.size() << "\n";
+    for (const kz_fact_reffect& r : reffect_) {
+      os << "  " << site_text(r.site) << " in " << fn_name(r.fn) << " " << enum_text("KZ_REFF_OUTCOME", r.outcome) << " " << r.outcome_value << " "
+         << enum_text("KZ_REFF_REACH", r.reach) << " -> " << enum_text("KZ_REFF_EFFECT", r.effect);
+      if (r.effect_site != KZ_NONE32) os << " " << site_text(r.effect_site);
+      else if (r.effect_line != 0) os << " at " << fh_pos(r.effect_fh, r.effect_line, 0);
+      if (r.effect_value != 0) os << " value " << r.effect_value;
+      const std::string d = str(r.detail), why = str(r.reason);
+      if (!d.empty()) os << " [" << d << "]";
+      os << " " << enum_text("KZ_REFF_STATUS", r.status);
+      if (!why.empty()) os << " (" << why << ")";
+      os << " flow " << idx(r.flow) << " " << flags_text("KZ_REFF_FLAG", r.flags) << "\n";
+      os << "      chain: " << str(r.chain) << "\n";
+    }
+  }
   void fstatus(std::ostream& os) {
     os << "[fstatus] " << fstatus_.size() << "\n";
     for (const kz_fact_fstatus& r : fstatus_) {
@@ -916,6 +957,8 @@ class View {
   std::vector<kz_fact_ftype> ftypes_;
   std::vector<kz_fact_argtype> argtypes_;
   std::vector<kz_fact_sem> sem_;
+  std::vector<kz_fact_rflow> rflow_;
+  std::vector<kz_fact_reffect> reffect_;
   std::vector<kz_fact_fstatus> fstatus_;
   std::vector<kz_fact_await> awaits_;
   std::map<uint32_t, size_t> call_by_site_, loop_by_site_;

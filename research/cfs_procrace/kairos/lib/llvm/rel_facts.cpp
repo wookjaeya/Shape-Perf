@@ -48,6 +48,11 @@ kz::Status RelFacts::load() {
   if (!(s = read(KZ_SEC_AWAIT_L1, &awaits_)).ok()) return s;
   if (!(s = read(KZ_SEC_LOCK_PATHS, &lockpaths_)).ok()) return s;
   if (!(s = read(KZ_SEC_SEMANTICS, &sem_)).ok()) return s;
+  if (!(s = read(KZ_SEC_RESULT_FLOW, &rflow_)).ok()) return s;
+  if (!(s = read(KZ_SEC_RESULT_EFFECT, &reffect_)).ok()) return s;
+  result_flow_ = c_.find_section(KZ_SEC_RESULT_FLOW) != nullptr && c_.find_section(KZ_SEC_RESULT_EFFECT) != nullptr;
+  for (size_t i = 0; i < rflow_.size(); ++i) rflow_of_site_[rflow_[i].site].push_back(static_cast<uint32_t>(i));
+  for (size_t i = 0; i < reffect_.size(); ++i) reffect_of_site_[reffect_[i].site].push_back(static_cast<uint32_t>(i));
   return kz::Status::success();
 }
 

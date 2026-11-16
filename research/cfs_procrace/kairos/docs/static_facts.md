@@ -724,6 +724,28 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - 같은 이름의 함수가 판마다 다른 뜻을 가질 수 있으므로 항목은 이름으로 옮기지 않는다(고정 파일의 sha256 이 같을 때만 적용).
 - 이 층이 방법이 받아들이는 framework-adapter 층인지는 PI 의 물음이다(가정하지 않음).
 
+## 5u. 결과 흐름과 효과: `extract --result-flow`, relations rules revision 10, order rules revision 3 (2026-11-16) [D]
+
+옵션 `kz-static extract --no-profile --result-flow` (프로필 없는 방식에서만; 프로필 방식은 종료 코드 2). 옵션이 없으면 추출의 출력은 앞판 그대로이고, relations 와 order 는 RESULT_FLOW·RESULT_EFFECT 가 없는 facts 에서 revision 9·2 의 바이트를 낸다. 규칙의 판: `result flow rules revision 1 (2026-11-16)` (BASIS `extract.result_flow`). 섹션은 schema revision 12 의 142·143 이고 레코드·열거형은 바뀌지 않는다(`include/` 그대로).
+
+**모든 회차가 적는 것.** 함수마다 매개변수를 바꾸지 않고 돌려주는 return(그 매개변수에 대입·증감·주소 취함이 없음), 호출 인자마다 그 상수 또는 그 값이 결과인 호출(직접, 또는 하나뿐인 도달 정의가 그 호출이나 상수인 지역). 첫 회차의 RETURNS 에서 함수마다 돌려줄 수 있는 값을 만든다(`lib/llvm/result_flow.cpp`): 상수 return, 호출 결과 return(그 호출의 값, 매개변수는 그 호출의 인자로 풀어), 바꾸지 않고 돌려주는 매개변수(기호로 두고 각 호출에서 인자로 품), 그 밖은 따라가지 않은 것. 몸이 없는 함수는 따라가지 않음이고, P0 의 스레드 생성은 0(성공)과 그 밖(오류 번호)이다(POSIX.1-2017 `pthread_create` RETURN VALUE; P0 표의 스레드 생성 계열). 나중에 다시 정의되는 정의를 거친 값은 `present-only` 다(RETURNS `redefined-later`).
+
+**RESULT_FLOW (둘째 회차).** 결과가 있는 호출마다: 결과가 지역의 정의이면(대입·선언 초기값) 그 지역의 읽기마다 CFG 의 도달 정의(`reaching_defs`)로 이 정의가 닿는지 보고, 닿는 읽기마다 한 행(분기 조건·return·호출 인자·저장·그 밖; `unique` 이 정의만, `shared` 다른 정의도, `undef-path` 정의 없는 경로도). 결과를 바로 쓰면 `direct` 한 행, 버리면 `discarded`/`cast-void`, 필드·전역·역참조에 저장하면 `field-store`/`out-store`. 분기 행의 조건, 인자·return 행의 guard 에서 지역은 그 조건 자리에 닿는 정의로 이름 붙는다: `x@def:L:C`(하나), `x@defs:L:C|...[|undef]`(여럿), `x@undef`. 그래서 한 지역의 두 정의(다른 호출의 결과)는 서로 다른 항이다. **guard 행**(def none, use none): 호출 결과(직접, 또는 어떤 정의가 호출인 지역)를 읽는 조건 아래에서 도는 호출마다, 그 호출을 감싼 조건의 곱(같은 이름 규칙). 조건 안에서 표현 깊이 24 를 넘어 잘린 부분은 BASIS `count.result_flow_depth_cut` 에 따로 센다(`count.walk_bounds_hit` 는 앞판 그대로).
+
+**RESULT_EFFECT (둘째 회차).** 결과가 분기에서 시험되거나 return 되는 호출 S 마다, S 의 callee 가 돌려줄 수 있는 값마다(따라가지 않은 return 이 있거나 P0 스레드 생성이면, 열거한 값 밖의 값 하나 더: `reach none`, 언제나 open) CFG 를 S 다음부터 걷는다. 이 값이 정하는 분기(조건이 S 의 살아 있는 정의나 S 자체를 읽어 값이 정해지는 것; switch 도)는 한 갈래만, 정하지 못하는 분기는 둘 다 간다(그 뒤의 효과는 `open`: "on a path through a branch this value does not decide"). 지역의 다른 정의가 나오면 S 의 값은 죽고, 다만 `v = g(..., v, ...)` 에서 g 가 그 매개변수를 바꾸지 않고 돌려주기만 하면 살아 있다. 모든 값이 닿는 블록은 공통이고, 이 값에만 닿는 블록의 호출·저장이 이 값의 효과다. 효과: 그 블록의 호출(직렬화가 분류: SEMANTICS 의 인자 역할 `event-type` 이면 event-send, `run-status` 이면 exit-app, 호출 표지 terminal-op 이면 terminal, 아니면 행 없음), 필드·전역에의 저장과 지역에의 상수 저장(store), 닿는 모든 return(S 의 값이면 return-result, 상수나 이 경로에서 대입된 상수면 return-const, 그 밖은 effect none open), S 가 다시 불리면 retry(그 경로의 지연 호출을 적음), 이 값의 효과가 없으면 fallthrough. 저장한 위치를 값으로 받는 뒤의 exit·terminal 호출과, S 의 값(살아 있는 지역)을 인자로 받는 exit·terminal 호출도 효과다; 그 사이에 그 위치의 주소를 받는 호출이 있으면, 그 callee 가 그 매개변수로 저장하거나 그것이 새거나 몸이 없을 때 open 이다(그 까닭을 적음). 위로의 합성(호출자에게 돌아간 값의 효과)은 facts 에 쓰지 않고 relations 가 읽을 때 한다(행 수가 호출자 수에 곱해지지 않게).
+
+**relations rules revision 10** (그 두 섹션이 있을 때만; `rules` 줄은 revision 9 그대로이고 머리에 `rules with result flow:` 줄과 표지 수 줄이 더해짐):
+- 경로 A 행: `absence:` 줄(부재 값 `nomatch_values` 마다 그 lookup 호출에서의 효과)과 `handling_label:` 줄. 부재 값이 정해지지 않으면 그 호출의 failure 값 모두로 계산하고 그렇다고 적는다.
+- 경로 B 행: 그 행의 호출 지점마다 callee-check 의 failure 값으로 표지를 구하고 행의 표지는 R > H > T? > J > T 차례의 첫 것(지점 수를 함께 적음).
+- 생성자 callee: `callee-check (result flow)` 줄(그 함수의 return 에 닿는다고 RESULT_EFFECT 가 보인 값)과 `callee-check (result flow, success)` 줄. 완전성은 여전히 `callee-check (set)` 줄이 말한다.
+- 표지(판정 규칙 3.4 의 처리 사실이며 판정이 아님): R = 정해진 경로의 terminal·exit-app, 또는 failure 값이 행위자의 root 까지 return 됨; H = probe-create 또는 retry(재시도 루프 자신의 한도 분기를 지나는 경로도); T? = open 효과, 열거되지 않은 값, 결과가 시험되지도 return 되지도 않는 호출, 함수 포인터로만 불리는 함수, 또는 event-send 뿐(자료는 event type 영역의 상수를 줄 뿐 그 등급을 주지 않음); J = 버려지는 호출에 닿음(부재 값이 정해지지 않으면 J?); T = 실패 등급이 아닌 return·저장·합류뿐. failure 등급 return 은 호출자의 호출로 고정점까지(방문 집합) 따라간다.
+
+**order rules revision 3** (그 두 섹션이 있을 때만; 머리에 `rules with result flow:` 줄):
+- child without success: spawn 연산 안의 생성 호출 x 에 성공 값의 RESULT_EFFECT 행이 있으면 위치 대신 그 행: 성공 값이 닿는 failure 등급 return 은 증인(그 값이 정하지 않는 분기를 지나도 CFG 의 경로이므로 증인), x 자신이 스레드를 만든 뒤 실패를 알릴 수 있으면(그 표지가 not found 가 아니면) x 의 실패 값이 return 되는 것도 증인. 성공 값의 행이 없으면 revision 2 의 위치 규칙.
+- 대기 함수 g 를 부르는 호출 x(결과를 시험·사용): 예산 출구가 return 이고 그 자리 RETURNS 가 상수이면 그 상수가 예산 값이다. x 의 결과를 이름 붙은 정의(`local@def:L:C`)나 호출 결과로 읽는 guard 행의 호출이 호출자 쪽 사용이고, 그 guard 를 예산 값마다 평가해 모두 거짓이면 skip, 모두 참이면 continue, 아니면 정해지지 않음. skip·continue 인 호출자 쪽 사용에 HB-await 간선(대기 행과 같은 hard 조건). 예산 출구가 루프를 벗어나 이어지면(그 뒤 return 의 값이 지역 플래그에 달림) 정해지지 않음이라 적는다.
+
+**알려진 한계.** event type·run status 의 등급을 쓰지 않는다(자료에 없음). 루프 출구의 지역 플래그 값(예산 출구 뒤 return 되는 지역)은 따라가지 않는다. 몸이 없는 함수의 매개변수 저장은 알 수 없음으로 둔다. 효과의 "닿음"은 CFG 경로이며 무한히 도는 루프는 따로 가르지 않는다.
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).

@@ -2147,6 +2147,64 @@ startup_script {
     KZ_CHECK(has(sv, "  P0 precondition strcmp doc-collated declared {} [declared nonnull: arg 0, arg 1 must not be null] "));
   }
 
+  // ---- result flow and effects (--result-flow, static_facts.md 5u; relations rules revision 10, order rules revision 3) ----
+  {
+    const fs::path X = work / "resultflow";
+    fs::create_directories(X);
+    const std::string rc = fixtures + "/resultflow.c";
+    std::string on, off, v, rel, ord;
+    // the option needs the profile-free mode
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --extended-facts --source " + q(rc) + " --result-flow -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "--result-flow needs the profile-free mode (--no-profile)"));
+    KZ_CHECK(!fs::exists(X / "x.kz"));
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(rc) + " --root " + q(fixtures) + " --result-flow -o " + q((X / "on.kz").string()) + " -- -std=c99", &on), 0);
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(rc) + " --root " + q(fixtures) + " -o " + q((X / "off.kz").string()) + " -- -std=c99", &off), 0);
+    KZ_CHECK(has(on, "result flow                  ") && has(on, "result effect                "));
+    KZ_CHECK(!has(off, "result flow   ") && !has(off, "result effect   "));
+    // without the option: no section, no BASIS item, and the relations and order of revisions 9 and 2 only
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "off.kz").string()), &v), 0);
+    KZ_CHECK(!has(v, "[resultflow]") && !has(v, "[resulteffect]") && !has(v, "extract.result_flow") && !has(v, "count.result_flow"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "off.kz").string()), &rel), 0);
+    KZ_CHECK(!has(rel, "relations rules revision 10") && !has(rel, "handling_label:") && !has(rel, "absence:") && !has(rel, "callee-check (result flow"));
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "off.kz").string()), &ord), 0);
+    KZ_CHECK(!has(ord, "order rules revision 3") && !has(ord, "(result flow") && !has(ord, "caller-side"));
+    // with it: the reaching definitions of locals (two definitions of one local stay apart), the guard rows, the effects
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "on.kz").string()) + " --section resultflow --section resulteffect --section basis", &v), 0);
+    KZ_CHECK(has(v, "extract.result_flow = result flow rules revision 1 (2026-11-16) (--result-flow;"));
+    KZ_CHECK(has(v, " in checker_init local-def st@103:6 -> branch at 104:7 unique cond (ne local:st@def:103:6 0) "));
+    KZ_CHECK(has(v, " in checker_init local-def st@105:6 -> branch at 106:7 unique cond (eq local:st@def:105:6 0) "));
+    KZ_CHECK(has(v, " in checker_init guard [report] unique cond (and (not (ne local:st@def:103:6 0)) (eq local:st@def:105:6 0)) "));
+    KZ_CHECK(has(v, " in looper_init local-def ret@126:9 -> return at 132:10 shared (others 1: 123:7) "));
+    // the absence value of the lookup in checker_init falls through to a success return (TIME's shape); in looper_init it
+    // reaches the function's return through the break
+    KZ_CHECK(has(v, " in checker_init failure -17 reached -> return-const at resultflow.c:109 [RF_OK] complete "));
+    KZ_CHECK(has(v, " in looper_init failure -17 reached -> return-result at resultflow.c:132 [RF_ERR_NOT_FOUND] complete "));
+    // a parameter returned unchanged: the create's success value is that of the step it passes through
+    KZ_CHECK(has(v, " in obj_create success 0 reached -> return-result at resultflow.c:95 [RF_OK (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))] complete "));
+    // a retry, and an exit after a call that may change the stored status
+    KZ_CHECK(has(v, " in retrier_init failure -17 reached -> retry [the call runs again; delay usleep at 141:5] "));
+    KZ_CHECK(has(v, "[exit (terminal operation); the value of global:run_state stored on this path: 3] open ("));
+    KZ_CHECK(has(v, "run_loop at resultflow.c:172:10 takes the address of global:run_state on these paths: it stores through its parameter 0"));
+    // relations rules revision 10: the labels, the absence line, the creator's success value shown to reach its return
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "on.kz").string()), &rel), 0);
+    KZ_CHECK(has(rel, "rules with result flow: relations rules revision 10 (2026-11-16), over RESULT_FLOW and RESULT_EFFECT"));
+    KZ_CHECK(has(rel, "handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: H 1 R 2 T 1 T? 1 none 1"));
+    KZ_CHECK(has(rel, "      handling_label: T (over the absence value -17) T: checker_init returns 0 at resultflow.c:109 (not of failure class)"));
+    KZ_CHECK(has(rel, "      handling_label: R (over the absence value -17) R: terminal at resultflow.c:161:33 [abort (terminal operation)]"));
+    KZ_CHECK(has(rel, "      handling_label: H (over the absence value -17) H: the call runs again; delay usleep at 141:5"));
+    KZ_CHECK(has(rel, "      handling_label: T? (over the absence value -17) T?: terminal at resultflow.c:175:3 is open"));
+    KZ_CHECK(has(rel, "      absence: -17 (no match: obj_find) at the call resultflow.c:105:8: reached; effects: fallthrough at - complete; return-const 0 at resultflow.c:109 complete"));
+    KZ_CHECK(has(rel, "      callee-check (set): obj_create: not established ("));
+    KZ_CHECK(has(rel, "      callee-check (result flow, success): obj_create: shown to reach the return: 0 "));
+    // order rules revision 3: child without success from the creation call's success value, and a caller-side use of a wait
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "on.kz").string()), &ord), 0);
+    KZ_CHECK(has(ord, "rules with result flow: order rules revision 3 (2026-11-16)"));
+    KZ_CHECK(has(ord, "child without success: possible: task_spawn_detach returns -50 [RF_ERR_SPAWN] at resultflow.c:191 after pthread_create at resultflow.c:188:8 returned 0 (its success value) (result flow"));
+    KZ_CHECK(has(ord, "child without success: not found: no return of failure class after the creation call in task_spawn_plain"));
+    KZ_CHECK(has(ord, "use caller-side: call resultflow.c:233:33 in waiter_main -> gate_use in waiter_main under (eq local:st@def:232:6 0) (the result of gate_wait at resultflow.c:232:8): skip"));
+    KZ_CHECK(has(ord, " HB-await hard"));
+  }
+
   fs::remove_all(work);
   return kztest::finish("test_static_cli");
 }

@@ -124,7 +124,7 @@ int cmd_extract(int argc, char** argv) {
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--basis", "--source", "--root", "--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn",
                    "--resource-dir", "--extra-arg", "--section", "--argflow-depth", "--argflow-size", "--image-budget", "--targets-rule", "--semantics", "-o"},
-                  {"--text", "--verbose", "--no-profile", "--extended-facts", "--accept-option-difference", "--object-access"}, &args, &err)) {
+                  {"--text", "--verbose", "--no-profile", "--extended-facts", "--accept-option-difference", "--object-access", "--result-flow"}, &args, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
   }
@@ -172,6 +172,13 @@ int cmd_extract(int argc, char** argv) {
     return 2;
   }
   spec.object_access = args.has("--object-access");
+  // result flow and effects (static_facts.md 5u): the sections RESULT_FLOW and RESULT_EFFECT, written by the second pass of
+  // the profile-free mode (it needs the first pass's return values); off, the facts are written as before
+  if (args.has("--result-flow") && !no_profile) {
+    std::fprintf(stderr, "kz-static extract: --result-flow needs the profile-free mode (--no-profile)\n");
+    return 2;
+  }
+  spec.result_flow = args.has("--result-flow");
   // semantics with a verification state (static_facts.md 5t): the semantics data files joined to the build as the section
   // SEMANTICS; off, the facts are written as before
   std::vector<kzs::SemDataFile> sem_data;
@@ -459,6 +466,20 @@ int cmd_extract(int argc, char** argv) {
   std::fputs(summary_text(model, spec, units.size()).c_str(), stdout);
   if (no_profile) std::fputs(derivation_text(derivation).c_str(), stdout);
   if (!sem_data.empty()) std::printf("semantics                    %s\n", semantics_count.c_str());
+  if (spec.result_flow) {
+    std::string rf, re;
+    std::vector<kz_basis_item> items;
+    if (c.read_section(KZ_SEC_BASIS, &items).ok())
+      for (const kz_basis_item& b : items) {
+        std::string name, value;
+        c.string(b.name, &name);
+        c.string(b.value, &value);
+        if (name == "count.result_flow") rf = value;
+        if (name == "count.result_effect") re = value;
+      }
+    std::printf("result flow                  %s\n", rf.c_str());
+    std::printf("result effect                %s\n", re.c_str());
+  }
   if (args.has("--text")) {
     kzs::TextOptions to;
     for (const std::string& sec : args.many("--section")) to.sections.insert(sec);

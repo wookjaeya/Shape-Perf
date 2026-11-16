@@ -12,6 +12,7 @@
 
 #include "lockset.hpp"
 #include "p0.hpp"
+#include "result_flow.hpp"
 
 namespace kzs {
 
@@ -1217,6 +1218,192 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
       sem_rows.push_back(r);
     }
 
+  // ---- RESULT_FLOW and RESULT_EFFECT (--result-flow; kz_facts.h revision 10, static_facts.md 5u): after every other
+  // section's strings and expression roots (their roots are appended to FACT_EXPRS after all the others).  The effect
+  // calls are classified here, with the SEMANTICS rows of this serialization (none without --semantics) and the call
+  // flags: an event send (a parameter of role event-type), an application exit (role run-status), a terminal (the
+  // terminal-operation flag); a call of none of these is no effect row.
+  std::vector<kz_fact_rflow> rflow_rows;
+  std::vector<kz_fact_reffect> reffect_rows;
+  uint32_t rf_guard_rows = 0, rf_use_counts[8] = {0, 0, 0, 0, 0, 0, 0, 0}, rf_open = 0, rf_calls_dropped = 0, rf_event = 0, rf_exit = 0, rf_terminal = 0;
+  if (spec.result_flow) {
+    // the rows in a stable order: by site, use rows before guard rows, then by the use
+    std::vector<size_t> order(m.rflows.size());
+    for (size_t i = 0; i < order.size(); ++i) order[i] = i;
+    auto rkey = [&](size_t i) {
+      const RFlowFact& f = m.rflows[i];
+      return std::make_tuple(site_of_call(f.call_key), f.def_kind == KZ_RFLOW_DEF_NONE ? 1 : 0, f.use.line, f.use.col, f.use_kind, f.target, f.local, f.def.line, f.def.col);
+    };
+    std::stable_sort(order.begin(), order.end(), [&](size_t a, size_t b) { return rkey(a) < rkey(b); });
+    std::vector<uint32_t> new_index(m.rflows.size(), KZ_NONE32);
+    for (size_t i : order) {
+      const RFlowFact& f = m.rflows[i];
+      kz_fact_rflow r = zero<kz_fact_rflow>();
+      r.site = site_of_call(f.call_key);
+      r.fn = fn_of(f.func_key);
+      r.def_line = f.def.line;
+      r.def_col = f.def.col;
+      r.use_line = f.use.line;
+      r.use_col = f.use.col;
+      r.use_site = f.use_call_key.empty() ? KZ_NONE32 : site_of_call(f.use_call_key);
+      r.pos = f.pos;
+      r.cond_root = exprs.index_of(f.cond);
+      r.n_other = f.n_other;
+      r.fh = fh_of(f.use.file);
+      r.def_kind = f.def_kind;
+      r.use_kind = f.use_kind;
+      r.reach = f.reach;
+      r.flags = f.flags;
+      r.local = w.intern(f.local);
+      r.target = w.intern(f.target);
+      r.other_defs = w.intern(f.other_defs);
+      new_index[i] = static_cast<uint32_t>(rflow_rows.size());
+      rflow_rows.push_back(r);
+      if (f.def_kind == KZ_RFLOW_DEF_NONE && f.use_kind == KZ_RFLOW_USE_NONE) ++rf_guard_rows;
+      else if (f.use_kind < 8) ++rf_use_counts[f.use_kind];
+    }
+    // the roles of the parameters of the functions the SEMANTICS rows name, and the domains' constant names
+    std::map<std::pair<uint32_t, uint32_t>, std::string> role_of;     // (fn, parameter) -> "event-type", "run-status"
+    std::map<std::pair<uint32_t, uint32_t>, std::string> domain_of;   // (fn, parameter) -> "A=1, B=2"
+    for (const SemRow& x : opt.semantics) {
+      if (!opt.write_semantics || x.layer != KZ_SEM_LAYER_FRAMEWORK || x.fn == KZ_NONE32) continue;
+      if (x.column == KZ_SEM_COLUMN_ARG_ROLE) role_of[{x.fn, x.pos}] = x.item.substr(0, x.item.find(" ("));
+      if (x.column == KZ_SEM_COLUMN_ARG_DOMAIN) domain_of[{x.fn, x.pos}] = x.item.substr(x.item.find(": ") == std::string::npos ? 0 : x.item.find(": ") + 2);
+    }
+    auto domain_name = [&](uint32_t fn, uint32_t p, int64_t v) -> std::string {
+      auto it = domain_of.find({fn, p});
+      if (it == domain_of.end()) return "";
+      const std::string& d = it->second;
+      size_t at = 0;
+      while (at < d.size()) {
+        const size_t end = d.find(", ", at);
+        const std::string part = d.substr(at, end == std::string::npos ? std::string::npos : end - at);
+        const size_t eq = part.rfind('=');
+        if (eq != std::string::npos && part.substr(eq + 1) == std::to_string(v)) return part.substr(0, eq);
+        if (end == std::string::npos) break;
+        at = end + 2;
+      }
+      return "";
+    };
+    // classify a call: effect kind, value, detail; false when it is none of them
+    auto classify = [&](const std::string& ck, uint8_t* effect, int64_t* value, std::string* detail) -> bool {
+      auto ci = R.call_index.find(ck);
+      if (ci == R.call_index.end()) return false;
+      const CallFact& c = m.calls[ci->second];
+      const uint32_t fn = fn_of(c.callee_key);
+      for (uint32_t p = 0; p < c.args.size(); ++p) {
+        auto rit = role_of.find({fn, p});
+        if (rit == role_of.end() || (rit->second != "event-type" && rit->second != "run-status")) continue;
+        *effect = rit->second == "event-type" ? KZ_REFF_EFFECT_EVENT_SEND : KZ_REFF_EFFECT_EXIT_APP;
+        auto ac = m.rf_arg_consts.find(ck);
+        const bool is_const = ac != m.rf_arg_consts.end() && ac->second.count(p) != 0;
+        if (is_const) *value = ac->second.at(p);
+        const std::string nm = is_const ? domain_name(fn, p, *value) : std::string();
+        *detail = c.callee_name + " argument " + std::to_string(p) + " (" + rit->second + ") " +
+                  (is_const ? std::to_string(*value) + (nm.empty() ? std::string(" [not in the domain of the semantics data]") : " [" + nm + "]") : std::string("not a constant at this call"));
+        return true;
+      }
+      if (c.flags & KZ_CALL_FLAG_TERMINAL_OP) {
+        *effect = KZ_REFF_EFFECT_TERMINAL;
+        *detail = c.callee_name + " (terminal operation)";
+        return true;
+      }
+      return false;
+    };
+    struct Eff {
+      kz_fact_reffect r;
+      std::string detail, reason, chain;
+    };
+    std::vector<Eff> effs;
+    for (const REffFact& e : m.reffects) {
+      Eff x;
+      x.r = zero<kz_fact_reffect>();
+      x.r.outcome_value = e.outcome_value;
+      x.r.effect_value = e.effect_value;
+      x.r.site = site_of_call(e.call_key);
+      x.r.fn = fn_of(e.func_key);
+      x.r.flow = e.flow >= 0 && static_cast<size_t>(e.flow) < new_index.size() ? new_index[e.flow] : KZ_NONE32;
+      x.r.effect_site = e.effect_call_key.empty() ? KZ_NONE32 : site_of_call(e.effect_call_key);
+      x.r.effect_line = e.effect_pos.line;
+      x.r.effect_fh = e.effect_pos.file.empty() ? KZ_NONE32 : fh_of(e.effect_pos.file);
+      x.r.outcome = e.outcome;
+      x.r.reach = e.reach;
+      x.r.effect = e.effect;
+      x.r.status = e.status;
+      x.r.flags = e.flags;
+      x.detail = e.detail;
+      x.reason = e.reason;
+      x.chain = e.chain;
+      if (e.raw != REffFact::kFinal) {
+        uint8_t k = KZ_REFF_EFFECT_NONE;
+        int64_t v = 0;
+        std::string d;
+        if (!classify(e.effect_call_key, &k, &v, &d) || (e.raw == REffFact::kExitViaStore && k == KZ_REFF_EFFECT_EVENT_SEND)) {
+          ++rf_calls_dropped;
+          continue;
+        }
+        x.r.effect = k;
+        x.r.effect_value = e.raw == REffFact::kExitViaStore ? e.effect_value : v;
+        x.detail = e.raw != REffFact::kExitViaStore ? d
+                   : e.store_value == "the value of the call" ? d + "; its argument is the call's result (" + e.store_target + ")"
+                                                              : d + "; the value of " + e.store_target + " stored on this path: " + e.store_value;
+        if (e.raw == REffFact::kExitViaStore) {
+          // a call between that takes the address of the stored location may change it
+          for (const auto& [ack, ap] : e.address_passes) {
+            auto ci = R.call_index.find(ack);
+            if (ci == R.call_index.end()) continue;
+            const CallFact& c = m.calls[ci->second];
+            std::string why;
+            if (m.processed_functions.count(c.callee_key) == 0) why = "it has no body in these facts";
+            else {
+              auto sit = m.summaries.find(c.callee_key);
+              if (sit == m.summaries.end() || ap >= sit->second.params.size()) why = "its parameter " + std::to_string(ap) + " is not summarized";
+              else if (!sit->second.params[ap].stores.empty()) why = "it stores through its parameter " + std::to_string(ap);
+              else if (sit->second.params[ap].escapes) why = "its parameter " + std::to_string(ap) + " escapes (" + sit->second.params[ap].escape_detail + ")";
+            }
+            if (why.empty()) continue;
+            x.r.status = KZ_REFF_STATUS_OPEN;
+            x.reason += std::string(x.reason.empty() ? "" : "; ") + c.callee_name + " at " + c.pos.str() + " takes the address of " + e.store_target + " on these paths: " + why;
+          }
+        }
+      }
+      if (x.r.effect == KZ_REFF_EFFECT_EVENT_SEND) ++rf_event;
+      if (x.r.effect == KZ_REFF_EFFECT_EXIT_APP) ++rf_exit;
+      if (x.r.effect == KZ_REFF_EFFECT_TERMINAL) ++rf_terminal;
+      effs.push_back(std::move(x));
+    }
+    auto ekey = [](const Eff& a) {
+      return std::make_tuple(a.r.site, a.r.outcome_value, a.r.outcome, a.r.effect, a.r.effect_line, a.r.effect_site, a.r.status, a.r.effect_value, a.detail, a.reason, a.chain);
+    };
+    std::stable_sort(effs.begin(), effs.end(), [&](const Eff& a, const Eff& b) { return ekey(a) < ekey(b); });
+    effs.erase(std::unique(effs.begin(), effs.end(), [&](const Eff& a, const Eff& b) { return ekey(a) == ekey(b) && a.r.reach == b.r.reach && a.r.flow == b.r.flow; }), effs.end());
+    for (Eff& x : effs) {
+      x.r.detail = w.intern(x.detail);
+      x.r.reason = w.intern(x.reason);
+      x.r.chain = w.intern(x.chain);
+      if (x.r.status == KZ_REFF_STATUS_OPEN) ++rf_open;
+      reffect_rows.push_back(x.r);
+    }
+    item("extract.result_flow",
+         std::string(result_flow_revision()) + " (--result-flow; kz_facts.h revision 10): RESULT_FLOW, the uses each call result reaches by the reaching "
+             "definitions of locals on the body's control-flow graph, and guard rows (the calls that run under a condition that reads a call result, each "
+             "local named by the definitions that reach the condition); RESULT_EFFECT, per call and value its callee may return (the first pass's RETURNS, "
+             "followed through call results and parameters returned unchanged), what that value leads to in the body: the returns, the stores, the calls "
+             "classified as event send, application exit or terminal by the SEMANTICS argument roles and the call flags, a retry, nothing (static_facts.md 5u)",
+         KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.result_flow", num(rflow_rows.size()) + " rows (uses: branch " + num(rf_use_counts[KZ_RFLOW_USE_BRANCH]) + ", return " + num(rf_use_counts[KZ_RFLOW_USE_RETURN]) +
+                                  ", argument " + num(rf_use_counts[KZ_RFLOW_USE_ARG]) + ", store " + num(rf_use_counts[KZ_RFLOW_USE_STORE]) + ", other " +
+                                  num(rf_use_counts[KZ_RFLOW_USE_OTHER]) + ", none " + num(rf_use_counts[KZ_RFLOW_USE_NONE]) + "; guard rows " + num(rf_guard_rows) +
+                                  "); calls with a result " + num(m.rf_stats.calls_with_result),
+         KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.result_effect", num(reffect_rows.size()) + " rows (open " + num(rf_open) + "; event send " + num(rf_event) + ", application exit " + num(rf_exit) +
+                                    ", terminal " + num(rf_terminal) + "; calls on the paths that are none of these, no row: " + num(rf_calls_dropped) +
+                                    "); calls explored " + num(m.rf_stats.calls_explored) + ", outcomes " + num(m.rf_stats.outcomes),
+         KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.result_flow_depth_cut", num(m.rf_stats.depth_cut) + " subexpressions cut at param.walk_bounds' expression depth in the conditions of RESULT_FLOW (not in count.walk_bounds_hit)",
+         KZ_POLICY_UNSET, KZ_NONE32);
+  }
+
   // ---- add the sections (the writer sorts them canonically)
   kz::Status s;
   auto put = [&](uint32_t section, auto& rows) -> bool {
@@ -1241,6 +1428,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     return s;
   if (spec.object_access && (!put(KZ_SEC_OBJECT_ACCESS, objacc_rows) || !put(KZ_SEC_FIELD_TYPES, ftype_rows) || !put(KZ_SEC_ARG_TYPES, argtype_rows))) return s;
   if (opt.write_semantics && !put(KZ_SEC_SEMANTICS, sem_rows)) return s;
+  if (spec.result_flow && (!put(KZ_SEC_RESULT_FLOW, rflow_rows) || !put(KZ_SEC_RESULT_EFFECT, reffect_rows))) return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;
   return w.finish(out);

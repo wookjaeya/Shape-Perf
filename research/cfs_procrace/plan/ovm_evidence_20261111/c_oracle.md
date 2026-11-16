@@ -1,7 +1,7 @@
 # c_oracle — Phase 3, critic K2: oracle validity, feasibility and cost of D0, D1, D2, D3
 
 Date 2026-11-12. Tags: [M] measured by me in this run (commands in section 9), [F own] read by me in a source or tool file, [F Gx §] fact taken from a dossier at the place named, [I] my inference, [U] unknown.
-Dossiers: GS = g_fw_startup.md, GO = g_fw_objects.md, G1 = g_cases_c1c2.md, G3 = g_cases_c3r2.md, G5 = g_cases_c5.md. S4 = scratchpad/wbs/s4.md. OBS = R/kairos/docs/observer.md, EVT = R/kairos/docs/event_semantics.md. V = /home/user/work/procrace/cfs_ref/cFS (v7.0.1). REL(b) = /home/user/work/redesign/step2a/tests_8c_fix/b/NP/relations.txt. W6 = R/plan/results_w6_20261029.md.
+Dossiers: GS = g_fw_startup.md, GO = g_fw_objects.md, G1 = g_cases_c1c2.md, G3 = g_cases_c3r2.md, G5 = g_cases_c5.md. OBS = R/kairos/docs/observer.md, EVT = R/kairos/docs/event_semantics.md. V = /home/user/work/procrace/cfs_ref/cFS (v7.0.1). REL(b) = /home/user/work/redesign/step2a/tests_8c_fix/b/NP/relations.txt. W6 = R/plan/results_w6_20261029.md.
 "Effect class K0..K4" always means D1's classes; "critic K2" is only my role name.
 Nothing was booted or built. Every statement about what a run "would show" is [I] unless it cites a record.
 

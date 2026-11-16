@@ -1,0 +1,75 @@
+records r3 45, r4 45, same file names True
+A21	budget.run.reason	'one record suffices for the explanation test; repetition is a later cost study' -> '<absent>'
+A21	budget.run.run.reason	'<absent>' -> 'one record suffices for the explanation test; repetition is a later cost study; a second boot would be written with its reason and would not replace the first record'
+A21	budget.run.run.sensitivity	'<absent>' -> 'not measured'
+A21	budget.run.run.truncation	'<absent>' -> 'none'
+A21	budget.run.run.unresolved	'<absent>' -> 'none'
+A21	budget.run.run.value	'<absent>' -> '1 boot'
+A21	budget.run.sensitivity	'not measured' -> '<absent>'
+A21	budget.run.source	'<absent>' -> 'boot budget record bb814d4c966991b1'
+A21	budget.run.stop.fired	'<absent>' -> "yes: run.meta 'stop=ci-es-restart-poweron (CI L196-L197)'; tx_exit=0 rx_exit=0; no SIGKILL line in run.meta"
+A21	budget.run.stop.note	'<absent>' -> "the gap between t_init (dump, monotonic clock) and the harness's start (run.meta, UTC) is not recorded"
+A21	budget.run.stop.reason	'<absent>' -> "lead judgement: the natural boot's bound is the waits of the reference procedure (the CI lines above, as carried by observe_c1_smoke.sh --instances, run_gi_c1.sh:9-12); the value follows the settled budget principle: PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함); no hold, gate or control site in this boot"
+A21	budget.run.stop.rule	'<absent>' -> 'a budget stop is never turned into failure or normal'
+A21	budget.run.stop.sensitivity	'<absent>' -> 'not measured (one boot)'
+A21	budget.run.stop.source	'<absent>' -> 'CI src/bp/.github/workflows/build-run-bp-common.yml L176-L177 "Wait for Startup", L196-L197 "Terminate cFS" (ES restart POWERON over UDP 1234/1235), L199-L200 "Wait for Shutdown"; run_gi_c1.sh:82-91'
+A21	budget.run.stop.truncation	'<absent>' -> 'work after the process end is not recorded (the record pool is written by the atexit handler at the process end; a process ended by SIGKILL leaves no dump); CI L179-L191 (flow on, Class 1 send, sleep 30) are not in the reference procedure and not run'
+A21	budget.run.stop.unresolved	'<absent>' -> 'none: 5 of 5 applications reached their stop event inside the window (stop-event evaluation)'
+A21	budget.run.stop.value	'<absent>' -> "5 s wait + the command + 5 s wait, then the harness's SIGKILL of live processes (run_gi_c1.sh:91, a harness step not in CI)"
+A21	build_id.executables_plan.tx/cf/bp.so.chain	'<absent>' -> 'confirmed'
+A21	build_id.executables_plan.tx/cf/bp.so.sha256	'<absent>' -> '6789ff75c7d12818cdda4b1be9d8ff25c5339a41fc82f1e2c3b81ece1b244856'
+A21	build_id.executables_plan.tx/cf/bplib.so.chain	'<absent>' -> 'confirmed'
+A21	build_id.executables_plan.tx/cf/bplib.so.sha256	'<absent>' -> 'f16c177cf09e1e4d54eb1150962826c5ed9deceb14c1dca3d2cb4aa10647326b'
+A21	build_id.executables_plan.tx/cf/cf.so.chain	'<absent>' -> 'confirmed'
+A21	build_id.executables_plan.tx/cf/cf.so.sha256	'<absent>' -> 'f5af74f7fc41b7706db46db6fa916e171a83427e0b480da043f8c007357ea875'
+A21	build_id.executables_plan.tx/cf/ci_lab.so.chain	'<absent>' -> 'confirmed'
+A21	build_id.executables_plan.tx/cf/ci_lab.so.sha256	'<absent>' -> 'd0c9adbe476f2eb1ab5630b0668b9b0b98fff95ac3da9314fce81521db3288d2'
+A21	build_id.executables_plan.tx/cf/sch_lab.so.chain	'<absent>' -> 'confirmed'
+A21	build_id.executables_plan.tx/cf/sch_lab.so.sha256	'<absent>' -> '9a6ae3c94d85d1efcc8706db0b27550127997e8fd20618b656376d188eba83dc'
+A21	build_id.executables_plan.tx/cf/to_lab.so.chain	'<absent>' -> 'confirmed'
+A21	build_id.executables_plan.tx/cf/to_lab.so.sha256	'<absent>' -> 'ef83f6c2ab1cc7771e5490467fa38cffa1b8d18bd0db73d2d971be7a78518119'
+A21	build_id.executables_plan.tx/core-tx.chain	'<absent>' -> 'confirmed'
+A21	build_id.executables_plan.tx/core-tx.sha256	'<absent>' -> 'c2aa181b9922668423ca513040f271f4b59a4eebd28678dd275b88483a3a2d3c'
+A21	build_id.executables_plan_source	'<absent>' -> "the plan's executables as the chain's exe links name them; sha256 from the instance list run.meta names (list_sha256 4aac220ae1bed8bc, 31 entries)"
+A21	incompleteness.needs[14].reason	'plan_missing(need' -> 'plan_missing(need not planned)'
+A21	incompleteness.needs[15].reason	'plan_missing(need' -> 'plan_missing(need not planned)'
+A21	incompleteness.needs[16].reason	'plan_missing(need' -> 'plan_missing(need not planned)'
+A21	incompleteness.open_premises[6]	'L-ABS' -> '<absent>'
+A21	link.grounds[0]	"absence outcome: the use and the publisher's create name the same key in the namespace partition of the row in one process of one run; the use reached no instance (premise L-ABS)" -> '<absent>'
+A21	link.instance_evidence[0].admitted	'<absent>' -> False
+A21	link.instance_evidence[0].out	'0x30002' -> '<absent>'
+A21	link.instance_evidence[0].out.raw	'<absent>' -> '0x30002'
+A21	link.instance_evidence[0].out.read	'<absent>' -> False
+A21	link.instance_evidence[0].out.why	'<absent>' -> "not read: no success constant of the creator in the row (0 non-failure-class constants of OS_CountSemCreate among the row's callee-check lines)"
+A21	link.instance_evidence[0].same_key_text_as_the_use	'<absent>' -> True
+A21	link.instance_evidence[0].why	'<absent>' -> "equal key texts are not admitted evidence of one object instance (JR 3.2 axis 1: 'ID 문자열이 같다는 것')"
+A21	link.missing[0]	'<absent>' -> 'link_unlinked(absence outcome: the use reached no object instance)'
+A21	link.missing[1]	'<absent>' -> "record_insufficient(no success constant of the creator: the creator's out id is not read)"
+A21	link.resource_key.generation	'<absent>' -> None
+A21	link.resource_key.generation[0]	'0x30002' -> '<absent>'
+A21	link.resource_key.generation_missing	'<absent>' -> "record_insufficient(no success constant of the creator: the creator's out id is not read)"
+A21	link.status	'established' -> 'unlinked'
+A21	order.publish_events[0].out.raw	'<absent>' -> '0x30002'
+A21	order.publish_events[0].out.read	"recorded; not graded (the creator's return constants are not in the row)" -> False
+A21	order.publish_events[0].out.value	'0x30002' -> '<absent>'
+A21	order.publish_events[0].out.why	'<absent>' -> "not read: no success constant of the creator in the row (0 non-failure-class constants of OS_CountSemCreate among the row's callee-check lines)"
+A21	order.publish_events[1].out.raw	'<absent>' -> '0x30003'
+A21	order.publish_events[1].out.read	"recorded; not graded (the creator's return constants are not in the row)" -> False
+A21	order.publish_events[1].out.value	'0x30003' -> '<absent>'
+A21	order.publish_events[1].out.why	'<absent>' -> "not read: no success constant of the creator in the row (0 non-failure-class constants of OS_CountSemCreate among the row's callee-check lines)"
+A21	order.publish_events[2].out.raw	'<absent>' -> '0x30001'
+A21	order.publish_events[2].out.read	"recorded; not graded (the creator's return constants are not in the row)" -> False
+A21	order.publish_events[2].out.value	'0x30001' -> '<absent>'
+A21	order.publish_events[2].out.why	'<absent>' -> "not read: no success constant of the creator in the row (0 non-failure-class constants of OS_CountSemCreate among the row's callee-check lines)"
+A21	premises[5].text	"the return constants the row gives for the use (its flip or callee-check line) are the status constants of the use's callee" -> "the return constants the row gives for the use (its flip or callee-check line), and for a publisher's callee (its callee-check line), are the status constants of that callee"
+A21	premises[6].id	'L-ABS' -> '<absent>'
+A21	premises[6].text	"path A, absence outcome: a use that found no object and a create of the same key in the row's namespace partition, in one process of one run, are taken as the same named resource; the generation the use saw is none (JR 3.2 axis 1 resource key: object kind, namespace, name, generation; JR 4.2: the run value of the key and the same-named object)" -> '<absent>'
+A21	tool_verdict.violation.undetermined_reasons[0]	'absent_result_unevaluated(static-undetermined)' -> 'link_unlinked(absence outcome: the use reached no object instance)'
+A21	tool_verdict.violation.undetermined_reasons[1]	'key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:454)' -> "record_insufficient(no success constant of the creator: the creator's out id is not read)"
+A21	tool_verdict.violation.undetermined_reasons[2]	"caller_dependence_unknown(the terminal chain's guard is linked 'may')" -> 'absent_result_unevaluated(static-undetermined)'
+A21	tool_verdict.violation.undetermined_reasons[3]	'key_unresolved(creator key unresolved: relations.txt:444)' -> 'key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:454)'
+A21	tool_verdict.violation.undetermined_reasons[4]	'fixed_proof_open(undecidable)' -> "caller_dependence_unknown(the terminal chain's guard is linked 'may')"
+A21	tool_verdict.violation.undetermined_reasons[5]	'absent_result_unevaluated(the predicate is not derived: use_cond partial)' -> 'key_unresolved(creator key unresolved: relations.txt:444)'
+A21	tool_verdict.violation.undetermined_reasons[6]	'<absent>' -> 'fixed_proof_open(undecidable)'
+A21	tool_verdict.violation.undetermined_reasons[7]	'<absent>' -> 'absent_result_unevaluated(the predicate is not derived: use_cond partial)'
+changed leaf fields over all records, per top field: budget 765, build_id 675, incompleteness 150, link 14, order 2000, premises 135, tool_verdict 8

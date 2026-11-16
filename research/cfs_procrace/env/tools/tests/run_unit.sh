@@ -33,7 +33,8 @@
 #  12 binding report (env/tools/plan_bindings.py): every site bound or unsupported with a reason and the module ids
 #     of the plugin rule -> rc 0; a site no unit reported, an unsupported site without a reason, a unit with another
 #     module id, a unit header with another manifest sha256 -> rc 1 each; with --file-hashes every unit tied to its
-#     source sha256 -> rc 0; a source changed on disk, a unit not in FILE_HASHES -> rc 1 each
+#     source sha256 (also through a path relative to the basis's bundle root) -> rc 0; a source changed on disk, a unit
+#     not in FILE_HASHES -> rc 1 each
 #  13 chain checker, the links of a generated plan (sidecar, plan inputs, instance list and tree, B' parent, dump,
 #     bindings, run container): a consistent stub chain -> confirmed (0); another sidecar, a changed instance file, an
 #     instance list run.meta does not name, a run container with another parent basis, another dump -> refused (1)
@@ -309,9 +310,11 @@ mkfh() { printf 'section FILE_HASHES type=3 count=2 crc32=0x2\n  FILE_HASHES[0] 
 pbs() { python3 -I "$R/env/tools/plan_bindings.py" --manifest "$X/plan.kzs" --modules "$X/plan.mod" --bindings "$X/s.kzs" --module-flags "$FL2" --file-hashes "$1" -o "$X/reps.txt" > /dev/null 2>&1; }
 mkfh 1 > "$X/fh.txt"; pbs "$X/fh.txt"; s0=$?; sy=$(grep -c $'^sources\t.*\tyes$' "$X/reps.txt")
 mkfh 0 > "$X/fh0.txt"; pbs "$X/fh0.txt"; s1=$?
+# a FILE_HASHES path relative to the basis's bundle root
+{ printf '  BASIS[3] name="bundle.root" value="%s/w" policy=unset\n' "$X"; mkfh 1 | sed "s|path=\"$X/w/core/|path=\"core/|"; } > "$X/fhr.txt"; pbs "$X/fhr.txt"; sr=$?
 mkfh 1 > "$X/fh3.txt"; echo 'int i;' >> "$X/w/app/a.c"; pbs "$X/fh3.txt"; s3=$?
-[ $s0 -eq 0 ] && [ "$sy" = 1 ] && [ $s1 -eq 1 ] && [ $s3 -eq 1 ] || ok=1
-res "binding report (stub plan and bindings)" $ok "control rc $c; site not seen rc $f1; unsupported without reason rc $f2; other module id rc $f3; other manifest sha256 rc $f4; sources tied rc $s0; unit not in FILE_HASHES rc $s1; source changed on disk rc $s3"
+[ $s0 -eq 0 ] && [ "$sy" = 1 ] && [ $s1 -eq 1 ] && [ $sr -eq 0 ] && [ $s3 -eq 1 ] || ok=1
+res "binding report (stub plan and bindings)" $ok "control rc $c; site not seen rc $f1; unsupported without reason rc $f2; other module id rc $f3; other manifest sha256 rc $f4; sources tied rc $s0; unit not in FILE_HASHES rc $s1; path relative to the bundle root rc $sr; source changed on disk rc $s3"
 
 # 13 chain checker, links of a generated plan
 X=$W/cc; mkdir -p "$X/b/exe/tx" "$X/inst/tx"

@@ -1,0 +1,49 @@
+# reference /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/cfe_assert.so sha256 5dde55b0514c94f51c88e9886805f14b5f6b2dd1adee89b1388a71fe2224938e
+# derived   /home/user/work/redesign/obs1/c1pre_derived/ws/exe/tx/cf/cfe_assert.so sha256 e5e4a943f696bf5cfe0b7122aa26695f8b2e6364abe5af427f40f3c50d7a002e
+# rx copy: same bytes as tx
+# in the startup script of the instance: 0 lines
+# objects of cfe_assert in objects_differ.txt (derived instr vs same-path reference build): 0
+section	size_ref	size_derived	same_bytes
+.note.gnu.property	32	32	yes
+.note.gnu.build-id	36	36	no
+.gnu.hash	940	940	yes
+.dynsym	3552	3552	yes
+.dynstr	2603	2603	yes
+.gnu.version	296	296	yes
+.gnu.version_r	96	96	yes
+.rela.dyn	336	336	yes
+.rela.plt	2040	2040	yes
+.init	27	27	yes
+.plt	1376	1376	yes
+.plt.got	16	16	yes
+.plt.sec	1360	1360	yes
+.text	20873	20873	no
+.fini	13	13	yes
+.rodata	2768	2784	no
+.eh_frame_hdr	820	820	no
+.eh_frame	4684	4684	no
+.init_array	8	8	yes
+.fini_array	8	8	yes
+.dynamic	448	448	yes
+.got	88	88	yes
+.got.plt	704	704	yes
+.data	80	80	yes
+.bss	0	0	yes
+.comment	0	0	yes
+.symtab	0	0	yes
+.strtab	0	0	yes
+.shstrtab	0	0	yes
+# strings (strings -a -n 6) in one file only, after the derived prefixes of path_map.tsv are put back to the reference prefixes
+only in the reference: 0
+only in the derived (after the map): 0
+# section addresses (readelf -SW) of .text, .rodata, .eh_frame_hdr, .eh_frame: reference, then derived
+  [14] .text             PROGBITS        0000000000003ae0 003ae0 005189 00  AX  0   0 16
+  [16] .rodata           PROGBITS        0000000000009000 009000 000ad0 00   A  0   0 16
+  [17] .eh_frame_hdr     PROGBITS        0000000000009ad0 009ad0 000334 00   A  0   0  4
+  [18] .eh_frame         PROGBITS        0000000000009e08 009e08 00124c 00   A  0   0  8
+  [14] .text             PROGBITS        0000000000003ae0 003ae0 005189 00  AX  0   0 16
+  [16] .rodata           PROGBITS        0000000000009000 009000 000ae0 00   A  0   0 16
+  [17] .eh_frame_hdr     PROGBITS        0000000000009ae0 009ae0 000334 00   A  0   0  4
+  [18] .eh_frame         PROGBITS        0000000000009e18 009e18 00124c 00   A  0   0  8
+# .text disassembly (objdump -d --no-show-raw-insn) with every hexadecimal number replaced by H
+instruction lines reference 5685, derived 5685; differing after the normalisation 0

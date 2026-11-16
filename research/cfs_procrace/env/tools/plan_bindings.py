@@ -11,7 +11,9 @@
 #   --module-flags  the plugin's module options as the derive script passed them (derive_module_flags: the table's
 #                   prefixes through the path map): -fplugin-arg-kzgcc-module=<id>:<prefix> ... -fplugin-arg-kzgcc-default-module=<id>
 #   --file-hashes   optional: the kz-dump text of the derived build's basis (its FILE_HASHES records path="<p>"
-#                   sha256=<hex>); each unit is tied to the sha256 of its source file by the unit path the plugin wrote,
+#                   sha256=<hex>, and its BASIS record name="bundle.root": the basis writes the bundle's files relative
+#                   to that root, which is joined to them here); each unit is tied to the sha256 of its source file by
+#                   the unit path the plugin wrote,
 #                   and the file on disk is hashed again beside it.  The plugin's unit header carries no source hash
 #                   (kzgcc 0.3), so this ties the binding file to the source through the basis.
 # Checks (each a line in OUT; rc 1 if one fails, rc 2 on a usage or input error):
@@ -131,10 +133,16 @@ mbad = [u for u in units if u[1] != msha]
 fhs = None
 if fht is not None:
     fhs = {}
+    root = None
+    for line in fht:
+        m = re.match(r'\s*BASIS\[\d+\] name="bundle\.root" value="([^"]*)"', line)
+        if m:
+            root = m.group(1).rstrip('/')
     for line in fht:
         m = re.match(r'\s*FILE_HASHES\[(\d+)\] path="([^"]*)" sha256=([0-9a-f]{64})', line)
         if m:
-            fhs[m.group(2)] = (int(m.group(1)), m.group(3))
+            pth = m.group(2) if m.group(2).startswith('/') or root is None else root + '/' + m.group(2)
+            fhs[pth] = (int(m.group(1)), m.group(3))
 sbad = []
 for u in units:
     src = ''

@@ -109,11 +109,17 @@ for l in sys.stdin:
     sys.stdout.write(l)' "$W/path_map.tsv" | sort -u > "$T/sb"
       echo "only in the reference: $(comm -23 "$T/sa" "$T/sb" | wc -l)"; comm -23 "$T/sa" "$T/sb" | head -20 | sed 's/^/  < /'
       echo "only in the derived (after the map): $(comm -13 "$T/sa" "$T/sb" | wc -l)"; comm -13 "$T/sa" "$T/sb" | head -20 | sed 's/^/  > /'
+      echo "# section addresses (readelf -SW) of .text, .rodata, .eh_frame_hdr, .eh_frame: reference, then derived"
+      readelf -SW "$a" | grep -E '\] \.(text|rodata|eh_frame_hdr|eh_frame) '; readelf -SW "$b" | grep -E '\] \.(text|rodata|eh_frame_hdr|eh_frame) '
+      echo "# .text disassembly (objdump -d --no-show-raw-insn) with every hexadecimal number replaced by H"
+      norm() { objdump -d --no-show-raw-insn -j .text "$1" | sed -E 's/0x[0-9a-f]+/H/g; s/\b[0-9a-f]{3,}\b/H/g' | grep -vE 'file format|^$'; }
+      norm "$a" > "$T/da"; norm "$b" > "$T/db"
+      echo "instruction lines reference $(wc -l < "$T/da"), derived $(wc -l < "$T/db"); differing after the normalisation $(diff "$T/da" "$T/db" | grep -c '^<')"
     } > "$HERE/cfe_assert_compare.txt"; rm -rf "$T"; cat "$HERE/cfe_assert_compare.txt" ;;
   bindings)
     # the binding report again with the unit source sha256 from the B' basis FILE_HASHES (same module options)
     MF=$(sed -n 's/^module options: //p' "$R/records/obs1-20261116-derived/module_flags.txt")
-    "$MC/tools/kz-dump/kz-dump" "$BP/basis.kz" | grep -E '^(section FILE_HASHES|  FILE_HASHES\[)' > "$EX/bprime_basis_file_hashes.txt"
+    "$MC/tools/kz-dump/kz-dump" "$BP/basis.kz" | grep -E '^(section FILE_HASHES|  FILE_HASHES\[|  BASIS\[[0-9]+\] name="bundle\.root")' > "$EX/bprime_basis_file_hashes.txt"
     python3 -I "$R/env/tools/plan_bindings.py" --manifest "$P/plan.kzs" --modules "$P/plan.mod" --bindings "$W/binds_instr.kzs" \
       --module-flags "$MF" --file-hashes "$EX/bprime_basis_file_hashes.txt" -o "$HERE/bindings_report_src.tsv"; rc=$?
     grep -E '^(unit|sources)' "$HERE/bindings_report_src.tsv" | cut -f1,2,5,6,7 | head -40; exit $rc ;;

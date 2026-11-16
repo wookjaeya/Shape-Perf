@@ -36,6 +36,9 @@
 #     instance list run.meta does not name, a run container with another parent basis, another dump -> refused (1)
 #  14 stop-event evaluation (env/obs1/stop_eval.py): apps of a stub startup script reach run loop or exit -> rc 0; an
 #     app whose actor never reaches a stop site, an app without a root site in the plan -> rc 3; no RUN line -> rc 2
+#  15 explanation records (env/obs1/explain.py, fixtures env/obs1/tests/test_explain.py): each need state of the
+#     judgement rules 3.5, each status of the link, use_cond, order and effect axes, a repeated creation-argument value
+#     (both ties undetermined), a refused combination (rc 3), and a broken record for each format rule of 3.6 (rc 4)
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../../.." && pwd)"
@@ -314,6 +317,13 @@ dmp 4; grep -v 'site 2 ' "$X/plan.kzs" > "$X/p2.kzs"; se "$X/p2.kzs"; f2=$?; un=
 grep -v '^run t_init' "$X/d.txt" > "$X/d2.txt"; mv "$X/d2.txt" "$X/d.txt"; se "$X/plan.kzs"; f3=$?
 ok=0; [ $c -eq 0 ] && [ "$sm" = "applications=2 reached_inside_window=2 libraries=1" ] && [ $f1 -eq 3 ] && [ "$nr" = 1 ] && [ $f2 -eq 3 ] && [ "$un" = 1 ] && [ $f3 -eq 2 ] || ok=1
 res "stop-event evaluation (stub plan, script and dump)" $ok "control rc $c ($sm); actor never at a stop site rc $f1; no root site rc $f2; no RUN line rc $f3"
+
+# 15 explanation records
+X=$W/ex
+python3 -I "$R/env/obs1/tests/test_explain.py" "$R/env/obs1/explain.py" "$R/kairos/tests/static/data/reason_vocabulary.txt" "$X" > "$W/ex.log" 2>&1; c=$?
+sm=$(tail -1 "$W/ex.log")
+ok=0; [ $c -eq 0 ] || { ok=1; grep '^FAIL' "$W/ex.log" | head -5; }
+res "explanation records (synthetic fixtures)" $ok "$sm"
 
 echo "unit checks: $((NC - NF)) of $NC pass"
 exit $((NF > 0))

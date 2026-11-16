@@ -1,0 +1,3 @@
+# commands of the explanation step (plan/observation_path_results_20261116.md 7), in order, with their outcome
+env/tools/build_record.sh pre MC pre_mc.txt -> rc 0; equal to records/obs1-20261116-boot/post_mc.txt except the time and free lines
+env/tools/tests/run_unit.sh -> 15 of 15 (unit_tools_before.txt); env/redesign/step2a_tests_unit.sh -> 7 of 7 (unit_step2a_before.txt)

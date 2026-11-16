@@ -276,7 +276,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 5 (2026-10-30)
+rules relations rules revision 6 (2026-11-16)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 
@@ -294,6 +294,7 @@ actors: roots 32 (process 1, spawn-entry 30, table-walk-entry 0, table-image-ent
 spawn calls resolved through the static image of the table their entry argument is read from: 1 [relsound.c:974:33: img_main; the member ImgFn.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written; besides the function leaves of ImgFn.main, the image of img_table has 2 function leaf/leaves of another member of its record (img_table[0].fn.init img_init@relsound.c:963, img_table[2].fn.init img_init@relsound.c:963; a union member read gives that value): that the spawn reads only the elements whose main is a function leaf rests on its guard, which this revision does not read (so the threads of this spawn are taken as not complete)]
 spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 1 [relsound.c:689:10 in opn_worker -> pthread_create: the entry argument 2 [e] is no field of a global table]
 summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition in another actor 0, key-matched 0) B 0 (with a callee check 0) C 38 (self-identity reads 0); flip static-possible 35, static-undetermined 3, none 0; feasibility proven-impossible 8, possible 18, undecidable 11, not graded 1
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 38 [no run record read 38]; actor_not_extracted 38 [spawn call with no resolved entry 38, child threads not all resolved 4]; writer_set_incomplete 17 [FIELD_STATUS not complete 3, per-field completeness rule is a premise 15]; absent_result_unevaluated 3 [reader's returns not evaluated 3]; fixed_proof_open 19 [lock sets do not decide the order 6, indirect call with unresolved targets 3, child threads not all resolved 2, proof rests on an assumption 8]; link_unlinked 38 [identity of the reader and the created thread not decided 38]; reasons of the whole facts on every row: actor_not_extracted(spawn call with no resolved entry)
 [A] 0 (namespaces 0, key comparisons 0; left out: searches over no global table 0)
 [B] 0 (field-argument groups 0; left out: no writer 0, one actor only 0)
 [C] 38 (spawn calls 32, with no resolved entry 1, with no event after them on their control-flow graph 2; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 1, such contexts of a spawn whose threads are not all resolved (undecidable): 2, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 1 (reads taken in only so: 1); contexts called back from a function without a body: 1; contexts through indirect calls the facts do not resolve: 2)
@@ -307,6 +308,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: entry_worker returns 0 [0] with the earlier value (INIT 0 (entry_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(FIELD_STATUS not complete); link_unlinked(identity of the reader and the created thread not decided)
   C2 spawn relsound.c:59:8 in entry_spawn -> pthread_create; field EntryRec.ready; read relsound.c:45:21 in entry_worker (via the call relsound.c:51:9 in entry_locked_call; the threads this spawn starts do not reach this call)
       spawn: callee pthread_create, entries entry_worker; child actors {entry_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#9 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
       write after the spawn: relsound.c:60:3 key=entry_recs[1] value=1 [1] locks {#9 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
@@ -317,6 +319,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: entry_worker returns 0 [0] with the earlier value (INIT 0 (entry_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(FIELD_STATUS not complete); link_unlinked(identity of the reader and the created thread not decided)
   C3 spawn relsound.c:90:8 in via_spawn -> pthread_create; field ViaRec.ready; read relsound.c:71:19 in via_read (via the call relsound.c:81:9 in via_worker)
       spawn: callee pthread_create, entries via_worker; child actors {via_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#27 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
       write after the spawn: relsound.c:91:3 key=via_recs[2] value=1 [1] locks {#27 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
@@ -327,6 +330,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: via_read returns 0 [0] not with the earlier value (INIT 0 (via_recs)), with the written value 1 [1]; via_read returns -1 [-1] with the earlier value (INIT 0 (via_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
   C4 spawn relsound.c:90:8 in via_spawn -> pthread_create; field ViaRec.ready; read relsound.c:71:19 in via_read (via the indirect call relsound.c:79:9 in via_worker)
       spawn: callee pthread_create, entries via_worker; child actors {via_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#27 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
       write after the spawn: relsound.c:91:3 key=via_recs[2] value=1 [1] locks {#27 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
@@ -337,6 +341,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: via_read returns 0 [0] not with the earlier value (INIT 0 (via_recs)), with the written value 1 [1]; via_read returns -1 [-1] with the earlier value (INIT 0 (via_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C5 spawn relsound.c:119:8 in clear_spawn -> pthread_create; field ClearRec.ready; read relsound.c:104:21 in clear_ready (the read itself)
       spawn: callee pthread_create, entries clear_worker; child actors {clear_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#5 &clear_mutex@relsound.c:99 (static-instance)} acquired-at [relsound.c:118:3]
       write after the spawn: relsound.c:120:3 key=clear_recs[1] value=1 [1] locks {#5 &clear_mutex@relsound.c:99 (static-instance)} acquired-at [relsound.c:118:3]
@@ -349,6 +354,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: clear_ready returns -1 [-1] with the earlier value (INIT 0 (clear_recs)), not with the written value 1 [1]; clear_ready returns 0 [0] not with the earlier value (INIT 0 (clear_recs)), with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C6 spawn relsound.c:151:5 in loop_spawn -> pthread_create; field LoopRec.ready; read relsound.c:134:20 in loop_ready (the read itself)
       spawn: callee pthread_create, entries loop_worker; child actors {loop_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#16 &loop_mutex@relsound.c:129 (static-instance)} acquired-at [relsound.c:149:5]
       write after the spawn: relsound.c:150:5 key=loop_recs[0] value=symbolic [i] locks {#16 &loop_mutex@relsound.c:129 (static-instance)} acquired-at [relsound.c:149:5]
@@ -359,6 +365,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-undetermined: not evaluated: a value that is no constant at relsound.c:150:5; no constant value among the writes of LoopRec.ready after the spawn
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); absent_result_unevaluated(reader's returns not evaluated); link_unlinked(identity of the reader and the created thread not decided)
   C7 spawn relsound.c:182:8 in ptr_spawn -> pthread_create; field PtrRec.ready; read relsound.c:167:19 in ptr_ready (via the call relsound.c:174:9 in ptr_worker)
       spawn: callee pthread_create, entries ptr_worker; child actors {ptr_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#30 ptr_cfg@relsound.c:162.mp (not-static)} acquired-at [relsound.c:181:3]
       write after the spawn: relsound.c:183:3 key=ptr_recs[1] value=1 [1] locks {#30 ptr_cfg@relsound.c:162.mp (not-static)} acquired-at [relsound.c:181:3]
@@ -369,6 +376,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: ptr_ready returns -1 [-1] with the earlier value (INIT 0 (ptr_recs)), not with the written value 1 [1]; ptr_ready returns 0 [0] not with the earlier value (INIT 0 (ptr_recs)), with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); fixed_proof_open(lock sets do not decide the order); link_unlinked(identity of the reader and the created thread not decided)
   C8 spawn relsound.c:220:8 in hook_spawn -> pthread_create; field HookRec.ready; read relsound.c:202:20 in hook_ready (the read itself)
       spawn: callee pthread_create, entries hook_worker; child actors {hook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#13 &hook_mutex@relsound.c:196 (static-instance)} acquired-at [relsound.c:219:3]
       write after the spawn: relsound.c:221:3 key=hook_recs[1] value=1 [1] locks {#13 &hook_mutex@relsound.c:196 (static-instance)} acquired-at [relsound.c:219:3]
@@ -380,6 +388,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: hook_ready returns -1 [-1] with the earlier value (INIT 0 (hook_recs)), not with the written value 1 [1]; hook_ready returns 0 [0] not with the earlier value (INIT 0 (hook_recs)), with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(lock sets do not decide the order); link_unlinked(identity of the reader and the created thread not decided)
   C9 spawn relsound.c:256:3 in after_create -> pthread_create; field AfterRec.used; read relsound.c:241:21 in after_used (the read itself)
       spawn: callee pthread_create, entries after_worker; child actors {after_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#1 &after_mutex@relsound.c:236 (static-instance)} acquired-at [relsound.c:255:3]
       write after the spawn: relsound.c:257:3 key=after_recs[0] value=1 [1] locks {#1 &after_mutex@relsound.c:236 (static-instance)} acquired-at [relsound.c:255:3]
@@ -390,6 +399,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: after_used returns 0 [0] not with the earlier value (INIT 0 (after_recs)), with the written value 1 [1]; after_used returns 5 [5] with the earlier value (INIT 0 (after_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(lock sets do not decide the order); link_unlinked(identity of the reader and the created thread not decided)
   C10 spawn relsound.c:291:3 in held_create -> pthread_create; field HeldRec.used; read relsound.c:276:20 in held_used (the read itself)
       spawn: callee pthread_create, entries held_worker; child actors {held_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#12 &held_mutex@relsound.c:271 (static-instance)} acquired-at [relsound.c:290:3]
       write after the spawn: relsound.c:292:3 key=held_recs[0] value=1 [1] locks {#12 &held_mutex@relsound.c:271 (static-instance)} acquired-at [relsound.c:290:3]
@@ -400,6 +410,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: held_used returns 0 [0] not with the earlier value (INIT 0 (held_recs)), with the written value 1 [1]; held_used returns 5 [5] with the earlier value (INIT 0 (held_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
   C11 spawn relsound.c:327:3 in wait_create -> pthread_create; field WaitRec.used; read relsound.c:306:20 in wait_used (the read itself)
       spawn: callee pthread_create, entries wait_worker; child actors {wait_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#28 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:326:3]
       write after the spawn: relsound.c:328:3 key=wait_recs[0] value=1 [1] locks {#28 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:326:3]
@@ -411,6 +422,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: wait_used returns 0 [0] not with the earlier value (INIT 0 (wait_recs)), with the written value 2 [2]; wait_used returns 5 [5] with the earlier value (INIT 0 (wait_recs)), not with the written value 2 [2]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C12 spawn relsound.c:366:3 in waitp_create -> pthread_create; field WaitpRec.used; read relsound.c:343:21 in waitp_used (the read itself)
       spawn: callee pthread_create, entries waitp_worker; child actors {waitp_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#29 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:365:3]
       write after the spawn: relsound.c:367:3 key=waitp_recs[0] value=1 [1] locks {#29 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:365:3]
@@ -422,6 +434,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: waitp_used returns 0 [0] not with the earlier value (INIT 0 (waitp_recs)), with the written value 2 [2]; waitp_used returns 5 [5] with the earlier value (INIT 0 (waitp_recs)), not with the written value 2 [2]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C13 spawn relsound.c:400:3 in first_create -> pthread_create; field FirstRec.used; read relsound.c:382:21 in first_used (the read itself)
       spawn: callee pthread_create, entries first_worker; child actors {first_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#11 &first_obj@relsound.c:377.lock (static-instance)} acquired-at [relsound.c:399:3]
       write after the spawn: relsound.c:401:3 key=first_recs[0] value=1 [1] locks {#11 &first_obj@relsound.c:377.lock (static-instance)} acquired-at [relsound.c:399:3]
@@ -433,6 +446,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: first_used returns 0 [0] not with the earlier value (INIT 0 (first_recs)), with the written value 2 [2]; first_used returns 5 [5] with the earlier value (INIT 0 (first_recs)), not with the written value 2 [2]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C14 spawn relsound.c:433:3 in union_create -> pthread_create; field UnionRec.used; read relsound.c:418:21 in union_used (the read itself)
       spawn: callee pthread_create, entries union_worker; child actors {union_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#22 &union_lock@relsound.c:413.a (static-instance)} acquired-at [relsound.c:432:3]
       write after the spawn: relsound.c:434:3 key=union_recs[0] value=1 [1] locks {#22 &union_lock@relsound.c:413.a (static-instance)} acquired-at [relsound.c:432:3]
@@ -444,6 +458,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: union_used returns 0 [0] not with the earlier value (INIT 0 (union_recs)), with the written value 2 [2]; union_used returns 5 [5] with the earlier value (INIT 0 (union_recs)), not with the written value 2 [2]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C15 spawn relsound.c:469:3 in back_create -> pthread_create; field BackRec.used; read relsound.c:450:20 in back_read (via the call relsound.c:461:9 in back_worker)
       spawn: callee pthread_create, entries back_worker; child actors {back_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
       write after the spawn: relsound.c:470:3 key=back_recs[0] value=1 [1] locks {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
@@ -454,6 +469,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: back_read returns 0 [0] not with the earlier value (INIT 0 (back_recs)), with the written value 1 [1]; back_read returns -1 [-1] with the earlier value (INIT 0 (back_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
   C16 spawn relsound.c:469:3 in back_create -> pthread_create; field BackRec.used; read relsound.c:450:20 in back_read (called back from the call relsound.c:457:3 in back_worker of back_apply, a function without a body that receives back_read)
       spawn: callee pthread_create, entries back_worker; child actors {back_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
       write after the spawn: relsound.c:470:3 key=back_recs[0] value=1 [1] locks {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
@@ -464,6 +480,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: back_read returns 0 [0] not with the earlier value (INIT 0 (back_recs)), with the written value 1 [1]; back_read returns -1 [-1] with the earlier value (INIT 0 (back_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C17 spawn relsound.c:469:3 in back_create -> pthread_create; field BackRec.used; read relsound.c:450:20 in back_read (through an indirect call whose targets are not resolved (back_read is address-taken): relsound.c:459:9 in back_worker)
       spawn: callee pthread_create, entries back_worker; child actors {back_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
       write after the spawn: relsound.c:470:3 key=back_recs[0] value=1 [1] locks {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
@@ -474,6 +491,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: back_read returns 0 [0] not with the earlier value (INIT 0 (back_recs)), with the written value 1 [1]; back_read returns -1 [-1] with the earlier value (INIT 0 (back_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); fixed_proof_open(indirect call with unresolved targets); link_unlinked(identity of the reader and the created thread not decided)
   C18 spawn relsound.c:504:3 in addr_create -> pthread_create; field AddrRec.used; read relsound.c:489:20 in addr_used (the read itself)
       spawn: callee pthread_create, entries addr_worker; child actors {addr_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &addr_mutex@relsound.c:483 (static-instance)} acquired-at [relsound.c:503:3]
       write after the spawn: relsound.c:505:3 key=addr_recs[0] value=2 [2] locks {#0 &addr_mutex@relsound.c:483 (static-instance)} acquired-at [relsound.c:503:3]
@@ -484,6 +502,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: addr_used returns 0 [0] not with the earlier value (INIT 0 (addr_recs)), with the written value 2 [2]; addr_used returns 5 [5] with the earlier value (INIT 0 (addr_recs)), not with the written value 2 [2]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(lock sets do not decide the order); link_unlinked(identity of the reader and the created thread not decided)
   C19 spawn relsound.c:556:3 in jump_create -> pthread_create; field JumpRec.used; read relsound.c:533:20 in jump_used (the read itself)
       spawn: callee pthread_create, entries jump_worker; child actors {jump_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#15 &jump_mutex@relsound.c:525 (static-instance)} acquired-at [relsound.c:555:3]
       write after the spawn: relsound.c:558:3 key=jump_recs[0] value=1 [1] locks {#15 &jump_mutex@relsound.c:525 (static-instance)} acquired-at [relsound.c:555:3]
@@ -494,6 +513,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: jump_used returns 0 [0] not with the earlier value (INIT 0 (jump_recs)), with the written value 1 [1]; jump_used returns 5 [5] with the earlier value (INIT 0 (jump_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(lock sets do not decide the order); link_unlinked(identity of the reader and the created thread not decided)
   C20 spawn relsound.c:587:3 in elem_create -> pthread_create; field ElemRec.flags; read relsound.c:572:16 in elem_ready (the read itself)
       spawn: callee pthread_create, entries elem_worker; child actors {elem_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#8 &elem_mutex@relsound.c:567 (static-instance)} acquired-at [relsound.c:586:3]
       write after the spawn: relsound.c:588:3 key=elem_rec.flags value=top [copy of elem_zero] locks {#8 &elem_mutex@relsound.c:567 (static-instance)} acquired-at [relsound.c:586:3]
@@ -504,6 +524,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-undetermined: not evaluated: a index expression; a value that is no constant at relsound.c:588:3; no constant value among the writes of ElemRec.flags after the spawn
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(FIELD_STATUS not complete); writer_set_incomplete(per-field completeness rule is a premise); absent_result_unevaluated(reader's returns not evaluated); fixed_proof_open(lock sets do not decide the order); link_unlinked(identity of the reader and the created thread not decided)
   C21 spawn relsound.c:625:3 in root_create -> pthread_create; field RootRec.used; read relsound.c:600:20 in root_read (via the call relsound.c:606:9 in root_locked)
       spawn: callee pthread_create, entries root_worker; child actors {root_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#21 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
       write after the spawn: relsound.c:626:3 key=root_recs[0] value=1 [1] locks {#21 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
@@ -514,6 +535,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: root_read returns 0 [0] not with the earlier value (INIT 0 (root_recs)), with the written value 1 [1]; root_read returns -1 [-1] with the earlier value (INIT 0 (root_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
   C22 spawn relsound.c:625:3 in root_create -> pthread_create; field RootRec.used; read relsound.c:600:20 in root_read (via the call relsound.c:612:9 in root_other)
       spawn: callee pthread_create, entries root_worker; child actors {root_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#21 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
       write after the spawn: relsound.c:626:3 key=root_recs[0] value=1 [1] locks {#21 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
@@ -524,6 +546,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: root_read returns 0 [0] not with the earlier value (INIT 0 (root_recs)), with the written value 1 [1]; root_read returns -1 [-1] with the earlier value (INIT 0 (root_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C23 spawn relsound.c:664:3 in desc_create -> pthread_create; field DescRec.used; read relsound.c:642:20 in desc_read (via the call relsound.c:648:9 in desc_grand)
       spawn: callee pthread_create, entries desc_worker; child actors {desc_worker (spawn-entry)}; threads the child's code starts (descendants) {desc_grand (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#6 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
       write after the spawn: relsound.c:665:3 key=desc_recs[0] value=1 [1] locks {#6 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
@@ -534,6 +557,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: desc_read returns 0 [0] not with the earlier value (INIT 0 (desc_recs)), with the written value 1 [1]; desc_read returns -1 [-1] with the earlier value (INIT 0 (desc_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C24 spawn relsound.c:664:3 in desc_create -> pthread_create; field DescRec.used; read relsound.c:642:20 in desc_read (via the call relsound.c:656:9 in desc_worker)
       spawn: callee pthread_create, entries desc_worker; child actors {desc_worker (spawn-entry)}; threads the child's code starts (descendants) {desc_grand (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#6 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
       write after the spawn: relsound.c:665:3 key=desc_recs[0] value=1 [1] locks {#6 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
@@ -544,6 +568,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: desc_read returns 0 [0] not with the earlier value (INIT 0 (desc_recs)), with the written value 1 [1]; desc_read returns -1 [-1] with the earlier value (INIT 0 (desc_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
   C25 spawn relsound.c:697:3 in opn_create -> pthread_create; field OpnRec.used; read relsound.c:677:19 in opn_read (via the call relsound.c:686:9 in opn_worker)
       spawn: callee pthread_create, entries opn_worker; child actors {opn_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#18 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
       write after the spawn: relsound.c:698:3 key=opn_recs[0] value=1 [1] locks {#18 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
@@ -554,6 +579,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: opn_read returns 0 [0] not with the earlier value (INIT 0 (opn_recs)), with the written value 1 [1]; opn_read returns -1 [-1] with the earlier value (INIT 0 (opn_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); actor_not_extracted(child threads not all resolved); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
   C26 spawn relsound.c:697:3 in opn_create -> pthread_create; field OpnRec.used; read relsound.c:677:19 in opn_read (via the call relsound.c:692:34 in opn_elsewhere; the threads this spawn starts do not reach this call)
       spawn: callee pthread_create, entries opn_worker; child actors {opn_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#18 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
       write after the spawn: relsound.c:698:3 key=opn_recs[0] value=1 [1] locks {#18 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
@@ -564,6 +590,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: opn_read returns 0 [0] not with the earlier value (INIT 0 (opn_recs)), with the written value 1 [1]; opn_read returns -1 [-1] with the earlier value (INIT 0 (opn_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); actor_not_extracted(child threads not all resolved); fixed_proof_open(child threads not all resolved); link_unlinked(identity of the reader and the created thread not decided)
   C27 spawn relsound.c:745:19 in recur_create -> pthread_create; field RecurRec.used; read relsound.c:727:21 in recur_read (the read itself)
       spawn: callee pthread_create, entries recur_worker; child actors {recur_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#20 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:744:3]
       write after the spawn: relsound.c:746:3 key=recur_recs[0] value=symbolic [depth] locks {#20 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:744:3]
@@ -575,6 +602,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-undetermined: not evaluated: a value that is no constant at relsound.c:746:3; no constant value among the writes of RecurRec.used after the spawn
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); absent_result_unevaluated(reader's returns not evaluated); link_unlinked(identity of the reader and the created thread not decided)
   C28 spawn relsound.c:787:3 in memhook_create -> pthread_create; field MemhookRec.used; read relsound.c:772:23 in memhook_read (the read itself)
       spawn: callee pthread_create, entries memhook_worker; child actors {memhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#17 &memhook_mutex@relsound.c:755 (static-instance)} acquired-at [relsound.c:786:3]
       write after the spawn: relsound.c:789:3 key=memhook_recs[0] value=1 [1] locks {} unknown-release
@@ -586,6 +614,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: memhook_read returns 0 [0] not with the earlier value (INIT 0 (memhook_recs)), with the written value 1 [1]; memhook_read returns -1 [-1] with the earlier value (INIT 0 (memhook_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C29 spawn relsound.c:829:3 in dlhook_create -> pthread_create; field DlhookRec.used; read relsound.c:814:22 in dlhook_read (the read itself)
       spawn: callee pthread_create, entries dlhook_worker; child actors {dlhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#7 &dlhook_mutex@relsound.c:797 (static-instance)} acquired-at [relsound.c:828:3]
       write after the spawn: relsound.c:831:3 key=dlhook_recs[0] value=1 [1] locks {} unknown-release
@@ -597,6 +626,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: dlhook_read returns 0 [0] not with the earlier value (INIT 0 (dlhook_recs)), with the written value 1 [1]; dlhook_read returns -1 [-1] with the earlier value (INIT 0 (dlhook_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C30 spawn relsound.c:866:3 in cbq_create -> pthread_create; field CbqRec.used; read relsound.c:850:19 in cbq_read (the read itself)
       spawn: callee pthread_create, entries cbq_worker; child actors {cbq_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#4 &cbq_mutex@relsound.c:839 (static-instance)} acquired-at [relsound.c:865:3]
       write after the spawn: relsound.c:868:3 key=cbq_recs[0] value=1 [1] locks {}
@@ -607,6 +637,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: cbq_read returns 0 [0] not with the earlier value (INIT 0 (cbq_recs)), with the written value 1 [1]; cbq_read returns -1 [-1] with the earlier value (INIT 0 (cbq_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C31 spawn relsound.c:900:3 in unres_create -> pthread_create; field UnresRec.used; read relsound.c:880:21 in unres_read (via the call relsound.c:884:30 in unres_ctx; the threads this spawn starts do not reach this call)
       spawn: callee pthread_create, entries unres_worker; child actors {unres_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#25 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
       write after the spawn: relsound.c:901:3 key=unres_recs[0] value=1 [1] locks {#25 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
@@ -617,6 +648,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: unres_read returns 0 [0] not with the earlier value (INIT 0 (unres_recs)), with the written value 1 [1]; unres_read returns -1 [-1] with the earlier value (INIT 0 (unres_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); fixed_proof_open(indirect call with unresolved targets); link_unlinked(identity of the reader and the created thread not decided)
   C32 spawn relsound.c:900:3 in unres_create -> pthread_create; field UnresRec.used; read relsound.c:880:21 in unres_read (via the call relsound.c:892:9 in unres_worker)
       spawn: callee pthread_create, entries unres_worker; child actors {unres_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#25 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
       write after the spawn: relsound.c:901:3 key=unres_recs[0] value=1 [1] locks {#25 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
@@ -627,6 +659,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: unres_read returns 0 [0] not with the earlier value (INIT 0 (unres_recs)), with the written value 1 [1]; unres_read returns -1 [-1] with the earlier value (INIT 0 (unres_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
   C33 spawn relsound.c:933:3 in unres2_create -> pthread_create; field Unres2Rec.used; read relsound.c:918:22 in unres2_read (through an indirect call whose targets are not resolved (unres2_read is address-taken): relsound.c:926:9 in unres2_worker)
       spawn: callee pthread_create, entries unres2_worker; child actors {unres2_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#24 &unres2_mutex@relsound.c:914 (static-instance)} acquired-at [relsound.c:932:3]
       write after the spawn: relsound.c:934:3 key=unres2_recs[0] value=1 [1] locks {#24 &unres2_mutex@relsound.c:914 (static-instance)} acquired-at [relsound.c:932:3]
@@ -637,6 +670,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: unres2_read returns 0 [0] not with the earlier value (INIT 0 (unres2_recs)), with the written value 1 [1]; unres2_read returns -1 [-1] with the earlier value (INIT 0 (unres2_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); fixed_proof_open(indirect call with unresolved targets); link_unlinked(identity of the reader and the created thread not decided)
   C34 spawn relsound.c:974:33 in img_create -> pthread_create; field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:958:9 in img_main)
       spawn: callee pthread_create, entries img_main (from the static image of the table the entry argument is read from); child actors {img_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#14 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
       write after the spawn: relsound.c:977:3 key=img_recs[0] value=1 [1] locks {#14 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
@@ -647,6 +681,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: img_read returns 0 [0] not with the earlier value (INIT 0 (img_recs)), with the written value 1 [1]; img_read returns -1 [-1] with the earlier value (INIT 0 (img_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); actor_not_extracted(child threads not all resolved); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
   C35 spawn relsound.c:974:33 in img_create -> pthread_create; field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:967:34 in img_elsewhere; the threads this spawn starts do not reach this call)
       spawn: callee pthread_create, entries img_main (from the static image of the table the entry argument is read from); child actors {img_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#14 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
       write after the spawn: relsound.c:977:3 key=img_recs[0] value=1 [1] locks {#14 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
@@ -657,6 +692,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: img_read returns 0 [0] not with the earlier value (INIT 0 (img_recs)), with the written value 1 [1]; img_read returns -1 [-1] with the earlier value (INIT 0 (img_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); actor_not_extracted(child threads not all resolved); fixed_proof_open(child threads not all resolved); link_unlinked(identity of the reader and the created thread not decided)
   C36 spawn relsound.c:1016:3 in varhook_create -> pthread_create; field VarhookRec.used; read relsound.c:1001:23 in varhook_read (the read itself)
       spawn: callee pthread_create, entries varhook_worker; child actors {varhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#26 &varhook_mutex@relsound.c:986 (static-instance)} acquired-at [relsound.c:1015:3]
       write after the spawn: relsound.c:1018:3 key=varhook_recs[0] value=1 [1] locks {} unknown-release
@@ -668,6 +704,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: varhook_read returns 0 [0] not with the earlier value (INIT 0 (varhook_recs)), with the written value 1 [1]; varhook_read returns -1 [-1] with the earlier value (INIT 0 (varhook_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C37 spawn relsound.c:1061:3 in putcopy_create -> pthread_create; field PutcopyRec.used; read relsound.c:1046:23 in putcopy_read (the read itself)
       spawn: callee pthread_create, entries putcopy_worker; child actors {putcopy_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#19 &putcopy_mutex@relsound.c:1027 (static-instance)} acquired-at [relsound.c:1060:3]
       write after the spawn: relsound.c:1063:3 key=putcopy_recs[0] value=1 [1] locks {} unknown-release
@@ -679,6 +716,7 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: putcopy_read returns 0 [0] not with the earlier value (INIT 0 (putcopy_recs)), with the written value 1 [1]; putcopy_read returns -1 [-1] with the earlier value (INIT 0 (putcopy_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)
   C38 spawn relsound.c:1106:3 in arrhook_create -> pthread_create; field ArrhookRec.used; read relsound.c:1091:23 in arrhook_read (the read itself)
       spawn: callee pthread_create, entries arrhook_worker; child actors {arrhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#2 &arrhook_mutex@relsound.c:1072 (static-instance)} acquired-at [relsound.c:1105:3]
       write after the spawn: relsound.c:1108:3 key=arrhook_recs[0] value=1 [1] locks {} unknown-release
@@ -690,3 +728,4 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: arrhook_read returns 0 [0] not with the earlier value (INIT 0 (arrhook_recs)), with the written value 1 [1]; arrhook_read returns -1 [-1] with the earlier value (INIT 0 (arrhook_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); link_unlinked(identity of the reader and the created thread not decided)

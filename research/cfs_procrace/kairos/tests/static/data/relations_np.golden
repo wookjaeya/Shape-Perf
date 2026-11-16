@@ -68,7 +68,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 5 (2026-10-30)
+rules relations rules revision 6 (2026-11-16)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 
@@ -86,6 +86,7 @@ actors: roots 5 (process 1, spawn-entry 4, table-walk-entry 0, table-image-entry
 spawn calls resolved through the static image of the table their entry argument is read from: 0
 spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
 summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition in another actor 1, key-matched 1) B 1 (with a callee check 1) C 2 (self-identity reads 2); flip static-possible 4, static-undetermined 0, none 1; feasibility proven-impossible 1, possible 1, undecidable 3, not graded 0
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 5 [no run record read 5]; writer_set_incomplete 4 [FIELD_STATUS not complete 2, per-field completeness rule is a premise 2]; fixed_proof_open 3 [no static order between the actors 2, proof rests on an assumption 1]; link_unlinked 2 [identity of the reader and the created thread not decided 2, self-reported identity 2]; reasons of the whole facts on every row: none
 [A] 2 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
   namespace Slot.name (record type Slot; tables slots)
       search: A1 search loop relations.c:35:3 in slot_find: key Slot.name strcmp at relations.c:36:31 compared with parameter 0 [name] (search parameter 0)
@@ -116,6 +117,7 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: none: no creator of the same partition and key in another actor; search returns: slot_create returns -17 [ERR_NOT_FOUND], slot_create returns -5 [ERR_ILLEGAL], slot_create returns 0 [0], slot_find returns -17 [ERR_NOT_FOUND], slot_find returns 0 [0]
       layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete)
   A2 lookup relations.c:113:9 in client_main -> slot_find#0 namespace Slot.name partition {} key known
       key: string literal "gamma"
       actors: {client_main (spawn-entry)}; result=discarded
@@ -129,6 +131,7 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: slot_create returns -17 [ERR_NOT_FOUND], slot_create returns -5 [ERR_ILLEGAL], slot_create returns 0 [0], slot_find returns -17 [ERR_NOT_FOUND], slot_find returns 0 [0]
       layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
 [B] 1 (field-argument groups 3; left out: no writer 2, one actor only 0)
   B1 Service.self_id -> notify#0 sites=2 callee-check=yes
       site relations.c:111:3 in client_main [service.self_id] base=global hops=0 result=discarded
@@ -144,6 +147,7 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: a written constant and the initial value give different results of the callee check
       layers: B P0 R (writers: rule targets)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
 [C] 2 (spawn calls 5, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 9; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 0, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)
   C1 spawn relations.c:153:12 in task_spawn -> pthread_create; field TaskRec.registered; read relations.c:141:26 in task_check (the read itself) self-identity
       spawn: callee pthread_create, entries child_main; child actors {child_main (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
@@ -156,6 +160,7 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: task_check returns -17 [ERR_NOT_FOUND] with the earlier value (INIT 0 (tasks)), not with the written value 1 [1]; task_check returns 0 [0] not with the earlier value (INIT 0 (tasks)), with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_getspecific, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); writer_set_incomplete(per-field completeness rule is a premise); link_unlinked(identity of the reader and the created thread not decided); link_unlinked(self-reported identity)
   C2 spawn relations.c:163:8 in task_spawn_locked -> pthread_create; field TaskRec.registered; read relations.c:141:26 in task_check (the read itself) self-identity
       spawn: callee pthread_create, entries child_main; child actors {child_main (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &table_mutex@relations.c:30 (static-instance)} acquired-at [relations.c:162:3]
       write after the spawn: relations.c:164:3 key=tasks[slot] value=1 [1] locks {#0 &table_mutex@relations.c:30 (static-instance)} acquired-at [relations.c:162:3]
@@ -167,3 +172,4 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: task_check returns -17 [ERR_NOT_FOUND] with the earlier value (INIT 0 (tasks)), not with the written value 1 [1]; task_check returns 0 [0] not with the earlier value (INIT 0 (tasks)), with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_getspecific, pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided); link_unlinked(self-reported identity)

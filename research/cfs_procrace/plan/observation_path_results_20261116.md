@@ -247,3 +247,135 @@ kz-static 빌드가 없으므로 빌드 전 선언은 없다. 바뀌는 출력�
 - **누적 바이트 동일성**: 빌드 뒤 `env/tools/ledger_check.sh` 전체와 `tools_check.sh --deep`. 모두 같아야 한다. 앞 단계의 키 목록(장부 행 `OBS_relrows_keys`)도 그 안에 있다.
 - **공간**: 시작 전 여유 ≥ 하한 314,572,800 + 필요량. 필요량 = 앞 단계에서 잰 kz-static 제자리 빌드 dip 93,020,160 + 새 출력 10 MB + 한 시간 흐름 13 MB = 116,020,160 B(감시 문턱 430,592,960). 감시(`env/tools/space_guard.sh --kind kz-static`, 2초마다)가 하한을 넘으면 멈추고 보고한다. 재실행(`--kind relations`), 민감도 추출(`--kind extract`), 도구 사본(`--kind tool-copy`)도 감시 아래 돌린다.
 - **비교 스크립트**(빌드 전에 이 선언과 함께 커밋): `records/obs1-20261116-relincomplete/compare_declared.py`(위 세 변화를 되돌려 바이트 비교, 행마다 한 줄, key unresolved 인 A 행의 사유; 키 목록은 셋째 줄만), `vocab_check.py`(어휘 자료 = JR 3.5 표). 둘 다 `python3 -I`.
+
+### 3.1 바뀐 것 [F]
+
+- 커밋 `750cc43`(선언·코드·시험·문서·비교 스크립트·도구 사본 기록을 함께, 빌드 전). 규모(`git diff --stat 357bdc0 750cc43 -- kairos`, 11 파일 +753/−20): `lib/llvm/relations.cpp` +263 줄 남짓, `relations.hpp` +18, `rel_facts.cpp` +27, `rel_facts.hpp` +18, `tests/static/` 의 여섯 파일(셋은 새: `fixtures/relincomplete.c` 150줄, `test_static_reasons.cpp` 127줄, `data/reason_vocabulary.txt` 26줄), `docs/static_facts.md` +25.
+- 잘린 이미지: `RelFacts::image_cut`, `image_value_why(…, cut)`, `image_entries` 의 `image_cut_`, 개정 5 덮개 검사에서 표시 잎 빼기. 경로 A `key_value` 는 잘린 이미지에서 `unresolved`(KeyValue `why`, `cut`). ChildSet `cut`.
+- 미완 사유: 표 `relations_incomplete_reasons()` 36 항목(사유 열: `no_run` 1, `actor_not_extracted` 4, `key_unresolved` 9, `truncated` 6, `writer_set_incomplete` 3, `absent_result_unevaluated` 3, `fixed_proof_open` 7, `link_unlinked` 2, `reading_options_differ` 1). `Rel::inc`, `global_reasons`, `inc_writers`, `finish`. 줄은 `render_row`, 요약은 `header`.
+- 판정 규칙 3.5: 세 줄, 하위 사유 표기, need 상태 표(§3.0).
+- `env/redesign/one_build.sh`: `ONE_BUILD_EXTRACT_EXTRA`.
+
+### 3.2 빌드 [M]
+
+- 빌드 전(`pre_mc.txt`, 06:12:46Z): 도구 일곱이 앞 단계 `post_mc.txt` 와 같다. HEAD `750cc43`, `kairos` 미커밋 0줄.
+- 빌드 전에 kz-static `a763e255` 의 압축 사본을 만들었다(`/home/user/work/preserve/tools-20261116-b/kz-static.a763e255.xz`, 39,612,812 B; `xz -t`, 스트림 sha256, `cmp` 모두 같음; `tool_copy/ROUNDTRIP.txt`).
+- MC 제자리 `make -j4 all`(06:12:56Z–06:15:16Z), 공간 감시 아래. rc 0, 첫 번에 됐다. CMake 가 다시 구성했다. 링크 13줄: `libkz-llvm.a`, kz-static, `kz-llvm` 을 링크하는 시험 여덟, `test_static_cli`, 새 `test_static_reasons`, `static_golden`. 빌드 시작 뒤 정체성 경로의 파일은 바뀌지 않았다(`find -newer` 0).
+
+| 도구 | 전 | 뒤 |
+|---|---|---|
+| kz-static | `a763e2550ad6902f102d5a1c2d310c4a658a36c2087b1b6f6717d3d4b1193ed7` | `5d4a1d7f4023b20cbd6caf797edcdbd0e54d8efb329ace358c07002f27088749` (178,301,376 → 178,474,384 B) |
+| kz-static tool_sha256 | `90046f5d…` | `c162e7f65c3235a3d0e92c867654fcca014a1097c075d46088d4c4cd7c6d3297` |
+| kz-static tool_source | `b9a4e443…` | `7003f7ed3e7d0cba04ae150b805c2cf33b0cd83e57c5584c2a7ebefc5c0db342` |
+| core_source | `f6e3c7b4…` | 같음 |
+| kz / kz-dump / kz-rt-dump / kz-phi / kz_lint / kz-instr-clang | `931dd39c` / `05623054` / `4390d4f1` / `7d34e6e2` / `b0f0d6a5` / `28db4017` | 모두 같음(다시 링크되지 않음) |
+| kz, kz-phi, kz-dump 의 정체성 정의 | `caf58235…`, `7fc3ed73…`, `cc51ff35…` | 같음 |
+| `CMakeCache.txt` | `bc2f43b4…` | 같음 |
+| flags.make 목록 해시 | `b354fbbf…` | `1d3b5bba…` (kz-static 의 `flags.make`, 새 `test_static_reasons`) |
+
+- 선언대로다.
+
+### 3.3 시험 [M]
+
+- golden 갱신 전 전체 ctest(`ctest_first.log`): 243개 가운데 실패 7. 선언한 것뿐이다: 바뀌는 golden 넷, 아직 파일이 없는 새 golden 둘, 그 golden 을 읽는 `test_static_reasons`. `test_static_cli` 는 이때 이미 통과했다.
+- `KZ_GOLDEN_UPDATE=1` 로 여섯 golden 을 쓰고 읽었다. 바뀐 넷은 `compare_declared.py relations` 로 옛 golden 과 비교했다: 넷 모두 SAME(행 3/5/7/38, 행마다 `incomplete:` 한 줄; 셋을 되돌린 글은 옛 golden 과 바이트 동일)(`golden_compare.txt`). 새 둘(`relincomplete_np`, `relincomplete_cut_np`)의 차이는 잘림이 닿는 자리뿐이다: GLOBAL_IMAGES 행의 `image-truncated` 와 표시 `name_defs[...]`, `task_defs[...]`; seek_known 의 키가 unresolved 가 되고 "key constants differ" 제외가 없어져 creator 와 짝이 됨; entry 가 `green_main red_main` 둘; blue_main 을 지나는 C 행이 undecidable.
+- 그 밖의 golden(`tests/static/data` 의 나머지, `tests/golden/data`, `tests/phi/data`)은 바뀌지 않았다(`git status` 에 없음).
+- 갱신 뒤 전체 ctest(06:16:14Z–06:16:34Z, `ctest_full.log`): 243개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음; `skip_reason.log`). 라벨: golden 60, static 49, legacy-case 51, unit 84, runtime 66, lint 6(앞 단계에서 golden +2, static +4).
+- `test_static_cli` 확인 837개(앞 798, +39: 미완 줄과 잘린 이미지 블록). `test_static_reasons` 575개. `lint_selftest` 102 경우 실패 0, lint 6/6. 빌드 전 kz_lint 규칙 다섯도 깨끗했다(`commands.txt` §0).
+- 단위 점검: `env/tools/tests/run_unit.sh` 8/8, `env/redesign/step2a_tests_unit.sh` 7/7.
+- 어휘 자료와 판정 규칙 3.5 표: `vocab_check.py` SAME(22 사유, 같은 차례).
+- 합성 시험의 내용(`test_static_cli`, fixture `relincomplete.c`): 기본 예산에서 seek_known 의 키는 known(네 이름)이고 미완 줄에 `key_unresolved` 도 `truncated` 도 없다. seek_opaque 는 `key_unresolved(pointer field without points-to)` 와 `fixed_proof_open(no static order between the actors)`. red_main 의 "lime" 은 static-possible. C 행은 union 의 다른 멤버 때문에 `actor_not_extracted(child threads not all resolved)`. `--image-budget 3` 에서 seek_known 의 키는 unresolved(세 이름 뒤 `unresolved (image, not taken as the run-time value: the static image was cut at the image budget (marker leaves name_defs[...]): …)`), "key constants differ" 가 없고, 미완 줄에 `key_unresolved(static image truncated)`, `truncated(static image)`, `actor_not_extracted(spawn entries from a cut static image)`. 표시 잎은 "non-constant leaf covering" 수에 들지 않는다. blue_main 의 C 행은 `fixed_proof_open(child threads not all resolved)`.
+
+### 3.4 바이트 동일성 [M]
+
+- relations 다섯 빌드(새 도구, T8CF 의 NP facts 그대로; 06:17:10Z–06:17:12Z, 새 디렉터리 `/home/user/work/redesign/obs1/relincomplete_check`): 다섯 모두 선언대로다(`byte_identity.txt`).
+
+| 빌드 | 행(미완 줄) | key unresolved 인 A 행 중 key_unresolved 를 가진 것 | 줄 수 | relations.txt | keys.txt |
+|---|---|---|---|---|---|
+| c1_pre_tx | 431 (431) | 72/72 | 7594 | `7c7396d2…` | 셋째 줄만 다름 |
+| c1_post_tx | 431 (431) | 72/72 | 7594 | `0a3bf6d9…` | 셋째 줄만 다름 |
+| r2_core | 338 (338) | 32/32 | 5305 | `3a6fcf81…` | 셋째 줄만 다름 |
+| c5_641 | 178 (178) | 64/64 | 3262 | `b62fd1f2…` | 셋째 줄만 다름 |
+| c5_642 | 175 (175) | 64/64 | 3213 | `996d32bd…` | 셋째 줄만 다름 |
+
+- 세 변화를 되돌린 `relations.txt` 는 T8CF(`936cd6c8…`, `00b57eb2…`, `fc8ea8da…`, `1d4af508…`, `34ac45f1…`)와 바이트 동일하다. 둘째 줄 `facts` 는 같다. `relations.log` 는 빈 파일로 같다. 그래서 잘린 이미지 규칙은 다섯 빌드의 어느 행도 바꾸지 않았다(표시 잎이 없다).
+- 사용 지점 키는 모든 행에서 앞 단계와 같다(키 목록의 셋째 줄 밖 모든 줄이 같음).
+- 다시 돌리지 않은 것(새 도구로는 확인하지 않음): basis, extract(민감도 실행의 c1_pre_tx 하나 밖), NP2, identity, count, twice, 드라이버 비교.
+- 남긴 것: 다섯 빌드의 `relations.txt`·`keys.txt`·`relations.log`(합 6,444,906 B; `outputs.sha256`; 장부 행 `OBS_relincomplete`).
+- 도구 보존: 새 도구가 `a763e255` 의 남은 출력(키 목록 다섯)을 선언한 한 줄(규칙 개정) 밖에서 바이트 동일하게 다시 만들었으므로 등록부에 "대체됨"(사본 있음)으로 적었다. `5d4a1d7f` 는 `in-place` 행으로 더했다.
+- 누적 목록: `ledger_check.sh` 33행, 실패 0(새 행 셋: 도구 사본, 다섯 빌드 출력, 민감도 출력). `tools_check.sh --deep` 28행, 실패 0. 바깥 이름 점검(`--tree`)은 두 출력 디렉터리와 사본 디렉터리에서 깨끗하다.
+
+### 3.5 측정: 사유별 행 수 [M]
+
+다섯 빌드의 요약 줄(`summary incomplete`)에서. 수는 그 사유를 가진 행이다(한 행이 여러 사유를 가진다). facts 전체의 사유는 다섯 빌드 모두 `actor_not_extracted(spawn call with no resolved entry)` 하나다(풀리지 않은 spawn 호출이 있다, 머리 줄).
+
+| 사유 (하위 사유) | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| 행 | 431 | 431 | 338 | 178 | 175 |
+| `no_run` | 431 | 431 | 338 | 178 | 175 |
+| `actor_not_extracted` (spawn call with no resolved entry) | 431 | 431 | 338 | 178 | 175 |
+| ″ (no root reaches the use) | 15 | 15 | 16 | 19 | 18 |
+| ″ (child threads not all resolved) | 89 | 89 | 78 | 0 | 0 |
+| `key_unresolved` 행 | 76 | 76 | 36 | 64 | 64 |
+| ″ (pointer field without points-to) | 2 | 2 | 0 | 0 | 0 |
+| ″ (field read without a static image) | 33 | 33 | 10 | 31 | 31 |
+| ″ (argument is no literal, constant or field) | 37 | 37 | 22 | 33 | 33 |
+| ″ (creator key) | 10 | 10 | 7 | 2 | 2 |
+| `writer_set_incomplete` 행 | 318 | 318 | 272 | 146 | 143 |
+| ″ (FIELD_STATUS not complete) | 318 | 318 | 245 | 132 | 129 |
+| ″ (per-field completeness rule is a premise) | 0 | 0 | 55 | 17 | 16 |
+| `absent_result_unevaluated` 행 | 68 | 68 | 35 | 35 | 33 |
+| ″ (no failure return of the search) | 0 | 0 | 0 | 5 | 5 |
+| ″ (callee check not evaluated) | 31 | 31 | 18 | 26 | 24 |
+| ″ (reader's returns not evaluated) | 37 | 37 | 17 | 4 | 4 |
+| `fixed_proof_open` 행 | 227 | 227 | 206 | 89 | 97 |
+| ″ (no static order between the actors) | 157 | 157 | 120 | 75 | 73 |
+| ″ (creation order without an order of the use) | 0 | 0 | 55 | 0 | 0 |
+| ″ (no creation order from a static image) | 49 | 49 | 0 | 0 | 0 |
+| ″ (lock sets do not decide the order) | 0 | 0 | 0 | 8 | 10 |
+| ″ (indirect call with unresolved targets) | 20 | 20 | 29 | 0 | 0 |
+| ″ (child threads not all resolved) | 1 | 1 | 2 | 0 | 0 |
+| ″ (proof rests on an assumption) | 0 | 0 | 0 | 6 | 14 |
+| `link_unlinked` (identity of the reader and the created thread not decided) | 134 | 134 | 115 | 39 | 38 |
+| ″ (self-reported identity) | 0 | 0 | 0 | 32 | 32 |
+| `reading_options_differ` (basis deviation of a unit of the row) | 0 | 0 | 0 | 159 | 156 |
+| `truncated` | 0 | 0 | 0 | 0 | 0 |
+
+- c1_pre_tx 의 A21(사용 지점 키 `17975444d83f6589`)의 줄: `no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); key_unresolved(pointer field without points-to); fixed_proof_open(no static order between the actors)`. c1_post_tx 의 같은 키의 행도 같다.
+
+### 3.6 민감도 실행: c1_pre_tx, `--image-budget 3` [M]
+
+- 예산 기록: 값 3. 이유: fixture 의 값(fixture 의 네 잎짜리 두 표를 모두 자르는 가장 큰 예산)이고, c1_pre_tx 에서는 잎이 셋보다 많은 모든 정적 이미지를 자른다. 기본 값 4096 은 그대로다(이 실행만의 값). 잘림: BASIS `image_budget_exhausted` 34 객체, `image_leaves_omitted` 46 표시. 다른 걷기 상한은 0.
+- 실행: `ONE_BUILD_EXTRACT_EXTRA="--image-budget 3" one_build.sh c1_pre_tx`(06:17:32Z–06:17:58Z, PASS; `args.txt` 의 extract 인자 `--targets-rule R-T1,R-T2 --image-budget 3`). 새 디렉터리 `/home/user/work/redesign/obs1/relincomplete_sens`. 같은 facts 에 `--keys` 를 더한 relations 도 돌렸다(글은 같은 바이트).
+- 결과(`sens_detail.txt`):
+  - 행 305(A 127, B 135, C 43). 기본 예산은 431(A 127, B 170, C 134). 305 행의 키는 모두 기본 예산의 키다. 기본 예산에만 있는 행 126(B 35, C 91).
+  - 까닭: `cfe_es_start.c:767:34` 의 spawn(`CFE_ES_StartAppTask`)이 `CFE_ES_ObjectTable` 의 이미지로 풀리지 않는다. 이미지가 `MainTaskPtr` 잎 앞에서 잘렸다(표시 `CFE_ES_ObjectTable[0].ObjectSize...`, `CFE_ES_ObjectTable[...]`). 그래서 table-image-entry root 5 → 0 이고, 머리의 "spawn calls with no resolved entry" 가 2 → 3 이며 그 이유가 잘림을 적는다. 그 root 들이 닿던 B·C 행이 빠진다. 빠진 행은 남은 행의 미완 줄에 `actor_not_extracted(spawn call with no resolved entry)` 로 드러난다(모든 행). 행 자체는 남지 않는다 [I: 이 규칙에서 행이 없는 것은 그 행위자가 root 가 아니기 때문이다].
+  - 잘림이 행에 닿은 것: `key_unresolved(static image truncated)` 3 행(A20, A40, A41: BP 의 `initialize_throttling` 이 `BP_Throttles` 이미지에서 읽는 키), `truncated(static image)` 4 행(그 셋과 A21). A21 은 BP creator 의 키(`BP_Throttles` 이미지)가 잘려 `key_unresolved(creator key)` 와 `truncated(static image)` 를 더 가진다. 기본 예산에서 creator 의 키는 known(`"BP0_tsem"`, `"BP1_tsem"`)이다.
+  - 같은 키의 305 행 가운데 첫 줄이 같은 것 296, 미완 줄이 같은 것 244.
+- 출력은 남겼다(12,955,197 B; `sens_outputs.sha256`; 장부 행 `OBS_relincomplete_sens`). 계획 생성기의 다음 단계가 같은 수를 다시 만든 뒤 지운다.
+
+### 3.7 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 이 단계 처음 | 4,367,933,440 | 시작(앞 단계 끝의 515,837,952 에서 늘었다: 이 단계 밖의 지우기, 커밋 `47c0cfa` 의 기록) |
+| 06:08–06:10 | 4,364,591,104 → 4,324,966,400 | 도구 사본(dip 39,632,896) |
+| 06:12:56 | 4,323,872,768 | 빌드 시작(감시 문턱 430,592,960) |
+| 06:15:14 | 4,149,112,832 | 빌드의 가장 낮은 점(dip 174,759,936) |
+| 06:15:16 | 4,166,381,568 | 빌드 끝(변화 −157,491,200) |
+| 06:17:12 | 4,158,799,872 | 다섯 빌드 재실행 끝(dip 6,488,064) |
+| 06:17:58 | 4,146,688,000 | 민감도 실행 끝(extract dip 11,018,240) |
+| 06:19:09 | 4,145,606,656 | 기록을 쓴 뒤 |
+
+- 하한을 넘지 않았다. 빌드 dip 174.8 MB 는 선언한 필요량(116.0 MB)보다 크다. 새 시험 프로그램 `test_static_reasons`(154,547,088 B, `kz-llvm` 을 링크)가 더해졌기 때문이다. 순변화 −157.5 MB 의 대부분도 그것이다 [I: 파일별로 재지 않음]. 다음 kz-static 빌드의 필요량은 이 dip 으로 잡는다.
+- 지운 것은 없다. scratchpad 의 작업 파일(fixture 시도, 합성 비교)만 scratchpad 에 남았다.
+
+### 3.8 계획과 다르게 한 것
+
+- 잘린 이미지는 객체 단위로 본다. 읽는 원소·멤버를 표시 잎이 덮는지는 가리지 않는다(보수 쪽). 그래서 읽는 원소가 잘리지 않은 부분에 있어도 키는 unresolved 다.
+- 잘린 이미지에서 찾은 spawn entry 는 풀리지 않은 spawn 으로 돌리지 않고 entry 로 남긴다. 그 spawn 의 스레드를 완전하지 않음으로 두고 모든 행에 `actor_not_extracted(spawn entries from a cut static image)` 를 적는다. 찾은 잎이 하나도 없으면 전처럼 풀리지 않은 spawn 이고 이유가 잘림을 적는다(민감도 실행의 ES 표가 이 경우다). 잘린 이미지 규칙은 `image_value_why` 의 첫 이유로도 들어갔지만 spawn entry 에는 그 인자를 넘기지 않는다.
+- 하위 사유는 relations 가 facts 에서 가를 수 있는 것만 썼다. `key_unresolved(runtime table buffer)` 는 쓰지 않는다: 지금 facts 에서 그 포인터 필드가 실행 중 표 버퍼로 쓰인다는 것을 일반 규칙으로 이끌어 낼 수 없다. A21 은 `key_unresolved(pointer field without points-to)` 다. 판정 규칙 3.5 에는 그 하위 사유를 표기의 예로 남겼다.
+- relations 는 `handling_effect_unknown`, `caller_dependence_unknown` 을 내지 않는다(handling 줄의 판정은 계획 생성기 몫). 더한 세 사유 가운데 `reading_options_differ` 만 relations 가 낸다. 나머지 둘은 실행·개입의 사유다.
+- 민감도 예산의 이유를 "fixture 의 두 표를 모두 자르는 가장 큰 예산"으로 적었다(계획의 글 "가장 작은 예산"은 이 fixture 에 맞지 않는다: 1 도 자른다).
+- 이 빌드가 덮은 `a763e255` 는 빌드 전에 압축 사본을 두었다(그 도구의 출력을 다시 만들 수 있는지는 덮은 뒤에야 알 수 있어서).
+- 빌드 dip 이 선언한 필요량을 넘었다(§3.7). 하한과는 멀었다.

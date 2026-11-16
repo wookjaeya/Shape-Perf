@@ -1,0 +1,4 @@
+# space_guard.sh kind=relations need=30000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/obs1-20261116-relincomplete/rerun.sh
+start 2026-11-16T06:17:10.625Z free=4165287936 threshold=344572800
+sample 2026-11-16T06:17:10.633Z 4165283840
+end 2026-11-16T06:17:12.639Z kind=relations verdict=completed rc=0 free=4158799872 lowest=4158799872 dip=6488064 change=-6488064

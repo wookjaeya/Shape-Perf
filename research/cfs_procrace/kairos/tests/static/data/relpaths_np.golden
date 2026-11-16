@@ -92,7 +92,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 5 (2026-10-30)
+rules relations rules revision 6 (2026-11-16)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 
@@ -110,6 +110,7 @@ actors: roots 10 (process 1, spawn-entry 7, table-walk-entry 0, table-image-entr
 spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member EntryUnion.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written; besides the function leaves of EntryUnion.main, the image of entry_defs has 1 function leaf/leaves of another member of its record (entry_defs[0].u.call early_init@relpaths.c:141; a union member read gives that value): that the spawn reads only the elements whose main is a function leaf rests on its guard, which this revision does not read (so the threads of this spawn are taken as not complete)]
 spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
 summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition in another actor 0, key-matched 0) B 0 (with a callee check 0) C 6 (self-identity reads 0); flip static-possible 4, static-undetermined 0, none 3; feasibility proven-impossible 1, possible 4, undecidable 1, not graded 1
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 7 [no run record read 7]; writer_set_incomplete 3 [FIELD_STATUS not complete 2, per-field completeness rule is a premise 1]; fixed_proof_open 1 [proof rests on an assumption 1]; link_unlinked 6 [identity of the reader and the created thread not decided 6]; reasons of the whole facts on every row: none
 [A] 1 (namespaces 1, key comparisons 1; left out: searches over no global table 0)
   namespace Task.name (record type Task; tables tasks)
       search: A1 search loop relpaths.c:203:3 in task_find: key Task.name strcmp at relpaths.c:204:31 compared with parameter 0 [name] (search parameter 0)
@@ -134,6 +135,7 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: none: no creator of the same partition and key in another actor; search returns: task_find returns -1 [-1], task_find returns 0 [0]
       layers: B P0 R P0-unverified(exit, strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete)
 [B] 0 (field-argument groups 1; left out: no writer 0, one actor only 1)
 [C] 6 (spawn calls 12, with no resolved entry 0, with no event after them on their control-flow graph 3; fields written after a spawn only in the functions the creator calls, not paired in this revision: 14; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 1, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)
   C1 spawn relpaths.c:84:5 in spawn_all -> pthread_create; field Rec.count; read relpaths.c:65:15 in rec_counted (via the call relpaths.c:74:9 in worker)
@@ -146,6 +148,7 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: none: the earlier and the written values give the same constant returns
       layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); link_unlinked(identity of the reader and the created thread not decided)
   C2 spawn relpaths.c:84:5 in spawn_all -> pthread_create; field Rec.count; read relpaths.c:65:15 in rec_counted (via the call relpaths.c:160:9 in helper_main; the threads this spawn starts do not reach this call)
       spawn: callee pthread_create, entries worker; child actors {worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
       write after the spawn: relpaths.c:83:5 key=recs[i] value=0 [0] locks {}
@@ -156,6 +159,7 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: none: the earlier and the written values give the same constant returns
       layers: B P0 R
+      incomplete: no_run(no run record read); link_unlinked(identity of the reader and the created thread not decided)
   C3 spawn relpaths.c:93:10 in spawn_checked -> pthread_create; field Rec.ready; read relpaths.c:37:15 in rec_ready (the read itself)
       spawn: callee pthread_create, entries worker; child actors {worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:91:3]
       write after the spawn: relpaths.c:94:5 key=recs[1] value=1 [1] locks {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:91:3]
@@ -166,6 +170,7 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: rec_ready returns -1 [-1] with the earlier value (INIT 0 (recs)), not with the written value 1 [1]; rec_ready returns 0 [0] not with the earlier value (INIT 0 (recs)), with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); writer_set_incomplete(per-field completeness rule is a premise); fixed_proof_open(proof rests on an assumption); link_unlinked(identity of the reader and the created thread not decided)
   C4 spawn relpaths.c:93:10 in spawn_checked -> pthread_create; field Rec.ready; read relpaths.c:53:15 in ready_unlocked (via the call relpaths.c:60:7 in check_ready)
       spawn: callee pthread_create, entries worker; child actors {worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:91:3]
       write after the spawn: relpaths.c:94:5 key=recs[1] value=1 [1] locks {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:91:3]
@@ -176,6 +181,7 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: ready_unlocked returns 0 [0] not with the earlier value (INIT 0 (recs)), with the written value 1 [1]; ready_unlocked returns -1 [-1] with the earlier value (INIT 0 (recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); link_unlinked(identity of the reader and the created thread not decided)
   C5 spawn relpaths.c:110:8 in spawn_staged -> pthread_create; field Rec.stage; read relpaths.c:45:15 in rec_stage (the read itself)
       spawn: callee pthread_create, entries worker; child actors {worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:109:3]
       write after the spawn: relpaths.c:111:3 key=recs[2] value=1 [1] locks {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:109:3]
@@ -187,6 +193,7 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: rec_stage returns -1 [-1] with the earlier value (INIT 0 (recs)), not with the written value 1 [1]; rec_stage returns 0 [0] not with the earlier value (INIT 0 (recs)), with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); link_unlinked(identity of the reader and the created thread not decided)
   C6 spawn relpaths.c:276:9 in main -> spawn_marked; field Marks.started; read relpaths.c:251:13 in watcher_main (the read run as the entry of the spawned thread, under no lock of a caller)
       spawn: callee spawn_marked, entries watcher_main; child actors {watcher_main (spawn-entry)}; creator identity: arg 0 [&marks.started] (spawn_marked stores through it); locks held {}
       write after the spawn by the spawn operation: spawn_marked stores through arg 0 [&marks.started] inside the call at relpaths.c:276:9 (PARAM_FLOW out-store; its order to the thread creation inside the call is not read) locks not known
@@ -197,3 +204,4 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: watcher_main returns 0 [0] with the earlier value (INIT 0 (marks)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); link_unlinked(identity of the reader and the created thread not decided)

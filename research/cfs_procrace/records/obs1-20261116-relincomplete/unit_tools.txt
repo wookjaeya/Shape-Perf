@@ -1,0 +1,11 @@
+space_guard.sh: refused: free 900 < floor 500 + need 500
+space_guard.sh: stopped: free fell below the floor 500
+check 1 space guard (stub writer): PASS (control rc 0; refused rc 75; floor rc 76 after 5 of 20 writer steps; dip 500)
+check 2 build record (stub tree): PASS (control rc 0; missing tool rc 1)
+check 3 ledger (temp tree): PASS (control rc 0; missing file rc 1; changed byte rc 1; broken bundle part rc 1)
+check 4 tool registry (temp tree): PASS (control rc 0; changed tool byte rc 1; missing copy rc 1)
+check 5 single-build runner (stand-in kz-static): PASS (control rc 0; failing extract rc 1; failing relations rc 1; failing sha256 list rc 1; inputs table same as step2a_tests.sh: yes; non-empty OUT rc 2)
+check 6 chain checker (stub chain): PASS (consistent rc 0 (confirmed); changed executable byte rc 1; other manifest rc 1; missing B' rc 3)
+check 7 harness hashing (temp instance dir): PASS (control rc 0; existing list rc 64)
+check 8 derive-script arguments (stub module table): PASS (control rc 0 (derive script called: yes); no sidecar reference rc 64; other sidecar sha256 rc 64; missing --exes rc 64; module options as-table; partial plan derive_c1 rc 64 derive_c5 rc 64)
+unit checks: 8 of 8 pass

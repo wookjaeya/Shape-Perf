@@ -68,6 +68,19 @@
  * one or has a lock effect the analysis cannot follow); P0_TABLE has four more kinds (thread-specific
  * key creation and deletion, cleanup handler push and pop).  The section has no expression roots; no
  * earlier record or section version changes.
+ * Revision 10 (2026-11-16, schema revision 12): eight NEW sections whose records are defined for the
+ * writers of later extraction work; no tool writes any of them in this revision, so every facts
+ * container is written as before.  Sections 137-139 close the second extraction range: 137
+ * (OBJECT_ACCESS: per typed read or write, the base object and the access path), 138 (FIELD_TYPES:
+ * per field of a record type the reads name, its array extent, element kind and qualifiers), 139
+ * (ARG_TYPES: per call argument, its declared type class and, for a character array, its extent and
+ * whether the program reads that memory at a point that dominates the call).  A third extraction
+ * range 140-159 starts with 140 (LOOP_DEFS: the local definitions a loop condition reads), 141
+ * (SEMANTICS: one row per (api, column item) of the semantics table joined to this build, with a
+ * verification state), 142 (RESULT_FLOW: per call with a result, each use the result reaches), 143
+ * (RESULT_EFFECT: per call and outcome class, the effects on the paths that outcome takes) and 144
+ * (LOCK_HANDLES: lock identity by handle expression, with the writer and the semantics entry it rests
+ * on).  No earlier record, enumeration value or section version changes.
  *
  * Source positions.  Every fact carries (file, line, col) as strings and numbers, and `fh`,
  * the index of that file in the FILE_HASHES section of the same artifact.  So a fact is
@@ -134,7 +147,15 @@ enum kz_facts_section_id {
   KZ_SEC_LOCKSET = 133,
   KZ_SEC_FIELD_STATUS = 134,
   KZ_SEC_AWAIT_L1 = 135,
-  KZ_SEC_LOCK_PATHS = 136
+  KZ_SEC_LOCK_PATHS = 136,
+  KZ_SEC_OBJECT_ACCESS = 137, /* revision 10 (schema revision 12): sections 137-144 */
+  KZ_SEC_FIELD_TYPES = 138,
+  KZ_SEC_ARG_TYPES = 139,
+  KZ_SEC_LOOP_DEFS = 140,
+  KZ_SEC_SEMANTICS = 141,
+  KZ_SEC_RESULT_FLOW = 142,
+  KZ_SEC_RESULT_EFFECT = 143,
+  KZ_SEC_LOCK_HANDLES = 144
 };
 
 #define KZ_FACTS_SECTIONS(S)                   \
@@ -180,7 +201,15 @@ enum kz_facts_section_id {
   S(LOCKSET, 133, kz_fact_lockset, 1)          \
   S(FIELD_STATUS, 134, kz_fact_fstatus, 1)     \
   S(AWAIT_L1, 135, kz_fact_await, 1)          \
-  S(LOCK_PATHS, 136, kz_fact_lockpath, 1)
+  S(LOCK_PATHS, 136, kz_fact_lockpath, 1)      \
+  S(OBJECT_ACCESS, 137, kz_fact_objacc, 1)     \
+  S(FIELD_TYPES, 138, kz_fact_ftype, 1)        \
+  S(ARG_TYPES, 139, kz_fact_argtype, 1)        \
+  S(LOOP_DEFS, 140, kz_fact_loopdef, 1)        \
+  S(SEMANTICS, 141, kz_fact_sem, 1)            \
+  S(RESULT_FLOW, 142, kz_fact_rflow, 1)        \
+  S(RESULT_EFFECT, 143, kz_fact_reffect, 1)    \
+  S(LOCK_HANDLES, 144, kz_fact_lockh, 1)
 
 /* A function: defined in the closed program, or only declared (library, external).  */
 #define KZ_FACT_FUNC_FIELDS(X, T)                                                    \
@@ -1219,6 +1248,206 @@ enum kz_facts_section_id {
   X(T, uint8_t, rsv0, )                                                              \
   X(T, uint16_t, flags, )
 
+/*
+ * Revision 10 (schema revision 12).  The records of sections 137-144 are defined here so that the schema changes once;
+ * no tool writes them in this revision (a container written by this revision has none of them).  Each section will be
+ * written only under the option of the extraction work that fills it, so a default extraction keeps its sections byte
+ * for byte.  Expression roots are FACT_EXPRS indices after those of the earlier sections.  Positions are (fh, line,
+ * col) as in every other section.  Zero is the conservative value of every enumeration.
+ *
+ * OBJECT_ACCESS (137).  One row per typed read or write: `kind` read, write, write through an out-pointer argument or
+ * a data function (memset/memcpy-like, through its destination argument); `read` / `writer` the READS / WRITERS row it
+ * describes; `site` the call of an out-pointer or data-function write; `base_kind` and `base_object` the object the
+ * access path starts from (the object key with its linkage, as FACT_LOCS keys it), `path` the access path as text,
+ * `index_root` the subscripts on that path (a SEQ in FACT_EXPRS).  `status` says whether the base was resolved; a row
+ * whose base is not resolved keeps the type-level target (`type`, `field`) only.
+ */
+#define KZ_FACT_OBJACC_FIELDS(X, T)                                                  \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, site, )       /* the call of an out-pointer or data-function write, or KZ_NONE32 */ \
+  X(T, uint32_t, read, )       /* READS index, or KZ_NONE32 */                       \
+  X(T, uint32_t, writer, )     /* WRITERS index, or KZ_NONE32 */                     \
+  X(T, uint32_t, index_root, ) /* FACT_EXPRS: SEQ of the subscripts, or KZ_NONE32 */ \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint8_t, kind, )        /* KZ_OBJACC_KIND */                                  \
+  X(T, uint8_t, base_kind, )   /* KZ_OBJBASE */                                      \
+  X(T, uint8_t, status, )      /* KZ_OBJACC_STATUS */                                \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint32_t, flags, )      /* KZ_OBJACC_FLAG */                                  \
+  X(T, kz_str, type, )                                                               \
+  X(T, kz_str, field, )                                                              \
+  X(T, kz_str, base_object, )  /* object key with linkage, empty when not resolved */ \
+  X(T, kz_str, path, )         /* the access path from the base object */
+
+/*
+ * FIELD_TYPES (138).  One row per field of each record type a read names: the element kind, the array extent as an
+ * evaluated constant (`extent`, with `extent_kind` saying whether it is one) and as written (`extent_text`, a macro
+ * name where the declaration uses one), the element size, the bit-field width and the qualifiers.  It gives the bound
+ * of a character array that a key argument points into, and the const premise of a writer set, without re-reading the
+ * source.
+ */
+#define KZ_FACT_FTYPE_FIELDS(X, T)                                                   \
+  X(T, uint32_t, extent, )     /* number of elements, 0 = not an array or not evaluated */ \
+  X(T, uint32_t, elem_size, )  /* bytes of one element, 0 = not known */             \
+  X(T, uint32_t, bit_width, )  /* 0 = not a bit-field */                             \
+  X(T, uint32_t, line, )       /* the field's declaration */                         \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint8_t, elem_kind, )   /* KZ_FTYPE_ELEM */                                   \
+  X(T, uint8_t, extent_kind, ) /* KZ_FTYPE_EXTENT */                                 \
+  X(T, uint16_t, flags, )      /* KZ_FTYPE_FLAG */                                   \
+  X(T, kz_str, type, )         /* the record type */                                 \
+  X(T, kz_str, field, )                                                              \
+  X(T, kz_str, elem_type, )    /* the element type as spelled */                     \
+  X(T, kz_str, extent_text, )  /* the extent as written, empty when none */
+
+/*
+ * ARG_TYPES (139).  One row per call argument (`call` a FACTS index, `pos` the position): the declared type class and
+ * width; for a character array (directly or through a pointer field) its extent and where the array field or object
+ * is declared (`decl_object`, `decl_fh`, `decl_line`); and whether the program reads that memory at a point that
+ * dominates the call (`read_dom`, with `read` the READS row of that read).
+ */
+#define KZ_FACT_ARGTYPE_FIELDS(X, T)                                                 \
+  X(T, uint32_t, call, )       /* FACTS index */                                     \
+  X(T, uint32_t, pos, )        /* argument position */                               \
+  X(T, uint32_t, extent, )     /* character array extent, 0 = none */                \
+  X(T, uint32_t, decl_line, )                                                        \
+  X(T, uint32_t, decl_fh, )                                                          \
+  X(T, uint32_t, read, )       /* READS index of the dominating read, or KZ_NONE32 */ \
+  X(T, uint8_t, type_class, )  /* KZ_ARGT_CLASS */                                   \
+  X(T, uint8_t, width, )       /* bytes of the value, 0 = not known */               \
+  X(T, uint8_t, read_dom, )    /* KZ_ARGT_READ */                                    \
+  X(T, uint8_t, flags, )       /* KZ_ARGT_FLAG */                                    \
+  X(T, kz_str, type, )         /* the declared type as spelled */                    \
+  X(T, kz_str, decl_object, )  /* the array's field (Type.field) or object key */
+
+/*
+ * LOOP_DEFS (140).  One row per (loop, local definition its condition reads): where the definition is (`where`), the
+ * value assigned and the condition under which it is assigned (FACT_EXPRS roots), and whether a flag predicate over
+ * that local is recognised (`status`; the refusals name why).  The predicate form recognised this way (`pred`) is
+ * written only here: FACT_LOOPS and AWAIT_L1 keep their rows.
+ */
+#define KZ_FACT_LOOPDEF_FIELDS(X, T)                                                 \
+  X(T, uint32_t, loop, )       /* the loop site */                                   \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, value_root, ) /* FACT_EXPRS, or KZ_NONE32 */                        \
+  X(T, uint32_t, guard_root, ) /* FACT_EXPRS, or KZ_NONE32 */                        \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint8_t, where, )       /* KZ_LOOPDEF_WHERE */                                \
+  X(T, uint8_t, status, )      /* KZ_LOOPDEF_STATUS */                               \
+  X(T, uint16_t, flags, )      /* KZ_LOOPDEF_FLAG */                                 \
+  X(T, kz_str, local, )        /* name@line:col of the local's declaration */        \
+  X(T, kz_str, pred, )         /* the predicate form, empty when not recognised */
+
+/*
+ * SEMANTICS (141).  The semantics table joined to this build: one row per (api, column item), for the APIs some
+ * extended fact of the build references.  `layer` is the C and thread library (P0), the framework of the build, or a
+ * status-space rule; `column` the item (role, an argument's role or domain, out-parameter behaviour per outcome, a
+ * success / failure / absence value, a documented return, the agreement of documented and derived returns, the
+ * translation of a callee's result, a precondition, blocking); `item` its text and `value` its constant where it has
+ * one (flag `value-set`); `origin` whether it was derived from the body, declared by a data file or read from the
+ * documentation only; `verify` its verification state, and `source` where it was read (file:line of the data file, of
+ * the version-pinned header or of the standard text).
+ */
+#define KZ_FACT_SEM_FIELDS(X, T)                                                     \
+  X(T, int64_t, value, )       /* the item's constant (flag value-set), else 0 */    \
+  X(T, uint32_t, fn, )         /* FUNCS index of the api in this build, or KZ_NONE32 */ \
+  X(T, uint32_t, pos, )        /* argument position of an argument item, or KZ_NONE32 */ \
+  X(T, uint32_t, decl_fh, )    /* FILE_HASHES index of the declaration, or KZ_NONE32 */ \
+  X(T, uint32_t, decl_line, )                                                        \
+  X(T, uint32_t, src_line, )   /* line of the item in its source, 0 = none */        \
+  X(T, uint8_t, layer, )       /* KZ_SEM_LAYER */                                    \
+  X(T, uint8_t, column, )      /* KZ_SEM_COLUMN */                                   \
+  X(T, uint8_t, verify, )      /* KZ_SEM_VERIFY */                                   \
+  X(T, uint8_t, origin, )      /* KZ_SEM_ORIGIN */                                   \
+  X(T, uint32_t, flags, )      /* KZ_SEM_FLAG */                                     \
+  X(T, uint32_t, rsv0, )                                                             \
+  X(T, kz_str, api, )                                                                \
+  X(T, kz_str, component, )    /* component and its version or commit */             \
+  X(T, kz_str, item, )                                                               \
+  X(T, kz_str, source, )
+
+/*
+ * RESULT_FLOW (142).  One row per (call with a non-void result, use the result reaches): how the result is defined
+ * (`def_kind`; a local definition at def_line:def_col), the use (`use_kind`; a branch condition, a return, an argument
+ * of `use_site` at `pos`, a store into `target`, an exit `pos` of the loop `use_site`), whether that definition is the
+ * only one reaching the use (`reach`; the others in `other_defs`), and the use's condition with each local replaced by
+ * the definition that reaches it (`cond_root`).
+ */
+#define KZ_FACT_RFLOW_FIELDS(X, T)                                                   \
+  X(T, uint32_t, site, )       /* the call (FACTS site) */                           \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, def_line, )                                                         \
+  X(T, uint32_t, def_col, )                                                          \
+  X(T, uint32_t, use_line, )                                                         \
+  X(T, uint32_t, use_col, )                                                          \
+  X(T, uint32_t, use_site, )   /* the call of an argument use, the loop of a loop-exit use, or KZ_NONE32 */ \
+  X(T, uint32_t, pos, )        /* argument position or exit index, or KZ_NONE32 */   \
+  X(T, uint32_t, cond_root, )  /* FACT_EXPRS, or KZ_NONE32 */                        \
+  X(T, uint32_t, n_other, )    /* other definitions reaching the use */              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint8_t, def_kind, )    /* KZ_RFLOW_DEF */                                    \
+  X(T, uint8_t, use_kind, )    /* KZ_RFLOW_USE */                                    \
+  X(T, uint8_t, reach, )       /* KZ_RFLOW_REACH */                                  \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint32_t, flags, )      /* KZ_RFLOW_FLAG */                                   \
+  X(T, kz_str, local, )        /* name@line:col of the local, empty when none */     \
+  X(T, kz_str, target, )       /* field, global or callee of a store or argument use */ \
+  X(T, kz_str, other_defs, )   /* positions of the other definitions, "; " */
+
+/*
+ * RESULT_EFFECT (143).  One row per (call, outcome class, effect): the outcome class of the callee's result (success,
+ * a failure value, absence, other; `outcome_value` its constant, `reach` how the callee reaches it), the branch use
+ * that selects it (`flow`, a RESULT_FLOW row), and one effect on the paths that outcome takes up to the join (a
+ * returned constant or the result passed through, an event send, a system log, a store, an application exit with its
+ * argument, a terminal, a retry, nothing before the join), with `effect_value` its constant where it has one.
+ * `status` is `complete` or `open`; an open row names its reason (the judgement rules' vocabulary or a local reason).
+ */
+#define KZ_FACT_REFFECT_FIELDS(X, T)                                                 \
+  X(T, int64_t, outcome_value, ) /* the outcome's constant, 0 when the class has none */ \
+  X(T, int64_t, effect_value, )  /* the effect's constant, 0 when none */            \
+  X(T, uint32_t, site, )       /* the call (FACTS site) */                           \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, flow, )       /* RESULT_FLOW index of the branch use, or KZ_NONE32 */ \
+  X(T, uint32_t, effect_site, ) /* the call of an event, exit or terminal effect, or KZ_NONE32 */ \
+  X(T, uint32_t, effect_line, )                                                      \
+  X(T, uint32_t, effect_fh, )                                                        \
+  X(T, uint8_t, outcome, )     /* KZ_REFF_OUTCOME */                                 \
+  X(T, uint8_t, reach, )       /* KZ_REFF_REACH */                                   \
+  X(T, uint8_t, effect, )      /* KZ_REFF_EFFECT */                                  \
+  X(T, uint8_t, status, )      /* KZ_REFF_STATUS */                                  \
+  X(T, uint32_t, flags, )      /* KZ_REFF_FLAG */                                    \
+  X(T, kz_str, detail, )       /* the constant's name, the field, the event type or the callee */ \
+  X(T, kz_str, reason, )       /* an open row's reason, empty otherwise */           \
+  X(T, kz_str, chain, )        /* call, definition, branch and effect with their positions */
+
+/*
+ * LOCK_HANDLES (144).  Lock identity by handle (the second identity rule beside LOCK_IDS): one row per lock operation
+ * call (`lockop` its LOCK_OPS row, `site` the call) whose lock is named by a handle expression (`handle_root`): the
+ * handle's field or global (`field`), its writer (`writer`, the out argument of the create call that writes it) and
+ * the semantics entry the operation family rests on (`sem`).  `status` is `static-instance` when the writer set of the
+ * handle is complete with one writer that runs once and the entry is verified; the identity then holds under the
+ * premise that the object is not deleted and re-created between two operations (`premise`), which a run can check.
+ */
+#define KZ_FACT_LOCKH_FIELDS(X, T)                                                   \
+  X(T, uint32_t, lockop, )     /* LOCK_OPS index */                                  \
+  X(T, uint32_t, site, )       /* the operation's call */                            \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, handle_root, ) /* FACT_EXPRS: the handle expression, or KZ_NONE32 */ \
+  X(T, uint32_t, writer, )     /* WRITERS index of the handle's writer, or KZ_NONE32 */ \
+  X(T, uint32_t, sem, )        /* SEMANTICS index, or KZ_NONE32 */                   \
+  X(T, uint32_t, lock_id, )    /* LOCK_IDS index of the same lock, or KZ_NONE32 */   \
+  X(T, uint8_t, status, )      /* KZ_LOCKH_STATUS */                                 \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )      /* KZ_LOCKH_FLAG */                                   \
+  X(T, kz_str, family, )       /* the operation family */                            \
+  X(T, kz_str, field, )        /* the handle's field (Type.field) or global */       \
+  X(T, kz_str, premise, )
+
 #define KZ_FACTS_RECORDS(R)                       \
   R(kz_fact_func, KZ_FACT_FUNC_FIELDS)            \
   R(kz_fact_call, KZ_FACT_CALL_FIELDS)            \
@@ -1262,7 +1491,15 @@ enum kz_facts_section_id {
   R(kz_fact_lockset, KZ_FACT_LOCKSET_FIELDS)      \
   R(kz_fact_fstatus, KZ_FACT_FSTATUS_FIELDS)      \
   R(kz_fact_await, KZ_FACT_AWAIT_FIELDS)          \
-  R(kz_fact_lockpath, KZ_FACT_LOCKPATH_FIELDS)
+  R(kz_fact_lockpath, KZ_FACT_LOCKPATH_FIELDS)    \
+  R(kz_fact_objacc, KZ_FACT_OBJACC_FIELDS)        \
+  R(kz_fact_ftype, KZ_FACT_FTYPE_FIELDS)          \
+  R(kz_fact_argtype, KZ_FACT_ARGTYPE_FIELDS)      \
+  R(kz_fact_loopdef, KZ_FACT_LOOPDEF_FIELDS)      \
+  R(kz_fact_sem, KZ_FACT_SEM_FIELDS)              \
+  R(kz_fact_rflow, KZ_FACT_RFLOW_FIELDS)          \
+  R(kz_fact_reffect, KZ_FACT_REFFECT_FIELDS)      \
+  R(kz_fact_lockh, KZ_FACT_LOCKH_FIELDS)
 
 KZ_FACTS_RECORDS(KZ_RECORD)
 
@@ -1659,6 +1896,134 @@ KZ_FACTS_RECORDS(KZ_RECORD)
 #define KZ_ENUM_LOCKPATH_KIND(ITEM, P)                                               \
   ITEM(P, NONE, 0, "none") ITEM(P, AFTER_SPAWN, 1, "after-spawn") ITEM(P, ENTRY_RELEASE, 2, "entry-release")
 
+/* Revision 10 (schema revision 12): OBJECT_ACCESS. */
+#define KZ_ENUM_OBJACC_KIND(ITEM, P)                                                 \
+  ITEM(P, NONE, 0, "none") ITEM(P, READ, 1, "read") ITEM(P, WRITE, 2, "write")       \
+  ITEM(P, OUT_POINTER, 3, "out-pointer") ITEM(P, DATA_FUNCTION, 4, "data-function")
+
+#define KZ_ENUM_OBJBASE(ITEM, P)                                                     \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, GLOBAL, 1, "global") ITEM(P, GLOBAL_ELEMENT, 2, "global-element") \
+  ITEM(P, PARAM_POINTEE, 3, "param-pointee") ITEM(P, LOCAL, 4, "local") ITEM(P, CALL_RESULT, 5, "call-result")
+
+#define KZ_ENUM_OBJACC_STATUS(ITEM, P)                                               \
+  ITEM(P, UNRESOLVED, 0, "unresolved") ITEM(P, RESOLVED, 1, "resolved") ITEM(P, PARTIAL, 2, "partial")
+
+#define KZ_ENUM_OBJACC_FLAGS(ITEM, P) /* set */                                      \
+  ITEM(P, VIA_ARGFLOW, 0x1, "via-argflow") ITEM(P, ALIAS_RESOLVED, 0x2, "pointer-field-alias-resolved") \
+  ITEM(P, PATH_TRUNCATED, 0x4, "path-truncated") ITEM(P, INDEX_UNKNOWN, 0x8, "index-unknown")
+
+/* FIELD_TYPES. */
+#define KZ_ENUM_FTYPE_ELEM(ITEM, P)                                                  \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, SIGNED, 1, "signed-integer") ITEM(P, UNSIGNED, 2, "unsigned-integer") \
+  ITEM(P, CHAR, 3, "char") ITEM(P, POINTER, 4, "pointer") ITEM(P, RECORD, 5, "record") ITEM(P, ENUM, 6, "enum") \
+  ITEM(P, FLOATING, 7, "floating") ITEM(P, FUNCTION_POINTER, 8, "function-pointer") ITEM(P, ARRAY, 9, "array")
+
+#define KZ_ENUM_FTYPE_EXTENT(ITEM, P)                                                \
+  ITEM(P, NONE, 0, "none") ITEM(P, CONSTANT, 1, "constant") ITEM(P, FLEXIBLE, 2, "flexible") \
+  ITEM(P, UNEVALUATED, 3, "unevaluated")
+
+#define KZ_ENUM_FTYPE_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, CONST, 0x1, "const") ITEM(P, VOLATILE, 0x2, "volatile") ITEM(P, BIT_FIELD, 0x4, "bit-field") \
+  ITEM(P, TYPEDEF_NAMED, 0x8, "typedef-named")
+
+/* ARG_TYPES. */
+#define KZ_ENUM_ARGT_CLASS(ITEM, P)                                                  \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, SIGNED, 1, "signed-integer") ITEM(P, UNSIGNED, 2, "unsigned-integer") \
+  ITEM(P, POINTER, 3, "pointer") ITEM(P, CHAR_ARRAY, 4, "char-array") ITEM(P, RECORD_POINTER, 5, "record-pointer") \
+  ITEM(P, FUNCTION_POINTER, 6, "function-pointer") ITEM(P, OTHER, 7, "other")
+
+#define KZ_ENUM_ARGT_READ(ITEM, P)                                                   \
+  ITEM(P, NOT_COMPUTED, 0, "not-computed") ITEM(P, DOMINATING, 1, "read-dominating") \
+  ITEM(P, NOT_READ, 2, "not-read") ITEM(P, NOT_DOMINATING, 3, "read-not-dominating")
+
+#define KZ_ENUM_ARGT_FLAGS(ITEM, P) /* set */                                        \
+  ITEM(P, CONST_POINTEE, 0x1, "const-pointee") ITEM(P, VIA_POINTER_FIELD, 0x2, "via-pointer-field") \
+  ITEM(P, TYPEDEF_NAMED, 0x4, "typedef-named")
+
+/* LOOP_DEFS. */
+#define KZ_ENUM_LOOPDEF_WHERE(ITEM, P)                                               \
+  ITEM(P, NONE, 0, "none") ITEM(P, BEFORE_LOOP, 1, "before-loop") ITEM(P, IN_BODY, 2, "in-body") \
+  ITEM(P, IN_CONDITION, 3, "in-condition")
+
+#define KZ_ENUM_LOOPDEF_STATUS(ITEM, P)                                              \
+  ITEM(P, NOT_EXAMINED, 0, "not-examined") ITEM(P, RECOGNISED, 1, "recognised")      \
+  ITEM(P, RESET_IN_BODY, 2, "refused-reset-in-body") ITEM(P, ADDRESS_TAKEN, 3, "refused-address-taken") \
+  ITEM(P, UNRESOLVED, 4, "refused-unresolved")
+
+#define KZ_ENUM_LOOPDEF_FLAGS(ITEM, P) /* set */                                     \
+  ITEM(P, UNDER_LOCK, 0x1, "under-lock") ITEM(P, CALL_RESULT, 0x2, "call-result")
+
+/* SEMANTICS. */
+#define KZ_ENUM_SEM_LAYER(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, P0, 1, "P0") ITEM(P, FRAMEWORK, 2, "framework") ITEM(P, STATUS, 3, "status-space")
+
+#define KZ_ENUM_SEM_COLUMN(ITEM, P)                                                  \
+  ITEM(P, NONE, 0, "none") ITEM(P, ROLE, 1, "role") ITEM(P, ARG_ROLE, 2, "arg-role") \
+  ITEM(P, ARG_DOMAIN, 3, "arg-domain") ITEM(P, OUT_BEHAVIOUR, 4, "out-behaviour")    \
+  ITEM(P, SUCCESS, 5, "success") ITEM(P, FAILURE, 6, "failure") ITEM(P, ABSENCE, 7, "absence") \
+  ITEM(P, DOC_RETURN, 8, "documented-return") ITEM(P, AGREEMENT, 9, "agreement")     \
+  ITEM(P, TRANSLATION, 10, "translation") ITEM(P, PRECONDITION, 11, "precondition")  \
+  ITEM(P, BLOCKING, 12, "blocking")
+
+#define KZ_ENUM_SEM_VERIFY(ITEM, P)                                                  \
+  ITEM(P, UNVERIFIED, 0, "unverified") ITEM(P, BODY_DERIVED, 1, "body-derived")      \
+  ITEM(P, DOC_COLLATED, 2, "doc-collated") ITEM(P, STANDARD_COLLATED, 3, "standard-collated")
+
+#define KZ_ENUM_SEM_ORIGIN(ITEM, P)                                                  \
+  ITEM(P, NONE, 0, "none") ITEM(P, DERIVED, 1, "derived") ITEM(P, DECLARED, 2, "declared") \
+  ITEM(P, DOC_ONLY, 3, "doc-only")
+
+#define KZ_ENUM_SEM_FLAGS(ITEM, P) /* set */                                         \
+  ITEM(P, VERSION_PINNED, 0x1, "version-pinned") ITEM(P, CROSS_SPACE, 0x2, "cross-space") \
+  ITEM(P, VALUE_SET, 0x4, "value-set")
+
+/* RESULT_FLOW. */
+#define KZ_ENUM_RFLOW_DEF(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, DIRECT, 1, "direct") ITEM(P, LOCAL_DEF, 2, "local-def") \
+  ITEM(P, FIELD_STORE, 3, "field-store") ITEM(P, OUT_STORE, 4, "out-store")          \
+  ITEM(P, DISCARDED, 5, "discarded") ITEM(P, CAST_VOID, 6, "cast-void")
+
+#define KZ_ENUM_RFLOW_USE(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, BRANCH, 1, "branch") ITEM(P, RETURN, 2, "return") \
+  ITEM(P, ARG, 3, "arg") ITEM(P, STORE, 4, "store") ITEM(P, LOOP_EXIT, 5, "loop-exit") ITEM(P, OTHER, 6, "other")
+
+#define KZ_ENUM_RFLOW_REACH(ITEM, P)                                                 \
+  ITEM(P, NOT_COMPUTED, 0, "not-computed") ITEM(P, UNIQUE, 1, "unique") ITEM(P, SHARED, 2, "shared") \
+  ITEM(P, UNDEF_PATH, 3, "undef-path")
+
+#define KZ_ENUM_RFLOW_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, IN_LOOP, 0x1, "in-loop") ITEM(P, REDEFINED_LATER, 0x2, "redefined-later")  \
+  ITEM(P, ADDR_TAKEN_LOCAL, 0x4, "addr-taken-local") ITEM(P, NO_CFG, 0x8, "no-cfg")  \
+  ITEM(P, EXPR_TRUNCATED, 0x10, "expr-truncated") ITEM(P, UNRESOLVED_CALL_BETWEEN, 0x20, "unresolved-call-between")
+
+/* RESULT_EFFECT. */
+#define KZ_ENUM_REFF_OUTCOME(ITEM, P)                                                \
+  ITEM(P, NONE, 0, "none") ITEM(P, SUCCESS, 1, "success") ITEM(P, FAILURE, 2, "failure") \
+  ITEM(P, ABSENCE, 3, "absence") ITEM(P, OTHER, 4, "other")
+
+#define KZ_ENUM_REFF_REACH(ITEM, P)                                                  \
+  ITEM(P, NONE, 0, "none") ITEM(P, REACHED, 1, "reached") ITEM(P, PRESENT_ONLY, 2, "present-only") \
+  ITEM(P, SHARED_ARGCHECK, 3, "shared-with-argument-check")
+
+#define KZ_ENUM_REFF_EFFECT(ITEM, P)                                                 \
+  ITEM(P, NONE, 0, "none") ITEM(P, RETURN_CONST, 1, "return-const") ITEM(P, RETURN_RESULT, 2, "return-result") \
+  ITEM(P, EVENT_SEND, 3, "event-send") ITEM(P, SYSLOG, 4, "syslog") ITEM(P, STORE, 5, "store") \
+  ITEM(P, EXIT_APP, 6, "exit-app") ITEM(P, TERMINAL, 7, "terminal") ITEM(P, RETRY, 8, "retry") \
+  ITEM(P, FALLTHROUGH, 9, "fallthrough")
+
+#define KZ_ENUM_REFF_STATUS(ITEM, P) ITEM(P, OPEN, 0, "open") ITEM(P, COMPLETE, 1, "complete")
+
+#define KZ_ENUM_REFF_FLAGS(ITEM, P) /* set */                                        \
+  ITEM(P, THROUGH_RETURN, 0x1, "composed-through-return") ITEM(P, CROSS_SPACE, 0x2, "cross-space")
+
+/* LOCK_HANDLES. */
+#define KZ_ENUM_LOCKH_STATUS(ITEM, P)                                                \
+  ITEM(P, NONE, 0, "none") ITEM(P, STATIC_INSTANCE, 1, "static-instance") ITEM(P, NOT_STATIC, 2, "not-static") \
+  ITEM(P, WRITERS_INCOMPLETE, 3, "writer-set-incomplete") ITEM(P, SEM_UNVERIFIED, 4, "semantics-unverified")
+
+#define KZ_ENUM_LOCKH_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, ONE_WRITER, 0x1, "one-writer") ITEM(P, WRITER_ONCE, 0x2, "writer-runs-once")
+
 #define KZ_ENUM_OUTPTR_SUMMARY(ITEM, P)                                              \
   ITEM(P, NONE, 0, "none") ITEM(P, STORE_ONLY, 1, "store-only")                      \
   ITEM(P, ESCAPES, 2, "escapes") ITEM(P, UNSUMMARIZED, 3, "unsummarized")            \
@@ -1767,6 +2132,35 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   D(KZ_AWAIT_MOD, KZ_ENUM_AWAIT_MOD, 0)        \
   D(KZ_AWAIT_FLAG, KZ_ENUM_AWAIT_FLAGS, 1)     \
   D(KZ_LOCKPATH_KIND, KZ_ENUM_LOCKPATH_KIND, 0) \
+  D(KZ_OBJACC_KIND, KZ_ENUM_OBJACC_KIND, 0)    \
+  D(KZ_OBJBASE, KZ_ENUM_OBJBASE, 0)            \
+  D(KZ_OBJACC_STATUS, KZ_ENUM_OBJACC_STATUS, 0) \
+  D(KZ_OBJACC_FLAG, KZ_ENUM_OBJACC_FLAGS, 1)   \
+  D(KZ_FTYPE_ELEM, KZ_ENUM_FTYPE_ELEM, 0)      \
+  D(KZ_FTYPE_EXTENT, KZ_ENUM_FTYPE_EXTENT, 0)  \
+  D(KZ_FTYPE_FLAG, KZ_ENUM_FTYPE_FLAGS, 1)     \
+  D(KZ_ARGT_CLASS, KZ_ENUM_ARGT_CLASS, 0)      \
+  D(KZ_ARGT_READ, KZ_ENUM_ARGT_READ, 0)        \
+  D(KZ_ARGT_FLAG, KZ_ENUM_ARGT_FLAGS, 1)       \
+  D(KZ_LOOPDEF_WHERE, KZ_ENUM_LOOPDEF_WHERE, 0) \
+  D(KZ_LOOPDEF_STATUS, KZ_ENUM_LOOPDEF_STATUS, 0) \
+  D(KZ_LOOPDEF_FLAG, KZ_ENUM_LOOPDEF_FLAGS, 1) \
+  D(KZ_SEM_LAYER, KZ_ENUM_SEM_LAYER, 0)        \
+  D(KZ_SEM_COLUMN, KZ_ENUM_SEM_COLUMN, 0)      \
+  D(KZ_SEM_VERIFY, KZ_ENUM_SEM_VERIFY, 0)      \
+  D(KZ_SEM_ORIGIN, KZ_ENUM_SEM_ORIGIN, 0)      \
+  D(KZ_SEM_FLAG, KZ_ENUM_SEM_FLAGS, 1)         \
+  D(KZ_RFLOW_DEF, KZ_ENUM_RFLOW_DEF, 0)        \
+  D(KZ_RFLOW_USE, KZ_ENUM_RFLOW_USE, 0)        \
+  D(KZ_RFLOW_REACH, KZ_ENUM_RFLOW_REACH, 0)    \
+  D(KZ_RFLOW_FLAG, KZ_ENUM_RFLOW_FLAGS, 1)     \
+  D(KZ_REFF_OUTCOME, KZ_ENUM_REFF_OUTCOME, 0)  \
+  D(KZ_REFF_REACH, KZ_ENUM_REFF_REACH, 0)      \
+  D(KZ_REFF_EFFECT, KZ_ENUM_REFF_EFFECT, 0)    \
+  D(KZ_REFF_STATUS, KZ_ENUM_REFF_STATUS, 0)    \
+  D(KZ_REFF_FLAG, KZ_ENUM_REFF_FLAGS, 1)       \
+  D(KZ_LOCKH_STATUS, KZ_ENUM_LOCKH_STATUS, 0)  \
+  D(KZ_LOCKH_FLAG, KZ_ENUM_LOCKH_FLAGS, 1)     \
   D(KZ_OUTPTR_SUMMARY, KZ_ENUM_OUTPTR_SUMMARY, 0) \
   D(KZ_ANCHOR_AUDIT, KZ_ENUM_ANCHOR_AUDIT, 0)  \
   D(KZ_ACTOR_KIND, KZ_ENUM_ACTOR_KIND, 0)      \
@@ -2010,6 +2404,67 @@ KZ_FACTS_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_fact_lockpath, fn, IDX, 0)                     \
   F(kz_fact_lockpath, row, IDX, 0)                    \
   F(kz_fact_lockpath, site, IDX, 0)                   \
-  F(kz_fact_lockpath, kind, ENUM, KZ_LOCKPATH_KIND)
+  F(kz_fact_lockpath, kind, ENUM, KZ_LOCKPATH_KIND)   \
+  F(kz_fact_objacc, fn, IDX, 0)                       \
+  F(kz_fact_objacc, site, IDX, 0)                     \
+  F(kz_fact_objacc, read, IDX, 0)                     \
+  F(kz_fact_objacc, writer, IDX, 0)                   \
+  F(kz_fact_objacc, index_root, IDX, 0)               \
+  F(kz_fact_objacc, fh, IDX, 0)                       \
+  F(kz_fact_objacc, kind, ENUM, KZ_OBJACC_KIND)       \
+  F(kz_fact_objacc, base_kind, ENUM, KZ_OBJBASE)      \
+  F(kz_fact_objacc, status, ENUM, KZ_OBJACC_STATUS)   \
+  F(kz_fact_objacc, flags, FLAGS, KZ_OBJACC_FLAG)     \
+  F(kz_fact_ftype, fh, IDX, 0)                        \
+  F(kz_fact_ftype, elem_kind, ENUM, KZ_FTYPE_ELEM)    \
+  F(kz_fact_ftype, extent_kind, ENUM, KZ_FTYPE_EXTENT) \
+  F(kz_fact_ftype, flags, FLAGS, KZ_FTYPE_FLAG)       \
+  F(kz_fact_argtype, call, IDX, 0)                    \
+  F(kz_fact_argtype, decl_fh, IDX, 0)                 \
+  F(kz_fact_argtype, read, IDX, 0)                    \
+  F(kz_fact_argtype, type_class, ENUM, KZ_ARGT_CLASS) \
+  F(kz_fact_argtype, read_dom, ENUM, KZ_ARGT_READ)    \
+  F(kz_fact_argtype, flags, FLAGS, KZ_ARGT_FLAG)      \
+  F(kz_fact_loopdef, fn, IDX, 0)                      \
+  F(kz_fact_loopdef, value_root, IDX, 0)              \
+  F(kz_fact_loopdef, guard_root, IDX, 0)              \
+  F(kz_fact_loopdef, fh, IDX, 0)                      \
+  F(kz_fact_loopdef, where, ENUM, KZ_LOOPDEF_WHERE)   \
+  F(kz_fact_loopdef, status, ENUM, KZ_LOOPDEF_STATUS) \
+  F(kz_fact_loopdef, flags, FLAGS, KZ_LOOPDEF_FLAG)   \
+  F(kz_fact_sem, fn, IDX, 0)                          \
+  F(kz_fact_sem, pos, IDX, 0)                         \
+  F(kz_fact_sem, decl_fh, IDX, 0)                     \
+  F(kz_fact_sem, layer, ENUM, KZ_SEM_LAYER)           \
+  F(kz_fact_sem, column, ENUM, KZ_SEM_COLUMN)         \
+  F(kz_fact_sem, verify, ENUM, KZ_SEM_VERIFY)         \
+  F(kz_fact_sem, origin, ENUM, KZ_SEM_ORIGIN)         \
+  F(kz_fact_sem, flags, FLAGS, KZ_SEM_FLAG)           \
+  F(kz_fact_rflow, fn, IDX, 0)                        \
+  F(kz_fact_rflow, use_site, IDX, 0)                  \
+  F(kz_fact_rflow, pos, IDX, 0)                       \
+  F(kz_fact_rflow, cond_root, IDX, 0)                 \
+  F(kz_fact_rflow, fh, IDX, 0)                        \
+  F(kz_fact_rflow, def_kind, ENUM, KZ_RFLOW_DEF)      \
+  F(kz_fact_rflow, use_kind, ENUM, KZ_RFLOW_USE)      \
+  F(kz_fact_rflow, reach, ENUM, KZ_RFLOW_REACH)       \
+  F(kz_fact_rflow, flags, FLAGS, KZ_RFLOW_FLAG)       \
+  F(kz_fact_reffect, fn, IDX, 0)                      \
+  F(kz_fact_reffect, flow, IDX, 0)                    \
+  F(kz_fact_reffect, effect_site, IDX, 0)             \
+  F(kz_fact_reffect, effect_fh, IDX, 0)               \
+  F(kz_fact_reffect, outcome, ENUM, KZ_REFF_OUTCOME)  \
+  F(kz_fact_reffect, reach, ENUM, KZ_REFF_REACH)      \
+  F(kz_fact_reffect, effect, ENUM, KZ_REFF_EFFECT)    \
+  F(kz_fact_reffect, status, ENUM, KZ_REFF_STATUS)    \
+  F(kz_fact_reffect, flags, FLAGS, KZ_REFF_FLAG)      \
+  F(kz_fact_lockh, lockop, IDX, 0)                    \
+  F(kz_fact_lockh, fn, IDX, 0)                        \
+  F(kz_fact_lockh, handle_root, IDX, 0)               \
+  F(kz_fact_lockh, writer, IDX, 0)                    \
+  F(kz_fact_lockh, sem, IDX, 0)                       \
+  F(kz_fact_lockh, lock_id, IDX, 0)                   \
+  F(kz_fact_lockh, status, ENUM, KZ_LOCKH_STATUS)     \
+  F(kz_fact_lockh, flags, FLAGS, KZ_LOCKH_FLAG)
 
 #endif /* KZ_SCHEMA_KZ_FACTS_H */

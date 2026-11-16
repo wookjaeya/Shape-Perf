@@ -1,5 +1,5 @@
 /*
- * kz_neutral.h -- the neutral event layer of a run container (schema revision 3).
+ * kz_neutral.h -- the neutral event layer of a run container (schema revision 3; side tables of revision 12).
  *
  * SPEC rev 1.4 section 2.3 "Formats in revision 1.4", decision record 2026-10-26 section 2 item 5,
  * review of 2026-10-26 sections 9.1-9.2; the meaning of every item is kairos/docs/event_semantics.md
@@ -30,6 +30,13 @@
  *   - realized control records (NCTL), apart from the plan;
  *   - (schema revision 6) owners a creation request named only after the spawn (NOWNER): at which events the owner
  *     was established; a run without such an owner has no NOWNER section, so its container is written as before.
+ *   - (schema revision 12) side tables keyed by actor, event, site or record index (NACTOR_TOKEN, NLIFE, NBUILD,
+ *     NSUFFICE, NCALLEND, NORDER, NORDER_OBS, sections 112-118): the creation token that ties an actor to the call that
+ *     created it and how the actor ended, lifetime generations of keyed resources, the same-build verdict of a
+ *     conversion, the sufficiency state of every planned need and the cause of every call without a return, and the
+ *     instances of static order edges in the run with the order observed per relation row.  Their records are defined
+ *     here so that the schema changes once; no tool writes them in this revision, each section is written only when it
+ *     has a record, and every existing record and section keeps its layout and version.
  *
  * Byte order: the records of this layer are written and read by the explicit little-endian codec of
  * kz/core/record_codec.hpp (field by field from the field lists below), never by copying host structs;
@@ -53,7 +60,14 @@ enum kz_neutral_section_id {
   KZ_SEC_NACTORS = 105,
   KZ_SEC_NLOSS = 106,
   KZ_SEC_NCTL = 107,
-  KZ_SEC_NOWNER = 111 /* schema revision 6 (108-110 are kz_replay.h) */
+  KZ_SEC_NOWNER = 111, /* schema revision 6 (108-110 are kz_replay.h) */
+  KZ_SEC_NACTOR_TOKEN = 112, /* schema revision 12: 112-118 */
+  KZ_SEC_NLIFE = 113,
+  KZ_SEC_NBUILD = 114,
+  KZ_SEC_NSUFFICE = 115,
+  KZ_SEC_NCALLEND = 116,
+  KZ_SEC_NORDER = 117,
+  KZ_SEC_NORDER_OBS = 118
 };
 
 /* The range of section ids whose records the container layer serializes field by field. */
@@ -69,7 +83,14 @@ enum kz_neutral_section_id {
   S(NACTORS, 105, kz_nactor, 1)      \
   S(NLOSS, 106, kz_nloss, 1)         \
   S(NCTL, 107, kz_nctl, 1)           \
-  S(NOWNER, 111, kz_nowner, 1)
+  S(NOWNER, 111, kz_nowner, 1)         \
+  S(NACTOR_TOKEN, 112, kz_ntoken, 1)   \
+  S(NLIFE, 113, kz_nlife, 1)           \
+  S(NBUILD, 114, kz_nbuild, 1)         \
+  S(NSUFFICE, 115, kz_nsuffice, 1)     \
+  S(NCALLEND, 116, kz_ncallend, 1)     \
+  S(NORDER, 117, kz_norder, 1)         \
+  S(NORDER_OBS, 118, kz_norderobs, 1)
 
 /*
  * The run (one record).  `backend` is the execution family, `backend_name` the backend inside it
@@ -282,6 +303,161 @@ enum kz_neutral_section_id {
   X(T, uint8_t, rsv0, )                                                              \
   X(T, uint16_t, rsv1, )
 
+/*
+ * Schema revision 12: sections 112-118, side tables beside the records above (none of which changes).  No tool writes
+ * them in this revision.
+ *
+ * NACTOR_TOKEN (112).  One record per actor (`actor`) for which the run recorded a creation token or a result of the
+ * token join.  The token is the pair (`token_actor`, `token_aseq`): the creating actor's runtime id and the per-actor
+ * sequence number of its spawn record, both assigned by the runtime on the creating side, so the pair is unique per
+ * creation call whatever thread handle, thread id or program-level id values are reused.  `spawn_event`,
+ * `spawn_return` and `begin_event` are the spawn record, its return record (the creation status and the out value)
+ * and the child's first record, which carries the token; `end_event` and `end_kind` how the actor ended.  `tie` is the
+ * result of the join (tied by the token, the token lost, two spawn records with the token, no token in the record).
+ * An id the actor reported itself (`self_id` at `self_event`) is only compared with the creator-side id of the same
+ * token (`creator_id`; `self_check`); it never makes or confirms a tie.  `start` / `arg` are the start routine and
+ * argument the child's first record names; `root_kind` / `root_func` the static root the start value maps to.
+ */
+#define KZ_NTOKEN_FIELDS(X, T)                                                       \
+  X(T, uint64_t, start, )         /* link-time start routine value, 0 = not recorded */ \
+  X(T, uint64_t, arg, )           /* the start argument value */                     \
+  X(T, uint32_t, actor, )         /* NACTORS index */                                \
+  X(T, uint32_t, token_actor, )   /* the creating runtime actor id, KZ_NONE32 = no token */ \
+  X(T, uint32_t, token_aseq, )    /* aseq of the spawn record on the creator */      \
+  X(T, uint32_t, spawn_event, )   /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, spawn_return, )  /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, begin_event, )   /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, end_event, )     /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, self_id, )       /* the id the actor reported, or KZ_NONE32 */      \
+  X(T, uint32_t, self_event, )    /* NEVENTS index of that report, or KZ_NONE32 */   \
+  X(T, uint32_t, creator_id, )    /* the creator-side id of the token, or KZ_NONE32 */ \
+  X(T, uint8_t, tie, )            /* KZ_NTIE */                                      \
+  X(T, uint8_t, end_kind, )       /* KZ_NAEND */                                     \
+  X(T, uint8_t, self_check, )     /* KZ_NSELF */                                     \
+  X(T, uint8_t, root_kind, )      /* KZ_NROOT */                                     \
+  X(T, uint32_t, flags, )         /* KZ_NTOKEN_FLAG */                               \
+  X(T, kz_str, root_func, )       /* the static root function, empty when not mapped */ \
+  X(T, kz_str, reason, )          /* why the tie or the root is not established */
+
+/*
+ * NLIFE (113).  One record per generation of a keyed resource: the resource kind, its key space (`key_space`, e.g. a
+ * table and its slot index, a named-object class) and key (`key_value`, `key_text`), the generation number per (kind,
+ * space, key), the events that began and ended it, the creating and the ending actor, and how it ended.  `previous`
+ * links the generations of one key.  Flags name what the generations show: a key reused while an older generation has
+ * no end (`reuse-while-stale`), a new generation of the same name or slot, a deregistration.
+ */
+#define KZ_NLIFE_FIELDS(X, T)                                                        \
+  X(T, uint64_t, key_value, )     /* the key (slot, id, handle, native id), per resource kind */ \
+  X(T, uint32_t, generation, )                                                       \
+  X(T, uint32_t, begin_event, )   /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, end_event, )     /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, creator, )       /* NACTORS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, ender, )         /* NACTORS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, previous, )      /* NLIFE index of the previous generation, or KZ_NONE32 */ \
+  X(T, uint8_t, resource, )       /* KZ_NRES */                                      \
+  X(T, uint8_t, end_kind, )       /* KZ_NLIFE_END */                                 \
+  X(T, uint16_t, rsv0, )                                                             \
+  X(T, uint32_t, flags, )         /* KZ_NLIFE_FLAG */                                \
+  X(T, kz_str, key_space, )                                                          \
+  X(T, kz_str, key_text, )        /* the key as text (a name), empty when none */
+
+/*
+ * NBUILD (114).  The same-build verdict of a conversion: one record per link checked (the site manifest against the
+ * plan, the plan's facts against the facts given, each executable and module of the run against the derived build's
+ * basis, the derived build's facts against the plan's facts section by section, build-ids) with the expected and the
+ * observed sha256, and one record of link `run` with the verdict of the whole: `confirmed` only when every link is;
+ * `refused` when a link differs; else `unconfirmed`.  Anything but `confirmed` is a build mismatch for a strong
+ * conclusion.
+ */
+#define KZ_NBUILD_FIELDS(X, T)                                                       \
+  X(T, uint8_t, link, )           /* KZ_NBUILD_LINK */                               \
+  X(T, uint8_t, verdict, )        /* KZ_NBUILD_VERDICT */                            \
+  X(T, uint16_t, rsv0, )                                                             \
+  X(T, uint32_t, flags, )         /* KZ_NBUILD_FLAG */                               \
+  X(T, uint32_t, index, )         /* the executable or module number within its link, else 0 */ \
+  X(T, uint32_t, rsv1, )                                                             \
+  X(T, uint8_t, expected_sha256, [32])                                               \
+  X(T, uint8_t, observed_sha256, [32])                                               \
+  X(T, kz_str, path, )                                                               \
+  X(T, kz_str, build_id, )        /* the build-id observed, empty when not recorded */ \
+  X(T, kz_str, reason, )
+
+/*
+ * NSUFFICE (115).  The sufficiency state of each planned need at each of its sites: the value was recorded, the event
+ * was recorded without the value, the text was cut at its bound, the site was attached and not reached, a loss interval
+ * covers it, the site has no binding, the need was not planned, or the build does not match.  `reason` is the reason of
+ * the judgement rules' vocabulary the state maps to (empty for `present`).
+ */
+#define KZ_NSUFFICE_FIELDS(X, T)                                                     \
+  X(T, uint32_t, site, )          /* NSITES index, or KZ_NONE32 */                   \
+  X(T, uint32_t, event, )         /* NEVENTS index of the evidence, or KZ_NONE32 */  \
+  X(T, uint32_t, loss, )          /* NLOSS index, or KZ_NONE32 */                    \
+  X(T, uint32_t, actor, )         /* NACTORS index, or KZ_NONE32 */                  \
+  X(T, uint8_t, state, )          /* KZ_NSUFF */                                     \
+  X(T, uint8_t, slot, )           /* the value slot the need names, 0xff = none */   \
+  X(T, uint16_t, flags, )         /* KZ_NSUFF_FLAG */                                \
+  X(T, kz_str, need, )            /* the plan's need */                              \
+  X(T, kz_str, reason, )                                                             \
+  X(T, kz_str, note, )
+
+/*
+ * NCALLEND (116).  One record per call record of the run whose return was not recorded, with its cause and the
+ * evidence of the cause: the actor ended, the process ended inside the call, the static facts say the call does not
+ * return, the record stopped, a loss follows, the return has no binding, a non-local exit is possible, the actor was
+ * held at the end; `unknown` otherwise.
+ */
+#define KZ_NCALLEND_FIELDS(X, T)                                                     \
+  X(T, uint32_t, event, )         /* NEVENTS index of the call record */             \
+  X(T, uint32_t, actor, )         /* NACTORS index */                                \
+  X(T, uint32_t, evidence, )      /* NEVENTS index of the evidence, or KZ_NONE32 */  \
+  X(T, uint32_t, loss, )          /* NLOSS index, or KZ_NONE32 */                    \
+  X(T, uint8_t, cause, )          /* KZ_NCALLEND */                                  \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, rsv1, )                                                             \
+  X(T, kz_str, evidence_text, )
+
+/*
+ * NORDER (117).  One record per instance of a static order edge in the run (`edge` the edge id of the static order
+ * output whose facts the run's build was extracted to; `rule` and `kind` copied from it): the events and actors it
+ * joins, the creation token it rests on (spawn edges), the object generation (lock edges), the exit kind and the
+ * iteration count (wait edges), and the result: instantiated, not instantiated, a wait that left by its budget (no
+ * edge), an operation that failed (no edge, the edge's premise falsified for this instance), no token.
+ */
+#define KZ_NORDER_FIELDS(X, T)                                                       \
+  X(T, uint32_t, from_event, )    /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, to_event, )      /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, from_actor, )    /* NACTORS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, to_actor, )      /* NACTORS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, life, )          /* NLIFE index of the object generation, or KZ_NONE32 */ \
+  X(T, uint32_t, token, )         /* NACTOR_TOKEN index, or KZ_NONE32 */             \
+  X(T, uint32_t, iterations, )    /* wait instances: iterations counted, else 0 */   \
+  X(T, uint8_t, rule, )           /* KZ_NORDER_RULE */                               \
+  X(T, uint8_t, kind, )           /* KZ_NORDER_KIND */                               \
+  X(T, uint8_t, result, )         /* KZ_NORDER_RESULT */                             \
+  X(T, uint8_t, exit_kind, )      /* KZ_NWAIT_EXIT */                                \
+  X(T, uint32_t, flags, )         /* KZ_NORDER_FLAG */                               \
+  X(T, kz_str, edge, )            /* the static edge id */                           \
+  X(T, kz_str, instance_key, )                                                       \
+  X(T, kz_str, reason, )
+
+/*
+ * NORDER_OBS (118).  The order observed in the run per relation row (`row_key`, the row's use-site key) and consumer
+ * actor: the write and the use events and the edge instance that orders them, if any.  `order_static` is the row's
+ * static order value, copied for the reader and never merged with the observed one.
+ */
+#define KZ_NORDEROBS_FIELDS(X, T)                                                    \
+  X(T, uint32_t, actor, )         /* NACTORS index of the consumer */                \
+  X(T, uint32_t, writer_actor, )  /* NACTORS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, write_event, )   /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, use_event, )     /* NEVENTS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, instance, )      /* NORDER index, or KZ_NONE32 */                   \
+  X(T, uint8_t, observed, )       /* KZ_NOBS */                                      \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )         /* KZ_NOBS_FLAG */                                 \
+  X(T, kz_str, row_key, )                                                            \
+  X(T, kz_str, order_static, )                                                       \
+  X(T, kz_str, reason, )
+
 #define KZ_NEUTRAL_RECORDS(R)          \
   R(kz_nrun, KZ_NRUN_FIELDS)           \
   R(kz_nsite, KZ_NSITE_FIELDS)         \
@@ -291,7 +467,14 @@ enum kz_neutral_section_id {
   R(kz_nactor, KZ_NACTOR_FIELDS)       \
   R(kz_nloss, KZ_NLOSS_FIELDS)         \
   R(kz_nctl, KZ_NCTL_FIELDS)           \
-  R(kz_nowner, KZ_NOWNER_FIELDS)
+  R(kz_nowner, KZ_NOWNER_FIELDS)       \
+  R(kz_ntoken, KZ_NTOKEN_FIELDS)       \
+  R(kz_nlife, KZ_NLIFE_FIELDS)         \
+  R(kz_nbuild, KZ_NBUILD_FIELDS)       \
+  R(kz_nsuffice, KZ_NSUFFICE_FIELDS)   \
+  R(kz_ncallend, KZ_NCALLEND_FIELDS)   \
+  R(kz_norder, KZ_NORDER_FIELDS)       \
+  R(kz_norderobs, KZ_NORDEROBS_FIELDS)
 
 KZ_NEUTRAL_RECORDS(KZ_RECORD)
 
@@ -425,6 +608,102 @@ KZ_NEUTRAL_RECORDS(KZ_RECORD)
   ITEM(P, STATUS_NOT_OK, 0x10, "status-not-ok") ITEM(P, CHECK_AGREED, 0x20, "check-agreed") \
   ITEM(P, CHECK_DIFFERS, 0x40, "check-differs")
 
+/* Schema revision 12.  NACTOR_TOKEN: the join result, how the actor ended, the self-reported id against the creator's,
+ * the static root. */
+#define KZ_ENUM_NTIE(ITEM, P)                                                          \
+  ITEM(P, UNDETERMINED, 0, "undetermined") ITEM(P, TOKEN_TIED, 1, "token-tied")       \
+  ITEM(P, TOKEN_LOST, 2, "token-lost") ITEM(P, SPAWN_AMBIGUOUS, 3, "spawn-ambiguous") \
+  ITEM(P, NO_TOKEN, 4, "no-creation-token")
+
+#define KZ_ENUM_NAEND(ITEM, P)                                                         \
+  ITEM(P, NOT_OBSERVED, 0, "not-observed") ITEM(P, ENTRY_RETURN, 1, "entry-return")   \
+  ITEM(P, THREAD_EXIT, 2, "thread-exit") ITEM(P, CANCELLED, 3, "cancelled") ITEM(P, PROCESS_END, 4, "process-end")
+
+#define KZ_ENUM_NSELF(ITEM, P)                                                         \
+  ITEM(P, ABSENT, 0, "self-id-absent") ITEM(P, EQUAL, 1, "self-id-equal") ITEM(P, DIFFERS, 2, "self-id-differs")
+
+#define KZ_ENUM_NROOT(ITEM, P)                                                         \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, START, 1, "start") ITEM(P, TRAMPOLINE, 2, "trampoline") \
+  ITEM(P, TRAMPOLINE_UNRESOLVED, 3, "trampoline-unresolved") ITEM(P, SYMBOL_UNMAPPED, 4, "symbol-unmapped")
+
+#define KZ_ENUM_NTOKEN_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, SPAWN_FAILED, 0x1, "spawn-failed") ITEM(P, BEGIN_LOST, 0x2, "begin-lost")   \
+  ITEM(P, SLOT_TABLE_FULL, 0x4, "slot-table-full")
+
+/* NLIFE. */
+#define KZ_ENUM_NRES(ITEM, P)                                                          \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, TASK_SLOT, 1, "task-slot") ITEM(P, APP_RECORD, 2, "app-record") \
+  ITEM(P, TASK_RECORD, 3, "task-record") ITEM(P, NAMED_OBJECT, 4, "named-object")     \
+  ITEM(P, THREAD_HANDLE, 5, "thread-handle") ITEM(P, NATIVE_THREAD, 6, "native-thread")
+
+#define KZ_ENUM_NLIFE_END(ITEM, P)                                                     \
+  ITEM(P, NOT_OBSERVED, 0, "not-observed") ITEM(P, DELETED, 1, "deleted")             \
+  ITEM(P, RELEASED_BY_CLEANUP, 2, "released-by-cleanup")                               \
+  ITEM(P, THREAD_ENDED, 3, "thread-ended-without-delete") ITEM(P, OPEN_AT_END, 4, "open-at-end")
+
+#define KZ_ENUM_NLIFE_FLAGS(ITEM, P) /* set */                                        \
+  ITEM(P, REUSE_WHILE_STALE, 0x1, "reuse-while-stale") ITEM(P, RE_CREATION, 0x2, "re-creation") \
+  ITEM(P, DEREGISTRATION, 0x4, "deregistration") ITEM(P, KEY_TEXT_TRUNCATED, 0x8, "key-text-truncated")
+
+/* NBUILD. */
+#define KZ_ENUM_NBUILD_LINK(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, RUN, 1, "run") ITEM(P, MANIFEST, 2, "manifest")   \
+  ITEM(P, PLAN_FACTS, 3, "plan-facts") ITEM(P, EXECUTABLE, 4, "executable") ITEM(P, MODULE, 5, "module") \
+  ITEM(P, BASIS_BINARY, 6, "basis-binary") ITEM(P, BASIS_FACTS, 7, "basis-facts") ITEM(P, BUILD_ID, 8, "build-id")
+
+#define KZ_ENUM_NBUILD_VERDICT(ITEM, P)                                                \
+  ITEM(P, UNCONFIRMED, 0, "unconfirmed") ITEM(P, CONFIRMED, 1, "confirmed") ITEM(P, REFUSED, 2, "refused")
+
+#define KZ_ENUM_NBUILD_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, EXPECTED_KNOWN, 0x1, "expected-known") ITEM(P, OBSERVED_KNOWN, 0x2, "observed-known") \
+  ITEM(P, MAPPED_BY_CONTENT, 0x4, "mapped-by-content")
+
+/* NSUFFICE. */
+#define KZ_ENUM_NSUFF(ITEM, P)                                                         \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, PRESENT, 1, "present") ITEM(P, VALUE_MISSING, 2, "value-missing") \
+  ITEM(P, TEXT_PARTIAL, 3, "text-partial") ITEM(P, NOT_REACHED, 4, "not-reached")    \
+  ITEM(P, UNKNOWN_LOSS, 5, "unknown-loss") ITEM(P, UNBOUND, 6, "unbound") ITEM(P, NOT_PLANNED, 7, "not-planned") \
+  ITEM(P, BUILD_MISMATCH, 8, "build-mismatch")
+
+#define KZ_ENUM_NSUFF_FLAGS(ITEM, P) /* set */                                        \
+  ITEM(P, BRACKET_INTACT, 0x1, "bracket-intact") ITEM(P, CALL_ATTRIBUTED, 0x2, "call-attributed")
+
+/* NCALLEND. */
+#define KZ_ENUM_NCALLEND(ITEM, P)                                                      \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, ACTOR_ENDED, 1, "actor-ended")               \
+  ITEM(P, PROCESS_ENDED_INSIDE, 2, "process-ended-inside") ITEM(P, STATIC_NO_RETURN, 3, "static-no-return") \
+  ITEM(P, RECORD_STOPPED, 4, "record-stopped") ITEM(P, LOSS_AFTER, 5, "loss-after")  \
+  ITEM(P, RETURN_UNBOUND, 6, "return-unbound") ITEM(P, NONLOCAL_EXIT, 7, "nonlocal-exit-possible") \
+  ITEM(P, HELD_AT_END, 8, "held-at-end")
+
+/* NORDER and NORDER_OBS. */
+#define KZ_ENUM_NORDER_RULE(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, HB_SPAWN, 1, "HB-spawn") ITEM(P, HB_SEQ, 2, "HB-seq") \
+  ITEM(P, HB_LOCK, 3, "HB-lock") ITEM(P, HB_AWAIT, 4, "HB-await") ITEM(P, L0_SCRIPT, 5, "L0-script")
+
+#define KZ_ENUM_NORDER_KIND(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, HARD, 1, "hard") ITEM(P, CONDITIONAL, 2, "conditional") \
+  ITEM(P, OBSERVED_ONLY, 3, "observed-only")
+
+#define KZ_ENUM_NORDER_RESULT(ITEM, P)                                                 \
+  ITEM(P, UNDETERMINED, 0, "undetermined") ITEM(P, INSTANTIATED, 1, "instantiated")   \
+  ITEM(P, NOT_INSTANTIATED, 2, "not-instantiated") ITEM(P, WAIT_TIMED_OUT, 3, "wait-timed-out") \
+  ITEM(P, STATUS_FAILED, 4, "status-failed") ITEM(P, TOKEN_MISSING, 5, "token-missing")
+
+#define KZ_ENUM_NWAIT_EXIT(ITEM, P)                                                    \
+  ITEM(P, NONE, 0, "none") ITEM(P, CONDITION, 1, "condition") ITEM(P, BUDGET, 2, "budget")
+
+#define KZ_ENUM_NORDER_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, PREMISE_FALSIFIED, 0x1, "premise-falsified") ITEM(P, SAME_GENERATION, 0x2, "same-generation")
+
+#define KZ_ENUM_NOBS(ITEM, P)                                                          \
+  ITEM(P, UNDETERMINED, 0, "undetermined") ITEM(P, WRITE_FIRST, 1, "write-before-use") \
+  ITEM(P, USE_FIRST, 2, "use-before-write") ITEM(P, USE_WITHOUT_WRITE, 3, "use-without-write") \
+  ITEM(P, NOT_REACHED, 4, "not-reached")
+
+#define KZ_ENUM_NOBS_FLAGS(ITEM, P) /* set */                                         \
+  ITEM(P, ORDERED_BY_INSTANCE, 0x1, "ordered-by-instance") ITEM(P, VALUES_LINKED, 0x2, "values-linked")
+
 #define KZ_NEUTRAL_ENUMS(D)                     \
   D(KZ_NBACKEND, KZ_ENUM_NBACKEND, 0)           \
   D(KZ_NCLOCK, KZ_ENUM_NCLOCK, 0)               \
@@ -447,7 +726,28 @@ KZ_NEUTRAL_RECORDS(KZ_RECORD)
   D(KZ_NCTL_REASON, KZ_ENUM_NCTL_REASON, 0)     \
   D(KZ_NCTL_FLAG, KZ_ENUM_NCTL_FLAGS, 1)        \
   D(KZ_NCTX, KZ_ENUM_NCTX, 0)                   \
-  D(KZ_NOWNER_FLAG, KZ_ENUM_NOWNER_FLAGS, 1)
+  D(KZ_NOWNER_FLAG, KZ_ENUM_NOWNER_FLAGS, 1)     \
+  D(KZ_NTIE, KZ_ENUM_NTIE, 0)                   \
+  D(KZ_NAEND, KZ_ENUM_NAEND, 0)                 \
+  D(KZ_NSELF, KZ_ENUM_NSELF, 0)                 \
+  D(KZ_NROOT, KZ_ENUM_NROOT, 0)                 \
+  D(KZ_NTOKEN_FLAG, KZ_ENUM_NTOKEN_FLAGS, 1)    \
+  D(KZ_NRES, KZ_ENUM_NRES, 0)                   \
+  D(KZ_NLIFE_END, KZ_ENUM_NLIFE_END, 0)         \
+  D(KZ_NLIFE_FLAG, KZ_ENUM_NLIFE_FLAGS, 1)      \
+  D(KZ_NBUILD_LINK, KZ_ENUM_NBUILD_LINK, 0)     \
+  D(KZ_NBUILD_VERDICT, KZ_ENUM_NBUILD_VERDICT, 0) \
+  D(KZ_NBUILD_FLAG, KZ_ENUM_NBUILD_FLAGS, 1)    \
+  D(KZ_NSUFF, KZ_ENUM_NSUFF, 0)                 \
+  D(KZ_NSUFF_FLAG, KZ_ENUM_NSUFF_FLAGS, 1)      \
+  D(KZ_NCALLEND, KZ_ENUM_NCALLEND, 0)           \
+  D(KZ_NORDER_RULE, KZ_ENUM_NORDER_RULE, 0)     \
+  D(KZ_NORDER_KIND, KZ_ENUM_NORDER_KIND, 0)     \
+  D(KZ_NORDER_RESULT, KZ_ENUM_NORDER_RESULT, 0) \
+  D(KZ_NWAIT_EXIT, KZ_ENUM_NWAIT_EXIT, 0)       \
+  D(KZ_NORDER_FLAG, KZ_ENUM_NORDER_FLAGS, 1)    \
+  D(KZ_NOBS, KZ_ENUM_NOBS, 0)                   \
+  D(KZ_NOBS_FLAG, KZ_ENUM_NOBS_FLAGS, 1)
 
 KZ_NEUTRAL_ENUMS(KZ_DEFINE_ENUM_ENTRY)
 
@@ -511,6 +811,60 @@ KZ_NEUTRAL_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_nowner, check, IDX, 0)                         \
   F(kz_nowner, owner_id, IDX, 0)                      \
   F(kz_nowner, flags, FLAGS, KZ_NOWNER_FLAG)          \
-  F(kz_nowner, level, ENUM, KZ_OWNER_LEVEL)
+  F(kz_nowner, level, ENUM, KZ_OWNER_LEVEL)          \
+  F(kz_ntoken, start, HEX, 0)                         \
+  F(kz_ntoken, arg, HEX, 0)                           \
+  F(kz_ntoken, actor, IDX, 0)                         \
+  F(kz_ntoken, token_actor, IDX, 0)                   \
+  F(kz_ntoken, spawn_event, IDX, 0)                   \
+  F(kz_ntoken, spawn_return, IDX, 0)                  \
+  F(kz_ntoken, begin_event, IDX, 0)                   \
+  F(kz_ntoken, end_event, IDX, 0)                     \
+  F(kz_ntoken, self_id, IDX, 0)                       \
+  F(kz_ntoken, self_event, IDX, 0)                    \
+  F(kz_ntoken, creator_id, IDX, 0)                    \
+  F(kz_ntoken, tie, ENUM, KZ_NTIE)                    \
+  F(kz_ntoken, end_kind, ENUM, KZ_NAEND)              \
+  F(kz_ntoken, self_check, ENUM, KZ_NSELF)            \
+  F(kz_ntoken, root_kind, ENUM, KZ_NROOT)             \
+  F(kz_ntoken, flags, FLAGS, KZ_NTOKEN_FLAG)          \
+  F(kz_nlife, key_value, HEX, 0)                      \
+  F(kz_nlife, begin_event, IDX, 0)                    \
+  F(kz_nlife, end_event, IDX, 0)                      \
+  F(kz_nlife, creator, IDX, 0)                        \
+  F(kz_nlife, ender, IDX, 0)                          \
+  F(kz_nlife, previous, IDX, 0)                       \
+  F(kz_nlife, resource, ENUM, KZ_NRES)                \
+  F(kz_nlife, end_kind, ENUM, KZ_NLIFE_END)           \
+  F(kz_nlife, flags, FLAGS, KZ_NLIFE_FLAG)            \
+  F(kz_nbuild, link, ENUM, KZ_NBUILD_LINK)            \
+  F(kz_nbuild, verdict, ENUM, KZ_NBUILD_VERDICT)      \
+  F(kz_nbuild, flags, FLAGS, KZ_NBUILD_FLAG)          \
+  F(kz_nsuffice, site, IDX, 0)                        \
+  F(kz_nsuffice, event, IDX, 0)                       \
+  F(kz_nsuffice, loss, IDX, 0)                        \
+  F(kz_nsuffice, actor, IDX, 0)                       \
+  F(kz_nsuffice, state, ENUM, KZ_NSUFF)               \
+  F(kz_nsuffice, flags, FLAGS, KZ_NSUFF_FLAG)         \
+  F(kz_ncallend, evidence, IDX, 0)                    \
+  F(kz_ncallend, loss, IDX, 0)                        \
+  F(kz_ncallend, cause, ENUM, KZ_NCALLEND)            \
+  F(kz_norder, from_event, IDX, 0)                    \
+  F(kz_norder, to_event, IDX, 0)                      \
+  F(kz_norder, from_actor, IDX, 0)                    \
+  F(kz_norder, to_actor, IDX, 0)                      \
+  F(kz_norder, life, IDX, 0)                          \
+  F(kz_norder, token, IDX, 0)                         \
+  F(kz_norder, rule, ENUM, KZ_NORDER_RULE)            \
+  F(kz_norder, kind, ENUM, KZ_NORDER_KIND)            \
+  F(kz_norder, result, ENUM, KZ_NORDER_RESULT)        \
+  F(kz_norder, exit_kind, ENUM, KZ_NWAIT_EXIT)        \
+  F(kz_norder, flags, FLAGS, KZ_NORDER_FLAG)          \
+  F(kz_norderobs, writer_actor, IDX, 0)               \
+  F(kz_norderobs, write_event, IDX, 0)                \
+  F(kz_norderobs, use_event, IDX, 0)                  \
+  F(kz_norderobs, instance, IDX, 0)                   \
+  F(kz_norderobs, observed, ENUM, KZ_NOBS)            \
+  F(kz_norderobs, flags, FLAGS, KZ_NOBS_FLAG)
 
 #endif /* KZ_SCHEMA_KZ_NEUTRAL_H */

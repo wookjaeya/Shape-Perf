@@ -76,6 +76,10 @@ int main(int argc, char** argv) {
   {
     const std::map<std::string, std::string> id = parse_lines(out);
     KZ_CHECK(id.count("tool") == 1 && id.count("tool_sha256") == 1 && id.count("tool_source") == 1 && id.count("core_source") == 1);
+    // the schema revision and fingerprint of the records the tool reads (schema revision 12 added the two lines)
+    KZ_CHECK(id.count("schema_revision") == 1 && id.count("schema_fingerprint") == 1);
+    if (id.count("schema_revision") == 1) KZ_CHECK_EQ(id.at("schema_revision"), std::to_string(KZ_SCHEMA_REVISION));
+    if (id.count("schema_fingerprint") == 1) KZ_CHECK_EQ(id.at("schema_fingerprint"), kz::to_hex(kz::schema_fingerprint()));
     if (id.count("tool_source") == 1 && id.count("core_source") == 1 && id.count("tool_sha256") == 1) {
       KZ_CHECK(kz::is_hex_digest(id.at("tool_source")));
       KZ_CHECK_EQ(id.at("core_source"), std::string(kz::core_source_identity()));

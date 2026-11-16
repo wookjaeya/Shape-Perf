@@ -52,6 +52,36 @@ struct NActor {
   kz_nactor r{};
   std::string name, owner_app, request_func;
 };
+// Schema revision 12 (kz_neutral.h sections 112-118): the side tables.  No converter fills them in this revision; each
+// section is written only when its vector is not empty, and read when the container has it.
+struct NToken {
+  kz_ntoken r{};
+  std::string root_func, reason;
+};
+struct NLife {
+  kz_nlife r{};
+  std::string key_space, key_text;
+};
+struct NBuild {
+  kz_nbuild r{};
+  std::string path, build_id, reason;
+};
+struct NSuffice {
+  kz_nsuffice r{};
+  std::string need, reason, note;
+};
+struct NCallEnd {
+  kz_ncallend r{};
+  std::string evidence_text;
+};
+struct NOrder {
+  kz_norder r{};
+  std::string edge, instance_key, reason;
+};
+struct NOrderObs {
+  kz_norderobs r{};
+  std::string row_key, order_static, reason;
+};
 
 struct NeutralRun {
   NRun run;
@@ -63,6 +93,14 @@ struct NeutralRun {
   std::vector<kz_nloss> losses;
   std::vector<kz_nctl> ctl;
   std::vector<kz_nowner> owners;  // schema revision 6; the section is written only when not empty
+  // schema revision 12; each section is written only when not empty
+  std::vector<NToken> tokens;             // NACTOR_TOKEN
+  std::vector<NLife> lifetimes;           // NLIFE
+  std::vector<NBuild> build_checks;       // NBUILD
+  std::vector<NSuffice> needs;            // NSUFFICE
+  std::vector<NCallEnd> call_ends;        // NCALLEND
+  std::vector<NOrder> order_instances;    // NORDER
+  std::vector<NOrderObs> order_observed;  // NORDER_OBS
 };
 
 // A zeroed record with every index field that means "none" set to KZ_NONE32 (the neutral layer's defaults).
@@ -70,9 +108,17 @@ kz_nevent nevent_init();
 kz_nactor nactor_init();
 kz_nloss nloss_init();
 kz_nctl nctl_init();
+// Schema revision 12 records with their index fields set to KZ_NONE32 (and NSUFFICE's slot to 0xff).
+kz_ntoken ntoken_init();
+kz_nlife nlife_init();
+kz_nsuffice nsuffice_init();
+kz_ncallend ncallend_init();
+kz_norder norder_init();
+kz_norderobs norderobs_init();
 kz_ref self_ref(uint32_t section, uint32_t index);
 
-// Structural checks of a layer: every index in range, values belong to their event, enums in range.
+// Structural checks of a layer: every index in range, values belong to their event, enums in range (the revision 12
+// side tables included).
 Status check_neutral(const NeutralRun& n);
 
 Status neutral_from_f0(const Container& run, NeutralRun* out);

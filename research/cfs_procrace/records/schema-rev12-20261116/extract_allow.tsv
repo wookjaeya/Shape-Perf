@@ -1,0 +1,14 @@
+# allowance (file level, compare_build.py) of the five re-extractions with the kz-static of schema revision 12 against
+# tests_8c_fix/<build>/NP (the declaration, plan/full_stage_results_20261116.md 4.0).  The record-level rule is
+# check_extract.py: the containers differ only in the header fields of the tool identity and what follows from it, the
+# STRINGS crc32, BASIS extract.build_identity / front_end.build_identity (schema= and source= only) and facts' BASIS
+# extract.units_from; relations.txt is compared with the relations re-run of this build apart from line 2 (compare.sh)
+basis.kz	DIFF
+facts.kz	DIFF
+basis.txt	DIFF
+extract.txt	DIFF
+relations.txt	DIFF
+sha256.txt	DIFF
+facts.txt	ONLY
+status.txt	ONLY
+space_guard.log	ONLY

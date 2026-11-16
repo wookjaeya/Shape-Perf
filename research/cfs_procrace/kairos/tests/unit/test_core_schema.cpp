@@ -95,6 +95,11 @@ void check_known_sizes() {
       // schema revision 3 (SPEC rev 1.4 2.3, decision record 2026-10-26): the neutral event layer, new sections only
       {"kz_nrun", 168},  {"kz_nsite", 104}, {"kz_nslot", 64}, {"kz_nevent", 88},
       {"kz_nvalue", 24}, {"kz_nactor", 184}, {"kz_nloss", 72}, {"kz_nctl", 64},
+      // schema revision 12 (2026-11-16): new sections only; no earlier record changed
+      {"kz_fact_objacc", 72}, {"kz_fact_ftype", 60}, {"kz_fact_argtype", 44}, {"kz_fact_loopdef", 48},
+      {"kz_fact_sem", 72},    {"kz_fact_rflow", 76}, {"kz_fact_reffect", 72}, {"kz_fact_lockh", 56},
+      {"kz_ntoken", 80},      {"kz_nlife", 56},      {"kz_nbuild", 104},      {"kz_nsuffice", 44},
+      {"kz_ncallend", 28},    {"kz_norder", 60},     {"kz_norderobs", 48},
   };
   for (const Known& k : known) {
     const kz_record_desc* rec = kz::find_record(k.name);

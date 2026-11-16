@@ -390,3 +390,31 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 - **단계 2a 8b 수정 단계(2026-11-10)**: 개정 번호는 11 그대로다. 섹션·레코드 배치·섹션 버전·열거형은 바뀌지 않는다. 바뀐 값은 셋이다. (1) 배열의 초기값이 목록도 문자열도 0 채움도 아니면(예: 덮어쓰는 지정자, DesignatedInitUpdateExpr) 그 배열 자리에 상수 아닌 잎 하나가 생긴다. 전에는 행이 없었다. 예산과 무관한 따로 항목이다. (2) table walk가 잘린 이미지에서 풀리지 않으면 LOOP 행과 star-closed 규칙 글의 이유가 잘림을 적는다. 표시 잎이 없으면 이유는 전과 같다. (3) 새 golden `tests/static/data/imgbudget_np.golden`. 그 밖의 golden은 그대로다. 이름 없는 멤버의 표시 경로(`경로....`)는 코드를 고치지 않고 `static_facts.md` §5j에 적었다.
 - **단계 2a 8c(2026-11-10, RV3A §6.3 O2·O12)**: 개정 번호는 11 그대로다. 섹션·레코드 배치·섹션 버전·열거형은 바뀌지 않는다. 그래서 `layout_text()`, schema fingerprint, `layout.golden`·`records.golden`은 그대로다. 바뀐 것은 facts BASIS의 항목뿐이다(`docs/static_facts.md` §5k). 더한 항목: `extract.resource_dir`, `extract.extra_arg[i]`(없으면 `extract.extra_arg = none`), 선언이 없는 명령줄 대상마다 `unknown_target.<형>.<필드>`. 없앤 항목: 명령줄 대상의 둘째 기록 `target.<형>.<필드> = extraction target`. 그런 대상의 FACT_LOCS 상태는 이미 있는 값 `unchecked`(0)다. 옛 독자 규칙: BASIS를 이름으로 읽는 독자는 새 이름을 모르는 항목으로 지나친다. `target.` 항목을 세는 독자는 이제 명령줄 대상을 한 번 센다. relations의 "hand-entered vocabulary" 수가 그 예다. 전에는 두 번 셌다.
 - **단계 2a 8c 수정 단계(2026-11-10)**: 개정 번호는 11 그대로다. 섹션·레코드 배치·섹션 버전·열거형은 바뀌지 않는다. 바뀐 것은 BASIS 값의 글 셋이다(`docs/static_facts.md` §5k). (1) `unknown_target.*` 의 "no record type …" 글: "is found among the file-scope tags and typedef names of the units read". (2) `--target` 이 프로필 대상과 같아도 `unknown_target.*` 이 붙을 수 있다(대상 기록은 프로필 출처 그대로). (3) `--extra-arg -resource-dir` 가 있으면 `extract.resource_dir` 는 그 값과 "(--extra-arg -resource-dir, after and over the tool's: …)" 다. 옛 독자 규칙은 8c 줄과 같다. relations 는 대상 기록을 세는 수를 "hand-entered vocabulary" 머리 줄과 행마다의 layers 칸 둘에 쓴다.
+
+## 20. 스키마 개정 12: 새 섹션만, 뒤 작업의 공개 구조를 한 번에 (2026-11-16) [D][M]
+
+- 근거: `include/` 아래 파일 하나만 바뀌어도 kz-static, kz, kz-dump, kz-phi 의 소스 identity 가 바뀌고(`cmake/KzSourceIdentity.cmake` 의 `kz_tool_identity`: `include`, `cmake`, 최상위 `CMakeLists.txt` 를 늘 덮는다), `include/kz/schema` 가 바뀌면 libkz-core 의 identity(`KZ_CORE_SOURCE_PATHS`)와 schema fingerprint 도 바뀐다(§8). 그래서 뒤 작업(객체 접근·형, 의미 표, 결과 흐름·효과, 루프 정의와 잠금 정체성, 생성 토큰·수명·같은 빌드 판정·충분성·순서 인스턴스)이 쓸 레코드와 공개 구조를 이 개정에서 한 번에 정의하고, 뒤 작업의 코드는 `lib/` 안의 비공개 머리말에 둔다. 연구 조건은 정하지 않았다.
+- 방식: 개정 2–11과 같다. 기존 레코드의 배치·섹션 버전·필드 이름·열거형 값은 바꾸지 않았다. 옛 컨테이너는 그대로 읽힌다: 읽기는 레코드 크기와 섹션 버전이 다르면 거부하는데(`lib/core/container_reader.cpp` 의 섹션 표 검사), 기존 섹션은 둘 다 그대로다. `KZ_SCHEMA_REVISION` = 12 가 `layout_text()` 첫 줄에 들어가 schema fingerprint 와 모든 tool hash 가 바뀐다. 추출 레코드 개정은 10이다.
+- **이 개정의 어느 도구도 새 섹션을 쓰지 않는다.** 그래서 어느 도구가 쓰는 컨테이너든 섹션은 전과 같고, 다른 것은 도구 정체성에서 오는 값뿐이다(머리의 tool hash 와 그것을 덮는 해시, BASIS 의 build identity 문자열의 `schema=`·`source=`). 새 섹션은 그것을 채우는 뒤 작업의 옵션을 줄 때만, 레코드가 있을 때만 쓴다.
+- 새 추출 섹션(둘째 추출 범위 137–139 를 채우고, 셋째 추출 범위 140–159 를 연다; 모두 버전 1, `kz_facts.h` 머리 주석과 각 레코드 주석에 뜻):
+  - OBJECT_ACCESS(137, `kz_fact_objacc` 72 B): 형이 있는 읽기·쓰기마다 바탕 객체(연결 범위를 가진 객체 키)와 접근 경로, 첨자 식 뿌리.
+  - FIELD_TYPES(138, `kz_fact_ftype` 60 B): 읽기가 이름 붙인 레코드 형의 필드마다 배열 크기(평가한 상수와 쓴 그대로), 원소 종류, 한정자.
+  - ARG_TYPES(139, `kz_fact_argtype` 44 B): 호출 인자마다 선언 형의 종류, 문자 배열의 크기와 선언 위치, 호출을 지배하는 지점에서 그 메모리를 읽는지.
+  - LOOP_DEFS(140, `kz_fact_loopdef` 48 B): 루프 조건이 읽는 지역의 정의와 플래그 술어의 인식 여부. 인식한 술어는 이 섹션에만 적는다(FACT_LOOPS·AWAIT_L1 의 행은 그대로).
+  - SEMANTICS(141, `kz_fact_sem` 72 B): 이 빌드에 이은 의미 표, (api, 칸 항목)마다 한 행, 층(P0·프레임워크·상태 공간), 출처, 검증 상태.
+  - RESULT_FLOW(142, `kz_fact_rflow` 76 B): 결과가 있는 호출마다 그 결과가 닿는 사용(분기·반환·인자·저장·루프 탈출)과 정의의 유일성.
+  - RESULT_EFFECT(143, `kz_fact_reffect` 72 B): (호출, 결과 부류)마다 그 부류가 가는 경로의 효과와 `complete` / `open`(이유).
+  - LOCK_HANDLES(144, `kz_fact_lockh` 56 B): 핸들 식으로 정한 잠금 정체성, 핸들의 writer 와 그것이 기대는 의미 항목, 전제.
+- 새 중립 층 섹션(필드 단위 직렬화 범위 100–119 안의 112–118; 모두 버전 1, `kz_neutral.h` 에 뜻; actor·사건·site·레코드 번호로 잇는 곁 표이고 기존 NACTORS 등은 그대로다):
+  - NACTOR_TOKEN(112, `kz_ntoken` 80 B): 생성 토큰(만드는 쪽 런타임 actor id 와 spawn 기록의 aseq)과 spawn·spawn 반환·첫 기록·끝 기록, 결합 결과, 스스로 알린 id 의 대조(결합을 만들지 않는다), 정적 root.
+  - NLIFE(113, `kz_nlife` 56 B): 키가 있는 자원의 세대마다 시작·끝 사건, 만든·끝낸 actor, 끝난 방식, 앞 세대.
+  - NBUILD(114, `kz_nbuild` 104 B): 같은 빌드 판정의 고리마다 기대·관측 sha256 과 판정, 전체 판정(`run` 고리).
+  - NSUFFICE(115, `kz_nsuffice` 44 B): 계획한 필요마다 site 별 충분성 상태와 판정 규칙 어휘의 사유.
+  - NCALLEND(116, `kz_ncallend` 28 B): 반환이 기록되지 않은 호출마다 원인과 근거.
+  - NORDER(117, `kz_norder` 60 B): 정적 순서 간선의 실행 인스턴스(토큰, 객체 세대, 대기 탈출 종류, 결과).
+  - NORDER_OBS(118, `kz_norderobs` 48 B): relations 행과 소비 actor 마다 관측한 순서. 정적 순서 값은 옮겨 적기만 하고 섞지 않는다.
+- 새 열거형: 추출 쪽 29개(`KZ_OBJACC_KIND` … `KZ_LOCKH_FLAG`), 중립 쪽 21개(`KZ_NTIE` … `KZ_NOBS_FLAG`). 값 0은 모두 보수 쪽(`none`, `unknown`, `undetermined`, `unconfirmed`, `open`, `not-observed` 등)이거나 빈 집합이다.
+- 공개 구조: `include/kz/trace/neutral.hpp` 의 `NeutralRun` 에 곁 표 일곱의 벡터와 그 문자열을 담는 구조(`NToken` … `NOrderObs`), 기본값 함수(`ntoken_init` …), `check_neutral` 의 색인·열거형 검사, `read_neutral` 의 선택 섹션 읽기, `add_neutral_sections` 의 "레코드가 있을 때만" 쓰기. `include/kz/trace/run_analysis.hpp`(새): 같은 빌드 판정, 토큰 결합, 충분성, 수명, 순서 인스턴스의 입력·결과 구조. 이 파일은 구조만 둔다. 그것을 채우는 함수는 뒤 작업이 `lib/trace` 안에 선언하고 정의한다.
+- `--identity`: kz(새), kz-phi(새), kz-dump, kz-static 이 `schema_revision=` 과 `schema_fingerprint=` 두 줄을 더 적는다(앞 네 줄은 그대로). 시험 `tool_identity_schema_revision` 은 한 빌드의 도구들이 kz-dump 의 layout 과 같은 개정과 fingerprint 를 적는지 본다. 일부만 다시 빌드된 트리는 여기서 실패한다.
+- 시험: `test_trace_neutral_rev12`(곁 표가 비면 새 섹션이 없고 같은 바이트, 일곱 곁 표의 왕복, 색인·열거형 거부, 추출 섹션 여덟의 parse·dump, 공개 구조), `test_core_schema` 의 크기 표, `test_core_kzdump` 의 두 줄, `tool_identity_schema_revision`.
+- golden: `layout.golden`(revision·fingerprint 두 줄이 바뀌고 새 레코드·열거형·섹션·형식 줄이 더해짐, 옛 줄은 순서대로 그대로), `records.golden`(새 레코드 30줄, 패턴으로 채운 참조의 섹션이 섹션 목록이 늘어난 만큼 밀린 26줄; 개정 4–11 과 같은 기계적 변화). 나머지 golden(`container_*`, `render`, `tool_hash`, `tests/static/data/*.golden`)은 그대로다.

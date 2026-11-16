@@ -36,6 +36,17 @@ target_compile_definitions(test_core_kzdump PRIVATE
   "KZ_SOURCE_ROOT_DIR=\"${KZ_SOURCE_ROOT}\"" "KZ_KZDUMP_IDENTITY_PATHS=\"$<TARGET_PROPERTY:kz-dump,KZ_TOOL_IDENTITY_PATHS>\"")
 add_dependencies(test_core_kzdump kz-dump)
 
+# Every tool of this build reports the schema revision and fingerprint of kz-dump's layout (`--identity`, schema
+# revision 12): no tool of the tree was left on another revision.
+set(kz_identity_tools "$<TARGET_FILE:kz-dump>|$<TARGET_FILE:kz>|$<TARGET_FILE:kz-phi>")
+if(TARGET kz-static)
+  string(APPEND kz_identity_tools "|$<TARGET_FILE:kz-static>")
+endif()
+add_test(NAME tool_identity_schema_revision
+  COMMAND ${CMAKE_COMMAND} -DDUMP=$<TARGET_FILE:kz-dump> "-DTOOLS=${kz_identity_tools}"
+          -P ${CMAKE_CURRENT_SOURCE_DIR}/check_tool_schema_revision.cmake)
+set_tests_properties(tool_identity_schema_revision PROPERTIES LABELS unit)
+
 # cmake/KzSourceIdentity.cmake: the identity depends on the content, the names and the set of
 # files, and on nothing else (not on the place of the tree, hidden files or backup files).
 add_test(NAME source_identity_cmake

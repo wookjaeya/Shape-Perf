@@ -112,6 +112,66 @@ kz_nctl nctl_init() {
   return c;
 }
 
+kz_ntoken ntoken_init() {
+  kz_ntoken t = zeroed<kz_ntoken>();
+  t.token_actor = KZ_NONE32;
+  t.spawn_event = KZ_NONE32;
+  t.spawn_return = KZ_NONE32;
+  t.begin_event = KZ_NONE32;
+  t.end_event = KZ_NONE32;
+  t.self_id = KZ_NONE32;
+  t.self_event = KZ_NONE32;
+  t.creator_id = KZ_NONE32;
+  return t;
+}
+
+kz_nlife nlife_init() {
+  kz_nlife l = zeroed<kz_nlife>();
+  l.begin_event = KZ_NONE32;
+  l.end_event = KZ_NONE32;
+  l.creator = KZ_NONE32;
+  l.ender = KZ_NONE32;
+  l.previous = KZ_NONE32;
+  return l;
+}
+
+kz_nsuffice nsuffice_init() {
+  kz_nsuffice x = zeroed<kz_nsuffice>();
+  x.site = KZ_NONE32;
+  x.event = KZ_NONE32;
+  x.loss = KZ_NONE32;
+  x.actor = KZ_NONE32;
+  x.slot = 0xffu;
+  return x;
+}
+
+kz_ncallend ncallend_init() {
+  kz_ncallend c = zeroed<kz_ncallend>();
+  c.evidence = KZ_NONE32;
+  c.loss = KZ_NONE32;
+  return c;
+}
+
+kz_norder norder_init() {
+  kz_norder o = zeroed<kz_norder>();
+  o.from_event = KZ_NONE32;
+  o.to_event = KZ_NONE32;
+  o.from_actor = KZ_NONE32;
+  o.to_actor = KZ_NONE32;
+  o.life = KZ_NONE32;
+  o.token = KZ_NONE32;
+  return o;
+}
+
+kz_norderobs norderobs_init() {
+  kz_norderobs o = zeroed<kz_norderobs>();
+  o.writer_actor = KZ_NONE32;
+  o.write_event = KZ_NONE32;
+  o.use_event = KZ_NONE32;
+  o.instance = KZ_NONE32;
+  return o;
+}
+
 // ---------------------------------------------------------------------------------------------------------
 // F0 -> neutral.  The identity and loss rules are those the replay applied to the F0 sections before
 // revision 3 (real_trace.cpp at 78ff6ee), unchanged.
@@ -445,6 +505,51 @@ Status check_neutral(const NeutralRun& n) {
       return bad("NOWNER[" + std::to_string(i) + "] index out of range");
     if (o.level > KZ_OWNER_LEVEL_CONFIRMED) return bad("NOWNER[" + std::to_string(i) + "] enum out of range");
   }
+  // schema revision 12: the side tables
+  const size_t nl = n.losses.size(), ntok = n.tokens.size(), nlife = n.lifetimes.size(), nord = n.order_instances.size();
+  for (size_t i = 0; i < ntok; ++i) {
+    const kz_ntoken& t = n.tokens[i].r;
+    if (t.actor >= na) return bad("NACTOR_TOKEN[" + std::to_string(i) + "].actor out of range");
+    if (!idx_ok(t.spawn_event, ne) || !idx_ok(t.spawn_return, ne) || !idx_ok(t.begin_event, ne) || !idx_ok(t.end_event, ne) || !idx_ok(t.self_event, ne))
+      return bad("NACTOR_TOKEN[" + std::to_string(i) + "] event index out of range");
+    if (t.tie > KZ_NTIE_NO_TOKEN || t.end_kind > KZ_NAEND_PROCESS_END || t.self_check > KZ_NSELF_DIFFERS || t.root_kind > KZ_NROOT_SYMBOL_UNMAPPED)
+      return bad("NACTOR_TOKEN[" + std::to_string(i) + "] enum out of range");
+  }
+  for (size_t i = 0; i < nlife; ++i) {
+    const kz_nlife& l = n.lifetimes[i].r;
+    if (!idx_ok(l.begin_event, ne) || !idx_ok(l.end_event, ne) || !idx_ok(l.creator, na) || !idx_ok(l.ender, na) || !idx_ok(l.previous, nlife) ||
+        (l.previous != KZ_NONE32 && l.previous >= i))
+      return bad("NLIFE[" + std::to_string(i) + "] index out of range");
+    if (l.resource > KZ_NRES_NATIVE_THREAD || l.end_kind > KZ_NLIFE_END_OPEN_AT_END) return bad("NLIFE[" + std::to_string(i) + "] enum out of range");
+  }
+  for (size_t i = 0; i < n.build_checks.size(); ++i) {
+    const kz_nbuild& b = n.build_checks[i].r;
+    if (b.link > KZ_NBUILD_LINK_BUILD_ID || b.verdict > KZ_NBUILD_VERDICT_REFUSED) return bad("NBUILD[" + std::to_string(i) + "] enum out of range");
+  }
+  for (size_t i = 0; i < n.needs.size(); ++i) {
+    const kz_nsuffice& x = n.needs[i].r;
+    if (!idx_ok(x.site, ns) || !idx_ok(x.event, ne) || !idx_ok(x.loss, nl) || !idx_ok(x.actor, na)) return bad("NSUFFICE[" + std::to_string(i) + "] index out of range");
+    if (x.state > KZ_NSUFF_BUILD_MISMATCH) return bad("NSUFFICE[" + std::to_string(i) + "] enum out of range");
+  }
+  for (size_t i = 0; i < n.call_ends.size(); ++i) {
+    const kz_ncallend& c = n.call_ends[i].r;
+    if (c.event >= ne || c.actor >= na || !idx_ok(c.evidence, ne) || !idx_ok(c.loss, nl)) return bad("NCALLEND[" + std::to_string(i) + "] index out of range");
+    if (c.cause > KZ_NCALLEND_HELD_AT_END) return bad("NCALLEND[" + std::to_string(i) + "] enum out of range");
+  }
+  for (size_t i = 0; i < nord; ++i) {
+    const kz_norder& o = n.order_instances[i].r;
+    if (!idx_ok(o.from_event, ne) || !idx_ok(o.to_event, ne) || !idx_ok(o.from_actor, na) || !idx_ok(o.to_actor, na) || !idx_ok(o.life, nlife) ||
+        !idx_ok(o.token, ntok))
+      return bad("NORDER[" + std::to_string(i) + "] index out of range");
+    if (o.rule > KZ_NORDER_RULE_L0_SCRIPT || o.kind > KZ_NORDER_KIND_OBSERVED_ONLY || o.result > KZ_NORDER_RESULT_TOKEN_MISSING || o.exit_kind > KZ_NWAIT_EXIT_BUDGET)
+      return bad("NORDER[" + std::to_string(i) + "] enum out of range");
+  }
+  for (size_t i = 0; i < n.order_observed.size(); ++i) {
+    const kz_norderobs& o = n.order_observed[i].r;
+    if (o.actor >= na || !idx_ok(o.writer_actor, na) || !idx_ok(o.write_event, ne) || !idx_ok(o.use_event, ne) || !idx_ok(o.instance, nord))
+      return bad("NORDER_OBS[" + std::to_string(i) + "] index out of range");
+    if (o.observed > KZ_NOBS_NOT_REACHED) return bad("NORDER_OBS[" + std::to_string(i) + "] enum out of range");
+  }
   return Status::success();
 }
 
@@ -523,6 +628,24 @@ Status read_neutral(const Container& run, NeutralRun* out) {
   if (s.ok()) s = run.read_section(KZ_SEC_NLOSS, &out->losses);
   if (s.ok()) s = run.read_section(KZ_SEC_NCTL, &out->ctl);
   if (s.ok() && run.find_section(KZ_SEC_NOWNER) != nullptr) s = run.read_section(KZ_SEC_NOWNER, &out->owners);  // revision 6, optional
+  // revision 12, each optional
+  std::vector<kz_ntoken> tokens;
+  std::vector<kz_nlife> lifetimes;
+  std::vector<kz_nbuild> builds;
+  std::vector<kz_nsuffice> needs;
+  std::vector<kz_ncallend> call_ends;
+  std::vector<kz_norder> orders;
+  std::vector<kz_norderobs> observed;
+  auto optional = [&](uint32_t type, auto* v) {
+    if (s.ok() && run.find_section(type) != nullptr) s = run.read_section(type, v);
+  };
+  optional(KZ_SEC_NACTOR_TOKEN, &tokens);
+  optional(KZ_SEC_NLIFE, &lifetimes);
+  optional(KZ_SEC_NBUILD, &builds);
+  optional(KZ_SEC_NSUFFICE, &needs);
+  optional(KZ_SEC_NCALLEND, &call_ends);
+  optional(KZ_SEC_NORDER, &orders);
+  optional(KZ_SEC_NORDER_OBS, &observed);
   if (!s.ok()) return s;
   if (nrun.size() != 1) return Status::error(Err::Invalid, "neutral layer: NRUN must hold one record");
   bool strings_ok = true;
@@ -563,6 +686,58 @@ Status read_neutral(const Container& run, NeutralRun* out) {
     str(r.owner_app, &n.owner_app);
     str(r.request_func, &n.request_func);
     out->actors.push_back(std::move(n));
+  }
+  for (const kz_ntoken& r : tokens) {
+    NToken n;
+    n.r = r;
+    str(r.root_func, &n.root_func);
+    str(r.reason, &n.reason);
+    out->tokens.push_back(std::move(n));
+  }
+  for (const kz_nlife& r : lifetimes) {
+    NLife n;
+    n.r = r;
+    str(r.key_space, &n.key_space);
+    str(r.key_text, &n.key_text);
+    out->lifetimes.push_back(std::move(n));
+  }
+  for (const kz_nbuild& r : builds) {
+    NBuild n;
+    n.r = r;
+    str(r.path, &n.path);
+    str(r.build_id, &n.build_id);
+    str(r.reason, &n.reason);
+    out->build_checks.push_back(std::move(n));
+  }
+  for (const kz_nsuffice& r : needs) {
+    NSuffice n;
+    n.r = r;
+    str(r.need, &n.need);
+    str(r.reason, &n.reason);
+    str(r.note, &n.note);
+    out->needs.push_back(std::move(n));
+  }
+  for (const kz_ncallend& r : call_ends) {
+    NCallEnd n;
+    n.r = r;
+    str(r.evidence_text, &n.evidence_text);
+    out->call_ends.push_back(std::move(n));
+  }
+  for (const kz_norder& r : orders) {
+    NOrder n;
+    n.r = r;
+    str(r.edge, &n.edge);
+    str(r.instance_key, &n.instance_key);
+    str(r.reason, &n.reason);
+    out->order_instances.push_back(std::move(n));
+  }
+  for (const kz_norderobs& r : observed) {
+    NOrderObs n;
+    n.r = r;
+    str(r.row_key, &n.row_key);
+    str(r.order_static, &n.order_static);
+    str(r.reason, &n.reason);
+    out->order_observed.push_back(std::move(n));
   }
   if (!strings_ok) return Status::error(Err::BadRef, "neutral layer: a string does not resolve");
   return check_neutral(*out);
@@ -624,6 +799,80 @@ Status add_neutral_sections(const NeutralRun& n, ContainerWriter* w) {
   if (s.ok()) s = w->add_section(KZ_SEC_NLOSS, n.losses);
   if (s.ok()) s = w->add_section(KZ_SEC_NCTL, n.ctl);
   if (s.ok() && !n.owners.empty()) s = w->add_section(KZ_SEC_NOWNER, n.owners);  // only with an owner named after the spawn
+  // revision 12: each side table only when it has a record, so a layer without them is written as before
+  if (s.ok() && !n.tokens.empty()) {
+    std::vector<kz_ntoken> v;
+    for (const NToken& x : n.tokens) {
+      kz_ntoken r = x.r;
+      r.root_func = w->intern(x.root_func);
+      r.reason = w->intern(x.reason);
+      v.push_back(r);
+    }
+    s = w->add_section(KZ_SEC_NACTOR_TOKEN, v);
+  }
+  if (s.ok() && !n.lifetimes.empty()) {
+    std::vector<kz_nlife> v;
+    for (const NLife& x : n.lifetimes) {
+      kz_nlife r = x.r;
+      r.key_space = w->intern(x.key_space);
+      r.key_text = w->intern(x.key_text);
+      v.push_back(r);
+    }
+    s = w->add_section(KZ_SEC_NLIFE, v);
+  }
+  if (s.ok() && !n.build_checks.empty()) {
+    std::vector<kz_nbuild> v;
+    for (const NBuild& x : n.build_checks) {
+      kz_nbuild r = x.r;
+      r.path = w->intern(x.path);
+      r.build_id = w->intern(x.build_id);
+      r.reason = w->intern(x.reason);
+      v.push_back(r);
+    }
+    s = w->add_section(KZ_SEC_NBUILD, v);
+  }
+  if (s.ok() && !n.needs.empty()) {
+    std::vector<kz_nsuffice> v;
+    for (const NSuffice& x : n.needs) {
+      kz_nsuffice r = x.r;
+      r.need = w->intern(x.need);
+      r.reason = w->intern(x.reason);
+      r.note = w->intern(x.note);
+      v.push_back(r);
+    }
+    s = w->add_section(KZ_SEC_NSUFFICE, v);
+  }
+  if (s.ok() && !n.call_ends.empty()) {
+    std::vector<kz_ncallend> v;
+    for (const NCallEnd& x : n.call_ends) {
+      kz_ncallend r = x.r;
+      r.evidence_text = w->intern(x.evidence_text);
+      v.push_back(r);
+    }
+    s = w->add_section(KZ_SEC_NCALLEND, v);
+  }
+  if (s.ok() && !n.order_instances.empty()) {
+    std::vector<kz_norder> v;
+    for (const NOrder& x : n.order_instances) {
+      kz_norder r = x.r;
+      r.edge = w->intern(x.edge);
+      r.instance_key = w->intern(x.instance_key);
+      r.reason = w->intern(x.reason);
+      v.push_back(r);
+    }
+    s = w->add_section(KZ_SEC_NORDER, v);
+  }
+  if (s.ok() && !n.order_observed.empty()) {
+    std::vector<kz_norderobs> v;
+    for (const NOrderObs& x : n.order_observed) {
+      kz_norderobs r = x.r;
+      r.row_key = w->intern(x.row_key);
+      r.order_static = w->intern(x.order_static);
+      r.reason = w->intern(x.reason);
+      v.push_back(r);
+    }
+    s = w->add_section(KZ_SEC_NORDER_OBS, v);
+  }
   return s;
 }
 

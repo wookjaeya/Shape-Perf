@@ -14,6 +14,8 @@
 //                                               --real-record replays it as a real record (SPEC 4.8, ADR-055), as a
 //                                               `record real` line in the trace does; without either it is a complete
 //                                               model trace
+//   kz-phi --identity                           print the tool hash of this build, the source identities it is made
+//                                               of and the schema revision and fingerprint
 //
 // A directory stands for the *.kzp files in it, in the order of their names.  Exit status:
 // 0 = ok, 1 = the profile or a citation is wrong, 2 = usage or I/O error.
@@ -26,6 +28,8 @@
 #include <vector>
 
 #include "kz/core/container.hpp"
+#include "kz/core/dump.hpp"
+#include "kz/core/identity.hpp"
 #include "kz/core/eval_trace.hpp"
 #include "kz/core/phi.hpp"
 #include "kz/core/phi_provenance.hpp"
@@ -38,7 +42,8 @@ int usage() {
   std::fprintf(stderr,
                "usage: kz-phi check|dump|hash|stats <dir|file>...\n"
                "       kz-phi verify-prov --root <bundle> <dir|file>...\n"
-               "       kz-phi replay --trace <file> [--real-record] [--predicate RULE=EXPR]... [--version COMPONENT=VERSION]... <dir|file>...\n");
+               "       kz-phi replay --trace <file> [--real-record] [--predicate RULE=EXPR]... [--version COMPONENT=VERSION]... <dir|file>...\n"
+               "       kz-phi --identity\n");
   return 2;
 }
 
@@ -84,6 +89,12 @@ int load(const std::vector<kz::phi::SourceText>& files, kz::phi::Profile* p) {
 }  // namespace
 
 int main(int argc, char** argv) {
+  if (argc == 2 && std::strcmp(argv[1], "--identity") == 0) {
+    std::printf("tool=kz-phi\ntool_sha256=%s\ntool_source=%s\ncore_source=%s\nschema_revision=%u\nschema_fingerprint=%s\n",
+                kz::to_hex(KZ_THIS_TOOL_HASH("kz-phi")).c_str(), KZ_TOOL_SOURCE_SHA256, std::string(kz::core_source_identity()).c_str(),
+                static_cast<unsigned>(KZ_SCHEMA_REVISION), kz::to_hex(kz::schema_fingerprint()).c_str());
+    return 0;
+  }
   if (argc < 3) return usage();
   const std::string cmd = argv[1];
   std::vector<std::string> args;

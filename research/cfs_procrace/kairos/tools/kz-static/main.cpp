@@ -20,6 +20,7 @@
 #include "cli.hpp"
 #include "commands.hpp"
 #include "kz/core/container.hpp"
+#include "kz/core/dump.hpp"
 #include "kz/core/identity.hpp"
 
 namespace kzs_cli {
@@ -122,8 +123,9 @@ int main(int argc, char** argv) {
   if (argc < 2) return usage();
   const std::string cmd = argv[1];
   if (cmd == "--identity" && argc == 2) {
-    std::printf("tool=kz-static\ntool_sha256=%s\ntool_source=%s\ncore_source=%s\n", kz::to_hex(KZ_THIS_TOOL_HASH("kz-static")).c_str(), KZ_TOOL_SOURCE_SHA256,
-                std::string(kz::core_source_identity()).c_str());
+    std::printf("tool=kz-static\ntool_sha256=%s\ntool_source=%s\ncore_source=%s\nschema_revision=%u\nschema_fingerprint=%s\n",
+                kz::to_hex(KZ_THIS_TOOL_HASH("kz-static")).c_str(), KZ_TOOL_SOURCE_SHA256, std::string(kz::core_source_identity()).c_str(),
+                static_cast<unsigned>(KZ_SCHEMA_REVISION), kz::to_hex(kz::schema_fingerprint()).c_str());
     return 0;
   }
   if (cmd == "basis") return kzs_cli::cmd_basis(argc, argv);

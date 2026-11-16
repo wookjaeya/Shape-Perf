@@ -5,7 +5,8 @@
 //   kz-dump --check <file>    verify only (structure, reserved fields, references); exit status
 //   kz-dump --hash <file>     print the artifact hash (SHA-256 of the whole file)
 //   kz-dump --layout          print the schema layout and its fingerprint
-//   kz-dump --identity        print the tool hash of this build and the source identities it is made of
+//   kz-dump --identity        print the tool hash of this build, the source identities it is made of and the schema
+//                             revision and fingerprint
 //
 // This is the stand-alone form of `kz dump`; it links libkz-core only.  Exit status:
 // 0 = ok, 1 = the container is damaged or fails a content check, 2 = usage or I/O error.
@@ -35,8 +36,9 @@ int main(int argc, char** argv) {
   }
   if (argc == 2 && std::strcmp(argv[1], "--identity") == 0) {
     // The tool hash that this tool would write into the header of an artifact (kz/core/identity.hpp).
-    std::printf("tool=kz-dump\ntool_sha256=%s\ntool_source=%s\ncore_source=%s\n", kz::to_hex(KZ_THIS_TOOL_HASH("kz-dump")).c_str(),
-                KZ_TOOL_SOURCE_SHA256, std::string(kz::core_source_identity()).c_str());
+    std::printf("tool=kz-dump\ntool_sha256=%s\ntool_source=%s\ncore_source=%s\nschema_revision=%u\nschema_fingerprint=%s\n",
+                kz::to_hex(KZ_THIS_TOOL_HASH("kz-dump")).c_str(), KZ_TOOL_SOURCE_SHA256, std::string(kz::core_source_identity()).c_str(),
+                static_cast<unsigned>(KZ_SCHEMA_REVISION), kz::to_hex(kz::schema_fingerprint()).c_str());
     return 0;
   }
   std::string mode = "dump";

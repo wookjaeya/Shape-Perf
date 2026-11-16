@@ -4,6 +4,8 @@
 
 (2026-11-16 덧붙임) 개정 2(경로 A 부재 결과의 이름 결합)는 8절에 날짜를 붙여 덧붙였다. 0–7절의 개정 1 글은 그대로 두고, 개정 2 가 바꾸는 조항은 8.1 의 변경표에 적었다.
 
+(2026-11-16 검토 뒤 덧붙임) 개정 2 의 검토가 확인한 지적은 8.12 에 날짜를 붙여 덧붙였다(기초 4 의 완전성, 같은 행위자 대조의 범위, 사전 시험의 조건, 한 기록의 여러 사용 사건, 정적 키 상수 배제, (라)와 (마), 1차 근거 G15–G17, 8.7 의 셋째 줄).
+
 ## 0. 이 문서의 지위와 읽는 법
 
 ### 0.1 지위
@@ -746,11 +748,15 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 
 **반례(대조로 쓴다).** BP 의 "조회한 뒤 없으면 생성"(행 A20): 같은 행위자 안의 조회와 생성 사이에 이름 결합이 서도 필요한 순서는 없다(개정 1 R01 의 이유, G-CLASS 의 반례, 4.2 의 (c3) 에 붙인 [검토 판단]). 이름 결합은 연결만 준다.
 
+(2026-11-16 검토 뒤 덧붙임: 8.2 의 적용 대상과 기초 4·결과는 8.12 (ㄱ)(ㄴ)(ㄹ), (라)는 (ㅂ), (마)의 구간은 (ㅇ).)
+
 ### 8.3 refuted 규칙 (같은 다섯 조건 위에서)
 
 - **쌍의 refuted.** 기초 요건 1, 2, 4, 5 와 조건 다섯이 서고, 조건 (나)의 비교 의미로 두 키 글이 같지 않으면, 그 쌍의 c 는 u 가 찾은 객체가 아니다(`refuted`). 기초 3 과 6 은 쓰지 않는다: 이름이 다르면 u 의 결과나 두 사건의 순서와 상관없이 다른 객체다. 조건 (마)도 요구한다(lead 결정의 "같은 다섯 조건"; 생성 뒤의 이름 바꿈은 (다)와 (마)가 함께 막는다).
 - **기록의 refuted**(`link.status = refuted`, 그래서 `violation = refuted_link`). 셋이 모두 설 때만이다. (1) 행의 생성자 site 에 사건이 있는 모든 게시 행위자의 모든 생성 사건이 refuted 쌍이다. (2) 행의 생성자 site 가 모두 계획되었고, 그 키 글과 반환의 필요가 present 또는 not-reached 이며, 손실 표지가 없다. (3) 행의 생성자 집합에 `writer_set_incomplete` 나 풀리지 않은 간접 호출의 사유가 없다. 범위는 "이 실행의 관측 구간 안"이고 `link.refuted_scope` 에 적는다. 하나라도 빠지면 기록은 `unlinked` 이고 refuted 쌍은 `link.name_binding` 의 쌍 목록에 남는다(`link_unlinked(name binding: refuted for some creates only)`).
 - **키 글의 차이만으로는 refuted 를 내지 않는다.** 설명 스크립트 개정 2 의 갈래(`env/obs1/explain.py:970-973`: 행의 모든 게시 사건이 다른 키 글을 가지면 refuted)는 이 규칙에 맞지 않는다. 그 갈래가 낸 refuted 는 개정 2 로 읽으면 `unlinked` 다. 이 주기의 45 기록에서 refuted 는 0 이라(`records/obs1-20261116-reviewfix/index.tsv`의 link 칸: unlinked 45) 기록의 값은 바뀌지 않는다 [직접 확인]. 스크립트를 고치는 것은 이름 결합을 구현하는 다음 판의 일이다(8.7).
+
+(2026-11-16 검토 뒤 덧붙임: refuted 의 구간은 8.12 (ㅇ), 정적 키 상수 배제와 생성자 site 는 (ㅁ).)
 
 ### 8.4 빠진 조건마다의 값 (3.5 에 더하는 하위 사유)
 
@@ -775,6 +781,8 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 
 기초 1, 2 의 사유는 기존 글 그대로다(8.2 의 표).
 
+(2026-11-16 검토 뒤 덧붙임: 하위 사유 둘 더 — `record_insufficient(no success constant of the creator: the callee's returns are not all followed)` 8.12 (ㄱ), `link_unlinked(name binding: the uses of the record differ in basis)` 8.12 (ㄹ).)
+
 ### 8.5 3.3 과 3.6 의 바뀜
 
 - **3.3 (1) `violation`.** 표의 글은 그대로다. `established` 가 두 바탕을 함께 뜻하므로, 바탕 `name_binding` 에서도 `observed` 는 `use_cond = derived` 이고 `order = unmet_state_observed` 일 때 나온다. `not_observed_in_runs` 는 바탕 `name_binding` 에서 나오지 않는다: 이름 결합은 부재 결과에만 정의되고, 경로 A 의 축 3 규칙은 부재 결과에서 `met_state_only` 를 내지 않는다(결과 문서 §7.0 의 `order.status` 규칙). 그래서 표를 바꾸지 않아도 두 줄이 서로 맞는다.
@@ -786,6 +794,8 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
   10. `link.status = refuted` 이면: refuted 쌍마다 기초 요건 1, 2, 4, 5 와 조건 다섯이 `held` 이고 두 키 글이 잘리지 않고 서로 다르다; 8.3 의 (1)–(3) 이 있고 `link.refuted_scope` 가 비어 있지 않다.
   11. `link.basis` 는 `established` 일 때만 있다. 조건의 근거는 자료 파일, 도구 출력, 실행 기록 가운데 하나를 sha256 과 함께 가리킨다. 사람의 읽기(이 절의 "판의 읽기")는 근거로 받지 않는다(D6).
 
+(2026-11-16 검토 뒤 덧붙임: 한 기록의 여러 사용 사건과 그 위의 `not_observed_in_runs`, 검사 12 는 8.12 (ㄹ).)
+
 ### 8.6 같은 규칙을 C1 관계 밖에 돌리는 요구 (대조)
 
 - **요구.** 이름 결합을 구현한 첫 설명 스크립트 판은 같은 입력에서 아래 (a)–(c) 모두에 **같은 규칙**을 돌리고, 결과를 관계 1 의 기록과 함께 낸다. 규칙에 행·키·앱 이름을 넣지 않는다. 대조를 위해 규칙을 바꾸면 관계 1 의 결과도 다시 낸다.
@@ -795,6 +805,8 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 - **계획에 없는 행은 대조할 수 없다.** A20 은 C1 계획에서 잘렸다(`plan.side:56` `tier=3 … state=cut`) [직접 확인]. 이 주기의 기록에는 BP 행위자 13 의 조회 API 안 키 글(site 273, aseq 11 "BP0_tsem", aseq 15 "BP1_tsem")과 생성 API 안 키 글(site 272, aseq 13, 17)이 있으나, BP 의 조회 반환(`bp_flow.c:126` 의 after-call)은 계획에 없어 기초 3 이 서지 않는다(`c1_record_sites.txt`). 대조를 하려면 그 행을 넣는 계획(예산의 다음 층이나 대조의 예산)이 있어야 하고, 그 예산은 D5 대로 값·이유·잘림·미해결·민감도를 적는다.
 - **사전 시험으로 세는 것.** 이 개정의 커밋 뒤에 얻는 첫 기록(다음 C1 부팅, 다른 빌드의 부팅)에 규칙을 돌린 결과다. 이 주기의 C1 기록에 돌린 결과는 "규칙을 정하기 전에 본 기록"으로 표시한다.
 - **셈.** 행·소비자마다 `bound`, refuted 쌍, `unlinked`(하위 사유별)를 세고, 대조(`same_actor`)와 탐지를 섞지 않는다.
+
+(2026-11-16 검토 뒤 덧붙임: (a)의 범위는 8.12 (ㄴ), 사전 시험이 되는 기록의 조건과 (b)·(c)의 옛 수는 8.12 (ㄷ).)
 
 ### 8.7 규칙의 입력과 그것을 주는 뒤 단계, 그때까지의 값
 
@@ -809,6 +821,8 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 | 이름 결합을 구현하고 8.3 대로 refuted 갈래를 고친 설명 스크립트 판 | 전부 | 개정 2 에는 이름 결합이 없음 | 위 입력이 있은 뒤 |
 
 - **그때까지의 값.** 지금의 설명 스크립트(`env/obs1/explain.py` 개정 2)는 경로 A 의 부재 결과를 `unlinked` 로 둔다(`link_unlinked(absence outcome: the use reached no object instance)`). 8.4 의 하위 사유는 규칙을 구현한 판부터 쓴다. 그 판은 빠진 입력을 8.4 의 하위 사유로 모두 적고, 입력이 일부만 갖춰진 동안에도 `unlinked` 를 넘지 않는다.
+
+(2026-11-16 검토 뒤 덧붙임: 셋째 줄의 주는 단계는 8.12 (ㅈ), 정적 키 상수 배제는 (ㅁ).)
 
 ### 8.8 오늘의 입력으로 읽은 관계 1 (종이 적용, 도구 출력이 아님)
 
@@ -831,6 +845,8 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 - 결과: 연결은 `unlinked`. 개정 2 를 구현한 판이 이 기록에 낼 사유는 기존 `link_unlinked(absence outcome: the use reached no object instance)`, `record_insufficient(no success constant of the creator: the creator's out id is not read)` 에 더해 (가)–(마)의 하위 사유 여섯((나)는 의미와 한도 검증의 둘)이다 [I: 규칙에서 읽음]. 판정은 바뀌지 않는다: `violation` 은 이미 `use_cond = partial` 로 `undetermined` 이고, `odf = failure_sign` 은 연결을 쓰지 않는다(3.3).
 - 같은 기록의 다른 쌍: 행위자 13 의 "BP1_tsem" 생성(aseq 16–18), 행위자 14 의 "SCH_LAB" 생성(API 안 키 글 aseq 4, u 보다 앞)은 키 글이 다르다. 다섯 조건이 서지 않으므로 refuted 쌍이 아니고 `unlinked` 다(8.3).
 
+(2026-11-16 검토 뒤 덧붙임: (라)의 행은 8.12 (ㅂ) 대로 읽는다.)
+
 ### 8.9 규칙과 1차 근거
 
 | 번호 | 규칙 | 1차 근거 |
@@ -852,11 +868,15 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 
 C1 소스의 경로는 `/home/user/work/procrace/c1_build/bundle_1df262a/` 아래이고(`osal/src/os/shared/src/`, `osal/src/os/shared/inc/`, `osal/src/os/inc/`, `cfe/modules/es/fsw/src/`), 설정 헤더는 `/home/user/work/redesign/obs1/c1pre_derived/ws/build/osal_public_api/inc/osconfig.h` 다. 그 sha256 앞 16자리: `osapi-idmap.c` `706e2f7f33750149`, `osapi-countsem.c` `5b37b81ed01e3d5f`, `os-shared-idmap.h` `8e68948e1b599e36`. `relations.txt` 는 `/home/user/work/redesign/obs1/plangen_relcheck/c1_pre_tx/relations.txt`(`7c7396d2…`), `plan.kzs`·`plan.side` 는 `/home/user/work/redesign/obs1/plangen/c1_pre_tx/`(`5f015c5a…`, `8f5f200c…`)다.
 
+(2026-11-16 검토 뒤 덧붙임: G10 의 근거와 G15–G17 은 8.12 (ㄱ)(ㅅ).)
+
 ### 8.10 어휘 자료에 대하여
 
 - 이 개정은 새 바탕 사유를 만들지 않는다. 빠진 조건은 모두 "자원이나 주체의 실행 내 식별이 없음"(`link_unlinked`)의 구체적 까닭이므로 3.5 의 하위 사유 규칙대로 그 하위 사유로 쓰고, 기존 `record_insufficient` 의 두 하위 사유는 그대로 쓴다. 그래서 어휘 자료 `kairos/tests/static/data/reason_vocabulary.txt`(`4b964d34…`)는 바꾸지 않는다. 그 자료는 바탕 사유만 담고(머리 줄 1–4), 설명 스크립트의 어휘 검사도 바탕 이름과 `name(하위 사유)` 꼴만 본다(`env/obs1/explain.py:113-127`).
 - 잰 것 [직접 확인: `records/judgement-rules-rev2-20261116/vocab_test.txt`]: 그 자료를 읽는 시험 `test_static_reasons`(MC 바이너리 `900e48cd…`)는 지금 자료로 612 점검을 통과한다. 바탕 사유 한 줄을 더한 scratchpad 사본으로 돌리면 `test_static_reasons.cpp:64` 의 줄 수 점검(22)에서 614 가운데 1 이 실패한다(rc 1). 자료에 바탕 사유를 더하려면 시험 소스를 함께 바꾸고 빌드해야 하며, 문서만 바꾸는 이 개정의 범위 밖이다.
 - 바탕 사유가 따로 필요하다고 정해지면(예: 이름 결합의 사유를 바탕 이름으로 세고 싶을 때), 2026-11-16 의 세 덧붙임과 같은 차례를 따른다: 3.5 에 먼저 적고 그 까닭을 쓰고, 자료와 시험의 줄 수는 그 사유를 내는 코드와 같은 선언된 빌드에서 함께 바꾼다.
+
+(2026-11-16 검토 뒤 덧붙임: 새 하위 사유 둘은 바탕 사유의 하위라 어휘 자료를 바꾸지 않는다(8.12 (ㄱ)(ㄹ)).)
 
 ### 8.11 남은 문제 (6절에 더함)
 
@@ -866,3 +886,35 @@ C1 소스의 경로는 `/home/user/work/procrace/c1_build/bundle_1df262a/` 아�
 11. **관측 구간 밖.** (마)는 구간 안만 본다. 구간 밖의 삭제·재생성은 이름 결합에 닿지 않지만(u 가 부재를 보았고 c 가 구간 안에서 성공했으므로), refuted 의 범위는 구간 안으로 좁다(8.3).
 12. **사후 정의.** 이 정의는 C1 기록을 본 뒤에 나왔다. 사전 시험(8.6)의 결과가 나올 때까지 이 규칙의 결과를 "사전에 정한 규칙의 탐지"로 보고하지 않는다.
 13. **조회 쪽 키 글의 한도 검증.** 지금 계획은 조회 API 의 호출에서 런타임 복사 한도 64 로만 검증한다(8.2 (나)). 이름 공간의 한도로 검증하려면 그 한도가 자료(이름 공간 항목)에서 계획으로 와야 한다.
+
+(2026-11-16 검토 뒤 덧붙임: 14. 정적 키 상수 배제가 뺀 생성자 site 를 계획하지 않음, 8.12 (ㅁ).)
+
+### 8.12 검토 뒤 덧붙임 (2026-11-16)
+
+개정 2(8.0–8.11)의 검토가 확인한 지적 아홉(`plan/full_stage_results_20261116.md` §6.7 의 `rules-02`–`rules-10`)을 받아 덧붙인다. 8.0–8.11 의 글은 지우거나 고치지 않는다. 각 절의 끝에 이 절을 가리키는 날짜 붙은 한 줄을 둔다. 이 덧붙임은 이름 결합을 구현한 어떤 설명 스크립트 판도 돌기 전에 커밋한다(8.6 의 "대조를 위해 규칙을 바꾸면 관계 1 의 결과도 다시 낸다": 아직 낸 결과가 없다).
+
+**(ㄱ) 기초 4 의 완전성 (8.2, 8.4, G10에 더함; `rules-02`).** 기초 4 는 다음이 모두 설 때만 선다: 행에 그 생성자 callee 의 `callee-check (returns not followed): <callee>` 줄이 없고, `callee-check (set): <callee>: not established` 줄이 없으며(relations 규칙 개정 9), 성공 상수로 쓰는 상수의 `callee-check: <callee> returns` 줄에 `not shown to reach the return` 표지가 없다. 하나라도 빠지면 그 쌍은 `record_insufficient(no success constant of the creator: the callee's returns are not all followed)` 다(8.4 의 표에 더하는 하위 사유; 바탕 사유 `record_insufficient`). 까닭: 따라가지 못한 반환이 있으면 상수 목록은 callee 가 돌려주는 값의 위 한계가 아니어서 "실패 등급이 아닌 유일한 상수"가 성공 값이라는 추론이 서지 않는다. 그리고 도달 정의만으로 모은 상수는 그 경로에서 덮였을 수 있다. 실제 예: C1 의 `OS_CountSemCreate` 는 `OS_ObjectIdAllocateNew` 의 결과를 `return_code` 에 담고(`osal/src/os/shared/src/osapi-countsem.c:94`), 성공이면 `:103` 과 `:106`(`OS_ObjectIdFinalizeNew`)에서 다시 정의하므로 `:109` 에 그 결과가 닿는 것은 실패일 때뿐이다(`:95`). 실제 성공 반환은 `OS_ObjectIdFinalizeNew` 의 매개변수 `operation_status` 다(`osapi-idmap.c:863`). relations 규칙 개정 7 의 행은 `AllocateNew` 사슬의 `0 [OS_SUCCESS]` 줄만 성공 상수로 내놓아, 8.2 의 기초 4 를 글 그대로 읽으면 그 줄로 섰다. 설명 스크립트 개정 3(`env/obs1/explain.py` 의 `publisher_out`)이 이 규칙을 따른다. G10 의 1차 근거에 `osapi-countsem.c:94-109`, `osapi-idmap.c:863` 을 더한다.
+
+**(ㄴ) 같은 행위자 대조의 범위 (8.2 "적용 대상", 8.6 (a)에 더함; `rules-03`).** 8.2 의 적용 대상은 "행의 생성자 site 에 사건이 있는 게시 행위자의 생성"이다. 그러나 존재 탐침 행(relations 의 `handling: probe-create`)은 생성자를 남기지 않는다: C1 의 A20 은 BP 자신의 생성을 `not a pair: probe-create`, SCH_LAB 의 생성을 `not a pair: key constants differ` 로 빼고 `no creator left after exclusions` 다(relations 개정 7 출력, `relrev7_check/c1_pre_tx/relations.txt` 의 A20). 그래서 8.2 의 범위로는 A20 에서 짝이 생기지 않고 8.6 (a)의 기대도 생기지 않는다. 대조 기록(`actor_pair_kind = same_actor`)에 한해 범위를 이렇게 정한다: 존재 탐침 행의 대조에서 c 는 (1) 그 행이 `not a pair: probe-create` 로 뺀 생성(소비자와 같은 행위자; 같은 행위자가 게시 행위자 자리를 대신한다)과 (2) `not a pair: key constants differ` 로 뺀 생성(다른 행위자)이고, 그 줄들이 이름 댄 생성 호출 site 를 "행의 생성자 site" 로 읽어 기초 요건, 다섯 조건, 8.3 의 쌍 규칙을 그대로 쓴다. 이 범위의 결과는 대조 기록에만 쓰고 3.4 의 모집단에 넣지 않는다. 8.6 (a)의 [I] 기대(BP 의 조회와 생성은 `bound`, SCH_LAB 과의 쌍은 refuted 쌍)는 이 범위를 조건으로 한다. 관계 1(A21)의 생성자는 빠진 것이 아니라 행의 `creator:` 줄이므로 이 덧붙임으로 관계 1 의 쌍은 바뀌지 않는다 [I].
+
+**(ㄷ) 사전 시험이 되는 기록의 조건 (8.6 에 더함; `rules-04`).** relations 규칙 개정 7(결과 문서 §2)이 경로 A 의 사용을 이름 공간의 비교 함수로 거른 뒤 다시 만든 계획에서 경로 A 의 계획된 행은 c1_pre_tx 의 A21 하나뿐이고, c1_post_tx·r2_core·c5_641·c5_642 에는 없다(`relrev7_plans`, 그 뒤의 `order_rev1b_plans`, `schema12_plans`, `extfix_plans` 의 sidecar `state=planned` 행) [직접 확인: 결과 문서 §2.5, §6.7]. 8.6 (b)·(c)가 대조로 든 A22, A23, A50, A51(c1_pre_tx)과 c1_post_tx 의 넷은 계획에서 빠지거나(A22, A23) 층 3 으로 밀렸다(A50, A51 → A31, A32). 그래서 지금 계획으로 다음 부팅을 하면 경로 A 의 기록은 A21 하나이고, 그것은 이 규칙을 맞춘 C1 행이다. 8.0 (2)와 8.6 의 안전장치가 서려면, 부팅의 계획이 C1 관계 밖의 경로 A 행과 A20 을 기록된 예산(D5: 값, 이유, 잘림, 미해결, 민감도) 아래에 넣었을 때만 그 부팅의 기록을 8.6 의 "사전 시험"으로 센다. 8.6 (b)·(c)의 옛 수는 지우지 않고 이 줄로 고쳐 읽는다.
+
+**(ㄹ) 한 기록 안의 여러 사용 사건 (8.2 "결과", 8.5 에 더함; `rules-05`).** 8.2 는 쌍 (u, c)마다 `bound` 를 정의하고 "여럿"은 한 u 의 여러 c 만 다룬다. 한 기록(빌드, 행, 소비 행위자)에는 사용 사건이 여럿일 수 있다: A21 의 조회는 상한 2 의 루프 안에 있다(`cf_cfdp.c:967`, 채널마다 한 번 `:993`). 그 루프는 조회가 실패하면 끝나므로(`:995-1001` 의 `break`) 한 기록에 부재 u 가 둘 생기지는 않지만, 채널 0 의 찾은 u 뒤에 채널 1 의 부재 u 는 생길 수 있다. 기록 단위의 규칙: 기록의 `link.status = established`, `link.basis = name_binding` 은 그 기록의 모든 사용 사건이 부재 결과이고 각각 `bound` 이며, 어느 u 도 `unlinked` 나 refuted 가 아닐 때만이다. 바탕 `instance` 는 개정 1 대로 모든 u 가 인스턴스에 닿았을 때만이다. 두 바탕이 섞인 기록(인스턴스에 닿은 u 와 이름 결합된 u)은 `unlinked` 이고 하위 사유는 `link_unlinked(name binding: the uses of the record differ in basis)` 다(8.4 에 더함). 이 위에서 8.5 의 글을 고쳐 읽는다: 바탕 `name_binding` 인 기록은 모든 u 가 부재 결과이고, 경로 A 의 축 3 규칙은 부재 결과에서 `met_state_only` 를 내지 않으므로 `not_observed_in_runs` 는 그 바탕에서 나오지 않는다. 서식 검사 12(8.5 의 9–11 에 더함): `link.basis = name_binding` 이면 기록의 모든 사용 사건이 부재 결과이고 `link.name_binding` 에 사용 사건마다 `bound` 인 쌍이 있다. 지금의 설명 스크립트(개정 2, 3)는 연결에 `use_events[0]` 만 읽는다(`env/obs1/explain.py` 의 연결 계산). 이름 결합을 구현하는 판은 이 집계를 따라야 하고, 그때까지 이름 결합은 내지 않는다.
+
+**(ㅁ) 정적 키 상수 배제 (8.3, 8.7, 8.11 에 더함; `rules-06`).** relations 의 경로 A 는 실행 전에 키 상수가 다른 생성자를 `not a pair: key constants differ` 로 뺀다(C1 A20 의 SCH_LAB 생성 `"SCH_LAB"`; 키가 알려진 모든 행이 같다). 이것은 키 글의 차이로만 생성자를 빼는 정적 규칙이고, 그 차이를 쓰는 데 8.3 이 요구하는 (나)(판이 고정된 소스에서 읽은 비교 의미)와 (다)(이름 대응이 없음)를 세우지 않는다. 정한다: 이 배제는 계획을 위한 후보 거르기로만 남는다. 3.4 와 8.3 에서 refuted 로 읽지 않으며, 8.3 (1)·(2)의 "행의 생성자 site"를 줄이지도 않는다: 8.3 에서 행의 생성자 site 는 `creator:` 줄과 `not a pair: key constants differ` 줄이 이름 댄 생성 호출 모두다. 까닭: 이 배제를 refuted 로 읽으면 다섯 조건 없이 키 글의 차이를 쓰는 것이고(lead 의 결정 §7.12 항목 2, 8.3 의 셋째 항목), 생성자 site 를 줄이면 관측하지 않은 생성자 자리를 정상으로 채우게 된다(0.2). 그래서 `not a pair: key constants differ` 줄의 생성자 site 를 계획에 넣는 것도 8.3 (2)의 요구에 든다. 8.7 의 입력 표에 "정적 키 상수 배제(relations 경로 A, 8.3 과 어긋나는 입력)"를 이 뜻으로 더하고, 8.11 에 남은 문제 14 로 둔다: 지금 계획 생성기는 그 생성자 site 를 계획하지 않는다 [직접 확인: C1 A20 의 계획 행 `order=NOPAIR … state=cut`, `relrev7_plans/c1_pre_tx/plan.side:56`].
+
+**(ㅂ) 조건 (라)의 증거 (8.2 (라), 8.8 에 더함; `rules-07`).** (라)는 정적 증거와 실행 증거가 **모두** 있을 때 선다: 정적으로는 표 선택에 닿는 상수만 partition 으로 받는 관계 규칙에서 조회와 생성의 partition 이 같고, 실행으로는 그 쌍의 두 쪽 종류 값이 기록에 있어 같다. 정적 partition 은 두 코드 경로가 같은 표를 고를 수 있음을 보이고, 실행 값은 이 쌍이 그렇게 했음을 보인다. 그래서 relations 규칙 개정 7 은 (라)의 정적 반쪽만 주었다(결과 문서 §2.8 을 이 뜻으로 고침). 8.8 의 (라) 행("partition 칸은 증거가 아님; 생성 쪽 종류 값 없음")은 개정 7 뒤에는 "정적 반쪽은 섬; 생성 쪽 종류 값이 기록에 없어 실행 반쪽이 서지 않음"으로 읽는다.
+
+**(ㅅ) 1차 근거 G15–G17 (8.9 에 더함; `rules-08`).**
+
+| 번호 | 규칙 | 1차 근거 |
+|---|---|---|
+| G15 | 기초 6: c 의 at-call 이 u 의 after-call 뒤(겹치지 않음) | 조회는 표를 `OS_LOCK_MODE_GLOBAL` 로 잡고 찾는다(`osapi-idmap.c:975` `OS_ObjectIdGetByName(OS_LOCK_MODE_GLOBAL, …)`). 생성은 `OS_ObjectIdTransactionInit(OS_LOCK_MODE_EXCLUSIVE, …)`(`:1158`)부터 `OS_ObjectIdFinalizeNew`(`:828-863`)까지 표를 잡는다. 그래서 조회의 결과는 그 at-call 과 after-call 사이 어딘가의 잠긴 검색 때의 표 상태이고, 두 호출이 겹치면 잠긴 구간의 차례를 기록이 보이지 않는다. 겹치지 않을 때만 "u 가 부재를 본 뒤 c 가 이름을 넣었다"가 선다 |
+| G16 | 모순 규칙(c 가 u 앞에 끝났는데 부재) | 같은 종류에 그 이름이 있으면 생성은 `OS_ERR_NAME_TAKEN` 이다(`osapi-idmap.c:1170`, `:1177-1180`): 성공한 생성 뒤 삭제 없이 같은 이름을 찾지 못하면 (나)의 의미 읽기나 (마)가 틀렸다 |
+| G17 | 여럿 규칙(한 u 에 bound 인 c 가 둘 이상) | 같은 이름 중복 거부(`osapi-idmap.c:1177-1180`)와 (마): 다섯 조건 아래에서는 생기지 않아야 하므로, 생기면 어느 쪽에도 결합하지 않는다 |
+
+기초 6 의 경계(c 의 at-call 대 u 의 after-call)가 경로 A 의 순서 규칙(결과 문서 `plan/observation_path_results_20261116.md` §7.0: 두 at-call 의 비교)과 다른 까닭: 순서 규칙은 어느 API 호출이 먼저 시작했는지(앱 수준 사건의 차례)를 묻고, 이름 결합은 조회의 잠긴 검색이 생성의 삽입 앞이었는지를 묻는다. 뒤의 것은 두 호출 구간이 겹치지 않아야 기록에서 정해진다(G15).
+
+**(ㅇ) 조건 (마)의 구간 (8.2 (마), 8.3 에 더함; `rules-09`).** (마)의 구간은 두 사건의 차례와 무관하게 "앞선 사건의 at-call 부터 나중 사건의 after-call 까지"다. 8.2 의 글("u 의 at-call 부터 c 의 after-call 까지")은 c 가 u 뒤인 경우다. 8.3 의 refuted 쌍도 같은 구간을 쓴다: c 가 u 앞인 쌍(C1 기록의 SCH_LAB 생성, 행위자 14 aseq 3–5, u 의 행위자 12 aseq 25 앞)에서는 c 의 at-call 부터 u 의 after-call 까지다.
+
+**(ㅈ) 8.7 의 셋째 줄 (8.7 에 더함; `rules-10`).** relations 규칙 개정 7 은 표 선택 partition 과 이름 공간 소속 규칙만 주었다. 키 필드 writer 의 종류별 나눔과 그 완전성(조건 (다))은 주지 않았다: 개정 7 의 출력은 여전히 나누지 않은 한 줄 `writers: OS_common_record_t.name_entry: 18 …` 이다(`relrev7_check/c1_pre_tx/relations.txt` 의 A20·A21). 이 입력은 객체 단위의 접근과 writer 집합을 내는 뒤 추출 단계(schema 개정 12 의 OBJECT_ACCESS 를 채우는 단계; 결과 문서 §5.8 의 셋째 항목, §4.8)가 맡는다. 그때까지 (다)는 `link_unlinked(name binding: a name mapping into the table is not excluded)` 다.

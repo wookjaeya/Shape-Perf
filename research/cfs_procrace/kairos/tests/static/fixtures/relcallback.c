@@ -10,12 +10,12 @@
  *   - users in two threads and the process: a lookup by name with a key read from a static table through a pointer field,
  *     a lookup by path, a creation of the same name, and a search whose comparison comes from a function without a body.
  *
- * The rules this shows: a use belongs to the namespace of a comparison only when the comparison its chain of calls passes
- * to the search is that namespace's (the lookup by path is no use of the name namespace, the lookup and the creation by
+ * The rules this shows: a use belongs to the namespace of a comparison only when the comparison its chain of calls passes to the search is that namespace's (the lookup by path is no use of the name namespace, the lookup and the creation by
  * name are none of the path namespace); a comparison that comes from a function without a body leaves the membership
  * unresolved; the partition takes the kind (a table selector) and names the lock mode as no table selector; the rows name
  * the out-pointer arguments, the pointer field of the key, the writer sets with their premises (zero writers is no
- * verdict) and the constants the creator's callee may return; a lookup with no creator says why.
+ * verdict) and the constants the creator's callee may return (revision 9: its success value comes through a definition redefined
+ * later and a finishing call returns its parameter, so the set is not established); a lookup with no creator says why.
  */
 #include <pthread.h>
 #include <string.h>
@@ -108,16 +108,16 @@ static int alloc_check(int kind, const char *name, Token *t) {
   }
   return RC_NO_FREE;
 }
-
+static int rec_finish(int rc, Token *t, int *id) { if (rc == RC_OK) *id = t->idx; return rc; }
 int rec_create(int kind, const char *name, int *id) {
   Token t;
   int rc;
   if (id == 0) return RC_BAD_POINTER;
   rc = alloc_check(kind, name, &t);
-  if (rc != RC_OK) return rc;
-  strncpy(table[kind][t.idx].name, name, 15);
-  table[kind][t.idx].active = 1;
-  *id = t.idx;
+  if (rc == RC_OK) {
+    strncpy(table[kind][t.idx].name, name, 15);
+    table[kind][t.idx].active = 1;
+    rc = rec_finish(rc, &t, id); }
   return rc;
 }
 

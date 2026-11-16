@@ -1,4 +1,4 @@
-/* order.c -- a fixture for `kz-static order` (order rules revision 1) over the facts of the profile-free mode with the
+/* order.c -- a fixture for `kz-static order` (order rules revisions 1 and 2) over the facts of the profile-free mode with the
  * rule targets (extract --no-profile --targets-rule R-T1,R-T2).  Synthetic, for the regression of the component only.
  *
  *   name table   a registration table searched by name (strcmp in a loop over a global array) with a lookup and a create
@@ -18,7 +18,14 @@
  *   gate         a flag polled with a delay by another thread (a recognised predicate, an atomic read) and then passed to
  *                the check (relations path B): skip_* returns on the budget exit (the use after the wait is skipped: hard),
  *                cont_* leaves the loop on the budget exit and goes on to the use (continue: conditional);
- *   apps         a table of entries started in a loop (the iterations and the observed-only order of the two starts).
+ *   apps         a table of entries started in a loop (the iterations and the observed-only order of the two starts);
+ *   peers        (order rules revision 2) two threads that start their own children through one spawn wrapper, which
+ *                writes a field before its spawn call: in the call of the thread whose child reads the field the write is
+ *                before the read (hard); in the other thread's call it is not, since that call creates another child
+ *                (the wrapper's spawn call is caller-dependent);
+ *   local        (order rules revision 2) a spawn operation whose failure return is guarded by a local that holds the
+ *                primitive's result (two definitions): the witness rests on the source position alone (child without
+ *                success: unknown (position-based)).
  * The values are the fixture's; they are no experiment results. */
 #include <pthread.h>
 #include <signal.h>
@@ -311,8 +318,58 @@ void apps_start(void) {
   }
 }
 
+/* ---- two threads, one spawn wrapper that writes before its spawn call (order rules revision 2) ------------- */
+typedef struct {
+  int stamp;
+} Peer;
+
+static Peer peer;
+
+int spawn_via(pthread_t *out, void *(*entry)(void *)) {
+  peer.stamp = 0;
+  return pthread_create(out, 0, entry, 0);
+}
+
+void *peer_reader(void *arg) {
+  (void)arg;
+  (void)level_check(peer.stamp);
+  return 0;
+}
+
+void *peer_quiet(void *arg) {
+  (void)arg;
+  return 0;
+}
+
+void *peer_one(void *arg) {
+  pthread_t t;
+  (void)arg;
+  (void)spawn_via(&t, peer_quiet);
+  return 0;
+}
+
+void *peer_two(void *arg) {
+  pthread_t t;
+  (void)arg;
+  (void)spawn_via(&t, peer_reader);
+  return 0;
+}
+
+/* ---- a failure return guarded by a local that holds the primitive's result (order rules revision 2) -------- */
+int start_local(pthread_t *out, void *(*entry)(void *)) {
+  int rc = ERR_SETUP;
+  rc = pthread_create(out, 0, entry, 0);
+  if (rc != 0) return ERR_ILLEGAL;
+  return 0;
+}
+
+void *local_child(void *arg) {
+  (void)arg;
+  return 0;
+}
+
 int main(void) {
-  pthread_t a, b, c, d;
+  pthread_t a, b, c, d, e, f, g;
   (void)names_start();
   (void)held_spawn(0);
   (void)window_spawn(1);
@@ -325,5 +382,8 @@ int main(void) {
   pthread_create(&c, 0, gate_main, 0);
   pthread_create(&d, 0, waiter_main, 0);
   apps_start();
+  pthread_create(&e, 0, peer_one, 0);
+  pthread_create(&f, 0, peer_two, 0);
+  (void)start_local(&g, local_child);
   return 0;
 }

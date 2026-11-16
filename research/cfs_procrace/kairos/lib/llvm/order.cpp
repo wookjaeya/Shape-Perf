@@ -26,7 +26,7 @@
 
 namespace kzs {
 
-const char* order_rules_revision() { return "order rules revision 1 (2026-11-16)"; }
+const char* order_rules_revision() { return "order rules revision 2 (2026-11-16)"; }
 
 namespace {
 
@@ -335,6 +335,58 @@ class Ord : public RelFacts {
       if (root_kind_.count(r) != 0) out.insert(r);
     return out;
   }
+  // order rules revision 2: a call of a spawn operation's chain -- a spawn call, a call flagged spawn-op, or the call of a
+  // SPAWN_WRAP entry-argument or called-by-entry step (the entry reaches the creation through that call) -- passes on, in
+  // one call instance, the entry of the outer spawn call that reached its function.  A call whose function such a call
+  // calls is caller-dependent: the threads resolved at it are the union over every caller.
+  bool chain_call(uint32_t y) const {
+    if (chain_sites_.empty())
+      for (const kz_fact_spawnw& w : spawnw_)
+        if (w.kind == KZ_SPAWNW_KIND_ENTRY_ARG || w.kind == KZ_SPAWNW_KIND_CALLED_BY_ENTRY) chain_sites_.insert(w.site);
+    return (calls_[y].flags & KZ_CALL_FLAG_SPAWN_OP) != 0 || chain_sites_.count(calls_[y].site) != 0 || !spawn_children(y).empty();
+  }
+  bool caller_dependent(uint32_t ci) const {
+    auto it = dependent_.find(ci);
+    if (it != dependent_.end()) return it->second;
+    bool dep = false;
+    for (uint32_t x : callers_of(calls_[ci].caller_fn))
+      if (x != ci && chain_call(x)) dep = true;
+    dependent_[ci] = dep;
+    return dep;
+  }
+  std::vector<uint32_t> callers_of(uint32_t fn) const {
+    std::vector<uint32_t> in;
+    if (fn < callers_.size()) in.insert(in.end(), callers_[fn].begin(), callers_[fn].end());
+    auto ic = indirect_callers_.find(fn);
+    if (ic != indirect_callers_.end()) in.insert(in.end(), ic->second.begin(), ic->second.end());
+    std::sort(in.begin(), in.end());
+    in.erase(std::unique(in.begin(), in.end()), in.end());
+    return in;
+  }
+  // the threads the call `ci` can create when thread `t` makes it: its own resolved threads when it is not
+  // caller-dependent; when it is, the threads the callers of its function in t's code can create (followed outwards),
+  // within its own resolved threads when it has any.  A caller that passes on no resolved entry adds none: an
+  // under-approximation of the threads, so the hard closure loses edges and never gains one.
+  std::set<uint32_t> children_on(uint32_t ci, uint32_t t) const {
+    auto key = std::make_pair(ci, t);
+    auto it = children_on_.find(key);
+    if (it != children_on_.end()) return it->second;
+    std::set<uint32_t> out;
+    children_on_[key] = out;  // a cycle of spawn operations reads the empty set
+    const uint32_t g = calls_[ci].caller_fn;
+    if (in_code(g, t)) {
+      const std::set<uint32_t> own = spawn_children(ci);
+      if (!caller_dependent(ci)) out = own;
+      else
+        for (uint32_t x : callers_of(g)) {
+          if (x == ci || !in_code(calls_[x].caller_fn, t)) continue;
+          for (uint32_t r : children_on(x, t))
+            if (own.empty() || own.count(r) != 0) out.insert(r);
+        }
+    }
+    children_on_[key] = out;
+    return out;
+  }
   bool is_p0(const std::string& name, uint8_t kind) const {
     auto it = p0_kind_.find(name);
     return it != p0_kind_.end() && it->second == kind;
@@ -411,8 +463,22 @@ class Ord : public RelFacts {
   // "child without success": whether the spawn operation a spawn call reaches may report a failure after a thread was
   // created -- a return of the operation (or of an operation below it) positioned after its inner spawn call whose value
   // is of failure class, or not followed, and whose condition is not false when the inner call returned its success
-  // value.  The source position stands for "after"; a return in another branch is counted (an over-approximation: the
-  // flag says "possible", never that it happens).  `chain` gets the creation primitive the operation reaches.
+  // value.  The source position stands for "after"; a return in another branch is counted (an over-approximation).
+  // Order rules revision 2: a witness is shown ("possible") only when it does not rest on the position alone -- its value
+  // is not from a definition that is redefined later on a path to the return (RETURNS `redefined-later`), its condition
+  // reads no local (a local may hold the inner call's own result, which these facts do not link to the call), and an
+  // inner call's failure it maps is itself shown.  When every witness rests on the position, the flag is
+  // "unknown (position-based)", never "possible".  `chain` gets the creation primitive the operation reaches.
+  static constexpr const char* kPositional = "unknown (position-based)";
+  // 2: shown, 1: position-based, 0: unknown
+  static int strength_of(const std::string& flag) {
+    if (flag.compare(0, 8, "possible") == 0) return 2;
+    if (flag.compare(0, 24, kPositional) == 0) return 1;
+    return 0;
+  }
+  bool positional_only(const kz_fact_return& r) const {
+    return (r.flags & KZ_RET_FLAG_REDEFINED) != 0 || (r.cond_root != kN && !refs(r.cond_root, KZ_EXPR_REF_LOCAL).empty());
+  }
   std::string child_without_success(uint32_t ci, std::set<uint32_t>* seen, std::string* chain) const {
     const kz_fact_call& c = calls_[ci];
     if (!defined(c.callee_fn)) {
@@ -438,13 +504,16 @@ class Ord : public RelFacts {
     }
     const std::vector<uint32_t> inner(inner_set.begin(), inner_set.end());
     if (inner.empty()) return "unknown: " + fname(g) + " makes no spawn call in its body";
-    std::vector<std::string> possible, unknown, inner_text;
+    std::vector<std::string> possible, positional, unknown, inner_text;
+    // a witness of the given strength (2 shown, 1 position-based, 0 unknown) into its list
+    auto put = [&](int strength, const std::string& w) { (strength >= 2 ? possible : strength == 1 ? positional : unknown).push_back(w); };
     for (uint32_t x : inner) {
       std::string sub_chain;
       const std::string sub = child_without_success(x, seen, &sub_chain);
       // a return under the inner call's failure is a child without success unless the inner call creates no thread when
       // it fails (its own flag is "not found")
       const bool inner_clean = sub.compare(0, 9, "not found") == 0;
+      const int sub_strength = inner_clean ? 2 : strength_of(sub);
       const std::string via = inner_clean ? std::string() : " (the inner call " + call_pos(x) + " may report a failure after its thread started: " + sub.substr(0, sub.find(':')) + ")";
       if (inner_text.empty()) *chain = fname(g) + " -> " + sub_chain;
       std::string stext;
@@ -459,8 +528,8 @@ class Ord : public RelFacts {
         const bool of_inner = r.vkind == KZ_RET_VALUE_CALL && r.value_root < exprs_.size() && exprs_[r.value_root].op == KZ_EXPR_OP_CALL_RESULT &&
                               str(exprs_[r.value_root].name) == inner_name;
         if (of_inner) {
-          if (sub.compare(0, 8, "possible") == 0) possible.push_back(fname(g) + " returns the result of " + inner_name + " at " + at + " (" + sub + ")");
-          else if (sub.compare(0, 7, "unknown") == 0) unknown.push_back(fname(g) + " returns the result of " + inner_name + " at " + at + " (" + sub + ")");
+          if (sub.compare(0, 8, "possible") == 0 || sub.compare(0, 7, "unknown") == 0)
+            put(std::min(sub_strength, positional_only(r) ? 1 : 2), fname(g) + " returns the result of " + inner_name + " at " + at + " (" + sub + ")");
           continue;
         }
         const bool later = after(str(r.file), r.line, r.col, xc) || (r.loop != kN && r.loop == xc.loop);
@@ -469,8 +538,9 @@ class Ord : public RelFacts {
           std::map<std::string, int64_t> calls{{inner_name, succ.begin()->first}};
           if (eval(r.cond_root, {}, calls) == 0) continue;  // runs only when the inner call failed
         }
+        const int own = std::min(sub_strength, positional_only(r) ? 1 : 2);
         if (r.vkind == KZ_RET_VALUE_CONST) {
-          if (fail_class(r.value)) possible.push_back(fname(g) + " returns " + std::to_string(r.value) + " [" + str(r.text) + "] at " + at + " after " + call_pos(x) + via);
+          if (fail_class(r.value)) put(own, fname(g) + " returns " + std::to_string(r.value) + " [" + str(r.text) + "] at " + at + " after " + call_pos(x) + via);
           continue;
         }
         if (r.vkind == KZ_RET_VALUE_CALL && r.value_root < exprs_.size() && exprs_[r.value_root].op == KZ_EXPR_OP_CALL_RESULT) {
@@ -482,7 +552,7 @@ class Ord : public RelFacts {
             for (uint32_t h : fit->second)
               for (const auto& kv : consts_of(h, &s2, &o2))
                 if (fail_class(kv.first)) fails = true;
-          if (fails) possible.push_back(fname(g) + " returns the result of " + str(exprs_[r.value_root].name) + " at " + at + " after " + call_pos(x) + " (it may return a failure-class constant)" + via);
+          if (fails) put(own, fname(g) + " returns the result of " + str(exprs_[r.value_root].name) + " at " + at + " after " + call_pos(x) + " (it may return a failure-class constant)" + via);
           else if (!o2.empty() || fit == fn_by_name_.end()) unknown.push_back(fname(g) + " returns the result of " + str(exprs_[r.value_root].name) + " at " + at + " (not followed)");
           continue;
         }
@@ -497,6 +567,9 @@ class Ord : public RelFacts {
       return t;
     };
     if (!possible.empty()) return "possible: " + first(possible);
+    if (!positional.empty())
+      return std::string(kPositional) + ": every witness rests on the source position alone (a value redefined later on a path, a condition that reads a local, or an inner flag that does): " +
+             first(positional) + (unknown.empty() ? std::string() : "; not followed: " + first(unknown));
     if (!unknown.empty()) return "unknown: " + first(unknown);
     return "not found: no return of failure class after the creation call in " + fname(g) + (inner_text.empty() ? std::string() : " (below: " + inner_text.front() + ")");
   }
@@ -523,7 +596,10 @@ class Ord : public RelFacts {
       ++n_spawn_calls_;
       if (flag.compare(0, 8, "possible") == 0) ++n_cws_possible_;
       else if (flag.compare(0, 9, "not found") == 0) ++n_cws_none_;
-      else ++n_cws_unknown_;
+      else {
+        ++n_cws_unknown_;
+        if (strength_of(flag) == 1) ++n_cws_positional_;
+      }
       flag_of_[ci] = flag;
       status_of_[ci] = stext;
       const kz_fact_call& c = calls_[ci];
@@ -544,6 +620,13 @@ class Ord : public RelFacts {
         e.notes.push_back("create primitive: " + chain);
         e.notes.push_back("status condition: " + stext);
         e.notes.push_back("child without success: " + flag);
+        if (caller_dependent(ci)) {
+          std::set<uint32_t> from;
+          for (uint32_t a : actor_set(c.caller_fn))
+            if (children_on(ci, a).count(r) != 0) from.insert(a);
+          e.notes.push_back("caller-dependent: " + fname(c.caller_fn) + " is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure follows this edge only from " +
+                            (from.empty() ? std::string("no thread (no outer spawn call in the code of a thread that reaches this call creates this thread)") : "the threads whose own outer spawn calls create this thread: " + actors_text(from)));
+        }
         spawn_edge_[{ci, r}] = add_edge(std::move(e));
       }
     }
@@ -672,7 +755,9 @@ class Ord : public RelFacts {
           if (!w.ok()) continue;
           for (uint32_t pa : actor_set(row.caller_fn))
             for (uint32_t q : kids) {
-              if (pa == q) continue;
+              // order rules revision 2: the writer's thread makes the spawn call; a caller-dependent call reaches only the
+              // threads that thread's own outer spawn calls create
+              if (pa == q || children_on(ci, pa).count(q) == 0) continue;
               Edge e;
               e.rule = "HB-lock";
               e.kind = "hard";
@@ -955,7 +1040,8 @@ class Ord : public RelFacts {
         for (uint32_t c : in)
           if (in_code(calls_[c].caller_fn, n.a)) go(n, Node{'e', Ev{'c', c}, n.a}, seq_edge(n.e, c, n.a, "inside"));
       } else if (n.t == 's') {
-        for (uint32_t r : spawn_children(n.e.i)) {
+        // order rules revision 2: only the threads this thread's own call can create (children_on)
+        for (uint32_t r : children_on(n.e.i, n.a)) {
           auto it = spawn_edge_.find({n.e.i, r});
           if (it != spawn_edge_.end()) go(n, Node{'n', Ev{'f', r}, r}, it->second);
         }
@@ -1228,7 +1314,8 @@ class Ord : public RelFacts {
     os << "kinds: hard: every execution in which both instances occur has them in this order, under the premises; conditional: only when the condition holds; "
           "observed-only: no rule of this revision orders them, a run record may show an order\n";
     os << "closure: hard_before and fixed_early_proved follow hard edges only; a conditional edge makes the path conditional (conditional_before, "
-          "fixed_early_candidate) and is never in the hard closure; observed-only edges are not followed\n";
+          "fixed_early_candidate) and is never in the hard closure; observed-only edges are not followed; a caller-dependent spawn call (in a function "
+          "a call of a spawn operation's chain calls) is followed from a thread only to the threads that thread's own outer spawn calls create\n";
     os << "values: hard_before, conditional_before (the write or creation before the use), fixed_early_proved, fixed_early_candidate (the use before it), "
           "unordered (no path either way between two threads of resolved roots), unknown (why)\n";
     // the edges: the precomputed ones and the HB-seq steps the rows' listed paths use
@@ -1252,7 +1339,7 @@ class Ord : public RelFacts {
     os << "summary edges listed " << order.size() << " (" << counts(by_rule) << "; " << counts(by_kind) << "); HB-seq steps the closures followed " << steps
        << " (listed where a listed pair's path uses them)\n";
     os << "listing: a row lists at most " << kPairLines << " pairs per value (a print bound); its `pairs` line counts them all\n";
-    os << "summary spawn calls with resolved threads " << n_spawn_calls_ << "; child without success: possible " << n_cws_possible_ << ", not found " << n_cws_none_ << ", unknown " << n_cws_unknown_ << "\n";
+    os << "summary spawn calls with resolved threads " << n_spawn_calls_ << "; child without success: possible " << n_cws_possible_ << ", not found " << n_cws_none_ << ", unknown " << n_cws_unknown_ << " (position-based " << n_cws_positional_ << ")\n";
     std::map<std::string, size_t> uc(use_count_.begin(), use_count_.end());
     os << "summary waits " << waits_.size() << " (poll " << n_poll_ << ", count-bounded " << n_bounded_ << "; predicate recognised " << n_recognised_ << "); dependent uses " << counts(uc) << "\n";
     for (const auto& [p, m] : row_count_) {
@@ -1316,7 +1403,10 @@ class Ord : public RelFacts {
   std::set<size_t> used_;
   std::map<std::string, int> use_count_;
   std::map<std::string, std::map<std::string, int>> row_count_;
-  size_t n_spawn_calls_ = 0, n_cws_possible_ = 0, n_cws_none_ = 0, n_cws_unknown_ = 0, n_poll_ = 0, n_bounded_ = 0, n_recognised_ = 0;
+  mutable std::map<uint32_t, bool> dependent_;
+  mutable std::set<uint32_t> chain_sites_;
+  mutable std::map<std::pair<uint32_t, uint32_t>, std::set<uint32_t>> children_on_;
+  size_t n_spawn_calls_ = 0, n_cws_possible_ = 0, n_cws_none_ = 0, n_cws_unknown_ = 0, n_cws_positional_ = 0, n_poll_ = 0, n_bounded_ = 0, n_recognised_ = 0;
 };
 
 }  // namespace

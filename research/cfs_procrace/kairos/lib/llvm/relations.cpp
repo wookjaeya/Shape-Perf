@@ -26,7 +26,7 @@
 
 namespace kzs {
 
-const char* relations_rules_revision() { return "relations rules revision 8 (2026-11-16)"; }
+const char* relations_rules_revision() { return "relations rules revision 9 (2026-11-16)"; }
 
 namespace {
 
@@ -1012,19 +1012,27 @@ class Rel : public RelFacts {
   // the chain it comes through and its condition in the innermost function; the returns not followed (a parameter, a
   // local, a field, an expression, a call of a function without a body) go to `open`.  The set is what may be returned,
   // not a proof of what is.
-  std::vector<std::string> callee_returns(uint32_t F, std::vector<std::string>* open) const {
+  // Revision 9: a constant is marked "not shown to reach the return" when it comes through a definition that the
+  // RETURNS rows flag redefined later on a path to the return (the RET_CONSTS row of the constant, or a call-result
+  // return on its chain): the value of such a definition may be overwritten before the return on the path where the
+  // constant is returned (reaching definitions without the values of the conditions).  `marked` counts those lines.
+  std::vector<std::string> callee_returns(uint32_t F, std::vector<std::string>* open, size_t* marked) const {
     std::vector<std::string> out;
     std::set<uint32_t> seen;
     std::set<std::pair<int64_t, std::string>> printed;
-    std::function<void(uint32_t, const std::string&)> rec = [&](uint32_t fn, const std::string& chain) {
+    std::function<void(uint32_t, const std::string&, const std::string&)> rec = [&](uint32_t fn, const std::string& chain, const std::string& killed) {
       if (!defined(fn) || !seen.insert(fn).second) return;
       auto it = retconsts_of_.find(fn);
       if (it != retconsts_of_.end())
         for (uint32_t i : it->second) {
           const kz_fact_retconst& r = retconsts_[i];
           if (!printed.insert({r.value, str(r.text) + "|" + chain + "|" + std::to_string(i)}).second) continue;
+          std::string k = killed;
+          if (k.empty() && (r.flags & KZ_RET_FLAG_REDEFINED)) k = "a definition of the value returned in " + fname(fn) + " is redefined later on a path to the return";
           out.push_back(fname(F) + " returns " + std::to_string(r.value) + " [" + str(r.text) + "]" + (chain.empty() ? "" : " through " + chain) +
-                        (r.cond_root == kN ? std::string(" with no condition") : " when " + ex(r.cond_root)));
+                        (r.cond_root == kN ? std::string(" with no condition") : " when " + ex(r.cond_root)) +
+                        (k.empty() ? std::string() : "; not shown to reach the return: " + k));
+          if (!k.empty()) ++*marked;
         }
       auto rit = returns_of_.find(fn);
       if (rit == returns_of_.end()) return;
@@ -1034,13 +1042,16 @@ class Rel : public RelFacts {
         const std::string at = pos(str(r.file), r.line, r.col);
         if (r.vkind == KZ_RET_VALUE_CALL && r.value_root < exprs_.size() && exprs_[r.value_root].op == KZ_EXPR_OP_CALL_RESULT) {
           const std::string callee = str(exprs_[r.value_root].name);
+          std::string k = killed;
+          if (k.empty() && (r.flags & KZ_RET_FLAG_REDEFINED))
+            k = fname(fn) + " returns the result of " + callee + " at " + at + " from the definition at " + pos(str(r.def_file), r.def_line, r.def_col) + ", redefined later on a path to the return";
           bool any = false;
           auto fit = fn_by_name_.find(callee);
           if (fit != fn_by_name_.end())
             for (uint32_t g : fit->second)
               if (defined(g)) {
                 any = true;
-                rec(g, (chain.empty() ? fname(fn) : chain) + " -> " + fname(g));
+                rec(g, (chain.empty() ? fname(fn) : chain) + " -> " + fname(g), k);
               }
           if (!any) open->push_back(fname(fn) + " returns the result of " + callee + " at " + at + " (no body in these facts)");
           continue;
@@ -1048,7 +1059,7 @@ class Rel : public RelFacts {
         open->push_back(fname(fn) + " returns " + enum_text("KZ_RET_VALUE", r.vkind) + " [" + str(r.text) + "] at " + at);
       }
     };
-    rec(F, "");
+    rec(F, "", "");
     std::sort(open->begin(), open->end());
     open->erase(std::unique(open->begin(), open->end()), open->end());
     return out;
@@ -3523,8 +3534,15 @@ class Rel : public RelFacts {
       }
       for (uint32_t F : creator_callees) {
         std::vector<std::string> open;
-        for (const std::string& t : callee_returns(F, &open)) L.line("callee-check") << "callee-check: " << t;
+        size_t marked = 0;
+        for (const std::string& t : callee_returns(F, &open, &marked)) L.line("callee-check") << "callee-check: " << t;
         if (!open.empty()) L.line("callee-check (returns not followed)") << "callee-check (returns not followed): " << fname(F) << ": " << join(open, "; ");
+        // relations rules revision 9: whether the constants listed are all the callee returns and each reaches the return
+        if (open.empty() && marked == 0)
+          L.line("callee-check (set)") << "callee-check (set): " << fname(F) << ": complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)";
+        else
+          L.line("callee-check (set)") << "callee-check (set): " << fname(F) << ": not established (" << open.size() << " returns not followed, " << marked
+                                       << " constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them";
       }
       // relations rules revision 7 (O4): the writer sets the row uses -- the key, the active fields, and the fields the keys
       // are read from in a static image -- with their rule statuses, premises and what they do not cover

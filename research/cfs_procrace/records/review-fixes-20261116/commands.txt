@@ -1,0 +1,20 @@
+# declaration: sha256 of declared_before_build.txt (= the lines of section 6 of plan/full_stage_results_20261116.md up to the end of 6.0 (나), before the build) = c50493ec665887b0a0853e86f1b63ff4457f15fded4a442dd54ade346e66a5d9 (2026-11-16T15:37:12Z; committed before the build)
+# review-fixes-20261116: commands, rc and free space (df -B1 /, bytes available)
+# <scratch> is this session's scratchpad directory (rf/)
+
+## 0. before any tool change (declaration 6.0 (가), commit 8ca732d; addendum 6.0 (가-1), commit be9a94b)
+keys_check/keys_check.sh under env/tools/space_guard.sh (--need 60000000, kind kz-static-run; keys_check/df_keys_check.log, dip 187404288: above the need, the restored 185 MB binary was not counted in it) -> rc 0, keys_check/keys_check.txt: 26 OK (restored 038cd9e3; five builds keys.txt and relations.txt = relrev7_check apart from line 2, relations.txt = relrev7_extract's, line 2 names the re-extracted facts, relations.log empty); the restored binary removed by the script; revfix_relrev7_extract_keys.sha256 (15 files)
+extract_compare/compare_extract.sh under the space guard (--need 200000000, kind compare) -> rc 1 (15:00Z): extract.txt of c1_pre_tx, c1_post_tx, r2_core BAD (old location lines with no successor: no pair rows for extract.txt) -- NOT DECLARED: stopped; first run kept in extract_compare/first/; addendum 6.0 (가-1) written and committed (be9a94b) before the run again
+extract_compare/compare_extract.sh again -> rc 0 (15:04Z), extract_compare/compare_extract.txt: 46 OK (the tool check and 45)
+counts_before_build.log: ctest -V -R '^test_static_reasons$' with the test binary of the extractor-fix step (b2aee337, = records/extract-fixes-20261116/after_build1.sha256): 660 checks passed
+
+## 1. code and the scratch check (no tool of MC changed)
+scratch check program <scratch>/chk: order.cpp and relations.cpp compiled with the flags of lib/llvm (MC flags.make) into a copy of MC's libkz-llvm.a, kz-static linked from MC's objects with MC's link line, test_static_cli compiled and linked the same way, under the space guard (df_build.log of the scratch, dip 322265088; first link failed on the quoted object names of link.txt, relinked with bash -c)
+  -> test_static_cli 963 checks passed (after one expectation fix of the test); static_golden with KZ_GOLDEN_UPDATE=1 into a scratch copy of tests/static/data: the eight goldens of 6.0 (나) changed, no other; test_static_plan: the two relations revision lines of plangen_np.plan.golden; test_static_reasons (MC binary) on the scratch goldens 660
+  -> order and relations of the five builds on the tests_8c_fix facts with the scratch tool: the [I] values of 6.0 (나) (compare_order.py and compare_relations.py: 0 undeclared); the closure rule broadened once (a caller without resolved threads but in a spawn operation's chain: r2_core's OS_TaskCreate -> OS_TaskCreate_Impl) before the values were written down
+  these outputs are scratch and no evidence; the build's tool re-measures them
+MC ctest -R '^lint' on the changed sources (kz_lint 5f62ec20 unchanged): 7 of 7
+env/tools/tests/run_unit.sh: 15 of 15 (check 15: explain fixtures 22 of 22)
+relink_expected.sha256 (13), not_relink.sha256 (111) from MC (ELF executables and static libraries outside CMakeFiles), sha256 before the build
+env/tools/tools_check.sh --deep -> tools_check_pre.txt: 39 rows, 0 failing; env/tools/ledger_check.sh -> ledger_check_pre.txt: 76 rows, 0 failing
+free before the commit of the declaration: 2306027520 (2026-11-16T15:37:12Z)

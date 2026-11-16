@@ -610,6 +610,8 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 
 ## 5p. 순서 간선 `kz-static order` (order rules revision 1, 2026-11-16) [D]
 
+(2026-11-16 검토 뒤: order rules revision 2 의 두 고침, 호출자에 기대는 spawn 호출과 child without success 의 위치 근거는 §5r.)
+
 결과는 `plan/full_stage_results_20261116.md` §3. 새 명령 `kz-static order <facts> [-o OUT] [--edges TSV]`(`lib/llvm/order.cpp`, "order rules revision 1 (2026-11-16)")이고 기존 출력은 바꾸지 않는다: facts schema(개정 11), 추출, relations 의 규칙과 글(개정 7), 계획 생성기는 그대로다. relations 의 행을 같은 프로세스 안에서 `relations_rows` 로 계산하고(§5l 의 `RelFacts` 를 다시 적재), 행마다 순서를 낸다. 필드·callee·사례 이름을 받지 않는다. 같은 컨테이너는 같은 바이트를 낸다.
 
 **간선과 종류** [D]. 간선마다 id(규칙·양 끝·양 끝 행위자 글의 sha256 앞 16자리), 규칙, 종류, from/to(정적 위치와 행위자), 조건, 전제, 범위, 인스턴스 키를 적는다. 종류: `hard`(두 인스턴스가 모두 일어나는 모든 실행에서 이 차례다, 전제 아래), `conditional`(조건이 설 때만), `observed-only`(이 개정의 어떤 규칙도 차례를 정하지 않는다; 실행 기록이 차례를 보일 수 있다).
@@ -654,7 +656,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 4. 태그 없는 레코드가 객체의 형(파일·블록 범위, 배열 포함): `<객체 키>::type`(내부 연결 객체는 키에 정의 위치가 있다, `TuReader::object_key`). 예: `PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type`.
 5. 그 밖: `<anonymous@<파일>:<줄>:<열>>`(정의 위치).
 - 위치는 점 없이 쓴다: 파일의 `.` 를 `_` 로 적는다(`TuReader::name_pos`). `Type.field` 글을 첫 점에서 나누는 곳(`spec.cpp` `parse_field_ref`, `--target`)이 있어서 형 이름에 점이 없어야 한다. 객체 키 자체(GLOBAL_IMAGES 의 객체 칸 등)는 바꾸지 않았다.
-- 같은 정의는 그것을 읽는 모든 단위에서 같은 이름이다(머리말의 형은 위치·바깥 이름이 같다).
+- 같은 정의는 그것을 읽는 모든 단위에서 같은 이름이다(머리말의 형은 위치·바깥 이름이 같다). 2026-11-16 검토 뒤 덧붙임: 이것은 한 추출 안의 말이다. 묶음 루트 밖의 파일은 위치를 절대 경로로 쓰므로, 같은 소스라도 빌드 디렉터리가 다르면 이름이 다르다(§5r 알려진 한계).
 - C11 이름 없는 멤버(익명 struct·union)는 규칙을 바꾸지 않았다: 그 필드는 감싼 레코드의 필드다(`record_name` 이 감싼 레코드의 이름을 주고, `targets_of_field` 가 그리로 올라간다).
 - 바뀐 규칙 하나: 이름 있는 멤버의 형인 태그 없는 레코드는 이제 제 형이다. 앞판은 그 필드를 감싼 레코드의 필드로도 맞췄다(§5k 의 `struct Unn { struct { int q; } m; }` 에서 `--target Unn.q` 가 `g_unn.m.q = 5` 를 writer 로 셈). 이제 `Unn.q` 는 `unknown-target (the record type Unn has no field q …)` 이고 그 형은 `Unn::m` 이다(`--target Unn::m.q`).
 - unknown-target 의 글: "no record type T is found among the record names of the units read"(앞판 "… the file-scope tags and typedef names …"). 이름 표가 넓어졌기 때문이다.
@@ -663,6 +665,20 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 **relations rules revision 8** [D]: 위의 사유 하나(`reading_options_differ(extraction options differ from the basis)`)와 계층 표시와 머리 줄. 행의 다른 규칙은 개정 7 그대로다.
 
 **시험** [M]. fixture `anonrec.c`(사례 이름 없음, C99): 매크로가 만든 이름 없는 union 형을 두 레코드의 멤버에 씀, 내부 연결의 이름 없는 struct 객체를 memset 하고 필드 주소를 생성자에 넘김, 레코드 안의 태그, 함수 몸 안의 태그와 이름 없는 union, 배열 멤버의 이름 없는 struct. golden `static_golden_anonrec_np`(`--no-profile --targets-rule R-T1,R-T2`, functions·writers·locs·fstatus·fwrites·gimages 와 relations). `test_static_cli`: 읽기 옵션의 같음·거부·`--accept-option-difference`(BASIS 항목, relations 의 모든 행의 사유와 계층 표시)·basis 없음; C11 이름 없는 멤버(`Anon.a`)와 이름 있는 멤버의 형(`Unn::m.q`, `Unn.q` 의 unknown-target); 중첩 태그 `Inner.ix`(이제 writer 1, writer-set-complete); 잘린 원소 이미지의 펼치기(guard residual 의 글, 인자의 글)와 잘린 뿌리 이미지의 PTR_FIELDS(`resolved` → `may`), 기본 예산과 `--image-budget 2` 의 대조. golden `imgbudget_np` 의 네 줄은 `field=<anonymous>.a` → `field=ImgUnion::s.a` 다.
+
+## 5r. 검토 뒤의 규칙 고침: order rules revision 2, relations rules revision 9 (2026-11-16) [D]
+
+결과는 `plan/full_stage_results_20261116.md` §6. facts schema(개정 12)와 추출은 바꾸지 않는다.
+
+**order rules revision 2** (`lib/llvm/order.cpp`, "order rules revision 2 (2026-11-16)") [D]:
+- **호출자에 기대는 spawn 호출.** spawn 연산의 사슬에 든 호출(spawn 호출, spawn-op 표시가 있는 호출, SPAWN_WRAP entry-argument·called-by-entry 행의 호출)이 부르는 함수 안의 spawn 호출은 호출자에 기댄다(caller-dependent): 그 호출에서 풀린 스레드는 모든 호출자의 합이지만, 한 호출 인스턴스는 그 함수에 닿은 바깥 spawn 호출의 스레드만 만든다. 앞판은 그런 호출(예: 생성 기본 연산을 부르는 감싸개 안의 호출)에 닿은 모든 스레드에서 그 호출이 풀린 모든 스레드로 갔다(`order.cpp` 의 닫힘 `'s'` 마디). 이제 스레드 t 가 닿은 그런 호출에서는 t 의 코드에 있는 그 함수의 호출자들이 만들 수 있는 스레드로만 간다(`children_on`: 바깥으로 따라감; 자기 스레드가 풀린 호출이면 그 안에서). 풀린 entry 를 넘기지 않는 호출자는 아무것도 더하지 않는다: 스레드를 덜 잡는 쪽이라 hard 닫힘은 간선을 잃기만 하고 얻지 않는다. HB-lock 간선도 쓰기의 스레드가 그 spawn 호출로 만들 수 있는 자식에게만 낸다. 그런 HB-spawn 간선에는 `caller-dependent:` 줄이 그 간선을 따라가는 스레드를 적는다. 근거: 한 호출 인스턴스의 자식은 그 인스턴스의 entry 인자로 정해지고(POSIX.1-2017 `pthread_create` 의 `start_routine`), 감싸개는 그 인자를 호출자에게서 받는다(SPAWN_WRAP entry-argument, called-by-entry).
+- **child without success 의 위치 근거.** 증거 반환이 소스 위치만으로 서면(그 값이 RETURNS `redefined-later` 정의에서 오거나, 조건이 지역을 읽거나 — 그 지역이 안쪽 호출 자신의 결과일 수 있는데 이 facts 는 지역을 호출에 잇지 않는다 —, 그것이 옮기는 안쪽 호출의 표지가 그렇거나) `possible` 이 아니라 `unknown (position-based)` 다. 머리의 `summary spawn calls` 줄은 unknown 가운데 그 수를 괄호에 센다. 예: C1 의 `OS_Posix_InternalTaskCreate_Impl` 의 `return OS_ERROR`(`os-impl-tasks.c:547`)는 `pthread_create` 가 실패한 갈래이고(그 조건의 `return_code` 는 정의가 여럿인 지역), `OS_TaskCreate` 의 `:202` 반환은 `OS_ObjectIdAllocateNew` 의 정의가 `:199` 에서 다시 정의된다(`redefined-later`).
+
+**relations rules revision 9** [D]: 생성자 callee 의 상수(§5o (5))에서, RETURNS 가 `redefined-later` 로 표시한 정의를 거쳐 오는 상수(그 상수의 RET_CONSTS 행, 또는 사슬의 call-result 반환)는 줄 끝에 `; not shown to reach the return: <그 정의>` 를 단다. 그런 정의의 값은 그 상수가 반환되는 경로에서 반환 전에 덮일 수 있다(도달 정의는 조건의 값을 보지 않는다; 예: `OS_CountSemCreate` 의 `return_code = OS_ObjectIdAllocateNew(...)` 는 성공이면 `:103`, `:106` 에서 다시 정의되고 `:109` 에 실패 값만 닿는다, `osapi-countsem.c:94-109`). 생성자 callee 마다 새 줄 `callee-check (set): <callee>: complete under these facts (…)` 또는 `… not established (N returns not followed, M constants not shown to reach the return): …; no success constant is taken from them`. 판정 규칙 8.2 기초 4 의 2026-11-16 덧붙임이 이 줄을 읽는다.
+
+**알려진 한계** [D] (고치지 않음, 결과 §6.9):
+- §5q 의 위치가 붙은 형 이름은 한 추출 안에서만 같다: 위치는 `TuReader::name_pos` → `pos_of` 이고 묶음 루트 밖의 파일은 절대 경로로 쓴다(`lib/llvm/ast_tu.cpp`). 같은 CF 소스가 c1_pre_tx 와 c1_post_tx 에서 `…/c1_build/pre/…` 와 `…/c1_build/post/…` 로 다른 이름을 얻는다. 빌드 사이의 대응(이름 결합의 실행 사이 대응, 빌드 사이 키 비교)에 이 이름을 그대로 쓰지 않는다. 오늘 relations 의 키는 이 이름을 담지 않는다(`records/extract-fixes-20261116/key_map_<b>.tsv`: 바뀐 키 0).
+- FACT_LOCS 의 writer-set-complete 는 배열 필드가 포인터로 바뀌어(배열에서 포인터로의 변환) 호출 인자로 넘어가는 것을 주소 탈출로 세지 않는다. C1 의 `CFE_SB_MemParams_t::Partition.Data`, `CFE_TBL_BufParams_t::Partition.Data` 는 `CFE_ES_PoolCreateEx`·`CFE_ES_PoolCreate` 에 `void *` 로 넘어가 풀 코드가 정수 주소로 그 안에 쓴다(`cfe_sb_init.c:104`, `cfe_tbl_internal.c:105`, `cfe_es_mempool.c:313`, `:84-85`). 그래서 그 두 행의 `writer-set-complete writers=1` 은 소스가 뒷받침하지 않는다. 추출 규칙의 고침(그런 넘김을 탈출이나 알 수 없는 효과로 셈)은 다섯 빌드의 다시 뽑기를 바꾸는 뒤 추출 단계의 일이다.
 
 ## 6. core-cpu1 결과 [M]
 

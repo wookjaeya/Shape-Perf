@@ -1,0 +1,6 @@
+# builds-8 count log: ctest -V -R '^test_static_reasons$' in MC before the build of the review fixes (2026-11-16T15:04:59Z), with the test binary of the extractor-fix step's build 2
+# test_static_reasons sha256 b2aee337b7133a06c6c1f3720cce3c5b77cd4cc16edd066169ba48d64aab8a2c; kz-static c6aa4811612f13bd79b826e53e1f104e3e759d4d97123029c232558a98c73507
+252: test_static_reasons: 660 checks passed
+1/1 Test #252: test_static_reasons ..............   Passed    0.01 sec
+The following tests passed:
+100% tests passed, 0 tests failed out of 1

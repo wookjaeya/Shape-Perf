@@ -1,0 +1,11 @@
+new names: 1
+  name PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type
+class A              renamed                                  1
+class B              change:head-B                            1
+class C              change:head-C                            1
+class head           change:facts-hash                        1
+class head           change:rules                             1
+class head           insert:reading-options                   1
+pairs of an old <anonymous> line and its successors (a successor not equal after the names alone): 0 lines
+undeclared other: 0
+compare_classes: only declared classes

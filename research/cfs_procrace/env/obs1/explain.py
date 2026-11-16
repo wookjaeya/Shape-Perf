@@ -27,7 +27,10 @@ record's `inputs`).  The script reads no case value: rows, sites, values, keys a
   - out values are read only when the status equals the success constant: the one constant among the row's return
     constants of the use that is not of failure class; a publisher's (creator's) out value likewise only under the
     success constant of the creator's callee, from the row's "callee-check: <callee> returns" lines (the line form the
-    relations text uses for a use's callee); without one it is kept as raw evidence, not read;
+    relations text uses for a use's callee); without one it is kept as raw evidence, not read; revision 3: a creator's
+    callee whose row has a "callee-check (returns not followed): <callee>" or "callee-check (set): <callee>: not
+    established" line gives no success constant (its returns are not all followed or not shown), and a line marked "not
+    shown to reach the return" gives no constant (judgement rules 8.2 base requirement 4, 2026-11-16 addendum);
   - link (JR 3.2 axis 1 as written): established only on a run record in which the read and the write reached the
     same object instance (path A: the use's out id read under its success constant = a tied publisher's create out id
     read under the creator's success constant); equal key texts are recorded as instance evidence and are not admitted
@@ -45,7 +48,7 @@ import os
 import re
 import sys
 
-SCRIPT_REV = "explain.py revision 2 (2026-11-16, after review)"
+SCRIPT_REV = "explain.py revision 3 (2026-11-16, after the second review)"
 INPUTS = {}  # name -> (path, sha256)
 
 
@@ -284,6 +287,7 @@ def parse_keys(text):
 
 
 CONST = re.compile(r"returns (-?\d+) \[([^\]]*)\]")
+OPEN_WHY = "not read: no success constant of the creator: the returns of"
 
 
 def row_static(row, rel_name):
@@ -341,12 +345,17 @@ def row_static(row, rel_name):
     # the return constants the row gives for any callee ("callee-check: <callee> returns ..."): the source of a
     # publisher's success constant (a creator's out is read only under it)
     cc = {}
+    copen = {}
     for n2, t2 in body:
         mm = re.match(r"callee-check: (\S+) returns", t2)
-        if mm:
+        if mm and "; not shown to reach the return:" not in t2:
             for v, name in CONST.findall(t2):
                 cc.setdefault(mm.group(1), []).append((int(v), name, n2))
+        mo = re.match(r"callee-check \(returns not followed\): (\S+): ", t2) or re.match(r"callee-check \(set\): (\S+): not established", t2)
+        if mo:
+            copen.setdefault(mo.group(1), n2)
     st["callee_consts"] = cc
+    st["callee_open"] = copen
     st["writers"] = [(n, t) for n, t in body if re.match(r"(out-pointer|assign|memset|call|store|copy) at ", t)]
     n, t = first("field:")
     st["field_line"] = (n, t)
@@ -961,7 +970,9 @@ def explain_row(ctx, rowkey, consumer):
                     else:
                         lm.append("link_unlinked(the use's out id is not the out id of a publisher's create with its key)")
                 if link["resource_key"]["generation"] is None:
-                    gm = ("record_insufficient(no success constant of the creator: the creator's out id is not read)"
+                    gm = ("record_insufficient(no success constant of the creator: the callee's returns are not all followed)"
+                          if not any(p.get("out", {}).get("read") for p in matched) and any(p.get("out", {}).get("why", "").startswith(OPEN_WHY) for p in matched) else
+                          "record_insufficient(no success constant of the creator: the creator's out id is not read)"
                           if not any(p.get("out", {}).get("read") for p in matched) else
                           "link_unlinked(no object instance reached by the use)")
                     link["resource_key"]["generation_missing"] = gm
@@ -1110,6 +1121,10 @@ def explain_row(ctx, rowkey, consumer):
 def publisher_out(st, inst, status, raw):
     """A publisher's out value: read only when its status equals the success constant of its callee, the one
     non-failure-class constant of the row's "callee-check: <callee> returns" lines; otherwise kept as raw evidence."""
+    if inst.callee in st.get("callee_open", {}):
+        return {"raw": raw, "read": False,
+                "why": "not read: no success constant of the creator: the returns of %s are not all followed or not shown "
+                       "(%s)" % (inst.callee, st["ref"](st["callee_open"][inst.callee]))}
     cs = st["callee_consts"].get(inst.callee, [])
     succ = sorted({(v, nm) for v, nm, _ in cs if not fail_class(v)})
     if len(succ) != 1:

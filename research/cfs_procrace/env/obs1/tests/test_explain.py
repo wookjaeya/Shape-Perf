@@ -5,7 +5,9 @@
 
 Every fixture is a stub plan (sidecar, manifest, bindings), a stub relations row with its keys file, a stub facts view,
 and a stub boot (dump text, run.meta, chain record, startup script) written into a new directory under <work dir>; the
-script is run on it with python3 -I and its records are read back.  Covered (revision 2, after review): the link by
+script is run on it with python3 -I and its records are read back.  Covered (revision 3: a creator's callee whose returns
+are not all followed, or whose success constant is only on a line marked not shown to reach the return, gives no success
+constant; revision 2, after review): the link by
 JR 3.2 axis 1 as written (an absence outcome stays unlinked; established only when the use's and the creator's out
 ids, each read under its success constant, are the same instance), the publisher's out kept raw without the creator's
 success constant, sidecar reasons with spaces read whole, the unbalanced-reason refusal, the stop budget in
@@ -282,6 +284,25 @@ ok = rc == 0 and R and ax(R[0])[:3] == ("unlinked", "derived", "record_insuffici
     and "record_insufficient(no success constant of the creator: the creator's out id is not read)" in R[0]["link"]["missing"] \
     and R[0]["link"]["resource_key"]["generation"] is None
 case("no success constant of the creator: its out id is not read -> link unlinked, order record_insufficient", ok,
+     str(ax(R[0])) if R else out[-300:])
+# --- revision 3: the row gives the creator's callee constants, but a return of the callee is not followed: no success
+# constant is taken from them (judgement rules 8.2 base requirement 4, 2026-11-16 addendum) -> not read, the named reason
+ROW_DERIVED_OPEN = ROW_DERIVED_CC.replace("      dependency:", "      callee-check (returns not followed): CREATE: FINISH returns param [status] at p.c:50:5\n"
+                                          "      callee-check (set): CREATE: not established (1 returns not followed, 0 constants not shown to reach the return)\n      dependency:")
+rc, R, _, out = make("derived_met_open", row=ROW_DERIVED_OPEN, events=base_events(order="pub-first", use_status="0x0", use_out="0x30002"))
+ok = rc == 0 and R and ax(R[0])[:3] == ("unlinked", "derived", "record_insufficient") \
+    and "record_insufficient(no success constant of the creator: the callee's returns are not all followed)" in R[0]["link"]["missing"] \
+    and R[0]["order"]["publish_events"][0]["out"]["read"] is False and R[0]["link"]["resource_key"]["generation"] is None
+case("revision 3: a creator's callee with a return not followed gives no success constant -> out not read, named reason", ok,
+     str(ax(R[0])) if R else out[-300:])
+# --- revision 3: the creator's success constant only on a line marked "not shown to reach the return" -> not taken
+ROW_DERIVED_MARK = ROW_DERIVED.replace("      dependency:", "      callee-check: CREATE returns -5 [ERR_FULL] when (lt param:n#0 0)\n"
+                                       "      callee-check: CREATE returns 0 [OK] through CREATE -> ALLOC when (eq local:i 0); not shown to reach the return: CREATE returns the result of ALLOC at p.c:40:5 from the definition at p.c:31:9, redefined later on a path to the return\n      dependency:")
+rc, R, _, out = make("derived_met_mark", row=ROW_DERIVED_MARK, events=base_events(order="pub-first", use_status="0x0", use_out="0x30002"))
+ok = rc == 0 and R and ax(R[0])[:3] == ("unlinked", "derived", "record_insufficient") \
+    and "record_insufficient(no success constant of the creator: the creator's out id is not read)" in R[0]["link"]["missing"] \
+    and R[0]["order"]["publish_events"][0]["out"]["read"] is False
+case("revision 3: a success constant only on a line marked not shown to reach the return is not taken -> out not read", ok,
      str(ax(R[0])) if R else out[-300:])
 # --- no run: static_only; derived -> candidate; partial -> order-dependence candidate
 rc, R, _, out = make("norun_derived", row=ROW_DERIVED, run=False)

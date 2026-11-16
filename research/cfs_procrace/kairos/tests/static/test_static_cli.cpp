@@ -1154,7 +1154,7 @@ startup_script {
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &a), 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &b), 0);
     KZ_CHECK_EQ(a, b);
-    KZ_CHECK(has(a, "rules relations rules revision 8 (2026-11-16)"));
+    KZ_CHECK(has(a, "rules relations rules revision 9 (2026-11-16)"));
     // roots: the image entries of the table, the root that calls a root directly, the dispatching trampoline
     KZ_CHECK(has(a, "table-image-entry 2"));
     KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member "
@@ -1328,7 +1328,7 @@ startup_script {
       if (endh < end) end = endh;
       return text.substr(at, end == std::string::npos ? std::string::npos : end - at);
     };
-    KZ_CHECK(has(r, "rules relations rules revision 8 (2026-11-16)\n"));
+    KZ_CHECK(has(r, "rules relations rules revision 9 (2026-11-16)\n"));
     // the name namespace: the lookup by path is left out; the path namespace: the lookup and the creation by name are left out
     KZ_CHECK(has(r, "      left out: relcallback.c:152:9 in user_main -> path_find#0 (lookup): the callback path_match passed as argument 2 at relcallback.c:94:12 in path_find "
                     "is not the comparison's function name_match\n"));
@@ -1347,6 +1347,13 @@ startup_script {
     // the creator's callee: its constants through the functions whose result it returns; one of them not of failure class
     KZ_CHECK(has(a1, "callee-check: sem_create returns 0 [RC_OK] through sem_create -> rec_create -> alloc_check@relcallback.c:99 when "));
     KZ_CHECK(has(a1, "callee-check: sem_create returns -2 [RC_BAD_POINTER] through sem_create -> rec_create when (eq param:id#2 0)\n"));
+    // relations rules revision 9: the success value comes through a definition redefined later (rc = rec_finish(...)) and
+    // the finishing call returns its parameter: the constants through it are marked, and the set is not established
+    KZ_CHECK(has(a1, "; not shown to reach the return: rec_create returns the result of alloc_check at relcallback.c:121:3 from the definition at "
+                     "relcallback.c:116:6, redefined later on a path to the return\n"));
+    KZ_CHECK(has(a1, "callee-check (returns not followed): sem_create: rec_finish@relcallback.c:111 returns param [rc] at relcallback.c:111:"));
+    KZ_CHECK(has(a1, "callee-check (set): sem_create: not established (1 returns not followed, 3 constants not shown to reach the return): the constants listed are "
+                     "not all it returns, or not shown; no success constant is taken from them\n"));
     KZ_CHECK(has(a1, "writers: Def.name: no writer found under these premises; premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete"));
     KZ_CHECK(has(a1, "writer_set_incomplete(zero writers under the rules)"));
     KZ_CHECK(has(a1, "dependency: path A: 1 creator(s) of this partition in other actors\n"));
@@ -1360,7 +1367,7 @@ startup_script {
     KZ_CHECK(has(a3, "writers: Rec.path: no writer found under these premises"));
     KZ_CHECK(!has(r, "  A5 "));
   }
-  // ---- order edges with kinds and premises (order.c; order rules revision 1) -----------------------------------------
+  // ---- order edges with kinds and premises (order.c; order rules revisions 1 and 2) ---------------------------------
   // A name created before the spawn of the thread that looks it up (hard), looked up before the spawn of the creator's thread
   // (the use fixed early) and after it (unordered); a write after the spawn under a lock held across it (HB-lock) and in a
   // lock window; a spawn operation that reports a failure after the thread started; a field written before the spawn of
@@ -1385,8 +1392,8 @@ startup_script {
     KZ_CHECK_EQ(o, o2);
     const std::string tsv = read(X / "order.tsv");
     KZ_CHECK(has(tsv, "id\trule\tkind\tfrom\tfrom_actor\tto\tto_actor\tcondition\tpremises\tscope\tinstance_key\n"));
-    KZ_CHECK(has(o, "kz-static order (order rules revision 1 (2026-11-16))\n"));
-    KZ_CHECK(has(o, "relations relations rules revision 8 (2026-11-16)\n"));
+    KZ_CHECK(has(o, "kz-static order (order rules revision 2 (2026-11-16))\n"));
+    KZ_CHECK(has(o, "relations relations rules revision 9 (2026-11-16)\n"));
     auto row = [&](const std::string& id) {
       const size_t at = o.find("\n  " + id + " key ");
       if (at == std::string::npos) return std::string();
@@ -1431,6 +1438,26 @@ startup_script {
     KZ_CHECK(has(o, " HB-await hard\n") && has(o, " HB-await conditional\n"));
     KZ_CHECK(has(o, " HB-seq observed-only\n") && has(o, "which of them runs its code first is not fixed by any rule of this revision"));
     KZ_CHECK(has(o, "in iteration 0 (app_one)") && has(o, "in iteration 1 (app_two)"));
+    // order rules revision 2: a write in a spawn wrapper that two threads call is before the start of the child only in the
+    // call of the thread whose own call creates that child (the wrapper's spawn call is caller-dependent)
+    auto line_with = [&](const std::string& a, const std::string& b) {
+      for (size_t at = o.find(a); at != std::string::npos; at = o.find(a, at + 1)) {
+        const size_t bol = o.rfind('\n', at) + 1, eol = o.find('\n', at);
+        const std::string l = o.substr(bol, eol - bol);
+        if (l.find(b) != std::string::npos) return true;
+      }
+      return false;
+    };
+    KZ_CHECK(line_with("in spawn_via [Peer.stamp] peer_two (spawn-entry) -> call order.c:", " -> level_check peer_reader (spawn-entry): hard_before; path "));
+    KZ_CHECK(line_with("in spawn_via [Peer.stamp] peer_one (spawn-entry) -> call order.c:", " -> level_check peer_reader (spawn-entry): unordered: no path of hard or conditional edges either way"));
+    KZ_CHECK(has(o, "caller-dependent: spawn_via is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure "
+                    "follows this edge only from the threads whose own outer spawn calls create this thread: {peer_two (spawn-entry)}\n"));
+    KZ_CHECK(has(o, "the closure follows this edge only from the threads whose own outer spawn calls create this thread: {peer_one (spawn-entry)}\n"));
+    // order rules revision 2: a failure return guarded by a local that holds the primitive's result rests on the position alone
+    KZ_CHECK(has(o, "child without success: unknown (position-based): every witness rests on the source position alone (a value redefined later on a path, a condition "
+                    "that reads a local, or an inner flag that does): start_local returns -5 [ERR_ILLEGAL] at order.c:"));
+    KZ_CHECK(!has(o, "child without success: possible: start_local"));
+    KZ_CHECK(has(o, "summary spawn calls with resolved threads ") && has(o, " (position-based 1)\n"));
     // the summary counts what the text lists
     KZ_CHECK(has(o, "summary rows A 3 (fixed_early_proved 1, hard_before 1, unordered 1)\n"));
     KZ_CHECK(has(o, "summary rows C 5 (hard_before 4, unordered 1)\n"));

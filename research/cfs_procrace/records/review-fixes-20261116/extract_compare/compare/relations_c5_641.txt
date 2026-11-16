@@ -1,0 +1,7 @@
+new names: 0
+class head           change:facts-hash                        1
+class head           change:rules                             1
+class head           insert:reading-options                   1
+pairs of an old <anonymous> line and its successors (a successor not equal after the names alone): 0 lines
+undeclared other: 0
+compare_classes: only declared classes

@@ -258,7 +258,7 @@ OVM은 한 사다리의 등급(`CONFIRMED`, `FIXED-ORDER`, `PREDICTED`, `TOLERAT
 | 인정하는 증거 | 생성 관계(누가 누구를 만들었는가), 소속 앱의 생성 이력, 같은 빌드의 실행에서 읽기와 쓰기가 같은 객체 인스턴스에 닿았다는 기록 |
 | 인정하지 않는 것 | 타입과 필드 이름이 같다는 것, ID 문자열이 같다는 것, task가 스스로 보고한 앱 ID나 이름. 숫자 ID를 실행 사이에 그대로 비교하는 것 |
 | `status` | `established`(성립), `refuted`(다른 객체임이 입증됨), `unlinked`(연결 미확정) |
-| 근거가 없을 때 | `unlinked`와 `link.missing`(빠진 것의 목록). 이 값이면 세 출력은 모두 `undetermined`를 넘지 못한다 |
+| 근거가 없을 때 | `unlinked`와 `link.missing`(빠진 것의 목록). 이 값이면 `violation`은 `observed`·`not_observed_in_runs`가 될 수 없고 `odf`는 `shown`이 될 수 없다(2026-11-16 정정: 앞 글 "세 출력은 모두 `undetermined`를 넘지 못한다"는 3.3의 `failure_sign` 조건과 5.1의 C1 값과 맞지 않았다. `failure_sign`은 대상 사용 자체의 실패 등급 관측이라 연결을 입력으로 쓰지 않고, `final_effect`는 사실의 목록이라 등급이 아니다. 3.3의 표와 5.1은 그대로다) |
 
 **축 2. 사용 조건 (`use_cond`)** — 그 동작에 어떤 선행 상태가 필요한가.
 

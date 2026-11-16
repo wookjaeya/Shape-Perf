@@ -122,3 +122,88 @@ kz-static 빌드가 없으므로 빌드 전 선언은 없다. 바뀌는 출력�
 - **누적 바이트 동일성**: 빌드 뒤 `env/tools/ledger_check.sh` 전체(T/, T_RV4, T_8B, T_8BF, T_8C, T8CF, PV, 11-09 묶음, kairos-build 도구, 플러그인 둘, F1T, C5 641 `b/`, W6·C5 기록, 앞 단계의 도구 사본)와 `tools_check.sh --deep`. 모두 같아야 한다.
 - **도구 보존**: kz-static `0024f192`는 이 빌드가 제자리에서 덮는다. 사본은 앞 단계에서 만들었다(`/home/user/work/preserve/tools-20261116/kz-static.0024f192.xz`, 왕복 확인됨). 새 도구는 그 도구의 남은 출력 가운데 relations 다섯만 다시 만든다. basis·facts는 다시 만들지 않으므로 `0024f192`를 "대체됨"으로 적지 않는다. 등록부의 상태는 `copy`가 된다.
 - **공간**: 시작 전 여유 ≥ 하한 314,572,800 + 필요량. 필요량 = 가장 큰 kz-static 제자리 빌드 dip 92.6 MB + 새 출력 1 MB + 한 시간 흐름 13 MB = 106,600,000 B. 감시(`env/tools/space_guard.sh --kind kz-static`, 2초마다)가 하한을 넘으면 멈추고 보고한다. 재실행도 감시 아래 돌린다(`--kind relations`).
+
+### 2.1 바뀐 것 [F]
+
+- 커밋 `ab182a9`(선언·코드·시험·문서를 함께, 빌드 전). 규모(`git diff 1b8d82f ab182a9 -- kairos`): `lib/llvm/rel_facts.cpp` +594(새), `rel_facts.hpp` +235(새), `relations.cpp` +366/−799, `relations.hpp` +59, `lib/llvm/CMakeLists.txt` +5/−1, `tools/kz-static/cmd_show.cpp` +13/−4, `main.cpp` +2/−2, `tests/static/test_static_cli.cpp` +98, `docs/static_facts.md` +27/−1.
+- `RelFacts`(`lib/llvm/rel_facts.hpp`): facts 섹션, 색인, 정적 행위자. `relations.cpp`에서 옮긴 코드이고 규칙 글은 그대로다. `prepare()` = `load()`, `index()`, `actors()`. 파일 기록은 `file_notes_` 포인터로 한다(relations가 제 행 기록 집합을 가리키게 한다).
+- `RelRow`, `RelGroup`, `RelReport`(`lib/llvm/relations.hpp`), `relations_rows`, `render_row`, `render_relations`, `relation_keys_text`. 행의 줄은 `RowLines`(줄마다 이름을 단다)로 쓴다. 칸 여섯은 기록의 값이고, 그리는 쪽이 이름표를 붙인다. `relations_report`는 `relations_rows`를 그린 것이다.
+- 사용 지점 키(`docs/static_facts.md` §5l). A: `A|이름 공간|부르는 함수|키 매개변수 함수#k|n`. B: `B|필드|-|callee#k|-`와 사이트마다 `B-site|필드|부르는 함수|callee#k|n`. C: `C|필드|생성자|spawn callee|n|read 읽는 함수 n|맥락`. 줄·열, creator, writer, 구획, 계수, 판정은 넣지 않는다.
+- `kz-static relations <facts> [-o OUT] [--keys KEYS]`.
+
+### 2.2 빌드 [M]
+
+- 빌드 전(`pre_mc.txt`, 05:41:27Z): 도구 일곱이 앞 단계 `pre_mc.txt`와 같다. HEAD `ab182a9`, `kairos` 미커밋 0줄.
+- MC 제자리 `make -j4 all`(05:41:33Z–05:44:01Z), 공간 감시 아래. rc 0, 첫 번에 됐다. CMake가 다시 구성했다. 링크는 `libkz-llvm.a`, kz-static, `kz-llvm`을 링크하는 시험 여덟, `test_static_cli`(11줄). kz_lint, kz-phi, `static_golden`은 "Built target"뿐이다. 빌드 시작 뒤 정체성 경로의 파일은 바뀌지 않았다(`find -newer` 0).
+
+| 도구 | 전 | 뒤 |
+|---|---|---|
+| kz-static | `0024f192980dfbd93e4a662666239c3b4082fcb65f3bd5d25a19fbbfc06d2431` | `a763e2550ad6902f102d5a1c2d310c4a658a36c2087b1b6f6717d3d4b1193ed7` (176,674,872 → 178,301,376 B) |
+| kz-static tool_sha256 | `3b7de5b7…` | `90046f5de050d8b49b1acb4dcb33ea4db6c3da07107cdb41e1fc8725f5d2710d` |
+| kz-static tool_source | `bbd48436…` | `b9a4e4431a7af93675be307aa82372f863409da5c9d4ec29bec7133695cfa545` |
+| core_source | `f6e3c7b4…` | 같음 |
+| kz / kz-dump / kz-rt-dump / kz-phi / kz_lint / kz-instr-clang | `931dd39c` / `05623054` / `4390d4f1` / `7d34e6e2` / `b0f0d6a5` / `28db4017` | 모두 같음(다시 링크되지 않음) |
+| kz, kz-phi, kz-dump의 정체성 정의 | `caf58235…`, `7fc3ed73…`, `cc51ff35…` | 같음 |
+| `CMakeCache.txt` | `bc2f43b4…` | 같음 |
+| flags.make 목록 해시 | `b0f15434…` | `b354fbbf…` (kz-static의 `flags.make`) |
+
+- 선언대로다.
+
+### 2.3 시험 [M]
+
+- 전체 ctest(05:44:19Z–05:44:41Z): 239개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음; `skip_reason.log`). 라벨 수는 §16.10.4와 같다(legacy-case 51, unit 84, runtime 66, static 45, golden 58, lint 6).
+- `test_static_cli` 확인 798개(앞 752, +46: 사용 지점 키 블록). `lint_selftest` 102 경우, 실패 0. lint 6/6.
+- golden: `tests/static/data`, `tests/golden/data`, `tests/phi/data`에 바뀐 파일도 새 파일도 없고, relations를 그리는 golden(`relations`, `relations_np`, `relpaths_np`, `relsound_np` 등)이 그대로 통과한다.
+- 합성 시험(사용 지점 키 블록): 표를 찾는 lookup API를 한 줄에서 두 번 부르는 원본, 줄이 셋 밀린 것, creator 둘을 더한 것, 구획 상수 3을 4로 바꾼 것. 넷 모두 A 행 둘의 키 줄이 같다. 그 사이 텍스트는 위치, `creator:` 줄 수(1 → 2 이상), `partition {3}` → `{4}`로 바뀐다. 한 줄의 두 호출은 `…|t_find#0|1`과 `…|t_find#0|2`로 키가 다르다. `--keys`가 있어도 텍스트 바이트는 같다. fixture `relations.c`: 행 다섯, 서로 다른 키 다섯, B1 사이트 키 둘.
+- 단위 점검: `env/tools/tests/run_unit.sh` 8/8, `env/redesign/step2a_tests_unit.sh` 7/7.
+
+### 2.4 바이트 동일성 [M]
+
+- relations 다섯 빌드(새 도구, T8CF의 NP facts 그대로; 05:44:58Z–05:45:04Z, 새 디렉터리 `/home/user/work/redesign/obs1/relrows_check`): `--keys` 없는 실행과 있는 실행 모두 `relations.txt`가 T8CF와 `cmp`로 같다. `relations.log`는 두 실행 모두 빈 파일로 T8CF와 같다. 20 of 20 same, DIFF 0(`byte_identity.txt`).
+
+| 빌드 | relations.txt (두 실행) |
+|---|---|
+| c1_pre_tx | `936cd6c8…` |
+| c1_post_tx | `00b57eb2…` |
+| r2_core | `fc8ea8da…` |
+| c5_641 | `1d4af508…` |
+| c5_642 | `34ac45f1…` |
+
+- 다시 돌리지 않은 것(새 도구로는 확인하지 않음): basis, extract, NP2, identity, count, twice, 드라이버 비교.
+- 재실행의 relations 출력은 비교를 적은 뒤 지웠다(T8CF와 같다). 남긴 것은 키 목록 다섯(합 340,285 B; `keys.sha256`; 장부 행 `OBS_relrows_keys`).
+- 누적 목록: `ledger_check.sh` 30행, 실패 0. `tools_check.sh --deep` 27행, 실패 0. 등록부에서 `0024f192`는 `copy`가 되었다(사본 `/home/user/work/preserve/tools-20261116/kz-static.0024f192.xz`). 새 도구는 그 도구의 relations 출력 다섯만 다시 만들었으므로 "대체됨"으로 적지 않는다. `a763e255`는 `in-place` 행으로 더했다.
+
+### 2.5 사용 지점 키의 측정 [M]
+
+| 빌드 | 행 | 서로 다른 키 | 키를 나누는 행 | 겹친 B 사이트 키 | 목록 바이트 |
+|---|---|---|---|---|---|
+| c1_pre_tx | 431 | 431 | 0 | 0 | 96,613 |
+| c1_post_tx | 431 | 431 | 0 | 0 | 96,619 |
+| r2_core | 338 | 338 | 0 | 0 | 77,674 |
+| c5_641 | 178 | 178 | 0 | 0 | 35,051 |
+| c5_642 | 175 | 175 | 0 | 0 | 34,328 |
+
+- c1_pre_tx의 A21(`cf_cfdp.c:993:19` in `CF_CFDP_InitEngine` → `OS_CountSemGetIdByName#1`, 이름 공간 `OS_common_record_t.name_entry`)과 c1_post_tx의 A21(`cf_cfdp.c:1003:23`, 같은 이름 공간)은 키가 같다(`17975444d83f6589`, 키 글 `A|OS_common_record_t.name_entry|CF_CFDP_InitEngine|OS_CountSemGetIdByName#1|1`). c1_post_tx에는 같은 자리의 행이 하나 더 있다(A48, 이름 공간 `OS_filesys_internal_record_t.virtual_mountpt`, 키 `61d5d789b1133a4f`). 그래서 위치로는 행이 하나로 정해지지 않고, 키는 이름 공간을 담아 둘을 가른다.
+- c1_pre_tx와 c1_post_tx가 함께 가진 키: 431개 가운데 425개. 나머지 여섯씩은 이 측정에서 더 보지 않았다 [미확인: 두 빌드 사이 소스 차이에서 오는지].
+
+### 2.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 05:41:07 | 529,895,424 | 이 단계 시작(하한 위 215.3 MB) |
+| 05:41:33 | 529,571,840 | 빌드 시작(감시 문턱 421,172,800 = 하한 + 106,600,000) |
+| 05:42:01 | 436,551,680 | 빌드의 가장 낮은 점(dip 93,020,160) |
+| 05:44:01 | 516,796,416 | 빌드 끝(변화 −12,775,424) |
+| 05:45:04 | 504,549,376 | relations 재실행 끝(dip 11,857,920; 지우기 전) |
+| 05:47:40 | 515,837,952 | 기록을 쓴 뒤 |
+
+- 하한을 넘지 않았다. 이 빌드의 dip 93.0 MB는 앞의 kz-static 제자리 빌드 dip(74.2–92.6 MB)의 위 끝을 조금 넘는다. 순변화 −12.8 MB는 앞의 −0.8–−3.8 MB보다 크다: kz-static이 1.6 MB 커졌고 나머지는 빌드 트리의 새 목적 파일·시험 프로그램이다 [I: 파일별로 재지 않음].
+- 지운 것: 재실행의 relations 출력(다시 만들 수 있음, T8CF와 같음)뿐이다. scratchpad의 다른 것, 도구, 저장소 자료, 묶음, PV, CK, T8CF, 빌드 트리는 건드리지 않았다.
+
+### 2.7 계획과 다르게 한 것
+
+- 키의 정의를 경로마다 적었다. 계획의 정의(경로, 이름 공간 또는 필드, 부르는 함수, callee, 키 매개변수 위치, n 번째 호출)는 경로 A의 lookup에 맞는다. 경로 B의 행은 (필드, callee, 인자) 묶음이고 사이트가 여럿이다: 행 키에는 부르는 함수와 n을 넣지 않고(`-`), 사이트마다의 키를 목록에 따로 둔다. 경로 C의 행은 spawn 호출 하나에 읽기와 맥락이 여럿이다: spawn 호출의 키에 읽기(읽는 함수와 그 함수 안 같은 필드 읽기의 n)와 맥락(종류, 맥락 호출의 부르는 함수·callee·n)을 더했다. 그래도 줄·열 번호는 넣지 않는다. 다섯 빌드에서 키 겹침은 0이다.
+- 키는 sha256의 앞 16 hex 자리다. 목록에는 키 글을 함께 적어, 겹침을 키와 글 둘로 센다.
+- 공유 적재기는 지금 relations만 쓴다. 순서 명령과 계획 생성기는 아직 없다(뒤 단계에서 같은 `RelFacts`를 쓴다).
+- 키 목록은 저장소 밖 출력 디렉터리에 두고 저장소에는 sha256만 둔다(`keys.sha256`).
+- 이 빌드의 dip(93.0 MB)과 순변화(−12.8 MB)는 계획의 추정(74–93 MB, 출력 약 1 MB 외 −0.8–−3.8 MB)의 위 끝이거나 그 밖이다. 다음 kz-static 빌드의 필요량은 이 값으로 다시 잡는다.

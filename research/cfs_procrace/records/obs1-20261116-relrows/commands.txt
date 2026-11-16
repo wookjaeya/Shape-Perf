@@ -1,3 +1,44 @@
 # declaration: sha256 of declared_before_build.txt (= the lines of section 2 of plan/observation_path_results_20261116.md up to the end of 2.0, before the build) = 5b067dbfcb4d397ae957a88537d016bf44f4e6245eb54b7aef4ce6dafcd9431b (2026-11-16T05:41:07Z; committed before the build)
 # obs1-20261116-relrows: commands, rc and free space (df -B1 /, bytes available)
 start: 2026-11-16T05:41:07Z, free 529895424
+# <scratch> is this session's scratchpad directory (relrows/); the script used there is copied here as rerun.sh
+
+## 1. code, tests, docs (kairos/): lib/llvm/{rel_facts.hpp,rel_facts.cpp} (new: loading, indices, actors moved out of relations.cpp),
+##    lib/llvm/{relations.hpp,relations.cpp,CMakeLists.txt}, tools/kz-static/{cmd_show.cpp,main.cpp}, tests/static/test_static_cli.cpp, docs/static_facts.md 5l
+g++ -std=c++17 <the MC kz-llvm warning flags, -Werror> -fsyntax-only lib/llvm/{rel_facts,relations}.cpp tests/static/test_static_cli.cpp -> clean (no object written)
+MC/tests/lint/kz_lint <rule> kairos --data kairos/tests/lint/data for case-ids retired-term banned-files no-llvm no-generated (kz_lint b0f0d6a5, before the build) -> clean
+
+## 2. the declaration, code, tests and docs committed together before the build: ab182a9 (line 1 above)
+
+## 3. before the build (pre_mc.txt, 05:41:27Z): the seven tools equal records/obs1-20261116-ground/pre_mc.txt; HEAD ab182a9, uncommitted lines under kairos 0
+
+## 4. rebuild in place in MC under the space guard
+cd MC && env/tools/space_guard.sh --need 106600000 --log df_build.log --kind kz-static -- bash -c "make -j4 all > make.log 2>&1"   (05:41:33Z-05:44:01Z) -> rc 0
+CMake re-ran (Configuring done); links: libkz-llvm.a, kz-static, test_static_{expr,flow,recipe,gitrev,unroll,wrappers,link,elf32,cli} (11 Linking lines); kz_lint, kz-phi, static_golden only "Built target"
+free: start 529571840, lowest 436551680, end 516796416 (dip 93020160, change -12775424); 74 samples, floor never crossed
+find kairos/{lib,tools,include,cmake,CMakeLists.txt,probe,instrument,runtime} -newer <build start> -> 0 files
+post_mc.txt: kz-static a763e255 (tool_sha256 90046f5d, tool_source b9a4e443, core_source f6e3c7b4 unchanged); kz, kz-dump, kz-rt-dump, kz-phi, kz_lint, kz-instr-clang unchanged;
+  defines of kz, kz-phi, kz-dump unchanged; CMakeCache.txt bc2f43b4 unchanged; flags.make list b0f15434 -> b354fbbf (kz-static's flags.make)
+
+## 5. tests
+ctest -j4 --output-on-failure (05:44:19Z-05:44:41Z) -> ctest_full.log: 239 tests, 0 failed, 1 skipped (test_probe_anchor_reached), rc 0; labels as 16.10.4 (legacy-case 51, unit 84, runtime 66, static 45, golden 58, lint 6)
+ctest -R '^(test_static_cli|lint_selftest)$' -V -> test_static_cli 798 checks passed (752 before, +46); lint selftest 102 cases, 0 failed
+ctest -R '^test_probe_anchor_reached$' -V -O skip_reason.log -> Skipped (no tracefs, as records/step2a-20261110-8cfix/skip_reason.log)
+git diff ab182a9~1 -- kairos/tests/{static,golden,phi}/data -> 0 lines; no new file there (goldens unchanged and passing)
+TMPDIR=<scratch>/tmp bash env/tools/tests/run_unit.sh -> unit_tools.txt, 8 of 8;  TMPDIR=<scratch>/tmp bash env/redesign/step2a_tests_unit.sh -> unit_step2a.txt, 7 of 7
+
+## 6. relations of the five builds on the tests_8c_fix NP facts (facts not re-extracted)
+env/tools/space_guard.sh --need 20000000 --log df_rerun.log --kind relations -- bash <scratch>/rerun.sh   (05:44:58Z-05:45:04Z) -> rc 0; dip 11857920
+  rerun.sh: for b in c1_pre_tx c1_post_tx r2_core c5_641 c5_642: kz-static relations T8CF/$b/NP/facts.kz -o O/$b/relations.txt > O/$b/relations.log 2>&1;
+            kz-static relations T8CF/$b/NP/facts.kz -o O/$b/relations_k.txt --keys O/$b/keys.txt > O/$b/relations_k.log 2>&1   (O = /home/user/work/redesign/obs1/relrows_check, new)
+cmp with T8CF/<b>/NP/relations.txt and relations.log -> byte_identity.txt: 20 of 20 same (both runs, five builds; logs empty as in T8CF)
+the relations re-runs removed after the comparison (equal to T8CF); kept: O/<b>/keys.txt (340285 B in all; keys.sha256)
+key measurements (keys.txt line 5): rows 431/431/338/178/175, distinct keys equal to rows, rows sharing a key 0, B site keys repeated 0
+c1_pre_tx A21 and c1_post_tx A21 (cf_cfdp.c:1003:23, namespace OS_common_record_t.name_entry): both 17975444d83f6589; keys common to c1_pre_tx and c1_post_tx: 425 of 431
+name_check.sh --tree O -> clean
+
+## 7. registry, ledger, cumulative list
+records/TOOLS.tsv: 0024f192 in-place+copy -> copy; new row a763e255 in-place.  env/tools/tools_check.sh --deep -> tools_check.txt, 27 rows, 0 failing
+records/LEDGER.tsv: new row OBS_relrows_keys.  env/tools/ledger_check.sh -> ledger_check.txt, 30 rows, 0 failing
+nothing deleted except the five builds' relations re-runs above (re-creatable, equal to T8CF); no cFS boot; no push
+end: 2026-11-16T05:47:40Z, free 515837952

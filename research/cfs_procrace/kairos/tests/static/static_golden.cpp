@@ -59,6 +59,8 @@ const std::vector<std::string> kPathSections = {"functions", "lockpaths"};
 // Types and object access (--object-access, static_facts.md 5s): the writer sets the rules of the option count, and the three
 // sections it writes (the views of a facts container without them have no such section).
 const std::vector<std::string> kObjectSections = {"functions", "writers", "atype", "locs", "outcalls", "fstatus", "objaccess", "ftypes", "argtypes"};
+// Semantics with a verification state (--semantics, static_facts.md 5t): the section SEMANTICS and the facts it is joined from.
+const std::vector<std::string> kSemSections = {"functions", "retconsts", "semantics"};
 const std::vector<std::string> kObjectTargets = {"--extended-facts", "--target", "Mem.pool", "--target", "Mem.buf", "--target", "Mem.label", "--target", "Mem.tag",
                                                  "--target", "Mem.data", "--target", "Mem.raw", "--target", "Mem.count", "--target", "Chan.name"};
 std::vector<std::string> with_option(std::vector<std::string> v, const std::string& o) {
@@ -110,6 +112,9 @@ const std::vector<Case>& cases() {
       // types and object access (static_facts.md 5s): objaccess.c with the option and, for the difference, without it
       {"objaccess", "objaccess.c", with_option(kObjectTargets, "--object-access"), kObjectSections},
       {"objaccess_off", "objaccess.c", kObjectTargets, kObjectSections},
+      // semantics with a verification state (static_facts.md 5t): semantics.c with the data file the coverage scan generates for
+      // it (an option value "@data/..." names a file of the golden data directory), and the relations rows that name its functions
+      {"semantics_np", "semantics.c", {"--targets-rule", "R-T1,R-T2", "--semantics", "@data/semantics_fixture/framework_semantics_fixture-sem.txt"}, kSemSections, true, true},
   };
   return all;
 }
@@ -198,7 +203,7 @@ int run_fixture(const Case& c, const std::string& tool, const std::string& fixtu
   ::mkdir(work.c_str(), 0777);
   const std::string out1 = work + "/" + c.name + ".kz", out2 = work + "/" + c.name + ".again.kz";
   std::string options;
-  for (const std::string& o : c.options) options += " " + quote(o);
+  for (const std::string& o : c.options) options += " " + quote(o.compare(0, 6, "@data/") == 0 ? data + "/" + o.substr(6) : o);
   auto extract = [&](const std::string& out, std::string* log) {
     const std::string prof = c.no_profile ? std::string(" --no-profile") : " --profile " + quote(profile);
     return run(quote(tool) + " extract" + prof + " --source " + quote(fixtures + "/" + c.source) + " --root " + quote(fixtures) + " -o " + quote(out) + options +

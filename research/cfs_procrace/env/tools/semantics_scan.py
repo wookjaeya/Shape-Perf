@@ -1021,7 +1021,8 @@ def p0_lines(comp, sc, names):
     for rel in sorted(pins):
         L.append('file %s sha256=%s' % (rel, pins[rel]))
     if sc['source']:
-        L.append('source %s sha256=%s' % sc['source'])
+        # the local copy by its file name and sha256 (its directory is a path of this machine, not data)
+        L.append('source %s sha256=%s' % (os.path.basename(sc['source'][0]), sc['source'][1]))
     for n, t in names:
         if n in sc['found']:
             r, ln, attrs, _ = sc['found'][n]
@@ -1109,6 +1110,13 @@ def main(argv):
                 if sha(os.path.join(root, rel)) != sh:
                     print('FAIL %s: %s sha256 differs' % (name, rel))
                     nbad += 1
+            for l in have:
+                m = re.match(r'^source (\S+) sha256=([0-9a-f]{64})$', l)
+                if m:
+                    src = comp.get('p0-source', '')
+                    if not src or os.path.basename(src) != m.group(1) or sha(src) != m.group(2):
+                        print('FAIL %s: the source line does not name the p0-source copy with its sha256' % name)
+                        nbad += 1
             for l in have:
                 for m in re.finditer(r'(?:^|[ =])([\w./+-]+\.[ch]):(\d+)\b', l):
                     rel, ln = m.group(1), int(m.group(2))

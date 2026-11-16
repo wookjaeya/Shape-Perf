@@ -1193,6 +1193,30 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   for (const auto& n : opt.notes) item(n.first, n.second, KZ_POLICY_UNSET, KZ_NONE32);
   for (const auto& n : opt.deviation_notes) item(n.first, n.second, KZ_POLICY_DEVIATION, KZ_NONE32);
 
+  // ---- SEMANTICS (--semantics; kz_facts.h revision 10, static_facts.md 5t): the rows semantics_rows() computed on a
+  // first serialization of these facts, their strings interned after every other string
+  std::vector<kz_fact_sem> sem_rows;
+  if (opt.write_semantics)
+    for (const SemRow& x : opt.semantics) {
+      kz_fact_sem r = zero<kz_fact_sem>();
+      r.value = x.value;
+      r.fn = x.fn;
+      r.pos = x.pos;
+      r.decl_fh = x.decl_fh;
+      r.decl_line = x.decl_line;
+      r.src_line = x.src_line;
+      r.layer = x.layer;
+      r.column = x.column;
+      r.verify = x.verify;
+      r.origin = x.origin;
+      r.flags = x.flags;
+      r.api = w.intern(x.api);
+      r.component = w.intern(x.component);
+      r.item = w.intern(x.item);
+      r.source = w.intern(x.source);
+      sem_rows.push_back(r);
+    }
+
   // ---- add the sections (the writer sorts them canonically)
   kz::Status s;
   auto put = [&](uint32_t section, auto& rows) -> bool {
@@ -1216,6 +1240,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
                               !put(KZ_SEC_FIELD_STATUS, fstatus_rows) || !put(KZ_SEC_AWAIT_L1, await_rows) || !put(KZ_SEC_LOCK_PATHS, lockpath_rows)))
     return s;
   if (spec.object_access && (!put(KZ_SEC_OBJECT_ACCESS, objacc_rows) || !put(KZ_SEC_FIELD_TYPES, ftype_rows) || !put(KZ_SEC_ARG_TYPES, argtype_rows))) return s;
+  if (opt.write_semantics && !put(KZ_SEC_SEMANTICS, sem_rows)) return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;
   return w.finish(out);

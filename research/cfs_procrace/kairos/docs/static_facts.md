@@ -703,6 +703,27 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - 지배는 잠금 집합 골격(Clang CFG)의 블록 지배다. 첨자가 변수인 두 경로(`chan[i]`)는 같은 변수 이름이면 같은 위치로 본다(그 사이에 변수가 바뀌지 않는다는 전제).
 - 소스 트리의 기준은 `.git` 항목이다. 소스 트리가 아닌 checkout(내려받은 압축 파일 등)은 절대 경로로 남는다.
 
+## 5t. 검증 상태가 붙은 의미: `extract --semantics` (추출 옵션, 2026-11-16) [D]
+
+결과는 `plan/full_stage_results_20261116.md` §8. 범위 규칙은 `docs/semantics_coverage.md`(개정 1, 어떤 자료 파일보다 먼저 커밋)이고, 자료 파일 `semantics/framework_semantics_<판>.txt`, `semantics/p0_declarations_<판>.txt`, `semantics/framework_namespaces_<판>.txt` 는 그 규칙의 기계적 훑기(연구 `env/tools/semantics_scan.py generate`)가 만든 것이며 `semantics_scan.py check` 가 다시 만들어 대조한다. 옵션을 주지 않은 추출은 앞판과 같은 바이트다(같은 코드 경로; 섹션·BASIS 항목·출력 줄은 모두 옵션 아래). 옵션은 확장 사실과 함께만 받고(그 밖이면 종료 코드 2), 자료 파일이 형식에 맞지 않거나(첫 줄, 알 수 없는 줄, 끝 줄 없음, 고정되지 않은 파일) 읽히지 않으면 아무것도 읽기 전에 종료 코드 2.
+
+1. **결합(join).** 추출은 facts 를 한 번 쓰고 그 컨테이너를 다시 읽어(relations 와 같은 적재기 `RelFacts`, 그리고 FILE_HASHES) 의미 행을 계산한 뒤, 섹션 SEMANTICS 와 BASIS 항목을 더해 한 번 더 쓴다. 다른 섹션의 레코드는 같다(SEMANTICS 의 글은 다른 모든 글 다음에 STRINGS 에 들어간다).
+2. **적용.** 프레임워크 자료의 항목은 빌드가 부르는 함수(직접 호출의 callee)에만, 그리고 빌드가 그 항목의 정의 파일을 고정된 sha256 으로 갖고 그 줄에서 그 함수를 정의하거나, 선언 머리말을 고정된 sha256 으로 가질 때만 적용한다. P0 선언 자료의 항목은 빌드의 FUNCS 가 그 함수의 선언으로 적은 파일·줄이 자료의 것이고 그 파일의 sha256 이 같을 때만 적용한다. 판이 다른 자료는 아무 행도 내지 않고 BASIS `count.semantics_entries[k]` 에 "called but neither pin held" 로 센다. 두 판의 고정 파일이 바이트로 같으면 두 판의 항목이 모두 적용된다(그 행들은 판의 글로 갈린다).
+3. **층과 칸.**
+   - P0: 빌드가 부르는 P0 표 항목마다 역할(종류·가족·의미 문장), out 인자, 조건부(try/timed); 검증 상태는 P0 표의 출처가 있으면 `standard-collated`(지금 `pthread_create` 하나: 로컬 upstream 사본), 없으면 `unverified`. P0 비교 표의 함수도 같다(모두 `unverified`). P0 선언 자료가 적용되면 그 선언의 속성: `pure`·`const` → out-behaviour("인자를 통해 저장하지 않음"), `noreturn` → role, `nonnull(i,…)` → precondition(0 부터 센 인자 번호); `doc-collated`, 출처는 머리말 file:line. `nothrow`, `warn-unused-result` 는 행을 내지 않는다.
+   - 프레임워크: 문서의 반환(`documented-return`, 값, `doc-collated`, 머리말 file:line), 인자의 역할과 정의역(`arg-role`, `arg-domain`: 상태·event-type·run-status 와 그 상수 무리), 본문이 이 facts 에서 돌려주는 상수(`success`(성공 상수와 같은 값)·`failure`, `body-derived`; RET_CONSTS 와 RETURNS 의 call-result 반환을 따라간 사슬, relations 의 생성자 callee 상수와 같은 걸음), 문서와 본문의 일치(`agreement`), facts 가 도출한 역할(`role`: OP_DERIV 의 delay·terminal, SPAWN_WRAP 의 spawn).
+   - 상태 공간: 항목이 하나라도 적용된 판의 성공 상수와 severity mask(`doc-collated`).
+4. **일치(agreement)의 규칙.** 본문이 없으면 `not compared: no body`; 문서의 반환이 없으면 `not compared: no documented return`; 따라가지 못한 반환(매개변수·지역·필드·식·본문 없는 함수의 결과)이 있거나 나중에 다시 정의되는 정의를 거친 상수(relations rules revision 9 의 "not shown to reach the return")가 있으면 `not compared: the body's set is not established (…)` — 이 셋은 `unverified`. 집합이 서면 `derived = documented (n values)`, 또는 `the documentation lists a value the body cannot return: …` 와 `the body returns a value the documentation omits: …` — `body-derived`. 값은 쓴 그대로의 상수 값으로 비교한다(형 변환을 적용하지 않음; RET_CONSTS 가 주는 값과 같은 방식).
+5. **BASIS**(옵션 아래): `extract.semantics`(결합 규칙 개정과 파일 수), `extract.semantics[i]`(파일 이름, sha256, 층, 판), `count.semantics`(행 수와 층마다 검증된 행 / 행), `count.semantics_entries[i]`(자료마다 항목 수, 적용 수와 그 고정, 부르지만 고정이 맞지 않는 수, P0 선언 속성 행 수). 추출 출력에 `semantics` 한 줄.
+6. **relations**(SEMANTICS 가 있을 때만; 없으면 앞판과 같은 바이트): 머리에 `semantics of these facts …` 한 줄(BASIS `count.semantics`, 프레임워크 의미 항목이 있는 함수를 이름 대는 행 수와 그 가운데 검증되지 않은 항목이 있는 행 수), 행과 이름 공간 블록의 layers 칸에 `sem-unverified(api:column, …)`(행이 이름 대는 함수의 프레임워크 항목 가운데 `unverified` 인 것; P0 은 `P0-unverified(...)` 그대로). 규칙 개정 줄(relations rules revision 9)은 바뀌지 않는다.
+7. **보기.** `kz-static show` 의 절 `semantics`.
+
+**한계** [D]:
+- 이름 공간 항목(`framework_namespaces_*`)은 판정 규칙 8.2 (가)의 입력이고 kz-static 은 읽지 않는다(이름 결합을 구현하는 설명 스크립트가 읽는다). `--semantics` 에 주면 형식 오류다.
+- P0 의 행위 문장은 로컬 C 라이브러리 소스 사본이 있는 것만 대조된다(지금 `pthread_create` 의 upstream 2.39 사본; 배포판 패치는 대조하지 않음). 선언 속성은 빌드가 읽는 머리말의 것이고, 그 머리말 패키지와 빌드가 링크하는 C 라이브러리의 판이 같다는 것은 기록(`records/semantics-20261116/`)의 측정이다. 그 밖의 판·POSIX 글과의 대조는 새 외부 자원이 필요하다.
+- 같은 이름의 함수가 판마다 다른 뜻을 가질 수 있으므로 항목은 이름으로 옮기지 않는다(고정 파일의 sha256 이 같을 때만 적용).
+- 이 층이 방법이 받아들이는 framework-adapter 층인지는 PI 의 물음이다(가정하지 않음).
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).

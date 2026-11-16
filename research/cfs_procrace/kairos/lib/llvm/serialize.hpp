@@ -13,6 +13,7 @@
 
 #include "kz/core/container.hpp"
 #include "model.hpp"
+#include "semantics.hpp"
 #include "spec.hpp"
 
 namespace kzs {
@@ -29,6 +30,10 @@ struct SerializeOptions {
   std::vector<std::pair<std::string, std::string>> notes;  // further BASIS items (name, value), policy unset
   std::vector<std::pair<std::string, std::string>> deviation_notes;  // further BASIS items (name, value), policy deviation
   size_t image_budget = 4096;    // ReadOptions::image_budget of the run (recorded with the extended facts)
+  // --semantics (static_facts.md 5t): the SEMANTICS rows (semantics.hpp), written as the section SEMANTICS after every
+  // other section's strings; off, no such section is written and the facts are as before
+  bool write_semantics = false;
+  std::vector<SemRow> semantics;
 };
 
 kz::Status serialize_facts(const Model& model, const ExtractSpec& spec, const SerializeOptions& options, kz::Bytes* out);

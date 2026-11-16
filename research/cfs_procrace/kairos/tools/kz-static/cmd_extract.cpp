@@ -11,6 +11,7 @@
 #include "p0.hpp"
 #include "kz/core/dump.hpp"
 #include "kz/core/identity.hpp"
+#include "semantics.hpp"
 #include "serialize.hpp"
 #include "spec.hpp"
 #include "target_rules.hpp"
@@ -122,7 +123,7 @@ int cmd_extract(int argc, char** argv) {
   std::string err;
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--basis", "--source", "--root", "--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn",
-                   "--resource-dir", "--extra-arg", "--section", "--argflow-depth", "--argflow-size", "--image-budget", "--targets-rule", "-o"},
+                   "--resource-dir", "--extra-arg", "--section", "--argflow-depth", "--argflow-size", "--image-budget", "--targets-rule", "--semantics", "-o"},
                   {"--text", "--verbose", "--no-profile", "--extended-facts", "--accept-option-difference", "--object-access"}, &args, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
@@ -171,6 +172,24 @@ int cmd_extract(int argc, char** argv) {
     return 2;
   }
   spec.object_access = args.has("--object-access");
+  // semantics with a verification state (static_facts.md 5t): the semantics data files joined to the build as the section
+  // SEMANTICS; off, the facts are written as before
+  std::vector<kzs::SemDataFile> sem_data;
+  if (args.has("--semantics")) {
+    if (!spec.extended_facts) {
+      std::fprintf(stderr, "kz-static extract: --semantics needs the extended facts (--extended-facts or --no-profile)\n");
+      return 2;
+    }
+    for (const std::string& f : args.many("--semantics")) {
+      kzs::SemDataFile d;
+      const kz::Status ls = kzs::load_semantics_file(f, &d);
+      if (!ls.ok()) {
+        std::fprintf(stderr, "kz-static extract: --semantics %s\n", ls.describe().c_str());
+        return 2;
+      }
+      sem_data.push_back(std::move(d));
+    }
+  }
   // the tool parameters of F4 and F6 (no reference fixes them; recorded as unspecified_by_reference)
   size_t image_budget = 4096;
   {
@@ -402,6 +421,30 @@ int cmd_extract(int argc, char** argv) {
   kz::Bytes out;
   kz::Status s = kzs::serialize_facts(model, spec, so, &out);
   if (!s.ok()) return fail("extract", s.describe());
+  std::string semantics_count;
+  if (!sem_data.empty()) {
+    // the join reads the facts as written (FILE_HASHES, FUNCS, calls, RET_CONSTS, RETURNS, P0_TABLE, OP_DERIV, SPAWN_WRAP);
+    // the facts are then written once more with the section and its BASIS items
+    kzs::SemResult sr;
+    {
+      kz::Container first;
+      s = kz::Container::parse(out, &first);
+      if (s.ok()) s = first.verify_content();
+      if (!s.ok()) return fail("extract", "the facts before the semantics join do not verify: " + s.describe());
+      s = kzs::semantics_rows(first, sem_data, &sr);
+      if (!s.ok()) return fail("extract", "the semantics join: " + s.describe());
+    }
+    for (const auto& n : sr.notes) {
+      so.notes.push_back(n);
+      if (n.first == "count.semantics") semantics_count = n.second;
+    }
+    so.write_semantics = true;
+    so.semantics = std::move(sr.rows);
+    kz::Bytes again;
+    s = kzs::serialize_facts(model, spec, so, &again);
+    if (!s.ok()) return fail("extract", s.describe());
+    out = std::move(again);
+  }
   s = kz::write_whole_file(args.one("-o"), out);
   if (!s.ok()) {
     std::fprintf(stderr, "kz-static extract: %s\n", s.describe().c_str());
@@ -415,6 +458,7 @@ int cmd_extract(int argc, char** argv) {
   std::printf("facts %s\n", kz::to_hex(c.artifact_hash()).c_str());
   std::fputs(summary_text(model, spec, units.size()).c_str(), stdout);
   if (no_profile) std::fputs(derivation_text(derivation).c_str(), stdout);
+  if (!sem_data.empty()) std::printf("semantics                    %s\n", semantics_count.c_str());
   if (args.has("--text")) {
     kzs::TextOptions to;
     for (const std::string& sec : args.many("--section")) to.sections.insert(sec);

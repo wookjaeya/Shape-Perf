@@ -1,0 +1,3 @@
+# fixture_trees.tsv -- the component of the semantics fixture (kairos/tests/static/fixtures/semantics.c) for the scan that
+# generates kairos/tests/static/data/semantics_fixture/ (same format as semantics_trees.tsv)
+label=fixture-sem	layer=framework	root=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures	version=the semantics fixture	headers=semantics.c	sources=semantics.c	status=semantics.c:20-25	status-types=sem_status_t	success=SEM_OK	event-type=semantics.c:28-29	run-status=semantics.c:32-33

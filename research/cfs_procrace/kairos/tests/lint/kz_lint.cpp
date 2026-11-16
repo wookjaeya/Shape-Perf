@@ -13,6 +13,10 @@
 //                  are split at '_' and at camel-case boundaries and compared without regard to case
 //   case-ids-data  no case identifier (data/case_identifiers.txt only) in the framework-layer data files under
 //                  semantics/ (any text file), with the same matching as case-ids; framework names are allowed there
+//   semantics-names no API name of the framework-layer semantics data (semantics/*.txt: the `api` lines of the files of
+//                  layer framework, the functions of the name-space files, `function=` of the role file) as a word in
+//                  engine code (the scope of case-ids); the data names framework APIs by design, the engine never; the
+//                  P0 declarations (layer p0) name C library functions the engine's P0 table holds and are not read
 //   retired-term  no identifier containing "contract" in code, build files and profiles
 //                  (comments and string literals are not identifiers; data/contract_allow.txt
 //                  lists the few exact tokens that are allowed, e.g. the provenance tier name)
@@ -43,6 +47,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <regex>
 #include <set>
 #include <sstream>
@@ -399,6 +404,76 @@ Violations rule_case_ids_data(const fs::path& root, const fs::path& data, bool* 
   return v;
 }
 
+// The API names of the framework-layer semantics data (docs/semantics_coverage.md): every word that names a function in
+// semantics/*.txt -- the second word of an `api` line in a file whose `layer` line says framework, the second word of a
+// lookup, create, delete, compare, copy, clear, create-check, stored-name or chain-status line of a name-space file, and
+// the value of function= -- must not stand as a word in engine code (include/, lib/, tools/, and probe/ and instrument/
+// outside their tests/, scripts/, sites/ and out/ directories).
+Violations rule_semantics_names(const fs::path& root) {
+  Violations v;
+  std::map<std::string, std::string> names;  // name -> the data file that names it
+  for (const fs::path& f : files_under(root, {"semantics"})) {
+    std::string text;
+    if (!read_file(f, &text) || looks_binary(text)) continue;
+    std::istringstream in(text);
+    std::string line;
+    bool framework = false, p0 = false;
+    std::vector<std::string> found;
+    while (std::getline(in, line)) {
+      if (line.rfind("layer framework", 0) == 0) framework = true;
+      if (line.rfind("layer p0", 0) == 0) p0 = true;
+      std::istringstream ws(line);
+      std::string a, b;
+      ws >> a >> b;
+      if (a == "api" && !b.empty()) found.push_back(b);
+      for (const char* k : {"lookup", "create", "delete", "compare", "copy", "clear", "create-check", "stored-name", "chain-status"})
+        if (a == k && !b.empty()) found.push_back(b);
+      const size_t at = line.find("function=");
+      if (at != std::string::npos) {
+        size_t e = at + 9;
+        while (e < line.size() && word_char(line[e])) ++e;
+        found.push_back(line.substr(at + 9, e - at - 9));
+      }
+    }
+    if (p0 && !framework) continue;
+    for (const std::string& n : found)
+      if (!n.empty() && std::all_of(n.begin(), n.end(), [](char c) { return word_char(c); })) names.emplace(n, rel(root, f));
+  }
+  if (names.empty()) return v;
+  std::vector<fs::path> files = files_under(root, {"include", "lib", "tools"});
+  for (const fs::path& f : files_under(root, {"probe", "instrument"})) {
+    const std::string r = "/" + rel(root, f);
+    bool input = false;
+    for (const char* d : {"/tests/", "/scripts/", "/sites/", "/out/"})
+      if (r.find(d) != std::string::npos) input = true;
+    if (!input) files.push_back(f);
+  }
+  for (const fs::path& f : files) {
+    std::string text;
+    if (!read_file(f, &text) || looks_binary(text)) continue;
+    std::istringstream in(text);
+    std::string line;
+    int no = 0;
+    while (std::getline(in, line)) {
+      ++no;
+      size_t i = 0;
+      while (i < line.size()) {
+        if (!word_char(line[i])) {
+          ++i;
+          continue;
+        }
+        size_t j = i;
+        while (j < line.size() && word_char(line[j])) ++j;
+        auto it = names.find(line.substr(i, j - i));
+        if (it != names.end())
+          v.push_back(Violation{rel(root, f), no, "API name '" + it->first + "' of the framework-layer data (" + it->second + ") in engine code: it belongs in semantics/ only"});
+        i = j;
+      }
+    }
+  }
+  return v;
+}
+
 Violations rule_retired_word(const fs::path& root, const fs::path& data, bool* usage_ok) {
   Violations v;
   bool ok = false;
@@ -656,6 +731,7 @@ Violations run_rule(const std::string& rule, const fs::path& root, const fs::pat
   *known = true;
   if (rule == "case-ids") return rule_case_ids(root, data, usage_ok);
   if (rule == "case-ids-data") return rule_case_ids_data(root, data, usage_ok);
+  if (rule == "semantics-names") return rule_semantics_names(root);
   if (rule == "retired-term") return rule_retired_word(root, data, usage_ok);
   if (rule == "banned-files") return rule_banned_files(root);
   if (rule == "no-llvm") return rule_no_llvm(root);
@@ -735,6 +811,21 @@ int selftest(const fs::path& data) {
       {"case-ids", true, {"case id in an instrument .cmake file", {{"instrument/llvm/gates.cmake", "set(KZ_CASE R2)\n"}}}},
       {"case-ids", false, {"a .cmake file under scripts/ and a test build file are allowed",
                            {{"instrument/llvm/scripts/gates.cmake", "set(KZ_CASE R2)\n"}, {"probe/hold/tests/CMakeLists.txt", "# C1\n"}}}},
+      // ---- the API names of the framework-layer semantics data stay out of engine code
+      {"semantics-names", true, {"a framework API of the data in engine code",
+                                 {{"semantics/framework_semantics_x.txt", "semantics-data 1\nlayer framework\napi Fx_FindByName decl=inc/x.h:3 def=- return=status by=doc rule=E2\n"},
+                                  {"lib/a.cpp", "int n = Fx_FindByName(0);\n"}}}},
+      {"semantics-names", true, {"a name-space function of the data in a tool",
+                                 {{"semantics/framework_namespaces_x.txt", "semantics-data 1\nlayer framework\nkind K value=1 at=a.h:2 source=a.c:3\n  create Fx_Make def=a.c:9 at=a.c:10 public=yes\n"},
+                                  {"tools/kz/cmd_a.cpp", "// calls Fx_Make\n"}}}},
+      {"semantics-names", true, {"a role function of the data in a probe source",
+                                 {{"semantics/roles.txt", "role run-loop function=Fx_Loop def=a.c:1\n"}, {"probe/plan/a.cpp", "void Fx_Loop();\n"}}}},
+      {"semantics-names", false, {"the P0 declarations name C library functions the engine holds",
+                                  {{"semantics/p0_declarations_x.txt", "semantics-data 1\nlayer p0\napi memcpy decl=string.h:43 table=table attrs=-\n"},
+                                   {"lib/p0.cpp", "const char* n = \"memcpy\";\n"}}}},
+      {"semantics-names", false, {"the data, tests and docs may name the APIs",
+                                  {{"semantics/framework_semantics_x.txt", "semantics-data 1\nlayer framework\napi Fx_FindByName decl=inc/x.h:3 def=- return=status by=doc rule=E2\n"},
+                                   {"tests/t.cpp", "// Fx_FindByName\n"}, {"docs/a.md", "Fx_FindByName\n"}, {"lib/a.cpp", "int Fx_FindByNameX;\n"}}}},
       // ---- the word "contract" in identifiers
       {"retired-term", true, {"identifier in C++", {{"lib/a.hpp", "struct kz_contract {};\n"}}}},
       {"retired-term", true, {"macro name", {{"include/a.h", "#define KZ_CONTRACT_MAX 4\n"}}}},

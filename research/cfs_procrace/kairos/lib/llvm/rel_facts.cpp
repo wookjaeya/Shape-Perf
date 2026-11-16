@@ -47,6 +47,7 @@ kz::Status RelFacts::load() {
   if (!(s = read(KZ_SEC_FIELD_STATUS, &fstatus_)).ok()) return s;
   if (!(s = read(KZ_SEC_AWAIT_L1, &awaits_)).ok()) return s;
   if (!(s = read(KZ_SEC_LOCK_PATHS, &lockpaths_)).ok()) return s;
+  if (!(s = read(KZ_SEC_SEMANTICS, &sem_)).ok()) return s;
   return kz::Status::success();
 }
 

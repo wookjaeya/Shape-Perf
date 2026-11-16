@@ -133,6 +133,16 @@ class Rel : public RelFacts {
     if (relations_incomplete_reasons().size() != kIncCount) return kz::Status::error(kz::Err::Invalid, "the incompleteness reason table does not match its index");
     kz::Status s = prepare();
     if (!s.ok()) return s;
+    // semantics with a verification state (static_facts.md 5t): with a SEMANTICS section, the rows note the functions they
+    // name, and their layers column names the framework items of those functions that are not verified
+    if (!sem_.empty()) {
+      fn_notes_ = &row_fns_;
+      for (const kz_fact_sem& r : sem_) {
+        if (r.fn == kN || r.layer != KZ_SEM_LAYER_FRAMEWORK) continue;
+        sem_items_[r.fn] += 1;
+        if (r.verify == KZ_SEM_VERIFY_UNVERIFIED) sem_unverified_[r.fn].insert(str(r.api) + ":" + enum_text("KZ_SEM_COLUMN", r.column));
+      }
+    }
     global_reasons();
     RelReport rep;
     path_a(&rep);
@@ -493,6 +503,21 @@ class Rel : public RelFacts {
     row_tags_.clear();
     row_p0_.clear();
     row_inc_.clear();
+    row_fns_.clear();
+  }
+  // the framework semantics items not verified of the functions the row names ("api:column"), for facts with SEMANTICS
+  std::set<std::string> row_sem_unverified() const {
+    std::set<std::string> out;
+    for (uint32_t f : row_fns_) {
+      auto it = sem_unverified_.find(f);
+      if (it != sem_unverified_.end()) out.insert(it->second.begin(), it->second.end());
+    }
+    return out;
+  }
+  bool row_has_sem() const {
+    for (uint32_t f : row_fns_)
+      if (sem_items_.count(f) != 0) return true;
+    return false;
   }
   // ---------------------------------------------------------------- incompleteness (relations rules revision 6, §5m)
   // A reason of the row being written (Inc, relations_incomplete_reasons()).
@@ -550,6 +575,10 @@ class Rel : public RelFacts {
     for (const std::string& t : row_tags_) {
       if (t.compare(0, 28, "per-field completeness rule ") == 0) inc(kWriterPremise);
       if (r->feasibility_grade == "proven-impossible" && (t.compare(0, 7, "assume.") == 0 || t.compare(0, 19, "premises of path C ") == 0)) inc(kFixedAssumption);
+    }
+    if (!sem_.empty() && row_has_sem()) {
+      ++n_sem_rows_;
+      if (!row_sem_unverified().empty()) ++n_sem_unverified_rows_;
     }
     r->incomplete.assign(row_inc_.begin(), row_inc_.end());
     std::set<std::string> reasons;
@@ -618,6 +647,10 @@ class Rel : public RelFacts {
       t += ")";
     }
     if (!row_p0_.empty()) t += " P0-unverified(" + join(std::vector<std::string>(row_p0_.begin(), row_p0_.end()), ", ") + ")";
+    if (!sem_.empty()) {
+      const std::set<std::string> su = row_sem_unverified();
+      if (!su.empty()) t += " sem-unverified(" + join(std::vector<std::string>(su.begin(), su.end()), ", ") + ")";
+    }
     return t;
   }
 
@@ -646,6 +679,10 @@ class Rel : public RelFacts {
     if (!profile_free_) os << "; case layer: the profile " << basis_map_.at_or("extract.profile");
     if (hand_entered_vocabulary_ != 0) os << "; hand-entered vocabulary on the command line: " << hand_entered_vocabulary_ << " items";
     os << "\n";
+    if (!sem_.empty())
+      os << "semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): " << basis_map_.at_or("count.semantics")
+         << "; rows that name a function with framework semantics items " << n_sem_rows_ << ", of them with items not verified " << n_sem_unverified_rows_
+         << " (sem-unverified(api:column) in the layers column; the P0 entries stay in P0-unverified)\n";
     os << "run order: no record given (this revision reads no run record; the column says so in every row)\n";
     os << "functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): ";
     for (size_t i = 0; i < sizeof kReturnsTwice / sizeof kReturnsTwice[0]; ++i) os << (i == 0 ? "" : ", ") << kReturnsTwice[i];
@@ -3778,6 +3815,10 @@ class Rel : public RelFacts {
   std::map<uint32_t, ChildSet> child_sets_;  // spawn site -> its child set
   uint32_t n_c_incomplete_ctx_ = 0, n_c_descendant_ctx_ = 0, n_c_callback_ctx_ = 0, n_c_unresolved_ctx_ = 0, n_c_open_reach_ctx_ = 0, n_c_open_reach_reads_ = 0;
   mutable std::set<std::string> row_files_, row_tags_, row_p0_;
+  mutable std::set<uint32_t> row_fns_;                       // the functions the row names (facts with SEMANTICS only)
+  std::map<uint32_t, uint32_t> sem_items_;                   // function -> its framework SEMANTICS rows
+  std::map<uint32_t, std::set<std::string>> sem_unverified_;  // function -> "api:column" of its rows not verified
+  uint32_t n_sem_rows_ = 0, n_sem_unverified_rows_ = 0;
   mutable std::set<uint32_t> row_inc_;          // the incompleteness reasons of the row being written (Inc)
   std::set<uint32_t> global_inc_;               // the reasons of the whole facts (global_reasons)
   std::map<uint32_t, uint32_t> inc_rows_;       // reason (Inc) -> rows that carry it

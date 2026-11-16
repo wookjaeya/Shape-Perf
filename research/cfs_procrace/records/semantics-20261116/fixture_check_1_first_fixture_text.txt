@@ -1,0 +1,2 @@
+ok   framework_semantics_fixture-sem.txt: equal to the scan; 37 lines, 4 entries, 1 pinned files, 32 file:line references
+PASS: 1 data files, 0 failures

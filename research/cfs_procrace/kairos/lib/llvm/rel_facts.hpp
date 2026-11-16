@@ -56,6 +56,7 @@ struct RelFacts {
   std::string fname(uint32_t fn) const {
     if (fn == kN || fn >= funcs_.size()) return "-";
     if (defined(fn)) note_file(str(funcs_[fn].file));
+    if (fn_notes_ != nullptr) fn_notes_->insert(fn);
     std::string n = str(funcs_[fn].name);
     if (funcs_[fn].flags & KZ_FUNC_FLAG_STATIC) n += "@" + str(funcs_[fn].file) + ":" + std::to_string(funcs_[fn].line);
     return n;
@@ -184,6 +185,7 @@ struct RelFacts {
   std::vector<kz_fact_fstatus> fstatus_;
   std::vector<kz_fact_await> awaits_;
   std::vector<kz_fact_lockpath> lockpaths_;
+  std::vector<kz_fact_sem> sem_;  // SEMANTICS (extract --semantics, static_facts.md 5t); empty without the section
 
   struct BasisMap : std::map<std::string, std::string> {
     std::string at_or(const std::string& k) const {
@@ -238,6 +240,8 @@ struct RelFacts {
   std::vector<std::string> keys_dtor_, keys_null_dtor_, cleanup_pushes_, unresolved_spawns_;
   // the files of the positions and functions named since the set was last cleared (set by the relation rows)
   std::set<std::string>* file_notes_ = nullptr;
+  // the functions a row names (fname), when set: relations notes them only for facts with a SEMANTICS section (5t)
+  std::set<uint32_t>* fn_notes_ = nullptr;
 };
 
 }  // namespace kzs

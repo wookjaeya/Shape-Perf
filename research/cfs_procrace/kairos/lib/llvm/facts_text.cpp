@@ -20,7 +20,7 @@ constexpr uint32_t kViewElements = 64;
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
                                  "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits",
-                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits", "lockpaths", "objaccess", "ftypes", "argtypes"};
+                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits", "lockpaths", "objaccess", "ftypes", "argtypes", "semantics"};
 
 class View {
  public:
@@ -56,7 +56,7 @@ class View {
                  {"fstatus", KZ_SEC_FIELD_STATUS, &View::fstatus},    {"awaits", KZ_SEC_AWAIT_L1, &View::awaits},
                  {"lockpaths", KZ_SEC_LOCK_PATHS, &View::lockpaths},
                  {"objaccess", KZ_SEC_OBJECT_ACCESS, &View::objaccess}, {"ftypes", KZ_SEC_FIELD_TYPES, &View::ftypes},
-                 {"argtypes", KZ_SEC_ARG_TYPES, &View::argtypes}};
+                 {"argtypes", KZ_SEC_ARG_TYPES, &View::argtypes},      {"semantics", KZ_SEC_SEMANTICS, &View::semantics}};
     for (const auto& t : added)
       if (c_.find_section(t.id) != nullptr && (o_.sections.empty() || o_.sections.count(t.name) != 0)) (this->*t.fn)(os);
     *out = os.str();
@@ -110,6 +110,7 @@ class View {
     if (!(s = read(KZ_SEC_OBJECT_ACCESS, &objacc_)).ok()) return s;
     if (!(s = read(KZ_SEC_FIELD_TYPES, &ftypes_)).ok()) return s;
     if (!(s = read(KZ_SEC_ARG_TYPES, &argtypes_)).ok()) return s;
+    if (!(s = read(KZ_SEC_SEMANTICS, &sem_)).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_by_site_[calls_[i].site] = i;
     for (size_t i = 0; i < loops_.size(); ++i) loop_by_site_[loops_[i].site] = i;
     return kz::Status::success();
@@ -715,6 +716,21 @@ class View {
       os << " " << flags_text("KZ_ARGT_FLAG", r.flags) << "\n";
     }
   }
+  // SEMANTICS (--semantics, static_facts.md 5t): layer, column, api, argument position, value, verification state, origin,
+  // flags, the item, the component and where the item was read
+  void semantics(std::ostream& os) {
+    os << "[semantics] " << sem_.size() << "\n";
+    for (const kz_fact_sem& r : sem_) {
+      const std::string api = str(r.api);
+      os << "  " << enum_text("KZ_SEM_LAYER", r.layer) << " " << enum_text("KZ_SEM_COLUMN", r.column) << " " << (api.empty() ? std::string("-") : api);
+      if (r.pos != KZ_NONE32) os << " arg " << r.pos;
+      if (r.flags & KZ_SEM_FLAG_VALUE_SET) os << " value " << r.value;
+      os << " " << enum_text("KZ_SEM_VERIFY", r.verify) << " " << enum_text("KZ_SEM_ORIGIN", r.origin) << " " << flags_text("KZ_SEM_FLAG", r.flags) << " [" << str(r.item) << "] ("
+         << str(r.component) << ") source " << str(r.source);
+      if (r.decl_fh != KZ_NONE32) os << " decl " << fh_pos(r.decl_fh, r.decl_line, 0);
+      os << "\n";
+    }
+  }
   void fstatus(std::ostream& os) {
     os << "[fstatus] " << fstatus_.size() << "\n";
     for (const kz_fact_fstatus& r : fstatus_) {
@@ -899,6 +915,7 @@ class View {
   std::vector<kz_fact_objacc> objacc_;
   std::vector<kz_fact_ftype> ftypes_;
   std::vector<kz_fact_argtype> argtypes_;
+  std::vector<kz_fact_sem> sem_;
   std::vector<kz_fact_fstatus> fstatus_;
   std::vector<kz_fact_await> awaits_;
   std::map<uint32_t, size_t> call_by_site_, loop_by_site_;

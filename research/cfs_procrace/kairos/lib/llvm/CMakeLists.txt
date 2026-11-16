@@ -22,6 +22,8 @@
 #                                                   derived by rule from the relations rows
 #   order                                           no Clang types: `kz-static order`, the order edges with
 #                                                   kinds and premises and the static order of each row
+#   semantics                                       no Clang types: the semantics data files and the SEMANTICS
+#                                                   rows they give a build (extract --semantics)
 #   ast_*                                           the Clang front end of the extraction
 #   basis_*                                         the analysis basis B (SPEC 1.7)
 add_library(kz-llvm STATIC
@@ -38,6 +40,7 @@ add_library(kz-llvm STATIC
   facts_query.cpp
   rel_facts.cpp
   relations.cpp
+  semantics.cpp
   plan_gen.cpp
   order.cpp
   unroll.cpp

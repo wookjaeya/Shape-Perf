@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "kz/core/container.hpp"
+#include "kz/core/sha256.hpp"
 #include "support/kz_test.hpp"
 
 namespace fs = std::filesystem;
@@ -2049,6 +2050,101 @@ startup_script {
     KZ_CHECK(has(views["c1on"], "sys_state@" + (X / "sys").string() + "/y_h:1::type.z"));
     KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "c1_on.kz").string()) + " --section basis", &sv), 0);
     KZ_CHECK(has(sv, "count.type_names_outside_root = by source tree 2, absolute (no source tree) 1  (unset)"));
+  }
+
+  // ---- semantics with a verification state (--semantics, static_facts.md 5t) -----------------------------------------------
+  {
+    const fs::path X = work / "semantics";
+    fs::create_directories(X);
+    const std::string sc = fixtures + "/semantics.c";
+    const std::string sdata = fixtures + "/../data/semantics_fixture/framework_semantics_fixture-sem.txt";
+    // the option needs the extended facts; a file that is not semantics data, or a cut one, is refused before any reading
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(sc) + " --semantics " + q(sdata) + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "--semantics needs the extended facts"));
+    write(X / "bad.txt", "role run-loop function=x\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --semantics " + q((X / "bad.txt").string()) + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "not a semantics data file"));
+    write(X / "cut.txt", "semantics-data 1\nlayer framework\ncomponent c version=\"v\"\nfile a.c sha256=00\napi f decl=a.c:1 def=- return=none by=- rule=E2\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --semantics " + q((X / "cut.txt").string()) + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "no end line (a cut file)"));
+    write(X / "odd.txt", "semantics-data 1\nlayer framework\ncomponent c version=\"v\"\nfrob x\nend\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --semantics " + q((X / "odd.txt").string()) + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "not a line of the semantics data format"));
+    KZ_CHECK(!fs::exists(X / "x.kz"));
+    // with and without the option: the same facts but the section and its BASIS items
+    std::string on, off, sv, so;
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --root " + q(fixtures) + " --semantics " + q(sdata) + " -o " + q((X / "on.kz").string()) +
+                        " -- -std=c99 -pedantic",
+                    &on),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --root " + q(fixtures) + " -o " + q((X / "off.kz").string()) + " -- -std=c99 -pedantic", &off), 0);
+    KZ_CHECK(has(on, "semantics                    rows "));
+    KZ_CHECK(!has(off, "semantics                    rows "));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "on.kz").string()) + " --section semantics --section basis", &sv), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "off.kz").string()), &so), 0);
+    KZ_CHECK(!has(so, "[semantics]") && !has(so, "extract.semantics") && !has(so, "count.semantics"));
+    // documented returns (doc-collated, pinned), the body's constants (body-derived), their agreement
+    KZ_CHECK(has(sv, "  framework documented-return reg_find value -99 doc-collated doc-only {version-pinned,value-set} [SEM_ERR_NEVER] (the semantics fixture) source semantics.c:45 "));
+    KZ_CHECK(has(sv, "  framework failure reg_find value -17 body-derived derived {value-set} [SEM_ERR_NOT_FOUND through reg_find -> reg_search] "));
+    KZ_CHECK(has(sv, "  framework success reg_find value 0 body-derived derived {value-set} [SEM_OK through reg_find -> reg_search] "));
+    KZ_CHECK(has(sv, "  framework agreement reg_find body-derived derived {} [the documentation lists a value the body cannot return: SEM_ERR_NEVER (-99)] "));
+    KZ_CHECK(has(sv, "  framework agreement reg_create unverified derived {} [not compared: no documented return] "));
+    KZ_CHECK(has(sv, "  framework agreement send_event body-derived derived {} [derived = documented (1 values)] "));
+    // an argument role and its domain, documented in the parameter's paragraph; a terminal the facts derive
+    KZ_CHECK(has(sv, "  framework arg-role send_event arg 1 doc-collated doc-only {version-pinned} [event-type (doc)] "));
+    KZ_CHECK(has(sv, "  framework arg-domain send_event arg 1 doc-collated doc-only {version-pinned} [event-type: SEM_EV_DEBUG=1, SEM_EV_ERROR=3] "));
+    KZ_CHECK(has(sv, "  framework arg-domain app_exit arg 0 doc-collated doc-only {version-pinned} [run-status: SEM_RUN=1, SEM_RUN_ERROR=3] "));
+    KZ_CHECK(has(sv, "  framework role app_exit body-derived derived {} [derived terminal operation (must, primitive exit)] "));
+    // the status space, and the P0 entries the build calls with the state of their source
+    KZ_CHECK(has(sv, "  status-space success - value 0 doc-collated doc-only {version-pinned,value-set} [success constant SEM_OK] "));
+    KZ_CHECK(has(sv, "  P0 role pthread_create standard-collated declared {} [thread-create (thread creation): "));
+    KZ_CHECK(has(sv, "  P0 role strcmp unverified declared {} [byte-string comparison: "));
+    KZ_CHECK(has(sv, "count.semantics_entries[0] = fixture-sem: entries 4, applied 4 for a function the build calls (by the definition 4, by the declaration 0), called but neither pin "
+                     "held 0  (unset)"));
+    // relations: the header line and the tags of the rows that name a function with framework items not verified
+    std::string rel;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "on.kz").string()), &rel), 0);
+    KZ_CHECK(has(rel, "semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): rows "));
+    KZ_CHECK(has(rel, "sem-unverified(reg_create:agreement)"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "off.kz").string()), &rel), 0);
+    KZ_CHECK(!has(rel, "semantics of these facts") && !has(rel, "sem-unverified("));
+    // a file whose pin the build does not hold applies to nothing (the function is called, the sha256 differs)
+    {
+      std::string txt;
+      std::ifstream in(sdata);
+      std::ostringstream ss;
+      ss << in.rdbuf();
+      txt = ss.str();
+      const size_t at = txt.find("sha256=");
+      KZ_CHECK(at != std::string::npos);
+      if (at != std::string::npos) txt.replace(at + 7, 4, txt.compare(at + 7, 4, "0000") == 0 ? "1111" : "0000");
+      write(X / "other.txt", txt);
+    }
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --root " + q(fixtures) + " --semantics " + q((X / "other.txt").string()) + " -o " +
+                        q((X / "other.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "other.kz").string()) + " --section semantics --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "fixture-sem: entries 4, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 4"));
+    KZ_CHECK(!has(sv, "  framework "));
+    // P0 declarations: the attributes of the declaration the build reads, when the build holds that header with the pinned sha256
+    write(X / "p0" / "p0hdr.h", "int strcmp(const char *a, const char *b) __attribute__((pure)) __attribute__((nonnull(1, 2)));\n");
+    write(X / "p0" / "p0decl.c", "#include \"p0hdr.h\"\nint f(const char *a) { return strcmp(a, \"x\"); }\nint main(void) { return f(\"y\"); }\n");
+    {
+      std::ifstream in(X / "p0" / "p0hdr.h", std::ios::binary);
+      std::ostringstream ss;
+      ss << in.rdbuf();
+      const std::string h = kz::to_hex(kz::sha256(ss.str()));
+      write(X / "p0.txt", "semantics-data 1\nlayer p0\ncomponent hdr version=\"the test header\"\nfile p0hdr.h sha256=" + h +
+                              "\napi strcmp decl=p0hdr.h:1 table=compare attrs=pure,nothrow,nonnull(1,2)\nend entries=1 missing=0\n");
+    }
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q((X / "p0" / "p0decl.c").string()) + " --root " + q((X / "p0").string()) + " --semantics " +
+                        q((X / "p0.txt").string()) + " -o " + q((X / "p0.kz").string()) + " -- -std=c99",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "p0.kz").string()) + " --section semantics", &sv), 0);
+    KZ_CHECK(has(sv, "  P0 out-behaviour strcmp doc-collated declared {} [declared pure: no effect but its return value (no store through an argument)] (the test header) source p0hdr.h:1 "));
+    KZ_CHECK(has(sv, "  P0 precondition strcmp doc-collated declared {} [declared nonnull: arg 0, arg 1 must not be null] "));
   }
 
   fs::remove_all(work);

@@ -1,0 +1,2 @@
+semantics/p0_declarations_glibc-2.39-headers.txt:19: [case-ids-data] case identifier 'C5' (case_identifiers.txt entry 5): the framework-layer data names no case
+lint case-ids-data: 1 violation(s)

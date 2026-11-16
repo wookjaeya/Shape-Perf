@@ -43,7 +43,11 @@
 #                    the option, objaccess_off without it: target array fields whose pointer goes to calls, to a global
 #                    and to an integer, a store to an element, a character array tested before a call, reads and writes
 #                    of globals, a local and a parameter's pointee); plankey.c (plan rules revision 2): plangen.c with
-#                    the key of the lookup in a character array tested before the call, read by test_static_plan only
+#                    the key of the lookup in a character array tested before the call, read by test_static_plan only;
+#                    semantics.c for semantics with a verification state (extract --semantics, static_facts.md 5t;
+#                    semantics_np with data/semantics_fixture/, the data file the coverage scan of
+#                    docs/semantics_coverage.md generates for the fixture: documented returns, one the body cannot return,
+#                    an undocumented function, an event-type and a run-status parameter, and relations rows that name them)
 #   data/reason_vocabulary.txt  the reason vocabulary of the judgement rules (JUDGEMENT_RULES_REV1.md 3.5);
 #                    test_static_reasons compares every reason `kz-static relations` can write with it, and every
 #                    `incomplete:` line of the relations goldens with the reasons the tool can write
@@ -74,9 +78,9 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
 # clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
-set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete relcallback plangen order anonrec objaccess plankey)
+set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete relcallback plangen order anonrec objaccess plankey semantics)
 set(kz_golden_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations clobber flowfacts_np argflow_np lockset_np
-    relations_np lockpaths_np relpaths_np relsound_np imgbudget_np relincomplete_np relincomplete_cut_np relcallback_np order_np anonrec_np objaccess objaccess_off)
+    relations_np lockpaths_np relpaths_np relsound_np imgbudget_np relincomplete_np relincomplete_cut_np relcallback_np order_np anonrec_np objaccess objaccess_off semantics_np)
 foreach(kz_name IN LISTS kz_fixtures)
   add_test(NAME static_fixture_compile_${kz_name}
     COMMAND ${CMAKE_C_COMPILER} -std=c99 -pedantic -Wall -Wextra -Werror -c ${kz_fixture_dir}/${kz_name}.c -o ${CMAKE_CURRENT_BINARY_DIR}/${kz_name}.fixture.o)

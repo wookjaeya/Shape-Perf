@@ -85,6 +85,9 @@ const std::vector<Case>& cases() {
       // default image budget and at --image-budget 3, where its name table and its table of thread entries are cut
       {"relincomplete_np", "relincomplete.c", {"--targets-rule", "R-T1,R-T2"}, kFlowSections, true, true},
       {"relincomplete_cut_np", "relincomplete.c", {"--targets-rule", "R-T1,R-T2", "--image-budget", "3"}, kFlowSections, true, true},
+      // namespace membership by the callback passed, the table selector, the writer premises, the out-pointer arguments and the
+      // constants of a creator's callee (relations rules revision 7, static_facts.md 5o): relcallback.c
+      {"relcallback_np", "relcallback.c", {"--targets-rule", "R-T1,R-T2"}, kFlowSections, true, true},
   };
   return all;
 }

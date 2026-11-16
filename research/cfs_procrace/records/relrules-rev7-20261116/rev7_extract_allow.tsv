@@ -1,0 +1,14 @@
+# allowance of the five re-extractions with the kz-static of relations rules revision 7 against tests_8c_fix/<build>/NP
+# (the declaration, plan/full_stage_results_20261116.md 2.0): the containers differ only in the header fields of the tool
+# identity and what follows from it, every section record the same except BASIS extract.units_from (it holds the basis
+# artifact hash; read from the compare output); relations.txt by the rules change (checked against rerun.sh's output
+# apart from line 2, the facts hash)
+basis.kz	DIFF
+facts.kz	DIFF
+basis.txt	DIFF
+extract.txt	DIFF
+relations.txt	DIFF
+sha256.txt	DIFF
+facts.txt	ONLY
+status.txt	ONLY
+space_guard.log	ONLY

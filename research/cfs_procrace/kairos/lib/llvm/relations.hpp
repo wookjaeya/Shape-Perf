@@ -28,6 +28,12 @@
 // (`reason(sub-reason)`), from the facts the row's derivation read (relations rules revision 6, docs/static_facts.md §5m).
 // The reasons a row can carry are the fixed table relations_incomplete_reasons(); the summary counts the rows per reason.
 //
+// Relations rules revision 7 (docs/static_facts.md §5o): a use belongs to a path A namespace only when the comparison its
+// chain of calls passes to the search (a callback search) is that namespace's; the partition takes the constants that
+// select the searched table only; rows name the writer sets they use with their rule statuses and premises (zero
+// writers is no verdict), the out-pointer arguments of the lookup and the creators, the pointer fields of the keys, the
+// constants a creator's callee may return, and why a lookup has no creator.
+//
 // The rows are records (RelRow): the text is rendered from them (render_relations), so a tool that reads the rows
 // reads what the text says, with references to the facts the row stands on and a use-site key that names where
 // the row's use is in the program (docs/static_facts.md §5l).  The facts are loaded and indexed by RelFacts

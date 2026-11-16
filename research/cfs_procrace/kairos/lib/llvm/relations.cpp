@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
 #include <cstring>
 #include <functional>
 #include <map>
@@ -25,7 +26,7 @@
 
 namespace kzs {
 
-const char* relations_rules_revision() { return "relations rules revision 6 (2026-11-16)"; }
+const char* relations_rules_revision() { return "relations rules revision 7 (2026-11-16)"; }
 
 namespace {
 
@@ -58,6 +59,8 @@ enum Inc : uint32_t {
   kWriterNotComplete,
   kWriterNoStatus,
   kWriterPremise,
+  kWriterZero,
+  kWriterUnread,
   kAbsentSearch,
   kAbsentCallee,
   kAbsentReader,
@@ -70,6 +73,7 @@ enum Inc : uint32_t {
   kFixedAssumption,
   kLinkIdentity,
   kLinkSelf,
+  kLinkMembership,
   kReadingDeviation,
   kIncCount
 };
@@ -679,6 +683,18 @@ class Rel : public RelFacts {
        << ", key-matched " << n_a_keymatch_ << ") B " << n_b_ << " (with a callee check " << n_b_check_ << ") C " << n_c_ << " (self-identity reads " << n_c_self_
        << "); flip static-possible " << n_flip_possible_ << ", static-undetermined " << n_flip_undet_ << ", none " << n_flip_none_ << "; feasibility proven-impossible "
        << n_feas_impossible_ << ", possible " << n_feas_possible_ << ", undecidable " << n_feas_undecidable_ << ", not graded " << n_feas_not_graded_ << "\n";
+    // relations rules revision 7: the uses of path A left out for another callback, the rows whose membership is not
+    // resolved, and the lookup rows without a creator of their partition per sub-reason (a row may have several)
+    os << "summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups " << n_a_other_lookups_ << ", creators "
+       << n_a_other_creators_ << "; lookup rows with the membership unresolved " << n_a_member_unres_ << "; lookup rows without a creator of their partition " << n_a_nocreator_ << " [";
+    {
+      bool first = true;
+      for (const auto& [w, k] : no_creator_why_) {
+        os << (first ? "" : ", ") << w << " " << k;
+        first = false;
+      }
+    }
+    os << "]\n";
     // relations rules revision 6: the rows per incompleteness reason (the reason, then its sub-reasons)
     os << "summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m):";
     const std::vector<RelReason>& table = relations_incomplete_reasons();
@@ -881,6 +897,149 @@ class Rel : public RelFacts {
         out.push_back(r);
       }
     }
+    return out;
+  }
+  // the names of the bits of a set enumeration, ", "-separated (a bit the registry does not name as "#0x..")
+  std::string flags_text(const char* name, uint64_t v) const {
+    const kz::EnumDesc* d = kz::find_enum(name);
+    std::string t;
+    uint64_t left = v;
+    if (d != nullptr)
+      for (size_t i = 0; i < d->nitems; ++i)
+        if (d->items[i].value != 0 && (v & d->items[i].value) == d->items[i].value) {
+          t += (t.empty() ? "" : ", ") + std::string(d->items[i].display);
+          left &= ~d->items[i].value;
+        }
+    if (left != 0) {
+      char buf[32];
+      std::snprintf(buf, sizeof buf, "#0x%llx", static_cast<unsigned long long>(left));
+      t += (t.empty() ? "" : ", ") + std::string(buf);
+    }
+    return t;
+  }
+  // relations rules revision 7 (O4): the writer set of a field the row uses, with the statuses of FIELD_STATUS under both
+  // completeness rules, the premises the set rests on and the channels it does not cover.  Zero writers is no verdict:
+  // the text says "no writer found under these premises" and `zero` is set (the row carries
+  // writer_set_incomplete(zero writers under the rules)).
+  std::string writer_premises(const std::string& tf, bool* zero) const {
+    std::string src;
+    const std::vector<WriterRow> ws = writers_of(tf, &src);
+    std::map<std::string, uint32_t> kinds;
+    uint32_t covers = 0, early = 0, tree = 0, partial = 0;
+    for (const WriterRow& w : ws) {
+      ++kinds[w.kind];
+      if (w.flags & KZ_WRITER_FLAG_COVERS_MORE) ++covers;
+      if (w.flags & KZ_WRITER_FLAG_EARLY_INIT) ++early;
+      if (w.flags & KZ_WRITER_FLAG_INIT_TREE) ++tree;
+      if (w.flags & KZ_WRITER_FLAG_PARTIAL) ++partial;
+    }
+    std::ostringstream os;
+    os << "writers: " << tf << ": ";
+    *zero = ws.empty();
+    if (ws.empty()) {
+      os << "no writer found under these premises";
+    } else {
+      os << ws.size() << " (";
+      bool first = true;
+      for (const auto& [k, nk] : kinds) {
+        os << (first ? "" : ", ") << k << " " << nk;
+        first = false;
+      }
+      os << ") from " << src;
+      if (covers + early + tree + partial != 0)
+        os << "; of them covers-more-than-the-field " << covers << ", early-init " << early << ", init-tree " << tree << ", partial-write " << partial;
+    }
+    auto fsit = fstatus_of_.find(tf);
+    if (fsit == fstatus_of_.end()) {
+      os << "; premises: no FIELD_STATUS row (the completeness of the set is not graded)";
+    } else {
+      const kz_fact_fstatus& f = fstatus_[fsit->second];
+      os << "; premises: FIELD_STATUS per-field " << enum_text("KZ_LOC_STATUS", f.status_field) << ", type-level " << enum_text("KZ_LOC_STATUS", f.status_type)
+         << " (writers " << f.n_writers << ": direct " << f.n_direct << ", data-function " << f.n_data_fn << ", out-pointer " << f.n_outptr << ", initial values " << f.n_init
+         << "; instances " << f.n_instances << "); hits on the field: escape " << f.own_escape << ", cast " << f.own_cast << ", union " << f.own_union << ", unknown effect "
+         << f.own_unknown << "; hits on other fields of the type " << f.sibling_hits << "; untyped write sites in the program " << f.untyped;
+      if (f.flags != 0) os << "; flags " << flags_text("KZ_FSTATUS_FLAG", f.flags);
+    }
+    os << "; not covered: calls whose targets are not resolved (" << unresolved_sites_.size()
+       << " in these facts; they may run any address-taken function), writes in units outside the closure (not read)";
+    return os.str();
+  }
+  // relations rules revision 7 (O5): the out-pointer arguments of a call of a key-parameter function -- the parameters of
+  // the callee, other than the key, that it stores through (PARAM_FLOW out-store, the shallowest row) -- with the argument
+  // as passed (ARGFLOW: its text, source, field, base and object).  The object's id, when the callee gives one, is among them.
+  std::vector<std::string> id_holders(uint32_t ci, uint32_t F, uint32_t key) const {
+    std::vector<std::string> out;
+    if (!defined(F)) return out;
+    const kz_fact_call& c = calls_[ci];
+    for (uint32_t j = 0; j < c.nargs; ++j) {
+      if (j == key) continue;
+      auto it = pflow_of_.find({F, j});
+      if (it == pflow_of_.end()) continue;
+      const kz_fact_pflow* best = nullptr;
+      for (uint32_t i : it->second) {
+        const kz_fact_pflow& p = pflow_[i];
+        if (p.kind == KZ_PFLOW_KIND_OUT_STORE && (best == nullptr || p.depth < best->depth)) best = &p;
+      }
+      if (best == nullptr) continue;
+      std::string arg = "no ARGFLOW row";
+      auto af = argflow_at_.find({c.site, j});
+      if (af != argflow_at_.end()) {
+        const kz_fact_argflow& a = argflow_[af->second];
+        arg = "[" + str(a.text) + "] " + enum_text("KZ_ARGSRC", a.src);
+        if (!str(a.type).empty() && !str(a.field).empty()) arg += " " + str(a.type) + "." + str(a.field);
+        arg += " base " + enum_text("KZ_ARGBASE", a.base);
+        if (!str(a.object).empty()) arg += " object " + str(a.object);
+      }
+      const uint32_t sink = best->depth == 0 ? best->fn : best->sink_fn;
+      out.push_back("arg " + std::to_string(j) + " " + arg + " <- " + fname(F) + " stores through its parameter " + std::to_string(j) + " in " + fname(sink) + " at " +
+                    pos(str(best->file), best->line, best->col) + " [" + str(best->text) + "]");
+    }
+    return out;
+  }
+  // relations rules revision 7: the constants a creator's callee may return as these facts give them -- its RET_CONSTS and
+  // those of the functions whose call result it returns (RETURNS call-result rows), followed transitively -- each with
+  // the chain it comes through and its condition in the innermost function; the returns not followed (a parameter, a
+  // local, a field, an expression, a call of a function without a body) go to `open`.  The set is what may be returned,
+  // not a proof of what is.
+  std::vector<std::string> callee_returns(uint32_t F, std::vector<std::string>* open) const {
+    std::vector<std::string> out;
+    std::set<uint32_t> seen;
+    std::set<std::pair<int64_t, std::string>> printed;
+    std::function<void(uint32_t, const std::string&)> rec = [&](uint32_t fn, const std::string& chain) {
+      if (!defined(fn) || !seen.insert(fn).second) return;
+      auto it = retconsts_of_.find(fn);
+      if (it != retconsts_of_.end())
+        for (uint32_t i : it->second) {
+          const kz_fact_retconst& r = retconsts_[i];
+          if (!printed.insert({r.value, str(r.text) + "|" + chain + "|" + std::to_string(i)}).second) continue;
+          out.push_back(fname(F) + " returns " + std::to_string(r.value) + " [" + str(r.text) + "]" + (chain.empty() ? "" : " through " + chain) +
+                        (r.cond_root == kN ? std::string(" with no condition") : " when " + ex(r.cond_root)));
+        }
+      auto rit = returns_of_.find(fn);
+      if (rit == returns_of_.end()) return;
+      for (uint32_t ri : rit->second) {
+        const kz_fact_return& r = returns_[ri];
+        if (r.vkind == KZ_RET_VALUE_CONST || r.vkind == KZ_RET_VALUE_STRING) continue;
+        const std::string at = pos(str(r.file), r.line, r.col);
+        if (r.vkind == KZ_RET_VALUE_CALL && r.value_root < exprs_.size() && exprs_[r.value_root].op == KZ_EXPR_OP_CALL_RESULT) {
+          const std::string callee = str(exprs_[r.value_root].name);
+          bool any = false;
+          auto fit = fn_by_name_.find(callee);
+          if (fit != fn_by_name_.end())
+            for (uint32_t g : fit->second)
+              if (defined(g)) {
+                any = true;
+                rec(g, (chain.empty() ? fname(fn) : chain) + " -> " + fname(g));
+              }
+          if (!any) open->push_back(fname(fn) + " returns the result of " + callee + " at " + at + " (no body in these facts)");
+          continue;
+        }
+        open->push_back(fname(fn) + " returns " + enum_text("KZ_RET_VALUE", r.vkind) + " [" + str(r.text) + "] at " + at);
+      }
+    };
+    rec(F, "");
+    std::sort(open->begin(), open->end());
+    open->erase(std::unique(open->begin(), open->end()), open->end());
     return out;
   }
   // the initial value of a field from the INIT image
@@ -1149,6 +1308,8 @@ class Rel : public RelFacts {
       L.line("field") << "field: " << (has_init ? itext : "no INIT row") << "; writers " << ws.size() << " from " << wsource;
       for (const WriterRow& w : ws)
         L.line("writer", 8) << w.kind << " at " << w.where << " value=" << w.value_text << (w.guard.empty() || w.guard == "-" ? "" : " guard=" + w.guard);
+      bool b_zero = false;  // relations rules revision 7 (O4)
+      L.line("writers") << writer_premises(tf, &b_zero);
       L.line("actors") << "actors: readers " << actors_text(ra) << "; writers " << actors_text(wa) << (undetermined ? " (undetermined)" : " (inter-actor)");
       for (const Check& ck : checks) L.line("callee-check") << "callee-check: " << fname(callee) << " returns " << ck.value << " [" << ck.text << "] when " << ck.cond;
       // one level into the calls the check's conditions make with the parameter
@@ -1223,6 +1384,7 @@ class Rel : public RelFacts {
       // relations rules revision 6: the incompleteness reasons of the field-argument row (the feasibility's in b_feasibility)
       if (undetermined) inc(kActorNoRoot);
       inc_writers(tf);
+      if (b_zero) inc(kWriterZero);
       if (grade == "static-undetermined") inc(kAbsentCallee);
       finish(&r);
       key_b(&r);
@@ -1785,6 +1947,8 @@ class Rel : public RelFacts {
               }
             }
             if (!self.empty()) L.line("read subscript") << "read subscript: the reader's own identity: " << self;
+            bool c_zero = false;  // relations rules revision 7 (O4)
+            L.line("writers") << writer_premises(tf, &c_zero);
             L.done();
             r.dependency = "path C: the creator writes " + tf + " after the spawn; code the spawned entry reaches reads it" + (self.empty() ? "" : " at the subscript of its own identity") +
                            "; that the two identities are equal is not decided statically";
@@ -1926,6 +2090,7 @@ class Rel : public RelFacts {
             if (!cs.incomplete.empty()) inc(kActorChildSet);
             if (cs.cut) inc(kTruncImage);
             inc_writers(tf);
+            if (c_zero) inc(kWriterZero);
             if (grade == "static-undetermined") inc(kAbsentReader);
             finish(&r);
             key_c(&r);
@@ -2396,10 +2561,21 @@ class Rel : public RelFacts {
   struct Search {
     uint32_t fn = kN, loop = kN, param = kN;  // the search function, its loop, the parameter carried to the key
     std::string kind;
+    // A2 (relations rules revision 7): the indirect call, and the parameter of the search function that carries the callee
+    // (CALL_TARGETS `via` "P:<search function>#<j>" of the call's row for the comparison's function), or kN with the why
+    uint32_t call = kN, cb = kN;
+    std::string cb_why;
   };
   std::vector<Search> searches_of(const KeyCmp& k) const {
     std::vector<Search> out;
-    if (k.loop != kN) out.push_back(Search{k.fn, k.loop, k.param, "A1 search loop"});
+    if (k.loop != kN) {
+      Search a1;
+      a1.fn = k.fn;
+      a1.loop = k.loop;
+      a1.param = k.param;
+      a1.kind = "A1 search loop";
+      out.push_back(a1);
+    }
     auto it = indirect_callers_.find(k.fn);
     if (it != indirect_callers_.end())
       for (uint32_t ci : it->second) {
@@ -2410,9 +2586,42 @@ class Rel : public RelFacts {
           auto af = argflow_at_.find({c.site, k.param});
           if (af != argflow_at_.end() && argflow_[af->second].src == KZ_ARGSRC_PARAM) p = argflow_[af->second].param;
         }
-        out.push_back(Search{c.caller_fn, c.loop, p, "A2 callback search (indirect call " + call_pos(ci) + ")"});
+        Search s;
+        s.fn = c.caller_fn;
+        s.loop = c.loop;
+        s.param = p;
+        s.kind = "A2 callback search (indirect call " + call_pos(ci) + ")";
+        s.call = static_cast<uint32_t>(ci);
+        callback_param(ci, k.fn, &s.cb, &s.cb_why);
+        out.push_back(s);
       }
     return out;
+  }
+  // The parameter of the calling function that carries the callee of an indirect call to `target`: the CALL_TARGETS row
+  // of the call for that target names the node the function value came through; a parameter of the caller is written
+  // "P:<function key>#<index>" (ast_fn.cpp, the flow-graph node of a parameter).  Anything else (a field, a global, a local
+  // the flow graph does not name) leaves the callback not carried by a parameter: kN, with the node in `why`.
+  void callback_param(uint32_t ci, uint32_t target, uint32_t* cb, std::string* why) const {
+    *cb = kN;
+    const kz_fact_call& c = calls_[ci];
+    for (const kz_fact_target& t : targets_) {
+      if (t.site != c.site || t.fn != target || t.kind != KZ_CALL_TARGET_KIND_INDIRECT) continue;
+      const std::string via = str(t.via);
+      const size_t hash = via.rfind('#');
+      if (via.compare(0, 2, "P:") == 0 && hash != std::string::npos && hash + 1 < via.size()) {
+        std::string key = via.substr(2, hash - 2);
+        const size_t at = key.find('@');
+        if (at != std::string::npos) key = key.substr(0, at);
+        const std::string idx = via.substr(hash + 1);
+        if (key == short_fname(c.caller_fn) && idx.find_first_not_of("0123456789") == std::string::npos) {
+          *cb = static_cast<uint32_t>(std::stoul(idx));
+          return;
+        }
+      }
+      *why = "the callee of the indirect call " + call_pos(ci) + " comes through " + (via.empty() ? std::string("no named node") : via) + ", no parameter of " + fname(c.caller_fn);
+      return;
+    }
+    *why = "the indirect call " + call_pos(ci) + " has no CALL_TARGETS row for " + fname(target);
   }
   // the record type's other fields in the exit conditions of a loop
   std::set<std::string> loop_fields(uint32_t loop, const std::string& type) const {
@@ -2438,10 +2647,178 @@ class Rel : public RelFacts {
       }
     }
   }
-  // the constants of the first call down the chain from (fn, param) to the comparison that passes one;
-  // `desc` names them (value, text as written, callee and argument)
+  // ---- relations rules revision 7: namespace membership by the callback passed, partition by the table selector only
+  // A state of the walk from a search up the chains of calls that carry the key (PARAM_FLOW call-argument rows of depth 0
+  // between key-parameter functions): how the comparison is reached from (fn, param).  kind 0: through direct calls to a
+  // comparison in its own search loop (A1); 1: the callback of an A2 search is parameter `idx` of fn; 2: the callback is
+  // the function `name`; 3: the callback is not resolved (`how` says why).  `target` is the comparison's function.
+  struct CbState {
+    int kind = 0;
+    uint32_t idx = kN, target = kN;
+    std::string name;
+    bool operator<(const CbState& o) const { return std::tie(kind, idx, target, name) < std::tie(o.kind, o.idx, o.target, o.name); }
+  };
+  using CbStates = std::map<std::pair<uint32_t, uint32_t>, std::map<CbState, std::string>>;  // (fn, param) -> state -> how
+  CbStates membership_states(const Namespace& n) const {
+    std::map<std::pair<uint32_t, uint32_t>, std::vector<uint32_t>> pred;  // (next_fn, next_param) -> PARAM_FLOW rows
+    for (size_t i = 0; i < pflow_.size(); ++i) {
+      const kz_fact_pflow& p = pflow_[i];
+      if (p.kind != KZ_PFLOW_KIND_CALL_ARG || p.depth != 0 || p.next_fn == kN || n.key_params.count({p.fn, p.param}) == 0) continue;
+      pred[{p.next_fn, p.next_param}].push_back(static_cast<uint32_t>(i));
+    }
+    CbStates st;
+    std::vector<std::tuple<uint32_t, uint32_t, CbState>> work;
+    auto add = [&](uint32_t fn, uint32_t param, const CbState& cs, const std::string& how) {
+      if (st[{fn, param}].emplace(cs, how).second) work.emplace_back(fn, param, cs);
+    };
+    for (const KeyCmp& k : n.cmps)
+      for (const Search& sr : searches_of(k)) {
+        if (sr.fn == k.fn) {
+          if (k.param != kN) add(k.fn, k.param, CbState{0, kN, k.fn, ""}, "the comparison " + k.how + " in its own search loop");
+          continue;
+        }
+        if (sr.param == kN) continue;
+        if (sr.cb == kN) add(sr.fn, sr.param, CbState{3, kN, k.fn, ""}, sr.cb_why);
+        else add(sr.fn, sr.param, CbState{1, sr.cb, k.fn, ""}, "");
+      }
+    while (!work.empty()) {
+      const auto [h, q, cs] = work.back();
+      work.pop_back();
+      const std::string how = st[{h, q}][cs];
+      auto pit = pred.find({h, q});
+      if (pit == pred.end()) continue;
+      for (uint32_t i : pit->second) {
+        const kz_fact_pflow& p = pflow_[i];
+        CbState next = cs;
+        std::string nhow = how;
+        if (cs.kind == 1) {
+          auto af = argflow_at_.find({p.site, cs.idx});
+          auto cit = call_by_site_.find(p.site);
+          const std::string at = cit != call_by_site_.end() ? call_pos(cit->second) : "site " + std::to_string(p.site);
+          if (af != argflow_at_.end() && argflow_[af->second].src == KZ_ARGSRC_FUNCTION) {
+            next = CbState{2, kN, cs.target, str(argflow_[af->second].root)};
+            nhow = str(argflow_[af->second].root) + " passed as argument " + std::to_string(cs.idx) + " at " + at + " in " + fname(p.fn);
+          } else if (af != argflow_at_.end() && argflow_[af->second].src == KZ_ARGSRC_PARAM && argflow_[af->second].param != kN) {
+            next = CbState{1, argflow_[af->second].param, cs.target, ""};
+          } else {
+            next = CbState{3, kN, cs.target, ""};
+            nhow = "argument " + std::to_string(cs.idx) + " at " + at + " is " +
+                   (af == argflow_at_.end() ? std::string("no ARGFLOW row") : enum_text("KZ_ARGSRC", argflow_[af->second].src) + " [" + str(argflow_[af->second].text) + "]");
+          }
+        }
+        add(p.fn, p.param, next, nhow);
+      }
+    }
+    return st;
+  }
+  // The membership of a use (the call `ci` of the key-parameter function F, parameter k) in the namespace: 0 member (a
+  // chain reaches a comparison of the namespace through its own search loop, or passes the comparison's function as the
+  // callback of a search), 1 another callback only (every chain resolved passes another function), 2 unresolved.
+  int use_membership(const CbStates& st, uint32_t ci, uint32_t F, uint32_t k, std::string* text) const {
+    auto it = st.find({F, k});
+    if (it == st.end()) {
+      *text = "no chain of direct calls from the use to a search of the namespace in PARAM_FLOW";
+      return 2;
+    }
+    std::string member, other, unres;
+    const kz_fact_call& c = calls_[ci];
+    for (const auto& [cs, how] : it->second) {
+      std::string name = cs.name, h = how;
+      int kind = cs.kind;
+      if (kind == 1) {
+        auto af = argflow_at_.find({c.site, cs.idx});
+        if (af != argflow_at_.end() && argflow_[af->second].src == KZ_ARGSRC_FUNCTION) {
+          kind = 2;
+          name = str(argflow_[af->second].root);
+          h = name + " passed as argument " + std::to_string(cs.idx) + " of the use";
+        } else {
+          kind = 3;
+          h = "the callback is argument " + std::to_string(cs.idx) + " of the use" +
+              (af == argflow_at_.end() ? std::string(" (no ARGFLOW row)") : " [" + str(argflow_[af->second].text) + "] (" + enum_text("KZ_ARGSRC", argflow_[af->second].src) + ")") +
+              ", not followed beyond the use";
+        }
+      }
+      if (kind == 0) member = member.empty() ? "reaches " + h : member;
+      else if (kind == 2 && name == short_fname(cs.target)) member = member.empty() ? "the callback " + h + " is the comparison's function " + fname(cs.target) : member;
+      else if (kind == 2) other = other.empty() ? "the callback " + h + " is not the comparison's function " + fname(cs.target) : other;
+      else unres = unres.empty() ? h : unres;
+    }
+    if (!member.empty()) {
+      *text = member;
+      return 0;
+    }
+    if (!unres.empty()) {
+      *text = unres;
+      return 2;
+    }
+    *text = other;
+    return 1;
+  }
+  // Whether a constant argument of a call reaches the table selection of a search of the namespace: a use of the callee's
+  // parameter (PARAM_FLOW, any depth) that is a subscript in the search function, or a comparison in its search loop's
+  // exit, or a store of it to a field the search function reads as a subscript, in the exit of its search loop, or into
+  // a local that exit reads.  "" when none: the constant is no table selector (a lock mode, a flag, a count).
+  std::string selects_table(uint32_t G, uint32_t a, const std::vector<Search>& ss) const {
+    if (!defined(G)) return "";
+    auto it = pflow_of_.find({G, a});
+    if (it == pflow_of_.end()) return "";
+    for (uint32_t i : it->second) {
+      const kz_fact_pflow& p = pflow_[i];
+      const uint32_t sink = p.depth == 0 ? p.fn : p.sink_fn;
+      const std::string at = pos(str(p.file), p.line, p.col);
+      for (const Search& sr : ss) {
+        if (p.kind == KZ_PFLOW_KIND_SUBSCRIPT && sink == sr.fn) return "a subscript in " + fname(sr.fn) + " at " + at;
+        if (p.kind == KZ_PFLOW_KIND_COMPARE && sink == sr.fn && in_exit(sr.loop, p.expr_root)) return "a comparison of the exit of the search loop " + loop_pos(sr.loop) + " at " + at;
+        if (p.kind != KZ_PFLOW_KIND_STORE || p.expr_root == kN || p.expr_root >= exprs_.size()) continue;
+        const kz_fact_expr& d = exprs_[p.expr_root];
+        if (d.op != KZ_EXPR_OP_LOAD || d.flags != KZ_EXPR_REF_FIELD) continue;
+        const std::string tf = str(d.name);
+        auto rit = reads_of_field_.find(tf);
+        if (rit == reads_of_field_.end()) continue;
+        for (uint32_t ri : rit->second) {
+          const kz_fact_read& r = reads_[ri];
+          if (r.fn != sr.fn) continue;
+          const std::string rat = pos(str(r.file), r.line, r.col);
+          std::string local;
+          if (r.ctx_root != kN && r.ctx_root < exprs_.size() && exprs_[r.ctx_root].op == KZ_EXPR_OP_LOAD && exprs_[r.ctx_root].flags == KZ_EXPR_REF_LOCAL) local = str(exprs_[r.ctx_root].name);
+          if (r.use & KZ_READ_USE_SUBSCRIPT) return "stored to " + tf + " at " + at + ", which " + fname(sr.fn) + " reads as a subscript at " + rat;
+          if (r.loop == sr.loop && (r.use & KZ_READ_USE_BRANCH) && in_exit(sr.loop, r.ctx_root)) return "stored to " + tf + " at " + at + ", read in the exit of the search loop at " + rat;
+          if (!local.empty() && exit_reads_local(sr.loop, local))
+            return "stored to " + tf + " at " + at + ", which " + fname(sr.fn) + " reads at " + rat + " into the local " + local + " of the search loop's exit";
+        }
+      }
+    }
+    return "";
+  }
+  // whether a node is (in) an exit condition of a loop (LOOP_EXITS)
+  bool in_exit(uint32_t loop, uint32_t node) const {
+    if (node == kN) return false;
+    auto it = loopexits_of_.find(loop);
+    if (it == loopexits_of_.end()) return false;
+    bool found = false;
+    for (uint32_t i : it->second)
+      for (uint32_t root : {loopexits_[i].root, loopexits_[i].aux_root})
+        if (root != kN && root < exprs_.size()) visit(root, [&](const kz_fact_expr& e) {
+            if (&e == &exprs_[node]) found = true;
+          });
+    return found;
+  }
+  bool exit_reads_local(uint32_t loop, const std::string& local) const {
+    auto it = loopexits_of_.find(loop);
+    if (it == loopexits_of_.end()) return false;
+    bool found = false;
+    for (uint32_t i : it->second)
+      for (uint32_t root : {loopexits_[i].root, loopexits_[i].aux_root})
+        if (root != kN && root < exprs_.size()) visit(root, [&](const kz_fact_expr& e) {
+            if (e.op == KZ_EXPR_OP_LOAD && e.flags == KZ_EXPR_REF_LOCAL && str(e.name) == local) found = true;
+          });
+    return found;
+  }
+  // The partition of a use: the constants of the first call down the chain from (fn, param) to the comparison that
+  // passes a table selector (selects_table); the constants of that call and of the calls before it that are no table
+  // selector go to `nonsel`.  `desc` names the selectors (value, text as written, callee and argument, and how it selects).
   std::string partition(uint32_t fn, uint32_t param, std::set<std::pair<uint32_t, uint32_t>>* seen, const std::set<std::pair<uint32_t, uint32_t>>& kp,
-                        std::string* desc) const {
+                        const std::vector<Search>& ss, std::string* desc, std::string* nonsel) const {
     if (!seen->insert({fn, param}).second) return "";
     auto it = pflow_of_.find({fn, param});
     if (it == pflow_of_.end()) return "";
@@ -2453,19 +2830,28 @@ class Rel : public RelFacts {
     }
     std::sort(steps.begin(), steps.end(), [](const kz_fact_pflow* a, const kz_fact_pflow* b) { return a->site < b->site; });
     for (const kz_fact_pflow* p : steps) {
-      std::string consts;
+      std::string consts, d, ns;
       auto cit = call_by_site_.find(p->site);
       if (cit != call_by_site_.end())
         for (uint32_t a = 0; a < calls_[cit->second].nargs; ++a) {
           auto af = argflow_at_.find({p->site, a});
-          if (af != argflow_at_.end() && argflow_[af->second].src == KZ_ARGSRC_CONST) {
-            consts += (consts.empty() ? "" : ",") + std::to_string(argflow_[af->second].value);
-            *desc += std::string(desc->empty() ? "" : ", ") + std::to_string(argflow_[af->second].value) + " [" + str(argflow_[af->second].text) + "] as " +
-                     str(calls_[cit->second].callee) + " arg " + std::to_string(a) + " at " + call_pos(cit->second);
+          if (af == argflow_at_.end() || argflow_[af->second].src != KZ_ARGSRC_CONST) continue;
+          const std::string item = std::to_string(argflow_[af->second].value) + " [" + str(argflow_[af->second].text) + "] as " + str(calls_[cit->second].callee) + " arg " +
+                                   std::to_string(a) + " at " + call_pos(cit->second);
+          const std::string how = selects_table(calls_[cit->second].callee_fn, a, ss);
+          if (how.empty()) {
+            ns += std::string(ns.empty() ? "" : ", ") + item;
+            continue;
           }
+          consts += (consts.empty() ? "" : ",") + std::to_string(argflow_[af->second].value);
+          d += std::string(d.empty() ? "" : ", ") + item + " (selects the table: " + how + ")";
         }
-      if (!consts.empty()) return consts;
-      const std::string deeper = partition(p->next_fn, p->next_param, seen, kp, desc);
+      if (!ns.empty()) *nonsel += std::string(nonsel->empty() ? "" : ", ") + ns;
+      if (!consts.empty()) {
+        *desc += std::string(desc->empty() ? "" : ", ") + d;
+        return consts;
+      }
+      const std::string deeper = partition(p->next_fn, p->next_param, seen, kp, ss, desc, nonsel);
       if (!deeper.empty()) return deeper;
     }
     return "";
@@ -2476,6 +2862,9 @@ class Rel : public RelFacts {
     std::string text;
     Inc why = kIncCount;  // unresolved: the sub-reason of key_unresolved (relations rules revision 6)
     bool cut = false;     // the static image the key is read from was cut at the image budget
+    // relations rules revision 7: the field whose static image gives the values (Type.field), and the resolved pointer
+    // field the key is read through (O5 aliases)
+    std::string image_field, alias;
   };
   // the key a use passes: a literal, a constant, or a field whose static image the facts reach
   KeyValue key_value(uint32_t site, uint32_t arg) const {
@@ -2514,6 +2903,7 @@ class Rel : public RelFacts {
         }
         object = str(p.object);
         kv.text = "read through the pointer field " + str(p.type) + "." + str(p.field) + " -> " + object + " (PTR_FIELDS " + enum_text("KZ_PTRF_STATUS", p.status) + ")";
+        kv.alias = str(p.type) + "." + str(p.field) + " -> " + object + " (PTR_FIELDS " + enum_text("KZ_PTRF_STATUS", p.status) + ")";
         if (p.idx_n != 0) kv.text += ", elements from " + std::to_string(p.elem) + " step " + std::to_string(p.idx_step) + " count " + std::to_string(p.idx_n);
         // the image of the object, at the elements the reader's index takes
         auto git = gimages_of_.find(base_name(object));
@@ -2568,6 +2958,7 @@ class Rel : public RelFacts {
           }
         }
         kv.status = kv.values.empty() ? "unresolved" : "known";
+        if (!kv.values.empty()) kv.image_field = str(a.type) + "." + field;
         if (kv.values.empty()) {
           kv.text += "; no image leaf of the field";
           kv.why = kKeyNoImageLeaf;
@@ -2873,10 +3264,19 @@ class Rel : public RelFacts {
     struct Use {
       uint32_t ci = kN, callee = kN, param = kN;
       bool creator = false;
-      std::string part, part_desc;
+      std::string part, part_desc, nonsel;
       KeyValue key;
       std::set<uint32_t> actors;
+      int member = 0;           // relations rules revision 7: 0 member, 2 membership unresolved (1, another callback: no use here)
+      std::string member_text;  // how the use reaches the namespace's comparison
     };
+    // relations rules revision 7 (O3): the searches of the namespace, and how each key-parameter function reaches them
+    std::vector<Search> all_searches;
+    for (const KeyCmp& k : n.cmps)
+      for (const Search& sr : searches_of(k)) all_searches.push_back(sr);
+    const CbStates cbst = membership_states(n);
+    uint32_t other_lookups = 0, other_creators = 0;
+    std::vector<std::pair<uint32_t, std::string>> left_out;  // (site, line) of the uses left out for another callback
     std::vector<Use> uses;
     for (const auto& kp : n.key_params) {
       const uint32_t F = kp.first, k = kp.second;
@@ -2892,8 +3292,17 @@ class Rel : public RelFacts {
         for (uint32_t f : reach_direct(F))
           if (writer_fns.count(f) != 0) creates = true;
         u.creator = creates;
+        u.member = use_membership(cbst, ci, F, k, &u.member_text);
+        if (u.member == 1) {
+          // another callback only: the use searches with another comparison function, so it is no use of this namespace
+          ++(creates ? other_creators : other_lookups);
+          (creates ? n_a_other_creators_ : n_a_other_lookups_)++;
+          left_out.emplace_back(c.site, call_pos(ci) + " in " + fname(c.caller_fn) + " -> " + fname(F) + "#" + std::to_string(k) + (creates ? " (creator)" : " (lookup)") + ": " +
+                                                    u.member_text);
+          continue;
+        }
         std::set<std::pair<uint32_t, uint32_t>> seen;
-        u.part = partition(F, k, &seen, n.key_params, &u.part_desc);
+        u.part = partition(F, k, &seen, n.key_params, all_searches, &u.part_desc, &u.nonsel);
         u.key = key_value(c.site, k);
         u.actors = actor_set(c.caller_fn);
         uses.push_back(u);
@@ -2939,7 +3348,11 @@ class Rel : public RelFacts {
       (u.creator ? creators : lookups)++;
       if (uses_script_root(u.actors)) ns_l0 = true;
     }
-    rows << "      uses: lookups " << lookups << ", creators " << creators << " (calls from outside the key-parameter functions; a creator reaches a write of the key)\n";
+    rows << "      uses: lookups " << lookups << ", creators " << creators << " (calls from outside the key-parameter functions; a creator reaches a write of the key)";
+    // relations rules revision 7 (O3): a use whose every chain passes another comparison function to the search is no use here
+    rows << "; left out, another callback passed to the search: lookups " << other_lookups << ", creators " << other_creators << "\n";
+    std::sort(left_out.begin(), left_out.end());
+    for (const auto& [site, l] : left_out) rows << "      left out: " << l << "\n";
     rows << "      namespace layers: " << layers_text(true, ns_l0) << "\n";
     for (const Use& u : uses) {
       if (u.creator) continue;
@@ -2967,10 +3380,17 @@ class Rel : public RelFacts {
           << "} key " << u.key.status;
         r.head = h.str();
       }
-      if (!u.part_desc.empty()) L.line("partition") << "partition: " << u.part_desc;
+      // relations rules revision 7 (O3): the partition takes the table selectors only; the other constants are named
+      if (!u.part_desc.empty() || !u.nonsel.empty())
+        L.line("partition") << "partition: " << (u.part_desc.empty() ? std::string("no table selector") : u.part_desc) << (u.nonsel.empty() ? "" : "; not a table selector: " + u.nonsel);
+      L.line("membership") << "membership: " << (u.member == 0 ? "" : "unresolved: ") << u.member_text;
       L.line("key") << "key: " << u.key.text;
+      if (!u.key.alias.empty()) L.line("aliases") << "aliases: the key is read through the pointer field " << u.key.alias;
       L.line("actors") << "actors: " << actors_text(u.actors) << "; result=" << result_use(u.ci);
+      for (const std::string& h : id_holders(u.ci, u.callee, u.param)) L.line("id holder") << "id holder: the lookup's " << h;
       std::vector<std::string> paired, excluded, probes;
+      std::vector<const Use*> named;  // the creators the row pairs, and its probe-creates (relations rules revision 7)
+      bool creator_member_unres = false;
       bool any_inter = false, any_match = false, any_unres = false, creator_unres = false, creator_cut = false;
       uint32_t n_probe = 0, n_differ = 0, n_same_actor = 0;
       for (const Use& w : uses) {
@@ -3042,6 +3462,7 @@ class Rel : public RelFacts {
         // write of the same actor); run by several actors, the lookup of one and the creation of another stay a pair
         // (relations rules revision 5)
         if (probe && same_actor_only) {
+          named.push_back(&w);
           ++n_probe;
           excluded.push_back("probe-create (same function, the same key argument, the creator's key read under the lookup's result; " + polarity + "): " + line);
           probes.push_back(call_pos(w.ci) + " -> " + fname(w.callee) + " (" + polarity + ")");
@@ -3067,25 +3488,63 @@ class Rel : public RelFacts {
         else any_unres = true;
         if (w.key.status != "known") creator_unres = true;
         if (w.key.cut) creator_cut = true;
-        paired.push_back(keyrel + ": " + line);
+        if (w.member == 2) creator_member_unres = true;
+        named.push_back(&w);
+        // the creator's position stays the first of the line (the plan generator reads it so): the membership note goes last
+        paired.push_back(keyrel + ": " + line + (w.member == 2 ? "; namespace membership unresolved: " + w.member_text : ""));
       }
       if (any_inter) ++n_a_paired_;
       if (any_match) ++n_a_keymatch_;
       for (const std::string& p : paired) L.line("creator") << "creator: " << p;
       for (const std::string& x : excluded) L.line("not a pair") << "not a pair: " << x;
+      // relations rules revision 7 (O5): the out-pointer arguments and the resolved pointer fields of the creators named
+      // above; the constants their callees may return (a creator's out is read under its callee's success constant)
+      std::set<uint32_t> creator_callees;
+      std::set<std::string> key_fields(n.active.begin(), n.active.end());
+      key_fields.insert(n.key);
+      if (!u.key.image_field.empty()) key_fields.insert(u.key.image_field);
+      for (const Use* w : named) {
+        const std::string at = call_pos(w->ci) + " -> " + fname(w->callee);
+        for (const std::string& h : id_holders(w->ci, w->callee, w->param)) L.line("id holder") << "id holder: the creator " << at << ": " << h;
+        if (!w->key.alias.empty()) L.line("aliases") << "aliases: the creator " << at << ": the key is read through the pointer field " << w->key.alias;
+        if (!w->key.image_field.empty()) key_fields.insert(w->key.image_field);
+        creator_callees.insert(w->callee);
+      }
+      for (uint32_t F : creator_callees) {
+        std::vector<std::string> open;
+        for (const std::string& t : callee_returns(F, &open)) L.line("callee-check") << "callee-check: " << t;
+        if (!open.empty()) L.line("callee-check (returns not followed)") << "callee-check (returns not followed): " << fname(F) << ": " << join(open, "; ");
+      }
+      // relations rules revision 7 (O4): the writer sets the row uses -- the key, the active fields, and the fields the keys
+      // are read from in a static image -- with their rule statuses, premises and what they do not cover
+      bool zero_writers = false;
+      for (const std::string& f : key_fields) {
+        bool z = false;
+        L.line("writers") << writer_premises(f, &z);
+        if (z) zero_writers = true;
+      }
       // handling of the result
       L.done();
       add_lines(&r, a_handling(u.ci), "handling");
       for (const std::string& pc : probes) L.line("handling") << "handling: probe-create: on the lookup's failure result the same function creates the same key: " << pc;
       L.done();
       std::string dep;
+      bool unread_writes = false;
       if (!paired.empty()) {
         dep = std::to_string(paired.size()) + " creator(s) of this partition in other actors";
-      } else if (n_probe + n_differ + n_same_actor == 0) {
-        dep = "no creator of this partition";
       } else {
-        dep = "no creator left after exclusions (probe-create " + std::to_string(n_probe) + ", key constants differ " + std::to_string(n_differ) + ", same actor only " +
-              std::to_string(n_same_actor) + ")";
+        // relations rules revision 7 (I3): why no creator of the partition is left
+        std::set<std::string> other_parts;
+        for (const Use& w : uses)
+          if (w.creator && w.part != u.part) other_parts.insert("{" + w.part + "}");
+        std::vector<std::string> why = no_creator_reasons(n, other_parts, writer_fns, creators, u.member == 2, &unread_writes);
+        if (n_probe + n_differ + n_same_actor == 0) dep = "no creator of this partition";
+        else
+          dep = "no creator left after exclusions (probe-create " + std::to_string(n_probe) + ", key constants differ " + std::to_string(n_differ) + ", same actor only " +
+                std::to_string(n_same_actor) + ")";
+        dep += ": " + join(why, "; ");
+        ++n_a_nocreator_;
+        for (const std::string& w : why) ++no_creator_why_[w.substr(0, w.find(" ("))];
       }
       r.dependency = "path A: " + dep;
       r.run_order = "no record given";
@@ -3126,10 +3585,54 @@ class Rel : public RelFacts {
       for (const std::string& f : n.active) inc_writers(f);
       if (fails.empty()) inc(kAbsentSearch);
       if (!paired.empty()) inc(kFixedNoOrder);
+      // relations rules revision 7
+      if (zero_writers) inc(kWriterZero);
+      if (unread_writes) inc(kWriterUnread);
+      if (u.member == 2 || creator_member_unres) inc(kLinkMembership);
+      if (u.member == 2) ++n_a_member_unres_;
       finish(&r);
       key_a(&r);
       out->push_back(std::move(r));
     }
+  }
+  // relations rules revision 7 (I3): the sub-reasons of "no creator" for a lookup: creators of other partitions only; the
+  // key written, but by no function a key-parameter function reaches (the writer kinds and functions); the writer set of
+  // the key or an active field not complete; a function that writes the key reachable through an indirect call whose
+  // targets are not resolved; zero writers of the key under the rules; the lookup's namespace membership unresolved.
+  std::vector<std::string> no_creator_reasons(const Namespace& n, const std::set<std::string>& other_parts, const std::set<uint32_t>& writer_fns, uint32_t creators,
+                                              bool member_unres, bool* unread) {
+    std::vector<std::string> why;
+    *unread = false;
+    if (!other_parts.empty()) why.push_back("creators of other partitions only (" + join(std::vector<std::string>(other_parts.begin(), other_parts.end()), " ") + ")");
+    std::string src;
+    const std::vector<WriterRow> ws = writers_of(n.key, &src);
+    if (!ws.empty() && creators == 0) {
+      std::set<std::string> kf;
+      for (const WriterRow& w : ws) kf.insert(w.kind + " in " + fname(w.fn));
+      why.push_back("key written without a key parameter (no key-parameter function reaches a writer of " + n.key + ": " + join(std::vector<std::string>(kf.begin(), kf.end()), ", ") + ")");
+    }
+    std::set<std::string> fields(n.active.begin(), n.active.end());
+    fields.insert(n.key);
+    std::set<std::string> open;
+    for (const std::string& f : fields) {
+      auto fsit = fstatus_of_.find(f);
+      if (fsit == fstatus_of_.end()) open.insert(f + " no FIELD_STATUS row");
+      else if (fstatus_[fsit->second].status_field != KZ_LOC_STATUS_COMPLETE || fstatus_[fsit->second].status_type != KZ_LOC_STATUS_COMPLETE) open.insert(f + " not complete");
+    }
+    if (!open.empty()) why.push_back("writer set not complete (" + join(std::vector<std::string>(open.begin(), open.end()), ", ") + ")");
+    if (!unresolved_sites_.empty()) {
+      std::set<std::string> reach;
+      for (uint32_t f : writer_fns)
+        if (at_reach(f)) reach.insert(fname(f));
+      if (!reach.empty()) {
+        *unread = true;
+        why.push_back("creators may be in code not read (" + std::to_string(unresolved_sites_.size()) + " indirect calls with unresolved targets may run " +
+                      join(std::vector<std::string>(reach.begin(), reach.end()), ", ") + ", which write the key)");
+      }
+    }
+    if (ws.empty()) why.push_back("only initial values (no writer of " + n.key + " found under the premises of its writers line)");
+    if (member_unres) why.push_back("namespace membership unresolved (the lookup's callback)");
+    return why;
   }
   // the constant returns of the searches of a namespace: the failure constant (returned when no
   // record matches) and the success constant
@@ -3252,6 +3755,8 @@ class Rel : public RelFacts {
   std::map<std::string, uint32_t> inc_reason_rows_;  // reason of the vocabulary -> rows that carry it with any sub-reason
   std::string last_feas_grade_;  // the grade tally_feas counted last (the row's feasibility grade)
   std::map<std::string, std::set<int64_t>> in_use_, empty_;
+  uint32_t n_a_other_lookups_ = 0, n_a_other_creators_ = 0, n_a_member_unres_ = 0, n_a_nocreator_ = 0;  // relations rules revision 7: uses left out, another callback
+  std::map<std::string, uint32_t> no_creator_why_;            // relations rules revision 7: lookup rows per no-creator sub-reason
   uint32_t n_a_ = 0, n_ns_ = 0, n_a_paired_ = 0, n_a_keymatch_ = 0, n_b_ = 0, n_b_check_ = 0, n_c_ = 0, n_c_self_ = 0;
   uint32_t n_flip_possible_ = 0, n_flip_undet_ = 0, n_flip_none_ = 0, n_feas_impossible_ = 0, n_feas_possible_ = 0, n_feas_undecidable_ = 0, n_feas_not_graded_ = 0;
 };
@@ -3283,6 +3788,8 @@ const std::vector<RelReason>& relations_incomplete_reasons() {
       {"writer_set_incomplete", "FIELD_STATUS not complete", "A: the key or an active field, B and C: the field, whose FIELD_STATUS row is not complete under both rules"},
       {"writer_set_incomplete", "no FIELD_STATUS row", "A: the key or an active field, B and C: the field, with no FIELD_STATUS row"},
       {"writer_set_incomplete", "per-field completeness rule is a premise", "a row whose grade rests on the per-field completeness rule (rests-on in its layers)"},
+      {"writer_set_incomplete", "zero writers under the rules", "A: the key, an active field or the field a key is read from in a static image, B and C: the field, with no writer found: zero writers is no completeness verdict (relations rules revision 7)"},
+      {"writer_set_incomplete", "key writes reachable through unresolved indirect calls", "A: no creator of the partition, and a function that writes the key may run through an indirect call whose targets are not resolved (relations rules revision 7)"},
       {"absent_result_unevaluated", "no failure return of the search", "A: the searches of the namespace have no constant return (RET_CONSTS)"},
       {"absent_result_unevaluated", "callee check not evaluated", "B: the flip column is static-undetermined"},
       {"absent_result_unevaluated", "reader's returns not evaluated", "C: the flip column is static-undetermined"},
@@ -3295,6 +3802,7 @@ const std::vector<RelReason>& relations_incomplete_reasons() {
       {"fixed_proof_open", "proof rests on an assumption", "C: proven-impossible under a declared assumption or the premises of path C (rests-on in its layers)"},
       {"link_unlinked", "identity of the reader and the created thread not decided", "C: every row (the dependency column says so)"},
       {"link_unlinked", "self-reported identity", "C: the read's subscript is the reader's own identity"},
+      {"link_unlinked", "namespace membership unresolved", "A: the comparison function the use's chain of calls passes to the namespace's callback search is not resolved, so the use may search another table (relations rules revision 7)"},
       {"reading_options_differ", "basis deviation of a unit of the row", "a row that names a position in a unit with a basis deviation (layers basis-deviation)"},
   };
   return table;

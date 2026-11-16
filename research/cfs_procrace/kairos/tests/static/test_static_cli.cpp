@@ -1110,7 +1110,7 @@ startup_script {
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &a), 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &b), 0);
     KZ_CHECK_EQ(a, b);
-    KZ_CHECK(has(a, "rules relations rules revision 6 (2026-11-16)"));
+    KZ_CHECK(has(a, "rules relations rules revision 7 (2026-11-16)"));
     // roots: the image entries of the table, the root that calls a root directly, the dispatching trampoline
     KZ_CHECK(has(a, "table-image-entry 2"));
     KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member "
@@ -1260,6 +1260,61 @@ startup_script {
                      "is not complete: "));
     KZ_CHECK(has(cb, "the static image of task_defs was cut at the image budget"));
     KZ_CHECK(has(inc_of(cb), "fixed_proof_open(child threads not all resolved)") && has(inc_of(cb), "truncated(static image)"));
+  }
+
+  // ---- namespace membership, table selectors, writer premises, out-pointers (relcallback.c; relations rules revision 7) --
+  // One search loop over a table, the comparison passed as a callback: a use belongs to the namespace of the comparison its
+  // chain passes; a callback from a function without a body leaves the membership unresolved; the partition takes the
+  // kind the search reads as a subscript and names the lock mode beside it as no table selector; zero writers is no verdict.
+  {
+    const fs::path X = work / "relcallback";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/relcallback.c", f = (X / "rc.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(f) + " -- -std=c99 -pedantic", &out), 0);
+    std::string r, r2;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(f), &r), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(f), &r2), 0);
+    KZ_CHECK_EQ(r, r2);
+    auto row_of = [](const std::string& text, const std::string& head) {
+      const size_t at = text.find(head);
+      if (at == std::string::npos) return std::string();
+      size_t end = text.find("\n  A", at + 1);
+      const size_t endn = text.find("\n  namespace ", at + 1), endh = text.find("\n[", at + 1);
+      if (endn < end) end = endn;
+      if (endh < end) end = endh;
+      return text.substr(at, end == std::string::npos ? std::string::npos : end - at);
+    };
+    KZ_CHECK(has(r, "rules relations rules revision 7 (2026-11-16)\n"));
+    // the name namespace: the lookup by path is left out; the path namespace: the lookup and the creation by name are left out
+    KZ_CHECK(has(r, "      left out: relcallback.c:152:9 in user_main -> path_find#0 (lookup): the callback path_match passed as argument 2 at relcallback.c:94:12 in path_find "
+                    "is not the comparison's function name_match\n"));
+    KZ_CHECK(has(r, "      left out: relcallback.c:151:9 in user_main -> sem_find#0 (lookup): the callback name_match"));
+    KZ_CHECK(has(r, "      left out: relcallback.c:158:9 in maker_main -> sem_create#0 (lookup): the callback name_match"));
+    KZ_CHECK(has(r, "summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 3, creators 0; "
+                    "lookup rows with the membership unresolved 2; "));
+    const std::string a1 = row_of(r, "A1 lookup relcallback.c:151:9 in user_main -> sem_find#0 namespace Rec.name partition {1} key known");
+    KZ_CHECK(!a1.empty());
+    KZ_CHECK(has(a1, "partition: 1 [KIND_SEM] as find_by_name arg 1 at relcallback.c:90:50 (selects the table: stored to Token.kind at relcallback.c:53:3, which find_next "
+                     "reads as a subscript at relcallback.c:65:21); not a table selector: 2 [LOCK_SHARED] as find_by_name arg 0 at relcallback.c:90:50\n"));
+    KZ_CHECK(has(a1, "membership: the callback name_match passed as argument 2 at relcallback.c:85:12 in find_by_name is the comparison's function name_match\n"));
+    KZ_CHECK(has(a1, "aliases: the key is read through the pointer field Holder.defs -> defs@relcallback.c:138 (PTR_FIELDS resolved)\n"));
+    KZ_CHECK(has(a1, "id holder: the lookup's arg 1 [&holder.ids[0]] "));
+    KZ_CHECK(has(a1, "id holder: the creator relcallback.c:158:9 -> sem_create: arg 1 [&holder.ids[1]] "));
+    // the creator's callee: its constants through the functions whose result it returns; one of them not of failure class
+    KZ_CHECK(has(a1, "callee-check: sem_create returns 0 [RC_OK] through sem_create -> rec_create -> alloc_check@relcallback.c:99 when "));
+    KZ_CHECK(has(a1, "callee-check: sem_create returns -2 [RC_BAD_POINTER] through sem_create -> rec_create when (eq param:id#2 0)\n"));
+    KZ_CHECK(has(a1, "writers: Def.name: no writer found under these premises; premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete"));
+    KZ_CHECK(has(a1, "writer_set_incomplete(zero writers under the rules)"));
+    KZ_CHECK(has(a1, "dependency: path A: 1 creator(s) of this partition in other actors\n"));
+    const std::string a2 = row_of(r, "A2 lookup relcallback.c:166:9 in main -> search_with#1 namespace Rec.name partition {1} key known");
+    KZ_CHECK(has(a2, "membership: unresolved: the callback is argument 0 of the use [pick_match()] (call-result), not followed beyond the use\n"));
+    KZ_CHECK(has(a2, "link_unlinked(namespace membership unresolved)"));
+    KZ_CHECK(has(a2, "dependency: path A: no creator left after exclusions (probe-create 0, key constants differ 1, same actor only 0): "));
+    KZ_CHECK(has(a2, "namespace membership unresolved (the lookup's callback)"));
+    const std::string a3 = row_of(r, "A3 lookup relcallback.c:152:9 in user_main -> path_find#0 namespace Rec.path partition {0} key known");
+    KZ_CHECK(has(a3, "dependency: path A: no creator of this partition: writer set not complete (Rec.path not complete); only initial values (no writer of Rec.path found"));
+    KZ_CHECK(has(a3, "writers: Rec.path: no writer found under these premises"));
+    KZ_CHECK(!has(r, "  A5 "));
   }
 
   // ---- the soundness rules of relations path C (relsound.c; relations rules revisions 3 and 4) ---------------------
@@ -1453,7 +1508,7 @@ startup_script {
   }
 
   // ---- relation rows as records: the use-site key (docs/static_facts.md §5l) -------------------------------------
-  // A lookup API over a table (with a constant partition argument), two lookups on one line, a creator in another
+  // A lookup API over a table (with a constant partition argument that selects the table), two lookups on one line, a creator in another
   // thread.  The key of each row stays when lines move, when the creators change and when the partition changes; two
   // calls of one callee on one line get different keys (the n-th call); the text with --keys is the text without it.
   {
@@ -1462,12 +1517,12 @@ startup_script {
     auto source = [](const std::string& top, int kind, const std::string& more_creators) {
       return top +
              "#include <pthread.h>\n#include <string.h>\n#define KIND " + std::to_string(kind) + "\n"
-             "typedef struct { int used; char name[16]; } KSlot;\nstatic KSlot kslots[4];\n"
-             "int k_find(int kind, const char *name) {\n  int i;\n  (void)kind;\n  for (i = 0; i < 4; i++) {\n"
-             "    if (kslots[i].used == 1 && strcmp(kslots[i].name, name) == 0) return i;\n  }\n  return -17;\n}\n"
-             "int k_create(int kind, const char *name) {\n  int i;\n  (void)kind;\n  for (i = 0; i < 4; i++) {\n"
-             "    if (kslots[i].used == 1 && strcmp(kslots[i].name, name) == 0) return -5;\n  }\n"
-             "  for (i = 0; i < 4; i++) {\n    if (kslots[i].used == 0) {\n      strncpy(kslots[i].name, name, 15);\n      kslots[i].used = 1;\n      return i;\n"
+             "typedef struct { int used; char name[16]; } KSlot;\nstatic KSlot kslots[8][4];\n"
+             "int k_find(int kind, const char *name) {\n  int i;\n  for (i = 0; i < 4; i++) {\n"
+             "    if (kslots[kind][i].used == 1 && strcmp(kslots[kind][i].name, name) == 0) return i;\n  }\n  return -17;\n}\n"
+             "int k_create(int kind, const char *name) {\n  int i;\n  for (i = 0; i < 4; i++) {\n"
+             "    if (kslots[kind][i].used == 1 && strcmp(kslots[kind][i].name, name) == 0) return -5;\n  }\n"
+             "  for (i = 0; i < 4; i++) {\n    if (kslots[kind][i].used == 0) {\n      strncpy(kslots[kind][i].name, name, 15);\n      kslots[kind][i].used = 1;\n      return i;\n"
              "    }\n  }\n  return -17;\n}\n"
              "int t_find(const char *name) { return k_find(KIND, name); }\n"
              "int t_create(const char *name) { return k_create(KIND, name); }\n"

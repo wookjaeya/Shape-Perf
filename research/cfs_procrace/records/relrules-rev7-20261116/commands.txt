@@ -1,0 +1,17 @@
+# declaration: sha256 of declared_before_build.txt (= the lines of section 2 of plan/full_stage_results_20261116.md up to the end of 2.0, before the build) = 596474903eef9bb15483d0774ea60b3cc0cd4f6f7ce444c67ad7b00fdaea070b (2026-11-16T10:28:39Z; committed before the build)
+# relrules-rev7-20261116: commands, rc and free space (df -B1 /, bytes available)
+# <scratch> is this session's scratchpad directory (m7/)
+start: free 3701456896 at the first measurement of this step (after the step before; 2026-11-16 about 09:50Z)
+
+## 0. before the declaration (no tool of MC changed)
+scratch check program <scratch>/sbuild/kz-static: the repository's lib/llvm/relations.cpp compiled with the flags of MC's kz-llvm (flags.make, -Werror) into a copy of MC lib/llvm/libkz-llvm.a, linked with MC's kz-static objects and its link line into <scratch> (MC untouched)
+  -> relations on the five tests_8c_fix NP facts, compare_declared.py against plangen_relcheck/<b>: rc 0 on all five (A 127/127/68/66/66 -> 63/63/25/66/66; left out lines 98/98/64/0/0); callback_check.py: 98/98/64/0/0 pairs, all MATCH
+  -> MC tests/static/static_golden (unchanged binary) with the scratch kz-static and KZ_GOLDEN_UPDATE=1 into a scratch copy of tests/static/data: six relations goldens change, compare_declared.py --golden: all six of declared classes; the other goldens run (writers, lockset_np, flowfacts_np, argflow_np) unchanged
+  -> test_static_cli compiled from the repository source in <scratch> (MC libkz-core.a, libkz-testsupport.a) and run with the scratch kz-static: 864 checks passed
+  -> test_static_reasons and test_static_plan compiled in <scratch> against the scratch libkz-llvm.a: 630 and 181 checks passed (plan golden in a scratch data copy: the two "relations rules revision" lines only)
+  -> the c1_pre_tx plan with the scratch kz-static and the arguments of records/obs1-20261116-plangen/plans.sh (into <scratch>): rc 0; plan_diff.py against plangen/c1_pre_tx: planned rows 12 -> 8
+  these outputs are scratch and no evidence; the build's tool re-measures them
+MC ctest -R '^lint' (kz_lint 5f62ec20, no build, on this tree) -> 7 of 7 passed
+records/relrules-rev7-20261116/tool_copy/ROUNDTRIP.txt: the existing copy of de1315b3 re-checked (xz -t OK, stream sha256 de1315b3, cmp SAME)
+env/tools/tools_check.sh --deep -> 31 rows, 0 failing; env/tools/ledger_check.sh -> 45 rows, 0 failing
+free before the commit of the declaration: 3255668736 (2026-11-16T10:28:39Z)

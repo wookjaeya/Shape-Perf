@@ -326,7 +326,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - 규칙 대상은 사람이 넣은 입력이 아니다: BASIS `target.T.f = rule R-T1` 등은 정책 `unset`, 출처 행 없음으로 적는다(명령줄 `--target` 은 지금처럼 `declared-assumption`, 출처 `researcher`). BASIS `extract.targets_rule` 과 `count.targets_rule*` 를 더한다.
 - 옵션은 `--no-profile` 과만 쓴다. 옵션이 없으면 프로필 없는 추출은 앞과 같이 대상이 없다. 새 섹션은 없다(S5 때 facts schema 개정 10; LOCK_PATHS 를 더한 개정 11은 §5f).
 
-**`kz-static relations <facts> [-o OUT]`** [D]. facts 컨테이너 하나를 읽어 텍스트를 낸다(`lib/llvm/relations.cpp`, "relations rules revision 1"; 개정 2에서 바뀐 규칙은 §5f). 필드·callee·사례 이름을 받지 않는다. 확장 사실(READS … AWAIT_L1)이 없는 facts 는 이유와 함께 거부한다. 같은 컨테이너는 같은 바이트를 낸다. 행의 기록, 사용 지점 키(`--keys`)와 공유 적재기는 §5l. 잘린 정적 이미지와 행마다의 `incomplete:` 줄(개정 6)은 §5m. 그 행에서 관측 계획을 내는 `kz-static plan` 은 §5n.
+**`kz-static relations <facts> [-o OUT]`** [D]. facts 컨테이너 하나를 읽어 텍스트를 낸다(`lib/llvm/relations.cpp`, "relations rules revision 1"; 개정 2에서 바뀐 규칙은 §5f). 필드·callee·사례 이름을 받지 않는다. 확장 사실(READS … AWAIT_L1)이 없는 facts 는 이유와 함께 거부한다. 같은 컨테이너는 같은 바이트를 낸다. 행의 기록, 사용 지점 키(`--keys`)와 공유 적재기는 §5l. 잘린 정적 이미지와 행마다의 `incomplete:` 줄(개정 6)은 §5m. 그 행에서 관측 계획을 내는 `kz-static plan` 은 §5n. 이름 공간의 소속, 표 선택 상수, writer 의 전제, out 포인터, 생성자 callee 의 상수(개정 7)는 §5o.
 - **머리**: facts 해시, 모드, 내장 프로필·P0 표·유도 규칙·대상 규칙의 판, P0 비교 표의 판과 항목(판 표기, 원문 대조), 입력 계층, 행위자 root 와 트램펄린, 경로별 행 수와 등급별 수.
 - **입력 계층**: 행마다 B(빌드), P0(P0 표: spawn·잠금·지연·종료의 유도와 비교 함수), L0(행이 시작 스크립트 진입 root 에 기댈 때), R(규칙)을 붙인다. 프로필 추출의 facts 이면 `case:profile(<이름>)`, 명령줄 어휘가 있으면 `hand-entered:command-line(<n> items; G0 or other names, not automatic)` 를 모든 행에 붙인다.
 - **P0 비교 표**(`p0_compare_table`, "P0 comparison table revision 1"): 바이트 문자열 비교 묶음(`memcmp`, `strcmp`, `strcoll`, `strncmp`, `strcasecmp`, `strncasecmp`)과 스레드 id 비교 묶음(`pthread_equal`). 추출은 이 표를 쓰지 않으므로 P0 표와 facts 의 P0_TABLE 은 그대로다. 프로그램이 같은 이름의 본문을 정의하면(inline 이 아닌 본문) 그 호출은 비교로 읽지 않는다.
@@ -584,6 +584,27 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 ## 5n. 관측 계획 생성 `kz-static plan` (plan rules revision 1, 2026-11-16) [D]
 
 결과는 `plan/observation_path_results_20261116.md` §4. 규칙·입력·출력 형식은 `docs/plan_manifest.md` 다. relations 의 행을 같은 프로세스 안에서 `relations_rows`(§5l 의 공유 적재기 `RelFacts`)로 계산하고, 방법의 관측 집합(모든 행)을 방법의 우선순위 차례로 기록된 예산 아래 계획한다. 우선순위는 방법 문서 첫 단계 규칙의 이식이다(행 글의 표시, 순서 등급, 도달 표시, 처분). 관측 규칙은 use-call, key-text, creator-call, handling-chain, writer, spawn-call, actor, stop-event 다. 출력은 `kzs-sites 3` manifest 와 sidecar, module 표, 점검할 실행 파일 목록이다. 생성기는 명령줄에 이름이 있는 파일(facts, 그 basis, 프레임워크 계층 자료 `semantics/framework_api_roles.txt`)만 연다. facts schema(`include/`), relations 의 규칙과 글은 바꾸지 않는다.
+
+## 5o. relations 규칙 개정 7: 이름 공간의 소속, 표 선택 상수, writer 의 전제, out 포인터, 생성자 callee 의 상수, 생성자 없음의 까닭 (2026-11-16) [D]
+
+결과는 `plan/full_stage_results_20261116.md` §2. 개정 문자열은 "relations rules revision 7 (2026-11-16)" 이다. facts schema 는 개정 11 그대로다(`include/` 를 고치지 않음). 사용 지점 키(§5l)는 생성자·partition·계수를 담지 않으므로 남는 행의 키는 바뀌지 않는다. 행이 빠지면 뒤 행의 번호(A1, A2, …)는 당겨진다.
+
+**이름 공간의 소속: 실제로 넘긴 callback** [D]. 경로 A 의 A2 검색(검색 루프가 간접 호출로 비교 함수를 부름)은 그 간접 호출의 callee 를 나르는 검색 함수의 매개변수를 적는다: CALL_TARGETS 의 그 호출·그 비교 함수 행의 `via` 가 `P:<검색 함수>#<j>`(흐름 그래프의 매개변수 노드, `ast_fn.cpp`)이면 j. 다른 노드(필드, 전역, 이름 없는 지역)이면 매개변수가 나르지 않는다고 적는다. 사용(이름 공간의 키 매개변수 함수를 바깥에서 부르는 호출)마다, 검색에서 키를 나르는 호출 사슬(PARAM_FLOW 깊이 0 의 call-argument 행, 키 매개변수 함수 사이)을 거슬러 올라가며 그 매개변수가 받는 인자를 본다(ARGFLOW): 함수(`function`)면 그 함수, 매개변수면 한 단계 위로, 그 밖이면 풀리지 않음. 사용 자신의 인자에서 멈춘다(그 위는 따라가지 않음).
+- 소속(member): 어느 사슬이 그 이름 공간의 비교 함수를 넘기거나, 비교가 자기 검색 루프(A1) 안에 있는 함수에 직접 호출로 닿는다. 행에 `membership:` 줄이 그 까닭을 적는다.
+- 다른 callback 만(other): 풀린 사슬이 모두 다른 함수를 넘긴다. 그 사용은 이 이름 공간의 행도 생성자도 아니다. 이름 공간 블록의 `uses:` 줄 끝과 `left out:` 줄(사용마다 하나, 넘긴 함수와 그 자리), 머리의 `summary A membership and creators` 줄이 센다.
+- 풀리지 않음(unresolved): 행으로 남고 `membership: unresolved: <까닭>` 과 `link_unlinked(namespace membership unresolved)`. 짝지은 생성자의 소속이 풀리지 않아도 같은 사유를 단다.
+
+**partition: 표 선택 상수만** [D]. 사슬을 따라 내려가며 상수를 넘기는 첫 호출의 상수 가운데, 그 callee 의 매개변수가 검색의 표 선택에 닿는 것만 partition 에 든다: 그 매개변수의 쓰임(PARAM_FLOW, 깊이 무관)이 검색 함수 안의 첨자이거나 검색 루프 출구의 비교이거나, 그것을 필드에 저장하고 검색 함수가 그 필드를 첨자로, 루프 출구에서, 또는 루프 출구가 읽는 지역으로 읽는다. 표 선택이 아닌 상수(잠금 방식, 플래그)는 `partition:` 줄의 `not a table selector:` 에 적고, 그 호출에 표 선택 상수가 없으면 더 아래 호출로 간다. 선택 상수마다 `(selects the table: <근거>)` 를 붙인다.
+
+**writer 의 전제** [D]. 행이 쓰는 writer 집합마다 한 줄 `writers: <Type.field>: ...`: A 는 키 필드, 활성 필드, 그리고 lookup 이나 행이 이름 댄 생성자의 키를 읽은 정적 이미지의 필드; B 와 C 는 그 필드. 줄은 writer 수와 종류, 출처(WRITERS / LOCKSET / FUNC_WRITES), covers-more·early-init·init-tree·partial 의 수, FIELD_STATUS 의 두 규칙 상태와 그 수(writer, 인스턴스, 필드의 hit, 같은 타입 다른 필드의 hit, 프로그램의 untyped 쓰기 자리)와 플래그, 덮지 않는 것(대상이 풀리지 않은 호출의 수, closure 밖 단위의 쓰기: 읽지 않음)을 적는다. writer 가 없으면 "no writer found under these premises" 이고, writer 0 은 완전성 판정이 아니므로 행이 `writer_set_incomplete(zero writers under the rules)` 를 단다. `image_value_why` 의 결정(정적 이미지를 실행 값으로 받는지)은 바뀌지 않는다. 그 전제가 이 줄로 드러난다. const 한정은 facts 에 없어(필드 타입 표는 뒤의 schema 개정) 쓰지 않는다.
+
+**out 포인터와 별칭** [D]. lookup 과 행이 이름 댄 생성자(짝, probe-create)마다, 키가 아닌 매개변수 가운데 callee 가 그것을 통해 저장하는 것(PARAM_FLOW out-store, 가장 얕은 행)을 `id holder:` 줄로 적는다: 넘긴 인자의 글·출처·필드·base·객체(ARGFLOW)와 저장 자리. 객체의 id 를 주는 callee 라면 id 는 그 가운데 있다(어느 것이 id 인지는 가리지 않음). 키가 풀린 포인터 필드를 거쳐 읽히면 `aliases:` 줄이 그 필드와 대상을 적는다(PTR_FIELDS).
+
+**생성자 callee 의 상수** [D]. 행이 이름 댄 생성자의 callee 마다 `callee-check: <callee> returns <v> [<글>] [through <사슬>] when <조건>` 줄: callee 의 RET_CONSTS, 그리고 callee 가 호출 결과를 돌려주는 함수(RETURNS call-result)의 RET_CONSTS 를 따라 내려간 것(조건은 가장 안쪽 함수의 것). 매개변수·지역·필드·식을 돌려주는 반환과 본문 없는 함수의 결과는 따라가지 않고 `callee-check (returns not followed):` 줄에 적는다. 이 집합은 돌려줄 수 있는 상수이고, 무엇을 돌려주는지의 증명이 아니다. 생성자의 out 은 그 가운데 실패 등급이 아닌 상수 하나 아래에서만 읽는다(설명 기록의 규칙).
+
+**생성자가 없는 까닭** [D]. 짝지은 생성자가 없는 lookup 행의 dependency 칸은 까닭을 붙인다(`; ` 로 나눔): 다른 partition 의 생성자만(`creators of other partitions only`), 키를 쓰지만 키 매개변수 함수가 그 writer 에 닿지 않음(`key written without a key parameter`, writer 의 종류와 함수), 키나 활성 필드의 writer 집합이 완전하지 않음(`writer set not complete`), 대상이 풀리지 않은 간접 호출이 키를 쓰는 함수를 돌릴 수 있음(`creators may be in code not read`; 행에 `writer_set_incomplete(key writes reachable through unresolved indirect calls)`), 키의 writer 가 없음(`only initial values`), lookup 의 소속이 풀리지 않음(`namespace membership unresolved`). 머리의 `summary A membership and creators` 줄이 까닭마다 행을 센다.
+
+**시험** [M]. fixture `relcallback.c`(사례 이름 없음): callback 매개변수로 비교를 받는 검색 루프 하나, 두 필드의 비교 함수 둘(strcmp, strncmp), 이름·경로 lookup API, 이름을 쓰는 create API(그 상수를 helper 의 결과로 돌려줌), 본문 없는 함수에서 비교를 받는 검색, 토큰에 저장되어 첨자로 읽히는 종류 상수와 그 옆의 잠금 방식. golden `static_golden_relcallback_np`, `test_static_cli` 의 한 블록. `test_static_cli` 의 사용 지점 키 블록은 종류 인자가 표를 고르게 고쳤다(전에는 쓰지 않는 인자였고, 이 개정에서는 표 선택이 아니어서 partition 에 들지 않는다).
 
 ## 6. core-cpu1 결과 [M]
 

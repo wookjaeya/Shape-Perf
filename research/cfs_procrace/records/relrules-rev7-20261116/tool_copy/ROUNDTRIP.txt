@@ -1,0 +1,7 @@
+# round trip of the existing compressed copy of kz-static de1315b3 before the in-place build that overwrites it (2026-11-16T10:25:51Z)
+copy: /home/user/work/preserve/tools-20261116-c/kz-static.de1315b3.xz (40972128 B), made after the plan generator build (records/obs1-20261116-plangen/tool_copy)
+xz -t: OK
+sha256 of the xz file: 2c8cc08ddc88bcde6c1e7827e025c427a53159290ea8f46917b24cfd50a2d153 (the same line is in /home/user/work/preserve/tools-20261116-c/XZ.sha256: yes)
+xz -dc | sha256sum: de1315b359af279c46585d80e8a71db6143a19ded1ca164e4b88bc7106a3abdc
+in place: de1315b359af279c46585d80e8a71db6143a19ded1ca164e4b88bc7106a3abdc
+xz -dc | cmp in place: SAME

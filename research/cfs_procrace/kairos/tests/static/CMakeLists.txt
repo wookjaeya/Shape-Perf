@@ -24,7 +24,10 @@
 #                    imgbudget_np (--no-profile --image-budget 4: the leaves and flags of the five cases together);
 #                    relincomplete.c for the incompleteness line of relations (relations rules revision 6):
 #                    relincomplete_np at the default image budget, relincomplete_cut_np at --image-budget 3, where its
-#                    name table and its table of thread entries are cut; plangen.c for `kz-static plan` (plan rules
+#                    name table and its table of thread entries are cut; relcallback.c for relations rules revision 7
+#                    (relcallback_np: one search loop with the comparison as a callback, two comparisons over two
+#                    fields, a callback from a function without a body, a table selector beside a lock mode, a key from a
+#                    static table, a creator whose callee returns its constants through a helper); plangen.c for `kz-static plan` (plan rules
 #                    revision 1): read by test_static_plan only (two apps started through a spawn operation, a name
 #                    registry with a lookup and a create API, a failure that reaches the app exit, two calls of one
 #                    callee on one line, a lookup in a loop, and with -DPLANGEN_SECOND_CALLER a second caller)
@@ -57,9 +60,9 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
 # clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
-set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete plangen)
+set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete relcallback plangen)
 set(kz_golden_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations clobber flowfacts_np argflow_np lockset_np
-    relations_np lockpaths_np relpaths_np relsound_np imgbudget_np relincomplete_np relincomplete_cut_np)
+    relations_np lockpaths_np relpaths_np relsound_np imgbudget_np relincomplete_np relincomplete_cut_np relcallback_np)
 foreach(kz_name IN LISTS kz_fixtures)
   add_test(NAME static_fixture_compile_${kz_name}
     COMMAND ${CMAKE_C_COMPILER} -std=c99 -pedantic -Wall -Wextra -Werror -c ${kz_fixture_dir}/${kz_name}.c -o ${CMAKE_CURRENT_BINARY_DIR}/${kz_name}.fixture.o)

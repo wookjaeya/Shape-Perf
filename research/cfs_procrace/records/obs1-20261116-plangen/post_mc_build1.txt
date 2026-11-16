@@ -1,0 +1,32 @@
+# build_record.sh post /home/user/work/merge-check/kz-llvm (2026-11-16T07:00:40Z)
+2e0f8e404cc76b8d45aad24f018779a9a3d1c9fccf743468ea34c51e409ed975  tools/kz-static/kz-static
+931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248  tools/kz/kz
+05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43  tools/kz-dump/kz-dump
+4390d4f13b5bcae3145ddd4b3decb089790d18d6ebbdc3104de99beb66e5063a  runtime/kz-rt-dump
+7d34e6e20934c62b91f006c20712b7a096692b231d318257b096eb22dc68075f  tools/kz-phi/kz-phi
+5f62ec20d2d26e74501cf7469649761df662d673659835ec9bb0902ed6acd018  tests/lint/kz_lint
+28db40172dbdb06faa0e607b9a494805b19768ca888e865d0a5c3859dab8bcaf  instrument/clang/kz-instr-clang
+2026-11-16 07:00:20.988561905 +0000 184095248 tools/kz-static/kz-static
+2026-11-10 08:49:17.931027366 +0000 75503864 tools/kz/kz
+2026-10-30 16:41:39.341084223 +0000 2514528 tools/kz-dump/kz-dump
+2026-10-29 07:31:59.427491407 +0000 3350272 runtime/kz-rt-dump
+2026-10-30 16:41:44.817084098 +0000 28644248 tools/kz-phi/kz-phi
+2026-11-16 07:00:00.732560701 +0000 4093176 tests/lint/kz_lint
+2026-11-10 08:48:55.159026012 +0000 97195536 instrument/clang/kz-instr-clang
+# kz-static --identity
+tool=kz-static
+tool_sha256=82217190302574c3b3209d29ad47a59ecff011c2edcadeb0387a3e87a7ba81e0
+tool_source=ea8fc03b863543b8a3a9bac83efcd8f7590822d38087cf211806496793075efa
+core_source=f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+# tool identity defines (flags.make)
+kz KZ_TOOL_SOURCE_SHA256=\"caf58235d6b9d032685e0f5df7eb4c5f8cfcdaadd0e37457c897664fa4911141\"
+kz-phi KZ_TOOL_SOURCE_SHA256=\"7fc3ed73d83e5977112ef6c7a0d75c86de4f2871be72d299260a18b5c56713f8\"
+kz-static KZ_TOOL_SOURCE_SHA256=\"ea8fc03b863543b8a3a9bac83efcd8f7590822d38087cf211806496793075efa\"
+kz-dump KZ_TOOL_SOURCE_SHA256=\"cc51ff352881eb7fd56ec3c1d56cb53ff946c86ff51af310436e3850fce2ba2a\"
+# configuration files
+bc2f43b405fb16bfe8a12974af2be70ce2600dd43aa5550bff1c5600e1a996da  CMakeCache.txt
+8389ef531e3f5edb296573650859af20e565c900e276b89e0d17a7bba0c1da8a  (sha256 of the sorted list of every flags.make sha256)
+# repository
+HEAD=1b38530
+uncommitted lines under kairos (git diff -- kairos | wc -l): 0
+# free (df -B1 /): 3525496832

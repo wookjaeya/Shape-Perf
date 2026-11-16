@@ -1,0 +1,134 @@
+clause B per consumer (offline probe, revision 1).  읽기만 한다. 이 출력은 기존 기록에 대한 점검이고 탐지 주장이 아니다.
+행 B65 (/home/user/work/redesign/step2a/tests_8c_fix/r2_core/NP/relations.txt:2147) sha256 fc8ea8da2af0ec5cd57f7e7e4c0ff4179e1a4fb32b783ee72e5a8b5cfa9af975
+   공유 필드 CFE_SB_Global_t.AppId, callee CFE_EVS_SendEventWithAppID의 인자 2, 초기값(INIT) 0
+   [필터 F1] 지점 39곳(머리줄의 sites=39), 결과 처리 {'discarded': 39}, handling 줄 discarded/used/tested = (39, 0, 0)
+   지점이 든 함수: {'CFE_SB_CreatePipe': 6, 'CFE_SB_DeletePipeFull': 3, 'CFE_SB_SetPipeOpts': 3, 'CFE_SB_GetPipeOpts': 3, 'CFE_SB_GetPipeName': 2, 'CFE_SB_GetPipeIdByName': 3, 'CFE_SB_SubscribeFull': 9, 'CFE_SB_UnsubscribeFull': 5, 'CFE_SB_MessageTxn_ReportSingleEvent': 1, 'CFE_SB_SendSubscriptionReport': 1, 'CFE_SB_BackgroundFileEventHandler': 3}
+   작성자 줄 3개: ['cfe_sb_init.c:50 in CFE_SB_EarlyInit value=0', 'cfe_sb_task.c:138 in CFE_SB_AppInit value=symbolic', 'cfe_sb_task.c:138 in CFE_SB_AppInit value=0']
+   callee의 fail 등급 상수: ['CFE_EVS_APP_ILLEGAL_APP_ID=0xc2000003', 'CFE_EVS_APP_SQUELCHED=0xc2000009']
+   정적 뒤집힘 평가(flip): static-undetermined: the check is not evaluated: a written value that is not a constant; the parameter Spec#3; the result of EVS_AppDataIsMatch; the result of E
+   순서 등급(r2_core:2201): "undecidable: fixed unconfirmed (creation order + await; the await rests on the L1 premise only)"; 작성자 ('CFE_SB_TaskMain', 4); 먼저 만들어지는 독자 [('CFE_ES_TaskMain', 1), ('CFE_EVS_TaskMain', 2)]; 뒤에 만들어지는 독자 [('CFE_TBL_TaskMain', 5), ('CFE_TIME_TaskMain', 6)]
+   행의 독자 행위자: actors: readers {CFE_ES_BackgroundTask (spawn-entry), CFE_ES_TaskMain (table-walk-entry), CFE_EVS_TaskMain (table-walk-entry), CFE_SB_TaskMain (table-walk-entry), CFE_TBL_TaskMain (table-walk-entry), CFE_TIME_Local1HzTask (spawn-entry), CFE_TIME_TaskMain (table-walk-entry), CFE_TIME_Tone1HzTask (spawn-entry)}; writers {CFE_SB_TaskMain (table-walk-entry), main (process)} (inter-actor)
+   항목 1의 지위: 미완성. 행의 등급이 증명이 아니다(행의 문장: "neither order is proven").
+== 기록 F0
+   입력 /home/user/work/w6/replay/r2/f0/cur.txt sha256 00972c1632d6d97ae2d2a800a21404472f5553bc9097f59afb79bfeeb4eaaf70
+   입력 /home/user/work/w6/replay/r2/intervals/f0/occ.tsv sha256 106bacbca4b1ccb646e9422fafee52870b5aaae3d0b858529b063af1037e6b0b
+   입력 /home/user/work/w6/replay/r2/intervals/f0/neutral.dump sha256 ce6e29fe6c13846c12b382a7499e0189733dd6037aa5afc48c248cc4d00b82d2
+   [필터 F2] 행의 지점 39곳 가운데 기록에 지점별 관측이 있는 것 3곳: cfe_sb_api.c:275 in CFE_SB_CreatePipe (기록 지점 "CFE_EVS_SendEventWithAppID.id_valid@sb_api_275"), cfe_sb_api.c:1183 in CFE_SB_SubscribeFull (기록 지점 "CFE_EVS_SendEventWithAppID.id_valid@sb_api_1183"), cfe_sb_priv.c:786 in CFE_SB_MessageTxn_ReportSingleEvent (기록 지점 "CFE_EVS_SendEventWithAppID.id_valid@sb_priv_786")
+   [필터 F4] 게시 w = 기록 사건 127, 행위자 CFE_SB, 기록 지점 ['sb.appid.store', 'sb_publication']
+   [미확인] 행을 낸 빌드의 소스와 이 기록의 실행 파일이 같은 판인지는 대조하지 않았다. 확인한 것은 F2의 일치(파일, 줄, 함수)뿐이다.
+   [필터 F3] CFE_EVS_SendEventWithAppID 호출 발생 295번: 관계 소속 확인 228번, 소속 미확인(지점 미관측) 67번
+      소속 확인: 게시 전 24번, 게시 후 204번; 소속 미확인: 게시 전 0번, 게시 후 67번
+      소속 미확인 발생의 인자 값 분포(참고, 필터에 쓰지 않음): {'0x110004': 28, '0x110003': 39}
+      소속 확인 발생의 인자 값 분포(참고): 게시 전 {'0': 24}, 게시 후 {'0x110003': 204}
+   [정적 행위자 대응] 채택(가정): CFE_ES_CreateObjects가 만든 순서의 순위와 행의 반복 번호의 순위를 맞춤. 점검 하나 통과: 작성자 CFE_SB_TaskMain <-> w의 행위자 CFE_SB
+      CFE_ES <-> CFE_ES_TaskMain, CFE_EVS <-> CFE_EVS_TaskMain, CFE_SB <-> CFE_SB_TaskMain, CFE_TBL <-> CFE_TBL_TaskMain, CFE_TIME <-> CFE_TIME_TaskMain
+   소비자별 조항 B (게시자 CFE_SB 제외, 소비자 26개).  열: 소비자 | 게시 전 소속/미확인 | 게시 후 소속/대응/미확인 | 1 | 2 | 3 | 4 | 5 | 판정
+   core-cpu1        |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   tid15861         |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   tid15863         |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   CFE_ES           |  20/0   |   0/  0/0   | 미완성 | 성립 | 자료 없음 | 미검사 | 성립 | 미확정
+   ES_BG_TASK       |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   CFE_EVS          |   4/0   |   0/  0/0   | 미완성 | 성립 | 자료 없음 | 미검사 | 성립 | 미확정
+   CFE_TBL          |   0/0   |   4/  0/0   | 미완성 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   CFE_TIME         |   0/0   |   8/  0/0   | 미완성 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   TIME_TONE_TASK   |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   TIME_ONEHZ_TASK  |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   SCH_LAB          |   0/0   |   2/  0/1   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   CI_LAB           |   0/0   |   5/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   TO_LAB           |   0/0   | 102/  0/38  | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   SAMPLE_APP       |   0/0   |   4/  0/1   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   LC               |   0/0   |   8/  0/2   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   CF               |   0/0   |   9/  0/1   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   DS               |   0/0   |  19/  0/2   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   FM               |   0/0   |   3/  0/1   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   HK               |   0/0   |   9/  0/2   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   HS               |   0/0   |   6/  0/4   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   MM               |   0/0   |   3/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   SC               |   0/0   |   4/  0/5   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   MD               |   0/0   |   4/  0/4   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   CS               |   0/0   |   4/  0/4   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   SBN              |   0/0   |   5/  0/2   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   FM_CHILD_TASK    |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   게시 전에 관계 소속 발생이 있는 소비자의 항목별 근거:
+   - CFE_ES  판정 미확정
+       항목 1: 미완성 -- 정적 행위자 CFE_ES_TaskMain: 행의 등급은 "undecidable: fixed unconfirmed (creation order + await; the await rests on the L1 premise only)"(작성자보다 먼저 만들어짐 + 대기, 증명 아님)
+       항목 2: 성립 -- 게시 전 관계 소속 발생 20번, fail 20번, fail 아님 0번, 상태 값 ['0xc2000003']
+       항목 3: 자료 없음 -- 게시 후 대응 사용 0번: 같은 소비자가 게시 전에 쓴 지점에서의 게시 후 발생이 없음 (게시 후 이 소비자의 관계 소속 발생 0번, 지점 미관측 발생 0번)
+       항목 4: 미검사 -- 행위자의 초기화 구간의 끝이 기록에 없음; 인스턴스 키의 바깥 호출 지점과 문자열 키도 기록에 없음. 참고(판정 아님): fail 발생 20번 가운데 같은 행위자·같은 지점의 fail 아닌 재출현이 기록 전체에 없는 것 20번
+       항목 5: 성립 -- 표시 J: 쓴 지점의 결과 처리가 모두 discarded(행), 기록의 부재 결과가 fail 등급
+       게시 전 지점별: {'cfe_sb_api.c:275': 1, 'cfe_sb_api.c:1183': 2, 'cfe_sb_priv.c:786': 17}; 인자 값: {'0': 20} (필드의 초기값 0)
+       참고(판정에 쓰지 않음): 다른 행위자의 게시 후 관계 소속 발생 가운데 fail 아닌 것 204번
+   - CFE_EVS  판정 미확정
+       항목 1: 미완성 -- 정적 행위자 CFE_EVS_TaskMain: 행의 등급은 "undecidable: fixed unconfirmed (creation order + await; the await rests on the L1 premise only)"(작성자보다 먼저 만들어짐 + 대기, 증명 아님)
+       항목 2: 성립 -- 게시 전 관계 소속 발생 4번, fail 4번, fail 아님 0번, 상태 값 ['0xc2000003']
+       항목 3: 자료 없음 -- 게시 후 대응 사용 0번: 같은 소비자가 게시 전에 쓴 지점에서의 게시 후 발생이 없음 (게시 후 이 소비자의 관계 소속 발생 0번, 지점 미관측 발생 0번)
+       항목 4: 미검사 -- 행위자의 초기화 구간의 끝이 기록에 없음; 인스턴스 키의 바깥 호출 지점과 문자열 키도 기록에 없음. 참고(판정 아님): fail 발생 4번 가운데 같은 행위자·같은 지점의 fail 아닌 재출현이 기록 전체에 없는 것 4번
+       항목 5: 성립 -- 표시 J: 쓴 지점의 결과 처리가 모두 discarded(행), 기록의 부재 결과가 fail 등급
+       게시 전 지점별: {'cfe_sb_api.c:275': 1, 'cfe_sb_api.c:1183': 2, 'cfe_sb_priv.c:786': 1}; 인자 값: {'0': 4} (필드의 초기값 0)
+       참고(판정에 쓰지 않음): 다른 행위자의 게시 후 관계 소속 발생 가운데 fail 아닌 것 204번
+   게시자 CFE_SB 자신의 발생(소비자 아님): 게시 전 0번, 게시 후 5번(소속 확인 5번)
+   요약: 조항 B 충족 0, 미확정 2, 미충족 24 (소비자 수).  충족 0이면 이 기록으로는 FIXED-ORDER 판정이 서지 않는다.
+   미충족 가운데 "게시 전에 이 callee를 부른 발생이 0번"인 소비자 24개(조항 B의 대상이 되지 않음)
+== 기록 GI
+   입력 /home/user/work/w6/replay/r2/gi/cur.txt sha256 6452b89639f4f198c3ff89a95cdcf431084dd2c20c04b04d5238c7ee1225a071
+   입력 /home/user/work/w6/replay/r2/intervals/gi/occ.tsv sha256 c5f2e4a35329140968b4b61a19437697270fb61e92e4356b46848567bf98c0d4
+   입력 /home/user/work/w6/replay/r2/intervals/gi/neutral.dump sha256 9b5ac20a6812a46d9a3f9a865d7778d6345612059e93118738d44eaa1c820149
+   [필터 F2] 행의 지점 39곳 가운데 기록에 지점별 관측이 있는 것 3곳: cfe_sb_api.c:275 in CFE_SB_CreatePipe (기록 지점 "CFE_EVS_SendEventWithAppID.id_valid@sb_api_275"), cfe_sb_api.c:1183 in CFE_SB_SubscribeFull (기록 지점 "CFE_EVS_SendEventWithAppID.id_valid@sb_api_1183"), cfe_sb_priv.c:786 in CFE_SB_MessageTxn_ReportSingleEvent (기록 지점 "CFE_EVS_SendEventWithAppID.id_valid@sb_priv_786")
+   [필터 F4] 게시 w = 기록 사건 127, 행위자 a5, 기록 지점 ['sb.appid.store', 'sb_publication']
+   [미확인] 행을 낸 빌드의 소스와 이 기록의 실행 파일이 같은 판인지는 대조하지 않았다. 확인한 것은 F2의 일치(파일, 줄, 함수)뿐이다.
+   [필터 F3] CFE_EVS_SendEventWithAppID 호출 발생 276번: 관계 소속 확인 209번, 소속 미확인(지점 미관측) 67번
+      소속 확인: 게시 전 24번, 게시 후 185번; 소속 미확인: 게시 전 0번, 게시 후 67번
+      소속 미확인 발생의 인자 값 분포(참고, 필터에 쓰지 않음): {'0x110004': 28, '0x110003': 39}
+      소속 확인 발생의 인자 값 분포(참고): 게시 전 {'0': 24}, 게시 후 {'0x110003': 185}
+   [정적 행위자 대응] 채택(가정): CFE_ES_CreateObjects가 만든 순서의 순위와 행의 반복 번호의 순위를 맞춤. 점검 하나 통과: 작성자 CFE_SB_TaskMain <-> w의 행위자 a5
+      a2 <-> CFE_ES_TaskMain, a4 <-> CFE_EVS_TaskMain, a5 <-> CFE_SB_TaskMain, a6 <-> CFE_TBL_TaskMain, a7 <-> CFE_TIME_TaskMain
+   소비자별 조항 B (게시자 a5 제외, 소비자 24개).  열: 소비자 | 게시 전 소속/미확인 | 게시 후 소속/대응/미확인 | 1 | 2 | 3 | 4 | 5 | 판정
+   a1               |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a2               |  20/0   |   0/  0/0   | 미완성 | 성립 | 자료 없음 | 미검사 | 성립 | 미확정
+   a3               |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a4               |   4/0   |   0/  0/0   | 미완성 | 성립 | 자료 없음 | 미검사 | 성립 | 미확정
+   a6               |   0/0   |   4/  0/0   | 미완성 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a7               |   0/0   |   8/  0/0   | 미완성 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a8               |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a9               |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a10              |   0/0   |   2/  0/1   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a11              |   0/0   |   5/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a12              |   0/0   |  73/  0/38  | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a13              |   0/0   |   4/  0/1   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a14              |   0/0   |   8/  0/2   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a15              |   0/0   |   9/  0/1   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a16              |   0/0   |  20/  0/2   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a17              |   0/0   |   4/  0/2   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a18              |   0/0   |  10/  0/1   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a19              |   0/0   |   7/  0/4   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a20              |   0/0   |   4/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a21              |   0/0   |   5/  0/5   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a22              |   0/0   |   6/  0/4   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a23              |   0/0   |   5/  0/4   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a24              |   0/0   |   6/  0/2   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   a25              |   0/0   |   0/  0/0   | 자료 없음 | 불성립 | 자료 없음 | 자료 없음 | 자료 없음 | 미충족
+   게시 전에 관계 소속 발생이 있는 소비자의 항목별 근거:
+   - a2  판정 미확정
+       항목 1: 미완성 -- 정적 행위자 CFE_ES_TaskMain: 행의 등급은 "undecidable: fixed unconfirmed (creation order + await; the await rests on the L1 premise only)"(작성자보다 먼저 만들어짐 + 대기, 증명 아님)
+       항목 2: 성립 -- 게시 전 관계 소속 발생 20번, fail 20번, fail 아님 0번, 상태 값 ['0xc2000003']
+       항목 3: 자료 없음 -- 게시 후 대응 사용 0번: 같은 소비자가 게시 전에 쓴 지점에서의 게시 후 발생이 없음 (게시 후 이 소비자의 관계 소속 발생 0번, 지점 미관측 발생 0번)
+       항목 4: 미검사 -- 행위자의 초기화 구간의 끝이 기록에 없음; 인스턴스 키의 바깥 호출 지점과 문자열 키도 기록에 없음. 참고(판정 아님): fail 발생 20번 가운데 같은 행위자·같은 지점의 fail 아닌 재출현이 기록 전체에 없는 것 20번
+       항목 5: 성립 -- 표시 J: 쓴 지점의 결과 처리가 모두 discarded(행), 기록의 부재 결과가 fail 등급
+       게시 전 지점별: {'cfe_sb_api.c:275': 1, 'cfe_sb_api.c:1183': 2, 'cfe_sb_priv.c:786': 17}; 인자 값: {'0': 20} (필드의 초기값 0)
+       참고(판정에 쓰지 않음): 다른 행위자의 게시 후 관계 소속 발생 가운데 fail 아닌 것 185번
+   - a4  판정 미확정
+       항목 1: 미완성 -- 정적 행위자 CFE_EVS_TaskMain: 행의 등급은 "undecidable: fixed unconfirmed (creation order + await; the await rests on the L1 premise only)"(작성자보다 먼저 만들어짐 + 대기, 증명 아님)
+       항목 2: 성립 -- 게시 전 관계 소속 발생 4번, fail 4번, fail 아님 0번, 상태 값 ['0xc2000003']
+       항목 3: 자료 없음 -- 게시 후 대응 사용 0번: 같은 소비자가 게시 전에 쓴 지점에서의 게시 후 발생이 없음 (게시 후 이 소비자의 관계 소속 발생 0번, 지점 미관측 발생 0번)
+       항목 4: 미검사 -- 행위자의 초기화 구간의 끝이 기록에 없음; 인스턴스 키의 바깥 호출 지점과 문자열 키도 기록에 없음. 참고(판정 아님): fail 발생 4번 가운데 같은 행위자·같은 지점의 fail 아닌 재출현이 기록 전체에 없는 것 4번
+       항목 5: 성립 -- 표시 J: 쓴 지점의 결과 처리가 모두 discarded(행), 기록의 부재 결과가 fail 등급
+       게시 전 지점별: {'cfe_sb_api.c:275': 1, 'cfe_sb_api.c:1183': 2, 'cfe_sb_priv.c:786': 1}; 인자 값: {'0': 4} (필드의 초기값 0)
+       참고(판정에 쓰지 않음): 다른 행위자의 게시 후 관계 소속 발생 가운데 fail 아닌 것 185번
+   게시자 a5 자신의 발생(소비자 아님): 게시 전 0번, 게시 후 5번(소속 확인 5번)
+   요약: 조항 B 충족 0, 미확정 2, 미충족 22 (소비자 수).  충족 0이면 이 기록으로는 FIXED-ORDER 판정이 서지 않는다.
+   미충족 가운데 "게시 전에 이 callee를 부른 발생이 0번"인 소비자 22개(조항 B의 대상이 되지 않음)
+== 기록 사이
+   항목 2의 "모든 기준 부팅"은 기록마다 따로 평가했다. 기록 사이에서 같은 소비자를 맞추는 일은 하지 않았다(미검사):
+   행위자 이름이 기록마다 다르고, 소유 앱 ID는 같은 앱의 주 작업과 자식 작업을 가르지 못한다.
+   F0: 게시 전 관계 소속 발생이 있는 소비자 [('CFE_ES', 20, '미확정'), ('CFE_EVS', 4, '미확정')]
+   GI: 게시 전 관계 소속 발생이 있는 소비자 [('a2', 20, '미확정'), ('a4', 4, '미확정')]

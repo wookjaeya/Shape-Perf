@@ -1,0 +1,179 @@
+row	source_line	path	label	label_class	order_class	reach	flip	result	counterpart	sites	element	disposition	disposition_name	observe	reason
+A1	31	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A2	41	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A3	51	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A4	61	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A5	71	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A6	81	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A7	91	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A8	101	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A9	111	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A10	121	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A11	131	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A12	141	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A13	151	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A14	161	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A15	171	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_ES_AppStartParams_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A16	191	A	T?	effect-undetermined	RELOC	CALLEE-ONLY	static-undetermined	tested	2	1	CFE_ES_CDS_RegRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+A17	204	A	T?	effect-undetermined	RELOC	CALLEE-ONLY	static-undetermined	tested	2	1	CFE_ES_CDS_RegRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+A18	311	A	E	absence-undetermined	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_SB_PipeD_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+A19	322	A	E	absence-undetermined	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_SB_PipeD_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+A20	355	A	0	decided	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A21	366	A	0	decided	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A22	377	A	0	decided	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A23	388	A	0	decided	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A24	399	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A25	410	A	0	decided	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A26	421	A	0	decided	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A27	432	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A28	444	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A29	455	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A30	466	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A31	478	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A32	489	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A33	500	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A34	511	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A35	522	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A36	533	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A37	544	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A38	555	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A39	566	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A40	577	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A41	588	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A42	599	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A43	611	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A44	623	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A45	635	A	0	decided	NOPAIR	NO-FAILCONST	none	tested	0	1	CFE_SB_PipeD_t.PipeId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+A46	668	A	J	decided	NOPAIR	CALLEE-ONLY	none	discarded	0	1	CFE_TBL_AccessDescriptor_t.AppId	D06	표시 확정·상대 없음	no	표시 J이나 다른 행위자의 생성자가 행에 없음
+A47	679	A	J	decided	NOPAIR	CALLEE-ONLY	none	discarded	0	1	CFE_TBL_AccessDescriptor_t.AppId	D06	표시 확정·상대 없음	no	표시 J이나 다른 행위자의 생성자가 행에 없음
+A48	739	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_CmdHandlerTblRec_t.CmdCode	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A49	759	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_CmdHandlerTblRec_t.MsgId	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A50	779	A	E	absence-undetermined	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_TBL_CritRegRec_t.CDSHandle	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+A51	789	A	E	absence-undetermined	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_TBL_CritRegRec_t.CDSHandle	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+A52	799	A	E	absence-undetermined	NOPAIR	NO-FAILCONST	none	discarded	0	1	CFE_TBL_CritRegRec_t.CDSHandle	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+A53	829	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_RegistryRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A54	839	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_RegistryRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A55	849	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_RegistryRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A56	859	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_RegistryRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A57	869	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_RegistryRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A58	879	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_RegistryRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A59	889	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_RegistryRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A60	899	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	CFE_TBL_RegistryRec_t.Name	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A61	1056	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	OS_FDTableEntry.Path	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A62	1068	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	OS_FDTableEntry.Path	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+A63	1080	A	J	decided	NOPAIR	CALLEE-ONLY	none	discarded	0	1	OS_FDTableEntry.Path	D06	표시 확정·상대 없음	no	표시 J이나 다른 행위자의 생성자가 행에 없음
+A64	1092	A	J	decided	NOPAIR	CALLEE-ONLY	none	discarded	0	1	OS_FDTableEntry.Path	D06	표시 확정·상대 없음	no	표시 J이나 다른 행위자의 생성자가 행에 없음
+A65	1104	A	J	decided	NOPAIR	CALLEE-ONLY	none	discarded	0	1	OS_FDTableEntry.Path	D06	표시 확정·상대 없음	no	표시 J이나 다른 행위자의 생성자가 행에 없음
+A66	1144	A	T?	effect-undetermined	NOPAIR	CALLEE-ONLY	none	tested	0	1	OS_VolumeInfo_t.DeviceName	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 NOPAIR
+B1	1385	B	E	absence-undetermined	RELOC	NO-CHECK	none	d13/u0/t0	1	13	CFE_ES_AppStartParams_t.Name	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B2	1410	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_ES_AppState_t.AppControlRequest	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B3	1427	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_ES_ERLog_t.Context	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B4	1442	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_ES_Global_t.SharedDataMutex	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B5	1457	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_ES_Global_t.SharedDataMutex	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B6	1473	B	J	decided	RELOC	UNEVALUATED	static-undetermined	d3/u0/t0	1	3	CFE_ES_Global_t.StartupSyncSemaphore	D07	지향 실행 후보(재배치 후보)	yes	표시 J, 상대 있음, 정적 순서 없음; 도달 표시 UNEVALUATED
+B7	1491	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_ES_Global_t.StartupSyncSemaphore	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B8	1509	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u0/t1	1	1	CFE_ES_PerfLogDump_t.DataFileDescriptor	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B9	1523	B	J	decided	RELOC	UNEVALUATED	static-undetermined	d5/u0/t0	1	5	CFE_ES_PerfLogDump_t.DataFileDescriptor	D07	지향 실행 후보(재배치 후보)	yes	표시 J, 상대 있음, 정적 순서 없음; 도달 표시 UNEVALUATED
+B10	1544	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t2	1	2	CFE_ES_PerfLogDump_t.DataFileDescriptor	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B11	1561	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_ES_PerfMetaData_t.DataCount	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B12	1579	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_ES_PerfMetaData_t.DataCount	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B13	1597	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_ES_PerfMetaData_t.FilterMask	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B14	1611	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_ES_PerfMetaData_t.TriggerMask	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B15	1625	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_ES_ResetData_t.ERLog	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B16	1642	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_ES_ResetData_t.SystemLog	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B17	1657	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_ES_ResetData_t.SystemLog	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B18	1675	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u0/t1	1	1	CFE_EVS_GlobalData_t.EVS_AppID	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B19	1688	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_EVS_GlobalData_t.EVS_AppID	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B20	1701	B	J	decided	RELOC	UNEVALUATED	static-undetermined	d4/u0/t0	1	4	CFE_EVS_GlobalData_t.EVS_SharedDataMutexID	D07	지향 실행 후보(재배치 후보)	yes	표시 J, 상대 있음, 정적 순서 없음; 도달 표시 UNEVALUATED
+B21	1719	B	J	decided	RELOC	UNEVALUATED	static-undetermined	d4/u0/t0	1	4	CFE_EVS_GlobalData_t.EVS_SharedDataMutexID	D07	지향 실행 후보(재배치 후보)	yes	표시 J, 상대 있음, 정적 순서 없음; 도달 표시 UNEVALUATED
+B22	1738	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_EVS_Log_t.LogCount	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B23	1755	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_EVS_Log_t.LogCount	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B24	1771	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_EVS_Log_t.LogEntry	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B25	1786	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_EVS_Log_t.LogFullFlag	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B26	1803	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_EVS_Log_t.LogMode	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B27	1821	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_EVS_Log_t.LogOverflowCounter	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B28	1839	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_EVS_Log_t.Next	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B29	1857	B	0	decided	RELOC	NO-FAILCONST	static-undetermined	d0/u0/t1	1	1	CFE_SB_BufferD_t.MsgId	D05	실패 표시 없음	no	fail 등급의 부재 상수가 없음
+B30	1873	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_SB_MemParams_t.Partition	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B31	1891	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_SB_MemParams_t.Partition	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B32	1904	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t5	1	5	CFE_SB_MemParams_t.PoolHdl	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B33	1927	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_SB_MemParams_t.PoolHdl	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B34	1943	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t6	1	6	CFE_SB_MemParams_t.PoolHdl	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B35	1966	B	J	decided	RELOC	UNEVALUATED	static-undetermined	d1/u0/t0	1	1	CFE_SB_PipeD_t.AppId	D07	지향 실행 후보(재배치 후보)	yes	표시 J, 상대 있음, 정적 순서 없음; 도달 표시 UNEVALUATED
+B36	1983	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u1/t0	1	1	CFE_SB_PipeD_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B37	1997	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_SB_PipeD_t.PipeId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B38	2013	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_SB_PipeD_t.PipeId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B39	2029	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u0/t1	1	1	CFE_SB_PipeD_t.PipeId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B40	2045	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u1/t0	1	1	CFE_SB_PipeD_t.PipeId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B41	2061	B	J	decided	RELOC	UNEVALUATED	static-undetermined	d1/u0/t0	1	1	CFE_SB_PipeD_t.SysQueueId	D07	지향 실행 후보(재배치 후보)	yes	표시 J, 상대 있음, 정적 순서 없음; 도달 표시 UNEVALUATED
+B42	2080	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_SB_PipeD_t.SysQueueId	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B43	2102	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_SB_PipeD_t.ToTrashBuff	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B44	2120	B	E	absence-undetermined	RELOC	NO-CHECK	none	d3/u0/t0	1	3	CFE_SB_RouteEntry_t.MsgId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B45	2138	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_SB_RouteEntry_t.MsgId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B46	2154	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_SB_RouteEntry_t.SeqCnt	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B47	2169	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_TBL_LoadBuff_t.BufferPtr	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B48	2199	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_TBL_LoadBuff_t.DataSource	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B49	2218	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_TBL_LoadBuff_t.DataSource	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B50	2236	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_TBL_LoadBuff_t.DataSource	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B51	2254	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u0/t1	1	1	CFE_TBL_LoadBuff_t.DataSource	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B52	2272	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_TBL_LoadBuff_t.DataSource	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B53	2300	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	CFE_TBL_RegistryRec_t.LastFileLoaded	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B54	2317	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_TBL_RegistryRec_t.Name	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B55	2333	B	E	absence-undetermined	RELOC	NO-CHECK	none	d4/u0/t0	1	4	CFE_TBL_RegistryRec_t.Name	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B56	2351	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_TBL_RegistryRec_t.Name	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B57	2367	B	E	absence-undetermined	RELOC	NO-CHECK	none	d2/u0/t0	1	2	CFE_TBL_TaskData_t.TableTaskAppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B58	2380	B	J	decided	RELOC	UNEVALUATED	static-undetermined	d1/u0/t0	1	1	CFE_TIME_TaskData_t.LocalSemaphore	D07	지향 실행 후보(재배치 후보)	yes	표시 J, 상대 있음, 정적 순서 없음; 도달 표시 UNEVALUATED
+B59	2396	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_TIME_TaskData_t.LocalSemaphore	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B60	2414	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u1/t2	1	3	CFE_TIME_TaskData_t.MaxLocalClock	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B61	2430	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u1/t0	1	1	CFE_TIME_TaskData_t.OneHzAdjust	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B62	2445	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u1/t0	1	1	CFE_TIME_TaskData_t.OneHzAdjust	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B63	2460	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	CFE_TIME_TaskData_t.ToneSemaphore	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B64	2478	B	J	decided	RELOC	UNEVALUATED	static-undetermined	d36/u0/t0	1	36	cfe_sb_t.AppId	D07	지향 실행 후보(재배치 후보)	yes	표시 J, 상대 있음, 정적 순서 없음; 도달 표시 UNEVALUATED
+B65	2529	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	cfe_sb_t.CmdPipe	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B66	2544	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u0/t2	1	2	cfe_sb_t.CmdPipe	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B67	2558	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	cfe_sb_t.CmdPipePktPtr	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B68	2571	B	E	absence-undetermined	RELOC	NO-CHECK	none	d1/u0/t0	1	1	cfe_sb_t.CmdPipePktPtr	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B69	2584	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u1/t1	1	2	cfe_sb_t.CmdPipePktPtr	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B70	2598	B	E	absence-undetermined	RELOC	NO-CHECK	none	d0/u1/t1	1	2	cfe_sb_t.CmdPipePktPtr	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+B71	2612	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	cfe_sb_t.EventFilters	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B72	2626	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	cfe_sb_t.SharedDataMutexId	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+B73	2643	B	T?	effect-undetermined	RELOC	UNEVALUATED	static-undetermined	d0/u0/t1	1	1	cfe_sb_t.SharedDataMutexId	D11	처리 효과 미확정(T?)	yes	상태가 검사되나 부재 분기의 효과가 행에 없음; 순서 등급 RELOC
+C1	2662	C	E	absence-undetermined	ENF	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D01	순서 강제(행의 증명)	no	feasibility: proven-impossible
+C2	2673	C	E	absence-undetermined	ENF	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D01	순서 강제(행의 증명)	no	feasibility: proven-impossible
+C3	2683	C	E	absence-undetermined	NOPAIR	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+C4	2694	C	E	absence-undetermined	NOPAIR	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+C5	2705	C	E	absence-undetermined	NOPAIR	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+C6	2716	C	E	absence-undetermined	NOPAIR	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+C7	2727	C	E	absence-undetermined	ENF	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D01	순서 강제(행의 증명)	no	feasibility: proven-impossible
+C8	2738	C	E	absence-undetermined	COND	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D03	조건부 순서 후보	yes	순서가 확인되지 않은 전제에 기댐: undecidable: the read lies on a failure path of a lock acqui; 표시 E
+C9	2749	C	E	absence-undetermined	COND	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D03	조건부 순서 후보	yes	순서가 확인되지 않은 전제에 기댐: undecidable: the read lies on a failure path of a lock acqui; 표시 E
+C10	2760	C	F	effect-undetermined	ENF	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D01	순서 강제(행의 증명)	no	feasibility: proven-impossible
+C11	2771	C	E	absence-undetermined	ENF	UNEVALUATED	static-undetermined	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D01	순서 강제(행의 증명)	no	feasibility: proven-impossible
+C12	2781	C	F	effect-undetermined	NOPAIR	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 NOPAIR
+C13	2792	C	F	effect-undetermined	NOPAIR	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 NOPAIR
+C14	2803	C	F	effect-undetermined	NOPAIR	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 NOPAIR
+C15	2814	C	F	effect-undetermined	NOPAIR	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 NOPAIR
+C16	2825	C	F	effect-undetermined	ENF	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D01	순서 강제(행의 증명)	no	feasibility: proven-impossible
+C17	2836	C	F	effect-undetermined	COND	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D03	조건부 순서 후보	yes	순서가 확인되지 않은 전제에 기댐: undecidable: the read lies on a failure path of a lock acqui; 표시 F
+C18	2847	C	F	effect-undetermined	COND	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D03	조건부 순서 후보	yes	순서가 확인되지 않은 전제에 기댐: undecidable: the read lies on a failure path of a lock acqui; 표시 F
+C19	2858	C	E	absence-undetermined	RELOC	UNEVALUATED	static-undetermined	(not in row)	1	1	CFE_ES_AppRecord_t.RecordUsed	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+C20	2868	C	E	absence-undetermined	RELOC	UNEVALUATED	static-undetermined	(not in row)	1	1	CFE_ES_AppRecord_t.RecordUsed	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+C21	2878	C	E	absence-undetermined	RELOC	INDEPENDENT	none	(not in row)	1	1	CFE_ES_Global_t.AppStartupCounter	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+C22	2888	C	E	absence-undetermined	RELOC	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+C23	2899	C	E	absence-undetermined	RELOC	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+C24	2909	C	E	absence-undetermined	RELOC	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+C25	2920	C	E	absence-undetermined	RELOC	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+C26	2931	C	E	absence-undetermined	NOPAIR	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+C27	2942	C	E	absence-undetermined	NOPAIR	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+C28	2953	C	E	absence-undetermined	NOPAIR	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 NOPAIR
+C29	2964	C	E	absence-undetermined	COND	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D03	조건부 순서 후보	yes	순서가 확인되지 않은 전제에 기댐: undecidable: the read lies on a failure path of a lock acqui; 표시 E
+C30	2975	C	E	absence-undetermined	COND	INDEPENDENT	none	(not in row)	1	1	CFE_ES_TaskRecord_t.AppId	D03	조건부 순서 후보	yes	순서가 확인되지 않은 전제에 기댐: undecidable: the read lies on a failure path of a lock acqui; 표시 E
+C31	2986	C	F	effect-undetermined	RELOC	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 RELOC
+C32	2997	C	E	absence-undetermined	RELOC	UNEVALUATED	static-undetermined	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D12	부재 결과 미확정(E)	yes	행이 부재 결과를 주지 않음; 순서 등급 RELOC
+C33	3007	C	F	effect-undetermined	RELOC	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 RELOC
+C34	3018	C	F	effect-undetermined	RELOC	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 RELOC
+C35	3029	C	F	effect-undetermined	NOPAIR	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 NOPAIR
+C36	3040	C	F	effect-undetermined	NOPAIR	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 NOPAIR
+C37	3051	C	F	effect-undetermined	NOPAIR	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D10	부재 결과 있음·처리 효과 미확정(F)	yes	부재 상수는 fail(earlier value)이나 호출자의 처리가 행에 없음; 순서 등급 NOPAIR
+C38	3062	C	F	effect-undetermined	COND	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D03	조건부 순서 후보	yes	순서가 확인되지 않은 전제에 기댐: undecidable: the read lies on a failure path of a lock acqui; 표시 F
+C39	3073	C	F	effect-undetermined	COND	REACH-STATED	static-possible	(not in row)	1	1	CFE_ES_TaskRecord_t.RecordUsed	D03	조건부 순서 후보	yes	순서가 확인되지 않은 전제에 기댐: undecidable: the read lies on a failure path of a lock acqui; 표시 F

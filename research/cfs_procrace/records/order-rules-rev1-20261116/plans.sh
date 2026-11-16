@@ -6,7 +6,7 @@ set -uo pipefail
 KS=/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static
 T=/home/user/work/redesign/step2a/tests_8c_fix
 F=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_api_roles.txt
-O=/home/user/work/redesign/obs1/order_rev1_plans
+O=${O:-/home/user/work/redesign/obs1/order_rev1_plans}
 REASON="the record pool is fixed (KZ_RT_POOL_BYTES = KZ_RT_MAX_ACTORS x 65536, kairos/runtime/include/kz_rt.h:61-64) and no event volume of a generated plan is measured yet: the priority tier is planned whole, the next tier is not"
 DISCLOSURE="the value was chosen knowing which rows the priority tier holds on these builds (plan/ovm_rev1_20261116/S1_RETALLY.md 3.1 and its probe tables); which rows are in the plan is an output of the rule, checked after the generation"
 [ -e "$O" ] && { echo "refusing: $O exists" >&2; exit 2; }

@@ -13,4 +13,23 @@ scratch check program <scratch>/sbuild/kz-static: the repository's lib/llvm/orde
 MC ctest -R '^lint' (kz_lint 5f62ec20, no build, on this tree) -> 7 of 7 passed
 free before the commit of the declaration: 3147812864 (2026-11-16T11:20:58Z)
 
-## 1. declaration, code, fixture, tests, docs and scripts committed together before the build
+## 1. declaration, code, fixture, tests, docs and scripts committed together before the build: f3ebf65 (line 1 above)
+cd MC && build_record.sh pre -> pre_mc.txt (11:24:31Z): the seven tools equal records/relrules-rev7-20261116/post_mc.txt; HEAD f3ebf65, uncommitted lines under kairos 0
+tool copy of 038cd9e3 under the space guard (df_copy.log in tool_copy/): xz -9 -T4 into /home/user/work/preserve/tools-20261116-d/kz-static.038cd9e3.xz, round trip tool_copy/ROUNDTRIP.txt (xz -t OK, stream sha256 038cd9e3, cmp SAME)
+env/tools/tools_check.sh --deep -> tools_check_pre.txt: 32 rows, 0 failing; env/tools/ledger_check.sh -> ledger_check_pre.txt: 48 rows, 0 failing
+
+## 2. first build: rebuild in place in MC under the space guard
+env/tools/space_guard.sh --need 322463680 --log df_build.log --kind kz-static -- bash -c "make -j4 all > make.log 2>&1" (11:24:3xZ-11:27:07Z) -> rc 0, first time; 14 Linking lines (libkz-llvm.a, kz-static, test_static_{recipe,expr,flow,gitrev,unroll,wrappers,link,elf32}, test_static_reasons, test_static_plan, static_golden, test_static_cli); dip 53276672
+find kairos/{lib,tools,include,cmake,CMakeLists.txt,probe,instrument,runtime} -newer <build start> -> 0 files
+post_mc.txt: kz-static b1bf545d (tool_sha256 31b0bfe7, tool_source a8e00a05, core_source f6e3c7b4 unchanged); the other six unchanged; CMakeCache.txt bc2f43b4 unchanged; flags.make list 7d2a0717 -> 7a538b6e
+ctest -j4 -> ctest_first.log: 250 tests, 1 failed as declared (static_golden_order_np, no golden yet); KZ_GOLDEN_UPDATE=1 ctest -R '^static_golden_order_np$' -> golden_update.log (453 lines, cmp equal to the scratch check program's)
+ctest -j4 -> ctest_full.log: 250 tests, 0 failed, 1 skipped (skip_reason.log); test_static_cli 908, test_static_reasons 655, test_static_plan 182, lint selftest 109 cases 0 failed; labels golden 62, static 55
+run_unit.sh -> unit_tools.txt 15 of 15; step2a_tests_unit.sh -> unit_step2a.txt 7 of 7
+rerun.sh under the guard (df_rerun.log) -> compare.sh relations -> compare_relations.txt: 15 OK (relations.txt and keys.txt byte-identical to relrev7_check, relations.log empty)
+order.sh under the guard (df_order.log, order_run.txt) -> compare.sh order -> compare_order.txt: 15 OK (two runs the same bytes, order.log empty)
+extract.sh under the guard (df_extract.log, extract_run.txt): five PASS; compare_build.py against tests_8c_fix with order_extract_allow.tsv -> compare/extract_<b>.{tsv,log}: not allowed 0 on five (facts.kz: header tool fields, STRINGS crc32, BASIS extract.units_from)
+order.sh <order_rev1_extract> order_rev1_on_extract under the guard (df_order_extract.log) -> compare.sh extract -> compare_extract.txt: 15 OK
+plans.sh under the guard (df_plans.log, plans_run.txt) -> compare.sh plans -> compare_plans.txt: five "only declared differences"
+reading the order outputs: two defects of the child-without-success rule (results 3.0a); the scratch check program had linked the archive member of the first build (order.cpp.o) instead of the changed object until rebuild.sh removed that member (fixed, re-measured)
+
+## 3. addendum before the second build: declared_addendum_before_build2.txt (results 3.0a), sha256 c356e3d31472f935e5c3719531e8af7c3a6faaf984f3630cc5c8d5160344d848, committed with the fix before the second build

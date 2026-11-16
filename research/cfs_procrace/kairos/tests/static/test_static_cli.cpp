@@ -1370,6 +1370,10 @@ startup_script {
     // child without success: the operation that returns a failure after the thread started; the primitive's result
     KZ_CHECK(has(row("C3"), "child without success: possible: start_checked returns -11 [ERR_SETUP] at order.c:"));
     KZ_CHECK(has(row("C4"), "child without success: not found"));
+    KZ_CHECK(has(row("C4"), "start_plain returns 0 [pthread_create created the thread (P0 pthread_create)]"));
+    // an operation over one that may fail after its thread started: the mapped failure is a child without success too
+    KZ_CHECK(has(row("C5"), "child without success: possible: start_mapped returns -12 [ERR_MAPPED] at order.c:"));
+    KZ_CHECK(has(row("C5"), "may report a failure after its thread started: possible)"));
     KZ_CHECK(has(o, "      create primitive: start_checked -> pthread_create\n"));
     KZ_CHECK(has(o, "      status condition: start_checked returns 0 [0]; failure class: -11 [ERR_SETUP], -5 [ERR_ILLEGAL]\n"));
     // the waits: the budget exit returns (skip) or goes on (continue); the use inside the wait gets no edge
@@ -1385,7 +1389,7 @@ startup_script {
     KZ_CHECK(has(o, "in iteration 0 (app_one)") && has(o, "in iteration 1 (app_two)"));
     // the summary counts what the text lists
     KZ_CHECK(has(o, "summary rows A 3 (fixed_early_proved 1, hard_before 1, unordered 1)\n"));
-    KZ_CHECK(has(o, "summary rows C 4 (hard_before 3, unordered 1)\n"));
+    KZ_CHECK(has(o, "summary rows C 5 (hard_before 4, unordered 1)\n"));
     // the relations text is the same with and without the order query (it does not change the relations rows)
     std::string r1;
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(f), &r1), 0);

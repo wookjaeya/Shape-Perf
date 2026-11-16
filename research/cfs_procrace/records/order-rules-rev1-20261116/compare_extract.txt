@@ -1,0 +1,15 @@
+OK c1_pre_tx order.txt on the re-extraction same apart from line 2
+OK c1_pre_tx edges.tsv on the re-extraction same
+OK c1_pre_tx relations.txt of the re-extraction same apart from line 2
+OK c1_post_tx order.txt on the re-extraction same apart from line 2
+OK c1_post_tx edges.tsv on the re-extraction same
+OK c1_post_tx relations.txt of the re-extraction same apart from line 2
+OK r2_core order.txt on the re-extraction same apart from line 2
+OK r2_core edges.tsv on the re-extraction same
+OK r2_core relations.txt of the re-extraction same apart from line 2
+OK c5_641 order.txt on the re-extraction same apart from line 2
+OK c5_641 edges.tsv on the re-extraction same
+OK c5_641 relations.txt of the re-extraction same apart from line 2
+OK c5_642 order.txt on the re-extraction same apart from line 2
+OK c5_642 edges.tsv on the re-extraction same
+OK c5_642 relations.txt of the re-extraction same apart from line 2

@@ -5,7 +5,7 @@
 set -uo pipefail
 KS=/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static
 T=/home/user/work/redesign/step2a/tests_8c_fix
-O=/home/user/work/redesign/obs1/orderrev1_relcheck
+O=${O:-/home/user/work/redesign/obs1/orderrev1_relcheck}
 [ -e "$O" ] && { echo "refusing: $O exists" >&2; exit 2; }
 mkdir -p "$O"
 rc=0

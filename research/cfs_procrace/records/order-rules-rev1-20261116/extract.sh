@@ -4,7 +4,7 @@
 # own new directory, one after the other; a failing build stops nothing else and gives rc 1.
 set -uo pipefail
 REPO=/home/user/Shape-Perf/research/cfs_procrace
-O=/home/user/work/redesign/obs1/order_rev1_extract
+O=${O:-/home/user/work/redesign/obs1/order_rev1_extract}
 [ -e "$O" ] && { echo "refusing: $O exists" >&2; exit 2; }
 mkdir -p "$O"
 rc=0

@@ -1,0 +1,7 @@
+# round trip of the copy of kz-static 038cd9e3 before the in-place build that overwrites it (2026-11-16T11:24:16Z)
+copy: /home/user/work/preserve/tools-20261116-d/kz-static.038cd9e3.xz (41217284 B)
+xz -t: OK
+sha256 of the xz file: 7a384ef2219aae9cfa1ff67f83ddbe947d666a4dc39a7ef3c29cc725183c55e1
+xz -dc | sha256sum: 038cd9e36af4d4ded9f8801346405f0ceaa38025a2d603ac35974ea48097d0ce
+in place: 038cd9e36af4d4ded9f8801346405f0ceaa38025a2d603ac35974ea48097d0ce
+xz -dc | cmp in place: SAME

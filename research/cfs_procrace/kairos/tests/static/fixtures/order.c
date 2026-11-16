@@ -11,7 +11,8 @@
  *     held_*     one lock held from one acquisition across the spawn and the write, held by the read (HB-lock: hard);
  *     window_*   the spawn outside the lock, the write under it (the lock window: unordered);
  *     wrapped_*  the spawn through an operation that returns a failure after the thread was created (child without
- *                success: possible) and one that returns the primitive's result (not found);
+ *                success: possible), one that returns the primitive's result (not found), and one over the first that
+ *                maps every inner failure to its own constant (possible, through the inner call);
  *   config       a field written before the spawn of the thread that passes it to a function checking it (relations path B:
  *                the write before the spawn, hard);
  *   gate         a flag polled with a delay by another thread (a recognised predicate, an atomic read) and then passed to
@@ -31,6 +32,7 @@ int usleep(unsigned int usec); /* POSIX.1-2001 (XSI); declared here: <unistd.h> 
 #define ERR_ILLEGAL (-5)
 #define ERR_TIMEOUT (-9)
 #define ERR_SETUP (-11)
+#define ERR_MAPPED (-12)
 
 /* ---- the name table (path A) ----------------------------------------------------------------------------- */
 typedef struct {
@@ -181,6 +183,14 @@ int start_plain(pthread_t *out, void *(*entry)(void *)) {
   return pthread_create(out, 0, entry, 0);
 }
 
+/* an operation over start_checked that maps every inner failure to its own constant: the inner call may fail after its
+ * thread started, so the mapped failure is a child without success too */
+int start_mapped(pthread_t *out, void *(*entry)(void *)) {
+  int rc = start_checked(out, entry);
+  if (rc != 0) return ERR_MAPPED;
+  return 0;
+}
+
 int wrapped_spawn(int slot) {
   int rc;
   pthread_mutex_lock(&wtask_mutex);
@@ -194,6 +204,15 @@ int plain_spawn(int slot) {
   int rc;
   pthread_mutex_lock(&wtask_mutex);
   rc = start_plain(&wtasks[slot].id, wrapped_child);
+  if (rc == 0) wtasks[slot].registered = 1;
+  pthread_mutex_unlock(&wtask_mutex);
+  return rc;
+}
+
+int mapped_spawn(int slot) {
+  int rc;
+  pthread_mutex_lock(&wtask_mutex);
+  rc = start_mapped(&wtasks[slot].id, wrapped_child);
   if (rc == 0) wtasks[slot].registered = 1;
   pthread_mutex_unlock(&wtask_mutex);
   return rc;
@@ -299,6 +318,7 @@ int main(void) {
   (void)window_spawn(1);
   (void)wrapped_spawn(2);
   (void)plain_spawn(3);
+  (void)mapped_spawn(0);
   config.level = 3;
   pthread_create(&a, 0, config_reader, 0);
   pthread_create(&b, 0, config_writer, 0);

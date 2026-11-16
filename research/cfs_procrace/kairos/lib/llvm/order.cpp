@@ -362,6 +362,10 @@ class Ord : public RelFacts {
                 any = true;
                 for (const auto& kv : consts_of(g, seen, open)) out.emplace(kv.first, kv.second);
               }
+          if (!any && is_p0(callee, KZ_P0_KIND_THREAD_CREATE)) {
+            out.emplace(0, callee + " created the thread (P0 " + callee + ")");  // the primitive's success value
+            continue;
+          }
           if (!any && open != nullptr) open->push_back(fname(fn) + " returns the result of " + callee + " (no body in these facts)");
           continue;
         }
@@ -420,16 +424,28 @@ class Ord : public RelFacts {
     const uint32_t g = c.callee_fn;
     *chain = fname(g);
     if (!seen->insert(g).second) return "unknown: the spawn operations call each other";
-    std::vector<uint32_t> inner;
+    // the inner spawn calls: the calls of g flagged spawn-op, and the spawn call of every SPAWN_WRAP row of g (an operation
+    // the profile-free run does not keep as vocabulary, such as one with a fixed entry, has rows but no flag)
+    std::set<uint32_t> inner_set;
     auto cit = calls_of_.find(g);
     if (cit != calls_of_.end())
       for (uint32_t x : cit->second)
-        if (calls_[x].flags & KZ_CALL_FLAG_SPAWN_OP) inner.push_back(x);
+        if (calls_[x].flags & KZ_CALL_FLAG_SPAWN_OP) inner_set.insert(x);
+    for (const kz_fact_spawnw& w : spawnw_) {
+      if (w.fn != g || w.kind == KZ_SPAWNW_KIND_SCRIPT_ENTRY) continue;
+      auto sit = call_by_site_.find(w.site);
+      if (sit != call_by_site_.end() && calls_[sit->second].caller_fn == g) inner_set.insert(sit->second);
+    }
+    const std::vector<uint32_t> inner(inner_set.begin(), inner_set.end());
     if (inner.empty()) return "unknown: " + fname(g) + " makes no spawn call in its body";
     std::vector<std::string> possible, unknown, inner_text;
     for (uint32_t x : inner) {
       std::string sub_chain;
       const std::string sub = child_without_success(x, seen, &sub_chain);
+      // a return under the inner call's failure is a child without success unless the inner call creates no thread when
+      // it fails (its own flag is "not found")
+      const bool inner_clean = sub.compare(0, 9, "not found") == 0;
+      const std::string via = inner_clean ? std::string() : " (the inner call " + call_pos(x) + " may report a failure after its thread started: " + sub.substr(0, sub.find(':')) + ")";
       if (inner_text.empty()) *chain = fname(g) + " -> " + sub_chain;
       std::string stext;
       const std::map<int64_t, std::string> succ = success_of(x, &stext);
@@ -449,12 +465,12 @@ class Ord : public RelFacts {
         }
         const bool later = after(str(r.file), r.line, r.col, xc) || (r.loop != kN && r.loop == xc.loop);
         if (!later) continue;
-        if (succ.size() == 1 && r.cond_root != kN) {
+        if (inner_clean && succ.size() == 1 && r.cond_root != kN) {
           std::map<std::string, int64_t> calls{{inner_name, succ.begin()->first}};
           if (eval(r.cond_root, {}, calls) == 0) continue;  // runs only when the inner call failed
         }
         if (r.vkind == KZ_RET_VALUE_CONST) {
-          if (fail_class(r.value)) possible.push_back(fname(g) + " returns " + std::to_string(r.value) + " [" + str(r.text) + "] at " + at + " after " + call_pos(x));
+          if (fail_class(r.value)) possible.push_back(fname(g) + " returns " + std::to_string(r.value) + " [" + str(r.text) + "] at " + at + " after " + call_pos(x) + via);
           continue;
         }
         if (r.vkind == KZ_RET_VALUE_CALL && r.value_root < exprs_.size() && exprs_[r.value_root].op == KZ_EXPR_OP_CALL_RESULT) {
@@ -466,7 +482,7 @@ class Ord : public RelFacts {
             for (uint32_t h : fit->second)
               for (const auto& kv : consts_of(h, &s2, &o2))
                 if (fail_class(kv.first)) fails = true;
-          if (fails) possible.push_back(fname(g) + " returns the result of " + str(exprs_[r.value_root].name) + " at " + at + " after " + call_pos(x) + " (it may return a failure-class constant)");
+          if (fails) possible.push_back(fname(g) + " returns the result of " + str(exprs_[r.value_root].name) + " at " + at + " after " + call_pos(x) + " (it may return a failure-class constant)" + via);
           else if (!o2.empty() || fit == fn_by_name_.end()) unknown.push_back(fname(g) + " returns the result of " + str(exprs_[r.value_root].name) + " at " + at + " (not followed)");
           continue;
         }

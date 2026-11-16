@@ -11,6 +11,7 @@ int cmd_extract(int argc, char** argv);
 int cmd_show(int argc, char** argv);
 int cmd_reach(int argc, char** argv);
 int cmd_relations(int argc, char** argv);
+int cmd_order(int argc, char** argv);
 int cmd_plan(int argc, char** argv);
 
 }  // namespace kzs_cli

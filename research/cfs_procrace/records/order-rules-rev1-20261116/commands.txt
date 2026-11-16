@@ -1,0 +1,16 @@
+# declaration: sha256 of declared_before_build.txt (= the lines of section 3 of plan/full_stage_results_20261116.md up to the end of 3.0, before the build) = e9ff1db29593caf730ef2353abd5b23878c28259566d2a263fba8be1168f2d69 (2026-11-16T11:20:58Z; committed before the build)
+# order-rules-rev1-20261116: commands, rc and free space (df -B1 /, bytes available)
+# <scratch> is this session's scratchpad directory (m8/)
+start: free 3627954176 at the end of the step before (relations rules revision 7)
+
+## 0. before the declaration (no tool of MC changed)
+scratch check program <scratch>/sbuild/kz-static: the repository's lib/llvm/order.cpp, tools/kz-static/cmd_show.cpp and main.cpp compiled with the flags of MC (flags.make, -Werror) into a copy of MC lib/llvm/libkz-llvm.a and MC's other kz-static objects, linked with its link line into <scratch> (MC untouched; <scratch>/sbuild/rebuild.sh)
+  -> fixture order.c: gcc -std=c99 -pedantic -Wall -Wextra -Werror compiles; extract --no-profile --targets-rule R-T1,R-T2; order rc 0, two runs the same bytes
+  -> test_static_cli compiled from the repository source in <scratch> (MC libkz-core.a, libkz-testsupport.a) and run with the scratch kz-static: 908 checks passed
+  -> static_golden compiled in <scratch>, run with the scratch kz-static against a scratch copy of tests/static/data: the 23 existing fixture goldens match; order_np written with KZ_GOLDEN_UPDATE=1 into the copy (445 lines) and matched on a second run
+  -> order on the five tests_8c_fix NP facts: rc 0 (counts in the declaration, [I]); the c1_pre_tx plan with the arguments of relrev7_plans: compare_plans.py only the declared lines
+  these outputs are scratch and no evidence; the build's tool re-measures them
+MC ctest -R '^lint' (kz_lint 5f62ec20, no build, on this tree) -> 7 of 7 passed
+free before the commit of the declaration: 3147812864 (2026-11-16T11:20:58Z)
+
+## 1. declaration, code, fixture, tests, docs and scripts committed together before the build

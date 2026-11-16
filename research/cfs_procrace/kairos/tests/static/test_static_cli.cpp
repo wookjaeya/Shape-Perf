@@ -1316,6 +1316,81 @@ startup_script {
     KZ_CHECK(has(a3, "writers: Rec.path: no writer found under these premises"));
     KZ_CHECK(!has(r, "  A5 "));
   }
+  // ---- order edges with kinds and premises (order.c; order rules revision 1) -----------------------------------------
+  // A name created before the spawn of the thread that looks it up (hard), looked up before the spawn of the creator's thread
+  // (the use fixed early) and after it (unordered); a write after the spawn under a lock held across it (HB-lock) and in a
+  // lock window; a spawn operation that reports a failure after the thread started; a field written before the spawn of
+  // its reader; a polled flag whose budget exit returns (skip: hard) or goes on to the use (continue: conditional).
+  {
+    const fs::path X = work / "order";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/order.c", f = (X / "order.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(f) + " -- -std=c99 -pedantic", &out), 0);
+    // usage and inputs
+    KZ_CHECK_EQ(run(q(tool) + " order", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " order a b", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q(f) + " --loc Name.name", &out), 2);
+    KZ_CHECK(has(out, "unknown option"));
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((work / "garbage.kz").string()), &out), 1);
+    // -o and --edges write what stdout would show and one line per edge; two runs give the same bytes
+    std::string o, o2;
+    KZ_CHECK_EQ(run(q(tool) + " order " + q(f), &o), 0);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q(f) + " -o " + q((X / "order.txt").string()) + " --edges " + q((X / "order.tsv").string()), &out), 0);
+    KZ_CHECK_EQ(read(X / "order.txt"), o);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q(f), &o2), 0);
+    KZ_CHECK_EQ(o, o2);
+    const std::string tsv = read(X / "order.tsv");
+    KZ_CHECK(has(tsv, "id\trule\tkind\tfrom\tfrom_actor\tto\tto_actor\tcondition\tpremises\tscope\tinstance_key\n"));
+    KZ_CHECK(has(o, "kz-static order (order rules revision 1 (2026-11-16))\n"));
+    KZ_CHECK(has(o, "relations relations rules revision 7 (2026-11-16)\n"));
+    auto row = [&](const std::string& id) {
+      const size_t at = o.find("\n  " + id + " key ");
+      if (at == std::string::npos) return std::string();
+      const size_t next = o.find("\n  ", at + 3 + id.size());
+      size_t end = next;
+      while (end != std::string::npos && o.compare(end, 7, "\n      ") == 0) end = o.find("\n  ", end + 1);
+      return o.substr(at + 1, end == std::string::npos ? std::string::npos : end - at - 1);
+    };
+    // path A: the creation before the spawn of the looker's thread; the lookup before the spawn of the creator's; after it
+    KZ_CHECK(has(row("A1"), "order.static hard_before"));
+    KZ_CHECK(has(row("A1"), "HB-seq, ") && has(row("A1"), " HB-spawn, "));
+    KZ_CHECK(has(row("A2"), "order.static fixed_early_proved"));
+    KZ_CHECK(has(row("A3"), "order.static unordered"));
+    KZ_CHECK(has(row("A3"), "unordered: no path of hard or conditional edges either way"));
+    // path B: the write before the spawn of the reader (hard), a writer in another thread (unordered); the polled flag
+    KZ_CHECK(has(row("B1"), "order.static unordered"));
+    KZ_CHECK(has(row("B1"), "pairs: hard_before 1, unordered 1\n"));
+    KZ_CHECK(has(row("B2"), "order.static conditional_before"));
+    KZ_CHECK(has(row("B2"), "-> level_check waiter_main (spawn-entry): hard_before; path ") && has(row("B2"), " HB-await\n"));
+    KZ_CHECK(has(row("B2"), "conditional_before; path ") && has(row("B2"), "its budget exit also reaches the use (continue)"));
+    // path C: HB-lock where relations grades the other order proven-impossible; the lock window
+    KZ_CHECK(has(row("C1"), "order.static hard_before") && has(row("C1"), " HB-lock; applies when the write runs: it follows the spawn call order.c:"));
+    KZ_CHECK(has(row("C1"), "opposite: proven-impossible"));
+    KZ_CHECK(has(row("C2"), "order.static unordered") && has(row("C2"), "opposite: possible"));
+    // child without success: the operation that returns a failure after the thread started; the primitive's result
+    KZ_CHECK(has(row("C3"), "child without success: possible: start_checked returns -11 [ERR_SETUP] at order.c:"));
+    KZ_CHECK(has(row("C4"), "child without success: not found"));
+    KZ_CHECK(has(o, "      create primitive: start_checked -> pthread_create\n"));
+    KZ_CHECK(has(o, "      status condition: start_checked returns 0 [0]; failure class: -11 [ERR_SETUP], -5 [ERR_ILLEGAL]\n"));
+    // the waits: the budget exit returns (skip) or goes on (continue); the use inside the wait gets no edge
+    KZ_CHECK(has(o, " in skip_wait poll actors {waiter_main (spawn-entry)}\n"));
+    KZ_CHECK(has(o, "exit 1 return at order.c:") && has(o, "condition part -; budget part (le local:budget 0)\n"));
+    KZ_CHECK(has(o, "condition part (not (eq field:Gate.ready 0)); budget part (not (gt local:budget 0))\n"));
+    KZ_CHECK(has(o, "in skip_wait -> level_check: skip\n") && has(o, "in cont_wait -> level_check: continue\n"));
+    KZ_CHECK(has(o, "in skip_wait [gate.ready]: inside\n"));
+    KZ_CHECK(has(o, "the condition exit at the initial values: false (only a write makes it true)"));
+    // kinds: the HB-await edge of the skipped use is hard, that of the continued use conditional, the two starts observed-only
+    KZ_CHECK(has(o, " HB-await hard\n") && has(o, " HB-await conditional\n"));
+    KZ_CHECK(has(o, " HB-seq observed-only\n") && has(o, "which of them runs its code first is not fixed by any rule of this revision"));
+    KZ_CHECK(has(o, "in iteration 0 (app_one)") && has(o, "in iteration 1 (app_two)"));
+    // the summary counts what the text lists
+    KZ_CHECK(has(o, "summary rows A 3 (fixed_early_proved 1, hard_before 1, unordered 1)\n"));
+    KZ_CHECK(has(o, "summary rows C 4 (hard_before 3, unordered 1)\n"));
+    // the relations text is the same with and without the order query (it does not change the relations rows)
+    std::string r1;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(f), &r1), 0);
+    KZ_CHECK(has(r1, "  C1 spawn order.c:"));
+  }
 
   // ---- the soundness rules of relations path C (relsound.c; relations rules revisions 3 and 4) ---------------------
   {

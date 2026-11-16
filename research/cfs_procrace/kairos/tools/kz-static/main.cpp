@@ -5,6 +5,7 @@
 //   kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]
 //   kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]
 //   kz-static relations <facts> [-o OUT] [--keys KEYS]
+//   kz-static order   <facts> [-o OUT] [--edges TSV]
 //   kz-static plan    <facts> [--basis B] --framework F --select observation-set --order method-priority --budget SPEC
 //                     --budget-reason TEXT [--budget-disclosure TEXT] -o MANIFEST --sidecar SIDECAR --modules-out TABLE --exes-out LIST
 //   kz-static --identity
@@ -104,6 +105,7 @@ int usage() {
       "       kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]\n"
       "       kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]\n"
       "       kz-static relations <facts> [-o OUT] [--keys KEYS]   (paths A/B/C and the outcome-flip signal; KEYS: the use-site key of each row; no field, callee or case name)\n"
+      "       kz-static order   <facts> [-o OUT] [--edges TSV]   (order edges with kinds and premises, waits, and the static order of each relations row; no field, callee or case name)\n"
       "       kz-static plan    <facts> [--basis B] --framework F --select observation-set --order method-priority\n"
       "                         --budget tier:D07|tier:directed|all|rows:<n> --budget-reason TEXT [--budget-disclosure TEXT]\n"
       "                         -o MANIFEST --sidecar SIDECAR --modules-out TABLE --exes-out LIST\n"
@@ -129,6 +131,7 @@ int main(int argc, char** argv) {
   if (cmd == "show") return kzs_cli::cmd_show(argc, argv);
   if (cmd == "reach") return kzs_cli::cmd_reach(argc, argv);
   if (cmd == "relations") return kzs_cli::cmd_relations(argc, argv);
+  if (cmd == "order") return kzs_cli::cmd_order(argc, argv);
   if (cmd == "plan") return kzs_cli::cmd_plan(argc, argv);
   return usage();
 }

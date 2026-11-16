@@ -37,6 +37,7 @@ struct Case {
   std::vector<std::string> sections;  // the sections of the text view
   bool no_profile = false;            // extract --no-profile instead of the fixture profile
   bool relations = false;             // also `kz-static relations` (twice: the same bytes), after the view
+  bool order = false;                 // instead `kz-static order` (twice: the same bytes), after the view
 };
 
 // The sections that carry facts; `basis` (tool hash, counts) is left out, it changes with the tool.
@@ -88,6 +89,9 @@ const std::vector<Case>& cases() {
       // namespace membership by the callback passed, the table selector, the writer premises, the out-pointer arguments and the
       // constants of a creator's callee (relations rules revision 7, static_facts.md 5o): relcallback.c
       {"relcallback_np", "relcallback.c", {"--targets-rule", "R-T1,R-T2"}, kFlowSections, true, true},
+      // the order edges with their kinds and premises, the waits and the static order of each relations row (order rules
+      // revision 1, static_facts.md 5p): order.c
+      {"order_np", "order.c", {"--targets-rule", "R-T1,R-T2"}, kPathSections, true, false, true},
   };
   return all;
 }
@@ -203,6 +207,23 @@ int run_fixture(const Case& c, const std::string& tool, const std::string& fixtu
   if (run(quote(tool) + " show " + quote(out1) + sections_args(c.sections), &view) != 0) {
     std::fprintf(stderr, "show failed:\n%s\n", view.c_str());
     return 1;
+  }
+  if (c.order) {
+    // the order query: the same bytes twice; the line with the facts hash (it changes with the tool) is left out
+    std::string o1, o2;
+    if (run(quote(tool) + " order " + quote(out1), &o1) != 0 || run(quote(tool) + " order " + quote(out1), &o2) != 0) {
+      std::fprintf(stderr, "order failed:\n%s\n", o1.c_str());
+      return 1;
+    }
+    if (o1 != o2) {
+      std::fprintf(stderr, "%s: two order runs give different text\n", c.name);
+      return 1;
+    }
+    std::string ord;
+    std::istringstream lines(o1);
+    for (std::string l; std::getline(lines, l);)
+      if (l.rfind("facts ", 0) != 0) ord += l + "\n";
+    return compare(c.name, without_first_line(log1) + view + "\n# order\n" + ord, data);
   }
   if (!c.relations) return compare(c.name, without_first_line(log1) + view, data);
   // the relations: the same bytes twice; the line with the facts hash (it changes with the tool) is left out

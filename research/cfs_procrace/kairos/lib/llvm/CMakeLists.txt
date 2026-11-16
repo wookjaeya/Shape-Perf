@@ -20,6 +20,8 @@
 #                                                   loaded and indexed once, with the static actors
 #   plan_gen                                        no Clang types: `kz-static plan`, the observation plan
 #                                                   derived by rule from the relations rows
+#   order                                           no Clang types: `kz-static order`, the order edges with
+#                                                   kinds and premises and the static order of each row
 #   ast_*                                           the Clang front end of the extraction
 #   basis_*                                         the analysis basis B (SPEC 1.7)
 add_library(kz-llvm STATIC
@@ -37,6 +39,7 @@ add_library(kz-llvm STATIC
   rel_facts.cpp
   relations.cpp
   plan_gen.cpp
+  order.cpp
   unroll.cpp
   elf_info.cpp
   linkset.cpp

@@ -6,6 +6,7 @@
 #   kz-static show     print the text view of a BASIS or FACTS container
 #   kz-static reach    which call sites that pass a value derived from a location are reachable from roots
 #   kz-static relations  the relations of paths A/B/C and the outcome-flip signal, without a case input
+#   kz-static order    the order edges with kinds and premises and the static order of each relations row
 #   kz-static plan     an observation plan derived by rule from the relations rows (kzs-sites 3 and a sidecar)
 #
 # The tool names no Clang type: the Clang side is in lib/llvm.  The default location of Clang's

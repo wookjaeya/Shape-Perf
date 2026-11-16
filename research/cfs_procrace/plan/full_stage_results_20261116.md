@@ -750,6 +750,10 @@ FACT_LOCS 와 FIELD_STATUS 의 그 형 행(`compare/names_<b>.txt`; 옛 → 새)
 - **공간**: 각 빌드·사본·실행은 감시 아래(`env/tools/space_guard.sh`, 2 초마다, 하한 314,572,800). 빌드 필요량 = 앞 kz-static 빌드 dip 의 최대 123,981,824 + 새 출력 약 110 MB(다시 뽑기 약 47 MB, order 셋과 둘째 실행 약 40 MB, relations 약 16 MB, 계획 약 2 MB, 여유) + 한 시간 흐름 13 MB = 246,981,824 B. 사본은 필요량 100,000,000.
 - **스크립트**(이 선언과 함께 커밋, Python 은 `python3 -I`): `rerun.sh`, `order.sh`, `extract.sh`, `plans.sh`, `plan_one.sh`(앞 단계의 것을 옮김), `compare.sh`, `compare_relations.py`, `compare_order.py`, `compare_plans.py`(옮김), `creator_success.py`, `tool_copy/copy.sh`; 목록 `relink_expected.sha256`, `not_relink.sha256`; 빌드 전 점검 `tools_check_pre.txt`, `ledger_check_pre.txt`.
 
+#### 8.0a 빌드 뒤 확인 수의 덧붙임 (다섯 빌드를 돌리기 전에 적고 커밋함) [D][M]
+
+선언 §8.0 은 `test_static_reasons` 의 확인 수를 660 으로 적었고(scratchpad 점검 빌드에서 잰 값), MC 의 갱신 뒤 ctest 는 666 이다(`ctest_counts.log`). 시험은 통과했다. 차이는 선언 밖이므로 여기서 멈추고 까닭을 적는다: 그 시험은 `tests/static/data/` 의 relations 가 든 golden 마다 행의 `incomplete:` 줄을 읽어 확인을 센다(`tests/static/test_static_reasons.cpp:105-138`: 비지 않은 줄 1, 사유 낱낱 1, golden 마다 행 머리·짝·summary 셋). 새 `semantics_np.golden` 은 relations 행 하나에 사유 둘(`no_run`, `writer_set_incomplete`)이라 1 + 2 + 3 = 6 이 더해진다. scratchpad 점검 빌드에서는 새 golden 을 저장소가 아닌 scratchpad 의 자료 디렉터리에 썼으므로 그 시험이 읽지 않았다. 선언의 값을 666(= 660 + 6)으로 고친다. 다른 시험·수는 선언대로다(`test_static_cli` 1058, `test_static_plan` 195, `test_core_schema` 34,017, `lint_selftest` 114, lint 8 규칙 clean, ctest 261 개 실패 0 건너뜀 1).
+
 #### 6.0 (나-1) 다시 뽑기 비교 뒤의 덧붙임 (그 비교를 다시 돌리기 전에 적고 커밋함) [D][M]
 
 - **선언 밖의 차이** [M]. `compare.sh extract` 의 첫 실행(`first/compare_extract_first.txt`)에서 다섯 빌드 모두 BAD 셋: (1) facts.kz 의 전체 dump 에서 STRINGS 섹션 줄의 crc32 와 BASIS `extract.units_from` 의 basis 해시(`first/compare/facts_head_<b>.txt`: 다른 줄 둘); (2) facts 보기에서 `extract.units_from = basis …` 한 줄; (3) 다시 뽑기의 `relations.txt` 가 `revfix_relcheck` 와 둘째 줄 밖에서 다름. `compare.sh onextract` 의 첫 실행(`first/compare_onextract_first.txt`)에서 c1 두 빌드와 r2_core 의 `order.txt` 가 `revfix_order` 와 둘째 줄 밖에서 다름. 나머지(basis.kz, extract.txt, basis.txt, sha256.txt, args.txt, relations.log, 두 번 실행, edges.tsv, 키, 계획 열)는 선언 안이었다. 그래서 여기서 멈추고 이 덧붙임을 먼저 커밋한다.

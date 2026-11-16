@@ -17,3 +17,17 @@ scratch check build <scratch>/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_BUIL
   evidence; <scratch>/sbuild, x, pl and the views removed before the declaration
 tools_check.sh --deep -> tools_check_pre.txt (41 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (94 rows, 0 failing)
 relink_expected.sha256 (15) and not_relink.sha256 (109): sha256 of the MC binaries before the build
+## 1. tool copy and build (2026-11-16T18:43:33Z); HEAD b02ff21 (declaration commit)
+/dev/vda       270553174016 38786650112 2535858176  94% /
+copy rc=0
+make kz-static rc=0
+make kz_lint rc=0
+make all rc=0
+tools after build rc=0
+ledger after build rc=0
+ctest first rc=8
+golden update rc=0
+ctest full rc=0
+run_unit rc=0
+step2a unit rc=0
+## 2. after the build: addendum 8.0a (test_static_reasons 666 = 660 + 6 of the new relations golden) committed before the five builds

@@ -1,0 +1,35 @@
+# relink_expected.sha256: which of the 15 changed (the declaration allows each to change)
+lib/llvm/libkz-llvm.a: changed (relinked)
+tools/kz-static/kz-static: changed (relinked)
+tests/static/test_static_reasons: changed (relinked)
+tests/static/test_static_plan: changed (relinked)
+tests/static/test_static_unroll: same bytes
+tests/static/test_static_flow: same bytes
+tests/static/test_static_elf32: same bytes
+tests/static/test_static_wrappers: same bytes
+tests/static/test_static_gitrev: same bytes
+tests/static/test_static_link: same bytes
+tests/static/test_static_recipe: same bytes
+tests/static/test_static_expr: same bytes
+tests/static/test_static_cli: changed (relinked)
+tests/static/static_golden: changed (relinked)
+tests/lint/kz_lint: changed (relinked)
+sha256sum: WARNING: 7 computed checksums did NOT match
+# not_relink.sha256 (109): must be the same
+OK lines: 109
+# the link lines of the three makes
+libkz-llvm.a
+kz-static
+kz_lint
+static_golden
+test_static_expr
+test_static_flow
+test_static_recipe
+test_static_gitrev
+test_static_unroll
+test_static_wrappers
+test_static_link
+test_static_elf32
+test_static_reasons
+test_static_plan
+test_static_cli

@@ -1,0 +1,136 @@
+extract
+  translation units          1
+  functions                  14 (bodies read 9, in system headers skipped 0)
+  call sites                 12
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                2 (entry resolved 2)
+  loops                      2 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 2, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Reg.name   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Reg.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 9, control-flow graphs 9, call-graph components 9 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 1, noreturn 0, may 1 (all vocabulary)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 1 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               2 (R-T1 1, R-T2 2, both 1; left out, reached only through an unshared base: R-T1 0, R-T2 0)
+semantics                    rows 29 (collated / rows: P0 2/6, framework 20/22, status-space 1/1; collated: a verification state other than unverified)
+facts-view 1
+[functions] 14
+  fn 0 app_exit semantics.c:113-113 params=1 {defined}
+  fn 1 exit /usr/include/stdlib.h:756 params=1 {builtin}
+  fn 2 helper_count semantics.c:115-115 params=1 {defined}
+  fn 3 main semantics.c:135-140 params=0 {defined}
+  fn 4 memchr /usr/include/string.h:107 params=3 {builtin}
+  fn 5 one_main semantics.c:119-126 params=1 {defined,address-taken}
+  fn 6 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 7 reg_create semantics.c:93-106 params=2 {defined}
+  fn 8 reg_find semantics.c:88-91 params=2 {defined}
+  fn 9 reg_search semantics.c:77-86 params=2 {defined,static}
+  fn 10 send_event semantics.c:108-111 params=2 {defined}
+  fn 11 strcmp /usr/include/string.h:156 params=2 {builtin}
+  fn 12 strncpy /usr/include/string.h:144 params=3 {builtin}
+  fn 13 two_main semantics.c:128-133 params=1 {defined,address-taken}
+[retconsts] 11
+  main returns 0 [0] rows=1 {only-constants} when=always
+  one_main returns 0 [0] rows=1 {only-constants} when=always
+  reg_create returns -14 [SEM_ERR_NO_FREE] rows=1 {only-constants} when=(and (not (or (eq param:out#0 0) (eq param:name#1 0))) (not (eq (call-result memchr (seq param:name#1 (seq 0 (seq 16)))) 0)))
+  reg_create returns -13 [SEM_ERR_TOO_LONG] rows=1 {only-constants} when=(and (not (or (eq param:out#0 0) (eq param:name#1 0))) (eq (call-result memchr (seq param:name#1 (seq 0 (seq 16)))) 0))
+  reg_create returns -2 [SEM_ERR_POINTER] rows=1 {only-constants} when=(or (eq param:out#0 0) (eq param:name#1 0))
+  reg_create returns 0 [SEM_OK] rows=1 {in-loop,only-constants} when=(and (and (and (not (or (eq param:out#0 0) (eq param:name#1 0))) (not (eq (call-result memchr (seq param:name#1 (seq 0 (seq 16)))) 0))) (lt local:i 4)) (eq field:Reg.used 0))
+  reg_find returns -2 [SEM_ERR_POINTER] rows=1 {} when=(or (eq param:out#0 0) (eq param:name#1 0))
+  reg_search@semantics.c:77 returns -17 [SEM_ERR_NOT_FOUND] rows=1 {only-constants} when=always
+  reg_search@semantics.c:77 returns 0 [SEM_OK] rows=1 {in-loop,only-constants} when=(and (and (lt local:i 4) (eq field:Reg.used 1)) (eq (call-result strcmp (seq field:Reg.name (seq param:name#0))) 0))
+  send_event returns 0 [SEM_OK] rows=1 {only-constants} when=always
+  two_main returns 0 [0] rows=1 {only-constants} when=always
+[semantics] 29
+  P0 role exit unverified declared {} [process-exit (termination): ends the process after its exit handlers have run; does not return] (POSIX.1-2017 / glibc 2.39) source P0 table: source unverified decl /usr/include/stdlib.h:756
+  P0 role pthread_create standard-collated declared {} [thread-create (thread creation): creates a thread that runs arg 2 with the argument arg 3; on success the id of the new thread is stored through arg 0, and it is stored before the new thread is started] (POSIX.1-2017 / glibc 2.39) source P0 table: glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 and :836); upstream copy sha256 36fd1e6da5cee9ce; the patches of a distribution package of glibc 2.39 are not checked decl /usr/include/pthread.h:202
+  P0 out-behaviour pthread_create arg 0 standard-collated declared {} [arg 0 is written] (POSIX.1-2017 / glibc 2.39) source P0 table: glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 and :836); upstream copy sha256 36fd1e6da5cee9ce; the patches of a distribution package of glibc 2.39 are not checked decl /usr/include/pthread.h:202
+  P0 role strcmp unverified declared {} [byte-string comparison: compares the strings arg 0 and arg 1; returns zero exactly when they are equal] (POSIX.1-2017 / glibc 2.39) source P0 comparison table: source unverified decl /usr/include/string.h:156
+  P0 role strncpy unverified declared {} [data-function (data function): copies at most arg 2 bytes of the string arg 1 to arg 0, padding with zero] (POSIX.1-2017 / glibc 2.39) source P0 table: source unverified decl /usr/include/string.h:144
+  P0 out-behaviour strncpy arg 0 unverified declared {} [arg 0 is written] (POSIX.1-2017 / glibc 2.39) source P0 table: source unverified decl /usr/include/string.h:144
+  framework role app_exit body-derived derived {} [derived terminal operation (must, primitive exit)] (the semantics fixture) source OP_DERIV and SPAWN_WRAP of these facts decl semantics.c:113
+  framework arg-role app_exit arg 0 doc-collated doc-only {version-pinned} [run-status (doc)] (the semantics fixture) source semantics.c:63 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:113) decl semantics.c:113
+  framework arg-domain app_exit arg 0 doc-collated doc-only {version-pinned} [run-status: SEM_RUN=1, SEM_RUN_ERROR=3] (the semantics fixture) source semantics.c:63 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:113) decl semantics.c:113
+  framework agreement app_exit unverified derived {} [not compared: no documented return] (the semantics fixture) source RET_CONSTS and RETURNS of these facts (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:113) decl semantics.c:113
+  framework success reg_create value 0 body-derived derived {value-set} [SEM_OK] (the semantics fixture) source RET_CONSTS of reg_create in these facts decl semantics.c:93
+  framework failure reg_create value -14 body-derived derived {value-set} [SEM_ERR_NO_FREE] (the semantics fixture) source RET_CONSTS of reg_create in these facts decl semantics.c:93
+  framework failure reg_create value -2 body-derived derived {value-set} [SEM_ERR_POINTER] (the semantics fixture) source RET_CONSTS of reg_create in these facts decl semantics.c:93
+  framework failure reg_create value -13 body-derived derived {value-set} [SEM_ERR_TOO_LONG] (the semantics fixture) source RET_CONSTS of reg_create in these facts decl semantics.c:93
+  framework agreement reg_create unverified derived {} [not compared: no documented return] (the semantics fixture) source RET_CONSTS and RETURNS of these facts (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:93) decl semantics.c:93
+  framework success reg_find value 0 body-derived derived {value-set} [SEM_OK through reg_find -> reg_search] (the semantics fixture) source RET_CONSTS of reg_find in these facts decl semantics.c:88
+  framework failure reg_find value -17 body-derived derived {value-set} [SEM_ERR_NOT_FOUND through reg_find -> reg_search] (the semantics fixture) source RET_CONSTS of reg_find in these facts decl semantics.c:88
+  framework failure reg_find value -2 body-derived derived {value-set} [SEM_ERR_POINTER] (the semantics fixture) source RET_CONSTS of reg_find in these facts decl semantics.c:88
+  framework documented-return reg_find value -99 doc-collated doc-only {version-pinned,value-set} [SEM_ERR_NEVER] (the semantics fixture) source semantics.c:45 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:88) decl semantics.c:88
+  framework documented-return reg_find value -17 doc-collated doc-only {version-pinned,value-set} [SEM_ERR_NOT_FOUND] (the semantics fixture) source semantics.c:44 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:88) decl semantics.c:88
+  framework documented-return reg_find value -2 doc-collated doc-only {version-pinned,value-set} [SEM_ERR_POINTER] (the semantics fixture) source semantics.c:43 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:88) decl semantics.c:88
+  framework documented-return reg_find value 0 doc-collated doc-only {version-pinned,value-set} [SEM_OK] (the semantics fixture) source semantics.c:42 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:88) decl semantics.c:88
+  framework agreement reg_find body-derived derived {} [the documentation lists a value the body cannot return: SEM_ERR_NEVER (-99)] (the semantics fixture) source RET_CONSTS and RETURNS of these facts (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:88) decl semantics.c:88
+  framework arg-role send_event arg 1 doc-collated doc-only {version-pinned} [event-type (doc)] (the semantics fixture) source semantics.c:55 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:108) decl semantics.c:108
+  framework arg-domain send_event arg 1 doc-collated doc-only {version-pinned} [event-type: SEM_EV_DEBUG=1, SEM_EV_ERROR=3] (the semantics fixture) source semantics.c:55 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:108) decl semantics.c:108
+  framework success send_event value 0 body-derived derived {value-set} [SEM_OK] (the semantics fixture) source RET_CONSTS of send_event in these facts decl semantics.c:108
+  framework documented-return send_event value 0 doc-collated doc-only {version-pinned,value-set} [SEM_OK] (the semantics fixture) source semantics.c:57 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:108) decl semantics.c:108
+  framework agreement send_event body-derived derived {} [derived = documented (1 values)] (the semantics fixture) source RET_CONSTS and RETURNS of these facts (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:108) decl semantics.c:108
+  status-space success - value 0 doc-collated doc-only {version-pinned,value-set} [success constant SEM_OK] (the semantics fixture) source semantics.c:20 (framework_semantics_fixture-sem.txt, fixture-sem) decl semantics.c:20
+
+# relations
+kz-relations 1
+rules relations rules revision 9 (2026-11-16)
+mode profile-free
+  extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
+  extract.profile = kz-static-builtin-minimal / 
+  extract.p0_table = P0 table revision 3 (2026-10-30), 72 entries
+  extract.p0_table_scope = families of this revision: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread or process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Of a family the members that take, release, wait, signal, sleep, end, name a thread, bind or create a key, push or pop a handler, load or look up, or store memory are entries; a family is not listed whole where this list names members left out.  Not in this revision: read-write locks (pthread_rwlock_*; their shared acquisitions are not read by the lock-set analysis, so the family is left out whole and its acquisitions are no lock operations), barriers (pthread_barrier_*), one-time initialization (pthread_once, call_once), thread cancellation of another thread (pthread_cancel and the cancellation state functions), signals (kill, raise, pthread_kill, sigwait), dlclose, dlerror and dladdr, functions a compiler or a fortify wrapper calls without a call in the source (__stack_chk_fail, __chk_fail and the *_chk functions); thread join and detach (pthread_join, pthread_tryjoin_np, pthread_timedjoin_np, pthread_detach, thrd_join, thrd_detach); POSIX timers (timer_create, timer_settime, timer_gettime, timer_getoverrun, timer_delete; a timer with SIGEV_THREAD notification starts its function on a new thread, which is no actor here); I/O multiplexing (select, pselect, poll, ppoll); the initialization, destruction, attribute and query members of the mutex, spin lock, semaphore and condition variable families and of thread creation (pthread_mutex_init, pthread_mutex_destroy, pthread_mutexattr_*, pthread_spin_init, pthread_spin_destroy, sem_init, sem_destroy, sem_open, sem_close, sem_unlink, sem_getvalue, pthread_cond_init, pthread_cond_destroy, pthread_condattr_*, mtx_init, mtx_destroy, cnd_init, cnd_destroy, pthread_attr_*); scheduling (sched_*, pthread_setschedparam, pthread_getschedparam, pthread_setschedprio); data functions not in this revision (stpcpy, stpncpy, strlcpy and strlcat (glibc 2.38 and later), mempcpy, memccpy, explicit_bzero, and the wide-character members); formatted input, which stores through its arguments (sscanf, vsscanf, fscanf, vfscanf, scanf, vscanf); handlers registered for process exit (atexit, at_quick_exit, on_exit)
+  extract.derivation_rules = wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  extract.targets_rule = R-T1,R-T2 (target rules revision 1): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)
+  extract.reading_options_vs_basis = not compared: no basis (--source)
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
+semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): rows 29 (collated / rows: P0 2/6, framework 20/22, status-space 1/1; collated: a verification state other than unverified); rows that name a function with framework semantics items 1, of them with items not verified 1 (sem-unverified(api:column) in the layers column; the P0 entries stay in P0-unverified)
+run order: no record given (this revision reads no run record; the column says so in every row)
+functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
+actors: roots 3 (process 1, spawn-entry 2, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 0
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
+summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition in another actor 0, key-matched 0) B 0 (with a callee check 0) C 0 (self-identity reads 0); flip static-possible 0, static-undetermined 0, none 1; feasibility proven-impossible 0, possible 0, undecidable 1, not graded 0
+summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 0, creators 0; lookup rows with the membership unresolved 0; lookup rows without a creator of their partition 1 [key written without a key parameter 1, writer set not complete 1]
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 1 [no run record read 1]; writer_set_incomplete 1 [FIELD_STATUS not complete 1]; reasons of the whole facts on every row: none
+[A] 1 (namespaces 1, key comparisons 1; left out: searches over no global table 0)
+  namespace Reg.name (record type Reg; tables regs)
+      search: A1 search loop semantics.c:79:3 in reg_search: key Reg.name strcmp at semantics.c:80:30 compared with parameter 0 [name] (search parameter 0)
+      active fields: Reg.used 
+      active test: Reg.used == 1 is in use (a search with the key comparison requires it)
+      lifecycle Reg.name: writers 1 from WRITERS (the field is an extraction target)
+        memcpy at semantics.c:99:7 in reg_create value=top [copy of name] guard=(and (and (and (not (or (eq param:out#0 0) (eq param:name#1 0))) (not (eq (call-result memchr (seq param:name#1 (seq 0 (seq 16)))) 0))) (lt local:i 4)) (eq field:Reg.used 0))
+      lifecycle Reg.used: writers 1 from WRITERS (the field is an extraction target)
+        assign at semantics.c:100:7 in reg_create value=1 [1] guard=(and (and (and (not (or (eq param:out#0 0) (eq param:name#1 0))) (not (eq (call-result memchr (seq param:name#1 (seq 0 (seq 16)))) 0))) (lt local:i 4)) (eq field:Reg.used 0)) class=reservation or activation (writes the in-use value)
+      key-parameter functions: lookups reg_find#1 reg_search@semantics.c:77#0; creators none
+      uses: lookups 1, creators 0 (calls from outside the key-parameter functions; a creator reaches a write of the key); left out, another callback passed to the search: lookups 0, creators 0
+      namespace layers: B P0 R sem-unverified(reg_create:agreement)
+  A1 lookup semantics.c:121:7 in one_main -> reg_find#1 namespace Reg.name partition {} key known
+      membership: reaches the comparison strcmp at semantics.c:80:30 in its own search loop
+      key: string literal "lime"
+      actors: {one_main (spawn-entry)}; result=tested
+      id holder: the lookup's arg 0 [&one_handle] address <global>.one_handle base global object one_handle@semantics.c:117 <- reg_find stores through its parameter 0 in reg_search@semantics.c:77 at semantics.c:81:7 [i]
+      writers: Reg.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Reg.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: terminal app_exit at semantics.c:123:5 in one_main under the result (F8 must app_exit -> exit)
+      dependency: path A: no creator of this partition: key written without a key parameter (no key-parameter function reaches a writer of Reg.name: memcpy in reg_create); writer set not complete (Reg.name not complete)
+      run-order: no record given
+      feasibility: undecidable: no pair
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no creator of the same partition and key in another actor; search returns: reg_search@semantics.c:77 returns -17 [SEM_ERR_NOT_FOUND], reg_search@semantics.c:77 returns 0 [SEM_OK]
+      layers: B P0 R P0-unverified(exit, strcmp) sem-unverified(reg_create:agreement)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete)
+[B] 0 (field-argument groups 0; left out: no writer 0, one actor only 0)
+[C] 0 (spawn calls 2, with no resolved entry 0, with no event after them on their control-flow graph 1; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 0, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)

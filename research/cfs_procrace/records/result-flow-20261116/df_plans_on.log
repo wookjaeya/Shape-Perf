@@ -1,0 +1,5 @@
+# space_guard.sh kind=run need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/result-flow-20261116/plans.sh /home/user/work/redesign/obs1/rf_on_extract /home/user/work/redesign/obs1/rf_plans_on
+start 2026-11-16T21:06:01.321Z free=1923497984 threshold=414572800
+sample 2026-11-16T21:06:01.325Z 1923493888
+sample 2026-11-16T21:06:03.331Z 1922932736
+end 2026-11-16T21:06:05.337Z kind=run verdict=completed rc=0 free=1922506752 lowest=1922506752 dip=991232 change=-991232

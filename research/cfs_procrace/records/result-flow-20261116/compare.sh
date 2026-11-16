@@ -26,6 +26,8 @@
 #   measure      the offline probe (s1_rev1.py on the relations.txt kept beside the tests_8c_fix facts, on rf_relcheck's
 #                and on sem_on_order's; s1_rev2.py on rf_on_order's) into compare/s1_*_<b>.out and .tsv; measure_rf.py
 #                (compare/measure_<b>.txt; the use-site key of the C1 relation 1 for the first path)
+#   extract_on_rel (results 9.0a) the relations text of rf_on_extract against sem_on_extract again with compare_rel_rf_2.py
+#                (compare/on_relations_2_<b>.txt): the check of extract_on whose declared allowance was too narrow
 # One line per check; rc 0 when every check holds, 1 otherwise.  Tools: the build tree's (MC).  The facts views are written
 # to SCRATCH and removed after each build's comparison.
 set -uo pipefail
@@ -115,7 +117,10 @@ for b in c1_pre_tx c1_post_tx r2_core c5_641 c5_642; do
       python3 -I "$PROBE/s1_rev2.py" "$O/rf_on_order/$b/relations.txt" --tsv "$C/s1_rev2_after_$b.tsv" > "$C/s1_rev2_after_$b.out" || bad "$b s1 rev 2 (rf_on_order relations)"
       python3 -I "$HERE/measure_rf.py" "$O/rf_on_extract/$b/$b/NP/extract.txt" "$O/rf_on_order/$b/relations.txt" "$O/rf_on_order/$b/keys.txt" "$O/sem_on_order/$b/order.txt" "$O/rf_on_order/$b/order.txt" \
         "$C/s1_rev1_plan_$b.out" "$C/s1_rev1_rules_$b.out" "$C/s1_rev1_before_$b.out" "$C/s1_rev2_after_$b.out" --key 17975444d83f6589 > "$C/measure_$b.txt" && ok "$b measured (compare/measure_$b.txt: $(grep '^T? ' "$C/measure_$b.txt"))" || bad "$b measure_rf" ;;
-    *) echo "usage: compare.sh relations|order|extract|onextract|plans|extract_on|onextract_on|plans_on|measure" >&2; exit 64 ;;
+    extract_on_rel)
+      N=$O/rf_on_extract/$b/$b/NP; P=$O/sem_on_extract/$b/$b/NP
+      python3 -I "$HERE/compare_rel_rf_2.py" "$P/relations.txt" "$N/relations.txt" > "$C/on_relations_2_$b.txt"; [ $? = 0 ] && ok "$b relations.txt: $(head -1 "$C/on_relations_2_$b.txt")" || bad "$b relations.txt (compare/on_relations_2_$b.txt)" ;;
+    *) echo "usage: compare.sh relations|order|extract|onextract|plans|extract_on|extract_on_rel|onextract_on|plans_on|measure" >&2; exit 64 ;;
   esac
 done
 [ "${1:-}" = extract_on ] && mv "$HERE/section_text_on.txt.partial" "$HERE/section_text_on.txt"

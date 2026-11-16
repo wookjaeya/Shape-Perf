@@ -24,3 +24,26 @@ golden update rc=0
 ctest full rc=0
 run_unit rc=0
 step2a unit rc=0
+## 3. the five builds (2026-11-16T21:00:04Z)
+/dev/vda       270553174016 39211606016 2110902272  95% /
+rerun rc=0
+order rc=0
+extract_off rc=0
+order_off_extract rc=0
+plans rc=0
+plans_off rc=0
+extract_on rc=0
+order_on_extract rc=0
+plans_on rc=0
+five builds done
+## 4. comparisons (2026-11-16T21:06:13Z)
+compare relations rc=0
+compare order rc=0
+compare onextract rc=0
+compare plans rc=0
+compare onextract_on rc=0
+compare plans_on rc=0
+compare extract rc=0
+compare extract_on rc=1
+compare measure rc=0
+compare extract_on: 3 BAD (relations.txt of c1_pre_tx, c1_post_tx, r2_core: layers lines); addendum 9.0a written; compare_rel_rf_2.py tried once on three builds before the commit (output not kept)

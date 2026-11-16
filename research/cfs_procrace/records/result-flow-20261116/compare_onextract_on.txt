@@ -1,0 +1,40 @@
+OK c1_pre_tx order.txt two runs same
+OK c1_pre_tx edges.tsv two runs same
+OK c1_pre_tx order.txt: only declared differences: line 2, the header line, child without success lines 53, use the call of consequences 4, caller-side uses 0
+OK c1_pre_tx edges.tsv: only declared differences: 310 lines, conditions differing after child without success 0
+OK c1_pre_tx relations.txt = the on re-extraction's
+OK c1_pre_tx keys.txt = sem_on_order's apart from line 2
+OK c1_pre_tx order.log empty
+OK c1_pre_tx relations.log empty
+OK c1_post_tx order.txt two runs same
+OK c1_post_tx edges.tsv two runs same
+OK c1_post_tx order.txt: only declared differences: line 2, the header line, child without success lines 53, use the call of consequences 6, caller-side uses 0
+OK c1_post_tx edges.tsv: only declared differences: 310 lines, conditions differing after child without success 0
+OK c1_post_tx relations.txt = the on re-extraction's
+OK c1_post_tx keys.txt = sem_on_order's apart from line 2
+OK c1_post_tx order.log empty
+OK c1_post_tx relations.log empty
+OK r2_core order.txt two runs same
+OK r2_core edges.tsv two runs same
+OK r2_core order.txt: only declared differences: line 2, the header line, child without success lines 30, use the call of consequences 4, caller-side uses 0
+OK r2_core edges.tsv: only declared differences: 500 lines, conditions differing after child without success 0
+OK r2_core relations.txt = the on re-extraction's
+OK r2_core keys.txt = sem_on_order's apart from line 2
+OK r2_core order.log empty
+OK r2_core relations.log empty
+OK c5_641 order.txt two runs same
+OK c5_641 edges.tsv two runs same
+OK c5_641 order.txt: only declared differences: line 2, the header line, child without success lines 84, use the call of consequences 0, caller-side uses 0
+OK c5_641 edges.tsv: only declared differences: 93 lines, conditions differing after child without success 18
+OK c5_641 relations.txt = the on re-extraction's
+OK c5_641 keys.txt = sem_on_order's apart from line 2
+OK c5_641 order.log empty
+OK c5_641 relations.log empty
+OK c5_642 order.txt two runs same
+OK c5_642 edges.tsv two runs same
+OK c5_642 order.txt: only declared differences: line 2, the header line, child without success lines 186, use the call of consequences 2, caller-side uses 0
+OK c5_642 edges.tsv: only declared differences: 123 lines, conditions differing after child without success 48
+OK c5_642 relations.txt = the on re-extraction's
+OK c5_642 keys.txt = sem_on_order's apart from line 2
+OK c5_642 order.log empty
+OK c5_642 relations.log empty

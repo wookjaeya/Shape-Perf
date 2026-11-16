@@ -1,0 +1,4 @@
+# space_guard.sh kind=compare need=100000000 floor=314572800 interval=2 cmd=bash records/result-flow-20261116/compare.sh measure
+start 2026-11-16T21:07:01.947Z free=1943511040 threshold=414572800
+sample 2026-11-16T21:07:01.952Z 1943506944
+end 2026-11-16T21:07:03.958Z kind=compare verdict=completed rc=0 free=1941938176 lowest=1941938176 dip=1572864 change=-1572864

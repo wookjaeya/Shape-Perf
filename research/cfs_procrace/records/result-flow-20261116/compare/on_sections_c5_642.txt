@@ -1,0 +1,1 @@
+OK /home/user/work/redesign/obs1/rf_on_extract/c5_642/c5_642/NP/facts.kz: sections of the earlier round 43, the same record text 42 (['FACT_EXPRS(prefix, +3715 rows)']), differing ['BASIS'], new ['RESULT_EFFECT', 'RESULT_FLOW'] (RESULT_FLOW 5561, RESULT_EFFECT 6867 record lines)

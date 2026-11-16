@@ -326,7 +326,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - 규칙 대상은 사람이 넣은 입력이 아니다: BASIS `target.T.f = rule R-T1` 등은 정책 `unset`, 출처 행 없음으로 적는다(명령줄 `--target` 은 지금처럼 `declared-assumption`, 출처 `researcher`). BASIS `extract.targets_rule` 과 `count.targets_rule*` 를 더한다.
 - 옵션은 `--no-profile` 과만 쓴다. 옵션이 없으면 프로필 없는 추출은 앞과 같이 대상이 없다. 새 섹션은 없다(S5 때 facts schema 개정 10; LOCK_PATHS 를 더한 개정 11은 §5f).
 
-**`kz-static relations <facts> [-o OUT]`** [D]. facts 컨테이너 하나를 읽어 텍스트를 낸다(`lib/llvm/relations.cpp`, "relations rules revision 1"; 개정 2에서 바뀐 규칙은 §5f). 필드·callee·사례 이름을 받지 않는다. 확장 사실(READS … AWAIT_L1)이 없는 facts 는 이유와 함께 거부한다. 같은 컨테이너는 같은 바이트를 낸다. 행의 기록, 사용 지점 키(`--keys`)와 공유 적재기는 §5l. 잘린 정적 이미지와 행마다의 `incomplete:` 줄(개정 6)은 §5m.
+**`kz-static relations <facts> [-o OUT]`** [D]. facts 컨테이너 하나를 읽어 텍스트를 낸다(`lib/llvm/relations.cpp`, "relations rules revision 1"; 개정 2에서 바뀐 규칙은 §5f). 필드·callee·사례 이름을 받지 않는다. 확장 사실(READS … AWAIT_L1)이 없는 facts 는 이유와 함께 거부한다. 같은 컨테이너는 같은 바이트를 낸다. 행의 기록, 사용 지점 키(`--keys`)와 공유 적재기는 §5l. 잘린 정적 이미지와 행마다의 `incomplete:` 줄(개정 6)은 §5m. 그 행에서 관측 계획을 내는 `kz-static plan` 은 §5n.
 - **머리**: facts 해시, 모드, 내장 프로필·P0 표·유도 규칙·대상 규칙의 판, P0 비교 표의 판과 항목(판 표기, 원문 대조), 입력 계층, 행위자 root 와 트램펄린, 경로별 행 수와 등급별 수.
 - **입력 계층**: 행마다 B(빌드), P0(P0 표: spawn·잠금·지연·종료의 유도와 비교 함수), L0(행이 시작 스크립트 진입 root 에 기댈 때), R(규칙)을 붙인다. 프로필 추출의 facts 이면 `case:profile(<이름>)`, 명령줄 어휘가 있으면 `hand-entered:command-line(<n> items; G0 or other names, not automatic)` 를 모든 행에 붙인다.
 - **P0 비교 표**(`p0_compare_table`, "P0 comparison table revision 1"): 바이트 문자열 비교 묶음(`memcmp`, `strcmp`, `strcoll`, `strncmp`, `strcasecmp`, `strncasecmp`)과 스레드 id 비교 묶음(`pthread_equal`). 추출은 이 표를 쓰지 않으므로 P0 표와 facts 의 P0_TABLE 은 그대로다. 프로그램이 같은 이름의 본문을 정의하면(inline 이 아닌 본문) 그 호출은 비교로 읽지 않는다.
@@ -580,6 +580,10 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - 하지 않는 것: 실패 처리의 효과(`handling_effect_unknown`)와 호출자 의존(`caller_dependence_unknown`)은 행 글(handling 줄)에서 판정하지 않는다. 그것은 계획 생성기의 몫이다. 어휘의 다른 사유(`target_not_reached`, `record_insufficient`, `plan_*`, `budget_not_run`, `no_material`, `intervention_out_of_scope`, `build_mismatch` 등)는 실행·계획·개입의 사유라서 relations 가 내지 않는다.
 
 **어휘 자료와 시험** [M]. `tests/static/data/reason_vocabulary.txt` 는 JR 3.5 의 사유 표를 한 줄에 하나씩 옮긴 것이다(2026-11-16 에 그 표에 더한 셋 포함). `test_static_reasons` 는 도구의 표의 모든 사유가 그 어휘에 있는지, 하위 사유와 규칙이 비지 않았는지, 같은 사유가 두 번 없는지, relations golden 의 모든 행이 `incomplete:` 줄 하나를 가지고 그 줄의 항목이 모두 도구의 표에 있는지 본다. 도구는 표의 번호로만 사유를 쓴다. 그래서 표가 도구가 쓸 수 있는 사유의 전부다. fixture `relincomplete.c`(사례 이름 없음): 이름 표를 찾는 lookup 셋(풀린 포인터 필드로 닿는 네 이름의 정적 표, 본문 없는 함수에서 온 포인터, 다른 행위자가 만드는 리터럴)과, union 멤버로 읽는 네 원소의 entry 표에서 시작하는 spawn. golden `static_golden_relincomplete_np`(기본 예산)와 `static_golden_relincomplete_cut_np`(`--image-budget 3`: 두 표가 잘림). `test_static_cli` 가 두 예산의 행과 줄을 본다.
+
+## 5n. 관측 계획 생성 `kz-static plan` (plan rules revision 1, 2026-11-16) [D]
+
+결과는 `plan/observation_path_results_20261116.md` §4. 규칙·입력·출력 형식은 `docs/plan_manifest.md` 다. relations 의 행을 같은 프로세스 안에서 `relations_rows`(§5l 의 공유 적재기 `RelFacts`)로 계산하고, 방법의 관측 집합(모든 행)을 방법의 우선순위 차례로 기록된 예산 아래 계획한다. 우선순위는 방법 문서 첫 단계 규칙의 이식이다(행 글의 표시, 순서 등급, 도달 표시, 처분). 관측 규칙은 use-call, key-text, creator-call, handling-chain, writer, spawn-call, actor, stop-event 다. 출력은 `kzs-sites 3` manifest 와 sidecar, module 표, 점검할 실행 파일 목록이다. 생성기는 명령줄에 이름이 있는 파일(facts, 그 basis, 프레임워크 계층 자료 `semantics/framework_api_roles.txt`)만 연다. facts schema(`include/`), relations 의 규칙과 글은 바꾸지 않는다.
 
 ## 6. core-cpu1 결과 [M]
 

@@ -3,7 +3,9 @@
 //   - every reason the tool can write (relations_incomplete_reasons()) is a reason of the vocabulary, with a sub-reason
 //     and a rule, and no reason and sub-reason twice;
 //   - every `incomplete:` line of the relations goldens names only reasons of that table, and every row of a golden has
-//     one such line; the summary line counts them.
+//     one such line; the summary line counts them;
+//   - every reason the plan generator can write in a need or gap line (plan_reasons(), plan_gen.hpp) is a reason of the
+//     vocabulary, with a sub-reason and a rule, and no reason and sub-reason twice.
 // The tool writes a reason only through the table (an index into it), so the table is every reason string it can write.
 #include <filesystem>
 #include <fstream>
@@ -13,6 +15,7 @@
 #include <string>
 #include <vector>
 
+#include "plan_gen.hpp"
 #include "relations.hpp"
 #include "support/kz_test.hpp"
 
@@ -73,6 +76,19 @@ int main(int argc, char** argv) {
     KZ_CHECK(!when.empty());
     KZ_CHECK_EQ(reason_text(r), reason + "(" + sub + ")");
     KZ_CHECK(texts.insert(reason_text(r)).second);
+  }
+  // the table of the plan generator
+  {
+    std::set<std::string> ptexts;
+    KZ_CHECK(!plan_reasons().empty());
+    for (const RelReason& r : plan_reasons()) {
+      const std::string reason = r.reason, sub = r.sub, when = r.when;
+      if (vocab.count(reason) == 0) kztest::fail(__FILE__, __LINE__, "plan reason not in the vocabulary: " + reason);
+      ++kztest::state().checks;
+      KZ_CHECK(!sub.empty() && sub.find_first_of("();") == std::string::npos);
+      KZ_CHECK(!when.empty());
+      KZ_CHECK(ptexts.insert(reason_text(r)).second);
+    }
   }
   // the reasons the table groups together come one after another (the summary groups by reason in the table's order)
   {

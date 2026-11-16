@@ -5,11 +5,14 @@
 //                                             accepts what it must, on trees written on the fly
 //
 // Rules:
-//   case-ids       no case identifier (data/case_identifiers.txt) in include/, lib/ and tools/, and in
+//   case-ids       no case or framework identifier (data/case_identifiers.txt and data/framework_identifiers.txt)
+//                  in include/, lib/ and tools/, and in
 //                  every text file of probe/ and instrument/ outside their tests/, scripts/, sites/ and
 //                  out/ directories, whether it stands alone or is a component of a longer name
 //                  (check_R2, r2_x, R2Cert, CFE_ES_Main, a file name, a string or a comment); components
 //                  are split at '_' and at camel-case boundaries and compared without regard to case
+//   case-ids-data  no case identifier (data/case_identifiers.txt only) in the framework-layer data files under
+//                  semantics/ (any text file), with the same matching as case-ids; framework names are allowed there
 //   retired-term  no identifier containing "contract" in code, build files and profiles
 //                  (comments and string literals are not identifiers; data/contract_allow.txt
 //                  lists the few exact tokens that are allowed, e.g. the provenance tier name)
@@ -275,23 +278,25 @@ struct CasePattern {
   std::vector<std::string> phrase;  // word entries: the components of the phrase
   std::regex re;
   size_t index;
+  std::string file;  // the data file of the entry
 };
 
-bool load_case_patterns(const fs::path& data, std::vector<CasePattern>* out) {
+bool load_case_patterns(const fs::path& data, const char* file, std::vector<CasePattern>* out) {
   bool ok = false;
-  std::vector<std::string> lines = read_lines(data / "case_identifiers.txt", &ok);
+  std::vector<std::string> lines = read_lines(data / file, &ok);
   if (!ok) return false;
   size_t n = 0;
   for (const std::string& l : lines) {
     ++n;
     CasePattern p;
     p.index = n;
+    p.file = file;
     if (l.rfind("word ", 0) == 0) {
       p.is_regex = false;
       p.text = l.substr(5);
       p.phrase = components(p.text);
       if (p.phrase.empty()) {
-        std::fprintf(stderr, "case_identifiers.txt: empty word entry: %s\n", l.c_str());
+        std::fprintf(stderr, "%s: empty word entry: %s\n", file, l.c_str());
         return false;
       }
     } else if (l.rfind("regex ", 0) == 0) {
@@ -299,7 +304,7 @@ bool load_case_patterns(const fs::path& data, std::vector<CasePattern>* out) {
       p.text = l.substr(6);
       p.re = std::regex(p.text, std::regex::ECMAScript);
     } else {
-      std::fprintf(stderr, "case_identifiers.txt: bad line: %s\n", l.c_str());
+      std::fprintf(stderr, "%s: bad line: %s\n", file, l.c_str());
       return false;
     }
     out->push_back(std::move(p));
@@ -328,24 +333,8 @@ bool has_phrase(const std::string& line, const std::vector<std::string>& phrase)
 
 // ---- rules -----------------------------------------------------------------------------------
 
-Violations rule_case_ids(const fs::path& root, const fs::path& data, bool* usage_ok) {
-  Violations v;
-  std::vector<CasePattern> patterns;
-  if (!load_case_patterns(data, &patterns)) {
-    *usage_ok = false;
-    return v;
-  }
-  // the engine (include/, lib/, tools/) and, since RV3A 6.3 O9, every text file of probe/ and instrument/ (any
-  // extension: an included .inc or a build file is compiled in too) except under their tests/, scripts/, sites/ and
-  // out/ directories (tests, drivers, site manifests and committed transform outputs are inputs, not engine code)
-  std::vector<fs::path> files = files_under(root, {"include", "lib", "tools"});
-  for (const fs::path& f : files_under(root, {"probe", "instrument"})) {
-    const std::string r = "/" + rel(root, f);
-    bool input = false;
-    for (const char* d : {"/tests/", "/scripts/", "/sites/", "/out/"})
-      if (r.find(d) != std::string::npos) input = true;
-    if (!input) files.push_back(f);
-  }
+// The lines of the files (and each file's path, as line 0) against the patterns.
+void scan_case_patterns(const fs::path& root, const std::vector<fs::path>& files, const std::vector<CasePattern>& patterns, const char* why, Violations* v) {
   for (const fs::path& f : files) {
     std::string text;
     if (!read_file(f, &text) || looks_binary(text)) continue;
@@ -369,12 +358,44 @@ Violations rule_case_ids(const fs::path& root, const fs::path& data, bool* usage
         } else {
           hit = has_phrase(entry.second, p.phrase);
         }
-        if (hit)
-          v.push_back(Violation{r, entry.first, "case identifier '" + what + "' (case_identifiers.txt entry " + std::to_string(p.index) +
-                                                    "): cFS and case knowledge belongs in profiles/, not in the engine"});
+        if (hit) v->push_back(Violation{r, entry.first, "case identifier '" + what + "' (" + p.file + " entry " + std::to_string(p.index) + "): " + why});
       }
     }
   }
+}
+
+Violations rule_case_ids(const fs::path& root, const fs::path& data, bool* usage_ok) {
+  Violations v;
+  std::vector<CasePattern> patterns;
+  if (!load_case_patterns(data, "case_identifiers.txt", &patterns) || !load_case_patterns(data, "framework_identifiers.txt", &patterns)) {
+    *usage_ok = false;
+    return v;
+  }
+  // the engine (include/, lib/, tools/) and, since RV3A 6.3 O9, every text file of probe/ and instrument/ (any
+  // extension: an included .inc or a build file is compiled in too) except under their tests/, scripts/, sites/ and
+  // out/ directories (tests, drivers, site manifests and committed transform outputs are inputs, not engine code)
+  std::vector<fs::path> files = files_under(root, {"include", "lib", "tools"});
+  for (const fs::path& f : files_under(root, {"probe", "instrument"})) {
+    const std::string r = "/" + rel(root, f);
+    bool input = false;
+    for (const char* d : {"/tests/", "/scripts/", "/sites/", "/out/"})
+      if (r.find(d) != std::string::npos) input = true;
+    if (!input) files.push_back(f);
+  }
+  scan_case_patterns(root, files, patterns, "cFS and case knowledge belongs in profiles/, not in the engine", &v);
+  return v;
+}
+
+// The framework-layer data (semantics/): the case list only.  The data names framework APIs by design (with their
+// provenance); a case identifier there would make the data the case's.
+Violations rule_case_ids_data(const fs::path& root, const fs::path& data, bool* usage_ok) {
+  Violations v;
+  std::vector<CasePattern> patterns;
+  if (!load_case_patterns(data, "case_identifiers.txt", &patterns)) {
+    *usage_ok = false;
+    return v;
+  }
+  scan_case_patterns(root, files_under(root, {"semantics"}), patterns, "the framework-layer data names no case", &v);
   return v;
 }
 
@@ -634,6 +655,7 @@ int report(const char* rule, const Violations& v) {
 Violations run_rule(const std::string& rule, const fs::path& root, const fs::path& data, bool* known, bool* usage_ok) {
   *known = true;
   if (rule == "case-ids") return rule_case_ids(root, data, usage_ok);
+  if (rule == "case-ids-data") return rule_case_ids_data(root, data, usage_ok);
   if (rule == "retired-term") return rule_retired_word(root, data, usage_ok);
   if (rule == "banned-files") return rule_banned_files(root);
   if (rule == "no-llvm") return rule_no_llvm(root);
@@ -685,6 +707,15 @@ int selftest(const fs::path& data) {
       {"case-ids", true, {"function name GetAppID", {{"lib/a.cpp", "int GetAppID();\n"}}}},
       {"case-ids", true, {"field name AppId", {{"lib/a.cpp", "int AppId;\n"}}}},
       {"case-ids", true, {"field name app_id", {{"lib/a.cpp", "int app_id;\n"}}}},
+      // ---- the framework-layer data: the case list only, over semantics/
+      {"case-ids-data", true, {"case id in the framework data", {{"semantics/roles.txt", "role run-loop function=x # for C1\n"}}}},
+      {"case-ids-data", true, {"case symbol in the framework data", {{"semantics/roles.txt", "# BP0_tsem\n"}}}},
+      {"case-ids-data", true, {"case revision in the framework data", {{"semantics/roles.txt", "# fixed in 281a941\n"}}}},
+      {"case-ids-data", true, {"case id in a framework data file name", {{"semantics/c5_roles.txt", "role app-exit function=x\n"}}}},
+      {"case-ids-data", false, {"framework names are allowed in the framework data",
+                                {{"semantics/roles.txt", "role app-exit function=CFE_ES_ExitApp def=cfe/modules/es/fsw/src/cfe_es_api.c:340 # cFE, OSAL OS_TaskCreate\n"}}}},
+      {"case-ids-data", false, {"only semantics/ is read", {{"lib/a.cpp", "// C1 R2\n"}, {"profiles/p.kzp", "C5\n"}}}},
+      {"case-ids", false, {"semantics/ is not engine code for case-ids", {{"semantics/roles.txt", "CFE_ES_RunLoop\n"}}}},
       {"case-ids", false, {"similar but different words", {{"lib/a.cpp", "int CRC32 = 0xC1; int R2D2; int sha256; int KZ_OS_X; int C10; int usr2; int SIGUSR2;\n"}}}},
       {"case-ids", false, {"words that only contain a case id as letters", {{"lib/a.cpp", "int pace1 = 1; int arc2 = 2; int revs = 3; int appendix = 4; int cfei;\n"}}}},
       {"case-ids", false, {"profiles and tests are allowed", {{"profiles/p.kzp", "R2 C1 CFE_SB_Global\n"}, {"tests/t.cpp", "// C3 R2\n"}}}},

@@ -1,0 +1,5 @@
+# The framework-layer data of the fixture plangen.c (the format of semantics/framework_api_roles.txt): its run loop and
+# its app exit, defined and declared in the fixture itself.  The sha256 is that of fixtures/plangen.c; a change of the
+# fixture changes it (test_static_plan fails until this line is updated).
+role run-loop function=run_loop def=plangen.c:69 def_sha256=a94096b7eea3ced7f599e37318d1f5d13d136436c39df989c6b5988cf277a969 decl=plangen.c:69 decl_sha256=a94096b7eea3ced7f599e37318d1f5d13d136436c39df989c6b5988cf277a969 version="fixture plangen.c"
+role app-exit function=app_exit def=plangen.c:71 def_sha256=a94096b7eea3ced7f599e37318d1f5d13d136436c39df989c6b5988cf277a969 decl=plangen.c:71 decl_sha256=a94096b7eea3ced7f599e37318d1f5d13d136436c39df989c6b5988cf277a969 version="fixture plangen.c"

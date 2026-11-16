@@ -1,0 +1,20 @@
+# Framework identifiers: the second list of the lint case-ids (case_identifiers.txt is the first; the format is the same).
+# Engine code (the scope of case-ids, see case_identifiers.txt) must not contain any of them: knowledge about the framework
+# is data in profiles/<profile>/*.kzp, in a basis record or in the framework-layer data files of semantics/, with
+# provenance.  The lint case-ids-data does not read this list: the framework-layer data names framework APIs by design.
+#
+# Symbols and names of one framework:
+word CFE_SB_Global
+word ILLEGAL_APP_ID
+regex \bCFE_[A-Za-z0-9_]+
+regex \bOS_[A-Za-z][A-Za-z0-9_]*
+# The framework and its modules, whatever the spelling (CFE_*, cfe_sb_task.c, EVS_x, osal_x ...):
+word cfe
+word evs
+word osal
+word psp
+word cfs
+word c_fs
+# Names of the pinned bundle that belong to the framework:
+word GetAppID
+word AppId

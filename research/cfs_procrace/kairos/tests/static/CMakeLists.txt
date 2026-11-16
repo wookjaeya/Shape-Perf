@@ -24,11 +24,16 @@
 #                    imgbudget_np (--no-profile --image-budget 4: the leaves and flags of the five cases together);
 #                    relincomplete.c for the incompleteness line of relations (relations rules revision 6):
 #                    relincomplete_np at the default image budget, relincomplete_cut_np at --image-budget 3, where its
-#                    name table and its table of thread entries are cut
+#                    name table and its table of thread entries are cut; plangen.c for `kz-static plan` (plan rules
+#                    revision 1): read by test_static_plan only (two apps started through a spawn operation, a name
+#                    registry with a lookup and a create API, a failure that reaches the app exit, two calls of one
+#                    callee on one line, a lookup in a loop, and with -DPLANGEN_SECOND_CALLER a second caller)
 #   data/reason_vocabulary.txt  the reason vocabulary of the judgement rules (JUDGEMENT_RULES_REV1.md 3.5);
 #                    test_static_reasons compares every reason `kz-static relations` can write with it, and every
 #                    `incomplete:` line of the relations goldens with the reasons the tool can write
-#   data/*.golden    the text view of the facts of each fixture and of the core executable
+#   data/*.golden    the text view of the facts of each fixture and of the core executable; plangen_np.plan.golden
+#                    the plan of plangen.c (manifest, sidecar, module table, executables; sha256 values and paths masked)
+#   data/plangen_framework.txt  the framework-layer data of plangen.c (its run loop and app exit)
 #   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table
 #                    walks, recipe, commit reader, link set, command line, basis -> extract on a
 #                    synthetic program, the P0 table and the wrapper derivation of the profile-free mode)
@@ -52,7 +57,7 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
 # clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
-set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete)
+set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete plangen)
 set(kz_golden_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations clobber flowfacts_np argflow_np lockset_np
     relations_np lockpaths_np relpaths_np relsound_np imgbudget_np relincomplete_np relincomplete_cut_np)
 foreach(kz_name IN LISTS kz_fixtures)
@@ -121,6 +126,13 @@ add_dependencies(test_static_elf32 kz-static)
 # (data/reason_vocabulary.txt), and the `incomplete:` lines of the relations goldens against the reasons the tool can write.
 kz_add_unit_test(test_static_reasons SOURCES test_static_reasons.cpp LIBS kz-llvm kz-testsupport LABEL static
   ARGS ${CMAKE_CURRENT_SOURCE_DIR}/data/reason_vocabulary.txt ${CMAKE_CURRENT_SOURCE_DIR}/data)
+
+# `kz-static plan` on plangen.c (plan rules revision 1, docs/plan_manifest.md): determinism, the runtime's host parser on the
+# manifest (kzrt-manifest; a test links it, no tool does), the observation rules, the priority port, the refusals, a second
+# caller, the golden text
+kz_add_unit_test(test_static_plan SOURCES test_static_plan.cpp LIBS kz-llvm kzrt-manifest kz-testsupport LABEL static
+  ARGS $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/work_plan)
+add_dependencies(test_static_plan kz-static)
 
 kz_add_unit_test(test_static_cli SOURCES test_static_cli.cpp LIBS kz-core kz-testsupport LABEL static
   ARGS $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${CMAKE_CURRENT_SOURCE_DIR}/objects ${kz_fixture_profile} ${CMAKE_C_COMPILER} ${CMAKE_CURRENT_BINARY_DIR})

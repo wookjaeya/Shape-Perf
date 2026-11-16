@@ -5,7 +5,7 @@
 //   kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]
 //   kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]
 //   kz-static relations <facts> [-o OUT] [--keys KEYS]
-//   kz-static order   <facts> [-o OUT] [--edges TSV]
+//   kz-static order   <facts> [-o OUT] [--edges TSV] [--caller-dependent-report FILE]
 //   kz-static plan    <facts> [--basis B] --framework F --select observation-set --order method-priority --budget SPEC
 //                     --budget-reason TEXT [--budget-disclosure TEXT] -o MANIFEST --sidecar SIDECAR --modules-out TABLE --exes-out LIST
 //   kz-static --identity
@@ -96,7 +96,8 @@ int usage() {
       "                         [--spawn-op N]... [--terminal-op N]... [--poll-fn N]... [--resource-dir D] [--extra-arg A]...\n"
       "                         [--extended-facts] [--argflow-depth N|none] [--argflow-size N|none] [--image-budget N]\n"
       "                         [--targets-rule R-T1,R-T2] [--accept-option-difference] [--object-access]\n"
-      "                         [--semantics FILE]... [--result-flow] [--text] [--section S]... [--verbose]\n"
+      "                         [--semantics FILE]... [--result-flow] [--loop-defs] [--lock-handles]\n"
+      "                         [--text] [--section S]... [--verbose]\n"
       "                         (--no-profile: the built-in profile and the P0 table only, no vocabulary options;\n"
       "                         delay, terminal and spawn operations derived through wrappers; --extended-facts:\n"
       "                         the sections READS, RETURNS, RET_CONSTS, LOOP_EXITS, ARGFLOW, PARAM_FLOW, PTR_FIELDS\n"
@@ -107,11 +108,14 @@ int usage() {
       "                         extended facts: the sections OBJECT_ACCESS, FIELD_TYPES and ARG_TYPES and the reading\n"
       "                         rules that come with them, docs/static_facts.md 5s; --semantics, with the extended\n"
       "                         facts: the semantics data files joined to the build as the section SEMANTICS, 5t;\n"
-      "                         --result-flow, with --no-profile: the sections RESULT_FLOW and RESULT_EFFECT, 5u)\n"
+      "                         --result-flow, with --no-profile: the sections RESULT_FLOW and RESULT_EFFECT, 5u;\n"
+      "                         --loop-defs, with --no-profile: the section LOOP_DEFS, the local definitions a wait's\n"
+      "                         condition reads and the predicate through them; --lock-handles, with --no-profile: the\n"
+      "                         section LOCK_HANDLES, lock identity by handle, 5v)\n"
       "       kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]\n"
       "       kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]\n"
       "       kz-static relations <facts> [-o OUT] [--keys KEYS]   (paths A/B/C and the outcome-flip signal; KEYS: the use-site key of each row; no field, callee or case name)\n"
-      "       kz-static order   <facts> [-o OUT] [--edges TSV]   (order edges with kinds and premises, waits, and the static order of each relations row; no field, callee or case name)\n"
+      "       kz-static order   <facts> [-o OUT] [--edges TSV] [--caller-dependent-report FILE]   (order edges with kinds and premises, waits, and the static order of each relations row; no field, callee or case name)\n"
       "       kz-static plan    <facts> [--basis B] --framework F --select observation-set --order method-priority\n"
       "                         --budget tier:D07|tier:directed|all|rows:<n> --budget-reason TEXT [--budget-disclosure TEXT]\n"
       "                         -o MANIFEST --sidecar SIDECAR --modules-out TABLE --exes-out LIST\n"

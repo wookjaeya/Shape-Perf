@@ -708,6 +708,19 @@ struct RFlowFact {
 };
 // What a call's outcome leads to inside its function, before the effect calls are classified (serialize.cpp classifies
 // them with the SEMANTICS rows and the call flags: an event send, an application exit, a terminal, or none).
+// Loop flag predicates (--loop-defs, the profile-free mode; static_facts.md 5v).  A row of LOOP_DEFS: one definition of a
+// local that the condition of a wait reads (`where` before the loop, in its body, in its condition, or none: after it or
+// elsewhere), with its value and the guard it runs under, and whether a predicate over that local is recognised; or the
+// loop's own row (`local` empty), whose `guard` is the predicate recognised with every such local replaced, and whose
+// `pred` names the forms used ("flag", "value", "flag+value").
+struct LoopDefFact {
+  std::string loop_key, func_key;
+  Pos pos;
+  ExprRef value = nullptr, guard = nullptr;
+  uint8_t where = 0, status = 0;  // KZ_LOOPDEF_*
+  uint16_t flags = 0;
+  std::string local, pred;
+};
 struct REffFact {
   enum Raw : uint8_t { kFinal = 0, kCall = 1, kExitViaStore = 2 };
   std::string call_key, func_key;
@@ -861,6 +874,11 @@ struct Model {
   struct RfStats {
     uint32_t calls_with_result = 0, calls_explored = 0, outcomes = 0, depth_cut = 0;
   } rf_stats;
+  // Loop flag predicates (--loop-defs): the rows of LOOP_DEFS, and what the rule counted.
+  std::vector<LoopDefFact> loopdefs;
+  struct LoopDefStats {
+    uint32_t loops = 0, recognised = 0, depth_cut = 0;
+  } loopdef_stats;
   struct ObjectStats {
     uint32_t decay_outcalls = 0;    // out-pointer calls whose argument is a target array field that decays
     uint32_t decay_escapes = 0;     // address-escape hits: the decayed pointer leaves otherwise (integer, store, ...)

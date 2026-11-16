@@ -31,6 +31,11 @@ const char* relations_rules_revision() { return "relations rules revision 9 (202
 // rows the lines absence and handling_label, on the creators the lines callee-check (result flow), on path B rows the line
 // handling_label.  Without those sections the rows are revision 9's to the byte, and the line `rules` names revision 9.
 const char* relations_result_flow_revision() { return "relations rules revision 10 (2026-11-16)"; }
+// Revision 11 adds to revision 10 only what facts with LOCK_HANDLES carry (static_facts.md 5v): on path C, a lock whose
+// identity is no static instance is one mutex at the spawn and at the read when every acquisition that holds it there passes
+// the same handle and that handle is a static instance with a verified semantics item (LOCK_HANDLES static-instance);
+// a common handle of another status is named in the row's text.  Without the section the rows are revision 10's.
+const char* relations_lock_handle_revision() { return "relations rules revision 11 (2026-11-16)"; }
 
 namespace {
 
@@ -687,6 +692,10 @@ class Rel : public RelFacts {
       os << "semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): " << basis_map_.at_or("count.semantics")
          << "; rows that name a function with framework semantics items " << n_sem_rows_ << ", of them with items not verified " << n_sem_unverified_rows_
          << " (sem-unverified(api:column) in the layers column; the P0 entries stay in P0-unverified)\n";
+    if (lock_handles_)
+      os << "rules with lock handles: " << relations_lock_handle_revision() << ", over LOCK_HANDLES (extract --lock-handles, docs/static_facts.md 5v): "
+         << basis_map_.at_or("count.lock_handles") << "; path C rows whose common lock is identified by its handle " << n_handle_rows_ << ", of them with a static-instance handle "
+         << n_handle_static_ << "\n";
     if (result_flow_) {
       os << "rules with result flow: " << relations_result_flow_revision() << ", over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): "
          << basis_map_.at_or("count.result_flow") << "; " << basis_map_.at_or("count.result_effect") << "\n";
@@ -1142,6 +1151,60 @@ class Rel : public RelFacts {
     return "#" + std::to_string(id) + " " + str(lockids_[id].text) + " (" + enum_text("KZ_LOCKID_STATUS", lockids_[id].status) + ")";
   }
   bool static_lock(uint32_t id) const { return id < lockids_.size() && lockids_[id].status == KZ_LOCKID_STATUS_STATIC; }
+  // revision 11 (LOCK_HANDLES): the handle of the acquisition at the call `site` of lock `id`: the LOCK_HANDLES rows of the
+  // callee's acquisitions of that lock, a handle that is a parameter of the callee read at this call (its ARGFLOW source a
+  // field of a global object, judged by FIELD_STATUS as the extraction judges a field handle).  False when there is none or
+  // the rows disagree.
+  bool handle_at(uint32_t site, uint32_t id, std::string* field, uint8_t* status, std::string* premise) const {
+    auto cit = call_by_site_.find(site);
+    if (cit == call_by_site_.end()) return false;
+    const kz_fact_call& c = calls_[cit->second];
+    auto hit = lockh_of_fn_.find(c.callee_fn);
+    if (hit == lockh_of_fn_.end()) return false;
+    bool any = false;
+    for (uint32_t hi : hit->second) {
+      const kz_fact_lockh& h = lockh_[hi];
+      if (h.lock_id != id || h.lockop >= lockops_.size() || lockops_[h.lockop].kind != KZ_LOCKOP_KIND_ACQUIRE) continue;
+      std::string f = str(h.field), pr = str(h.premise);
+      uint8_t st = h.status;
+      if (f.empty() && h.handle_root < exprs_.size() && exprs_[h.handle_root].op == KZ_EXPR_OP_LOAD && exprs_[h.handle_root].flags == KZ_EXPR_REF_PARAM) {
+        const uint32_t q = static_cast<uint32_t>(exprs_[h.handle_root].value);
+        auto af = argflow_at_.find({site, q});
+        if (af == argflow_at_.end()) return false;
+        const kz_fact_argflow& a = argflow_[af->second];
+        if (a.src != KZ_ARGSRC_FIELD || a.base != KZ_ARGBASE_GLOBAL || str(a.root).empty()) return false;
+        f = str(a.type) + "." + str(a.field);
+        auto fs = fstatus_of_.find(f);
+        if (fs == fstatus_of_.end() || fstatus_[fs->second].status_field != KZ_LOC_STATUS_COMPLETE) st = KZ_LOCKH_STATUS_WRITERS_INCOMPLETE;
+        else if (fstatus_[fs->second].once != KZ_FSTATUS_ONCE_ONCE) st = KZ_LOCKH_STATUS_NOT_STATIC;
+        else st = h.sem != kN ? KZ_LOCKH_STATUS_STATIC_INSTANCE : KZ_LOCKH_STATUS_SEM_UNVERIFIED;
+        pr = "the handle " + f + " passed at " + call_pos(cit->second) + " as parameter " + std::to_string(q) + " of " + fname(c.callee_fn) + " (" + enum_text("KZ_LOCKH_STATUS", st) + ")";
+      }
+      if (f.empty()) return false;
+      if (any && (f != *field || st != *status)) return false;
+      *field = f;
+      *status = st;
+      *premise = pr;
+      any = true;
+    }
+    return any;
+  }
+  // the common handle of every acquisition in `sites` of lock `id`
+  bool common_handle(const std::set<uint32_t>& sites, uint32_t id, std::string* field, uint8_t* status, std::string* premise) const {
+    if (sites.empty()) return false;
+    bool first = true;
+    for (uint32_t st : sites) {
+      std::string f, p;
+      uint8_t s = 0;
+      if (!handle_at(st, id, &f, &s, &p)) return false;
+      if (!first && (f != *field || s != *status)) return false;
+      *field = f;
+      *status = s;
+      if (first) *premise = p;
+      first = false;
+    }
+    return true;
+  }
   std::string held_text(uint32_t row) const {
     std::string t = "{";
     bool first = true;
@@ -2378,24 +2441,46 @@ class Rel : public RelFacts {
       text = cx.entry ? "the read holds no lock (it runs as the entry of the spawned thread, under no lock of a caller)" : "the read holds no lock";
     } else {
       uint32_t proven = kN, undec = kN, other = kN;
-      std::string other_why;
+      std::string other_why, proven_handle, undec_handle;
+      bool row_handle = false, row_handle_static = false;
+      // revision 11: the acquisitions that hold a lock at the read (the read's own and those at the call that reaches it)
+      std::set<uint32_t> ro;
+      if (lock_handles_) {
+        if (u_row != kN) ro = openers(u_row);
+        if (call_row != kN && !dropped)
+          for (uint32_t o : openers(call_row)) ro.insert(o);
+      }
       for (uint32_t id : hu) {
         if (common.count(id) == 0) continue;
         std::string why;
         if (continuous(id, &why)) {
+          std::string hf, hp, hf2, hp2;
+          uint8_t hst = 0, hst2 = 0;
+          const bool by_handle = !static_lock(id) && lock_handles_ && common_handle(so, id, &hf, &hst, &hp) && common_handle(ro, id, &hf2, &hst2, &hp2) && hf == hf2 && hst == hst2;
+          if (by_handle) row_handle = true;
           if (static_lock(id)) {
             if (proven == kN) proven = id;
+          } else if (by_handle && hst == KZ_LOCKH_STATUS_STATIC_INSTANCE) {
+            row_handle_static = true;
+            if (proven == kN) {
+              proven = id;
+              proven_handle = hf + " (" + hp + ")";
+            }
           } else if (undec == kN) {
             undec = id;
+            if (by_handle) undec_handle = hf + " " + enum_text("KZ_LOCKH_STATUS", hst) + " (" + hp + ")";
           }
         } else if (other == kN) {
           other = id;
           other_why = why;
         }
       }
+      if (row_handle) ++n_handle_rows_;
+      if (row_handle_static) ++n_handle_static_;
       if (proven != kN) {
         tag_static();
-        const std::string held_how = "lock " + lock_text(proven) + " is held from the same acquisition across the spawn and every write of " + x.tf + " after it in this call of " +
+        const std::string held_how = "lock " + lock_text(proven) + (proven_handle.empty() ? std::string() : ", one mutex by its handle " + proven_handle + ",") +
+                                     " is held from the same acquisition across the spawn and every write of " + x.tf + " after it in this call of " +
                                      fname(x.creator) + ", that acquisition is not reached again after the spawn, and the read holds it";
         auto fs = fstatus_of_.find(x.tf);
         // the functions whose lock sets this verdict reads that call a function returning twice
@@ -2477,12 +2562,17 @@ class Rel : public RelFacts {
                 "targets are not resolved calls only address-taken "
                 "functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)";
           text += "; rests on " + on;
+          if (!proven_handle.empty())
+            text += "; and the lock identity by handle (LOCK_HANDLES, relations rules revision 11): every acquisition at the spawn and at the read passes that handle, "
+                    "its field's writer set is complete per field with one writer instance that runs once, a verified semantics item says the operation acts on the "
+                    "object the handle references, and that object is not deleted and created again between the acquisitions";
         }
         note_lock_prims();
       } else if (undec != kN) {
         grade = "undecidable";
         text = "lock " + lock_text(undec) + " is held from the same acquisition across the spawn and every write after it, and the read holds it, but its identity is no static "
                "instance: that the read's lock and the writes' lock are one mutex is not proven (must identity, ED §3.3)";
+        if (!undec_handle.empty()) text += "; every acquisition of it at the spawn and at the read passes the handle " + undec_handle + ", which is no static instance with a verified semantics item";
         note_lock_prims();
       } else if (other != kN) {
         grade = "possible";
@@ -4100,6 +4190,7 @@ class Rel : public RelFacts {
   std::map<uint32_t, uint32_t> sem_items_;                   // function -> its framework SEMANTICS rows
   std::map<uint32_t, std::set<std::string>> sem_unverified_;  // function -> "api:column" of its rows not verified
   uint32_t n_sem_rows_ = 0, n_sem_unverified_rows_ = 0;
+  uint32_t n_handle_rows_ = 0, n_handle_static_ = 0;  // revision 11: path C rows whose common lock has one handle
   std::map<std::string, uint32_t> n_lab_;  // relations rules revision 10: rows per handling label
   mutable std::set<uint32_t> row_inc_;          // the incompleteness reasons of the row being written (Inc)
   std::set<uint32_t> global_inc_;               // the reasons of the whole facts (global_reasons)

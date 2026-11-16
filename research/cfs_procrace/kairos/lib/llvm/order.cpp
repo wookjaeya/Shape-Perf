@@ -32,6 +32,12 @@ const char* order_rules_revision() { return "order rules revision 2 (2026-11-16)
 // result of the wait's function (its guard rows) with their HB-await edges.  Without those sections the output is
 // revision 2's to the byte.
 const char* order_result_flow_revision() { return "order rules revision 3 (2026-11-16)"; }
+// Revision 4 adds to revision 3 only what facts with LOOP_DEFS and LOCK_HANDLES carry (static_facts.md 5v): a wait whose
+// FACT_LOOPS row has no predicate reads the predicate LOOP_DEFS recognises through the local definitions; a budget exit
+// that leaves the loop gives the caller-side budget values through the flag (the function's returns after the loop, the
+// flag's in-body definition left out); and an HB-lock edge names the source of its lock identity.  Without the sections
+// the output is revision 3's (or 2's) to the byte.
+const char* order_loop_lock_revision() { return "order rules revision 4 (2026-11-16)"; }
 
 namespace {
 
@@ -389,7 +395,11 @@ class Ord : public RelFacts {
       else
         for (uint32_t x : callers_of(g)) {
           if (x == ci || !in_code(calls_[x].caller_fn, t)) continue;
-          for (uint32_t r : children_on(x, t))
+          const std::set<uint32_t> via = children_on(x, t);
+          // the measurement of the under-approximation (OrderOptions::caller_dependent_report): a caller that passes on no
+          // resolved entry is taken to create any of the call's own threads
+          if (via.empty() && over_) out.insert(own.begin(), own.end());
+          for (uint32_t r : via)
             if (own.empty() || own.count(r) != 0) out.insert(r);
         }
     }
@@ -824,6 +834,12 @@ class Ord : public RelFacts {
               if (!rests.empty()) e.premises.push_back("rests on: " + rests);
               e.scope = "one call of " + fname(row.caller_fn) + " and the thread its spawn call " + call_pos(ci) + " creates";
               e.instance = "the acquisition of the lock in that call (held across the spawn and the write) and the reader's acquisition of it";
+              // order rules revision 4: the source of the lock identity
+              if (lock_handles_) {
+                const bool by_handle = row.feasibility.find("one mutex by its handle") != std::string::npos;
+                e.notes.push_back(std::string("lock identity source: ") + (by_handle ? "handle (LOCK_HANDLES; relations rules revision 11, the row names the handle)" : "must-static-instance (LOCK_IDS)"));
+                if (by_handle) ++n_lock_handle_edges_;
+              }
               jumps_[{w, pa}].push_back(Jump{read, q, add_edge(std::move(e)), true});
             }
         }
@@ -841,7 +857,8 @@ class Ord : public RelFacts {
   // uses are the calls whose guard rows (RESULT_FLOW) read the result of the call x, named by its definition, or the call
   // result itself; each guard is evaluated at every budget value: false at all of them, the use is skipped on the budget
   // exit (skip); true at all, it runs after it (continue); else not decided.  False with `note` when that is not given.
-  bool caller_side_uses(uint32_t fn, const std::vector<uint32_t>& exit_rows, const std::set<std::string>& budget, uint32_t x, std::vector<Use>* out, std::string* note) const {
+  bool caller_side_uses(uint32_t fn, const std::vector<uint32_t>& exit_rows, const std::set<std::string>& budget, uint32_t x, std::vector<Use>* out, std::string* note,
+                        uint32_t lx = kN) const {
     std::set<int64_t> B;
     bool falls = false;
     for (uint32_t xr : exit_rows) {
@@ -867,6 +884,20 @@ class Ord : public RelFacts {
           const kz_fact_return& r = returns_[ri];
           if (r.line == X.line && str(r.file) == str(X.file) && r.vkind == KZ_RET_VALUE_CONST) B.insert(r.value);
         }
+    }
+    std::string via_flag;
+    if (falls && loop_defs_ && lx != kN) {
+      // order rules revision 4: the loop's predicate is a flag (LOOP_DEFS); at a budget exit the flag does not hold its in-body
+      // value, so the function returns, after the loop, the constants of its returns there apart from the alternatives
+      // defined by the flag's in-body definition
+      std::string why;
+      if (flag_budget_values(lx, fn, &B, &why)) {
+        falls = false;
+        via_flag = "; through the flag of LOOP_DEFS";
+      } else {
+        *note = "a budget exit leaves the loop and goes on: " + why;
+        return false;
+      }
     }
     if (falls || B.empty()) {
       *note = falls ? "a budget exit leaves the loop and goes on: the value the function returns after it is not followed" : "no constant return at a budget exit";
@@ -912,7 +943,43 @@ class Ord : public RelFacts {
           ++n;
         }
       }
-    *note = std::to_string(n) + " uses under its result; budget exit returns " + bs;
+    *note = std::to_string(n) + " uses under its result; budget exit returns " + bs + via_flag;
+    if (!via_flag.empty()) ++n_flag_budget_;
+    return true;
+  }
+  // order rules revision 4: the constants the function `fn` returns after the loop `lx` when it leaves the loop by a budget
+  // exit, read through the loop's flag (LOOP_DEFS): every return after the loop and outside it must be a constant; an
+  // alternative whose definition is the flag's definition in the loop's body is left out (on a budget exit the condition
+  // part is false, so the flag holds no value of that definition).  False with `why` when that is not given.
+  bool flag_budget_values(uint32_t lx, uint32_t fn, std::set<int64_t>* B, std::string* why) const {
+    const kz_fact_loop& L = loops_[lx];
+    auto hit = loopdef_head_.find(L.site);
+    if (hit == loopdef_head_.end() || loopdefs_[hit->second].status != KZ_LOOPDEF_STATUS_RECOGNISED || str(loopdefs_[hit->second].pred).find("flag") == std::string::npos) {
+      *why = "the value the function returns after it is not followed (no flag predicate in LOOP_DEFS)";
+      return false;
+    }
+    std::set<std::pair<uint32_t, uint32_t>> flag_defs;
+    for (const kz_fact_loopdef& d : loopdefs_)
+      if (d.loop == L.site && !str(d.local).empty() && str(d.pred) == "flag" && d.where == KZ_LOOPDEF_WHERE_IN_BODY) flag_defs.insert({d.line, d.col});
+    const std::string f0 = str(L.file);
+    size_t n = 0;
+    auto rit = returns_of_.find(fn);
+    if (rit != returns_of_.end())
+      for (uint32_t ri : rit->second) {
+        const kz_fact_return& r = returns_[ri];
+        if (str(r.file) != f0 || r.line < L.line || (r.line == L.line && r.col <= L.col) || (r.loop != kN && in_loop(r.loop, lx))) continue;
+        if (r.vkind == KZ_RET_VALUE_CONST && !str(r.local).empty() && flag_defs.count({r.def_line, r.def_col}) != 0) continue;
+        if (r.vkind != KZ_RET_VALUE_CONST) {
+          *why = "a return after the loop at " + pos(str(r.file), r.line, r.col) + " is no constant (" + enum_text("KZ_RET_VALUE", r.vkind) + ")";
+          return false;
+        }
+        B->insert(r.value);
+        ++n;
+      }
+    if (n == 0) {
+      *why = "no return after the loop gives a constant";
+      return false;
+    }
     return true;
   }
   struct Wait {
@@ -986,13 +1053,25 @@ class Ord : public RelFacts {
       if (ait != awaits_of_.end())
         for (uint32_t x : ait->second)
           if (awaits_[x].loop == L.site) aw = &awaits_[x];
-      const bool recognised = L.pred_root != kN;
+      // order rules revision 4: the predicate LOOP_DEFS recognises through the local definitions, where FACT_LOOPS has none
+      const kz_fact_loopdef* ld = nullptr;
+      if (loop_defs_ && L.pred_root == kN) {
+        auto hit = loopdef_head_.find(L.site);
+        if (hit != loopdef_head_.end()) ld = &loopdefs_[hit->second];
+      }
+      const bool by_defs = ld != nullptr && ld->status == KZ_LOOPDEF_STATUS_RECOGNISED && ld->guard_root != kN;
+      const uint32_t pred_root = L.pred_root != kN ? L.pred_root : by_defs ? ld->guard_root : kN;
+      const bool recognised = pred_root != kN;
       if (recognised) ++n_recognised_;
-      w.lines.push_back("predicate: " + (recognised ? enum_text("KZ_PRED_FORM", L.pred_form) + " " + ex(L.pred_root) : "not recognised (" + str(L.cert_note) + ")") +
-                        (aw != nullptr ? "; AWAIT_L1 per-field " + enum_text("KZ_LOOP_CERT", aw->cert_field) : std::string("; no AWAIT_L1 row")));
+      if (by_defs) ++n_ld_recognised_;
+      std::string pline = "predicate: " + (L.pred_root != kN ? enum_text("KZ_PRED_FORM", L.pred_form) + " " + ex(L.pred_root)
+                                           : by_defs ? "through local definitions (LOOP_DEFS, form " + str(ld->pred) + ") " + ex(ld->guard_root)
+                                                     : "not recognised (" + str(L.cert_note) + ")");
+      if (ld != nullptr && !by_defs) pline += "; LOOP_DEFS " + enum_text("KZ_LOOPDEF_STATUS", ld->status);
+      w.lines.push_back(pline + (aw != nullptr ? "; AWAIT_L1 per-field " + enum_text("KZ_LOOP_CERT", aw->cert_field) : std::string("; no AWAIT_L1 row")));
       std::set<std::string> awaited;
       if (recognised) {
-        for (const std::string& f : refs(L.pred_root, KZ_EXPR_REF_FIELD)) awaited.insert(f);
+        for (const std::string& f : refs(pred_root, KZ_EXPR_REF_FIELD)) awaited.insert(f);
       }
       const std::set<std::string> cond_calls = call_results(L.cond_root);
       // the writers of the awaited fields in other threads (LOCKSET write rows)
@@ -1018,7 +1097,7 @@ class Ord : public RelFacts {
       }
       if (recognised && !awaited.empty()) {
         // the exit condition at the initial values: false means only a write can make the wait leave by it
-        const int at_init = init_vals.size() == awaited.size() ? eval(L.cond_root, init_vals, {}) : -1;
+        const int at_init = init_vals.size() == awaited.size() ? eval(by_defs ? pred_root : L.cond_root, init_vals, {}) : -1;
         init_ok = at_init == 0 ? 1 : at_init == 1 ? 0 : -1;
         std::vector<std::string> av(awaited.begin(), awaited.end());
         w.lines.push_back("awaited: " + join(av, ", ") + "; writers in other threads " + std::to_string(writers.size()) + (wtext.empty() ? std::string() : ": " + join(wtext, "; ")) +
@@ -1069,7 +1148,7 @@ class Ord : public RelFacts {
           else if (use == "discarded") cons = "continue";
           else if (result_flow_) {  // order rules revision 3
             std::string note;
-            cons = caller_side_uses(L.fn, exit_rows, budget, x, &side, &note) ? "caller-side(" + note + ")" : "unknown(" + note + ")";
+            cons = caller_side_uses(L.fn, exit_rows, budget, x, &side, &note, lx) ? "caller-side(" + note + ")" : "unknown(" + note + ")";
           } else cons = "unknown(the caller " + std::string(use == "tested" ? "tests" : "uses") + " the result; the conditions of its calls are not in these facts)";
           w.uses.push_back(Use{Ev{'c', x}, "the call of " + fname(L.fn) + " " + call_pos(x) + " in " + fname(calls_[x].caller_fn) + " (result " + use + ")", cons});
           n_caller_side_ += side.size();
@@ -1364,6 +1443,7 @@ class Ord : public RelFacts {
               for (uint32_t Q : qa) {
                 if (P == Q && (row.path == 'A' || pa.size() * qa.size() > 1)) continue;  // path A pairs creators of other threads only
                 const PairOrder po = pair(w, P, u, Q);
+                if (record_pairs_) pair_values_[o.id + " " + o.key + " | " + ev_text(w) + " " + actor_text(P) + " -> " + ev_text(u) + " " + actor_text(Q)] = po.value;
                 threads.insert(P);
                 threads.insert(Q);
                 std::string t = "pair: " + ev_text(w) + " " + actor_text(P) + " -> " + ev_text(u) + " " + actor_text(Q) + ": " + po.value;
@@ -1441,6 +1521,7 @@ class Ord : public RelFacts {
         if (!ctx.empty()) o.lines.push_back("threads started by: " + join(ctx, "; "));
         o.lines.push_back("opposite: " + (row.feasibility_grade.empty() ? std::string("-") : row.feasibility_grade) + " (the relations row's feasibility of the other order)");
         ++row_count_[std::string(1, row.path)][o.value];
+        if (record_pairs_) row_values_[o.id + " " + o.key] = o.value;
         rows_.push_back(std::move(o));
       }
   }
@@ -1454,6 +1535,10 @@ class Ord : public RelFacts {
     if (result_flow_)
       os << "rules with result flow: " << order_result_flow_revision() << ", over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects "
          << n_cws_rf_inner_ << "; caller-side uses of waits " << n_caller_side_ << ", HB-await edges to them " << n_await_caller_side_ << "\n";
+    if (loop_defs_ || lock_handles_)
+      os << "rules with loop definitions and lock handles: " << order_loop_lock_revision() << ", over LOOP_DEFS and LOCK_HANDLES (extract --loop-defs, --lock-handles, "
+         << "docs/static_facts.md 5v): waits with a predicate through local definitions " << n_ld_recognised_ << "; caller-side budget values through a flag " << n_flag_budget_
+         << "; HB-lock edges whose lock is identified by its handle " << n_lock_handle_edges_ << "\n";
     os << "kinds: hard: every execution in which both instances occur has them in this order, under the premises; conditional: only when the condition holds; "
           "observed-only: no rule of this revision orders them, a run record may show an order\n";
     os << "closure: hard_before and fixed_early_proved follow hard edges only; a conditional edge makes the path conditional (conditional_before, "
@@ -1552,15 +1637,111 @@ class Ord : public RelFacts {
   size_t n_spawn_calls_ = 0, n_cws_possible_ = 0, n_cws_none_ = 0, n_cws_unknown_ = 0, n_cws_positional_ = 0, n_poll_ = 0, n_bounded_ = 0, n_recognised_ = 0;
   mutable size_t n_cws_rf_inner_ = 0;  // order rules revision 3: inner spawn calls read from their RESULT_EFFECT rows
   size_t n_caller_side_ = 0, n_await_caller_side_ = 0;  // order rules revision 3: caller-side uses of waits, and their HB-await edges
+  // order rules revision 4: waits whose predicate comes from LOOP_DEFS, caller-side budget values through a flag, HB-lock edges
+  // whose lock is identified by its handle
+  size_t n_ld_recognised_ = 0, n_lock_handle_edges_ = 0;
+  mutable size_t n_flag_budget_ = 0;
+ public:
+  // the measurement of the caller-dependent spawn rule (OrderOptions::caller_dependent_report)
+  bool over_ = false;
+  std::map<std::string, std::string> pair_values_;  // row id and pair -> value (recorded when record_pairs_)
+  bool record_pairs_ = false;
+  std::map<std::string, std::string> row_values_;
+  // the callers of caller-dependent spawn calls that pass on no resolved entry: (spawn call, caller call)
+  void caller_dependent_census(size_t* calls, size_t* dep, size_t* callers, size_t* none, std::set<uint32_t>* none_callers, std::vector<std::string>* lines) {
+    for (size_t i = 0; i < calls_.size(); ++i) {
+      const uint32_t ci = static_cast<uint32_t>(i);
+      if (spawn_children(ci).empty()) continue;
+      ++*calls;
+      if (!caller_dependent(ci)) continue;
+      ++*dep;
+      for (uint32_t x : callers_of(calls_[ci].caller_fn)) {
+        if (x == ci) continue;
+        ++*callers;
+        bool passes = false, any_thread = false;
+        for (uint32_t t = 0; t < funcs_.size(); ++t) {
+          if (root_kind_.count(t) == 0 || !in_code(calls_[x].caller_fn, t)) continue;
+          any_thread = true;
+          if (!children_on(x, t).empty()) passes = true;
+        }
+        if (!passes) {
+          ++*none;
+          none_callers->insert(x);
+          lines->push_back("caller " + call_pos(x) + " in " + fname(calls_[x].caller_fn) + " of the caller-dependent spawn call " + call_pos(ci) + " in " + fname(calls_[ci].caller_fn) +
+                           ": passes on no resolved entry" + (any_thread ? std::string() : " (no thread's code has it)"));
+        }
+      }
+    }
+  }
 };
 
 }  // namespace
 
 kz::Status order_report(const kz::Container& facts, const OrderOptions& options, std::string* text, std::string* tsv) {
-  (void)options;
   if (facts.header().artifact_kind != KZ_ARTIFACT_FACTS) return kz::Status::error(kz::Err::Invalid, "not a facts container");
   Ord o(facts);
-  return o.run(text, tsv);
+  o.record_pairs_ = options.caller_dependent_report != nullptr;
+  kz::Status s = o.run(text, tsv);
+  if (!s.ok() || options.caller_dependent_report == nullptr) return s;
+  // the measurement of the caller-dependent spawn rule (static_facts.md 5v): the callers of caller-dependent spawn calls that
+  // pass on no resolved entry, and the pairs whose order a closure that lets such a caller create any of the call's own
+  // threads gives otherwise (an upper bound of what the rule leaves unordered: that closure may order pairs no run orders)
+  size_t n_calls = 0, n_dep = 0, n_callers = 0, n_none = 0;
+  std::set<uint32_t> none_callers;
+  std::vector<std::string> lines;
+  o.caller_dependent_census(&n_calls, &n_dep, &n_callers, &n_none, &none_callers, &lines);
+  Ord b(facts);
+  b.over_ = true;
+  b.record_pairs_ = true;
+  std::string bt, bs;
+  s = b.run(&bt, &bs);
+  if (!s.ok()) return s;
+  std::map<std::string, size_t> moved, rows_moved;
+  std::vector<std::string> pair_lines, row_lines;
+  size_t n_pairs = 0, n_unordered = 0;
+  for (const auto& [k, v] : o.pair_values_) {
+    ++n_pairs;
+    if (v == "unordered") ++n_unordered;
+    auto it = b.pair_values_.find(k);
+    const std::string nv = it == b.pair_values_.end() ? std::string("(no such pair)") : it->second;
+    if (nv == v) continue;
+    ++moved[v + " -> " + nv];
+    pair_lines.push_back(k + ": " + v + " -> " + nv);
+  }
+  size_t new_pairs = 0;
+  for (const auto& [k, v] : b.pair_values_)
+    if (o.pair_values_.count(k) == 0) {
+      ++new_pairs;
+      ++moved["(no such pair) -> " + v];
+      pair_lines.push_back(k + ": (no such pair) -> " + v);
+    }
+  for (const auto& [k, v] : o.row_values_) {
+    auto it = b.row_values_.find(k);
+    const std::string nv = it == b.row_values_.end() ? std::string("(no such row)") : it->second;
+    if (nv == v) continue;
+    ++rows_moved[v + " -> " + nv];
+    row_lines.push_back(k + ": " + v + " -> " + nv);
+  }
+  std::ostringstream os;
+  os << "kz-static order caller-dependent report (" << order_rules_revision() << "; the measurement of the caller-dependent spawn rule, docs/static_facts.md 5v)\n";
+  os << "facts " << kz::to_hex(facts.artifact_hash()) << "\n";
+  os << "spawn calls with resolved threads " << n_calls << ", caller-dependent " << n_dep << "; their callers " << n_callers << ", passing on no resolved entry " << n_none
+     << " (distinct caller calls " << none_callers.size() << ")\n";
+  os << "pairs of the rows " << n_pairs << " (unordered " << n_unordered << "); with every such caller taken to create any of the call's own threads, pairs whose value differs "
+     << pair_lines.size() << " (new pairs " << new_pairs << ")";
+  for (const auto& [k, n] : moved) os << "; " << k << " " << n;
+  os << "\n";
+  os << "rows whose value differs " << row_lines.size();
+  for (const auto& [k, n] : rows_moved) os << "; " << k << " " << n;
+  os << "\n";
+  os << "[callers] " << lines.size() << "\n";
+  for (const std::string& l : lines) os << "  " << l << "\n";
+  os << "[pairs] " << pair_lines.size() << "\n";
+  for (const std::string& l : pair_lines) os << "  " << l << "\n";
+  os << "[rows] " << row_lines.size() << "\n";
+  for (const std::string& l : row_lines) os << "  " << l << "\n";
+  *options.caller_dependent_report = os.str();
+  return s;
 }
 
 }  // namespace kzs

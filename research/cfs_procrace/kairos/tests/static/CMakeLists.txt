@@ -52,7 +52,13 @@
 #                    the relations rows of revision 10, resultflow_order_np with the order of revision 3: two definitions
 #                    of one local, a parameter returned unchanged, a failure returned up to a terminal, a retry, an exit
 #                    after a call that may change the stored status, child without success from the creation's value, a
-#                    caller-side use of a wait)
+#                    caller-side use of a wait);
+#                    looplock.c for loop flag predicates and lock identity by handle (extract --loop-defs, --lock-handles,
+#                    static_facts.md 5v; looplock_np with data/looplock_fixture/, a hand-written semantics data file that
+#                    names the argument role lock-object, and the relations rows of revision 11, looplock_order_np with the
+#                    order of revision 4: a flag wait under a guard that reads a call result and a field read into a local,
+#                    a retry on a call result, a flag defined twice and one whose address is taken, a lock taken by a handle
+#                    created once, by a handle passed as a parameter and by a handle created twice)
 #   data/reason_vocabulary.txt  the reason vocabulary of the judgement rules (JUDGEMENT_RULES_REV1.md 3.5);
 #                    test_static_reasons compares every reason `kz-static relations` can write with it, and every
 #                    `incomplete:` line of the relations goldens with the reasons the tool can write
@@ -83,10 +89,10 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
 # clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
-set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete relcallback plangen order anonrec objaccess plankey semantics resultflow)
+set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete relcallback plangen order anonrec objaccess plankey semantics resultflow looplock)
 set(kz_golden_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations clobber flowfacts_np argflow_np lockset_np
     relations_np lockpaths_np relpaths_np relsound_np imgbudget_np relincomplete_np relincomplete_cut_np relcallback_np order_np anonrec_np objaccess objaccess_off semantics_np
-    resultflow_np resultflow_order_np)
+    resultflow_np resultflow_order_np looplock_np looplock_order_np)
 foreach(kz_name IN LISTS kz_fixtures)
   add_test(NAME static_fixture_compile_${kz_name}
     COMMAND ${CMAKE_C_COMPILER} -std=c99 -pedantic -Wall -Wextra -Werror -c ${kz_fixture_dir}/${kz_name}.c -o ${CMAKE_CURRENT_BINARY_DIR}/${kz_name}.fixture.o)

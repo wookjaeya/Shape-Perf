@@ -53,6 +53,17 @@ kz::Status RelFacts::load() {
   result_flow_ = c_.find_section(KZ_SEC_RESULT_FLOW) != nullptr && c_.find_section(KZ_SEC_RESULT_EFFECT) != nullptr;
   for (size_t i = 0; i < rflow_.size(); ++i) rflow_of_site_[rflow_[i].site].push_back(static_cast<uint32_t>(i));
   for (size_t i = 0; i < reffect_.size(); ++i) reffect_of_site_[reffect_[i].site].push_back(static_cast<uint32_t>(i));
+  if (!(s = read(KZ_SEC_LOOP_DEFS, &loopdefs_)).ok()) return s;
+  if (!(s = read(KZ_SEC_LOCK_HANDLES, &lockh_)).ok()) return s;
+  if (!(s = read(KZ_SEC_LOCK_OPS, &lockops_)).ok()) return s;
+  loop_defs_ = c_.find_section(KZ_SEC_LOOP_DEFS) != nullptr;
+  lock_handles_ = c_.find_section(KZ_SEC_LOCK_HANDLES) != nullptr;
+  for (size_t i = 0; i < loopdefs_.size(); ++i) {
+    std::string l;
+    c_.string(loopdefs_[i].local, &l);
+    if (l.empty()) loopdef_head_.emplace(loopdefs_[i].loop, static_cast<uint32_t>(i));
+  }
+  for (size_t i = 0; i < lockh_.size(); ++i) lockh_of_fn_[lockh_[i].fn].push_back(static_cast<uint32_t>(i));
   return kz::Status::success();
 }
 

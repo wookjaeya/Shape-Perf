@@ -2205,6 +2205,76 @@ startup_script {
     KZ_CHECK(has(ord, " HB-await hard"));
   }
 
+  // ---- loop flag predicates and lock identity by handle (--loop-defs, --lock-handles, static_facts.md 5v; relations rules
+  // revision 11, order rules revision 4; the measurement of the caller-dependent spawn rule) ----
+  {
+    const fs::path X = work / "looplock";
+    fs::create_directories(X);
+    const std::string lc = fixtures + "/looplock.c";
+    const std::string ldata = fixtures + "/../data/looplock_fixture/framework_semantics_fixture-lock.txt";
+    std::string on, off, v, rel, ord, ord2, cdr;
+    // the options need the profile-free mode
+    for (const char* o : {"--loop-defs", "--lock-handles"}) {
+      KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --extended-facts --source " + q(lc) + " " + o + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+      KZ_CHECK(has(out, std::string(o) + " needs the profile-free mode (--no-profile)"));
+      KZ_CHECK(!fs::exists(X / "x.kz"));
+    }
+    const std::string common = q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(lc) + " --root " + q(fixtures) + " --result-flow --semantics " + q(ldata);
+    KZ_CHECK_EQ(run(common + " --loop-defs --lock-handles -o " + q((X / "on.kz").string()) + " -- -std=c99", &on), 0);
+    KZ_CHECK_EQ(run(common + " -o " + q((X / "off.kz").string()) + " -- -std=c99", &off), 0);
+    KZ_CHECK(has(on, "loop defs                    15 rows (loops 4: recognised 2, refused-reset-in-body 1, refused-address-taken 1; definition rows 11); recognised 2"));
+    KZ_CHECK(has(on, "lock handles                 8 rows (static-instance 2, semantics-unverified 0, writer-set-incomplete 0, not-static 6, of them no handle found 0)"));
+    KZ_CHECK(!has(off, "loop defs   ") && !has(off, "lock handles   "));
+    // without the options: no section, no BASIS item, and the relations and order of revisions 10 and 3 only
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "off.kz").string()), &v), 0);
+    KZ_CHECK(!has(v, "[loopdefs]") && !has(v, "[lockhandles]") && !has(v, "extract.loop_defs") && !has(v, "count.lock_handles"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "off.kz").string()), &rel), 0);
+    KZ_CHECK(!has(rel, "relations rules revision 11") && !has(rel, "by its handle"));
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "off.kz").string()), &ord), 0);
+    KZ_CHECK(!has(ord, "order rules revision 4") && !has(ord, "LOOP_DEFS") && !has(ord, "lock identity source"));
+    // with them: the flag and value rules, the refusals, the handles
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "on.kz").string()) + " --section loopdefs --section lockhandles --section basis", &v), 0);
+    KZ_CHECK(has(v, "extract.loop_defs = loop flag predicate rules revision 1 (2026-11-16) (--loop-defs;"));
+    KZ_CHECK(has(v, "extract.lock_handles = lock handle rules revision 1 (2026-11-16) (--lock-handles;"));
+    KZ_CHECK(has(v, " in get_task_function recognised form flag+value {under-lock,call-result} predicate (and (ne (call-result task_by_context) 0) (and (ne field:TaskRec.app_id 0) (ne field:TaskRec.entry 0)))"));
+    KZ_CHECK(has(v, "    rc@172:7 in-body at looplock.c:184:12 recognised flag {under-lock} value 0 guard (and (ne local:t 0) (and (ne field:TaskRec.app_id 0) (ne local:e 0)))"));
+    KZ_CHECK(has(v, "    e@174:10 in-body at looplock.c:182:9 recognised value {under-lock} value field:TaskRec.entry guard (ne local:t 0)"));
+    KZ_CHECK(has(v, " in retry_lookup recognised form value {call-result} predicate (ne (call-result name_lookup "));
+    KZ_CHECK(has(v, " in wait_reset refused-reset-in-body {}"));
+    KZ_CHECK(has(v, " in wait_addr refused-address-taken {}"));
+    KZ_CHECK(has(v, " shared_lock site 8 looplock.c:58:32 family MutRec.m static-instance {one-writer,writer-runs-once} field Shared.mutex handle field:Shared.mutex "));
+    KZ_CHECK(has(v, " twice_lock site 10 looplock.c:60:31 family MutRec.m not-static {} field Twice.mutex handle field:Twice.mutex "));
+    KZ_CHECK(has(v, "Twice.mutex: 2 writer instance(s), not one that runs once (FIELD_STATUS not-once)"));
+    KZ_CHECK(has(v, " param_lock site 12 looplock.c:62:37 family MutRec.m not-static {} handle param:h#0 "));
+    KZ_CHECK(has(v, " mut_take site 2 looplock.c:43:36 family MutRec.m not-static {} handle param:#0 "));
+    // relations rules revision 11: path C one mutex by its handle (also through a parameter); the twice-created handle named
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "on.kz").string()), &rel), 0);
+    KZ_CHECK(has(rel, "rules with lock handles: relations rules revision 11 (2026-11-16), over LOCK_HANDLES"));
+    KZ_CHECK(has(rel, "path C rows whose common lock is identified by its handle 3, of them with a static-instance handle 2"));
+    KZ_CHECK(has(rel, "feasibility: proven-impossible: lock #0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable), one mutex by its handle Shared.mutex (handle at looplock.c:58:32"));
+    KZ_CHECK(has(rel, "one mutex by its handle Shared.mutex (the handle Shared.mutex passed at looplock.c:123:3 as parameter 0 of param_lock (static-instance))"));
+    KZ_CHECK(has(rel, "every acquisition of it at the spawn and at the read passes the handle Twice.mutex not-static"));
+    // order rules revision 4: the predicate through LOOP_DEFS, the budget value through the flag, HB-lock by the handle
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "on.kz").string()) + " -o " + q((X / "ord.txt").string()), &out), 0);
+    KZ_CHECK(read_file((X / "ord.txt").string(), &ord));
+    KZ_CHECK(has(ord, "rules with loop definitions and lock handles: order rules revision 4 (2026-11-16), over LOOP_DEFS and LOCK_HANDLES"));
+    KZ_CHECK(has(ord, "waits with a predicate through local definitions 2; caller-side budget values through a flag 1; HB-lock edges whose lock is identified by its handle 2"));
+    KZ_CHECK(has(ord, "predicate: through local definitions (LOOP_DEFS, form flag+value) (and (ne (call-result task_by_context) 0)"));
+    KZ_CHECK(has(ord, "caller-side(3 uses under its result; budget exit returns -5; through the flag of LOOP_DEFS)"));
+    KZ_CHECK(has(ord, "lock identity source: handle (LOCK_HANDLES; relations rules revision 11, the row names the handle)"));
+    KZ_CHECK(has(ord, " HB-lock hard"));
+    KZ_CHECK(has(ord, " HB-await conditional"));
+    // the caller-dependent report: written apart, the order text the same with and without it
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(fixtures + "/order.c") + " --root " + q(fixtures) + " -o " + q((X / "ord.kz").string()) + " -- -std=c99", &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "ord.kz").string()) + " -o " + q((X / "o1.txt").string()), &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "ord.kz").string()) + " -o " + q((X / "o2.txt").string()) + " --caller-dependent-report " + q((X / "cdr.txt").string()), &out), 0);
+    KZ_CHECK(read_file((X / "o1.txt").string(), &ord) && read_file((X / "o2.txt").string(), &ord2) && ord == ord2);
+    KZ_CHECK(read_file((X / "cdr.txt").string(), &cdr));
+    KZ_CHECK(has(cdr, "kz-static order caller-dependent report (order rules revision 2 (2026-11-16);"));
+    KZ_CHECK(has(cdr, "spawn calls with resolved threads 23, caller-dependent 5; their callers 7, passing on no resolved entry 0 (distinct caller calls 0)"));
+    KZ_CHECK(has(cdr, "pairs whose value differs 0 (new pairs 0)"));
+  }
+
   fs::remove_all(work);
   return kztest::finish("test_static_cli");
 }

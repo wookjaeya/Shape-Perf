@@ -124,7 +124,9 @@ int cmd_extract(int argc, char** argv) {
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--basis", "--source", "--root", "--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn",
                    "--resource-dir", "--extra-arg", "--section", "--argflow-depth", "--argflow-size", "--image-budget", "--targets-rule", "--semantics", "-o"},
-                  {"--text", "--verbose", "--no-profile", "--extended-facts", "--accept-option-difference", "--object-access", "--result-flow"}, &args, &err)) {
+                  {"--text", "--verbose", "--no-profile", "--extended-facts", "--accept-option-difference", "--object-access", "--result-flow", "--loop-defs",
+                   "--lock-handles"},
+                  &args, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
   }
@@ -179,6 +181,15 @@ int cmd_extract(int argc, char** argv) {
     return 2;
   }
   spec.result_flow = args.has("--result-flow");
+  // loop flag predicates and lock identity by handle (static_facts.md 5v): the sections LOOP_DEFS and LOCK_HANDLES, written
+  // by the second pass of the profile-free mode (it has the derived lock vocabulary); off, the facts are written as before
+  for (const char* o : {"--loop-defs", "--lock-handles"})
+    if (args.has(o) && !no_profile) {
+      std::fprintf(stderr, "kz-static extract: %s needs the profile-free mode (--no-profile)\n", o);
+      return 2;
+    }
+  spec.loop_defs = args.has("--loop-defs");
+  spec.lock_handles = args.has("--lock-handles");
   // semantics with a verification state (static_facts.md 5t): the semantics data files joined to the build as the section
   // SEMANTICS; off, the facts are written as before
   std::vector<kzs::SemDataFile> sem_data;
@@ -479,6 +490,20 @@ int cmd_extract(int argc, char** argv) {
       }
     std::printf("result flow                  %s\n", rf.c_str());
     std::printf("result effect                %s\n", re.c_str());
+  }
+  if (spec.loop_defs || spec.lock_handles) {
+    std::string ld, lh;
+    std::vector<kz_basis_item> items;
+    if (c.read_section(KZ_SEC_BASIS, &items).ok())
+      for (const kz_basis_item& b : items) {
+        std::string name, value;
+        c.string(b.name, &name);
+        c.string(b.value, &value);
+        if (name == "count.loop_defs") ld = value;
+        if (name == "count.lock_handles") lh = value;
+      }
+    if (spec.loop_defs) std::printf("loop defs                    %s\n", ld.c_str());
+    if (spec.lock_handles) std::printf("lock handles                 %s\n", lh.c_str());
   }
   if (args.has("--text")) {
     kzs::TextOptions to;

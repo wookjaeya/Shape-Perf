@@ -1404,6 +1404,253 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
          KZ_POLICY_UNSET, KZ_NONE32);
   }
 
+  // ---- LOOP_DEFS and LOCK_HANDLES (--loop-defs, --lock-handles; kz_facts.h revision 10, static_facts.md 5v): after every
+  // other section's strings and expression roots (their roots are appended to FACT_EXPRS after all the others).
+  std::vector<kz_fact_loopdef> loopdef_rows;
+  if (spec.loop_defs) {
+    uint32_t heads = 0, recognised = 0, rows_local = 0;
+    std::map<uint8_t, uint32_t> by_status;
+    for (const LoopDefFact& f : m.loopdefs) {
+      kz_fact_loopdef r = zero<kz_fact_loopdef>();
+      auto lit = R.loop_site.find(f.loop_key);
+      r.loop = lit != R.loop_site.end() ? lit->second : KZ_NONE32;
+      r.fn = fn_of(f.func_key);
+      r.value_root = exprs.index_of(f.value);
+      r.guard_root = exprs.index_of(f.guard);
+      r.line = f.pos.line;
+      r.col = f.pos.col;
+      r.fh = fh_of(f.pos.file);
+      r.where = f.where;
+      r.status = f.status;
+      r.flags = f.flags;
+      r.local = w.intern(f.local);
+      r.pred = w.intern(f.pred);
+      if (f.local.empty()) {
+        ++heads;
+        ++by_status[f.status];
+        if (f.status == KZ_LOOPDEF_STATUS_RECOGNISED) ++recognised;
+      } else {
+        ++rows_local;
+      }
+      loopdef_rows.push_back(r);
+    }
+    item("extract.loop_defs",
+         "loop flag predicate rules revision 1 (2026-11-16) (--loop-defs; kz_facts.h revision 10): LOOP_DEFS, for each poll and count-bounded loop whose "
+         "condition exits read locals (FACT_LOOPS has no predicate), the definitions of those locals and the predicate with each local replaced: a flag (one "
+         "constant before the loop, one other constant in the loop's own body under a guard, the exits that test it the loop condition or decided directly "
+         "in the body: the guard) or a value (one definition in the body by a call result or an object read, before every use and under a prefix of its "
+         "conditions); the loop's own row (local empty) holds the predicate (static_facts.md 5v)",
+         KZ_POLICY_UNSET, KZ_NONE32);
+    std::string st;
+    for (const auto& [k, n] : by_status) st += (st.empty() ? "" : ", ") + std::string(k == KZ_LOOPDEF_STATUS_RECOGNISED ? "recognised" : k == KZ_LOOPDEF_STATUS_RESET_IN_BODY ? "refused-reset-in-body"
+                                                                                       : k == KZ_LOOPDEF_STATUS_ADDRESS_TAKEN ? "refused-address-taken" : k == KZ_LOOPDEF_STATUS_UNRESOLVED ? "refused-unresolved" : "not-examined") + " " + num(n);
+    item("count.loop_defs", num(loopdef_rows.size()) + " rows (loops " + num(heads) + ": " + (st.empty() ? std::string("none") : st) + "; definition rows " + num(rows_local) +
+                                "); recognised " + num(recognised) + "; subexpressions cut at param.walk_bounds' expression depth " + num(m.loopdef_stats.depth_cut) +
+                                " (not in count.walk_bounds_hit)",
+         KZ_POLICY_UNSET, KZ_NONE32);
+  }
+  std::vector<kz_fact_lockh> lockh_rows;
+  ExprPool lh_pool;  // the handle expressions of LOCK_HANDLES that no fact of the model has (a parameter of the operation)
+  if (spec.lock_handles && spec.extended_facts) {
+    // the calls of each function by callee name; the argument sources; the completeness of the fields; the SEMANTICS rows
+    // of argument role lock-object; the LOCK_IDS rows by text
+    std::map<std::pair<std::string, std::string>, std::vector<size_t>> calls_to;  // (caller key, callee name) -> calls
+    for (size_t i = 0; i < m.calls.size(); ++i) calls_to[{m.calls[i].caller_key, m.calls[i].callee_name}].push_back(i);
+    auto ckey = [&](const CallFact& c) { return c.pos.str() + "#" + std::to_string(c.ordinal); };
+    std::map<std::pair<std::string, uint32_t>, const ArgFlowFact*> arg_of;
+    for (const ArgFlowFact& f : m.argflows) arg_of[{f.call_key, f.arg_index}] = &f;
+    std::map<std::string, const FieldStatusFact*> fs_of;
+    for (const FieldStatusFact& f : m.field_status) fs_of[f.type + "." + f.field] = &f;
+    std::map<std::string, std::vector<size_t>> writers_of;
+    for (size_t i = 0; i < m.writers.size(); ++i) writers_of[m.writers[i].loc_type + "." + m.writers[i].loc_field].push_back(i);
+    std::map<std::pair<uint32_t, uint32_t>, uint32_t> lock_object_role;  // (fn, parameter) -> SEMANTICS row
+    if (opt.write_semantics)
+      for (size_t i = 0; i < opt.semantics.size(); ++i) {
+        const SemRow& x = opt.semantics[i];
+        if (x.layer == KZ_SEM_LAYER_FRAMEWORK && x.column == KZ_SEM_COLUMN_ARG_ROLE && x.fn != KZ_NONE32 && x.item.compare(0, 11, "lock-object") == 0 && x.verify != KZ_SEM_VERIFY_UNVERIFIED)
+          lock_object_role.emplace(std::make_pair(x.fn, x.pos), static_cast<uint32_t>(i));
+      }
+    std::map<std::string, uint32_t> lockid_of;
+    for (size_t i = 0; i < m.lock_ids.size(); ++i) lockid_of.emplace(m.lock_ids[i].text, static_cast<uint32_t>(i));
+    auto key_of_name = [&](const std::string& caller_key, const std::string& callee, size_t* call) -> bool {
+      auto it = calls_to.find({caller_key, callee});
+      if (it == calls_to.end() || it->second.size() != 1) return false;
+      *call = it->second.front();
+      return true;
+    };
+    // a handle argument: a value read from a field, a global, a parameter, a local, an element or a call result (no
+    // address, string, function or constant)
+    auto handle_src = [](uint8_t src) {
+      return src == KZ_ARGSRC_FIELD || src == KZ_ARGSRC_GLOBAL || src == KZ_ARGSRC_PARAM || src == KZ_ARGSRC_LOCAL || src == KZ_ARGSRC_ELEMENT || src == KZ_ARGSRC_CALL ||
+             src == KZ_ARGSRC_EXPR || src == KZ_ARGSRC_DEREF;
+    };
+    uint32_t n_static = 0, n_not_static = 0, n_incomplete = 0, n_sem = 0, n_none = 0;
+    for (size_t li = 0; li < m.lock_ops.size(); ++li) {
+      const LockOpFact& op = m.lock_ops[li];
+      if ((op.kind != KZ_LOCKOP_KIND_ACQUIRE && op.kind != KZ_LOCKOP_KIND_RELEASE) || op.ident.find("?(") == std::string::npos) continue;
+      // the chain's calls: step 0 is the call in the operation's function, step k the one call of the next function in the
+      // function of step k-1's callee
+      std::vector<std::string> names;
+      for (size_t a = 0; a <= op.chain.size();) {
+        const size_t b = op.chain.find(" -> ", a);
+        names.push_back(op.chain.substr(a, b == std::string::npos ? std::string::npos : b - a));
+        if (b == std::string::npos) break;
+        a = b + 4;
+      }
+      std::vector<size_t> steps;  // call indices
+      std::string why;
+      auto c0 = R.call_index.find(op.call_key);
+      if (c0 != R.call_index.end()) {
+        steps.push_back(c0->second);
+        for (size_t k = 2; k < names.size(); ++k) {
+          const CallFact& prev = m.calls[steps.back()];
+          size_t ci = 0;
+          if (prev.callee_key.empty() || !key_of_name(prev.callee_key, names[k], &ci)) break;
+          steps.push_back(ci);
+        }
+      }
+      // the step whose callee has a verified semantics item of argument role lock-object at a handle argument; else the
+      // deepest step whose call passes exactly one handle argument
+      size_t hstep = kNone;
+      uint32_t hpos = KZ_NONE32;
+      for (size_t k = 0; k < steps.size() && hstep == kNone; ++k) {
+        const CallFact& c = m.calls[steps[k]];
+        for (uint32_t p = 0; p < c.args.size(); ++p) {
+          auto af = arg_of.find({ckey(c), p});
+          if (af == arg_of.end() || !handle_src(af->second->src) || lock_object_role.count({fn_of(c.callee_key), p}) == 0) continue;
+          hstep = k;
+          hpos = p;
+          break;
+        }
+      }
+      for (size_t k = steps.size(); hstep == kNone && k-- > 0;) {
+        const CallFact& c = m.calls[steps[k]];
+        uint32_t n = 0, at = KZ_NONE32;
+        for (uint32_t p = 0; p < c.args.size(); ++p) {
+          auto af = arg_of.find({ckey(c), p});
+          if (af == arg_of.end() || !handle_src(af->second->src)) continue;
+          ++n;
+          at = p;
+        }
+        if (n == 1) {
+          hstep = k;
+          hpos = at;
+          break;
+        }
+        if (n > 1) {
+          why = "the call " + c.pos.str() + " of the chain passes " + std::to_string(n) + " values that may be its handle";
+          break;
+        }
+      }
+      kz_fact_lockh r = zero<kz_fact_lockh>();
+      r.lockop = static_cast<uint32_t>(li);
+      r.site = site_of_call(op.call_key);
+      r.fn = fn_of(op.func_key);
+      r.handle_root = KZ_NONE32;
+      r.writer = KZ_NONE32;
+      r.sem = KZ_NONE32;
+      auto lid = lockid_of.find(op.ident);
+      r.lock_id = lid != lockid_of.end() ? lid->second : KZ_NONE32;
+      r.status = KZ_LOCKH_STATUS_NONE;
+      std::string family = op.may.empty() ? op.ident : op.may, field, premise;
+      // the operation's own parameter, when a semantics item names it the lock object
+      uint32_t own_param = KZ_NONE32;
+      if (hstep == kNone) {
+        const uint32_t ofn = fn_of(op.func_key);
+        for (const auto& [k, row] : lock_object_role)
+          if (k.first == ofn) {
+            own_param = k.second;
+            r.sem = row;
+            break;
+          }
+      }
+      if (hstep == kNone && own_param != KZ_NONE32) {
+        r.status = KZ_LOCKH_STATUS_NOT_STATIC;
+        r.handle_root = exprs.index_of(lh_pool.load(KZ_EXPR_REF_PARAM, "", own_param));
+        premise = "the handle is parameter " + std::to_string(own_param) + " of " + names.front() + " (the semantics item " + opt.semantics[r.sem].item + ", " +
+                  opt.semantics[r.sem].source + "): its identity is the argument of each call of it";
+        ++n_not_static;
+      } else if (hstep == kNone) {
+        r.status = KZ_LOCKH_STATUS_NOT_STATIC;
+        premise = why.empty() ? std::string("no call of the chain passes one handle value (a value read from a field, a global, a parameter, a local or a call result)") : why;
+        ++n_none;
+        ++n_not_static;
+      } else {
+        // the handle at that step, followed up the chain while it is a parameter of the calling function
+        size_t k = hstep;
+        uint32_t p = hpos;
+        const ArgFlowFact* af = arg_of.at({ckey(m.calls[steps[k]]), p});
+        const CallFact& hc = m.calls[steps[hstep]];
+        while (af->src == KZ_ARGSRC_PARAM && af->param != kNone && k > 0) {
+          --k;
+          auto up = arg_of.find({ckey(m.calls[steps[k]]), af->param});
+          if (up == arg_of.end()) break;
+          af = up->second;
+        }
+        const uint32_t sem_fn = fn_of(hc.callee_key);
+        auto sit = lock_object_role.find({sem_fn, hpos});
+        if (sit != lock_object_role.end()) r.sem = sit->second;
+        const std::string sem_text = sit != lock_object_role.end() ? "the semantics item " + opt.semantics[sit->second].item + " of " + hc.callee_name + " argument " + std::to_string(hpos) +
+                                                                         " (" + opt.semantics[sit->second].source + ")"
+                                                                   : "no verified semantics item of argument role lock-object for " + hc.callee_name + " argument " + std::to_string(hpos);
+        if (af->src == KZ_ARGSRC_FIELD && !af->root.empty() && af->base == KZ_ARGBASE_GLOBAL) {
+          field = af->type.empty() ? af->field : af->type + "." + af->field;
+          r.handle_root = exprs.index_of(af->chain);
+          auto wl = writers_of.find(field);
+          size_t outptrs = 0, one = kNone;
+          if (wl != writers_of.end())
+            for (size_t wi : wl->second)
+              if (m.writers[wi].kind == KZ_WRITER_KIND_OUTPTR) {
+                ++outptrs;
+                one = wi;
+              }
+          if (outptrs == 1) r.writer = static_cast<uint32_t>(one);
+          auto fs = fs_of.find(field);
+          if (fs == fs_of.end() || fs->second->status_field != KZ_LOC_STATUS_COMPLETE) {
+            r.status = KZ_LOCKH_STATUS_WRITERS_INCOMPLETE;
+            premise = field + (fs == fs_of.end() ? std::string(" has no FIELD_STATUS row") : std::string(": the writer set is not complete (per-field rule)"));
+          } else if (fs->second->once != KZ_FSTATUS_ONCE_ONCE) {
+            r.status = KZ_LOCKH_STATUS_NOT_STATIC;
+            premise = field + ": " + std::to_string(fs->second->n_instances) + " writer instance(s), not one that runs once (FIELD_STATUS " +
+                      (fs->second->once == KZ_FSTATUS_ONCE_NO_WRITER ? "no-writer-instance" : "not-once") + ")";
+          } else {
+            r.flags |= KZ_LOCKH_FLAG_ONE_WRITER | KZ_LOCKH_FLAG_WRITER_ONCE;
+            r.status = r.sem != KZ_NONE32 ? KZ_LOCKH_STATUS_STATIC_INSTANCE : KZ_LOCKH_STATUS_SEM_UNVERIFIED;
+            premise = "the object the handle names is not deleted and created again between two operations (a run can check it)";
+          }
+          premise += "; " + sem_text;
+        } else if (af->src == KZ_ARGSRC_PARAM && af->param != kNone) {
+          r.status = KZ_LOCKH_STATUS_NOT_STATIC;
+          field = "";
+          r.handle_root = exprs.index_of(af->chain);
+          premise = "the handle is parameter " + std::to_string(af->param) + " of " + names.front() + ": its identity is the argument of each call of it; " + sem_text;
+        } else {
+          r.status = KZ_LOCKH_STATUS_NOT_STATIC;
+          r.handle_root = exprs.index_of(af->chain);
+          premise = "the handle is " + std::string(af->text.empty() ? "a value" : af->text) + ", not a field of a global object; " + sem_text;
+        }
+        if (!premise.empty()) premise = "handle at " + hc.pos.str() + " (" + hc.callee_name + " argument " + std::to_string(hpos) + "): " + premise;
+        if (r.status == KZ_LOCKH_STATUS_STATIC_INSTANCE) ++n_static;
+        else if (r.status == KZ_LOCKH_STATUS_WRITERS_INCOMPLETE) ++n_incomplete;
+        else if (r.status == KZ_LOCKH_STATUS_SEM_UNVERIFIED) ++n_sem;
+        else ++n_not_static;
+      }
+      r.family = w.intern(family);
+      r.field = w.intern(field);
+      r.premise = w.intern(premise);
+      lockh_rows.push_back(r);
+    }
+    item("extract.lock_handles",
+         "lock handle rules revision 1 (2026-11-16) (--lock-handles; kz_facts.h revision 10): LOCK_HANDLES, for each acquire and release of LOCK_OPS whose lock "
+         "identity is lost behind a call result, the handle the chain passes (the deepest call of the chain with one value argument, followed up while it is a "
+         "parameter), its field, the field's out-pointer writer and the SEMANTICS item of argument role lock-object of that call; static-instance when the "
+         "field's writer set is complete per field with one instance that runs once and the item is verified (static_facts.md 5v)",
+         KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.lock_handles", num(lockh_rows.size()) + " rows (static-instance " + num(n_static) + ", semantics-unverified " + num(n_sem) + ", writer-set-incomplete " +
+                                   num(n_incomplete) + ", not-static " + num(n_not_static) + ", of them no handle found " + num(n_none) + ")",
+         KZ_POLICY_UNSET, KZ_NONE32);
+  }
+
   // ---- add the sections (the writer sorts them canonically)
   kz::Status s;
   auto put = [&](uint32_t section, auto& rows) -> bool {
@@ -1429,6 +1676,8 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   if (spec.object_access && (!put(KZ_SEC_OBJECT_ACCESS, objacc_rows) || !put(KZ_SEC_FIELD_TYPES, ftype_rows) || !put(KZ_SEC_ARG_TYPES, argtype_rows))) return s;
   if (opt.write_semantics && !put(KZ_SEC_SEMANTICS, sem_rows)) return s;
   if (spec.result_flow && (!put(KZ_SEC_RESULT_FLOW, rflow_rows) || !put(KZ_SEC_RESULT_EFFECT, reffect_rows))) return s;
+  if (spec.loop_defs && !put(KZ_SEC_LOOP_DEFS, loopdef_rows)) return s;
+  if (spec.lock_handles && spec.extended_facts && !put(KZ_SEC_LOCK_HANDLES, lockh_rows)) return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;
   return w.finish(out);

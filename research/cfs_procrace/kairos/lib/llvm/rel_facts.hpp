@@ -190,6 +190,12 @@ struct RelFacts {
   std::vector<kz_fact_reffect> reffect_;  // RESULT_EFFECT; empty without it
   bool result_flow_ = false;              // the facts carry RESULT_FLOW and RESULT_EFFECT
   std::map<uint32_t, std::vector<uint32_t>> rflow_of_site_, reffect_of_site_;  // call site -> rows
+  std::vector<kz_fact_loopdef> loopdefs_;  // LOOP_DEFS (extract --loop-defs, static_facts.md 5v); empty without it
+  std::vector<kz_fact_lockh> lockh_;       // LOCK_HANDLES (extract --lock-handles); empty without it
+  std::vector<kz_fact_lockop> lockops_;    // LOCK_OPS (read for LOCK_HANDLES)
+  bool loop_defs_ = false, lock_handles_ = false;  // the facts carry LOOP_DEFS, LOCK_HANDLES
+  std::map<uint32_t, uint32_t> loopdef_head_;      // loop site -> its own LOOP_DEFS row
+  std::map<uint32_t, std::vector<uint32_t>> lockh_of_fn_;  // the operation's function -> LOCK_HANDLES rows
 
   struct BasisMap : std::map<std::string, std::string> {
     std::string at_or(const std::string& k) const {

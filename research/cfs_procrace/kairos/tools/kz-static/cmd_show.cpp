@@ -115,7 +115,7 @@ int cmd_relations(int argc, char** argv) {
 int cmd_order(int argc, char** argv) {
   Args args;
   std::string err;
-  if (!parse_args(argc, argv, 2, {"-o", "--edges"}, {}, &args, &err) || args.positional.size() != 1) {
+  if (!parse_args(argc, argv, 2, {"-o", "--edges", "--caller-dependent-report"}, {}, &args, &err) || args.positional.size() != 1) {
     std::fprintf(stderr, "kz-static order: %s\n", err.empty() ? "expected one facts file" : err.c_str());
     return 2;
   }
@@ -125,9 +125,18 @@ int cmd_order(int argc, char** argv) {
     std::fprintf(stderr, "kz-static order: %s is not a facts container\n", args.positional[0].c_str());
     return 2;
   }
-  std::string text, tsv;
-  const kz::Status s = kzs::order_report(c, kzs::OrderOptions{}, &text, &tsv);
+  std::string text, tsv, cdr;
+  kzs::OrderOptions oo;
+  if (args.has("--caller-dependent-report")) oo.caller_dependent_report = &cdr;
+  const kz::Status s = kzs::order_report(c, oo, &text, &tsv);
   if (!s.ok()) return fail("order", s.describe());
+  if (args.has("--caller-dependent-report")) {
+    const kz::Status w = kz::write_whole_file(args.one("--caller-dependent-report"), kz::Bytes(cdr.begin(), cdr.end()));
+    if (!w.ok()) {
+      std::fprintf(stderr, "kz-static order: %s\n", w.describe().c_str());
+      return 2;
+    }
+  }
   if (args.has("--edges")) {
     const kz::Status w = kz::write_whole_file(args.one("--edges"), kz::Bytes(tsv.begin(), tsv.end()));
     if (!w.ok()) {

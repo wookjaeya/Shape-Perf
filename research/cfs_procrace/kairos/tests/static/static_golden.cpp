@@ -63,6 +63,9 @@ const std::vector<std::string> kObjectSections = {"functions", "writers", "atype
 const std::vector<std::string> kSemSections = {"functions", "retconsts", "semantics"};
 // Result flow and effects (--result-flow, static_facts.md 5u): the two sections and the returns they are built on.
 const std::vector<std::string> kResultFlowSections = {"functions", "returns", "resultflow", "resulteffect"};
+// Loop flag predicates and lock identity by handle (--loop-defs, --lock-handles, static_facts.md 5v): the two sections and the
+// lock operations the handles are read from.
+const std::vector<std::string> kLoopLockSections = {"functions", "lockops", "lockids", "loopdefs", "lockhandles"};
 const std::vector<std::string> kObjectTargets = {"--extended-facts", "--target", "Mem.pool", "--target", "Mem.buf", "--target", "Mem.label", "--target", "Mem.tag",
                                                  "--target", "Mem.data", "--target", "Mem.raw", "--target", "Mem.count", "--target", "Chan.name"};
 std::vector<std::string> with_option(std::vector<std::string> v, const std::string& o) {
@@ -121,6 +124,14 @@ const std::vector<Case>& cases() {
       // of revision 3 over the same facts
       {"resultflow_np", "resultflow.c", {"--targets-rule", "R-T1,R-T2", "--result-flow"}, kResultFlowSections, true, true},
       {"resultflow_order_np", "resultflow.c", {"--targets-rule", "R-T1,R-T2", "--result-flow"}, kPathSections, true, false, true},
+      // loop flag predicates and lock identity by handle (static_facts.md 5v): looplock.c with a hand-written semantics data file
+      // that names the argument role lock-object, with the relations rows of revision 11 and, apart, the order of revision 4
+      {"looplock_np", "looplock.c",
+       {"--targets-rule", "R-T1,R-T2", "--result-flow", "--loop-defs", "--lock-handles", "--semantics", "@data/looplock_fixture/framework_semantics_fixture-lock.txt"},
+       kLoopLockSections, true, true},
+      {"looplock_order_np", "looplock.c",
+       {"--targets-rule", "R-T1,R-T2", "--result-flow", "--loop-defs", "--lock-handles", "--semantics", "@data/looplock_fixture/framework_semantics_fixture-lock.txt"},
+       kPathSections, true, false, true},
   };
   return all;
 }

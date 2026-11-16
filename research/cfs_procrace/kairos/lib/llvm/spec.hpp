@@ -101,6 +101,14 @@ struct ExtractSpec {
   // for them and the facts are written as before.
   bool result_flow = false;
   std::shared_ptr<const ResultValues> result_values;
+  // Loop flag predicates (--loop-defs, the profile-free mode; static_facts.md 5v): the section LOOP_DEFS, the local
+  // definitions the condition of a poll or count-bounded loop reads, and the predicate recognised through them where
+  // FACT_LOOPS has none.  Off, nothing is read for them and the facts are written as before.
+  bool loop_defs = false;
+  // Lock identity by handle (--lock-handles, the profile-free mode; static_facts.md 5v): the section LOCK_HANDLES, per
+  // lock operation whose lock identity is no static instance, the handle its chain passes and the writer and semantics
+  // item that identity rests on.  Off, the facts are written as before.
+  bool lock_handles = false;
 
   bool has_field(const FieldRef& f) const;
   std::set<std::string> field_types() const;

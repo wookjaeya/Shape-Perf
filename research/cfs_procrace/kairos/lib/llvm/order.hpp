@@ -40,10 +40,13 @@
 namespace kzs {
 
 const char* order_rules_revision();
+const char* order_loop_lock_revision();  // order rules revision 4: what facts with LOOP_DEFS and LOCK_HANDLES add
 const char* order_result_flow_revision();  // order rules revision 3: what facts with RESULT_FLOW and RESULT_EFFECT add
 
 struct OrderOptions {
-  // nothing yet: the query has no parameter that selects what it reports
+  // the measurement of the caller-dependent spawn rule (static_facts.md 5v): when set, the report is written there; the
+  // order text and the edges are not changed by it
+  std::string* caller_dependent_report = nullptr;
 };
 
 // the text (`text`) and one line per edge (`tsv`, with a header line)

@@ -20,7 +20,7 @@ constexpr uint32_t kViewElements = 64;
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
                                  "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits",
-                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits", "lockpaths", "objaccess", "ftypes", "argtypes", "semantics", "resultflow", "resulteffect"};
+                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits", "lockpaths", "objaccess", "ftypes", "argtypes", "semantics", "resultflow", "resulteffect", "loopdefs", "lockhandles"};
 
 class View {
  public:
@@ -57,7 +57,8 @@ class View {
                  {"lockpaths", KZ_SEC_LOCK_PATHS, &View::lockpaths},
                  {"objaccess", KZ_SEC_OBJECT_ACCESS, &View::objaccess}, {"ftypes", KZ_SEC_FIELD_TYPES, &View::ftypes},
                  {"argtypes", KZ_SEC_ARG_TYPES, &View::argtypes},      {"semantics", KZ_SEC_SEMANTICS, &View::semantics},
-                 {"resultflow", KZ_SEC_RESULT_FLOW, &View::resultflow}, {"resulteffect", KZ_SEC_RESULT_EFFECT, &View::resulteffect}};
+                 {"resultflow", KZ_SEC_RESULT_FLOW, &View::resultflow}, {"resulteffect", KZ_SEC_RESULT_EFFECT, &View::resulteffect},
+                 {"loopdefs", KZ_SEC_LOOP_DEFS, &View::loopdefs},       {"lockhandles", KZ_SEC_LOCK_HANDLES, &View::lockhandles}};
     for (const auto& t : added)
       if (c_.find_section(t.id) != nullptr && (o_.sections.empty() || o_.sections.count(t.name) != 0)) (this->*t.fn)(os);
     *out = os.str();
@@ -114,6 +115,8 @@ class View {
     if (!(s = read(KZ_SEC_SEMANTICS, &sem_)).ok()) return s;
     if (!(s = read(KZ_SEC_RESULT_FLOW, &rflow_)).ok()) return s;
     if (!(s = read(KZ_SEC_RESULT_EFFECT, &reffect_)).ok()) return s;
+    if (!(s = read(KZ_SEC_LOOP_DEFS, &loopdefs_)).ok()) return s;
+    if (!(s = read(KZ_SEC_LOCK_HANDLES, &lockh_)).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_by_site_[calls_[i].site] = i;
     for (size_t i = 0; i < loops_.size(); ++i) loop_by_site_[loops_[i].site] = i;
     return kz::Status::success();
@@ -772,6 +775,43 @@ class View {
       os << "      chain: " << str(r.chain) << "\n";
     }
   }
+  // LOOP_DEFS (--loop-defs, static_facts.md 5v): the loop's own row (the predicate recognised with the locals replaced, or
+  // why not) and one row per definition of each local its condition reads
+  void loopdefs(std::ostream& os) {
+    os << "[loopdefs] " << loopdefs_.size() << "\n";
+    for (const kz_fact_loopdef& r : loopdefs_) {
+      auto lit = loop_by_site_.find(r.loop);
+      const std::string local = str(r.local), pred = str(r.pred);
+      if (local.empty()) {
+        os << "  loop " << (lit != loop_by_site_.end() ? std::to_string(lit->second) : std::string("?")) << " " << fh_pos(r.fh, r.line, r.col) << " in " << fn_name(r.fn) << " "
+           << enum_text("KZ_LOOPDEF_STATUS", r.status) << (pred.empty() ? std::string() : " form " + pred) << " " << flags_text("KZ_LOOPDEF_FLAG", r.flags);
+        if (r.guard_root != KZ_NONE32) os << " predicate " << expr(r.guard_root);
+        os << "\n";
+        continue;
+      }
+      os << "    " << local << " " << enum_text("KZ_LOOPDEF_WHERE", r.where) << " at " << fh_pos(r.fh, r.line, r.col) << " " << enum_text("KZ_LOOPDEF_STATUS", r.status)
+         << (pred.empty() ? std::string() : " " + pred) << " " << flags_text("KZ_LOOPDEF_FLAG", r.flags);
+      if (r.value_root != KZ_NONE32) os << " value " << expr(r.value_root);
+      if (r.guard_root != KZ_NONE32) os << " guard " << expr(r.guard_root);
+      os << "\n";
+    }
+  }
+  // LOCK_HANDLES (--lock-handles, static_facts.md 5v): per lock operation whose identity is lost behind a call result, the
+  // handle, its field, writer and semantics item, the status and the premise
+  void lockhandles(std::ostream& os) {
+    os << "[lockhandles] " << lockh_.size() << "\n";
+    for (const kz_fact_lockh& r : lockh_) {
+      os << "  lockop " << r.lockop << " " << fn_name(r.fn) << " " << site_text(r.site) << " family " << str(r.family) << " " << enum_text("KZ_LOCKH_STATUS", r.status) << " "
+         << flags_text("KZ_LOCKH_FLAG", r.flags);
+      const std::string f = str(r.field);
+      if (!f.empty()) os << " field " << f;
+      if (r.handle_root != KZ_NONE32) os << " handle " << expr(r.handle_root);
+      if (r.writer != KZ_NONE32) os << " writer " << r.writer;
+      if (r.sem != KZ_NONE32) os << " sem " << r.sem;
+      if (r.lock_id != KZ_NONE32) os << " lock #" << r.lock_id;
+      os << "\n      premise: " << str(r.premise) << "\n";
+    }
+  }
   void fstatus(std::ostream& os) {
     os << "[fstatus] " << fstatus_.size() << "\n";
     for (const kz_fact_fstatus& r : fstatus_) {
@@ -959,6 +999,8 @@ class View {
   std::vector<kz_fact_sem> sem_;
   std::vector<kz_fact_rflow> rflow_;
   std::vector<kz_fact_reffect> reffect_;
+  std::vector<kz_fact_loopdef> loopdefs_;
+  std::vector<kz_fact_lockh> lockh_;
   std::vector<kz_fact_fstatus> fstatus_;
   std::vector<kz_fact_await> awaits_;
   std::map<uint32_t, size_t> call_by_site_, loop_by_site_;

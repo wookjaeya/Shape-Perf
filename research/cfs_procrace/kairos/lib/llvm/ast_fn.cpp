@@ -207,6 +207,9 @@ struct LoopCtx {
   std::vector<ExprRef> triggers;  // per exit (parallel to `exits`): the condition that decides it
   std::vector<Pos> exit_pos;      // per exit: where it is (the loop itself for the loop condition)
   std::vector<uint8_t> exit_kind; // per exit: KZ_LOOPEXIT_KIND (the loop condition, break, return, goto)
+  // per exit (--loop-defs): the conditions from the body down to it, the deciding one last (empty for the loop condition)
+  std::vector<std::vector<std::pair<const Expr*, bool>>> exit_body_guards;
+  const Expr* cond_e = nullptr;  // the loop condition, or null
   bool cond_exit = false;         // exits[0] is the negated loop condition
   const VarDecl* budget_var = nullptr;
   // A table walk: the element variable, and the walk found before the body is read.
@@ -225,6 +228,10 @@ struct LocalEvent {
   ExprRef guard_inner = nullptr;  // the guards from the innermost loop's body down to the event
   const Expr* rhs = nullptr;  // Other: the value assigned, if a plain assignment
   Pos pos;
+  // --loop-defs: the conditions from the innermost loop's body down to the event, and whether a lock of the vocabulary
+  // is held there (the walker's lock depth)
+  std::vector<std::pair<const Expr*, bool>> body_guards;
+  bool locked = false;
 };
 
 // What a finished inner loop leaves for the counter pattern of its enclosing loop.
@@ -1096,11 +1103,13 @@ class FnWalker {
     ctx->body_guard_base = guards_.size();
     ctx->is_for = is_for;
     ctx->has_cond = cond != nullptr;
+    ctx->cond_e = cond;
     if (cond != nullptr && cond_first) {
       ctx->exits.push_back(cond_expr(cond, false));
       ctx->triggers.push_back(ctx->exits.back());
       ctx->exit_pos.push_back(lf.pos);
       ctx->exit_kind.push_back(KZ_LOOPEXIT_KIND_COND);
+      ctx->exit_body_guards.emplace_back();
       ctx->cond_exit = true;
     }
     loops_.push_back(std::move(ctx));
@@ -1184,6 +1193,8 @@ class FnWalker {
       lf.budget = build_budget(lc);
     }
     if (lf.kind == KZ_LOOP_KIND_POLL || lf.kind == KZ_LOOP_KIND_COUNT_BOUNDED) extract_predicate(lc, &lf);
+    // --loop-defs (static_facts.md 5v): a wait whose condition reads locals, where FACT_LOOPS has no predicate
+    if (ext_ && spec_.loop_defs && (lf.kind == KZ_LOOP_KIND_POLL || lf.kind == KZ_LOOP_KIND_COUNT_BOUNDED) && lf.pred == nullptr && lf.cond != nullptr) emit_loop_defs(lc, lf);
     restrict_lock_kind(lc, &lf);
     // F3 (LOOP_EXITS): the same trees for every loop, and each exit on its own
     if (ext_) {
@@ -1331,6 +1342,336 @@ class FnWalker {
       lf->pred_form = KZ_PRED_FORM_COMBINED;
       lf->pred_note = "a combination of direct tests and counter-zero tests";
     }
+  }
+
+  // ---- --loop-defs (static_facts.md 5v): the local definitions a wait's condition reads ----------------------------
+  //
+  // For a poll or count-bounded loop whose condition exits read locals (FACT_LOOPS has no predicate), every local the
+  // condition reads is resolved through its definitions, and the predicate is the condition with each local replaced:
+  //   flag   one definition before the loop by a constant c0 and one in the loop's own body by a constant c1 != c0 under
+  //          the guard G (no other definition inside the loop, the address never taken), every use of the local in the
+  //          condition a comparison with c0 or c1, and every exit that tests it either the loop condition or decided by one
+  //          condition directly in the body: `f == c1` is G (the guard that held when the definition ran), `f == c0` its
+  //          negation;
+  //   value  one definition in the loop's own body by a call result or an object read (a load of a field or a global, a
+  //          subscript or a dereference of one), the address never taken, every use after it in the same iteration and
+  //          under the conditions the definition runs under (its guards a prefix of the use's), never the loop condition:
+  //          the local is the value assigned.
+  // A guard or a value that reads another local is resolved the same way (three levels).  The budget locals (FACT_LOOPS'
+  // budget, and the induction variable of a count-bounded loop) are no part of the condition.  Rows: one per definition
+  // of each local resolved or refused, and the loop's own row with the predicate.  FACT_LOOPS and AWAIT_L1 are not changed.
+  using GuardList = std::vector<std::pair<const Expr*, bool>>;
+  struct LdUse {
+    Pos pos;
+    GuardList prefix;      // the conditions the use runs under, from the body down (the deciding condition left out)
+    bool loop_cond = false;
+    bool exit = false;     // a use in an exit's test
+    bool top_level = false;  // an exit decided by one condition directly in the body (or the loop condition)
+  };
+  static bool guard_prefix(const GuardList& a, const GuardList& b) {
+    if (a.size() > b.size()) return false;
+    for (size_t i = 0; i < a.size(); ++i)
+      if (a[i] != b[i]) return false;
+    return true;
+  }
+  static bool same_value(int64_t a, int64_t b) {
+    return a == b || (a & 0xFFFFFFFFLL) == (b & 0xFFFFFFFFLL);
+  }
+  ExprRef ld_expr(const Expr* e) {
+    if (e == nullptr) return nullptr;
+    const uint32_t before = m_.stats.expr_depth_cut;
+    ExprRef x = to_expr(e);
+    m_.loopdef_stats.depth_cut += m_.stats.expr_depth_cut - before;
+    m_.stats.expr_depth_cut = before;  // a cut here is counted apart (BASIS count.loop_defs), not in count.walk_bounds_hit
+    return x;
+  }
+  ExprRef ld_cond(const Expr* c, bool polarity) {
+    ExprRef e = ld_expr(c);
+    if (e != nullptr && e->op != KZ_EXPR_OP_EQ && e->op != KZ_EXPR_OP_NE && e->op != KZ_EXPR_OP_LT && e->op != KZ_EXPR_OP_LE && e->op != KZ_EXPR_OP_GT &&
+        e->op != KZ_EXPR_OP_GE && e->op != KZ_EXPR_OP_AND && e->op != KZ_EXPR_OP_OR && e->op != KZ_EXPR_OP_NOT)
+      e = pool().binary(KZ_EXPR_OP_NE, e, pool().constant(0));
+    if (!polarity) e = pool().unary(KZ_EXPR_OP_NOT, e);
+    return e;
+  }
+  static bool object_read(ExprRef x) {
+    if (x == nullptr) return false;
+    if (x->op == KZ_EXPR_OP_LOAD) return x->ref == KZ_EXPR_REF_FIELD || x->ref == KZ_EXPR_REF_GLOBAL;
+    if (x->op == KZ_EXPR_OP_INDEX || x->op == KZ_EXPR_OP_DEREF) return object_read(x->a);
+    return false;
+  }
+  ExprRef subst_local(ExprRef e, const std::string& name, ExprRef with) {
+    if (e == nullptr) return nullptr;
+    if (e->op == KZ_EXPR_OP_LOAD && e->ref == KZ_EXPR_REF_LOCAL && e->name == name) return with;
+    if (e->op == KZ_EXPR_OP_LOAD || e->op == KZ_EXPR_OP_CONST) return e;
+    ExprRef a = subst_local(e->a, name, with), b = subst_local(e->b, name, with);
+    if (a == e->a && b == e->b) return e;
+    return pool().make(e->op, e->ref, e->value, e->name, a, b);
+  }
+  // `f == c1` -> G, `f != c1` -> not G, `f == c0` -> not G, `f != c0` -> G; any other use of f stays (the caller refuses)
+  ExprRef subst_flag(ExprRef e, const std::string& name, int64_t c0, int64_t c1, ExprRef g, bool* other) {
+    if (e == nullptr) return nullptr;
+    auto is_f = [&](ExprRef x) { return x != nullptr && x->op == KZ_EXPR_OP_LOAD && x->ref == KZ_EXPR_REF_LOCAL && x->name == name; };
+    auto is_c = [](ExprRef x) { return x != nullptr && x->op == KZ_EXPR_OP_CONST && x->a == nullptr; };
+    if ((e->op == KZ_EXPR_OP_EQ || e->op == KZ_EXPR_OP_NE) && ((is_f(e->a) && is_c(e->b)) || (is_c(e->a) && is_f(e->b)))) {
+      const int64_t v = is_c(e->b) ? e->b->value : e->a->value;
+      const bool eq = e->op == KZ_EXPR_OP_EQ;
+      if (same_value(v, c1)) return eq ? g : pool().unary(KZ_EXPR_OP_NOT, g);
+      if (same_value(v, c0)) return eq ? pool().unary(KZ_EXPR_OP_NOT, g) : g;
+      *other = true;
+      return e;
+    }
+    if (e->op == KZ_EXPR_OP_LOAD || e->op == KZ_EXPR_OP_CONST) {
+      if (is_f(e)) *other = true;
+      return e;
+    }
+    ExprRef a = subst_flag(e->a, name, c0, c1, g, other), b = subst_flag(e->b, name, c0, c1, g, other);
+    if (a == e->a && b == e->b) return e;
+    if (e->op == KZ_EXPR_OP_NOT) return pool().unary(KZ_EXPR_OP_NOT, a);
+    if (e->op == KZ_EXPR_OP_AND || e->op == KZ_EXPR_OP_OR) return pool().binary(e->op, a, b);
+    return pool().make(e->op, e->ref, e->value, e->name, a, b);
+  }
+  void emit_loop_defs(LoopCtx* lc, LoopFact& lf) {
+    ++m_.loopdef_stats.loops;
+    const size_t L = lc->index;
+    // the budget locals
+    std::set<std::string> budget;
+    if (lc->budget_var != nullptr) budget.insert(lid(lc->budget_var));
+    if (lf.kind == KZ_LOOP_KIND_COUNT_BOUNDED && lc->counted && lc->induction != nullptr) budget.insert(lid(lc->induction));
+    auto mentions_budget = [&](ExprRef x) {
+      for (const std::string& b : budget)
+        if (expr_mentions_local(x, b)) return true;
+      return false;
+    };
+    auto only_budget = [&](ExprRef x) {
+      std::set<std::string> loc;
+      collect_locals(x, &loc);
+      if (loc.empty()) return false;
+      for (const std::string& l : loc)
+        if (budget.count(l) == 0) return false;
+      return true;
+    };
+    // the condition exits with the budget parts removed (as extract_predicate does, over the budget set), and the uses
+    std::vector<ExprRef> terms;
+    std::map<std::string, std::vector<LdUse>> uses;
+    for (size_t i = 0; i < lc->exits.size(); ++i) {
+      ExprRef full = lc->exits[i];
+      if (full != nullptr && full->op == KZ_EXPR_OP_CONST && full->a == nullptr && full->value == 0) continue;
+      ExprRef trig = i < lc->triggers.size() ? lc->triggers[i] : nullptr;
+      ExprRef term = full;
+      if (trig != nullptr && mentions_budget(trig)) {
+        std::vector<ExprRef> ds, keep;
+        disjuncts(trig, &ds);
+        for (ExprRef d : ds)
+          if (!mentions_budget(d)) keep.push_back(d);
+        if (keep.empty()) continue;
+        ExprRef rest = nullptr;
+        if (full != trig && full != nullptr && full->op == KZ_EXPR_OP_AND && full->b == trig) rest = full->a;
+        else if (full != trig) rest = full;
+        term = pool().conj(KZ_EXPR_OP_AND, {rest, pool().conj(KZ_EXPR_OP_OR, keep)});
+      }
+      // the conjuncts that test only the budget (the loop condition of a counted loop among the guards of a break)
+      std::vector<ExprRef> cs, kept;
+      std::function<void(ExprRef)> conjuncts = [&](ExprRef x) {
+        if (x != nullptr && x->op == KZ_EXPR_OP_AND) {
+          conjuncts(x->a);
+          conjuncts(x->b);
+        } else if (x != nullptr) {
+          cs.push_back(x);
+        }
+      };
+      conjuncts(term);
+      bool all_budget = !cs.empty();
+      for (ExprRef c : cs) {
+        if (only_budget(c)) continue;
+        all_budget = false;
+        kept.push_back(c);
+      }
+      if (all_budget) continue;  // a budget exit
+      term = kept.empty() ? pool().constant(1) : pool().conj(KZ_EXPR_OP_AND, kept);
+      terms.push_back(term);
+      std::set<std::string> loc;
+      collect_locals(term, &loc);
+      const bool is_cond = i < lc->exit_kind.size() && lc->exit_kind[i] == KZ_LOOPEXIT_KIND_COND;
+      const GuardList bg = i < lc->exit_body_guards.size() ? lc->exit_body_guards[i] : GuardList();
+      for (const std::string& n : loc) {
+        LdUse u;
+        u.pos = lc->exit_pos[i];
+        u.loop_cond = is_cond;
+        u.exit = true;
+        u.top_level = is_cond || bg.size() <= 1;
+        if (!bg.empty()) u.prefix.assign(bg.begin(), bg.end() - 1);
+        uses[n].push_back(u);
+      }
+    }
+    LoopDefFact head;
+    head.loop_key = lf.key;
+    head.func_key = fkey_;
+    head.pos = lf.pos;
+    head.where = KZ_LOOPDEF_WHERE_NONE;
+    if (terms.empty()) {
+      head.status = KZ_LOOPDEF_STATUS_NOT_EXAMINED;
+      m_.loopdefs.push_back(head);
+      return;
+    }
+    ExprRef pred = pool().conj(KZ_EXPR_OP_OR, terms);
+    uint8_t status = KZ_LOOPDEF_STATUS_RECOGNISED;
+    uint16_t hflags = 0;
+    std::set<std::string> forms, done;
+    std::vector<LoopDefFact> rows;
+    for (int round = 0; round < 4 && status == KZ_LOOPDEF_STATUS_RECOGNISED; ++round) {
+      std::set<std::string> locals;
+      collect_free_locals(pred, &locals);
+      if (locals.empty()) break;
+      if (round == 3) {
+        status = KZ_LOOPDEF_STATUS_UNRESOLVED;
+        break;
+      }
+      for (const std::string& name : locals) {
+        const VarDecl* var = local_by_name(lc, name);
+        std::vector<LdUse> us = uses[name];
+        uint8_t st = KZ_LOOPDEF_STATUS_UNRESOLVED;
+        std::string form;
+        uint16_t fl = 0;
+        const LocalEvent* flag_ev = nullptr;
+        const LocalEvent* value_ev = nullptr;
+        int64_t c0 = 0, c1 = 0;
+        ExprRef value = nullptr;
+        if (var != nullptr && done.count(name) == 0 && budget.count(name) == 0) {
+          std::vector<const LocalEvent*> in;
+          bool inner = false;
+          const Pos decl_at = tu_.pos_of(var->getLocation());
+          for (const LocalEvent& ev : local_events_)
+            if (ev.var == var && std::find(ev.loops.begin(), ev.loops.end(), L) != ev.loops.end()) {
+              // a declaration without an initializer defines nothing
+              if (ev.rhs == nullptr && ev.kind == LocalEvent::Other && var->getInit() == nullptr && ev.pos.line == decl_at.line && ev.pos.col == decl_at.col && ev.pos.file == decl_at.file) continue;
+              in.push_back(&ev);
+              if (ev.loops.back() != L) inner = true;
+            }
+          const LocalInfo& li = locals_[var];
+          std::vector<const DefInfo*> before;
+          for (const DefInfo& d : li.defs)
+            if (!in_range(d.loc, lc->range) && sm_.isBeforeInTranslationUnit(sm_.getExpansionLoc(d.loc), sm_.getExpansionLoc(lc->range.getBegin()))) before.push_back(&d);
+          if (li.addr_taken) {
+            st = KZ_LOOPDEF_STATUS_ADDRESS_TAKEN;
+          } else if (inner) {
+            st = KZ_LOOPDEF_STATUS_UNRESOLVED;
+          } else if (in.size() > 1) {
+            st = KZ_LOOPDEF_STATUS_RESET_IN_BODY;
+          } else if (in.size() == 1 && in[0]->rhs != nullptr) {
+            const LocalEvent* ev = in[0];
+            int64_t v1 = 0, v0 = 0;
+            const bool k1 = tu_.eval_int(ev->rhs->IgnoreParenCasts(), &v1);
+            const bool k0 = before.size() == 1 && before[0]->rhs != nullptr && tu_.eval_int(before[0]->rhs->IgnoreParenCasts(), &v0);
+            bool exits_ok = !us.empty();
+            for (const LdUse& u : us)
+              if (!u.exit || !u.top_level) exits_ok = false;
+            if (k1 && k0 && !same_value(v0, v1) && exits_ok) {
+              flag_ev = ev;
+              c0 = v0;
+              c1 = v1;
+            } else if (!k1) {
+              ExprRef x = ld_expr(ev->rhs);
+              const bool cr = x != nullptr && x->op == KZ_EXPR_OP_CALL_RESULT;
+              bool ok = (cr || object_read(x)) && !us.empty();
+              for (const LdUse& u : us)
+                if (u.loop_cond || !(ev->pos < u.pos) || ev->pos.file != u.pos.file || !guard_prefix(ev->body_guards, u.prefix)) ok = false;
+              if (ok) {
+                value_ev = ev;
+                value = x;
+                if (cr) fl |= KZ_LOOPDEF_FLAG_CALL_RESULT;
+              }
+            }
+          }
+        }
+        if (flag_ev != nullptr) {
+          ExprRef g = flag_ev->guard_inner != nullptr ? flag_ev->guard_inner : pool().constant(1);
+          bool other = false;
+          ExprRef np = subst_flag(pred, name, c0, c1, g, &other);
+          if (!other && !expr_mentions_local(np, name)) {
+            pred = np;
+            st = KZ_LOOPDEF_STATUS_RECOGNISED;
+            form = "flag";
+            if (flag_ev->locked) fl |= KZ_LOOPDEF_FLAG_UNDER_LOCK;
+            // the locals the guard reads: used where each condition of the guard is tested
+            for (size_t k = 0; k < flag_ev->body_guards.size(); ++k) {
+              std::set<std::string> gl;
+              collect_locals(ld_cond(flag_ev->body_guards[k].first, flag_ev->body_guards[k].second), &gl);
+              for (const std::string& n : gl) {
+                LdUse u;
+                u.pos = tu_.pos_of(flag_ev->body_guards[k].first->getBeginLoc());
+                u.prefix.assign(flag_ev->body_guards.begin(), flag_ev->body_guards.begin() + static_cast<long>(k));
+                uses[n].push_back(u);
+              }
+            }
+          }
+        } else if (value_ev != nullptr) {
+          pred = subst_local(pred, name, value);
+          st = KZ_LOOPDEF_STATUS_RECOGNISED;
+          form = "value";
+          if (value_ev->locked) fl |= KZ_LOOPDEF_FLAG_UNDER_LOCK;
+          std::set<std::string> vl;
+          collect_locals(value, &vl);
+          for (const std::string& n : vl) {
+            LdUse u;
+            u.pos = value_ev->pos;
+            u.prefix = value_ev->body_guards;
+            uses[n].push_back(u);
+          }
+        }
+        done.insert(name);
+        if (st != KZ_LOOPDEF_STATUS_RECOGNISED) status = st;
+        else forms.insert(form);
+        hflags |= fl;
+        // one row per definition of the local
+        if (var != nullptr) {
+          const Pos decl = tu_.pos_of(var->getLocation());
+          const std::string lname = var->getNameAsString() + "@" + std::to_string(decl.line) + ":" + std::to_string(decl.col);
+          for (const DefInfo& d : locals_[var].defs) {
+            LoopDefFact r;
+            r.loop_key = lf.key;
+            r.func_key = fkey_;
+            r.pos = tu_.pos_of(d.loc);
+            r.local = lname;
+            r.status = st;
+            r.flags = fl;
+            r.pred = st == KZ_LOOPDEF_STATUS_RECOGNISED ? form : std::string();
+            const bool inside = in_range(d.loc, lc->range);
+            if (inside && lc->cond_e != nullptr && in_range(d.loc, lc->cond_e->getSourceRange())) r.where = KZ_LOOPDEF_WHERE_IN_CONDITION;
+            else if (inside) r.where = KZ_LOOPDEF_WHERE_IN_BODY;
+            else if (sm_.isBeforeInTranslationUnit(sm_.getExpansionLoc(d.loc), sm_.getExpansionLoc(lc->range.getBegin()))) r.where = KZ_LOOPDEF_WHERE_BEFORE_LOOP;
+            else r.where = KZ_LOOPDEF_WHERE_NONE;
+            r.value = d.rhs != nullptr ? ld_expr(d.rhs) : nullptr;
+            for (const LocalEvent& ev : local_events_)
+              if (ev.var == var && ev.pos.line == r.pos.line && ev.pos.col == r.pos.col && ev.pos.file == r.pos.file && std::find(ev.loops.begin(), ev.loops.end(), L) != ev.loops.end())
+                r.guard = ev.guard_inner;
+            rows.push_back(r);
+          }
+        } else {
+          LoopDefFact r;
+          r.loop_key = lf.key;
+          r.func_key = fkey_;
+          r.pos = lf.pos;
+          r.local = name;
+          r.status = st;
+          rows.push_back(r);
+        }
+        if (status != KZ_LOOPDEF_STATUS_RECOGNISED) break;
+      }
+    }
+    std::set<std::string> left;
+    collect_free_locals(pred, &left);
+    if (status == KZ_LOOPDEF_STATUS_RECOGNISED && !left.empty()) status = KZ_LOOPDEF_STATUS_UNRESOLVED;
+    head.status = status;
+    head.flags = hflags;
+    if (status == KZ_LOOPDEF_STATUS_RECOGNISED) {
+      head.guard = pred;
+      std::string f;
+      for (const std::string& x : forms) f += (f.empty() ? "" : "+") + x;
+      head.pred = f;
+      ++m_.loopdef_stats.recognised;
+    }
+    m_.loopdefs.push_back(head);
+    for (LoopDefFact& r : rows) m_.loopdefs.push_back(std::move(r));
   }
 
   // The disjuncts of a condition: `or` is split, and `not (and a b)` is `(not a) or (not b)`.
@@ -1763,6 +2104,9 @@ class FnWalker {
     lc->triggers.push_back(guards_.size() > lc->body_guard_base ? cond_expr(guards_.back().cond, guards_.back().polarity) : nullptr);
     lc->exit_pos.push_back(tu_.pos_of(at->getBeginLoc()));
     lc->exit_kind.push_back(kind);
+    std::vector<std::pair<const Expr*, bool>> bg;
+    for (size_t i = lc->body_guard_base; i < guards_.size(); ++i) bg.emplace_back(guards_[i].cond, guards_[i].polarity);
+    lc->exit_body_guards.push_back(std::move(bg));
   }
   void visit_break(const BreakStmt* s) {
     if (breakables_.empty() || breakables_.back() == nullptr) return;  // leaves a switch, not a loop
@@ -2882,6 +3226,10 @@ class FnWalker {
     ev.guard_inner = guard_from(loops_.back()->body_guard_base);
     ev.rhs = rhs;
     ev.pos = tu_.pos_of(loc);
+    if (spec_.loop_defs) {
+      for (size_t i = loops_.back()->body_guard_base; i < guards_.size(); ++i) ev.body_guards.emplace_back(guards_[i].cond, guards_[i].polarity);
+      ev.locked = lock_depth_ > 0;
+    }
     local_events_.push_back(ev);
   }
   bool is_const_value(const Expr* e, int64_t v) {

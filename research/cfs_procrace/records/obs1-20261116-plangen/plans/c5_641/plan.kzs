@@ -1,0 +1,433 @@
+# kz plan written by kz-static plan (plan rules revision 1 (2026-11-16); relations rules revision 6 (2026-11-16))
+# sidecar sha256=2276c1015f7b0f3adb83a9019851bcbf960154bb2e2cddced917e6c97da7aa28
+# every site: a label from the sorted site keys with its rule names, a ref to the facts it came from; the plan states what to record, never what to expect
+kzs-sites 3
+source build rev=basis-1481cc9d31a478fcda5a5954512ccfa990ab2f986dcd3bff2a55a0b11f4d29ef ref="the analysis basis: every source file read is hashed in its FILE_HASHES; no source tree revision checked (basis source.worktree_state)"
+module 1 name=/cf/apps/ci_lab.so source=build
+module 2 name=/cf/apps/sample_app.so source=build
+module 3 name=/cf/apps/sample_lib.so source=build
+module 4 name=/cf/apps/sch_lab.so source=build
+module 5 name=/cf/apps/to_lab.so source=build
+module 6 name=core-linux.bin source=build
+site 1 label=s0001.actor-root+actor-start op=entry.CI_Lab_AppMain phase=before tu=apps/ci_lab/fsw/src/ci_lab_app.c func=CI_Lab_AppMain ref="actor CI_Lab_AppMain (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine CI_Lab_AppMain"
+site 2 label=s0002.actor-root+actor-start op=entry.SAMPLE_AppMain phase=before tu=apps/sample_app/fsw/src/sample_app.c func=SAMPLE_AppMain ref="actor SAMPLE_AppMain (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine SAMPLE_AppMain"
+site 3 label=s0003.actor-root+actor-start op=entry.SAMPLE_LibInit phase=before tu=apps/sample_lib/fsw/src/sample_lib.c func=SAMPLE_LibInit ref="actor SAMPLE_LibInit (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine SAMPLE_LibInit"
+site 4 label=s0004.actor-root+actor-start op=entry.SCH_Lab_AppMain phase=before tu=apps/sch_lab/fsw/src/sch_lab_app.c func=SCH_Lab_AppMain ref="actor SCH_Lab_AppMain (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine SCH_Lab_AppMain"
+site 5 label=s0005.actor-root+actor-start op=entry.TO_Lab_AppMain phase=before tu=apps/to_lab/fsw/src/to_lab_app.c func=TO_Lab_AppMain ref="actor TO_Lab_AppMain (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine TO_Lab_AppMain"
+site 6 label=s0006.stop-event op=entry.CFE_ES_ExitApp phase=before tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_ExitApp ref="framework-layer data line 22: app-exit CFE_ES_ExitApp cfe/fsw/cfe-core/src/es/cfe_es_api.c:435 (cFE 6.4.1)"
+value 6 0 role=param0 from=arg0 type=u64
+site 7 label=s0007.stop-event op=entry.CFE_ES_RunLoop phase=before tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_RunLoop ref="framework-layer data line 21: run-loop CFE_ES_RunLoop cfe/fsw/cfe-core/src/es/cfe_es_api.c:540 (cFE 6.4.1)"
+value 7 0 role=param0 from=arg0 type=u64
+site 8 label=s0008.use-call op=call.OS_BinSemFlush phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_RunLoop callee=OS_BinSemFlush line=608 place=after-call ref="row 310c707efde8ec21"
+value 8 0 role=status from=ret type=s64
+site 9 label=s0009.use-call op=call.OS_BinSemFlush phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_RunLoop callee=OS_BinSemFlush line=608 place=at-call ref="row 310c707efde8ec21"
+value 9 0 role=field_value from=arg0 type=u64
+site 10 label=s0010.use-call op=call.OS_BinSemFlush phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_WaitForStartupSync callee=OS_BinSemFlush line=734 place=after-call ref="row 310c707efde8ec21"
+value 10 0 role=status from=ret type=s64
+site 11 label=s0011.use-call op=call.OS_BinSemFlush phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_WaitForStartupSync callee=OS_BinSemFlush line=734 place=at-call ref="row 310c707efde8ec21"
+value 11 0 role=field_value from=arg0 type=u64
+site 12 label=s0012.actor-root+actor-start op=entry.CFE_ES_PerfLogDump phase=before tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfLogDump ref="actor CFE_ES_PerfLogDump (spawn-entry); creation osal/src/os/posix/osapi.c:645:19 start routine CFE_ES_PerfLogDump"
+site 13 label=s0013.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfLogDump callee=OS_close line=339 place=after-call ref="row 4c3712db382fdfa0"
+value 13 0 role=status from=ret type=s64
+site 14 label=s0014.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfLogDump callee=OS_close line=350 place=after-call ref="row 4c3712db382fdfa0"
+value 14 0 role=status from=ret type=s64
+site 15 label=s0015.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfLogDump callee=OS_close line=364 place=after-call ref="row 4c3712db382fdfa0"
+value 15 0 role=status from=ret type=s64
+site 16 label=s0016.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfLogDump callee=OS_close line=377 place=after-call ref="row 4c3712db382fdfa0"
+value 16 0 role=status from=ret type=s64
+site 17 label=s0017.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfLogDump callee=OS_close line=339 place=at-call ref="row 4c3712db382fdfa0"
+value 17 0 role=field_value from=arg0 type=u64
+site 18 label=s0018.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfLogDump callee=OS_close line=350 place=at-call ref="row 4c3712db382fdfa0"
+value 18 0 role=field_value from=arg0 type=u64
+site 19 label=s0019.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfLogDump callee=OS_close line=364 place=at-call ref="row 4c3712db382fdfa0"
+value 19 0 role=field_value from=arg0 type=u64
+site 20 label=s0020.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfLogDump callee=OS_close line=377 place=at-call ref="row 4c3712db382fdfa0"
+value 20 0 role=field_value from=arg0 type=u64
+site 21 label=s0021.writer op=store.CFE_ES_PerfStopDataCmd phase=effect tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfStopDataCmd line=251 place=store ref="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:251:11"
+value 21 0 role=value from=operand0 type=u64
+value 21 1 role=address from=operand1 type=u64
+site 22 label=s0022.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfStopDataCmd callee=OS_close line=285 place=after-call ref="row 4c3712db382fdfa0"
+value 22 0 role=status from=ret type=s64
+site 23 label=s0023.writer op=call.strncpy phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfStopDataCmd callee=strncpy line=239 place=after-call ref="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:239:15"
+site 24 label=s0024.writer op=call.strncpy phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfStopDataCmd callee=strncpy line=245 place=after-call ref="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:245:15"
+site 25 label=s0025.use-call op=call.OS_close phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfStopDataCmd callee=OS_close line=285 place=at-call ref="row 4c3712db382fdfa0"
+value 25 0 role=field_value from=arg0 type=u64
+site 26 label=s0026.writer op=call.strncpy phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfStopDataCmd callee=strncpy line=239 place=at-call ref="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:239:15"
+value 26 0 role=arg0 from=arg0 type=u64
+value 26 1 role=arg1 from=arg1 type=u64
+value 26 2 role=arg2 from=arg2 type=u64
+site 27 label=s0027.writer op=call.strncpy phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_perf.c func=CFE_ES_PerfStopDataCmd callee=strncpy line=245 place=at-call ref="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:245:15"
+value 27 0 role=arg0 from=arg0 type=u64
+value 27 1 role=arg1 from=arg1 type=u64
+value 27 2 role=arg2 from=arg2 type=u64
+site 28 label=s0028.writer op=call.OS_BinSemCreate phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_start.c func=CFE_ES_Main callee=OS_BinSemCreate line=251 place=after-call ref="row 310c707efde8ec21 cfe/fsw/cfe-core/src/es/cfe_es_start.c:251:17"
+value 28 0 role=status from=ret type=s64
+value 28 1 role=out0 from=out0 type=u64
+site 29 label=s0029.use-call op=call.OS_BinSemFlush phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_start.c func=CFE_ES_Main callee=OS_BinSemFlush line=308 place=after-call ref="row 310c707efde8ec21"
+value 29 0 role=status from=ret type=s64
+site 30 label=s0030.writer op=call.OS_BinSemCreate phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_start.c func=CFE_ES_Main callee=OS_BinSemCreate line=251 place=at-call ref="row 310c707efde8ec21 cfe/fsw/cfe-core/src/es/cfe_es_start.c:251:17"
+value 30 0 role=arg0 from=arg0 type=u64
+value 30 1 role=arg1 from=arg1 type=u64
+value 30 2 role=arg2 from=arg2 type=u64
+value 30 3 role=arg3 from=arg3 type=u64
+site 31 label=s0031.use-call op=call.OS_BinSemFlush phase=point tu=cfe/fsw/cfe-core/src/es/cfe_es_start.c func=CFE_ES_Main callee=OS_BinSemFlush line=308 place=at-call ref="row 310c707efde8ec21"
+value 31 0 role=field_value from=arg0 type=u64
+site 32 label=s0032.use-call op=call.OS_MutSemGive phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=CFE_EVS_SetLoggingModeCmd callee=OS_MutSemGive line=324 place=after-call ref="row 15136ceffd23c14f"
+value 32 0 role=status from=ret type=s64
+site 33 label=s0033.use-call op=call.OS_MutSemTake phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=CFE_EVS_SetLoggingModeCmd callee=OS_MutSemTake line=322 place=after-call ref="row e1ccf563479366fe"
+value 33 0 role=status from=ret type=s64
+site 34 label=s0034.use-call op=call.OS_MutSemGive phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=CFE_EVS_SetLoggingModeCmd callee=OS_MutSemGive line=324 place=at-call ref="row 15136ceffd23c14f"
+value 34 0 role=field_value from=arg0 type=u64
+site 35 label=s0035.use-call op=call.OS_MutSemTake phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=CFE_EVS_SetLoggingModeCmd callee=OS_MutSemTake line=322 place=at-call ref="row e1ccf563479366fe"
+value 35 0 role=field_value from=arg0 type=u64
+site 36 label=s0036.use-call op=call.OS_MutSemGive phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=CFE_EVS_WriteLogFileCmd callee=OS_MutSemGive line=298 place=after-call ref="row 15136ceffd23c14f"
+value 36 0 role=status from=ret type=s64
+site 37 label=s0037.use-call op=call.OS_MutSemTake phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=CFE_EVS_WriteLogFileCmd callee=OS_MutSemTake line=213 place=after-call ref="row e1ccf563479366fe"
+value 37 0 role=status from=ret type=s64
+site 38 label=s0038.use-call op=call.OS_MutSemGive phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=CFE_EVS_WriteLogFileCmd callee=OS_MutSemGive line=298 place=at-call ref="row 15136ceffd23c14f"
+value 38 0 role=field_value from=arg0 type=u64
+site 39 label=s0039.use-call op=call.OS_MutSemTake phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=CFE_EVS_WriteLogFileCmd callee=OS_MutSemTake line=213 place=at-call ref="row e1ccf563479366fe"
+value 39 0 role=field_value from=arg0 type=u64
+site 40 label=s0040.use-call op=call.OS_MutSemGive phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=EVS_AddLog callee=OS_MutSemGive line=151 place=after-call ref="row 15136ceffd23c14f"
+value 40 0 role=status from=ret type=s64
+site 41 label=s0041.use-call op=call.OS_MutSemTake phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=EVS_AddLog callee=OS_MutSemTake line=110 place=after-call ref="row e1ccf563479366fe"
+value 41 0 role=status from=ret type=s64
+site 42 label=s0042.use-call op=call.OS_MutSemGive phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=EVS_AddLog callee=OS_MutSemGive line=151 place=at-call ref="row 15136ceffd23c14f"
+value 42 0 role=field_value from=arg0 type=u64
+site 43 label=s0043.use-call op=call.OS_MutSemTake phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=EVS_AddLog callee=OS_MutSemTake line=110 place=at-call ref="row e1ccf563479366fe"
+value 43 0 role=field_value from=arg0 type=u64
+site 44 label=s0044.use-call op=call.OS_MutSemGive phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=EVS_ClearLog callee=OS_MutSemGive line=184 place=after-call ref="row 15136ceffd23c14f"
+value 44 0 role=status from=ret type=s64
+site 45 label=s0045.use-call op=call.OS_MutSemTake phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=EVS_ClearLog callee=OS_MutSemTake line=173 place=after-call ref="row e1ccf563479366fe"
+value 45 0 role=status from=ret type=s64
+site 46 label=s0046.use-call op=call.OS_MutSemGive phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=EVS_ClearLog callee=OS_MutSemGive line=184 place=at-call ref="row 15136ceffd23c14f"
+value 46 0 role=field_value from=arg0 type=u64
+site 47 label=s0047.use-call op=call.OS_MutSemTake phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_log.c func=EVS_ClearLog callee=OS_MutSemTake line=173 place=at-call ref="row e1ccf563479366fe"
+value 47 0 role=field_value from=arg0 type=u64
+site 48 label=s0048.writer op=call.OS_MutSemCreate phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_task.c func=CFE_EVS_EarlyInit callee=OS_MutSemCreate line=224 place=after-call ref="row 15136ceffd23c14f cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:224:16; row e1ccf563479366fe cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:224:16"
+value 48 0 role=status from=ret type=s64
+value 48 1 role=out0 from=out0 type=u64
+site 49 label=s0049.writer op=call.OS_MutSemCreate phase=point tu=cfe/fsw/cfe-core/src/evs/cfe_evs_task.c func=CFE_EVS_EarlyInit callee=OS_MutSemCreate line=224 place=at-call ref="row 15136ceffd23c14f cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:224:16; row e1ccf563479366fe cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:224:16"
+value 49 0 role=arg0 from=arg0 type=u64
+value 49 1 role=arg1 from=arg1 type=u64
+value 49 2 role=arg2 from=arg2 type=u64
+site 50 label=s0050.writer op=store.CFE_SB_CreatePipe phase=effect tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe line=234 place=store ref="row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:234:5"
+value 50 0 role=value from=operand0 type=u64
+value 50 1 role=address from=operand1 type=u64
+site 51 label=s0051.writer op=store.CFE_SB_CreatePipe phase=effect tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe line=237 place=store ref="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:237:5"
+value 51 0 role=value from=operand0 type=u64
+value 51 1 role=address from=operand1 type=u64
+site 52 label=s0052.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=195 place=after-call ref="row 6ad5bc1537946337"
+value 52 0 role=status from=ret type=s64
+site 53 label=s0053.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=207 place=after-call ref="row 6ad5bc1537946337"
+value 53 0 role=status from=ret type=s64
+site 54 label=s0054.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=217 place=after-call ref="row 6ad5bc1537946337"
+value 54 0 role=status from=ret type=s64
+site 55 label=s0055.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=264 place=after-call ref="row 6ad5bc1537946337"
+value 55 0 role=status from=ret type=s64
+site 56 label=s0056.writer op=call.strcpy phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=strcpy line=241 place=after-call ref="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5; row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5; row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5"
+site 57 label=s0057.writer op=call.strncpy phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=strncpy line=242 place=after-call ref="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5; row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5; row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5"
+site 58 label=s0058.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=195 place=at-call ref="row 6ad5bc1537946337"
+value 58 0 role=field_value from=arg2 type=u64
+value 58 1 role=arg0 from=arg0 type=u64
+value 58 2 role=arg1 from=arg1 type=u64
+value 58 3 role=arg3 from=arg3 type=u64
+site 59 label=s0059.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=207 place=at-call ref="row 6ad5bc1537946337"
+value 59 0 role=field_value from=arg2 type=u64
+value 59 1 role=arg0 from=arg0 type=u64
+value 59 2 role=arg1 from=arg1 type=u64
+value 59 3 role=arg3 from=arg3 type=u64
+site 60 label=s0060.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=217 place=at-call ref="row 6ad5bc1537946337"
+value 60 0 role=field_value from=arg2 type=u64
+value 60 1 role=arg0 from=arg0 type=u64
+value 60 2 role=arg1 from=arg1 type=u64
+value 60 3 role=arg3 from=arg3 type=u64
+site 61 label=s0061.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=264 place=at-call ref="row 6ad5bc1537946337"
+value 61 0 role=field_value from=arg2 type=u64
+value 61 1 role=arg0 from=arg0 type=u64
+value 61 2 role=arg1 from=arg1 type=u64
+value 61 3 role=arg3 from=arg3 type=u64
+site 62 label=s0062.writer op=call.strcpy phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=strcpy line=241 place=at-call ref="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5; row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5; row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5"
+value 62 0 role=arg0 from=arg0 type=u64
+value 62 1 role=arg1 from=arg1 type=u64
+site 63 label=s0063.writer op=call.strncpy phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe callee=strncpy line=242 place=at-call ref="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5; row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5; row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5"
+value 63 0 role=arg0 from=arg0 type=u64
+value 63 1 role=arg1 from=arg1 type=u64
+value 63 2 role=arg2 from=arg2 type=u64
+site 64 label=s0064.writer op=store.CFE_SB_DeletePipeFull phase=effect tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_DeletePipeFull line=430 place=store ref="row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:430:5"
+value 64 0 role=value from=operand0 type=u64
+value 64 1 role=address from=operand1 type=u64
+site 65 label=s0065.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_DeletePipeFull callee=CFE_EVS_SendEventWithAppID line=366 place=after-call ref="row 6ad5bc1537946337"
+value 65 0 role=status from=ret type=s64
+site 66 label=s0066.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_DeletePipeFull callee=CFE_EVS_SendEventWithAppID line=378 place=after-call ref="row 6ad5bc1537946337"
+value 66 0 role=status from=ret type=s64
+site 67 label=s0067.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_DeletePipeFull callee=CFE_EVS_SendEventWithAppID line=445 place=after-call ref="row 6ad5bc1537946337"
+value 67 0 role=status from=ret type=s64
+site 68 label=s0068.use-call op=call.OS_QueueDelete phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_DeletePipeFull callee=OS_QueueDelete line=426 place=after-call ref="row a86d2e8fd5a85472"
+value 68 0 role=status from=ret type=s64
+site 69 label=s0069.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_DeletePipeFull callee=CFE_EVS_SendEventWithAppID line=366 place=at-call ref="row 6ad5bc1537946337"
+value 69 0 role=field_value from=arg2 type=u64
+value 69 1 role=arg0 from=arg0 type=u64
+value 69 2 role=arg1 from=arg1 type=u64
+value 69 3 role=arg3 from=arg3 type=u64
+site 70 label=s0070.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_DeletePipeFull callee=CFE_EVS_SendEventWithAppID line=378 place=at-call ref="row 6ad5bc1537946337"
+value 70 0 role=field_value from=arg2 type=u64
+value 70 1 role=arg0 from=arg0 type=u64
+value 70 2 role=arg1 from=arg1 type=u64
+value 70 3 role=arg3 from=arg3 type=u64
+site 71 label=s0071.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_DeletePipeFull callee=CFE_EVS_SendEventWithAppID line=445 place=at-call ref="row 6ad5bc1537946337"
+value 71 0 role=field_value from=arg2 type=u64
+value 71 1 role=arg0 from=arg0 type=u64
+value 71 2 role=arg1 from=arg1 type=u64
+value 71 3 role=arg3 from=arg3 type=u64
+site 72 label=s0072.use-call op=call.OS_QueueDelete phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_DeletePipeFull callee=OS_QueueDelete line=426 place=at-call ref="row a86d2e8fd5a85472"
+value 72 0 role=field_value from=arg0 type=u64
+site 73 label=s0073.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_GetLastSenderId callee=CFE_EVS_SendEventWithAppID line=1599 place=after-call ref="row 6ad5bc1537946337"
+value 73 0 role=status from=ret type=s64
+site 74 label=s0074.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_GetLastSenderId callee=CFE_EVS_SendEventWithAppID line=1608 place=after-call ref="row 6ad5bc1537946337"
+value 74 0 role=status from=ret type=s64
+site 75 label=s0075.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_GetLastSenderId callee=CFE_EVS_SendEventWithAppID line=1622 place=after-call ref="row 6ad5bc1537946337"
+value 75 0 role=status from=ret type=s64
+site 76 label=s0076.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_GetLastSenderId callee=CFE_EVS_SendEventWithAppID line=1599 place=at-call ref="row 6ad5bc1537946337"
+value 76 0 role=field_value from=arg2 type=u64
+value 76 1 role=arg0 from=arg0 type=u64
+value 76 2 role=arg1 from=arg1 type=u64
+value 76 3 role=arg3 from=arg3 type=u64
+site 77 label=s0077.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_GetLastSenderId callee=CFE_EVS_SendEventWithAppID line=1608 place=at-call ref="row 6ad5bc1537946337"
+value 77 0 role=field_value from=arg2 type=u64
+value 77 1 role=arg0 from=arg0 type=u64
+value 77 2 role=arg1 from=arg1 type=u64
+value 77 3 role=arg3 from=arg3 type=u64
+site 78 label=s0078.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_GetLastSenderId callee=CFE_EVS_SendEventWithAppID line=1622 place=at-call ref="row 6ad5bc1537946337"
+value 78 0 role=field_value from=arg2 type=u64
+value 78 1 role=arg0 from=arg0 type=u64
+value 78 2 role=arg1 from=arg1 type=u64
+value 78 3 role=arg3 from=arg3 type=u64
+site 79 label=s0079.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_RcvMsg callee=CFE_EVS_SendEventWithAppID line=1464 place=after-call ref="row 6ad5bc1537946337"
+value 79 0 role=status from=ret type=s64
+site 80 label=s0080.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_RcvMsg callee=CFE_EVS_SendEventWithAppID line=1476 place=after-call ref="row 6ad5bc1537946337"
+value 80 0 role=status from=ret type=s64
+site 81 label=s0081.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_RcvMsg callee=CFE_EVS_SendEventWithAppID line=1464 place=at-call ref="row 6ad5bc1537946337"
+value 81 0 role=field_value from=arg2 type=u64
+value 81 1 role=arg0 from=arg0 type=u64
+value 81 2 role=arg1 from=arg1 type=u64
+value 81 3 role=arg3 from=arg3 type=u64
+site 82 label=s0082.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_RcvMsg callee=CFE_EVS_SendEventWithAppID line=1476 place=at-call ref="row 6ad5bc1537946337"
+value 82 0 role=field_value from=arg2 type=u64
+value 82 1 role=arg0 from=arg0 type=u64
+value 82 2 role=arg1 from=arg1 type=u64
+value 82 3 role=arg3 from=arg3 type=u64
+site 83 label=s0083.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_ReadQueue callee=CFE_EVS_SendEventWithAppID line=2025 place=after-call ref="row 6ad5bc1537946337"
+value 83 0 role=status from=ret type=s64
+site 84 label=s0084.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_ReadQueue callee=CFE_EVS_SendEventWithAppID line=2025 place=at-call ref="row 6ad5bc1537946337"
+value 84 0 role=field_value from=arg2 type=u64
+value 84 1 role=arg0 from=arg0 type=u64
+value 84 2 role=arg1 from=arg1 type=u64
+value 84 3 role=arg3 from=arg3 type=u64
+site 85 label=s0085.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1146 place=after-call ref="row 6ad5bc1537946337"
+value 85 0 role=status from=ret type=s64
+site 86 label=s0086.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1164 place=after-call ref="row 6ad5bc1537946337"
+value 86 0 role=status from=ret type=s64
+site 87 label=s0087.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1182 place=after-call ref="row 6ad5bc1537946337"
+value 87 0 role=status from=ret type=s64
+site 88 label=s0088.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1209 place=after-call ref="row 6ad5bc1537946337"
+value 88 0 role=status from=ret type=s64
+site 89 label=s0089.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1234 place=after-call ref="row 6ad5bc1537946337"
+value 89 0 role=status from=ret type=s64
+site 90 label=s0090.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1367 place=after-call ref="row 6ad5bc1537946337"
+value 90 0 role=status from=ret type=s64
+site 91 label=s0091.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1385 place=after-call ref="row 6ad5bc1537946337"
+value 91 0 role=status from=ret type=s64
+site 92 label=s0092.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1400 place=after-call ref="row 6ad5bc1537946337"
+value 92 0 role=status from=ret type=s64
+site 93 label=s0093.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1146 place=at-call ref="row 6ad5bc1537946337"
+value 93 0 role=field_value from=arg2 type=u64
+value 93 1 role=arg0 from=arg0 type=u64
+value 93 2 role=arg1 from=arg1 type=u64
+value 93 3 role=arg3 from=arg3 type=u64
+site 94 label=s0094.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1164 place=at-call ref="row 6ad5bc1537946337"
+value 94 0 role=field_value from=arg2 type=u64
+value 94 1 role=arg0 from=arg0 type=u64
+value 94 2 role=arg1 from=arg1 type=u64
+value 94 3 role=arg3 from=arg3 type=u64
+site 95 label=s0095.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1182 place=at-call ref="row 6ad5bc1537946337"
+value 95 0 role=field_value from=arg2 type=u64
+value 95 1 role=arg0 from=arg0 type=u64
+value 95 2 role=arg1 from=arg1 type=u64
+value 95 3 role=arg3 from=arg3 type=u64
+site 96 label=s0096.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1209 place=at-call ref="row 6ad5bc1537946337"
+value 96 0 role=field_value from=arg2 type=u64
+value 96 1 role=arg0 from=arg0 type=u64
+value 96 2 role=arg1 from=arg1 type=u64
+value 96 3 role=arg3 from=arg3 type=u64
+site 97 label=s0097.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1234 place=at-call ref="row 6ad5bc1537946337"
+value 97 0 role=field_value from=arg2 type=u64
+value 97 1 role=arg0 from=arg0 type=u64
+value 97 2 role=arg1 from=arg1 type=u64
+value 97 3 role=arg3 from=arg3 type=u64
+site 98 label=s0098.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1367 place=at-call ref="row 6ad5bc1537946337"
+value 98 0 role=field_value from=arg2 type=u64
+value 98 1 role=arg0 from=arg0 type=u64
+value 98 2 role=arg1 from=arg1 type=u64
+value 98 3 role=arg3 from=arg3 type=u64
+site 99 label=s0099.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1385 place=at-call ref="row 6ad5bc1537946337"
+value 99 0 role=field_value from=arg2 type=u64
+value 99 1 role=arg0 from=arg0 type=u64
+value 99 2 role=arg1 from=arg1 type=u64
+value 99 3 role=arg3 from=arg3 type=u64
+site 100 label=s0100.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SendMsgFull callee=CFE_EVS_SendEventWithAppID line=1400 place=at-call ref="row 6ad5bc1537946337"
+value 100 0 role=field_value from=arg2 type=u64
+value 100 1 role=arg0 from=arg0 type=u64
+value 100 2 role=arg1 from=arg1 type=u64
+value 100 3 role=arg3 from=arg3 type=u64
+site 101 label=s0101.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=629 place=after-call ref="row 6ad5bc1537946337"
+value 101 0 role=status from=ret type=s64
+site 102 label=s0102.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=639 place=after-call ref="row 6ad5bc1537946337"
+value 102 0 role=status from=ret type=s64
+site 103 label=s0103.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=650 place=after-call ref="row 6ad5bc1537946337"
+value 103 0 role=status from=ret type=s64
+site 104 label=s0104.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=660 place=after-call ref="row 6ad5bc1537946337"
+value 104 0 role=status from=ret type=s64
+site 105 label=s0105.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=681 place=after-call ref="row 6ad5bc1537946337"
+value 105 0 role=status from=ret type=s64
+site 106 label=s0106.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=704 place=after-call ref="row 6ad5bc1537946337"
+value 106 0 role=status from=ret type=s64
+site 107 label=s0107.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=714 place=after-call ref="row 6ad5bc1537946337"
+value 107 0 role=status from=ret type=s64
+site 108 label=s0108.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=750 place=after-call ref="row 6ad5bc1537946337"
+value 108 0 role=status from=ret type=s64
+site 109 label=s0109.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=759 place=after-call ref="row 6ad5bc1537946337"
+value 109 0 role=status from=ret type=s64
+site 110 label=s0110.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=629 place=at-call ref="row 6ad5bc1537946337"
+value 110 0 role=field_value from=arg2 type=u64
+value 110 1 role=arg0 from=arg0 type=u64
+value 110 2 role=arg1 from=arg1 type=u64
+value 110 3 role=arg3 from=arg3 type=u64
+site 111 label=s0111.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=639 place=at-call ref="row 6ad5bc1537946337"
+value 111 0 role=field_value from=arg2 type=u64
+value 111 1 role=arg0 from=arg0 type=u64
+value 111 2 role=arg1 from=arg1 type=u64
+value 111 3 role=arg3 from=arg3 type=u64
+site 112 label=s0112.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=650 place=at-call ref="row 6ad5bc1537946337"
+value 112 0 role=field_value from=arg2 type=u64
+value 112 1 role=arg0 from=arg0 type=u64
+value 112 2 role=arg1 from=arg1 type=u64
+value 112 3 role=arg3 from=arg3 type=u64
+site 113 label=s0113.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=660 place=at-call ref="row 6ad5bc1537946337"
+value 113 0 role=field_value from=arg2 type=u64
+value 113 1 role=arg0 from=arg0 type=u64
+value 113 2 role=arg1 from=arg1 type=u64
+value 113 3 role=arg3 from=arg3 type=u64
+site 114 label=s0114.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=681 place=at-call ref="row 6ad5bc1537946337"
+value 114 0 role=field_value from=arg2 type=u64
+value 114 1 role=arg0 from=arg0 type=u64
+value 114 2 role=arg1 from=arg1 type=u64
+value 114 3 role=arg3 from=arg3 type=u64
+site 115 label=s0115.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=704 place=at-call ref="row 6ad5bc1537946337"
+value 115 0 role=field_value from=arg2 type=u64
+value 115 1 role=arg0 from=arg0 type=u64
+value 115 2 role=arg1 from=arg1 type=u64
+value 115 3 role=arg3 from=arg3 type=u64
+site 116 label=s0116.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=714 place=at-call ref="row 6ad5bc1537946337"
+value 116 0 role=field_value from=arg2 type=u64
+value 116 1 role=arg0 from=arg0 type=u64
+value 116 2 role=arg1 from=arg1 type=u64
+value 116 3 role=arg3 from=arg3 type=u64
+site 117 label=s0117.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=750 place=at-call ref="row 6ad5bc1537946337"
+value 117 0 role=field_value from=arg2 type=u64
+value 117 1 role=arg0 from=arg0 type=u64
+value 117 2 role=arg1 from=arg1 type=u64
+value 117 3 role=arg3 from=arg3 type=u64
+site 118 label=s0118.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=759 place=at-call ref="row 6ad5bc1537946337"
+value 118 0 role=field_value from=arg2 type=u64
+value 118 1 role=arg0 from=arg0 type=u64
+value 118 2 role=arg1 from=arg1 type=u64
+value 118 3 role=arg3 from=arg3 type=u64
+site 119 label=s0119.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=1004 place=after-call ref="row 6ad5bc1537946337"
+value 119 0 role=status from=ret type=s64
+site 120 label=s0120.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=1014 place=after-call ref="row 6ad5bc1537946337"
+value 120 0 role=status from=ret type=s64
+site 121 label=s0121.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=922 place=after-call ref="row 6ad5bc1537946337"
+value 121 0 role=status from=ret type=s64
+site 122 label=s0122.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=931 place=after-call ref="row 6ad5bc1537946337"
+value 122 0 role=status from=ret type=s64
+site 123 label=s0123.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=943 place=after-call ref="row 6ad5bc1537946337"
+value 123 0 role=status from=ret type=s64
+site 124 label=s0124.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=955 place=after-call ref="row 6ad5bc1537946337"
+value 124 0 role=status from=ret type=s64
+site 125 label=s0125.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=1004 place=at-call ref="row 6ad5bc1537946337"
+value 125 0 role=field_value from=arg2 type=u64
+value 125 1 role=arg0 from=arg0 type=u64
+value 125 2 role=arg1 from=arg1 type=u64
+value 125 3 role=arg3 from=arg3 type=u64
+site 126 label=s0126.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=1014 place=at-call ref="row 6ad5bc1537946337"
+value 126 0 role=field_value from=arg2 type=u64
+value 126 1 role=arg0 from=arg0 type=u64
+value 126 2 role=arg1 from=arg1 type=u64
+value 126 3 role=arg3 from=arg3 type=u64
+site 127 label=s0127.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=922 place=at-call ref="row 6ad5bc1537946337"
+value 127 0 role=field_value from=arg2 type=u64
+value 127 1 role=arg0 from=arg0 type=u64
+value 127 2 role=arg1 from=arg1 type=u64
+value 127 3 role=arg3 from=arg3 type=u64
+site 128 label=s0128.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=931 place=at-call ref="row 6ad5bc1537946337"
+value 128 0 role=field_value from=arg2 type=u64
+value 128 1 role=arg0 from=arg0 type=u64
+value 128 2 role=arg1 from=arg1 type=u64
+value 128 3 role=arg3 from=arg3 type=u64
+site 129 label=s0129.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=943 place=at-call ref="row 6ad5bc1537946337"
+value 129 0 role=field_value from=arg2 type=u64
+value 129 1 role=arg0 from=arg0 type=u64
+value 129 2 role=arg1 from=arg1 type=u64
+value 129 3 role=arg3 from=arg3 type=u64
+site 130 label=s0130.use-call op=call.CFE_EVS_SendEventWithAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_UnsubscribeFull callee=CFE_EVS_SendEventWithAppID line=955 place=at-call ref="row 6ad5bc1537946337"
+value 130 0 role=field_value from=arg2 type=u64
+value 130 1 role=arg0 from=arg0 type=u64
+value 130 2 role=arg1 from=arg1 type=u64
+value 130 3 role=arg3 from=arg3 type=u64
+site 131 label=s0131.writer op=store.CFE_SB_InitPipeTbl phase=effect tu=cfe/fsw/cfe-core/src/sb/cfe_sb_init.c func=CFE_SB_InitPipeTbl line=226 place=store ref="row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_init.c:226:9"
+value 131 0 role=value from=operand0 type=u64
+value 131 1 role=address from=operand1 type=u64
+site 132 label=s0132.writer op=call.CFE_ES_GetAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_task.c func=CFE_SB_AppInit callee=CFE_ES_GetAppID line=198 place=after-call ref="row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_task.c:198:5"
+value 132 0 role=status from=ret type=s64
+value 132 1 role=out0 from=out0 type=u64
+site 133 label=s0133.writer op=call.CFE_ES_GetAppID phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_task.c func=CFE_SB_AppInit callee=CFE_ES_GetAppID line=198 place=at-call ref="row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_task.c:198:5"
+value 133 0 role=arg0 from=arg0 type=u64
+site 134 label=s0134.use-call op=call.CFE_ES_GetAppName phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_task.c func=CFE_SB_SendRtgInfo callee=CFE_ES_GetAppName line=791 place=after-call ref="row 19d3bd31786b5b60"
+value 134 0 role=status from=ret type=s64
+site 135 label=s0135.use-call op=call.CFE_ES_GetAppName phase=point tu=cfe/fsw/cfe-core/src/sb/cfe_sb_task.c func=CFE_SB_SendRtgInfo callee=CFE_ES_GetAppName line=791 place=at-call ref="row 19d3bd31786b5b60"
+value 135 0 role=field_value from=arg1 type=u64
+value 135 1 role=arg0 from=arg0 type=u64
+value 135 2 role=arg2 from=arg2 type=u64
+site 136 label=s0136.writer op=call.OS_BinSemCreate phase=point tu=cfe/fsw/cfe-core/src/time/cfe_time_task.c func=CFE_TIME_TaskInit callee=OS_BinSemCreate line=269 place=after-call ref="row 7790bbae71516ab3 cfe/fsw/cfe-core/src/time/cfe_time_task.c:269:14"
+value 136 0 role=status from=ret type=s64
+value 136 1 role=out0 from=out0 type=u64
+site 137 label=s0137.writer op=call.OS_BinSemCreate phase=point tu=cfe/fsw/cfe-core/src/time/cfe_time_task.c func=CFE_TIME_TaskInit callee=OS_BinSemCreate line=269 place=at-call ref="row 7790bbae71516ab3 cfe/fsw/cfe-core/src/time/cfe_time_task.c:269:14"
+value 137 0 role=arg0 from=arg0 type=u64
+value 137 1 role=arg1 from=arg1 type=u64
+value 137 2 role=arg2 from=arg2 type=u64
+value 137 3 role=arg3 from=arg3 type=u64
+site 138 label=s0138.use-call op=call.OS_BinSemGive phase=point tu=cfe/fsw/cfe-core/src/time/cfe_time_tone.c func=CFE_TIME_Local1HzISR callee=OS_BinSemGive line=1271 place=after-call ref="row 7790bbae71516ab3"
+value 138 0 role=status from=ret type=s64
+site 139 label=s0139.use-call op=call.OS_BinSemGive phase=point tu=cfe/fsw/cfe-core/src/time/cfe_time_tone.c func=CFE_TIME_Local1HzISR callee=OS_BinSemGive line=1271 place=at-call ref="row 7790bbae71516ab3"
+value 139 0 role=field_value from=arg0 type=u64
+site 140 label=s0140.actor-root+actor-start op=entry.CFE_TIME_Local1HzTask phase=before tu=cfe/fsw/cfe-core/src/time/cfe_time_tone.c func=CFE_TIME_Local1HzTask ref="actor CFE_TIME_Local1HzTask (spawn-entry); creation osal/src/os/posix/osapi.c:645:19 start routine CFE_TIME_Local1HzTask"
+site 141 label=s0141.actor-root+actor-start op=entry.CFE_TIME_Tone1HzTask phase=before tu=cfe/fsw/cfe-core/src/time/cfe_time_tone.c func=CFE_TIME_Tone1HzTask ref="actor CFE_TIME_Tone1HzTask (spawn-entry); creation osal/src/os/posix/osapi.c:645:19 start routine CFE_TIME_Tone1HzTask"
+site 142 label=s0142.writer op=call.strcpy phase=point tu=cfe/fsw/cfe-core/src/time/cfe_time_utils.c func=CFE_TIME_InitData callee=strcpy line=264 place=after-call ref="row 7790bbae71516ab3 cfe/fsw/cfe-core/src/time/cfe_time_utils.c:264:5"
+site 143 label=s0143.writer op=call.strcpy phase=point tu=cfe/fsw/cfe-core/src/time/cfe_time_utils.c func=CFE_TIME_InitData callee=strcpy line=264 place=at-call ref="row 7790bbae71516ab3 cfe/fsw/cfe-core/src/time/cfe_time_utils.c:264:5"
+value 143 0 role=arg0 from=arg0 type=u64
+value 143 1 role=arg1 from=arg1 type=u64
+site 144 label=s0144.actor-owner op=store.OS_TaskCreate phase=effect tu=osal/src/os/posix/osapi.c func=OS_TaskCreate line=700 place=store ref="actor CFE_ES_PerfLogDump (spawn-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CFE_TIME_Local1HzTask (spawn-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CFE_TIME_Tone1HzTask (spawn-entry) parameter 4 of OS_TaskCreate stored  ...(sidecar)"
+value 144 0 role=value from=operand0 type=u64
+value 144 1 role=address from=operand1 type=u64
+site 145 label=s0145.actor-owner op=store.OS_TaskCreate phase=effect tu=osal/src/os/posix/osapi.c func=OS_TaskCreate line=702 place=store ref="actor CFE_ES_PerfLogDump (spawn-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CFE_TIME_Local1HzTask (spawn-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CFE_TIME_Tone1HzTask (spawn-entry) parameter 5 of OS_TaskCreate stored  ...(sidecar)"
+value 145 0 role=value from=operand0 type=u64
+value 145 1 role=address from=operand1 type=u64
+site 146 label=s0146.actor-create op=call.pthread_create phase=point tu=osal/src/os/posix/osapi.c func=OS_TaskCreate callee=pthread_create line=645 place=after-call ref="creation osal/src/os/posix/osapi.c:645:19"
+value 146 0 role=status from=ret type=s64
+value 146 1 role=out0 from=out0 type=u64
+site 147 label=s0147.actor-create op=call.pthread_create phase=point tu=osal/src/os/posix/osapi.c func=OS_TaskCreate callee=pthread_create line=645 place=at-call ref="creation osal/src/os/posix/osapi.c:645:19"
+value 147 0 role=start_routine from=arg2 type=u64
+value 147 1 role=creation_arg from=arg3 type=u64
+value 147 2 role=arg0 from=arg0 type=u64
+value 147 3 role=arg1 from=arg1 type=u64

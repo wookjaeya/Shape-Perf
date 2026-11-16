@@ -1,0 +1,4 @@
+# space_guard.sh kind=plan need=30000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/obs1-20261116-plangen/plans.sh
+start 2026-11-16T07:05:40.929Z free=3504824320 threshold=344572800
+sample 2026-11-16T07:05:40.933Z 3504820224
+end 2026-11-16T07:05:42.940Z kind=plan verdict=completed rc=0 free=3503730688 lowest=3503730688 dip=1093632 change=-1093632

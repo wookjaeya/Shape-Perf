@@ -4,3 +4,8 @@ stream sha256 5d4a1d7f4023b20cbd6caf797edcdbd0e54d8efb329ace358c07002f27088749
 cmp with the original: same
 size 39663956
 2323bf4ef52bcfb8b5059f30d8d7981f4b663f2bad621a704c5dc92b5da96598  kz-static.5d4a1d7f.xz
+# round trip of the generator copy after the build (2026-11-16T07:08:02Z)
+xz -t ok
+stream sha256 de1315b359af279c46585d80e8a71db6143a19ded1ca164e4b88bc7106a3abdc
+cmp with the original: same
+size 40972128

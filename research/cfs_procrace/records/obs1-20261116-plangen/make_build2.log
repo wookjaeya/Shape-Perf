@@ -1,0 +1,146 @@
+-- LLVM 23.0.0git at /home/user/work/llvm-project/build/lib/cmake/llvm; Clang at /home/user/work/llvm-project/build/lib/cmake/clang
+-- libkz-core source identity f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+-- Configuring done (0.1s)
+-- Generating done (0.3s)
+-- Build files have been written to: /home/user/work/merge-check/kz-llvm
+[  1%] Built target kzrt-manifest
+[  1%] Built target kzrt-decode
+[  2%] Built target kzrt
+[ 10%] Built target kz-core
+[ 11%] Built target kzrt-pool4
+[ 12%] Built target kzrt-build-info-test
+[ 12%] Built target kzrt-build-info-bad
+[ 12%] Built target kz_schema_c99
+[ 13%] Built target kz_schema_c11
+[ 14%] Built target kz_lint
+[ 15%] Built target target_prog
+[ 17%] Built target target_prog_variants
+[ 17%] Built target hold_prog
+[ 18%] Built target hold_seq_prog
+[ 18%] Built target kz_static_whole_member
+[ 18%] Built target kz_static_main_obj
+[ 19%] Built target kz_static_lazy_used
+[ 19%] Built target kz_static_lazy_unused
+[ 19%] Built target kz-instr-clang
+[ 20%] Built target kz-predict
+[ 25%] Built target kz-trace
+[ 26%] Built target kzrt-posix
+[ 27%] Built target kz-anchor
+[ 28%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/plan_gen.cpp.o
+[ 29%] Built target kz-rt-dump
+[ 30%] Built target test_rt_manifest
+[ 30%] Built target test_rt_pool
+[ 31%] Built target test_rt_pool4
+[ 31%] Built target test_rt_mode_api
+[ 31%] Built target test_rt_plan
+[ 32%] Built target test_rt_plan_nb
+[ 32%] Built target kz-dump
+[ 33%] Built target kz-phi
+[ 34%] Built target kz-testsupport
+[ 34%] Built target kzrt-posix-auto
+[ 35%] Built target kz-plan
+[ 36%] Built target test_rt_bootstrap
+[ 37%] Built target test_rt_order
+[ 37%] Built target test_rt_loss
+[ 37%] Built target test_rt_serial
+[ 38%] Built target test_rt_gate
+[ 39%] Built target test_rt_holdsem
+[ 40%] Built target test_rt_mode
+[ 41%] Built target test_rt_auto
+[ 42%] Built target test_rt_auto_bad
+[ 42%] Built target test_rt_auto_bi
+[ 42%] Built target test_rt_end
+[ 43%] Built target test_core_schema
+[ 43%] Built target test_core_identity
+[ 43%] Built target test_core_container
+[ 44%] Built target test_core_kzdump
+[ 45%] Built target test_core_container_corrupt
+[ 46%] Built target test_core_crc32
+[ 46%] Built target test_core_dump
+[ 47%] Built target test_core_eval
+[ 48%] Built target test_core_monitor
+[ 49%] Built target test_core_phi_canonical
+[ 49%] Built target test_core_phi_allowed
+[ 49%] Built target test_core_phi_check
+[ 50%] Built target test_core_phi_provenance
+[ 51%] Built target test_core_phi_parser
+[ 52%] Built target test_core_replay
+[ 52%] Built target test_core_realrecord
+[ 53%] Built target test_core_state_order
+[ 53%] Built target test_core_sha256
+[ 53%] Built target test_core_verdict
+[ 54%] Built target test_core_verify
+[ 55%] Built target test_core_vocab
+[ 55%] Built target kz_golden
+[ 56%] Built target test_trace_decode_fetch
+[ 56%] Built target test_trace_decode_merge
+[ 57%] Built target test_trace_decode_perf
+[ 58%] Built target test_trace_decode_real
+[ 58%] Built target test_trace_decode_sites
+[ 59%] Built target test_trace_identity
+[ 60%] Built target test_trace_hold_nctl
+[ 60%] Built target test_trace_key_separation
+[ 61%] Built target test_trace_merge_order
+[ 62%] Built target test_trace_occ_match
+[ 62%] Built target test_trace_neutral
+[ 62%] Built target test_trace_replay_out
+[ 63%] Built target test_trace_static_closure
+[ 64%] Built target test_trace_symbols
+[ 64%] Built target test_realrecord_derived
+[ 65%] Built target test_kzrt_identity
+[ 66%] Built target test_neutral_kzrt
+[ 67%] Built target test_kzrt_app_request
+[ 67%] Built target test_kzrt_recovered
+[ 67%] Built target kz_phi_golden
+[ 68%] Built target test_phi_cli
+[ 68%] Built target test_predict_model
+[ 69%] Built target test_property_eval_agreement
+[ 71%] Built target kz-hold
+[ 73%] Built target kz-loader
+[ 74%] Built target test_rt_plan_convert
+[ 74%] Built target test_hold_plan
+[ 77%] Built target kz
+[ 78%] Built target test_trace_occ_basis
+[ 79%] Built target test_probe_anchor_compilers
+[ 79%] Built target test_probe_anchor_reached
+[ 80%] Built target test_probe_basis
+[ 81%] Built target test_probe_elf_dwarf
+[ 81%] Built target test_probe_golden
+[ 82%] Built target test_probe_observe
+[ 82%] Built target test_probe_profile
+[ 83%] Built target test_probe_record
+[ 84%] Built target test_hold_ptrace
+[ 84%] Built target test_hold_sequence
+[ 84%] Linking CXX static library libkz-llvm.a
+[ 91%] Built target kz-llvm
+[ 91%] Linking CXX executable test_static_recipe
+[ 91%] Linking CXX executable test_static_expr
+[ 91%] Linking CXX executable test_static_flow
+[ 91%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/main.cpp.o
+[ 91%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_basis.cpp.o
+[ 92%] Built target test_static_flow
+[ 93%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_extract.cpp.o
+[ 93%] Built target test_static_expr
+[ 93%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_show.cpp.o
+[ 94%] Built target test_static_recipe
+[ 94%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_plan.cpp.o
+[ 95%] Linking CXX executable test_static_gitrev
+[ 96%] Linking CXX executable test_static_unroll
+[ 96%] Linking CXX executable test_static_wrappers
+[ 96%] Built target test_static_gitrev
+[ 96%] Linking CXX executable test_static_link
+[ 96%] Built target test_static_unroll
+[ 96%] Building CXX object tests/static/CMakeFiles/test_static_reasons.dir/test_static_reasons.cpp.o
+[ 96%] Built target test_static_wrappers
+[ 97%] Linking CXX executable kz-static
+[ 97%] Linking CXX executable test_static_reasons
+[ 97%] Built target test_static_link
+[ 97%] Built target test_static_reasons
+[ 97%] Built target kz-static
+[ 97%] Built target static_golden
+[ 97%] Building CXX object tests/static/CMakeFiles/test_static_plan.dir/test_static_plan.cpp.o
+[ 98%] Linking CXX executable test_static_elf32
+[ 99%] Built target test_static_cli
+[ 99%] Built target test_static_elf32
+[100%] Linking CXX executable test_static_plan
+[100%] Built target test_static_plan

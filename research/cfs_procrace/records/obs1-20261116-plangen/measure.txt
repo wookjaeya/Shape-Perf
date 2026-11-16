@@ -1,0 +1,50 @@
+== c1_pre_tx
+rows 431 tiers {'1': 12, '2': 306, '3': 113} planned 12 {'A': 5, 'B': 7} cut 419
+sites 301 values 671 per rule {'actor-create': 2, 'actor-owner': 2, 'actor-root': 15, 'actor-start': 1, 'creator-call': 40, 'handling-chain': 7, 'key-text': 4, 'stop-event': 2, 'use-call': 194, 'writer': 35}
+needs {'event-send | plan_missing(need not planned)': 5, 'lock-result | plan_missing(need not planned)': 12, 'observation | budget_not_run(row outside the budget)': 419, 'wait-result | plan_missing(need not planned)': 12}
+gaps {'record_insufficient(key text)': 10}
+creation osal/src/os/posix/src/os-impl-tasks.c:543:19 roots BP_AppMain BP_CLA_InputTask BP_CLA_OutputTask CFE_ES_BackgroundTask CFE_ES_TaskMain CFE_EVS_TaskMain CFE_SB_TaskMain CFE_TBL_TaskMain CFE_TIME_Local1HzTask CFE_TIME_TaskMain CFE_TIME_Tone1HzTask CF_Ap
+stop-event run-loop CFE_ES_RunLoop cfe/modules/es/fsw/src/cfe_es_api.c:470 decl cfe/modules/core_api/fsw/inc/cfe_es.h:397 version "cFE 6.7.99 (baseline v7.0.0-rc4, build 205)" data line 15
+stop-event app-exit CFE_ES_ExitApp cfe/modules/es/fsw/src/cfe_es_api.c:340 decl cfe/modules/core_api/fsw/inc/cfe_es.h:355 version "cFE 6.7.99 (baseline v7.0.0-rc4, build 205)" data line 16
+default-module 5 core-tx
+modules 6 exes 7
+== c1_post_tx
+rows 431 tiers {'1': 11, '2': 307, '3': 113} planned 11 {'A': 4, 'B': 7} cut 420
+sites 287 values 641 per rule {'actor-create': 2, 'actor-owner': 2, 'actor-root': 15, 'actor-start': 1, 'creator-call': 36, 'key-text': 2, 'stop-event': 2, 'use-call': 192, 'writer': 35}
+needs {'event-send | plan_missing(need not planned)': 4, 'lock-result | plan_missing(need not planned)': 11, 'observation | budget_not_run(row outside the budget)': 420, 'wait-result | plan_missing(need not planned)': 11}
+gaps {'record_insufficient(key text)': 10}
+creation osal/src/os/posix/src/os-impl-tasks.c:543:19 roots BP_AppMain BP_CLA_InputTask BP_CLA_OutputTask CFE_ES_BackgroundTask CFE_ES_TaskMain CFE_EVS_TaskMain CFE_SB_TaskMain CFE_TBL_TaskMain CFE_TIME_Local1HzTask CFE_TIME_TaskMain CFE_TIME_Tone1HzTask CF_Ap
+stop-event run-loop CFE_ES_RunLoop cfe/modules/es/fsw/src/cfe_es_api.c:470 decl cfe/modules/core_api/fsw/inc/cfe_es.h:397 version "cFE 6.7.99 (baseline v7.0.0-rc4, build 205)" data line 15
+stop-event app-exit CFE_ES_ExitApp cfe/modules/es/fsw/src/cfe_es_api.c:340 decl cfe/modules/core_api/fsw/inc/cfe_es.h:355 version "cFE 6.7.99 (baseline v7.0.0-rc4, build 205)" data line 16
+default-module 5 core-tx
+modules 6 exes 7
+== r2_core
+rows 338 tiers {'1': 3, '2': 196, '3': 139} planned 3 {'B': 3} cut 335
+sites 42 values 62 per rule {'actor-create': 2, 'actor-owner': 2, 'actor-root': 8, 'actor-start': 1, 'stop-event': 2, 'use-call': 10, 'writer': 17}
+needs {'lock-result | plan_missing(need not planned)': 3, 'observation | budget_not_run(row outside the budget)': 335, 'wait-result | plan_missing(need not planned)': 3}
+gaps {}
+creation osal/src/os/posix/src/os-impl-tasks.c:568:19 roots CFE_ES_BackgroundTask CFE_ES_TaskMain CFE_EVS_TaskMain CFE_SB_TaskMain CFE_TBL_TaskMain CFE_TIME_Local1HzTask CFE_TIME_TaskMain CFE_TIME_Tone1HzTask; start routines OS_PthreadTaskEntry@osal/src/os/pos
+stop-event run-loop CFE_ES_RunLoop cfe/modules/es/fsw/src/cfe_es_api.c:426 decl cfe/modules/core_api/fsw/inc/cfe_es.h:388 version "cFE 7.0.1" data line 18
+stop-event app-exit CFE_ES_ExitApp cfe/modules/es/fsw/src/cfe_es_api.c:292 decl cfe/modules/core_api/fsw/inc/cfe_es.h:346 version "cFE 7.0.1" data line 19
+default-module 1 core-cpu1
+modules 0 exes 1
+== c5_641
+rows 178 tiers {'1': 8, '2': 78, '3': 92} planned 8 {'B': 8} cut 170
+sites 147 values 275 per rule {'actor-create': 2, 'actor-owner': 2, 'actor-root': 8, 'actor-start': 8, 'stop-event': 2, 'use-call': 110, 'writer': 23}
+needs {'lock-result | plan_missing(need not planned)': 8, 'observation | budget_not_run(row outside the budget)': 170, 'wait-result | plan_missing(need not planned)': 8}
+gaps {'link_unlinked(no creation-argument channel)': 1}
+creation osal/src/os/posix/osapi.c:645:19 roots CFE_ES_PerfLogDump CFE_TIME_Local1HzTask CFE_TIME_Tone1HzTask CI_Lab_AppMain SAMPLE_AppMain SAMPLE_LibInit SCH_Lab_AppMain TO_Lab_AppMain; start routines CFE_ES_PerfLogDump CFE_TIME_Local1HzTask CFE_TIME_Tone1HzT
+stop-event run-loop CFE_ES_RunLoop cfe/fsw/cfe-core/src/es/cfe_es_api.c:540 decl cfe/fsw/cfe-core/src/inc/cfe_es.h:543 version "cFE 6.4.1" data line 21
+stop-event app-exit CFE_ES_ExitApp cfe/fsw/cfe-core/src/es/cfe_es_api.c:435 decl cfe/fsw/cfe-core/src/inc/cfe_es.h:515 version "cFE 6.4.1" data line 22
+default-module 6 core-linux.bin
+modules 5 exes 6
+== c5_642
+rows 175 tiers {'1': 7, '2': 66, '3': 102} planned 7 {'B': 7} cut 168
+sites 139 values 263 per rule {'actor-create': 2, 'actor-owner': 2, 'actor-root': 8, 'actor-start': 8, 'stop-event': 2, 'use-call': 104, 'writer': 21}
+needs {'lock-result | plan_missing(need not planned)': 7, 'observation | budget_not_run(row outside the budget)': 168, 'wait-result | plan_missing(need not planned)': 7}
+gaps {'link_unlinked(no creation-argument channel)': 1}
+creation osal/src/os/posix/osapi.c:645:19 roots CFE_ES_PerfLogDump CFE_TIME_Local1HzTask CFE_TIME_Tone1HzTask CI_Lab_AppMain SAMPLE_AppMain SAMPLE_LibInit SCH_Lab_AppMain TO_Lab_AppMain; start routines CFE_ES_PerfLogDump CFE_TIME_Local1HzTask CFE_TIME_Tone1HzT
+stop-event run-loop CFE_ES_RunLoop cfe/fsw/cfe-core/src/es/cfe_es_api.c:540 decl cfe/fsw/cfe-core/src/inc/cfe_es.h:543 version "cFE 6.4.2" data line 24
+stop-event app-exit CFE_ES_ExitApp cfe/fsw/cfe-core/src/es/cfe_es_api.c:435 decl cfe/fsw/cfe-core/src/inc/cfe_es.h:515 version "cFE 6.4.2" data line 25
+default-module 6 core-linux.bin
+modules 5 exes 6

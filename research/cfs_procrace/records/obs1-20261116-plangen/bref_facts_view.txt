@@ -1,0 +1,7 @@
+# the full text view (kz-static show, every section) of the re-extracted facts against tests_8c_fix/c1_pre_tx/NP/facts.txt
+lines 148887 vs 148887; differing lines:
+462c462
+<   extract.units_from = basis 87a80eb0e3731b55  (unset)
+---
+>   extract.units_from = basis b06fd996d877d20a  (unset)
+basis artifact: T8CF 87a80eb0e3731b558a23f7c682d13dbe016b3d94e9511731c68ebf58d19bf519, new b06fd996d877d20a51c827f343da0f6f2cb6c7a0d39cfa4797b8bf52234a3996 (kz-dump: header artifact_sha256 and tool_sha256 only)

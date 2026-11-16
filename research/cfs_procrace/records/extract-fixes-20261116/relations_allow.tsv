@@ -1,0 +1,11 @@
+# allowance of compare_classes.py for relations.txt of a re-extraction with the extractor fixes (relations rules revision
+# 8) against schema12_extract (revision 7), plan/full_stage_results_20261116.md 5.0; besides the built-in classes
+change	facts-hash	facts [0-9a-f]{64}	1
+change	rules	rules relations rules revision [0-9] \(2026-11-16\)	1
+insert	reading-options	  extract\.reading_options_vs_basis = same as basis front_end\.arguments_added and front_end	1
+# the number of indirect calls whose targets are not resolved, which rows quote (a call through a field of a record named
+# by use may lose its resolution: CALL_TARGETS incomplete-source)
+mask	unresolved-calls	(?<=calls whose targets are not resolved \()\d+(?= in these facts)|(?<=creators may be in code not read \()\d+(?= indirect call)
+# the heads of path B and C count fields left out by their writers and actors
+change	head-B	\[B\] \d+ \(field-argument groups \d+; left out: no writer \d+, one actor only \d+\)	1
+change	head-C	\[C\] \d+ \(spawn calls .*	1

@@ -53,7 +53,9 @@ class TuReader {
   Pos pos_of(clang::SourceLocation loc);
   std::string path_of(clang::FileID id);
   std::string source_text(clang::SourceRange range, size_t max = 120);
-  // The name of a record type for output: a typedef name if there is one, else the tag.
+  // The name of a record type for output: a typedef name if there is one, else the tag; a record with neither gets a
+  // stable name from where it is used (name_unnamed_records, static_facts.md 5q); a C11 unnamed member (an anonymous
+  // struct or union) is named by the record it is a member of, whose fields its fields are.
   std::string record_name(const clang::RecordDecl* rd);
   // The record declaration a type denotes after stripping qualifiers, typedefs and arrays; null if none.
   const clang::RecordDecl* record_of(clang::QualType t);
@@ -90,6 +92,9 @@ class TuReader {
 
  private:
   void collect_typedefs();
+  // The names of the records that have no file-scope tag or typedef name (static_facts.md 5q), into `names`.
+  void name_unnamed_records();
+  std::string name_pos(clang::SourceLocation loc, bool with_column);
   // The targets this unit declares: Model::target_types_defined and target_fields_defined (static_facts.md 5k).
   void note_declared_targets();
   void read_function(const clang::FunctionDecl* fd);

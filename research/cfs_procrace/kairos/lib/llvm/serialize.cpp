@@ -1079,6 +1079,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     item("count.await_l1", num(await_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
   }
   for (const auto& n : opt.notes) item(n.first, n.second, KZ_POLICY_UNSET, KZ_NONE32);
+  for (const auto& n : opt.deviation_notes) item(n.first, n.second, KZ_POLICY_DEVIATION, KZ_NONE32);
 
   // ---- add the sections (the writer sorts them canonically)
   kz::Status s;

@@ -508,6 +508,10 @@ class PtrFields {
       remaining_[i] = n;
     }
   }
+  bool root_image_cut(const std::string& root) const {
+    auto it = m_.object_images.find(root);
+    return it != m_.object_images.end() && !image_marker_paths(it->second, root).empty();
+  }
   bool ordered(const PtrWriteFact& w, const ReadFact& r) const {
     if (w.kind == KZ_PTRF_KIND_STATIC_INIT) return true;
     if (r.func_key == w.func_key) return w.after_reads.count(r.key()) != 0;
@@ -591,6 +595,10 @@ class PtrFields {
       if (ord) f.flags |= KZ_PTRF_FLAG_WRITE_BEFORE_READ;
       if (remaining_[wi] > 0) f.flags |= KZ_PTRF_FLAG_OTHER_WRITES;
       f.status = (cands.size() == 1 && same_root && ord && remaining_[wi] == 0) ? KZ_PTRF_STATUS_RESOLVED : KZ_PTRF_STATUS_MAY;
+      // The static initializers are read from the leaves of the images (writes()): when the image of the read's root
+      // object has a marker leaf, the part not read may hold another initializer of the field, so the one candidate
+      // found there is no resolution (static_facts.md 5q).
+      if (f.status == KZ_PTRF_STATUS_RESOLVED && root_image_cut(r.root_object)) f.status = KZ_PTRF_STATUS_MAY;
       // the elements read: the subscript of the step
       if (r.ptr_index == nullptr || r.ptr_index_is_const) {
         f.elem = w.elem + (r.ptr_index_is_const ? r.ptr_index_const : 0);

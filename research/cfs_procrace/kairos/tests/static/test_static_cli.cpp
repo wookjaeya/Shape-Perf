@@ -471,6 +471,50 @@ startup_script {
     KZ_CHECK_OK(kz::Container::read_file((N / "facts_prof.kz").string(), &pfc));
     KZ_CHECK(pfc.find_section(KZ_SEC_P0_TABLE) == nullptr && pfc.find_section(KZ_SEC_OP_DERIV) == nullptr && pfc.find_section(KZ_SEC_SPAWN_WRAP) == nullptr);
     KZ_CHECK(nfc.find_section(KZ_SEC_P0_TABLE) != nullptr && nfc.find_section(KZ_SEC_OP_DERIV) != nullptr && nfc.find_section(KZ_SEC_SPAWN_WRAP) != nullptr);
+    // The reading options compared with the basis (static_facts.md 5q).  The same options: "same".  An extra argument
+    // the basis was not made with: refused (rc 1, no facts file), unless --accept-option-difference, which records the
+    // difference as a policy deviation that every relations row carries (reading_options_differ, a layer token).
+    {
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(nf) + " --section basis", &out), 0);
+      KZ_CHECK(has(out, "extract.reading_options_vs_basis = same as basis front_end.arguments_added and front_end  (unset)\n"));
+      const std::string nfx = (N / "facts_x.kz").string(), nfa = (N / "facts_a.kz").string();
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --basis " + q(nb) + " --extra-arg -DKZ_OPTION_PROBE=1 -o " + q(nfx), &out), 1);
+      KZ_CHECK(has(out, "kz-static extract: the reading options differ from those of the basis (arguments: basis front_end.arguments_added ["));
+      KZ_CHECK(has(out, " -DKZ_OPTION_PROBE=1]); refused: "));
+      KZ_CHECK(!fs::exists(nfx));
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --basis " + q(nb) + " --extra-arg -DKZ_OPTION_PROBE=1 --accept-option-difference -o " + q(nfa), &out), 0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(nfa) + " --section basis", &out), 0);
+      KZ_CHECK(has(out, "extract.reading_options_vs_basis = differs (--accept-option-difference): arguments: basis front_end.arguments_added ["));
+      KZ_CHECK(has(out, " -DKZ_OPTION_PROBE=1]  (deviation)\n"));
+      KZ_CHECK(!has(out, "front end: basis front_end"));  // the same front end
+      KZ_CHECK(has(out, "extract.extra_arg[0] = -DKZ_OPTION_PROBE=1  (unset)\n"));
+      const std::string ra = (N / "rel_a.txt").string(), rs = (N / "rel_s.txt").string();
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q(nfa) + " -o " + q(ra), &out), 0);
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q(nf) + " -o " + q(rs), &out), 0);
+      const std::string rta = read(ra), rts = read(rs);
+      KZ_CHECK(has(rta, "  extract.reading_options_vs_basis = differs (--accept-option-difference): "));
+      KZ_CHECK(has(rts, "  extract.reading_options_vs_basis = same as basis front_end.arguments_added and front_end\n"));
+      KZ_CHECK(has(rta, "reasons of the whole facts on every row: ") && has(rta, "reading_options_differ(extraction options differ from the basis)"));
+      KZ_CHECK(!has(rts, "reading_options_differ(extraction options differ from the basis)") && !has(rts, "reading-options-differ"));
+      // every row of the facts read with other options carries the reason and the layer token
+      size_t rows = 0, with_reason = 0, with_token = 0;
+      std::istringstream ls(rta);
+      for (std::string l; std::getline(ls, l);) {
+        if (l.compare(0, 18, "      incomplete: ") == 0) {
+          ++rows;
+          if (has(l, "reading_options_differ(extraction options differ from the basis)")) ++with_reason;
+        }
+        if (l.compare(0, 14, "      layers: ") == 0 && has(l, " reading-options-differ(extract.reading_options_vs_basis)")) ++with_token;
+      }
+      KZ_CHECK_EQ(with_reason, rows);
+      KZ_CHECK_EQ(with_token, rows);
+      // no basis: nothing compared
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q((N / "src/app.c").string()) + " --root " + q(N.string()) + " -o " + q((N / "facts_s.kz").string()) + " -- -std=c99",
+                      &out),
+                  0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q((N / "facts_s.kz").string()) + " --section basis", &out), 0);
+      KZ_CHECK(has(out, "extract.reading_options_vs_basis = not compared: no basis (--source)  (unset)\n"));
+    }
   }
 
   // ---- the extended facts F1-F3 (READS, RETURNS, RET_CONSTS, LOOP_EXITS; kz_facts.h revision 6) ---------
@@ -1110,7 +1154,7 @@ startup_script {
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &a), 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &b), 0);
     KZ_CHECK_EQ(a, b);
-    KZ_CHECK(has(a, "rules relations rules revision 7 (2026-11-16)"));
+    KZ_CHECK(has(a, "rules relations rules revision 8 (2026-11-16)"));
     // roots: the image entries of the table, the root that calls a root directly, the dispatching trampoline
     KZ_CHECK(has(a, "table-image-entry 2"));
     KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member "
@@ -1284,7 +1328,7 @@ startup_script {
       if (endh < end) end = endh;
       return text.substr(at, end == std::string::npos ? std::string::npos : end - at);
     };
-    KZ_CHECK(has(r, "rules relations rules revision 7 (2026-11-16)\n"));
+    KZ_CHECK(has(r, "rules relations rules revision 8 (2026-11-16)\n"));
     // the name namespace: the lookup by path is left out; the path namespace: the lookup and the creation by name are left out
     KZ_CHECK(has(r, "      left out: relcallback.c:152:9 in user_main -> path_find#0 (lookup): the callback path_match passed as argument 2 at relcallback.c:94:12 in path_find "
                     "is not the comparison's function name_match\n"));
@@ -1342,7 +1386,7 @@ startup_script {
     const std::string tsv = read(X / "order.tsv");
     KZ_CHECK(has(tsv, "id\trule\tkind\tfrom\tfrom_actor\tto\tto_actor\tcondition\tpremises\tscope\tinstance_key\n"));
     KZ_CHECK(has(o, "kz-static order (order rules revision 1 (2026-11-16))\n"));
-    KZ_CHECK(has(o, "relations relations rules revision 7 (2026-11-16)\n"));
+    KZ_CHECK(has(o, "relations relations rules revision 8 (2026-11-16)\n"));
     auto row = [&](const std::string& id) {
       const size_t at = o.find("\n  " + id + " key ");
       if (at == std::string::npos) return std::string();
@@ -1695,9 +1739,9 @@ startup_script {
                     &out),
                 0);
     KZ_CHECK(has(out, "location NoSuch_t.nofield   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
-                      "unknown effect 0  -> unknown-target (no record type NoSuch_t is found among the file-scope tags and typedef names of the units read)"));
+                      "unknown effect 0  -> unknown-target (no record type NoSuch_t is found among the record names of the units read)"));
     KZ_CHECK(has(out, "location Slot.nofield   writers 0 "));
-    KZ_CHECK(has(out, "-> unknown-target (no record type Slot is found among the file-scope tags and typedef names of the units read)"));
+    KZ_CHECK(has(out, "-> unknown-target (no record type Slot is found among the record names of the units read)"));
     KZ_CHECK(has(out, "-> unknown-target (the record type Cell has no field nofield in the units read)"));
     KZ_CHECK(!has(out, "nofield   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> "
                        "writer-set-complete"));
@@ -1708,7 +1752,7 @@ startup_script {
     KZ_CHECK(has(out, "hand-entered inputs        15 (built-in data-function table 12, command line 3)"));
     std::string sv;
     KZ_CHECK_EQ(run(q(tool) + " show " + q(tk) + " --section basis --section locs", &sv), 0);
-    KZ_CHECK(has(sv, "unknown_target.NoSuch_t.nofield = unknown-target: no record type NoSuch_t is found among the file-scope tags and typedef names of the units "
+    KZ_CHECK(has(sv, "unknown_target.NoSuch_t.nofield = unknown-target: no record type NoSuch_t is found among the record names of the units "
                      "read; FACT_LOCS status unchecked (not writer-set-complete)  (unset)"));
     KZ_CHECK(has(sv, "unknown_target.Cell.nofield = unknown-target: the record type Cell has no field nofield in the units read; FACT_LOCS status unchecked"));
     KZ_CHECK(!has(sv, "unknown_target.Cell.id"));
@@ -1798,21 +1842,24 @@ startup_script {
     KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "rd0.kz").string()) + " --section basis", &sv), 0);
     KZ_CHECK(has(sv, "extract.resource_dir = none (no resource directory: the front end's own search)  (unset)\n"));
     // a --target that the profile also names (Cell.id) on a source without Cell: checked like a command-line target;
-    // its record keeps the profile's origin.  A nested tag (Inner, inside Outer) is not looked up: unknown-target.
+    // its record keeps the profile's origin.  A nested tag (Inner, inside Outer) has file scope in C and is looked up
+    // (static_facts.md 5q; before, only the tags at file scope were, and Inner.ix was unknown-target): its writer is found.
     write(X / "other.c", "struct Outer { struct Inner { int ix; } in; };\nstruct Inner g_inner;\nvoid w(void) { g_inner.ix = 9; }\n");
     KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q((X / "other.c").string()) + " --root " + q(X.string()) +
                         " --target Cell.id --target Inner.ix -o " + q((X / "other.kz").string()) + " -- -std=c99 -pedantic",
                     &out),
                 0);
     KZ_CHECK(has(out, "location Cell.id   writers 0 "));
-    KZ_CHECK(has(out, "-> unknown-target (no record type Cell is found among the file-scope tags and typedef names of the units read)"));
-    KZ_CHECK(has(out, "-> unknown-target (no record type Inner is found among the file-scope tags and typedef names of the units read)"));
-    KZ_CHECK(!has(out, "-> writer-set-complete"));
+    KZ_CHECK(has(out, "-> unknown-target (no record type Cell is found among the record names of the units read)"));
+    KZ_CHECK(!has(out, "no record type Inner"));
+    KZ_CHECK(has(out, "location Inner.ix   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> writer-set-complete"));
     KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "other.kz").string()) + " --section basis --section locs", &sv), 0);
     KZ_CHECK(has(sv, "target.Cell.id = profile loc Cell.id  (from-reference)"));
     KZ_CHECK(has(sv, "unknown_target.Cell.id = unknown-target: no record type Cell is found among"));
     KZ_CHECK(has(sv, "  Cell.id unchecked writers=0"));
-    KZ_CHECK(has(sv, "  Inner.ix unchecked writers=0"));
+    KZ_CHECK(has(sv, "  Inner.ix writer-set-complete writers=1"));
+    KZ_CHECK(!has(sv, "unknown_target.Inner"));
     // without --target the profile's Cell.id keeps the profile rule (the open defect of static_facts.md 5k)
     KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q((X / "other.c").string()) + " --root " + q(X.string()) + " -o " +
                         q((X / "other0.kz").string()) + " -- -std=c99 -pedantic",
@@ -1820,6 +1867,71 @@ startup_script {
                 0);
     KZ_CHECK(has(out, "location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
                       "unknown effect 0  -> writer-set-complete"));
+  }
+
+  // ---- record names (static_facts.md 5q) and truncated images in the unrolled walks and PTR_FIELDS -------------------
+  {
+    const fs::path X = work / "names";
+    fs::create_directories(X);
+    std::string sv;
+    // C11 unnamed members keep their rule (their fields are the enclosing record's); a record with no tag that is the type
+    // of a named member is a type of its own, <Outer>::<member>, and Outer has no field of it
+    write(X / "c11.c",
+          "struct Unn { struct { int q; } m; int r; };\nstruct Anon { union { int a; long b; }; int c; };\nstruct Unn g_unn;\nstruct Anon g_anon;\n"
+          "void w(void) { g_unn.m.q = 5; g_anon.a = 1; }\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q((X / "c11.c").string()) + " --root " + q(X.string()) +
+                        " --target Unn::m.q --target Unn.q --target Anon.a -o " + q((X / "c11.kz").string()) + " -- -std=c11",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location Unn::m.q   writers 1 (direct 1, "));
+    KZ_CHECK(has(out, "location Unn.q   writers 0 ") && has(out, "-> unknown-target (the record type Unn has no field q in the units read)"));
+    KZ_CHECK(has(out, "location Anon.a   writers 1 (direct 1, "));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "c11.kz").string()) + " --section writers --section fwrites", &sv), 0);
+    KZ_CHECK(has(sv, "  Unn::m.q assign at c11.c:5:"));
+    KZ_CHECK(has(sv, "  Anon.a assign at c11.c:5:"));
+    KZ_CHECK(!has(sv, "<anonymous"));
+    // the static image of a table element cut at the budget: a field the walk reads that is not in the image may be in
+    // the part not read, so the guard stays residual and says so, and so does an argument (unroll.cpp); a pointer field
+    // whose one static initializer is in an image with a marker leaf is no resolution (PTR_FIELDS may, argflow.cpp)
+    write(X / "cut.c",
+          "typedef struct { const char *name; int (*init)(void); int flag; int a; int b; } Mod;\n"
+          "typedef struct { const Mod *const *list; } Cfg;\n"
+          "int fx_use(int v);\n"
+          "static int a_init(void) { return 0; }\n"
+          "static const Mod mod_a = {\"a\", a_init, 1, 2, 3};\n"
+          "static const Mod *const mod_list[] = {&mod_a, 0};\n"
+          "Cfg g_cfg = {mod_list};\n"
+          "void init_all(void) {\n"
+          "  unsigned long i;\n"
+          "  const Mod *e;\n"
+          "  for (i = 0;; i++) {\n"
+          "    e = g_cfg.list[i];\n"
+          "    if (e == 0) break;\n"
+          "    if (e->b != 0) (void)e->init();\n"
+          "    (void)fx_use(e->a);\n"
+          "  }\n"
+          "}\n"
+          "struct Tbl { int x; };\nstruct Tbl g_tbl;\n"
+          "struct Hold { struct Tbl *tbl; int a; int b; int c; };\n"
+          "struct Hold g_hold = {&g_tbl, 1, 2, 3};\n"
+          "int read_tbl(void) { return g_hold.tbl->x; }\n");
+    for (const char* budget : {"4096", "2"}) {
+      const std::string f = (X / (std::string("cut_") + budget + ".kz")).string();
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --image-budget " + budget + " --source " + q((X / "cut.c").string()) + " --root " + q(X.string()) + " -o " + q(f) +
+                          " -- -std=c99",
+                      &out),
+                  0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f) + " --section iters --section ptrfields", &sv), 0);
+      if (std::string(budget) == "4096") {
+        KZ_CHECK(has(sv, "    call site ") && !has(sv, "truncated at"));
+        KZ_CHECK(has(sv, "      arg 0 = int 2 "));
+        KZ_CHECK(has(sv, "read Hold.tbl") && has(sv, " resolved "));
+      } else {
+        KZ_CHECK(has(sv, " residual if ") && has(sv, " (the guard reads a field not in the static image of mod_a, which is truncated at mod_a.flag... (the field may be in the part not read))"));
+        KZ_CHECK(has(sv, "      arg 0 = non-constant field a not in the image, which is truncated at mod_a.flag... (the field may be in the part not read)"));
+        KZ_CHECK(has(sv, "read Hold.tbl") && !has(sv, " resolved "));
+      }
+    }
   }
 
   fs::remove_all(work);

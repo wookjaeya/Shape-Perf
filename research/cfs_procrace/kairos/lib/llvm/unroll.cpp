@@ -329,6 +329,13 @@ void unroll_table_walks(Model* mp, const std::map<std::string, std::vector<Image
         auto it = m.object_images.find(entry.text);
         if (it != m.object_images.end()) img = &it->second;
       }
+      // The marker leaves of the element's image (static_facts.md 5j, 5q): a field the lookup does not find there may be
+      // in the part not read, so it reads as unknown with that reason (never as "not in the image" alone).
+      const std::string image_cut = img == nullptr ? std::string() : image_marker_paths(*img, object_name(entry.text));
+      bool lookup_cut = false;  // a lookup of the guard or a value found no field in an image with a marker leaf
+      auto not_in_image = [&](const std::string& field) {
+        return "field " + field + " not in the image" + (image_cut.empty() ? std::string() : ", which is truncated at " + image_cut + " (the field may be in the part not read)");
+      };
       ElemLookup lookup = [&](const std::string& field) {
         ElemValue v;
         if (field.empty()) {
@@ -343,6 +350,7 @@ void unroll_table_walks(Model* mp, const std::map<std::string, std::vector<Image
         if (img == nullptr) return v;
         for (const ImageFact& f : *img)
           if (f.path == "." + field) return value_of(f);
+        if (!image_cut.empty()) lookup_cut = true;
         return v;
       };
       IterFact el;
@@ -365,10 +373,13 @@ void unroll_table_walks(Model* mp, const std::map<std::string, std::vector<Image
         c.iter = static_cast<uint32_t>(i);
         c.kind = KZ_ITER_KIND_CALL;
         c.call_key = u->call_key;
+        lookup_cut = false;
         ExprRef g = peval(&m.exprs, u->guard, lookup);
         const int t = g == nullptr ? 1 : truth(g);
         c.status = t == 1 ? KZ_ITER_STATUS_TAKEN : t == 0 ? KZ_ITER_STATUS_SKIPPED : KZ_ITER_STATUS_RESIDUAL;
         if (c.status == KZ_ITER_STATUS_RESIDUAL) c.guard = g;
+        if (c.status == KZ_ITER_STATUS_RESIDUAL && lookup_cut)
+          c.text = "the guard reads a field not in the static image of " + object_name(entry.text) + ", which is truncated at " + image_cut + " (the field may be in the part not read)";
         m.iters.push_back(c);
         if (c.status == KZ_ITER_STATUS_SKIPPED) continue;
         const CallFact* call = call_by_key.count(u->call_key) != 0 ? call_by_key[u->call_key] : nullptr;
@@ -378,7 +389,7 @@ void unroll_table_walks(Model* mp, const std::map<std::string, std::vector<Image
           ce.kind = KZ_ITER_KIND_CALLEE;
           ce.guard = nullptr;
           ce.value_kind = v.known ? v.kind : static_cast<uint8_t>(KZ_IMAGE_KIND_NONCONST);
-          ce.text = v.known ? v.text : "field " + u->callee_field + " not in the image";
+          ce.text = v.known ? v.text : not_in_image(u->callee_field);
           ce.fn_key = v.fn_key;
           ce.pos = v.pos;
           m.iters.push_back(ce);
@@ -393,7 +404,7 @@ void unroll_table_walks(Model* mp, const std::map<std::string, std::vector<Image
             const ElemValue v = lookup(x->name);
             a.value_kind = v.known ? v.kind : static_cast<uint8_t>(KZ_IMAGE_KIND_NONCONST);
             a.value = v.value;
-            a.text = v.known ? v.text : "field " + x->name + " not in the image";
+            a.text = v.known ? v.text : not_in_image(x->name);
             a.fn_key = v.fn_key;
             a.pos = v.pos;
           } else {

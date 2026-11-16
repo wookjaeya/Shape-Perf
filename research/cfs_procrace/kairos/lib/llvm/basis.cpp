@@ -402,9 +402,8 @@ kz::Status Builder::front_end(const Recipe& recipe) {
     }
   }
   item("compiler.identification", comment, notes.comments.empty() ? KZ_POLICY_UNSPECIFIED : KZ_POLICY_UNSET);
-  std::string adapt = "-Wno-unknown-warning-option -Wno-error -w";
-  if (!in_.read.resource_dir.empty()) adapt += " -resource-dir=" + in_.read.resource_dir;
-  for (const std::string& a : in_.read.extra_args) adapt += " " + a;
+  // the text the extraction compares its own reading options with (one function for both, extract.hpp)
+  const std::string adapt = reading_arguments_text(in_.read);
   const std::string version = clang_version_text();
   const uint32_t dev = add_deviation(
       "front end that reads the program", "the recorded commands (compiler " + (compiler_.empty() ? std::string("unknown") : compiler_) + ", identified as: " + comment + ")",
@@ -413,7 +412,7 @@ kz::Status Builder::front_end(const Recipe& recipe) {
       "diagnostics are changed (-w, -Wno-error, -Wno-unknown-warning-option); differences between the two compilers in builtin functions and predefined macros are possible and not excluded; "
       "the program described is the recorded command's program as another front end reads it",
       KZ_AVOIDABLE_NO);
-  item("front_end", "Clang LibTooling, " + version, KZ_POLICY_DEVIATION, KZ_NONE32, dev);
+  item("front_end", reading_front_end_text(), KZ_POLICY_DEVIATION, KZ_NONE32, dev);
   item("front_end.arguments_added", adapt, KZ_POLICY_DEVIATION, KZ_NONE32, dev);
   item("front_end.build_identity", in_.build_identity);
   return kz::Status::success();

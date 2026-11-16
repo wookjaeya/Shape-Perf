@@ -26,7 +26,7 @@
 
 namespace kzs {
 
-const char* relations_rules_revision() { return "relations rules revision 7 (2026-11-16)"; }
+const char* relations_rules_revision() { return "relations rules revision 8 (2026-11-16)"; }
 
 namespace {
 
@@ -75,6 +75,7 @@ enum Inc : uint32_t {
   kLinkSelf,
   kLinkMembership,
   kReadingDeviation,
+  kReadingOptions,
   kIncCount
 };
 
@@ -506,6 +507,7 @@ class Rel : public RelFacts {
       if (!ms.empty()) missing = true;
     if (missing) global_inc_.insert(kActorUnresolvedSpawn);
     if (!image_cut_.empty()) global_inc_.insert(kActorCutSpawn);
+    if (reading_options_differ()) global_inc_.insert(kReadingOptions);
     auto it = basis_map_.find("count.walk_bounds_hit");
     if (it == basis_map_.end()) return;
     const std::string& v = it->second;
@@ -580,6 +582,13 @@ class Rel : public RelFacts {
       }
     return out;
   }
+  // The extraction read the units with other reading options or another front end than its basis records, and was
+  // told to go on (extract --accept-option-difference): BASIS extract.reading_options_vs_basis starts with "differs"
+  // (static_facts.md 5q).  Facts without the item (an extraction before it) are not taken as differing.
+  bool reading_options_differ() const {
+    auto it = basis_map_.find("extract.reading_options_vs_basis");
+    return it != basis_map_.end() && it->second.compare(0, 7, "differs") == 0;
+  }
   std::string layers_text(bool p0, bool l0, const std::string& extra = "") const {
     std::string t = "B";
     if (p0) t += " P0";
@@ -588,6 +597,7 @@ class Rel : public RelFacts {
     if (!profile_free_) t += " case:profile(" + basis_map_.at_or("extract.profile") + ")";
     if (hand_entered_vocabulary_ != 0) t += " hand-entered:command-line(" + std::to_string(hand_entered_vocabulary_) + " items; G0 or other names, not automatic)";
     if (!extra.empty()) t += " " + extra;
+    if (reading_options_differ()) t += " reading-options-differ(extract.reading_options_vs_basis)";
     const std::set<std::string> devs = row_deviations();
     if (!devs.empty()) {
       t += " basis-deviation(";
@@ -617,7 +627,8 @@ class Rel : public RelFacts {
     os << "facts " << kz::to_hex(c_.artifact_hash()) << "\n";
     os << "rules " << relations_rules_revision() << "\n";
     os << "mode " << (profile_free_ ? "profile-free" : "profile-driven") << "\n";
-    for (const char* k : {"extract.builtin_profile", "extract.profile", "extract.p0_table", "extract.p0_table_scope", "extract.derivation_rules", "extract.targets_rule"}) {
+    for (const char* k : {"extract.builtin_profile", "extract.profile", "extract.p0_table", "extract.p0_table_scope", "extract.derivation_rules", "extract.targets_rule",
+                          "extract.reading_options_vs_basis"}) {
       auto it = basis_map_.find(k);
       if (it != basis_map_.end()) os << "  " << k << " = " << it->second << "\n";
     }
@@ -3804,6 +3815,9 @@ const std::vector<RelReason>& relations_incomplete_reasons() {
       {"link_unlinked", "self-reported identity", "C: the read's subscript is the reader's own identity"},
       {"link_unlinked", "namespace membership unresolved", "A: the comparison function the use's chain of calls passes to the namespace's callback search is not resolved, so the use may search another table (relations rules revision 7)"},
       {"reading_options_differ", "basis deviation of a unit of the row", "a row that names a position in a unit with a basis deviation (layers basis-deviation)"},
+      {"reading_options_differ", "extraction options differ from the basis",
+       "every row, when BASIS extract.reading_options_vs_basis says the extraction read the units with other options or another front end than the basis "
+       "records (extract --accept-option-difference; layers reading-options-differ; relations rules revision 8)"},
   };
   return table;
 }

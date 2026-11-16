@@ -10,7 +10,8 @@
 //                     --budget-reason TEXT [--budget-disclosure TEXT] -o MANIFEST --sidecar SIDECAR --modules-out TABLE --exes-out LIST
 //   kz-static --identity
 //
-// Exit status: 0 = ok, 1 = the analysis failed (a unit does not parse, a container is damaged),
+// Exit status: 0 = ok, 1 = the analysis failed (a unit does not parse, a container is damaged, the reading options differ
+// from those of the basis without --accept-option-difference),
 // 2 = usage or I/O error.  See docs/static_facts.md.
 
 #include <cstdio>
@@ -94,7 +95,7 @@ int usage() {
       "                         [--root R] [--target Type.field]... [--delay-op N]... [--lock-op N]... [--unlock-op N]...\n"
       "                         [--spawn-op N]... [--terminal-op N]... [--poll-fn N]... [--resource-dir D] [--extra-arg A]...\n"
       "                         [--extended-facts] [--argflow-depth N|none] [--argflow-size N|none] [--image-budget N]\n"
-      "                         [--targets-rule R-T1,R-T2]\n"
+      "                         [--targets-rule R-T1,R-T2] [--accept-option-difference]\n"
       "                         [--text] [--section S]... [--verbose]\n"
       "                         (--no-profile: the built-in profile and the P0 table only, no vocabulary options;\n"
       "                         delay, terminal and spawn operations derived through wrappers; --extended-facts:\n"

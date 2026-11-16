@@ -1,0 +1,8 @@
+# allowance of compare_classes.py for extract.txt (the summary of `kz-static extract`) of a re-extraction with the
+# extractor fixes against schema12_extract, plan/full_stage_results_20261116.md 5.0; besides the built-in classes
+change	facts-hash	facts [0-9a-f]{64}	1
+change	rule-targets	  rule targets               \d+ \(R-T1 \d+, R-T2 \d+, both \d+; left out, reached only through an unshared base: R-T1 \d+, R-T2 \d+\)	1
+change	indirect	  indirect calls             \d+ \(resolved \d+, unresolved \d+\)	1
+change	untyped	  untyped write sites        \d+ in the program, \d+ of them count for a target	1
+change	unknown-effect	  unknown-effect passes      \d+ \(pointers that reach a target, passed to code without a body, an unresolved call or a variadic position\)	1
+change	outptr	  out-pointer summaries      store-only \d+, escaping \d+, unsummarized \d+	1

@@ -27,6 +27,7 @@ struct SerializeOptions {
   kz::Digest tool_hash = {};
   std::string build_identity;    // kz::build_identity() of the running tool
   std::vector<std::pair<std::string, std::string>> notes;  // further BASIS items (name, value), policy unset
+  std::vector<std::pair<std::string, std::string>> deviation_notes;  // further BASIS items (name, value), policy deviation
   size_t image_budget = 4096;    // ReadOptions::image_budget of the run (recorded with the extended facts)
 };
 

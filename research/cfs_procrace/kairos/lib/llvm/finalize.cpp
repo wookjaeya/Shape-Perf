@@ -672,12 +672,13 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     l.status = (l.n_untyped + l.n_escape + l.n_cast + l.n_union + l.n_unknown) > 0 ? KZ_LOC_STATUS_DISABLED : KZ_LOC_STATUS_COMPLETE;
     // A command-line target that no unit read declares has no writer because it names nothing here, not because its
     // writer set is complete: its status stays unchecked (static_facts.md 5k).  A --target that the profile also names
-    // is checked the same way.  Targets of a profile or a rule alone keep the rule above.  Only the tags and typedef
-    // names at file scope are looked up (TuReader::collect_typedefs): a tag nested in a record or in a block is not.
+    // is checked the same way.  Targets of a profile or a rule alone keep the rule above.  The record names looked up are
+    // those of TuReader::names: the file-scope tags and typedef names, and the names of the records without one (a tag in
+    // a record or a block, a record named by its member or object; static_facts.md 5q).
     if ((tf.origin == "command line" || tf.command_line) && m.target_fields_defined.count(l.loc_type + "." + l.loc_field) == 0) {
       l.status = KZ_LOC_STATUS_UNCHECKED;
       l.unknown_target = m.target_types_defined.count(l.loc_type) == 0
-                             ? "no record type " + l.loc_type + " is found among the file-scope tags and typedef names of the units read"
+                             ? "no record type " + l.loc_type + " is found among the record names of the units read"
                              : "the record type " + l.loc_type + " has no field " + l.loc_field + " in the units read";
     }
     m.locs.push_back(l);

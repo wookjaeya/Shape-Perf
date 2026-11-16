@@ -52,6 +52,8 @@ const std::vector<std::string> kFlowSections = {"functions", "argflow", "paramfl
 const std::vector<std::string> kLockSections = {"functions", "lockops", "lockids", "lockset", "fstatus", "awaits"};
 // `kz-static relations` (with the rule targets in the profile-free mode): the targets and their writers.
 const std::vector<std::string> kRelationSections = {"functions", "writers", "locs"};
+// The record names (static_facts.md 5q): the writers, targets and completeness of the fields of records named by use.
+const std::vector<std::string> kNameSections = {"functions", "writers", "locs", "fstatus", "fwrites", "gimages"};
 // The order and entry-path facts of the F5 events (LOCK_PATHS, written with those of F1-F3).
 const std::vector<std::string> kPathSections = {"functions", "lockpaths"};
 
@@ -92,6 +94,9 @@ const std::vector<Case>& cases() {
       // the order edges with their kinds and premises, the waits and the static order of each relations row (order rules
       // revision 1, static_facts.md 5p): order.c
       {"order_np", "order.c", {"--targets-rule", "R-T1,R-T2"}, kPathSections, true, false, true},
+      // the names of record types without a file-scope tag or typedef name and the writers they let the rules match
+      // (static_facts.md 5q): anonrec.c
+      {"anonrec_np", "anonrec.c", {"--targets-rule", "R-T1,R-T2"}, kNameSections, true, true},
   };
   return all;
 }

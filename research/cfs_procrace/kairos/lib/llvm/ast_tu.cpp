@@ -1,6 +1,7 @@
 // ast_tu.cpp -- see ast_reader.hpp: the unit-level part of the extraction.
 #include <algorithm>
 #include <filesystem>
+#include <functional>
 
 #include "ast_reader.hpp"
 #include "clang/AST/APValue.h"
@@ -8,6 +9,7 @@
 #include "clang/AST/DeclBase.h"
 #include "clang/AST/Expr.h"
 #include "clang/AST/RecordLayout.h"
+#include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Basic/SourceManager.h"
 #include "clang/Lex/Lexer.h"
 #include "llvm/ADT/APSInt.h"
@@ -110,6 +112,9 @@ const RecordDecl* TuReader::record_of(QualType t) {
 std::string TuReader::record_name(const RecordDecl* rd) {
   rd = canonical_record(rd);
   if (rd == nullptr) return "<none>";
+  // a C11 unnamed member: its fields are fields of the record it is a member of (targets_of_field)
+  if (rd->isAnonymousStructOrUnion())
+    if (const auto* outer = dyn_cast_or_null<RecordDecl>(rd->getDeclContext())) return record_name(outer);
   auto it = names.find(rd);
   if (it != names.end() && !it->second.empty()) {
     // Typedef names are stored with a leading '\x01' so that they sort before tags.
@@ -129,6 +134,101 @@ void TuReader::collect_typedefs() {
     } else if (auto* rd = dyn_cast<RecordDecl>(d)) {
       if (rd->getIdentifier() != nullptr) names[canonical_record(rd)].insert(rd->getName().str());
     }
+  }
+  name_unnamed_records();
+}
+
+// A position as a part of a type name: the file (as recorded, relative to the root when under it) with each '.' written
+// '_', so that the name holds no dot (a `Type.field` text is split at its first dot by parse_field_ref, spec.cpp), then
+// the line and, if asked, the column.
+std::string TuReader::name_pos(SourceLocation loc, bool with_column) {
+  const Pos p = pos_of(loc);
+  std::string file = p.file;
+  for (char& c : file)
+    if (c == '.') c = '_';
+  return file + ":" + std::to_string(p.line) + (with_column ? ":" + std::to_string(p.col) : std::string());
+}
+
+// The records the file-scope pass (collect_typedefs) leaves without a name, named so that every record type of the unit
+// has a name of its own, the same in every unit that reads the same definition (static_facts.md 5q).  In this order:
+//   - a tag declared inside a record: the tag (in C a tag declared in a struct has file scope);
+//   - a tag or typedef name declared in a function body: that name and "@<file>:<line>" of its declaration;
+//   - a record with no tag that is the type of a named member of a record (also of an array member): "<Outer>::<member>",
+//     with the name of the record the member is in (the first such member in the order of the declarations);
+//   - a record with no tag that is the type of an object (file or block scope; also an array of it): "<object key>::type",
+//     the object key with the position of an object of internal linkage (TuReader::object_key);
+//   - otherwise "<anonymous@<file>:<line>:<col>>" of its definition.
+// A C11 unnamed member keeps the rule it had: its fields are those of the record it is a member of (record_name,
+// targets_of_field).  A position is written without dots (name_pos).
+void TuReader::name_unnamed_records() {
+  struct Collect : RecursiveASTVisitor<Collect> {
+    std::vector<const RecordDecl*> records;
+    std::map<const RecordDecl*, const FieldDecl*> member_of;
+    std::map<const RecordDecl*, const VarDecl*> object_of;
+    std::map<const RecordDecl*, const TypedefNameDecl*> block_typedef;
+    TuReader* tu = nullptr;
+    bool VisitRecordDecl(RecordDecl* rd) {
+      if (rd->isThisDeclarationADefinition()) records.push_back(rd);
+      return true;
+    }
+    bool VisitFieldDecl(FieldDecl* fd) {
+      if (fd->getIdentifier() != nullptr)
+        if (const RecordDecl* r = tu->record_of(fd->getType())) member_of.emplace(r, fd);
+      return true;
+    }
+    bool VisitVarDecl(VarDecl* vd) {
+      if (!isa<ParmVarDecl>(vd) && vd->getIdentifier() != nullptr)
+        if (const RecordDecl* r = tu->record_of(vd->getType())) object_of.emplace(r, vd);
+      return true;
+    }
+    bool VisitTypedefNameDecl(TypedefNameDecl* td) {
+      if (td->getDeclContext()->isFunctionOrMethod())
+        if (const RecordDecl* r = tu->record_of(td->getUnderlyingType())) block_typedef.emplace(r, td);
+      return true;
+    }
+  } c;
+  c.tu = this;
+  c.TraverseDecl(ctx_.getTranslationUnitDecl());
+  auto in_function = [](const Decl* d) {
+    for (const DeclContext* dc = d->getDeclContext(); dc != nullptr; dc = dc->getParent())
+      if (dc->isFunctionOrMethod()) return true;
+    return false;
+  };
+  std::map<const RecordDecl*, std::string> done;
+  std::function<std::string(const RecordDecl*)> name_of = [&](const RecordDecl* rd) -> std::string {
+    rd = canonical_record(rd);
+    if (rd->isAnonymousStructOrUnion())
+      if (const auto* outer = dyn_cast_or_null<RecordDecl>(rd->getDeclContext())) return name_of(outer);
+    auto nit = names.find(rd);
+    if (nit != names.end() && !nit->second.empty()) return record_name(rd);
+    auto dit = done.find(rd);
+    if (dit != done.end()) return dit->second;
+    std::string n;
+    if (rd->getIdentifier() != nullptr) {
+      n = rd->getName().str();
+      if (in_function(rd)) n += "@" + name_pos(rd->getLocation(), false);
+    } else if (auto bt = c.block_typedef.find(rd); bt != c.block_typedef.end()) {
+      n = bt->second->getName().str() + "@" + name_pos(bt->second->getLocation(), false);
+    } else if (auto mo = c.member_of.find(rd); mo != c.member_of.end()) {
+      n = name_of(mo->second->getParent()) + "::" + mo->second->getName().str();
+    } else if (auto ob = c.object_of.find(rd); ob != c.object_of.end()) {
+      n = object_key(ob->second);
+      for (char& ch : n)
+        if (ch == '.') ch = '_';
+      n += "::type";
+    } else {
+      n = "<anonymous@" + name_pos(rd->getLocation(), true) + ">";
+    }
+    done[rd] = n;
+    return n;
+  };
+  for (const RecordDecl* r : c.records) {
+    const RecordDecl* rd = canonical_record(r);
+    if (rd == nullptr || rd->isAnonymousStructOrUnion()) continue;
+    auto nit = names.find(rd);
+    if (nit != names.end() && !nit->second.empty()) continue;
+    const std::string n = name_of(rd);
+    names[rd].insert(n);
   }
 }
 
@@ -196,8 +296,9 @@ std::string TuReader::next_key(const Pos& pos, const std::string& func_key, uint
 std::vector<size_t> TuReader::targets_of_field(const FieldDecl* fd) {
   std::vector<size_t> out;
   const RecordDecl* rd = fd->getParent();
-  // A field of an anonymous record inside a named record belongs to the named one.
-  while (rd != nullptr && rd->getIdentifier() == nullptr && rd->getTypedefNameForAnonDecl() == nullptr) {
+  // A field of a C11 unnamed member (an anonymous struct or union) belongs to the record it is a member of.  A record
+  // with no tag that is the type of a named member has a name of its own (name_unnamed_records).
+  while (rd != nullptr && rd->isAnonymousStructOrUnion()) {
     const RecordDecl* outer = dyn_cast_or_null<RecordDecl>(rd->getDeclContext());
     if (outer == nullptr) break;
     rd = outer;
@@ -348,7 +449,7 @@ void TuReader::note_declared_targets() {
       }
     }
     if (!named) continue;
-    // the fields of the record and of the unnamed records inside it, which targets_of_field gives to it
+    // the fields of the record and of its C11 unnamed members, which targets_of_field gives to it
     std::vector<const RecordDecl*> todo = {def};
     while (!todo.empty()) {
       const RecordDecl* rd = todo.back();
@@ -357,8 +458,7 @@ void TuReader::note_declared_targets() {
         for (size_t i : targets_of_field(fd)) model_->target_fields_defined.insert(spec_.fields[i].field.type + "." + spec_.fields[i].field.field);
       for (const Decl* d : rd->decls())
         if (const auto* inner = dyn_cast<RecordDecl>(d))
-          if (inner->getIdentifier() == nullptr && inner->getTypedefNameForAnonDecl() == nullptr && inner->getDefinition() != nullptr)
-            todo.push_back(inner->getDefinition());
+          if (inner->getDefinition() != nullptr && inner->getDefinition()->isAnonymousStructOrUnion()) todo.push_back(inner->getDefinition());
     }
   }
 }

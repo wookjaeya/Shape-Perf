@@ -21,6 +21,14 @@ struct ReadOptions {
   size_t image_budget = 4096;
 };
 
+// The reading options of the front end as one text: the arguments every unit gets (the extraction's own, -w included),
+// the resource directory and the extra arguments, in the order the front end gets them.  The basis records this text
+// as `front_end.arguments_added` and the extraction compares its own with it (static_facts.md 5q); both use this one
+// function, so the two texts cannot be composed differently.
+std::string reading_arguments_text(const ReadOptions& options);
+// The front end that reads the units: "Clang LibTooling, <full version>" (the basis item `front_end`).
+std::string reading_front_end_text();
+
 // One translation unit as the build recorded it.
 struct UnitCommand {
   std::string directory;                  // working directory of the recorded command

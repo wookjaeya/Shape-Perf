@@ -152,6 +152,12 @@ class Factory : public tooling::FrontendActionFactory {
 
 }  // namespace
 
+std::string reading_arguments_text(const ReadOptions& options) {
+  std::string t;
+  for (const std::string& a : adaptations(options, true)) t += (t.empty() ? "" : " ") + a;
+  return t;
+}
+
 std::vector<std::string> flag_list(const std::vector<std::string>& cl) {
   std::vector<std::string> out;
   bool skip_next = false, take_next = false;

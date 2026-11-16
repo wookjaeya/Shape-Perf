@@ -276,6 +276,7 @@ class View {
       if (it.kind == KZ_ITER_KIND_CALL) {
         os << "    call site " << it.site << " " << callee << " " << enum_text("KZ_ITER_STATUS", it.status);
         if (it.guard_root != KZ_NONE32) os << " if " << expr(it.guard_root);
+        if (!str(it.text).empty()) os << " (" << str(it.text) << ")";
         os << "\n";
         continue;
       }

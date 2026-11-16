@@ -1,0 +1,19 @@
+# allowance of compare_classes.py for the facts view (kz-static show) of a re-extraction with the extractor fixes against
+# the re-extraction of schema revision 12 (schema12_extract), plan/full_stage_results_20261116.md 5.0.  Besides these rows
+# the built-in classes renamed / added-named / removed-anon (a record type named by use instead of <anonymous>).
+# numbers that move when rows are added (sites are numbered over every located fact; LOCK_PATHS names LOCKSET rows)
+mask	site	(?<=site )\d+|(?<=sites )\d+|(?<=site=)\d+|(?<=sites=)\d+
+mask	row	(?<=row )\d+
+mask	count-head	^(\[[a-z_0-9]+\]) \d+$	\1 <n>
+mask	and-more	\(and \d+ more\)
+# BASIS: counts that follow from the targets and rows, the comparison of the reading options, the basis hash
+change	basis-count	  count\.(sites|field_status|lockset|lock_paths|targets_rule|targets_rule_t1|targets_rule_t2|targets_rule_both|targets_rule_t1_unshared_only|targets_rule_t2_unshared_only|indirect_calls_incomplete) = .*	*
+change	units-from	  extract\.units_from = basis [0-9a-f]{16}  \(unset\)	1
+insert	reading-options	  extract\.reading_options_vs_basis = same as basis front_end\.arguments_added and front_end  \(unset\)	1
+# LOCK_PATHS of the two C1 builds: the entry-release rows of the one function whose indirect call through a field of a
+# record named by use (an object's type) now has incomplete targets (CALL_TARGETS incomplete-source after the memset of
+# that object became a writer): the first call that may release a lock on entry is now that indirect call
+only	c1_pre_tx,c1_post_tx
+insert	cf-entry-release	  entry-release row <row> (call|read|write \S*) at \S+/cf/fsw/src/cf_cmd\.c:\d+:\d+ in CF_CmdGetSetParam through the call \S+/cf/fsw/src/cf_cmd\.c:1014:18 	8
+remove	cf-entry-release	  entry-release row <row> (call|read|write \S*) at \S+/cf/fsw/src/cf_cmd\.c:\d+:\d+ in CF_CmdGetSetParam through the call \S+/cf/fsw/src/cf_cmd\.c:1020:17 CFE_EVS_SendEvent	7
+only	*

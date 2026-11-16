@@ -1,0 +1,7 @@
+# allowance of compare_classes.py for order.txt on a re-extraction with the extractor fixes against schema12_on_extract,
+# plan/full_stage_results_20261116.md 5.0; besides the built-in classes
+change	facts-hash	facts [0-9a-f]{64}	1
+change	relations-rules	relations relations rules revision [0-9] \(2026-11-16\)	1
+# the record type a pair line names for a write of a whole record is the first of the record types that write contains
+# (sorted): a record named by use sorts elsewhere than "<anonymous>"
+mask	record-write	(?<= \[)[^\]\s]+(?=\.\*\] )

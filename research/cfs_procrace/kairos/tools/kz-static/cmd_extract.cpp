@@ -123,7 +123,7 @@ int cmd_extract(int argc, char** argv) {
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--basis", "--source", "--root", "--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn",
                    "--resource-dir", "--extra-arg", "--section", "--argflow-depth", "--argflow-size", "--image-budget", "--targets-rule", "-o"},
-                  {"--text", "--verbose", "--no-profile", "--extended-facts"}, &args, &err)) {
+                  {"--text", "--verbose", "--no-profile", "--extended-facts", "--accept-option-difference"}, &args, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
   }
@@ -228,6 +228,10 @@ int cmd_extract(int argc, char** argv) {
   // the deviations of the basis (policy deviation), copied into the facts of the runs that write the extended facts
   // so that `kz-static relations` can name them in the rows that rest on them
   std::vector<std::pair<std::string, std::string>> basis_deviations;
+  // the reading options and the front end the basis records (front_end.arguments_added, front_end), for the comparison
+  // with this extraction's own below
+  std::string basis_arguments, basis_front_end;
+  bool basis_has_arguments = false, basis_has_front_end = false;
   if (args.has("--basis")) {
     kz::Container basis;
     kz::Status s = kz::Container::read_file(args.one("--basis"), &basis);
@@ -245,10 +249,17 @@ int cmd_extract(int argc, char** argv) {
     std::vector<kz_basis_item> items;
     if (basis.read_section(KZ_SEC_BASIS, &items).ok())
       for (const kz_basis_item& b : items) {
-        if (b.policy != KZ_POLICY_DEVIATION) continue;
         std::string name, value;
         basis.string(b.name, &name);
         basis.string(b.value, &value);
+        if (name == "front_end.arguments_added") {
+          basis_arguments = value;
+          basis_has_arguments = true;
+        } else if (name == "front_end") {
+          basis_front_end = value;
+          basis_has_front_end = true;
+        }
+        if (b.policy != KZ_POLICY_DEVIATION) continue;
         basis_deviations.push_back({name, value});
       }
   } else {
@@ -295,6 +306,35 @@ int cmd_extract(int argc, char** argv) {
   }
   if (ro.extra_args.empty()) so.notes.push_back({"extract.extra_arg", "none"});
   for (size_t i = 0; i < ro.extra_args.size(); ++i) so.notes.push_back({"extract.extra_arg[" + std::to_string(i) + "]", ro.extra_args[i]});
+  // The reading options compared with the basis (static_facts.md 5q): the text of this extraction's arguments and its
+  // front end, composed by the function the basis uses (kzs::reading_arguments_text, kzs::reading_front_end_text), and
+  // the basis items front_end.arguments_added and front_end.  Facts read with other options or another front end do not
+  // describe the units the basis describes; such an extraction is refused, unless --accept-option-difference records
+  // the difference as a policy deviation (BASIS extract.reading_options_vs_basis = differs: ...), which every row of
+  // `kz-static relations` then carries (reading_options_differ).  Without a basis (--source) nothing is compared.
+  {
+    const char* kItem = "extract.reading_options_vs_basis";
+    if (!args.has("--basis")) {
+      so.notes.push_back({kItem, "not compared: no basis (--source)"});
+    } else {
+      const std::string own_arguments = kzs::reading_arguments_text(ro), own_front_end = kzs::reading_front_end_text();
+      const bool same_arguments = basis_has_arguments && basis_arguments == own_arguments, same_front_end = basis_has_front_end && basis_front_end == own_front_end;
+      if (same_arguments && same_front_end) {
+        so.notes.push_back({kItem, "same as basis front_end.arguments_added and front_end"});
+      } else {
+        auto shown = [](bool has, const std::string& v) { return has ? "[" + v + "]" : std::string("(no such item in the basis)"); };
+        std::string what;
+        if (!same_arguments) what = "arguments: basis front_end.arguments_added " + shown(basis_has_arguments, basis_arguments) + ", this extraction [" + own_arguments + "]";
+        if (!same_front_end)
+          what += std::string(what.empty() ? "" : "; ") + "front end: basis front_end " + shown(basis_has_front_end, basis_front_end) + ", this extraction [" + own_front_end + "]";
+        if (!args.has("--accept-option-difference"))
+          return fail("extract", "the reading options differ from those of the basis (" + what +
+                                     "); refused: facts read so would not describe the units the basis describes (--accept-option-difference extracts and records the "
+                                     "difference as a policy deviation)");
+        so.deviation_notes.push_back({kItem, "differs (--accept-option-difference): " + what});
+      }
+    }
+  }
 
   kzs::Model model;
   std::string error;

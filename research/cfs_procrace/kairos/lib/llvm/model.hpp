@@ -315,6 +315,16 @@ struct ImageFact {
   Pos spell;
 };
 
+// A marker leaf of a static image: the part of the initializer from its path on was not read, the budget being used
+// up (ast_tu.cpp flatten_initializer, static_facts.md 5j).  The marker paths of an image, as "<object><path>, ...", or "".
+inline bool is_image_marker(const ImageFact& f) { return f.kind == KZ_IMAGE_KIND_NONCONST && f.text == "<image truncated>"; }
+inline std::string image_marker_paths(const std::vector<ImageFact>& img, const std::string& object) {
+  std::string out;
+  for (const ImageFact& f : img)
+    if (is_image_marker(f)) out += (out.empty() ? "" : ", ") + object + f.path;
+  return out;
+}
+
 struct LocFact {
   std::string loc_type, loc_field;
   uint32_t n_writers = 0, n_direct = 0, n_data_fn = 0, n_outptr = 0;

@@ -42,6 +42,8 @@ kz::Status load_compile_db(const std::string& path, std::vector<CdbEntry>* out) 
 
 std::string clang_version_text() { return getClangFullVersion(); }
 
+std::string reading_front_end_text() { return "Clang LibTooling, " + clang_version_text(); }
+
 namespace {
 
 class ErrorCollector : public DiagnosticConsumer {

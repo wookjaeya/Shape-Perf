@@ -1,0 +1,5 @@
+# space_guard.sh kind=pre-reference need=120000000 floor=314572800 interval=2 cmd=bash records/extract-fixes-20261116/pre_ref.sh
+start 2026-11-16T13:41:37.624Z free=3156295680 threshold=434572800
+sample 2026-11-16T13:41:37.628Z 3156291584
+sample 2026-11-16T13:41:39.636Z 3151577088
+end 2026-11-16T13:41:41.645Z kind=pre-reference verdict=completed rc=0 free=3147706368 lowest=3147706368 dip=8589312 change=-8589312

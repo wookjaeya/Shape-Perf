@@ -44,7 +44,8 @@ $B/tools/kz-static/kz-static reach facts.kz --root CFE_ES_TaskMain --loc CFE_SB_
 - `show` 의 section: `basis files functions calls derives loops iters order init consts writers atype locs targets spawnparams image terminals outcalls fwrites`, 컨테이너에 있으면 `p0 derived spawnwrap`(§5a)와 `reads returns retconsts loopexits`(§5b). `--loc Type.field`, `--callee NAME` 으로 거른다(`--loc` 은 `reads` 에도 걸린다).
 - 프로필 없는 추출(§5a): `basis --no-profile …`, `extract --no-profile --basis basis.kz -o facts.kz`. `--profile` 과 어휘 옵션(`--target`, `--delay-op`, `--lock-op`, `--unlock-op`, `--spawn-op`, `--terminal-op`, `--poll-fn`)은 함께 쓸 수 없다(종료 코드 2).
 - 확장 사실 F1–F3(§5b): 프로필 없는 추출은 늘 쓴다. 프로필 추출은 `extract --extended-facts` 를 줄 때만 쓴다. 주지 않으면 facts 는 예전 그대로다.
-- 종료 코드: 0 정상, 1 분석 실패(번역 단위가 parse 되지 않음, 컨테이너 손상), 2 사용법·입출력 오류.
+- 종료 코드: 0 정상, 1 분석 실패(번역 단위가 parse 되지 않음, 컨테이너 손상, 읽기 옵션이 basis 와 다름), 2 사용법·입출력 오류.
+- `extract --basis` 는 제 읽기 옵션(`--resource-dir`, `--extra-arg`)과 프런트엔드를 basis 의 것과 대조하고 다르면 거부한다. `--accept-option-difference` 는 추출하고 그 차이를 편차로 적는다(§5q).
 - 고정 도구(fixture)처럼 compile DB 없이 읽을 때는 `--source FILE ... -- <컴파일 플래그>` 를 쓴다.
 
 **무엇을 찾는가는 데이터다** [D]. 추출 대상 필드(`loc`, `bind`, store pattern), 역할이 있는 인자(`op` 의 매개변수 역할), 종료 연산(`terminal`), spawn 연산(`hb` 의 spawn 템플릿), poll 함수는 프로필에서 온다. 프로필 문법(Φ)에 아직 **지연(delay) 연산과 잠금 연산을 선언하는 수단이 없어서**, 이 넷(`OS_TaskDelay`, `CFE_ES_LockSharedData`, `CFE_ES_UnlockSharedData`, 그리고 프로필의 spawn 템플릿이 아닌 `CFE_ES_CreateChildTask`)은 명령줄로 준다. 명령줄 항목과 C 라이브러리 데이터 함수 표(12개)는 사람이 넣은 입력이라 facts 컨테이너의 BASIS 항목에 정책 `declared-assumption`, 출처 계층 `researcher` 로 기록되고 요약에 "hand-entered inputs" 로 센다. 엔진 코드(`lib/`, `include/`)에는 cFS 이름이 없다(lint `lint_case-ids` 와 별도 grep 으로 확인 [M]).
@@ -493,7 +494,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 **소비자** [D]. 표시 잎과 `image-truncated` 플래그를 읽는 방식은 소비자마다 다르다.
 - table walk(`finalize.cpp`): 경로를 정확히 맞추는 조회(`find_entry`)에서 표시 잎은 어느 멤버와도 맞지 않는다. 앞부분 조회(`has_prefix_entries`)는 표시 잎을 빼고 본다. walk 가 풀리지 않고 그 객체의 이미지에 표시 잎이 있으면 이유 문장이 잘림을 적는다. 필드가 잘린 바로 그 자리이면 "was not read", 아니면 "has no initializer or is in the part that was not read", 표가 끝나지 않으면 "the elements after the cut were not read" 다. 표시 잎이 없으면 이유는 전과 같다. walk 가 풀리는지는 바뀌지 않는다(8b 수정 단계, 2026-11-10) [M: `test_static_flow`, `test_static_cli`]. 8b 판에서는 앞부분 조회가 `경로.멤버...` 를 그 멤버의 중첩 항목으로 보았다. 그래서 이유가 "no null element ends the table" 로 틀렸다.
 - 표의 원소가 가리키는 객체의 이미지가 잘려도 walk 는 풀릴 수 있다. 그때 펼친 차례는 잘린 필드를 "not in the image" 의 상수 아닌 값으로 읽고 residual 조건을 남긴다 [M: 검증 단계 fixture, `--image-budget 3`]. 잘림 플래그로 UNKNOWN 을 정하는 일반 규칙은 ③ 이다.
-- 펼치기(`unroll.cpp`), PTR_FIELDS 정적 초기값(`argflow.cpp`), basis 의 table 항목은 고치지 않았다. 펼치기의 필드 조회도 경로를 정확히 맞춘다. 그래서 잘린 멤버는 전처럼 "이미지에 없음"이다. argflow 의 정적 초기값 쓰기는 남은 잎에서만 나온다. basis 의 table 항목은 원소의 표시 잎을 그 원소의 글에 넣는다.
+- (2026-11-16 §5q 에서 펼치기와 PTR_FIELDS 를 고침.) 펼치기(`unroll.cpp`), PTR_FIELDS 정적 초기값(`argflow.cpp`), basis 의 table 항목은 고치지 않았다. 펼치기의 필드 조회도 경로를 정확히 맞춘다. 그래서 잘린 멤버는 전처럼 "이미지에 없음"이다. argflow 의 정적 초기값 쓰기는 남은 잎에서만 나온다. basis 의 table 항목은 원소의 표시 잎을 그 원소의 글에 넣는다.
 - relations(`relations.cpp`)는 표시 잎도 `image-truncated` 플래그도 읽지 않는다. spawn entry 를 표의 정적 이미지로 풀 때 남은 함수 잎만 본다. 상수 아닌 잎이 읽은 멤버를 덮는지 보는 검사(relations 규칙 개정 5)는 경로 모양을 비교한다. 배열 표시 `P[...]` 는 덮는 것으로 본다. 그래서 그 spawn 의 스레드는 완전하지 않은 것으로 남는다. 레코드·union 표시 `P.m...` 는 덮지 않는다. 모양 `[].fn...` 이 멤버의 모양 `[].fn` 과 같지 않고 그 앞부분도 아니기 때문이다. 그래서 잘린 원소의 entry 는 표시 없이 빠진다 [M: 검증 단계 fixture, 원소 셋의 표에서 `--image-budget 5` 면 entry 둘 가운데 하나, path C 후보 1 → 0]. PTR_FIELDS 를 지나는 이미지 값도 필드가 빈 행을 건너뛴다. 그래서 표시 잎은 값에 들지 않는다 [I: 코드]. 2a 도구도 같은 relations 출력을 낸다(표시 잎이 없었다). 회귀는 아니다. 다섯 빌드는 표시 잎이 0 이다(`plan/step2a_results_20261030.md` §15.8).
 - 그러므로 relations 의 결과는 이미지가 잘리면 보수 쪽이 아닐 수 있다. 잘린 이미지를 UNKNOWN 으로 두는 소비자 규칙(RV3A §2.5 ③)은 하지 않았다. ③ 의 소비자에 relations(spawn 이미지 entry, PTR_FIELDS 이미지 값)를 더했다(RV3A §2.5, 8b 수정 단계).
 - relations 규칙 개정 6(2026-11-16)부터 relations 는 표시 잎과 플래그를 읽는다. 잘린 이미지의 키는 풀리지 않음이고, 잘린 이미지에서 찾은 spawn entry 는 남기되 그 spawn 의 스레드는 완전하지 않음이다(§5m).
@@ -505,8 +506,8 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 근거: `plan/RV3_REVIEW_ANALYSIS_20261105.md` §6.3 O2·O12. 결과는 `plan/step2a_results_20261030.md` §16. facts schema 는 개정 11 그대로다(섹션·레코드 배치·열거형 변화 없음).
 
 **없는 명령줄 대상(`unknown-target`)** [D]. 명령줄 `--target T.f` 의 선언을 읽은 단위에서 찾는다. 찾는 규칙은 writer 를 맞추는 규칙과 같다(`TuReader::targets_of_field`: 필드 이름이 같고, 그 필드가 든 레코드나 그것을 감싼 이름 없는 레코드의 태그·typedef 이름에 `T` 가 있음). 레코드 정의만 센다. 앞선 선언(불완전 형)은 세지 않는다.
-- 찾는 이름은 파일 범위의 태그와 typedef 이름뿐이다(`TuReader::collect_typedefs`). 레코드 안에 둔 태그(`struct Outer { struct Inner { int ix; } in; }` 의 `Inner`)와 블록 안의 태그는 보지 않는다. 그래서 그런 `T` 는 선언이 있어도 `unknown-target` 이다. 상태(unchecked)는 안전한 쪽이다. 그 직접 쓰기는 writer 로 잡지 못한다 [M: 8c 수정 단계, C99 소스 둘]. 중첩 태그를 이름 표에 넣으면 writer 를 맞추는 규칙이 바뀐다. 그래서 따로 선언하고 빌드한다. 남는 결함이다.
-- 같은 규칙으로, 이름 없는 레코드 형의 멤버 안 필드도 감싼 레코드의 필드로 본다. `struct Unn { struct { int q; } m; }` 에서 `--target Unn.q` 는 선언이 있다고 보고, `g_unn.m.q = 5` 를 `Unn.q` 의 writer 로 센다 [M]. `Unn` 에는 멤버 `q` 가 없다(경로는 `m.q`). writer 를 맞추는 규칙의 성질이다. 바꾸지 않았다.
+- 찾는 이름은 파일 범위의 태그와 typedef 이름뿐이다(`TuReader::collect_typedefs`). 레코드 안에 둔 태그(`struct Outer { struct Inner { int ix; } in; }` 의 `Inner`)와 블록 안의 태그는 보지 않는다. 그래서 그런 `T` 는 선언이 있어도 `unknown-target` 이다. 상태(unchecked)는 안전한 쪽이다. 그 직접 쓰기는 writer 로 잡지 못한다 [M: 8c 수정 단계, C99 소스 둘]. 중첩 태그를 이름 표에 넣으면 writer 를 맞추는 규칙이 바뀐다. 그래서 따로 선언하고 빌드한다. 남는 결함이다. (2026-11-16 §5q 에서 고침: 레코드 안과 블록 안의 태그도 이름 표에 든다.)
+- 같은 규칙으로, 이름 없는 레코드 형의 멤버 안 필드도 감싼 레코드의 필드로 본다. `struct Unn { struct { int q; } m; }` 에서 `--target Unn.q` 는 선언이 있다고 보고, `g_unn.m.q = 5` 를 `Unn.q` 의 writer 로 센다 [M]. `Unn` 에는 멤버 `q` 가 없다(경로는 `m.q`). writer 를 맞추는 규칙의 성질이다. 바꾸지 않았다. (2026-11-16 §5q 에서 바꿈: 그 형은 `Unn::m` 이고 `Unn.q` 는 unknown-target 이다.)
 - 어느 단위에도 없으면 FACT_LOCS 상태는 `unchecked` 다. `writer-set-complete` 가 아니다. 수(writers 등)는 0 이다.
 - BASIS 에 `unknown_target.T.f` 한 항목을 둔다(정책 unset). 값은 까닭이다: "no record type T is found among the file-scope tags and typedef names of the units read" 또는 "the record type T has no field f in the units read". 8c 도구의 앞 글은 "no record type T is defined in the units read" 였다. 중첩 태그에는 틀린 글이라 8c 수정 단계에서 고쳤다.
 - extract 요약 줄은 `-> unknown-target (까닭)` 이다.
@@ -517,6 +518,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
   - 규칙 대상 [M]: 8c 판의 문장 "규칙 대상은 프로그램의 필드에서 고르므로 늘 선언이 있다" 는 틀렸다. 규칙(R-T1, R-T2)은 형 이름을 `field_type_name` 에서 받는다(`lib/llvm/ast_fn.cpp:587-590`). `targets_of_field` 가 아무것도 맞추지 못하면 그 이름은 `record_name(fl->getParent())` 다. 이름 없는 레코드와 중첩 태그 레코드에서는 `<anonymous>` 다. 이름 표의 어느 항목도 `<anonymous>` 가 아니다. 그래서 직접 쓰기는 그런 대상의 writer 로 맞지 않는다. 그래도 상태는 `writer-set-complete` 다(8c 수정 단계 C99 소스: `g_anon.u1 = 3` 과 `g_outer.in.ix = 7` 이 있어도 `<anonymous>.u1`, `<anonymous>.ix` 가 `writer-set-complete writers=0`).
   - 2a 다섯 빌드의 NP 에 그런 대상이 3 / 3 / 2 / 0 / 0 개 있다(c1_pre_tx, c1_post_tx: `<anonymous>.Data`, `.State`, `.sys_timebase_id`; r2_core: `.Data`, `.sys_timebase_id`). c1_pre_tx 의 `<anonymous>.State` 는 `writer-set-complete writers=0`, escape 0 이다. 그 필드는 이름 없는 구조체 `UnSock_Global` 의 멤버다(`psp/fsw/modules/unsock_intf/unsock_intf.c:81-85`). `:231` 의 memset 이 덮고, `:338` 에서 원소 주소를 받아 `:371`·`:409` 에서 쓴다. 이 대상들은 루프 행과 relations.txt 에 없다(grep 0). 그래서 T1–T7 은 바뀌지 않는다 [M].
   - 고치는 길은 둘이다. 규칙 대상에도 이 검사를 하거나, 규칙이 `targets_of_field` 가 주는 이름(감싼 이름 있는 레코드)을 고른다. 어느 쪽이든 C1·R2 NP 의 FACT_LOCS 가 바뀐다. 그래서 따로 선언하고 빌드한다. 이 판에서는 고치지 않았다.
+  - 2026-11-16 §5q 에서 고쳤다: 이름 없는 레코드는 쓰임에서 온 제 이름을 갖고, 그 이름이 이름 표에 들어 규칙 대상의 writer 가 맞는다.
   - 프로필 대상 [M]: fixture 프로필의 `loc Cell.id` 는 `Cell` 이 없는 fixture 의 golden 아홉에 나온다(`Cell` 은 `writers.c`·`derives.c` 에만 있다). `[locs]` 행과 요약 줄이 `writer-set-complete writers=0`: atype, loops, outptr, relations, spawn. 요약 줄만(그 golden 은 `[locs]` 를 싣지 않음): argflow, flowfacts, lockset. clobber 는 DISABLED. 8c 판은 "다섯, 그 가운데 넷" 이라 적었다. spawn 과 요약 줄의 셋을 빠뜨렸다. 고치면 옛 경로 golden 아홉 이상이 바뀐다. 그래서 이 판에서는 고치지 않았다.
 
 **명령줄 대상은 한 번 기록한다** [D]. 전에는 `target.T.f = command line` 과 `target.T.f = extraction target` 두 항목이었다. 이제 앞의 것 하나다(정책 declared-assumption, 출처 계층 researcher). 요약의 "hand-entered inputs" 수는 그대로다(명령줄 대상을 따로 센다). relations 의 "hand-entered vocabulary" 수와 행마다의 layers 칸(`hand-entered:command-line(N items; …)`)은 대상을 한 번 센다. 전에는 두 번 셌다. 2a 출력에서는 보이지 않는다. relations 는 명령줄 대상이 있는 facts(identity)에서 돌지 않는다. 이 변화는 8c 의 빌드 전 선언에 없었다(`plan/step2a_results_20261030.md` §16.10).
@@ -525,7 +527,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - `extract.resource_dir`: 도구가 단위마다 더하는 `-resource-dir=` 의 값이다(`lib/llvm/ast_run.cpp` adaptations). `--resource-dir` 가 없으면 도구에 내장된 기본값이다. 값은 그 경로와 "(the tool's built-in default; no --resource-dir)" 또는 "(--resource-dir)" 다. 둘 다 없으면 "none (…)" 이다. `--resource-dir` 의 상대 경로는 준 그대로 적는다(풀지 않는다). `--resource-dir ""` 이면 resource 디렉터리 없이 읽고 값은 "none (…)" 이다. 그때 시스템 헤더를 쓰는 단위는 읽기가 실패해 facts 가 나오지 않는다 [M: 8c 수정 단계, `writers.c` 는 읽힘, `<stddef.h>` 를 쓰는 소스는 실패].
 - `--extra-arg -resource-dir=X`(또는 `-resource-dir` 와 `X` 두 인자)는 도구의 것보다 뒤에 붙는다. 프런트엔드는 마지막 것을 쓴다 [M: 8c 수정 단계, 가짜 resource 디렉터리의 `stddef.h` 매크로가 읽힘]. 8c 도구는 이때도 내장 기본값을 적었다. 8c 수정 단계부터 값은 `X (--extra-arg -resource-dir, after and over the tool's: <도구의 값>)` 이다. basis 의 단위 분석 인자(`front_end.unit_diagnostic`, 더 뒤에 붙음)는 보지 않는다.
 - `extract.extra_arg[i]`: `--extra-arg` 마다 하나, 준 차례대로. 없으면 `extract.extra_arg = none` 하나다.
-- basis 는 basis 를 만들 때의 값을 `front_end.arguments_added` 에 적는다. extract 는 제 읽기 옵션을 그 값과 대조하지 않는다(`lib/llvm/basis.cpp` 의 단위 읽기는 `front_end.unit_diagnostic` 인자만 가져온다). 그래서 두 값은 두 명령에 같은 옵션을 줄 때만 같다. 2a 의 실행은 그렇다(`tests_8c` 의 facts.txt 11개에서 같음) [M]. 이제 extract 의 값도 facts 에서 되짚을 수 있다(CONFIG_MANAGEMENT §1).
+- (2026-11-16 §5q 부터 extract 가 대조한다: 다르면 거부, `--accept-option-difference` 이면 편차로 적음.) basis 는 basis 를 만들 때의 값을 `front_end.arguments_added` 에 적는다. extract 는 제 읽기 옵션을 그 값과 대조하지 않는다(`lib/llvm/basis.cpp` 의 단위 읽기는 `front_end.unit_diagnostic` 인자만 가져온다). 그래서 두 값은 두 명령에 같은 옵션을 줄 때만 같다. 2a 의 실행은 그렇다(`tests_8c` 의 facts.txt 11개에서 같음) [M]. 이제 extract 의 값도 facts 에서 되짚을 수 있다(CONFIG_MANAGEMENT §1).
 
 **죽은 입력** [D].
 - `OpInfo.out`(프로필 op 매개변수의 `out` 역할)은 지웠다. 채우기만 하고 읽는 곳이 없었다.
@@ -626,6 +628,41 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 **하지 않는 것** [D]. 한 스레드 안의 일반 프로그램 순서(CFG 순서는 facts 에 spawn 호출 뒤 도달뿐), 호출의 guard(facts schema 개정 11 의 호출 행에 없음; 예산 탈출 뒤 호출자 쪽 결과), 지역 플래그 술어(대기 술어의 다른 꼴), 잠금 정체성 개정 2 세대의 handle 단위, 생성 토큰, 실행 기록의 인스턴스화(`order.sync_results`, `order.observed`). 이것들은 그 단계의 일이다.
 
 **시험** [M]. fixture `order.c`(사례 이름 없음): 이름을 만든 뒤 그 이름을 찾는 스레드를 시작(hard_before), 찾은 뒤 만드는 스레드를 시작(fixed_early_proved), 만드는 스레드를 시작한 뒤 찾음(unordered); spawn 과 쓰기에 걸쳐 잡은 잠금(HB-lock)과 잠금 창(unordered); 스레드를 만든 뒤 실패를 돌려주는 spawn 연산(child without success: possible)과 기본 연산의 결과를 돌려주는 연산(not found), 앞의 것의 실패를 제 상수로 바꾸는 연산(possible, 안쪽 호출을 거쳐); 읽는 스레드를 시작하기 전에 쓴 필드(경로 B, hard_before)와 다른 스레드의 writer(unordered); 지연을 두고 기다린 플래그를 검사 함수에 넘김(예산 탈출이 return: hard, 이어짐: conditional); 루프로 시작한 entry 표(반복 차례와 observed-only 시작 차례). golden `static_golden_order_np`(order 두 번 같은 바이트), `test_static_cli` 의 한 블록.
+
+## 5q. 추출의 기본 경로 고침: 읽기 옵션의 대조, 잘린 이미지의 펼치기·포인터 필드, 이름 없는 레코드 형의 이름 (relations rules revision 8, 2026-11-16) [D]
+
+결과는 `plan/full_stage_results_20261116.md` §5. facts schema 는 개정 12 그대로다(섹션·레코드 배치·열거형 변화 없음). 바뀐 것은 extract 의 BASIS 항목 하나, 두 소비자의 잘린 이미지 규칙, 레코드 형의 이름(기존 문자열 칸의 값), relations 의 사유 하나와 계층 표시 하나다.
+
+**읽기 옵션의 대조** [D]. §5k 는 extract 의 읽기 옵션을 적기만 했고 basis 의 `front_end.arguments_added` 와 대조하지 않았다. 이제 대조한다.
+- 두 글은 한 함수가 만든다(`kzs::reading_arguments_text`, `lib/llvm/ast_run.cpp`: 단위마다 주는 인자 `-Wno-unknown-warning-option -Wno-error -w`, `-resource-dir=`, `--extra-arg` 들, 프런트엔드가 받는 차례). basis(`lib/llvm/basis.cpp` `Builder::front_end`)와 extract 가 같은 함수를 쓰므로 두 글이 따로 만들어져 어긋날 수 없다. 앞판의 basis 글과 이 함수의 글은 같다(같은 차례, 같은 구분자).
+- 프런트엔드도 대조한다: basis 의 `front_end`(`Clang LibTooling, <full version>`, `kzs::reading_front_end_text`)와 extract 를 돌리는 도구의 것.
+- 같으면 facts BASIS `extract.reading_options_vs_basis = same as basis front_end.arguments_added and front_end`(정책 unset).
+- 다르면(basis 에 그 항목이 없을 때도) extract 는 거부한다: 종료 코드 1, facts 파일을 쓰지 않는다. 그런 facts 는 basis 가 기술하는 단위를 기술하지 않기 때문이다. `--accept-option-difference` 를 주면 추출하고 `extract.reading_options_vs_basis = differs (--accept-option-difference): arguments: basis front_end.arguments_added [..], this extraction [..]; front end: …` 를 정책 deviation 으로 적는다(다른 쪽만).
+- basis 가 없으면(`--source`) `not compared: no basis (--source)`.
+- relations(규칙 개정 8): 그 항목이 `differs` 로 시작하면 모든 행이 `reading_options_differ(extraction options differ from the basis)` 를 갖고(전체 facts 의 사유), layers 칸에 `reading-options-differ(extract.reading_options_vs_basis)` 가 붙는다. 머리에 그 항목을 한 줄로 적는다(있을 때). 그 항목이 없는 facts(앞판 추출)는 다르다고 보지 않는다. 기존 사유 `reading_options_differ(basis deviation of a unit of the row)`(§5m)는 그대로다: 단위 하나의 basis 편차와 추출 전체의 옵션 차이는 다른 것이다.
+- 이 대조는 프런트엔드가 받는 인자 글과 프런트엔드 판의 글을 비교한다. 같은 글이 같은 읽기를 준다는 것은 같은 도구 판 안에서의 전제다. basis 의 단위 분석 인자(`front_end.unit_diagnostic`)는 basis 에서 그대로 가져오므로 대조할 것이 없다.
+
+**잘린 이미지의 소비자 둘** [D]. §5j 의 "고치지 않았다" 둘을 고쳤다.
+- 펼치기(`lib/llvm/unroll.cpp` `unroll_table_walks`): 원소 객체의 이미지에 표시 잎이 있고 찾는 필드가 이미지에 없으면, 값은 전처럼 모름(상수 아님)이고 글이 까닭을 적는다: 인자·callee 는 `field F not in the image, which is truncated at <표시 경로> (the field may be in the part not read)`, guard 가 그런 필드를 읽어 residual 이 된 호출 행은 그 글을 행의 text 칸에 둔다(`kz-static show` 는 `call site … residual if … (the guard reads a field not in the static image of O, which is truncated at …)`). 표시 잎이 없으면 글은 전과 같다(`field F not in the image`). 원소의 멤버 차례를 이미지가 주지 않으므로 그 필드가 잘린 부분에 있는지는 정하지 않는다(있을 수 있다고만 적는다).
+- PTR_FIELDS(`lib/llvm/argflow.cpp`): 정적 초기값 쓰기는 이미지의 남은 잎에서만 나온다. 읽기의 뿌리 객체 이미지에 표시 잎이 있으면, 읽지 않은 부분에 그 필드의 다른 초기값이 있을 수 있으므로 후보 하나로 `resolved` 가 되지 않고 `may` 다(기존 열거형 값).
+- table walk(`finalize.cpp`)와 relations 는 §5j, §5m 그대로다.
+
+**이름 없는 레코드 형의 이름** [D]. 앞판은 typedef 이름도 태그도 없는 레코드를 `<anonymous>` 하나로 불렀고, 이름 표(`TuReader::names`)는 파일 범위의 태그와 typedef 만 담았다. 그래서 (1) 서로 다른 형이 한 이름으로 합쳐졌고(C1 의 `<anonymous>.Data` 는 두 레코드의 멤버 형), (2) 규칙 대상(R-T1, R-T2)이 `<anonymous>.f` 를 고르면 둘째 읽기에서 어느 레코드도 그 이름이 아니어서 쓰기가 writer 로 맞지 않았고 상태가 `writer-set-complete writers=0` 이었으며(§5k), (3) 레코드 안의 태그와 블록 안의 태그는 찾지 못했다(`Inner.ix` 가 unknown-target). 이제 `TuReader::name_unnamed_records`(`lib/llvm/ast_tu.cpp`)가 단위의 모든 레코드 정의(레코드 안, 함수 몸 안 포함)를 걷고, 파일 범위 이름이 없는 레코드에 이름을 준다. 차례:
+1. 레코드 안에 선언한 태그: 그 태그(C 에서 struct 안의 태그는 파일 범위다).
+2. 함수 몸 안의 태그나 typedef 이름: 그 이름 + `@<파일>:<줄>`(선언 위치).
+3. 태그 없는 레코드가 이름 있는 멤버의 형(배열 멤버 포함): `<바깥 레코드>::<멤버>`(선언 차례로 첫 멤버). 예: `CFE_SB_MemParams_t::Partition`.
+4. 태그 없는 레코드가 객체의 형(파일·블록 범위, 배열 포함): `<객체 키>::type`(내부 연결 객체는 키에 정의 위치가 있다, `TuReader::object_key`). 예: `PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type`.
+5. 그 밖: `<anonymous@<파일>:<줄>:<열>>`(정의 위치).
+- 위치는 점 없이 쓴다: 파일의 `.` 를 `_` 로 적는다(`TuReader::name_pos`). `Type.field` 글을 첫 점에서 나누는 곳(`spec.cpp` `parse_field_ref`, `--target`)이 있어서 형 이름에 점이 없어야 한다. 객체 키 자체(GLOBAL_IMAGES 의 객체 칸 등)는 바꾸지 않았다.
+- 같은 정의는 그것을 읽는 모든 단위에서 같은 이름이다(머리말의 형은 위치·바깥 이름이 같다).
+- C11 이름 없는 멤버(익명 struct·union)는 규칙을 바꾸지 않았다: 그 필드는 감싼 레코드의 필드다(`record_name` 이 감싼 레코드의 이름을 주고, `targets_of_field` 가 그리로 올라간다).
+- 바뀐 규칙 하나: 이름 있는 멤버의 형인 태그 없는 레코드는 이제 제 형이다. 앞판은 그 필드를 감싼 레코드의 필드로도 맞췄다(§5k 의 `struct Unn { struct { int q; } m; }` 에서 `--target Unn.q` 가 `g_unn.m.q = 5` 를 writer 로 셈). 이제 `Unn.q` 는 `unknown-target (the record type Unn has no field q …)` 이고 그 형은 `Unn::m` 이다(`--target Unn::m.q`).
+- unknown-target 의 글: "no record type T is found among the record names of the units read"(앞판 "… the file-scope tags and typedef names …"). 이름 표가 넓어졌기 때문이다.
+- 영향: 새 이름을 쓰는 모든 문자열 칸(WRITERS·READS·ARGFLOW·PTR_FIELDS·GLOBAL_IMAGES 의 형·필드, FUNC_WRITES 의 `record T.*`, FACT_LOCS·FIELD_STATUS, BASIS `target.T.f`, LOCKSET·LOCK_PATHS 의 형, 식 글의 `field:T.f`). 규칙 대상이 새 이름을 고르면 둘째 읽기에서 그 형의 쓰기가 writer 로 맞고(직접 쓰기, 데이터 함수(memset 등), out 포인터, 주소 탈출) 상태가 바뀔 수 있다. relations·order 의 행은 그 필드를 쓰면 바뀌고, 사용 지점 키의 글에 형 이름이 들면 키가 바뀐다(옛 키 → 새 키 표는 결과 기록 §5).
+
+**relations rules revision 8** [D]: 위의 사유 하나(`reading_options_differ(extraction options differ from the basis)`)와 계층 표시와 머리 줄. 행의 다른 규칙은 개정 7 그대로다.
+
+**시험** [M]. fixture `anonrec.c`(사례 이름 없음, C99): 매크로가 만든 이름 없는 union 형을 두 레코드의 멤버에 씀, 내부 연결의 이름 없는 struct 객체를 memset 하고 필드 주소를 생성자에 넘김, 레코드 안의 태그, 함수 몸 안의 태그와 이름 없는 union, 배열 멤버의 이름 없는 struct. golden `static_golden_anonrec_np`(`--no-profile --targets-rule R-T1,R-T2`, functions·writers·locs·fstatus·fwrites·gimages 와 relations). `test_static_cli`: 읽기 옵션의 같음·거부·`--accept-option-difference`(BASIS 항목, relations 의 모든 행의 사유와 계층 표시)·basis 없음; C11 이름 없는 멤버(`Anon.a`)와 이름 있는 멤버의 형(`Unn::m.q`, `Unn.q` 의 unknown-target); 중첩 태그 `Inner.ix`(이제 writer 1, writer-set-complete); 잘린 원소 이미지의 펼치기(guard residual 의 글, 인자의 글)와 잘린 뿌리 이미지의 PTR_FIELDS(`resolved` → `may`), 기본 예산과 `--image-budget 2` 의 대조. golden `imgbudget_np` 의 네 줄은 `field=<anonymous>.a` → `field=ImgUnion::s.a` 다.
 
 ## 6. core-cpu1 결과 [M]
 

@@ -11,7 +11,7 @@ import sys
 
 H = r"[0-9a-f]{64}"
 ALLOW = [re.compile(r"^(tool_sha256|artifact_sha256|basis_sha256)=" + H + "$"), re.compile(r"^  parent\[0\] kind=basis role=1 sha256=" + H + "$")]
-STR = re.compile(r"^(section STRINGS .* )crc32=0x[0-9a-f]{8}$")
+STR = re.compile(r"^(section STRINGS .* )crc32=0x[0-9a-f]{1,8}$")  # kz-dump writes the crc32 without leading zeros
 UNITS = re.compile(r'^(  BASIS\[\d+\] name="extract\.units_from" value="basis )[0-9a-f]{16}(" .*)$')
 
 

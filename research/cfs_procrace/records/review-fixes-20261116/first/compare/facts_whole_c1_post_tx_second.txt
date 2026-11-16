@@ -1,0 +1,2 @@
+check_whole: lines 162184, allowed 5, other 1
+  line 9: section STRINGS type=1 version=1 record=kz_byte record_size=1 count=1218363 crc32=0xb4471446 | section STRINGS type=1 version=1 record=kz_byte record_size=1 count=1218363 crc32=0x7c22f22

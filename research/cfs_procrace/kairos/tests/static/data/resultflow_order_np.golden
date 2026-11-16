@@ -1,0 +1,241 @@
+extract
+  translation units          1
+  functions                  28 (bodies read 21, in system headers skipped 0)
+  call sites                 38
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                8 (entry resolved 8)
+  loops                      7 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 5, await 1, star-closed 1
+  spawn parameters           2, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Gate.ready   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Obj.name   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Obj.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 21, control-flow graphs 21, call-graph components 21 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 5 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 1, may 1 (all vocabulary)
+  spawn operations (F7)      entry-argument 2, called-by-entry 0, fixed-entry 1 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               3 (R-T1 2, R-T2 3, both 2; left out, reached only through an unshared base: R-T1 0, R-T2 0)
+result flow                  42 rows (uses: branch 16, return 2, argument 1, store 1, other 0, none 11; guard rows 11); calls with a result 30
+result effect                60 rows (open 24; event send 0, application exit 0, terminal 5; calls on the paths that are none of these, no row: 15); calls explored 17, outcomes 35
+facts-view 1
+[functions] 28
+  fn 0 abort /usr/include/stdlib.h:730 params=0 {builtin}
+  fn 1 checker_init resultflow.c:101-110 params=0 {defined}
+  fn 2 checker_main resultflow.c:153-157 params=1 {defined,address-taken}
+  fn 3 exit /usr/include/stdlib.h:756 params=1 {builtin}
+  fn 4 gate_main resultflow.c:211-215 params=1 {defined,address-taken}
+  fn 5 gate_use resultflow.c:227-227 params=1 {defined}
+  fn 6 gate_wait resultflow.c:217-225 params=0 {defined}
+  fn 7 looper_init resultflow.c:122-133 params=0 {defined}
+  fn 8 main resultflow.c:237-249 params=0 {defined}
+  fn 9 maker_main resultflow.c:178-182 params=1 {defined,address-taken}
+  fn 10 obj_create resultflow.c:75-96 params=2 {defined}
+  fn 11 obj_find resultflow.c:49-58 params=2 {defined}
+  fn 12 obj_finish resultflow.c:67-73 params=3 {defined,static}
+  fn 13 obj_impl resultflow.c:60-64 params=1 {defined,static}
+  fn 14 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 15 pthread_detach /usr/include/pthread.h:269 params=1 {}
+  fn 16 report resultflow.c:98-98 params=1 {defined,static}
+  fn 17 reporter_init resultflow.c:112-120 params=0 {defined}
+  fn 18 reporter_main resultflow.c:159-165 params=1 {defined,address-taken}
+  fn 19 retrier_init resultflow.c:135-143 params=0 {defined}
+  fn 20 run_loop resultflow.c:147-151 params=1 {defined}
+  fn 21 runner_main resultflow.c:167-176 params=1 {defined,address-taken}
+  fn 22 strcmp /usr/include/string.h:156 params=2 {builtin}
+  fn 23 strncpy /usr/include/string.h:144 params=3 {builtin}
+  fn 24 task_spawn_detach resultflow.c:185-193 params=2 {defined}
+  fn 25 task_spawn_plain resultflow.c:195-201 params=2 {defined}
+  fn 26 usleep resultflow.c:27 params=1 {}
+  fn 27 waiter_main resultflow.c:229-235 params=1 {defined,address-taken}
+[lockpaths] 16
+  after-spawn row 27 call at resultflow.c:190:8 in task_spawn_detach after the spawn resultflow.c:188:8 pthread_create
+  after-spawn row 33 call at resultflow.c:240:9 in main after the spawn resultflow.c:239:9 pthread_create
+  after-spawn row 34 call at resultflow.c:241:9 in main after the spawn resultflow.c:239:9 pthread_create
+  after-spawn row 34 call at resultflow.c:241:9 in main after the spawn resultflow.c:240:9 pthread_create
+  after-spawn row 35 call at resultflow.c:242:9 in main after the spawn resultflow.c:239:9 pthread_create
+  after-spawn row 35 call at resultflow.c:242:9 in main after the spawn resultflow.c:240:9 pthread_create
+  after-spawn row 35 call at resultflow.c:242:9 in main after the spawn resultflow.c:241:9 task_spawn_detach
+  after-spawn row 36 call at resultflow.c:243:9 in main after the spawn resultflow.c:239:9 pthread_create
+  after-spawn row 36 call at resultflow.c:243:9 in main after the spawn resultflow.c:240:9 pthread_create
+  after-spawn row 36 call at resultflow.c:243:9 in main after the spawn resultflow.c:241:9 task_spawn_detach
+  after-spawn row 36 call at resultflow.c:243:9 in main after the spawn resultflow.c:242:9 task_spawn_plain
+  after-spawn row 37 call at resultflow.c:244:9 in main after the spawn resultflow.c:239:9 pthread_create
+  after-spawn row 37 call at resultflow.c:244:9 in main after the spawn resultflow.c:240:9 pthread_create
+  after-spawn row 37 call at resultflow.c:244:9 in main after the spawn resultflow.c:241:9 task_spawn_detach
+  after-spawn row 37 call at resultflow.c:244:9 in main after the spawn resultflow.c:242:9 task_spawn_plain
+  after-spawn row 37 call at resultflow.c:244:9 in main after the spawn resultflow.c:243:9 pthread_create
+
+# order
+kz-static order (order rules revision 2 (2026-11-16))
+relations relations rules revision 9 (2026-11-16)
+rules with result flow: order rules revision 3 (2026-11-16), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects 2; caller-side uses of waits 1, HB-await edges to them 1
+kinds: hard: every execution in which both instances occur has them in this order, under the premises; conditional: only when the condition holds; observed-only: no rule of this revision orders them, a run record may show an order
+closure: hard_before and fixed_early_proved follow hard edges only; a conditional edge makes the path conditional (conditional_before, fixed_early_candidate) and is never in the hard closure; observed-only edges are not followed; a caller-dependent spawn call (in a function a call of a spawn operation's chain calls) is followed from a thread only to the threads that thread's own outer spawn calls create
+values: hard_before, conditional_before (the write or creation before the use), fixed_early_proved, fixed_early_candidate (the use before it), unordered (no path either way between two threads of resolved roots), unknown (why)
+summary edges listed 9 (HB-await 1, HB-spawn 8; hard 9); HB-seq steps the closures followed 4 (listed where a listed pair's path uses them)
+listing: a row lists at most 6 pairs per value (a print bound); its `pairs` line counts them all
+summary spawn calls with resolved threads 8; child without success: possible 1, not found 7, unknown 0 (position-based 0)
+summary waits 3 (poll 2, count-bounded 1; predicate recognised 2); dependent uses caller-side 1, continue 1, inside 6, no-budget 2, skip 1
+summary rows A 5 (unordered 5)
+summary rows B 1 (hard_before 1)
+[edges] 9
+  E5920af8001fcffe4 HB-await hard
+      from: write resultflow.c:213:3 in gate_main [Gate.ready] gate_main (spawn-entry)
+      to: call resultflow.c:233:33 in waiter_main -> gate_use waiter_main (spawn-entry)
+      condition: the wait at resultflow.c:219:3 was left by its condition exit, which read this write
+      premise: reads-from: the condition exit reads the value this write stored (the only write of the awaited fields in another thread)
+      premise: the awaited fields' writer sets are complete under the per-field rule of FIELD_STATUS
+      premise: L1 under the per-field rule: await
+      premise: the condition exit is false at the initial values: checked
+      scope: one run of the wait at resultflow.c:219:3 on the waiting thread and the use after it
+      instance key: the loop instance at resultflow.c:219:3 and the exit it takes (condition or budget)
+      wait W05e9ca0a4c60655f; budget exit: skip
+  E806a8dd8552bb8aa HB-spawn hard
+      from: spawn call resultflow.c:188:8 in task_spawn_detach -> pthread_create {main (process)}
+      to: the start of the thread of maker_main maker_main (spawn-entry)
+      condition: a thread of maker_main is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at resultflow.c:188:8 and the thread it creates
+      instance key: the call instance at resultflow.c:188:8 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+      caller-dependent: task_spawn_detach is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure follows this edge only from the threads whose own outer spawn calls create this thread: {main (process)}
+  E2f1df9640095d46a HB-spawn hard
+      from: spawn call resultflow.c:198:8 in task_spawn_plain -> pthread_create {main (process)}
+      to: the start of the thread of runner_main runner_main (spawn-entry)
+      condition: a thread of runner_main is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at resultflow.c:198:8 and the thread it creates
+      instance key: the call instance at resultflow.c:198:8 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+      caller-dependent: task_spawn_plain is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure follows this edge only from the threads whose own outer spawn calls create this thread: {main (process)}
+  E871ba4e9e9dd8dce HB-spawn hard
+      from: spawn call resultflow.c:239:9 in main -> pthread_create {main (process)}
+      to: the start of the thread of checker_main checker_main (spawn-entry)
+      condition: a thread of checker_main is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at resultflow.c:239:9 and the thread it creates
+      instance key: the call instance at resultflow.c:239:9 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  E37a203e72f1ba933 HB-spawn hard
+      from: spawn call resultflow.c:240:9 in main -> pthread_create {main (process)}
+      to: the start of the thread of reporter_main reporter_main (spawn-entry)
+      condition: a thread of reporter_main is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at resultflow.c:240:9 and the thread it creates
+      instance key: the call instance at resultflow.c:240:9 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  E81a3bf888b8d2831 HB-spawn hard
+      from: spawn call resultflow.c:241:9 in main -> task_spawn_detach {main (process)}
+      to: the start of the thread of maker_main maker_main (spawn-entry)
+      condition: a thread of maker_main is created by this call (task_spawn_detach returns 0 [RF_OK]; failure class: -50 [RF_ERR_SPAWN])
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at resultflow.c:241:9 and the thread it creates
+      instance key: the call instance at resultflow.c:241:9 (its call link) and the thread it creates (the creation link)
+      create primitive: task_spawn_detach -> pthread_create
+      status condition: task_spawn_detach returns 0 [RF_OK]; failure class: -50 [RF_ERR_SPAWN]
+      child without success: possible: task_spawn_detach returns -50 [RF_ERR_SPAWN] at resultflow.c:191 after pthread_create at resultflow.c:188:8 returned 0 (its success value) (result flow: on a path through a branch this value does not decide)
+  Ed066b75d3647ce6e HB-spawn hard
+      from: spawn call resultflow.c:242:9 in main -> task_spawn_plain {main (process)}
+      to: the start of the thread of runner_main runner_main (spawn-entry)
+      condition: a thread of runner_main is created by this call (task_spawn_plain returns 0 [RF_OK]; failure class: -50 [RF_ERR_SPAWN])
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at resultflow.c:242:9 and the thread it creates
+      instance key: the call instance at resultflow.c:242:9 (its call link) and the thread it creates (the creation link)
+      create primitive: task_spawn_plain -> pthread_create
+      status condition: task_spawn_plain returns 0 [RF_OK]; failure class: -50 [RF_ERR_SPAWN]
+      child without success: not found: no return of failure class after the creation call in task_spawn_plain (below: not found: pthread_create creates no thread when it fails (P0 pthread_create))
+  E2d3c5a65bbd5af96 HB-spawn hard
+      from: spawn call resultflow.c:243:9 in main -> pthread_create {main (process)}
+      to: the start of the thread of gate_main gate_main (spawn-entry)
+      condition: a thread of gate_main is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at resultflow.c:243:9 and the thread it creates
+      instance key: the call instance at resultflow.c:243:9 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  Ee751da51b469abdd HB-spawn hard
+      from: spawn call resultflow.c:244:9 in main -> pthread_create {main (process)}
+      to: the start of the thread of waiter_main waiter_main (spawn-entry)
+      condition: a thread of waiter_main is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at resultflow.c:244:9 and the thread it creates
+      instance key: the call instance at resultflow.c:244:9 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+[waits] 3
+  Wb30a0afb7e495853 resultflow.c:138:3 in retrier_init count-bounded actors {reporter_main (spawn-entry)}
+      budget: the locals k; trip 5; delay resultflow.c:141:5 -> usleep arg 0 [1000] = 1000
+      exit 0 condition at resultflow.c:138:3: condition part -; budget part (not (lt local:k 5))
+      exit 1 break at resultflow.c:140:21: condition part (eq local:v 0); budget part -
+      predicate: not recognised (unrolled: 5 iterations from the constant bound, with early exits; delay-paced: the failing outcome of the last attempt is a time-based transition); no AWAIT_L1 row
+      awaited: not named: the condition exits read locals only and the predicate is not recognised
+      use call resultflow.c:139:9 in retrier_init -> obj_find: inside
+      use call resultflow.c:141:5 in retrier_init -> usleep: inside
+      use the call of retrier_init resultflow.c:163:3 in reporter_main (result discarded): continue
+  W8404868f47fa0f93 resultflow.c:172:3 in runner_main poll actors {runner_main (spawn-entry)}
+      budget: none found; delay resultflow.c:173:5 -> usleep arg 0 [1000] = 1000
+      exit 0 condition at resultflow.c:172:3: condition part (not (ne (call-result run_loop (seq (addr global:run_state))) 0)); budget part -
+      predicate: direct-test (not (ne (call-result run_loop (seq (addr global:run_state))) 0)); AWAIT_L1 per-field star-closed
+      awaited: not named: the predicate reads no field
+      use read resultflow.c:175:13 in runner_main [run_state]: no-budget
+      use call resultflow.c:172:10 in runner_main -> run_loop: inside
+      use call resultflow.c:173:5 in runner_main -> usleep: inside
+      use call resultflow.c:175:3 in runner_main -> exit: no-budget
+  W05e9ca0a4c60655f resultflow.c:219:3 in gate_wait poll actors {waiter_main (spawn-entry)}
+      budget: the locals budget; delay resultflow.c:221:5 -> usleep arg 0 [1000] = 1000
+      exit 0 condition at resultflow.c:219:3: condition part (not (eq field:Gate.ready 0)); budget part -
+      exit 1 return at resultflow.c:220:22: condition part -; budget part (le local:budget 0)
+      predicate: direct-test (not (eq field:Gate.ready 0)); AWAIT_L1 per-field await
+      awaited: Gate.ready; writers in other threads 1: write resultflow.c:213:3 in gate_main [Gate.ready] gate_main (spawn-entry); writer sets complete under the per-field rule: yes; the condition exit at the initial values: false (only a write makes it true)
+      use read resultflow.c:219:15 in gate_wait [gate.ready]: inside
+      use call resultflow.c:221:5 in gate_wait -> usleep: inside
+      use the call of gate_wait resultflow.c:232:8 in waiter_main (result tested): caller-side(1 uses under its result; budget exit returns -9)
+      use caller-side: call resultflow.c:233:33 in waiter_main -> gate_use in waiter_main under (eq local:st@def:232:6 0) (the result of gate_wait at resultflow.c:232:8): skip
+[rows] 6
+  A1 key 2a92d5cdd548dcff order.static unordered
+      pair: call resultflow.c:180:7 in maker_main -> obj_create maker_main (spawn-entry) -> call resultflow.c:105:8 in checker_init -> obj_find checker_main (spawn-entry): unordered: no path of hard or conditional edges either way
+      pairs: unordered 1
+      threads started by: checker_main <- E871ba4e9e9dd8dce HB-spawn resultflow.c:239:9; maker_main <- E806a8dd8552bb8aa HB-spawn resultflow.c:188:8; maker_main <- E81a3bf888b8d2831 HB-spawn resultflow.c:241:9
+      opposite: undecidable (the relations row's feasibility of the other order)
+  A2 key adaea78073e9d368 order.static unordered
+      pair: call resultflow.c:180:7 in maker_main -> obj_create maker_main (spawn-entry) -> call resultflow.c:114:8 in reporter_init -> obj_find reporter_main (spawn-entry): unordered: no path of hard or conditional edges either way
+      pairs: unordered 1
+      threads started by: maker_main <- E806a8dd8552bb8aa HB-spawn resultflow.c:188:8; maker_main <- E81a3bf888b8d2831 HB-spawn resultflow.c:241:9; reporter_main <- E37a203e72f1ba933 HB-spawn resultflow.c:240:9
+      opposite: undecidable (the relations row's feasibility of the other order)
+  A3 key 764a5f6eb1d7ca30 order.static unordered
+      pair: call resultflow.c:180:7 in maker_main -> obj_create maker_main (spawn-entry) -> call resultflow.c:126:11 in looper_init -> obj_find reporter_main (spawn-entry): unordered: no path of hard or conditional edges either way
+      pairs: unordered 1
+      threads started by: maker_main <- E806a8dd8552bb8aa HB-spawn resultflow.c:188:8; maker_main <- E81a3bf888b8d2831 HB-spawn resultflow.c:241:9; reporter_main <- E37a203e72f1ba933 HB-spawn resultflow.c:240:9
+      opposite: undecidable (the relations row's feasibility of the other order)
+  A4 key 9a12d57c5b95ba4c order.static unordered
+      pair: call resultflow.c:180:7 in maker_main -> obj_create maker_main (spawn-entry) -> call resultflow.c:139:9 in retrier_init -> obj_find reporter_main (spawn-entry): unordered: no path of hard or conditional edges either way
+      pairs: unordered 1
+      threads started by: maker_main <- E806a8dd8552bb8aa HB-spawn resultflow.c:188:8; maker_main <- E81a3bf888b8d2831 HB-spawn resultflow.c:241:9; reporter_main <- E37a203e72f1ba933 HB-spawn resultflow.c:240:9
+      opposite: undecidable (the relations row's feasibility of the other order)
+  A5 key f577c9464dcb5de9 order.static unordered
+      pair: call resultflow.c:180:7 in maker_main -> obj_create maker_main (spawn-entry) -> call resultflow.c:170:8 in runner_main -> obj_find runner_main (spawn-entry): unordered: no path of hard or conditional edges either way
+      pairs: unordered 1
+      threads started by: maker_main <- E806a8dd8552bb8aa HB-spawn resultflow.c:188:8; maker_main <- E81a3bf888b8d2831 HB-spawn resultflow.c:241:9; runner_main <- E2f1df9640095d46a HB-spawn resultflow.c:198:8; runner_main <- Ed066b75d3647ce6e HB-spawn resultflow.c:242:9
+      opposite: undecidable (the relations row's feasibility of the other order)
+  B1 key 5e366999b0be71de order.static hard_before
+      pair: write resultflow.c:213:3 in gate_main [Gate.ready] gate_main (spawn-entry) -> call resultflow.c:233:33 in waiter_main -> gate_use waiter_main (spawn-entry): hard_before; path E5920af8001fcffe4 HB-await
+      pairs: hard_before 1
+      threads started by: gate_main <- E2d3c5a65bbd5af96 HB-spawn resultflow.c:243:9; waiter_main <- Ee751da51b469abdd HB-spawn resultflow.c:244:9
+      opposite: undecidable (the relations row's feasibility of the other order)

@@ -15,3 +15,12 @@ code snapshot commits: 9334e97 (model.hpp, spec.hpp), d22ec58 (the rest of the c
 /dev/vda       270553174016 39019282432 2303225856  95% /
 copy rc=0
 tools after copy rc=0
+make kz-static rc=0
+make all rc=0
+tools after build rc=0
+ledger after build rc=0
+ctest first rc=8
+golden update rc=0
+ctest full rc=0
+run_unit rc=0
+step2a unit rc=0

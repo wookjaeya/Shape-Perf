@@ -1,0 +1,15 @@
+68: test_core_schema: 34017 checks passed
+1/5 Test  #68: test_core_schema .................   Passed    0.01 sec
+105: lint selftest: 114 cases, 0 failed
+2/5 Test #105: lint_selftest ....................   Passed    0.09 sec
+262: test_static_reasons: 692 checks passed
+3/5 Test #262: test_static_reasons ..............   Passed    0.01 sec
+263: test_static_plan: 195 checks passed
+4/5 Test #263: test_static_plan .................   Passed    0.33 sec
+264: test_static_cli: 1099 checks passed
+5/5 Test #264: test_static_cli ..................   Passed    4.20 sec
+The following tests passed:
+100% tests passed, 0 tests failed out of 5
+lint    =   2.27 sec*proc (8 tests)
+
+Total Test time (real) =   2.28 sec

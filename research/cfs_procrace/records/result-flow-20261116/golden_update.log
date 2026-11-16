@@ -1,0 +1,19 @@
+Test project /home/user/work/merge-check/kz-llvm
+    Start 251: static_golden_resultflow_np
+1/2 Test #251: static_golden_resultflow_np .........   Passed    0.16 sec
+    Start 252: static_golden_resultflow_order_np
+2/2 Test #252: static_golden_resultflow_order_np ...   Passed    0.14 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+golden    =   0.30 sec*proc (2 tests)
+static    =   0.30 sec*proc (2 tests)
+
+Total Test time (real) =   0.31 sec
+041b4ab247d55f292c11dceaebf8fe6d0e524267da1ef0c99697aff40a2e6641  resultflow_np.golden
+a03cc6211a27f77004726262e6909a42b51d119e8493bb9d9a2258f8ed6fa3d7  resultflow_order_np.golden
+cmp resultflow_np.golden = scratch: same
+cmp resultflow_order_np.golden = scratch: same
+?? research/cfs_procrace/kairos/tests/static/data/resultflow_np.golden
+?? research/cfs_procrace/kairos/tests/static/data/resultflow_order_np.golden

@@ -1,0 +1,495 @@
+extract
+  translation units          1
+  functions                  28 (bodies read 21, in system headers skipped 0)
+  call sites                 38
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                8 (entry resolved 8)
+  loops                      7 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 5, await 1, star-closed 1
+  spawn parameters           2, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Gate.ready   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Obj.name   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Obj.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 21, control-flow graphs 21, call-graph components 21 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 5 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 1, may 1 (all vocabulary)
+  spawn operations (F7)      entry-argument 2, called-by-entry 0, fixed-entry 1 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               3 (R-T1 2, R-T2 3, both 2; left out, reached only through an unshared base: R-T1 0, R-T2 0)
+result flow                  42 rows (uses: branch 16, return 2, argument 1, store 1, other 0, none 11; guard rows 11); calls with a result 30
+result effect                60 rows (open 24; event send 0, application exit 0, terminal 5; calls on the paths that are none of these, no row: 15); calls explored 17, outcomes 35
+facts-view 1
+[functions] 28
+  fn 0 abort /usr/include/stdlib.h:730 params=0 {builtin}
+  fn 1 checker_init resultflow.c:101-110 params=0 {defined}
+  fn 2 checker_main resultflow.c:153-157 params=1 {defined,address-taken}
+  fn 3 exit /usr/include/stdlib.h:756 params=1 {builtin}
+  fn 4 gate_main resultflow.c:211-215 params=1 {defined,address-taken}
+  fn 5 gate_use resultflow.c:227-227 params=1 {defined}
+  fn 6 gate_wait resultflow.c:217-225 params=0 {defined}
+  fn 7 looper_init resultflow.c:122-133 params=0 {defined}
+  fn 8 main resultflow.c:237-249 params=0 {defined}
+  fn 9 maker_main resultflow.c:178-182 params=1 {defined,address-taken}
+  fn 10 obj_create resultflow.c:75-96 params=2 {defined}
+  fn 11 obj_find resultflow.c:49-58 params=2 {defined}
+  fn 12 obj_finish resultflow.c:67-73 params=3 {defined,static}
+  fn 13 obj_impl resultflow.c:60-64 params=1 {defined,static}
+  fn 14 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 15 pthread_detach /usr/include/pthread.h:269 params=1 {}
+  fn 16 report resultflow.c:98-98 params=1 {defined,static}
+  fn 17 reporter_init resultflow.c:112-120 params=0 {defined}
+  fn 18 reporter_main resultflow.c:159-165 params=1 {defined,address-taken}
+  fn 19 retrier_init resultflow.c:135-143 params=0 {defined}
+  fn 20 run_loop resultflow.c:147-151 params=1 {defined}
+  fn 21 runner_main resultflow.c:167-176 params=1 {defined,address-taken}
+  fn 22 strcmp /usr/include/string.h:156 params=2 {builtin}
+  fn 23 strncpy /usr/include/string.h:144 params=3 {builtin}
+  fn 24 task_spawn_detach resultflow.c:185-193 params=2 {defined}
+  fn 25 task_spawn_plain resultflow.c:195-201 params=2 {defined}
+  fn 26 usleep resultflow.c:27 params=1 {}
+  fn 27 waiter_main resultflow.c:229-235 params=1 {defined,address-taken}
+[returns] 32
+  obj_find returns at resultflow.c:54:7 alt 0/1 const 0 [RF_OK] {in-loop} loop=0
+      guard=(and (lt local:i 4) (and (eq field:Obj.used 1) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0))) when=(and (and (lt local:i 4) (eq field:Obj.used 1)) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0))
+  obj_find returns at resultflow.c:57:3 alt 0/1 const -17 [RF_ERR_NOT_FOUND] {}
+      guard=- when=-
+  obj_impl@resultflow.c:60 returns at resultflow.c:61:17 alt 0/1 const -30 [RF_ERR_IMPL] {}
+      guard=(lt param:slot#0 0) when=(lt param:slot#0 0)
+  obj_impl@resultflow.c:60 returns at resultflow.c:63:3 alt 0/1 const 0 [RF_OK] {}
+      guard=(not (lt param:slot#0 0)) when=(not (lt param:slot#0 0))
+  obj_finish@resultflow.c:67 returns at resultflow.c:72:3 alt 0/1 param param:status#0 [status] {}
+      guard=- when=-
+  obj_create returns at resultflow.c:79:17 alt 0/1 const -40 [RF_ERR_APP] {}
+      guard=(eq param:out#0 0) when=(eq param:out#0 0)
+  obj_create returns at resultflow.c:81:63 alt 0/1 const -40 [RF_ERR_APP] {in-loop} loop=1
+      guard=(and (and (not (eq param:out#0 0)) (lt local:i 4)) (and (eq field:Obj.used 1) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0))) when=(and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 1)) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0))
+  obj_create returns at resultflow.c:95:3 alt 0/3 const -14 [RF_ERR_FULL] {from-definition,redefined-later,in-loop}
+      definition of rc at resultflow.c:77:7 guard=-
+      guard=(not (eq param:out#0 0)) when=(and (and (not (eq param:out#0 0)) (not (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)))) (not (and (not (eq param:out#0 0)) (eq local:rc 0))))
+  obj_create returns at resultflow.c:95:3 alt 1/3 const 0 [RF_OK] {from-definition,redefined-later,in-loop}
+      definition of rc at resultflow.c:87:10 guard=(and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0))
+      guard=(not (eq param:out#0 0)) when=(and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)) (not (and (not (eq param:out#0 0)) (eq local:rc 0))))
+  obj_create returns at resultflow.c:95:3 alt 2/3 call-result (call-result obj_finish (seq local:rc (seq local:slot (seq param:out#0)))) [obj_finish(rc, slot, out)] {from-definition} call site 9 resultflow.c:93:10
+      definition of rc at resultflow.c:93:8 guard=(and (not (eq param:out#0 0)) (eq local:rc 0))
+      guard=(not (eq param:out#0 0)) when=(and (not (eq param:out#0 0)) (eq local:rc 0))
+  checker_init returns at resultflow.c:104:20 alt 0/1 const -40 [RF_ERR_APP] {}
+      guard=(ne local:st 0) when=(ne local:st 0)
+  checker_init returns at resultflow.c:109:3 alt 0/1 const 0 [RF_OK] {}
+      guard=(not (ne local:st 0)) when=(not (ne local:st 0))
+  reporter_init returns at resultflow.c:117:5 alt 0/1 const -40 [RF_ERR_APP] {unfolded}
+      guard=(ne local:st 0) when=(ne (call-result obj_find (seq (addr (index global:handles 2)) (seq string:peer))) 0)
+  reporter_init returns at resultflow.c:119:3 alt 0/1 const 0 [RF_OK] {unfolded}
+      guard=(not (ne local:st 0)) when=(not (ne (call-result obj_find (seq (addr (index global:handles 2)) (seq string:peer))) 0))
+  looper_init returns at resultflow.c:132:3 alt 0/2 const 0 [RF_OK] {from-definition,redefined-later,in-loop}
+      definition of ret at resultflow.c:123:7 guard=-
+      guard=- when=(not (lt local:k 2))
+  looper_init returns at resultflow.c:132:3 alt 1/2 call-result (call-result obj_find (seq (addr (index global:handles (add 3 local:k))) (seq string:peer))) [obj_find(&handles[3 + k], "peer")] {from-definition,in-loop} call site 16 resultflow.c:126:11
+      definition of ret at resultflow.c:126:9 guard=(lt local:k 2)
+      guard=- when=(lt local:k 2)
+  run_loop returns at resultflow.c:148:20 alt 0/1 const 0 [0] {}
+      guard=(ne (deref param:state#0) 1) when=(ne (deref param:state#0) 1)
+  run_loop returns at resultflow.c:150:3 alt 0/1 const 1 [1] {}
+      guard=(not (ne (deref param:state#0) 1)) when=(not (ne (deref param:state#0) 1))
+  checker_main returns at resultflow.c:156:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+  reporter_main returns at resultflow.c:164:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+  maker_main returns at resultflow.c:181:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+  task_spawn_detach returns at resultflow.c:189:16 alt 0/1 const -50 [RF_ERR_SPAWN] {}
+      guard=(ne local:rc 0) when=(ne local:rc 0)
+  task_spawn_detach returns at resultflow.c:191:16 alt 0/1 const -50 [RF_ERR_SPAWN] {}
+      guard=(and (not (ne local:rc 0)) (ne local:rc 0)) when=(and (not (ne local:rc 0)) (ne local:rc 0))
+  task_spawn_detach returns at resultflow.c:192:3 alt 0/1 const 0 [RF_OK] {}
+      guard=(and (not (ne local:rc 0)) (not (ne local:rc 0))) when=(not (ne local:rc 0))
+  task_spawn_plain returns at resultflow.c:199:16 alt 0/1 const -50 [RF_ERR_SPAWN] {unfolded}
+      guard=(ne local:rc 0) when=(ne (call-result pthread_create (seq (addr local:t) (seq 0 (seq param:entry#0 (seq param:arg#1))))) 0)
+  task_spawn_plain returns at resultflow.c:200:3 alt 0/1 const 0 [RF_OK] {unfolded}
+      guard=(not (ne local:rc 0)) when=(not (ne (call-result pthread_create (seq (addr local:t) (seq 0 (seq param:entry#0 (seq param:arg#1))))) 0))
+  gate_main returns at resultflow.c:214:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+  gate_wait returns at resultflow.c:220:22 alt 0/1 const -9 [RF_ERR_TIMEOUT] {in-loop} loop=6
+      guard=(and (eq field:Gate.ready 0) (le local:budget 0)) when=(and (eq field:Gate.ready 0) (le local:budget 0))
+  gate_wait returns at resultflow.c:224:3 alt 0/1 const 0 [RF_OK] {}
+      guard=- when=-
+  gate_use returns at resultflow.c:227:27 alt 0/1 expression (add param:level#0 1) [level + 1] {}
+      guard=- when=-
+  waiter_main returns at resultflow.c:234:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+  main returns at resultflow.c:248:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+[resultflow] 42
+  #0 site 1 resultflow.c:52:30 in obj_find direct -> branch at 52:30 unique cond (and (eq field:Obj.used 1) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0)) {in-loop}
+  #1 site 4 resultflow.c:81:30 in obj_create direct -> branch at 81:30 unique cond (and (eq field:Obj.used 1) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0)) {in-loop}
+  #2 site 6 resultflow.c:85:7 in obj_create discarded -> none at 85:7 not-computed {in-loop}
+  #3 site 8 resultflow.c:92:10 in obj_create local-def rc@92:8 -> arg at 93:21 of site 9 resultflow.c:93:10 arg 0 [obj_finish] unique cond (and (not (eq param:out#0 0)) (eq local:rc@defs:77:7|87:10 0)) {}
+  #4 site 9 resultflow.c:93:10 in obj_create local-def rc@93:8 -> return at 95:10 shared (others 2: 77:7; 87:10) cond (not (eq param:out#0 0)) {}
+  #5 site 10 resultflow.c:103:8 in checker_init local-def st@103:6 -> branch at 104:7 unique cond (ne local:st@def:103:6 0) {}
+  #6 site 11 resultflow.c:105:8 in checker_init local-def st@105:6 -> branch at 106:7 unique cond (eq local:st@def:105:6 0) {}
+  #7 site 11 resultflow.c:105:8 in checker_init guard [obj_find] unique cond (not (ne local:st@def:103:6 0)) {}
+  #8 site 12 resultflow.c:107:5 in checker_init guard [report] unique cond (and (not (ne local:st@def:103:6 0)) (eq local:st@def:105:6 0)) {}
+  #9 site 13 resultflow.c:114:8 in reporter_init local-def st@114:6 -> branch at 115:7 unique cond (ne local:st@def:114:6 0) {}
+  #10 site 14 resultflow.c:116:5 in reporter_init guard [report] unique cond (ne local:st@def:114:6 0) {}
+  #11 site 16 resultflow.c:126:11 in looper_init local-def ret@126:9 -> branch at 127:9 unique cond (ne local:ret@def:126:9 0) {in-loop}
+  #12 site 16 resultflow.c:126:11 in looper_init local-def ret@126:9 -> return at 132:10 shared (others 1: 123:7) {in-loop}
+  #13 site 17 resultflow.c:128:7 in looper_init guard [report] unique cond (and (lt local:k@defs:125:10|125:23 2) (ne local:ret@def:126:9 0)) {in-loop}
+  #14 site 19 resultflow.c:139:9 in retrier_init local-def v@139:7 -> branch at 140:9 unique cond (eq local:v@def:139:7 0) {in-loop}
+  #15 site 20 resultflow.c:141:5 in retrier_init discarded -> none at 141:5 not-computed {in-loop}
+  #16 site 20 resultflow.c:141:5 in retrier_init guard [usleep] unique cond (and (lt local:k@defs:138:10|138:23 5) (not (eq local:v@def:139:7 0))) {in-loop}
+  #17 site 21 resultflow.c:155:9 in checker_main cast-void -> none at 155:9 not-computed {}
+  #18 site 22 resultflow.c:161:7 in reporter_main direct -> branch at 161:7 unique cond (ne (call-result reporter_init) 0) {}
+  #19 site 23 resultflow.c:161:33 in reporter_main guard [abort] unique cond (ne (call-result reporter_init) 0) {}
+  #20 site 24 resultflow.c:162:7 in reporter_main direct -> branch at 162:7 unique cond (ne (call-result looper_init) 0) {}
+  #21 site 25 resultflow.c:162:31 in reporter_main guard [abort] unique cond (ne (call-result looper_init) 0) {}
+  #22 site 27 resultflow.c:170:8 in runner_main local-def st@170:6 -> branch at 171:7 unique cond (ne local:st@def:170:6 0) {}
+  #23 site 29 resultflow.c:172:10 in runner_main direct -> branch at 172:10 unique cond (ne (call-result run_loop (seq (addr global:run_state))) 0) {in-loop}
+  #24 site 30 resultflow.c:173:5 in runner_main discarded -> none at 173:5 not-computed {in-loop}
+  #25 site 30 resultflow.c:173:5 in runner_main guard [usleep] unique cond (ne (call-result run_loop (seq (addr global:run_state))) 0) {in-loop}
+  #26 site 32 resultflow.c:180:7 in maker_main direct -> branch at 180:7 unique cond (ne (call-result obj_create (seq (addr (index global:handles 7)) (seq string:peer))) 0) {}
+  #27 site 33 resultflow.c:180:49 in maker_main guard [report] unique cond (ne (call-result obj_create (seq (addr (index global:handles 7)) (seq string:peer))) 0) {}
+  #28 site 34 resultflow.c:188:8 in task_spawn_detach local-def rc@188:6 -> branch at 189:7 unique cond (ne local:rc@def:188:6 0) {}
+  #29 site 35 resultflow.c:190:8 in task_spawn_detach local-def rc@190:6 -> branch at 191:7 unique cond (ne local:rc@def:190:6 0) {}
+  #30 site 35 resultflow.c:190:8 in task_spawn_detach guard [pthread_detach] unique cond (not (ne local:rc@def:188:6 0)) {}
+  #31 site 36 resultflow.c:198:8 in task_spawn_plain local-def rc@198:6 -> branch at 199:7 unique cond (ne local:rc@def:198:6 0) {}
+  #32 site 39 resultflow.c:221:5 in gate_wait discarded -> none at 221:5 not-computed {in-loop}
+  #33 site 40 resultflow.c:232:8 in waiter_main local-def st@232:6 -> branch at 233:7 unique cond (eq local:st@def:232:6 0) {}
+  #34 site 41 resultflow.c:233:33 in waiter_main field-store -> store at 233:33 [field:Gate.level] unique {}
+  #35 site 41 resultflow.c:233:33 in waiter_main guard [gate_use] unique cond (eq local:st@def:232:6 0) {}
+  #36 site 42 resultflow.c:239:9 in main cast-void -> none at 239:9 not-computed {}
+  #37 site 43 resultflow.c:240:9 in main cast-void -> none at 240:9 not-computed {}
+  #38 site 44 resultflow.c:241:9 in main cast-void -> none at 241:9 not-computed {}
+  #39 site 45 resultflow.c:242:9 in main cast-void -> none at 242:9 not-computed {}
+  #40 site 46 resultflow.c:243:9 in main cast-void -> none at 243:9 not-computed {}
+  #41 site 47 resultflow.c:244:9 in main cast-void -> none at 244:9 not-computed {}
+[resulteffect] 60
+  site 1 resultflow.c:52:30 in obj_find other 0 none -> return-const at resultflow.c:54 [RF_OK] open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: strcmp has no body in these facts)) flow 0 {}
+      chain: call strcmp at 52:30 -> value (other) -> no branch decided by it -> 54:7
+  site 1 resultflow.c:52:30 in obj_find other 0 none -> return-const at resultflow.c:57 value -17 [RF_ERR_NOT_FOUND] open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: strcmp has no body in these facts)) flow 0 {}
+      chain: call strcmp at 52:30 -> value (other) -> no branch decided by it -> 57:3
+  site 1 resultflow.c:52:30 in obj_find other 0 none -> retry [the call runs again] open (on a path through a branch this value does not decide) flow 0 {}
+      chain: call strcmp at 52:30 -> value (other) -> no branch decided by it -> call strcmp at 52:30
+  site 4 resultflow.c:81:30 in obj_create other 0 none -> none at resultflow.c:95 open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: strcmp has no body in these facts); returns rc, neither a constant nor this result) flow 1 {}
+      chain: call strcmp at 81:30 -> value (other) -> no branch decided by it -> 95:3
+  site 4 resultflow.c:81:30 in obj_create other 0 none -> none at resultflow.c:95 open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: strcmp has no body in these facts); returns rc, neither a constant nor this result (assigned a value that is not a constant on this path)) flow 1 {}
+      chain: call strcmp at 81:30 -> value (other) -> no branch decided by it -> 95:3
+  site 4 resultflow.c:81:30 in obj_create other 0 none -> return-const at resultflow.c:81 value -40 [RF_ERR_APP] open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: strcmp has no body in these facts)) flow 1 {}
+      chain: call strcmp at 81:30 -> value (other) -> no branch decided by it -> 81:63
+  site 4 resultflow.c:81:30 in obj_create other 0 none -> return-const at resultflow.c:95 [rc = 0 (the constant assigned to it on this path)] open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: strcmp has no body in these facts)) flow 1 {}
+      chain: call strcmp at 81:30 -> value (other) -> no branch decided by it -> 95:3
+  site 4 resultflow.c:81:30 in obj_create other 0 none -> retry [the call runs again] open (on a path through a branch this value does not decide) flow 1 {}
+      chain: call strcmp at 81:30 -> value (other) -> no branch decided by it -> call strcmp at 81:30
+  site 9 resultflow.c:93:10 in obj_create failure -30 reached -> return-result at resultflow.c:95 [RF_ERR_IMPL (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))] complete flow - {}
+      chain: call obj_finish at 93:10 -> def rc at 93:8 -> value -30 -> no branch decided by it -> 95:3
+  site 9 resultflow.c:93:10 in obj_create failure -30 reached -> fallthrough [nothing before the paths of the values join] complete flow - {}
+      chain: call obj_finish at 93:10 -> def rc at 93:8 -> value -30 -> no branch decided by it
+  site 9 resultflow.c:93:10 in obj_create success 0 reached -> return-result at resultflow.c:95 [RF_OK (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))] complete flow - {}
+      chain: call obj_finish at 93:10 -> def rc at 93:8 -> value 0 -> no branch decided by it -> 95:3
+  site 9 resultflow.c:93:10 in obj_create success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow - {}
+      chain: call obj_finish at 93:10 -> def rc at 93:8 -> value 0 -> no branch decided by it
+  site 10 resultflow.c:103:8 in checker_init failure -40 reached -> return-const at resultflow.c:104 value -40 [RF_ERR_APP] complete flow 5 {}
+      chain: call obj_create at 103:8 -> def st at 103:6 -> value -40 -> branches decided by it at 104:7 -> 104:20
+  site 10 resultflow.c:103:8 in checker_init failure -40 reached -> fallthrough [nothing before the paths of the values join] complete flow 5 {}
+      chain: call obj_create at 103:8 -> def st at 103:6 -> value -40 -> branches decided by it at 104:7
+  site 10 resultflow.c:103:8 in checker_init failure -30 reached -> return-const at resultflow.c:104 value -40 [RF_ERR_APP] complete flow 5 {}
+      chain: call obj_create at 103:8 -> def st at 103:6 -> value -30 -> branches decided by it at 104:7 -> 104:20
+  site 10 resultflow.c:103:8 in checker_init failure -30 reached -> fallthrough [nothing before the paths of the values join] complete flow 5 {}
+      chain: call obj_create at 103:8 -> def st at 103:6 -> value -30 -> branches decided by it at 104:7
+  site 10 resultflow.c:103:8 in checker_init failure -14 present-only -> return-const at resultflow.c:104 value -40 [RF_ERR_APP] complete flow 5 {}
+      chain: call obj_create at 103:8 -> def st at 103:6 -> value -14 -> branches decided by it at 104:7 -> 104:20
+  site 10 resultflow.c:103:8 in checker_init failure -14 present-only -> fallthrough [nothing before the paths of the values join] complete flow 5 {}
+      chain: call obj_create at 103:8 -> def st at 103:6 -> value -14 -> branches decided by it at 104:7
+  site 10 resultflow.c:103:8 in checker_init success 0 reached -> return-const at resultflow.c:109 [RF_OK] open (on a path through a branch this value does not decide) flow 5 {}
+      chain: call obj_create at 103:8 -> def st at 103:6 -> value 0 -> branches decided by it at 104:7 -> 109:3
+  site 11 resultflow.c:105:8 in checker_init failure -17 reached -> return-const at resultflow.c:109 [RF_OK] complete flow 6 {}
+      chain: call obj_find at 105:8 -> def st at 105:6 -> value -17 -> branches decided by it at 106:7 -> 109:3
+  site 11 resultflow.c:105:8 in checker_init failure -17 reached -> fallthrough [nothing before the paths of the values join] complete flow 6 {}
+      chain: call obj_find at 105:8 -> def st at 105:6 -> value -17 -> branches decided by it at 106:7
+  site 11 resultflow.c:105:8 in checker_init success 0 reached -> return-const at resultflow.c:109 [RF_OK] complete flow 6 {}
+      chain: call obj_find at 105:8 -> def st at 105:6 -> value 0 -> branches decided by it at 106:7 -> 109:3
+  site 13 resultflow.c:114:8 in reporter_init failure -17 reached -> return-const at resultflow.c:117 value -40 [RF_ERR_APP] complete flow 9 {}
+      chain: call obj_find at 114:8 -> def st at 114:6 -> value -17 -> branches decided by it at 115:7 -> 117:5
+  site 13 resultflow.c:114:8 in reporter_init success 0 reached -> return-const at resultflow.c:119 [RF_OK] complete flow 9 {}
+      chain: call obj_find at 114:8 -> def st at 114:6 -> value 0 -> branches decided by it at 115:7 -> 119:3
+  site 13 resultflow.c:114:8 in reporter_init success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 9 {}
+      chain: call obj_find at 114:8 -> def st at 114:6 -> value 0 -> branches decided by it at 115:7
+  site 16 resultflow.c:126:11 in looper_init failure -17 reached -> return-result at resultflow.c:132 [RF_ERR_NOT_FOUND] complete flow 11 {}
+      chain: call obj_find at 126:11 -> def ret at 126:9 -> value -17 -> branches decided by it at 127:9 -> 132:3
+  site 16 resultflow.c:126:11 in looper_init success 0 reached -> return-result at resultflow.c:132 [RF_OK] open (on a path through a branch this value does not decide) flow 11 {}
+      chain: call obj_find at 126:11 -> def ret at 126:9 -> value 0 -> branches decided by it at 127:9 -> 132:3
+  site 16 resultflow.c:126:11 in looper_init success 0 reached -> retry [the call runs again] open (on a path through a branch this value does not decide) flow 11 {}
+      chain: call obj_find at 126:11 -> def ret at 126:9 -> value 0 -> branches decided by it at 127:9 -> call obj_find at 126:11
+  site 19 resultflow.c:139:9 in retrier_init failure -17 reached -> retry [the call runs again; delay usleep at 141:5] open (on a path through a branch this value does not decide) flow 14 {}
+      chain: call obj_find at 139:9 -> def v at 139:7 -> value -17 -> branches decided by it at 140:9 -> call obj_find at 139:9
+  site 19 resultflow.c:139:9 in retrier_init success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 14 {}
+      chain: call obj_find at 139:9 -> def v at 139:7 -> value 0 -> branches decided by it at 140:9
+  site 22 resultflow.c:161:7 in reporter_main failure -40 reached -> terminal site 23 resultflow.c:161:33 [abort (terminal operation)] complete flow 18 {}
+      chain: call reporter_init at 161:7 -> value -40 -> branches decided by it at 161:7 -> 161:33
+  site 22 resultflow.c:161:7 in reporter_main success 0 reached -> return-const at resultflow.c:164 [0] open (on a path through a branch this value does not decide) flow 18 {}
+      chain: call reporter_init at 161:7 -> value 0 -> branches decided by it at 161:7 -> 164:3
+  site 22 resultflow.c:161:7 in reporter_main success 0 reached -> terminal site 25 resultflow.c:162:31 [abort (terminal operation)] open (on a path through a branch this value does not decide) flow 18 {}
+      chain: call reporter_init at 161:7 -> value 0 -> branches decided by it at 161:7 -> 162:31
+  site 24 resultflow.c:162:7 in reporter_main failure -17 reached -> terminal site 25 resultflow.c:162:31 [abort (terminal operation)] complete flow 20 {}
+      chain: call looper_init at 162:7 -> value -17 -> branches decided by it at 162:7 -> 162:31
+  site 24 resultflow.c:162:7 in reporter_main success 0 reached -> return-const at resultflow.c:164 [0] complete flow 20 {}
+      chain: call looper_init at 162:7 -> value 0 -> branches decided by it at 162:7 -> 164:3
+  site 27 resultflow.c:170:8 in runner_main failure -17 reached -> store at resultflow.c:171 value 3 [global:run_state := 3] complete flow 22 {}
+      chain: call obj_find at 170:8 -> def st at 170:6 -> value -17 -> branches decided by it at 171:7 -> 171:20
+  site 27 resultflow.c:170:8 in runner_main failure -17 reached -> terminal site 31 resultflow.c:175:3 value 3 [exit (terminal operation); the value of global:run_state stored on this path: 3] open (on a path through a branch this value does not decide; run_loop at resultflow.c:172:10 takes the address of global:run_state on these paths: it stores through its parameter 0) flow 22 {}
+      chain: call obj_find at 170:8 -> def st at 170:6 -> value -17 -> branches decided by it at 171:7 -> 175:3 (the store at 171:20 of global:run_state := 3 is its argument)
+  site 27 resultflow.c:170:8 in runner_main success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 22 {}
+      chain: call obj_find at 170:8 -> def st at 170:6 -> value 0 -> branches decided by it at 171:7
+  site 29 resultflow.c:172:10 in runner_main success 0 reached -> terminal site 31 resultflow.c:175:3 [exit (terminal operation)] complete flow 23 {}
+      chain: call run_loop at 172:10 -> value 0 -> branches decided by it at 172:10 -> 175:3
+  site 29 resultflow.c:172:10 in runner_main success 1 reached -> retry [the call runs again; delay usleep at 173:5] complete flow 23 {}
+      chain: call run_loop at 172:10 -> value 1 -> branches decided by it at 172:10 -> call run_loop at 172:10
+  site 32 resultflow.c:180:7 in maker_main failure -40 reached -> return-const at resultflow.c:181 [0] complete flow 26 {}
+      chain: call obj_create at 180:7 -> value -40 -> branches decided by it at 180:7 -> 181:3
+  site 32 resultflow.c:180:7 in maker_main failure -30 reached -> return-const at resultflow.c:181 [0] complete flow 26 {}
+      chain: call obj_create at 180:7 -> value -30 -> branches decided by it at 180:7 -> 181:3
+  site 32 resultflow.c:180:7 in maker_main failure -14 present-only -> return-const at resultflow.c:181 [0] complete flow 26 {}
+      chain: call obj_create at 180:7 -> value -14 -> branches decided by it at 180:7 -> 181:3
+  site 32 resultflow.c:180:7 in maker_main success 0 reached -> return-const at resultflow.c:181 [0] complete flow 26 {}
+      chain: call obj_create at 180:7 -> value 0 -> branches decided by it at 180:7 -> 181:3
+  site 32 resultflow.c:180:7 in maker_main success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 26 {}
+      chain: call obj_create at 180:7 -> value 0 -> branches decided by it at 180:7
+  site 34 resultflow.c:188:8 in task_spawn_detach success 0 reached -> return-const at resultflow.c:191 value -50 [RF_ERR_SPAWN] open (on a path through a branch this value does not decide) flow 28 {}
+      chain: call pthread_create at 188:8 -> def rc at 188:6 -> value 0 -> branches decided by it at 189:7 -> 191:16
+  site 34 resultflow.c:188:8 in task_spawn_detach success 0 reached -> return-const at resultflow.c:192 [RF_OK] open (on a path through a branch this value does not decide) flow 28 {}
+      chain: call pthread_create at 188:8 -> def rc at 188:6 -> value 0 -> branches decided by it at 189:7 -> 192:3
+  site 34 resultflow.c:188:8 in task_spawn_detach failure 0 none -> return-const at resultflow.c:189 value -50 [RF_ERR_SPAWN] open (the outcome is a value other than 0 (an error number: pthread_create creates no thread (P0 thread creation))) flow 28 {}
+      chain: call pthread_create at 188:8 -> def rc at 188:6 -> value (other) -> branches decided by it at 189:7 -> 189:16
+  site 34 resultflow.c:188:8 in task_spawn_detach failure 0 none -> fallthrough [nothing before the paths of the values join] open (the outcome is a value other than 0 (an error number: pthread_create creates no thread (P0 thread creation))) flow 28 {}
+      chain: call pthread_create at 188:8 -> def rc at 188:6 -> value (other) -> branches decided by it at 189:7
+  site 35 resultflow.c:190:8 in task_spawn_detach other 0 none -> return-const at resultflow.c:191 value -50 [RF_ERR_SPAWN] open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: pthread_detach has no body in these facts)) flow 29 {}
+      chain: call pthread_detach at 190:8 -> def rc at 190:6 -> value (other) -> no branch decided by it -> 191:16
+  site 35 resultflow.c:190:8 in task_spawn_detach other 0 none -> return-const at resultflow.c:192 [RF_OK] open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: pthread_detach has no body in these facts)) flow 29 {}
+      chain: call pthread_detach at 190:8 -> def rc at 190:6 -> value (other) -> no branch decided by it -> 192:3
+  site 35 resultflow.c:190:8 in task_spawn_detach other 0 none -> fallthrough [nothing before the paths of the values join] open (the outcome is a value other than those listed (none) (the returns not followed: pthread_detach has no body in these facts)) flow 29 {}
+      chain: call pthread_detach at 190:8 -> def rc at 190:6 -> value (other) -> no branch decided by it
+  site 36 resultflow.c:198:8 in task_spawn_plain success 0 reached -> return-const at resultflow.c:200 [RF_OK] complete flow 31 {}
+      chain: call pthread_create at 198:8 -> def rc at 198:6 -> value 0 -> branches decided by it at 199:7 -> 200:3
+  site 36 resultflow.c:198:8 in task_spawn_plain success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 31 {}
+      chain: call pthread_create at 198:8 -> def rc at 198:6 -> value 0 -> branches decided by it at 199:7
+  site 36 resultflow.c:198:8 in task_spawn_plain failure 0 none -> return-const at resultflow.c:199 value -50 [RF_ERR_SPAWN] open (the outcome is a value other than 0 (an error number: pthread_create creates no thread (P0 thread creation))) flow 31 {}
+      chain: call pthread_create at 198:8 -> def rc at 198:6 -> value (other) -> branches decided by it at 199:7 -> 199:16
+  site 36 resultflow.c:198:8 in task_spawn_plain failure 0 none -> fallthrough [nothing before the paths of the values join] open (the outcome is a value other than 0 (an error number: pthread_create creates no thread (P0 thread creation))) flow 31 {}
+      chain: call pthread_create at 198:8 -> def rc at 198:6 -> value (other) -> branches decided by it at 199:7
+  site 40 resultflow.c:232:8 in waiter_main failure -9 reached -> return-const at resultflow.c:234 [0] complete flow 33 {}
+      chain: call gate_wait at 232:8 -> def st at 232:6 -> value -9 -> branches decided by it at 233:7 -> 234:3
+  site 40 resultflow.c:232:8 in waiter_main failure -9 reached -> fallthrough [nothing before the paths of the values join] complete flow 33 {}
+      chain: call gate_wait at 232:8 -> def st at 232:6 -> value -9 -> branches decided by it at 233:7
+  site 40 resultflow.c:232:8 in waiter_main success 0 reached -> return-const at resultflow.c:234 [0] complete flow 33 {}
+      chain: call gate_wait at 232:8 -> def st at 232:6 -> value 0 -> branches decided by it at 233:7 -> 234:3
+  site 40 resultflow.c:232:8 in waiter_main success 0 reached -> store at resultflow.c:233 [field:Gate.level := gate_use(gate.ready)] complete flow 33 {}
+      chain: call gate_wait at 232:8 -> def st at 232:6 -> value 0 -> branches decided by it at 233:7 -> 233:20
+
+# relations
+kz-relations 1
+rules relations rules revision 9 (2026-11-16)
+mode profile-free
+  extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
+  extract.profile = kz-static-builtin-minimal / 
+  extract.p0_table = P0 table revision 3 (2026-10-30), 72 entries
+  extract.p0_table_scope = families of this revision: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread or process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Of a family the members that take, release, wait, signal, sleep, end, name a thread, bind or create a key, push or pop a handler, load or look up, or store memory are entries; a family is not listed whole where this list names members left out.  Not in this revision: read-write locks (pthread_rwlock_*; their shared acquisitions are not read by the lock-set analysis, so the family is left out whole and its acquisitions are no lock operations), barriers (pthread_barrier_*), one-time initialization (pthread_once, call_once), thread cancellation of another thread (pthread_cancel and the cancellation state functions), signals (kill, raise, pthread_kill, sigwait), dlclose, dlerror and dladdr, functions a compiler or a fortify wrapper calls without a call in the source (__stack_chk_fail, __chk_fail and the *_chk functions); thread join and detach (pthread_join, pthread_tryjoin_np, pthread_timedjoin_np, pthread_detach, thrd_join, thrd_detach); POSIX timers (timer_create, timer_settime, timer_gettime, timer_getoverrun, timer_delete; a timer with SIGEV_THREAD notification starts its function on a new thread, which is no actor here); I/O multiplexing (select, pselect, poll, ppoll); the initialization, destruction, attribute and query members of the mutex, spin lock, semaphore and condition variable families and of thread creation (pthread_mutex_init, pthread_mutex_destroy, pthread_mutexattr_*, pthread_spin_init, pthread_spin_destroy, sem_init, sem_destroy, sem_open, sem_close, sem_unlink, sem_getvalue, pthread_cond_init, pthread_cond_destroy, pthread_condattr_*, mtx_init, mtx_destroy, cnd_init, cnd_destroy, pthread_attr_*); scheduling (sched_*, pthread_setschedparam, pthread_getschedparam, pthread_setschedprio); data functions not in this revision (stpcpy, stpncpy, strlcpy and strlcat (glibc 2.38 and later), mempcpy, memccpy, explicit_bzero, and the wide-character members); formatted input, which stores through its arguments (sscanf, vsscanf, fscanf, vfscanf, scanf, vscanf); handlers registered for process exit (atexit, at_quick_exit, on_exit)
+  extract.derivation_rules = wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  extract.targets_rule = R-T1,R-T2 (target rules revision 1): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)
+  extract.reading_options_vs_basis = not compared: no basis (--source)
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
+rules with result flow: relations rules revision 10 (2026-11-16), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): 42 rows (uses: branch 16, return 2, argument 1, store 1, other 0, none 11; guard rows 11); calls with a result 30; 60 rows (open 24; event send 0, application exit 0, terminal 5; calls on the paths that are none of these, no row: 15); calls explored 17, outcomes 35
+handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: H 1 R 2 T 1 T? 1 none 1
+run order: no record given (this revision reads no run record; the column says so in every row)
+functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
+actors: roots 7 (process 1, spawn-entry 6, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 0
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
+summary A 5 (namespaces 1, lookup uses 5, with a creator of the same partition in another actor 5, key-matched 5) B 1 (with a callee check 0) C 0 (self-identity reads 0); flip static-possible 5, static-undetermined 0, none 1; feasibility proven-impossible 0, possible 0, undecidable 6, not graded 0
+summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 0, creators 0; lookup rows with the membership unresolved 0; lookup rows without a creator of their partition 0 []
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 6 [no run record read 6]; writer_set_incomplete 5 [FIELD_STATUS not complete 5]; fixed_proof_open 6 [no static order between the actors 6]; reasons of the whole facts on every row: none
+[A] 5 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
+  namespace Obj.name (record type Obj; tables objs)
+      search: A1 search loop resultflow.c:51:3 in obj_find: key Obj.name strcmp at resultflow.c:52:30 compared with parameter 1 [name] (search parameter 1)
+      search: A1 search loop resultflow.c:80:3 in obj_create: key Obj.name strcmp at resultflow.c:81:30 compared with parameter 1 [name] (search parameter 1)
+      active fields: Obj.used 
+      active test: Obj.used == 1 is in use (a search with the key comparison requires it)
+      lifecycle Obj.name: writers 1 from WRITERS (the field is an extraction target)
+        memcpy at resultflow.c:85:7 in obj_create value=top [copy of name] guard=(and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0))
+      lifecycle Obj.used: writers 1 from WRITERS (the field is an extraction target)
+        assign at resultflow.c:69:5 in obj_finish@resultflow.c:67 value=1 [1] guard=(eq param:status#0 0) class=reservation or activation (writes the in-use value)
+      publication writes of the creator obj_create#1: Obj.name memcpy resultflow.c:85:7 in obj_create; Obj.used assign resultflow.c:69:5 in obj_finish@resultflow.c:67 := 1
+      key-parameter functions: lookups obj_find#1; creators obj_create#1
+      uses: lookups 5, creators 2 (calls from outside the key-parameter functions; a creator reaches a write of the key); left out, another callback passed to the search: lookups 0, creators 0
+      namespace layers: B P0 R
+  A1 lookup resultflow.c:105:8 in checker_init -> obj_find#1 namespace Obj.name partition {} key known
+      membership: reaches the comparison strcmp at resultflow.c:52:30 in its own search loop
+      key: string literal "peer"
+      actors: {checker_main (spawn-entry)}; result=tested
+      id holder: the lookup's arg 0 [&handles[1]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_find stores through its parameter 0 in obj_find at resultflow.c:53:7 [i]
+      creator: same key: resultflow.c:180:7 in maker_main -> obj_create key string literal "peer" actors {maker_main (spawn-entry)}
+      not a pair: key constants differ: resultflow.c:103:8 in checker_init -> obj_create key string literal "own" actors {checker_main (spawn-entry)}
+      id holder: the creator resultflow.c:180:7 -> obj_create: arg 0 [&handles[7]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_create stores through its parameter 0 in obj_finish@resultflow.c:67 at resultflow.c:70:5 [slot]
+      callee-check: obj_create returns -40 [RF_ERR_APP] when (or (eq param:out#0 0) (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 1)) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0)))
+      callee-check: obj_create returns -14 [RF_ERR_FULL] when (and (and (not (eq param:out#0 0)) (not (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)))) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check: obj_create returns 0 [RF_OK] when (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check (returns not followed): obj_create: obj_finish@resultflow.c:67 returns param [status] at resultflow.c:72:3
+      callee-check (set): obj_create: not established (1 returns not followed, 2 constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them
+      callee-check (result flow): obj_create returns -40: RF_ERR_APP (a constant returned at resultflow.c:81) (open)
+      callee-check (result flow): obj_create returns -30: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_ERR_IMPL (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow): obj_create returns 0: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_OK (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow, success): obj_create: shown to reach the return: 0 (the values RESULT_EFFECT shows to reach a return of obj_create, not all it returns: callee-check (set) says whether that set is complete)
+      writers: Obj.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Obj.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result tested; no return of it and no terminal operation under it found
+      absence: -17 (no match: obj_find) at the call resultflow.c:105:8: reached; effects: fallthrough at - complete; return-const 0 at resultflow.c:109 complete
+      handling_label: T (over the absence value -17) T: checker_init returns 0 at resultflow.c:109 (not of failure class); T: fallthrough [nothing before the paths of the values join] at -
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: obj_create returns -14 [RF_ERR_FULL], obj_create returns -40 [RF_ERR_APP], obj_create returns 0 [RF_OK], obj_find returns -17 [RF_ERR_NOT_FOUND], obj_find returns 0 [RF_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+  A2 lookup resultflow.c:114:8 in reporter_init -> obj_find#1 namespace Obj.name partition {} key known
+      membership: reaches the comparison strcmp at resultflow.c:52:30 in its own search loop
+      key: string literal "peer"
+      actors: {reporter_main (spawn-entry)}; result=tested
+      id holder: the lookup's arg 0 [&handles[2]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_find stores through its parameter 0 in obj_find at resultflow.c:53:7 [i]
+      creator: same key: resultflow.c:180:7 in maker_main -> obj_create key string literal "peer" actors {maker_main (spawn-entry)}
+      not a pair: key constants differ: resultflow.c:103:8 in checker_init -> obj_create key string literal "own" actors {checker_main (spawn-entry)}
+      id holder: the creator resultflow.c:180:7 -> obj_create: arg 0 [&handles[7]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_create stores through its parameter 0 in obj_finish@resultflow.c:67 at resultflow.c:70:5 [slot]
+      callee-check: obj_create returns -40 [RF_ERR_APP] when (or (eq param:out#0 0) (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 1)) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0)))
+      callee-check: obj_create returns -14 [RF_ERR_FULL] when (and (and (not (eq param:out#0 0)) (not (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)))) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check: obj_create returns 0 [RF_OK] when (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check (returns not followed): obj_create: obj_finish@resultflow.c:67 returns param [status] at resultflow.c:72:3
+      callee-check (set): obj_create: not established (1 returns not followed, 2 constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them
+      callee-check (result flow): obj_create returns -40: RF_ERR_APP (a constant returned at resultflow.c:81) (open)
+      callee-check (result flow): obj_create returns -30: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_ERR_IMPL (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow): obj_create returns 0: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_OK (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow, success): obj_create: shown to reach the return: 0 (the values RESULT_EFFECT shows to reach a return of obj_create, not all it returns: callee-check (set) says whether that set is complete)
+      writers: Obj.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Obj.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result tested; no return of it and no terminal operation under it found
+      absence: -17 (no match: obj_find) at the call resultflow.c:114:8: reached; effects: return-const -40 at resultflow.c:117 complete
+      handling_label: R (over the absence value -17) R: terminal at resultflow.c:161:33 [abort (terminal operation)] (call reporter_init at 161:7 -> value -40 -> branches decided by it at 161:7 -> 161:33)
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: obj_create returns -14 [RF_ERR_FULL], obj_create returns -40 [RF_ERR_APP], obj_create returns 0 [RF_OK], obj_find returns -17 [RF_ERR_NOT_FOUND], obj_find returns 0 [RF_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+  A3 lookup resultflow.c:126:11 in looper_init -> obj_find#1 namespace Obj.name partition {} key known
+      membership: reaches the comparison strcmp at resultflow.c:52:30 in its own search loop
+      key: string literal "peer"
+      actors: {reporter_main (spawn-entry)}; result=tested
+      id holder: the lookup's arg 0 [&handles[3 + k]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_find stores through its parameter 0 in obj_find at resultflow.c:53:7 [i]
+      creator: same key: resultflow.c:180:7 in maker_main -> obj_create key string literal "peer" actors {maker_main (spawn-entry)}
+      not a pair: key constants differ: resultflow.c:103:8 in checker_init -> obj_create key string literal "own" actors {checker_main (spawn-entry)}
+      id holder: the creator resultflow.c:180:7 -> obj_create: arg 0 [&handles[7]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_create stores through its parameter 0 in obj_finish@resultflow.c:67 at resultflow.c:70:5 [slot]
+      callee-check: obj_create returns -40 [RF_ERR_APP] when (or (eq param:out#0 0) (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 1)) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0)))
+      callee-check: obj_create returns -14 [RF_ERR_FULL] when (and (and (not (eq param:out#0 0)) (not (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)))) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check: obj_create returns 0 [RF_OK] when (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check (returns not followed): obj_create: obj_finish@resultflow.c:67 returns param [status] at resultflow.c:72:3
+      callee-check (set): obj_create: not established (1 returns not followed, 2 constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them
+      callee-check (result flow): obj_create returns -40: RF_ERR_APP (a constant returned at resultflow.c:81) (open)
+      callee-check (result flow): obj_create returns -30: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_ERR_IMPL (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow): obj_create returns 0: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_OK (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow, success): obj_create: shown to reach the return: 0 (the values RESULT_EFFECT shows to reach a return of obj_create, not all it returns: callee-check (set) says whether that set is complete)
+      writers: Obj.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Obj.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: in the loop resultflow.c:125:3 kind constant-trip trip upper-bound 2 exit (or (not (lt local:k 2)) (and (lt local:k 2) (ne local:ret 0)))
+      handling: looper_init returns the result of obj_find (resultflow.c:126:11)
+      handling: terminal abort at resultflow.c:162:31 in reporter_main under the result
+      absence: -17 (no match: obj_find) at the call resultflow.c:126:11: reached; effects: return-result at resultflow.c:132 complete
+      handling_label: R (over the absence value -17) R: terminal at resultflow.c:162:31 [abort (terminal operation)] (call looper_init at 162:7 -> value -17 -> branches decided by it at 162:7 -> 162:31)
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: obj_create returns -14 [RF_ERR_FULL], obj_create returns -40 [RF_ERR_APP], obj_create returns 0 [RF_OK], obj_find returns -17 [RF_ERR_NOT_FOUND], obj_find returns 0 [RF_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+  A4 lookup resultflow.c:139:9 in retrier_init -> obj_find#1 namespace Obj.name partition {} key known
+      membership: reaches the comparison strcmp at resultflow.c:52:30 in its own search loop
+      key: string literal "peer"
+      actors: {reporter_main (spawn-entry)}; result=tested
+      id holder: the lookup's arg 0 [&handles[5]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_find stores through its parameter 0 in obj_find at resultflow.c:53:7 [i]
+      creator: same key: resultflow.c:180:7 in maker_main -> obj_create key string literal "peer" actors {maker_main (spawn-entry)}
+      not a pair: key constants differ: resultflow.c:103:8 in checker_init -> obj_create key string literal "own" actors {checker_main (spawn-entry)}
+      id holder: the creator resultflow.c:180:7 -> obj_create: arg 0 [&handles[7]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_create stores through its parameter 0 in obj_finish@resultflow.c:67 at resultflow.c:70:5 [slot]
+      callee-check: obj_create returns -40 [RF_ERR_APP] when (or (eq param:out#0 0) (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 1)) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0)))
+      callee-check: obj_create returns -14 [RF_ERR_FULL] when (and (and (not (eq param:out#0 0)) (not (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)))) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check: obj_create returns 0 [RF_OK] when (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check (returns not followed): obj_create: obj_finish@resultflow.c:67 returns param [status] at resultflow.c:72:3
+      callee-check (set): obj_create: not established (1 returns not followed, 2 constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them
+      callee-check (result flow): obj_create returns -40: RF_ERR_APP (a constant returned at resultflow.c:81) (open)
+      callee-check (result flow): obj_create returns -30: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_ERR_IMPL (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow): obj_create returns 0: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_OK (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow, success): obj_create: shown to reach the return: 0 (the values RESULT_EFFECT shows to reach a return of obj_create, not all it returns: callee-check (set) says whether that set is complete)
+      writers: Obj.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Obj.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: in the loop resultflow.c:138:3 kind count-bounded trip upper-bound 5 exit (or (not (lt local:k 5)) (and (lt local:k 5) (eq local:v 0))) delay resultflow.c:141:5 usleep
+      handling: result tested; no return of it and no terminal operation under it found
+      absence: -17 (no match: obj_find) at the call resultflow.c:139:9: reached; effects: retry at - open
+      handling_label: H (over the absence value -17) H: the call runs again; delay usleep at 141:5 (call obj_find at 139:9 -> def v at 139:7 -> value -17 -> branches decided by it at 140:9 -> call obj_find at 139:9; on a path through a branch this value does not decide)
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: obj_create returns -14 [RF_ERR_FULL], obj_create returns -40 [RF_ERR_APP], obj_create returns 0 [RF_OK], obj_find returns -17 [RF_ERR_NOT_FOUND], obj_find returns 0 [RF_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+  A5 lookup resultflow.c:170:8 in runner_main -> obj_find#1 namespace Obj.name partition {} key known
+      membership: reaches the comparison strcmp at resultflow.c:52:30 in its own search loop
+      key: string literal "peer"
+      actors: {runner_main (spawn-entry)}; result=tested
+      id holder: the lookup's arg 0 [&handles[6]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_find stores through its parameter 0 in obj_find at resultflow.c:53:7 [i]
+      creator: same key: resultflow.c:180:7 in maker_main -> obj_create key string literal "peer" actors {maker_main (spawn-entry)}
+      not a pair: key constants differ: resultflow.c:103:8 in checker_init -> obj_create key string literal "own" actors {checker_main (spawn-entry)}
+      id holder: the creator resultflow.c:180:7 -> obj_create: arg 0 [&handles[7]] address <global>.handles base global-array-element object handles@resultflow.c:46 <- obj_create stores through its parameter 0 in obj_finish@resultflow.c:67 at resultflow.c:70:5 [slot]
+      callee-check: obj_create returns -40 [RF_ERR_APP] when (or (eq param:out#0 0) (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 1)) (eq (call-result strcmp (seq field:Obj.name (seq param:name#1))) 0)))
+      callee-check: obj_create returns -14 [RF_ERR_FULL] when (and (and (not (eq param:out#0 0)) (not (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)))) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check: obj_create returns 0 [RF_OK] when (and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Obj.used 0)) (not (and (not (eq param:out#0 0)) (eq local:rc 0)))); not shown to reach the return: a definition of the value returned in obj_create is redefined later on a path to the return
+      callee-check (returns not followed): obj_create: obj_finish@resultflow.c:67 returns param [status] at resultflow.c:72:3
+      callee-check (set): obj_create: not established (1 returns not followed, 2 constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them
+      callee-check (result flow): obj_create returns -40: RF_ERR_APP (a constant returned at resultflow.c:81) (open)
+      callee-check (result flow): obj_create returns -30: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_ERR_IMPL (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow): obj_create returns 0: the value of obj_finish at resultflow.c:93:10 reaches the return at resultflow.c:95 [RF_OK (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))]
+      callee-check (result flow, success): obj_create: shown to reach the return: 0 (the values RESULT_EFFECT shows to reach a return of obj_create, not all it returns: callee-check (set) says whether that set is complete)
+      writers: Obj.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, writer-function-not-once, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Obj.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result tested; no return of it and no terminal operation under it found
+      absence: -17 (no match: obj_find) at the call resultflow.c:170:8: reached; effects: store [global:run_state := 3] at resultflow.c:171 complete; terminal [exit (terminal operation); the value of global:run_state stored on this path: 3] at resultflow.c:175:3 open
+      handling_label: T? (over the absence value -17) T?: terminal at resultflow.c:175:3 is open: on a path through a branch this value does not decide; run_loop at resultflow.c:172:10 takes the address of global:run_state on these paths: it stores through its parameter 0
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: obj_create returns -14 [RF_ERR_FULL], obj_create returns -40 [RF_ERR_APP], obj_create returns 0 [RF_OK], obj_find returns -17 [RF_ERR_NOT_FOUND], obj_find returns 0 [RF_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+[B] 1 (field-argument groups 1; left out: no writer 0, one actor only 0)
+  B1 Gate.ready -> gate_use#0 sites=1 callee-check=none
+      site resultflow.c:233:33 in waiter_main [gate.ready] base=global hops=0 result=used
+      field: INIT 0 (gate); writers 1 from WRITERS (the field is an extraction target)
+        assign at resultflow.c:213:3 in gate_main value=1 [1]
+      writers: Gate.ready: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      actors: readers {waiter_main (spawn-entry)}; writers {gate_main (spawn-entry)} (inter-actor)
+      handling: discarded 0, used 1, tested 0
+      handling_label: none (no callee check)
+      dependency: path B: the shared field Gate.ready is read as argument 0 of gate_use at 1 sites; its writers run in another actor
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no callee check depends on the argument
+      layers: B P0 R (writers: rule targets)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
+[C] 0 (spawn calls 8, with no resolved entry 0, with no event after them on their control-flow graph 2; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 0, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)

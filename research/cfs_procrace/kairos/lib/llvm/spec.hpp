@@ -95,6 +95,12 @@ struct ExtractSpec {
   // FIELD_TYPES and ARG_TYPES (kz_facts.h revision 10) are written.  The reading rules of the option (ReadOptions::
   // object_access) are those of every pass.  Off, the facts are written as before.
   bool object_access = false;
+  // Result flow and effects (--result-flow, the profile-free mode; static_facts.md 5u): every pass records the
+  // parameters returned unchanged and the call arguments' constants and call results; the second pass, which has the
+  // first pass's return values (`result_values`), writes the rows of RESULT_FLOW and RESULT_EFFECT.  Off, nothing is read
+  // for them and the facts are written as before.
+  bool result_flow = false;
+  std::shared_ptr<const ResultValues> result_values;
 
   bool has_field(const FieldRef& f) const;
   std::set<std::string> field_types() const;

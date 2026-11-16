@@ -691,6 +691,60 @@ struct FieldTypeFact {
   uint8_t elem_kind = KZ_FTYPE_ELEM_UNKNOWN, extent_kind = KZ_FTYPE_EXTENT_NONE;
   uint16_t flags = 0;
 };
+// Result flow and effects (--result-flow, the profile-free mode; static_facts.md 5u).
+// A row of RESULT_FLOW: a use the result of a call reaches (use_kind/def_kind KZ_RFLOW_*), or a guard row (def_kind and
+// use_kind none: the call `call_key` runs under `cond`, the conditions that enclose it with each local named by the
+// definitions that reach the condition).
+struct RFlowFact {
+  std::string call_key, func_key;
+  Pos def, use;
+  std::string use_call_key;     // an argument use: the call it is an argument of
+  uint32_t pos = 0xFFFFFFFFu;   // an argument use: the argument position
+  ExprRef cond = nullptr;
+  uint32_t n_other = 0;
+  uint8_t def_kind = 0, use_kind = 0, reach = 0;
+  uint32_t flags = 0;
+  std::string local, target, other_defs;
+};
+// What a call's outcome leads to inside its function, before the effect calls are classified (serialize.cpp classifies
+// them with the SEMANTICS rows and the call flags: an event send, an application exit, a terminal, or none).
+struct REffFact {
+  enum Raw : uint8_t { kFinal = 0, kCall = 1, kExitViaStore = 2 };
+  std::string call_key, func_key;
+  int64_t outcome_value = 0;
+  uint8_t outcome = 0, reach = 0, effect = 0, status = 0;  // KZ_REFF_*
+  uint8_t raw = kFinal;
+  uint32_t flags = 0;
+  std::string effect_call_key;  // kCall, kExitViaStore: the call; or empty
+  Pos effect_pos;
+  int64_t effect_value = 0;
+  std::string detail, reason, chain;
+  int flow = -1;  // index in Model::rflows of the call's first branch use, or -1
+  // kExitViaStore: the stored location, the stored value text, and the calls on the explored paths that pass its address
+  std::string store_target, store_value;
+  std::vector<std::pair<std::string, uint32_t>> address_passes;  // (call key, argument)
+};
+// What a function may return, for the outcome classes of its calls (the first pass's RETURNS, followed through call
+// results and through parameters returned unchanged).  `params`: parameters some return gives back unchanged (resolved
+// at each call by its arguments); `open`: returns not followed; `complement`: the outcome class of a value outside
+// `vals` (KZ_REFF_OUTCOME; 0 when such a value is not an outcome of its own).
+struct RfVal {
+  int64_t v = 0;
+  std::string text;
+  bool present_only = false;  // through a definition redefined later on a path to the return
+  std::string via;
+};
+struct RfVals {
+  std::vector<RfVal> vals;
+  std::vector<uint32_t> params;
+  std::vector<std::string> open;
+  uint8_t complement = 0;
+  std::string complement_why;
+};
+struct ResultValues {
+  std::map<std::string, RfVals> by_fn;  // function key -> what it may return
+};
+
 // A row of ARG_TYPES (--object-access): one argument of one call.
 struct ArgTypeFact {
   std::string call_key, func_key;
@@ -797,6 +851,16 @@ struct Model {
   // ReadFact::oa and WriterFact::oa), and what the reading rules of the option counted.
   std::vector<FieldTypeFact> field_types;
   std::vector<ArgTypeFact> arg_types;
+  // Result flow and effects (--result-flow): what every pass with the option records (the parameters a return gives back
+  // unchanged; per call argument, its constant or the call whose result it is), and the rows of the second pass.
+  std::map<std::string, std::set<std::pair<std::string, uint32_t>>> rf_param_returns;  // function key -> (return position, parameter)
+  std::map<std::string, std::map<uint32_t, std::string>> rf_arg_calls;               // call key -> argument -> call key
+  std::map<std::string, std::map<uint32_t, int64_t>> rf_arg_consts;                  // call key -> argument -> constant
+  std::vector<RFlowFact> rflows;
+  std::vector<REffFact> reffects;
+  struct RfStats {
+    uint32_t calls_with_result = 0, calls_explored = 0, outcomes = 0, depth_cut = 0;
+  } rf_stats;
   struct ObjectStats {
     uint32_t decay_outcalls = 0;    // out-pointer calls whose argument is a target array field that decays
     uint32_t decay_escapes = 0;     // address-escape hits: the decayed pointer leaves otherwise (integer, store, ...)

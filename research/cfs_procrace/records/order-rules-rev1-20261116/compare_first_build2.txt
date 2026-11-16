@@ -1,0 +1,15 @@
+c1_pre_tx OK order.txt: lines 7154, allowed differences 71, other differences 0
+c1_pre_tx OK edges.tsv: lines 481, allowed differences 0, other differences 0
+c1_pre_tx compare_order: only declared differences
+c1_post_tx OK order.txt: lines 7177, allowed differences 71, other differences 0
+c1_post_tx OK edges.tsv: lines 481, allowed differences 0, other differences 0
+c1_post_tx compare_order: only declared differences
+r2_core OK order.txt: lines 6150, allowed differences 39, other differences 0
+r2_core OK edges.tsv: lines 519, allowed differences 0, other differences 0
+r2_core compare_order: only declared differences
+c5_641 OK order.txt: lines 2115, allowed differences 3, other differences 0
+c5_641 OK edges.tsv: lines 93, allowed differences 0, other differences 0
+c5_641 compare_order: only declared differences
+c5_642 OK order.txt: lines 2352, allowed differences 3, other differences 0
+c5_642 OK edges.tsv: lines 123, allowed differences 0, other differences 0
+c5_642 compare_order: only declared differences

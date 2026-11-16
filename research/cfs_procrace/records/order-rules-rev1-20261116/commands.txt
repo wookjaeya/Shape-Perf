@@ -33,3 +33,25 @@ plans.sh under the guard (df_plans.log, plans_run.txt) -> compare.sh plans -> co
 reading the order outputs: two defects of the child-without-success rule (results 3.0a); the scratch check program had linked the archive member of the first build (order.cpp.o) instead of the changed object until rebuild.sh removed that member (fixed, re-measured)
 
 ## 3. addendum before the second build: declared_addendum_before_build2.txt (results 3.0a), sha256 c356e3d31472f935e5c3719531e8af7c3a6faaf984f3630cc5c8d5160344d848, committed with the fix before the second build
+  -> committed as c023b11 before the second build
+tool copy of b1bf545d under the space guard (tool_copy/df_copy_first.log): /home/user/work/preserve/tools-20261116-d/kz-static.b1bf545d.xz, round trip tool_copy/ROUNDTRIP_first.txt (xz -t OK, stream sha256 b1bf545d, cmp SAME); XZ_SHA256 and ORIGINAL.sha256 of the copy directory hold both copies
+
+## 4. second build: rebuild in place in MC under the space guard
+build_record.sh pre -> pre_mc_build2.txt: the seven tools equal post_mc.txt; HEAD c023b11, uncommitted lines under kairos 0
+env/tools/space_guard.sh --need 322463680 --log df_build2.log --kind kz-static -- bash -c "make -j4 all > make_build2.log 2>&1" (11:43:24Z-11:45:57Z) -> rc 0; 13 Linking lines (static_golden not relinked); dip 26386432
+find -newer <build2 start> -> 0 files; post_mc_build2.txt: kz-static b52db538 (tool_sha256 0c45b0b8, tool_source 816f4177, core_source f6e3c7b4); the other six unchanged; CMakeCache.txt bc2f43b4 unchanged; flags.make list -> 321b751c
+ctest -j4 -> ctest_first_build2.log: 250 tests, 1 failed as declared (static_golden_order_np); KZ_GOLDEN_UPDATE=1 -> golden_update_build2.log (491 lines, cmp equal to the scratch check program's); ctest -j4 -> ctest_full_build2.log: 250, 0 failed, 1 skipped; test_static_cli 911, test_static_reasons 655, test_static_plan 182, lint selftest 109 cases 0 failed
+run_unit.sh -> unit_tools_build2.txt 15 of 15; step2a_tests_unit.sh -> unit_step2a_build2.txt 7 of 7
+RELCHECK=orderrev1b_relcheck ORDER=order_rev1b ORDER_EXTRACT=order_rev1b_on_extract EXTRACT=order_rev1b_extract PLANS=order_rev1b_plans:
+  O=.../orderrev1b_relcheck rerun.sh (df_rerun_build2.log) -> compare.sh relations -> compare_relations_build2.txt 15 OK
+  order.sh "" .../order_rev1b (df_order_build2.log) -> compare.sh order -> compare_order_build2.txt 15 OK; compare.sh first -> compare_first_build2.txt: five "only declared differences" (order.txt 71/71/39/3/3 lines, edges.tsv 0)
+  O=.../order_rev1b_extract extract.sh (df_extract_build2.log): five PASS; compare_build.py -> compare/extract_build2_<b>.{tsv,log}: not allowed 0 on five
+  order.sh .../order_rev1b_extract .../order_rev1b_on_extract (df_order_extract_build2.log) -> compare.sh extract -> compare_extract_build2.txt 15 OK
+  O=.../order_rev1b_plans plans.sh (df_plans_build2.log) -> compare.sh plans -> compare_plans_build2.txt: five "only declared differences"
+measurements: summary_build2.txt, named_rows_build2.txt, awaited_build2.txt; source reads: os-impl-tasks.c:541-562 (bundle 1df262a), osal-4.1.1 osapi.c:643-690
+
+## 5. lists and checks
+sha256 lists of the ten output directories (<dir>.sha256); records/LEDGER.tsv +11 rows; records/TOOLS.tsv: 038cd9e3 in-place -> copy, b1bf545d copy, b52db538 in-place
+env/tools/tools_check.sh --deep -> tools_check.txt: 34 rows, 0 failing; env/tools/ledger_check.sh -> ledger_check.txt: 59 rows, 0 failing
+name_check.sh --tree over the ten output directories and the copy directory: clean
+scratch removed at the end: <scratch> (the check program, its outputs, golden copies)

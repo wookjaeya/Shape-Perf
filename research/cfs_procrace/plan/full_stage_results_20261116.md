@@ -273,3 +273,113 @@
 - **둘째 빌드의 출력**(모두 새 디렉터리, 스크립트는 출력 디렉터리를 환경 변수로 받게 고쳤고 기본값은 첫 빌드의 것): relations `orderrev1b_relcheck`(relrev7_check 와 바이트 동일), order `order_rev1b`(두 번 같은 바이트; 첫 빌드의 `order_rev1` 과 `compare_order.py` 로: 줄 수 같고, 다를 수 있는 줄은 HB-spawn 간선의 `create primitive:`, `status condition:`, `child without success:` 줄, 머리의 `summary spawn calls with resolved threads` 줄, HB-lock 간선의 `condition: the write runs:` 줄, `; applies when the write runs:` 앞이 같은 행의 짝 줄, `edges.tsv` 에서 조건 칸만 다른 HB-lock 줄뿐), 다시 뽑기 `order_rev1b_extract` 와 그 order `order_rev1b_on_extract`(§3.0 과 같은 비교), 계획 `order_rev1b_plans`(relrev7_plans 와 §3.0 의 선언한 줄 밖에서 같음).
 - **기대**(측정 전 [I], scratchpad 점검 프로그램으로 잼): child without success possible / not found / unknown: c1_pre_tx 8/4/1 → 12/1/0, c1_post_tx 같음, r2_core 6/4/1 → 9/2/0, c5_641·c5_642 5/1/0 그대로; 다른 줄 수 c1 71, r2 39, c5 3. 행 값·간선 수·대기는 그대로. C1 의 가장 아래 단계(`OS_Posix_InternalTaskCreate_Impl`, `os-impl-tasks.c:543` 의 `pthread_create` 뒤 `:547` 의 `return OS_ERROR`)가 `possible` 로 나오는데, 소스를 읽으면 그 반환은 `pthread_create` 가 실패한 갈래다(`:544` `if (return_code != 0)`; 성공 뒤에는 `:562` `return OS_SUCCESS` 뿐이고 `:551-554` 의 주석이 그렇게 적는다) [M: 묶음 1df262a 의 소스]. 조건의 지역 `return_code` 가 정의를 여럿 가져(`:475` 부터) RETURNS 의 조건에서 펼쳐지지 않으므로 규칙은 그 반환을 뺄 수 없다: 이것은 규칙이 적는 과대 근사(`possible` 은 일어난다는 말이 아님)이고, 고침 2 가 그것을 위 단계로 올린다. 결과에 그렇게 적는다.
 - **공간**: §3.0 과 같은 필요량과 감시.
+
+### 3.1 바뀐 것 [F]
+
+- 커밋 `f3ebf65`(선언, 코드, fixture, 시험, 문서, 비교 스크립트를 함께, 첫 빌드 전). 규모: `lib/llvm/order.cpp` 1,315 줄(새), `order.hpp` 51 줄(새), `tests/static/fixtures/order.c`(새), `test_static_cli.cpp` +75, `static_golden.cpp` +21, `cmd_show.cpp` +40, `docs/static_facts.md` §5p.
+- 커밋 `6ae9a41`(첫 빌드의 기록, 첫 빌드의 golden, 덧붙임 §3.0a, `order.cpp` 의 child without success 고침, fixture 의 경우 하나, 확인 셋, 문서 두 문장; 둘째 빌드 전). 스크립트는 출력 디렉터리를 환경 변수로 받게 고쳤고(기본값은 첫 빌드의 것) `compare_order.py` 와 `compare.sh first` 를 더했다.
+- 둘째 빌드 뒤: `order_np.golden` 갱신, 이 절과 기록, 장부·등록부 행.
+
+### 3.2 빌드 [M]
+
+| | 첫 빌드 | 둘째 빌드 |
+|---|---|---|
+| 때 (UTC) | 11:24:39–11:27:07 | 11:43:24–11:45:57 |
+| rc, 링크 줄 | 0, 14 (`libkz-llvm.a`, kz-static, `kz-llvm` 을 링크하는 시험 여덟, `test_static_reasons`, `test_static_plan`, `static_golden`, `test_static_cli`) | 0, 13 (`static_golden` 은 소스가 바뀌지 않아 다시 링크되지 않음) |
+| kz-static | `038cd9e3…` → `b1bf545defe081a0de513ede65d2c6021388ddf2b46490983e2bc26a4831fa60` (190,536,096 B) | → `b52db538769e6bc8fecd9a7e3daec63fd785885c1873629c0dac244afa50b2f9` (190,578,904 B) |
+| tool_sha256 / tool_source | `31b0bfe7…` / `a8e00a05…` | `0c45b0b8ae991308ca0005e4121cb5da5728fcde69a9e64aa9f359e67020ad0d` / `816f41771a951db8c35dfaf1642f724c0715e1203e380092484577840501eef8` |
+| core_source | `f6e3c7b4…` 같음 | 같음 |
+| kz / kz-dump / kz-rt-dump / kz-phi / kz_lint / kz-instr-clang | §3.0 의 sha256 그대로 | 그대로 |
+| kz, kz-phi, kz-dump 의 정체성 정의, `CMakeCache.txt` `bc2f43b4…` | 같음 | 같음 |
+| flags.make 목록 해시 | `7d2a0717…` → `7a538b6e…` | → `321b751c…` |
+| 빌드 시작 뒤 바뀐 정체성 경로의 파일 (`find -newer`) | 0 | 0 |
+
+- 기록: `pre_mc.txt`, `post_mc.txt`, `make.log`, `df_build.log`(첫 빌드), `pre_mc_build2.txt`, `post_mc_build2.txt`, `make_build2.log`, `df_build2.log`(둘째 빌드). 선언대로다. 둘째 빌드가 `static_golden` 을 다시 링크하지 않은 것은 선언(§3.0a 의 "§3.0 과 같다")보다 적은 바뀜이다.
+
+### 3.3 시험 [M]
+
+- 첫 빌드: golden 갱신 전 전체 ctest(`ctest_first.log`) 250 개 가운데 실패 1, 선언한 `static_golden_order_np`(golden 없음) 그대로. `KZ_GOLDEN_UPDATE=1` 로 쓴 `order_np.golden`(453 줄)은 scratchpad 점검 프로그램의 것과 `cmp` 같다. 갱신 뒤(`ctest_full.log`) 250 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, tracefs 없음; `skip_reason.log`). `test_static_cli` 908, `test_static_reasons` 655, `test_static_plan` 182, `lint_selftest` 109 경우 실패 0, lint 7/7. 라벨 golden 62, static 55(+1, +2). 단위 점검 15/15, 7/7.
+- 둘째 빌드: 첫 ctest(`ctest_first_build2.log`) 실패 1, 선언한 `static_golden_order_np`(fixture 가 바뀜) 그대로. 갱신한 golden(491 줄, `golden_update_build2.log`)을 읽었다: 행 C5(`mapped_spawn`, hard_before, HB-lock)가 더해지고 그 spawn 간선의 child without success 가 `possible: start_mapped returns -12 [ERR_MAPPED] at order.c:190:16 after order.c:189:12 (the inner call order.c:189:12 may report a failure after its thread started: possible)`, `start_plain` 의 상태 조건이 `start_plain returns 0 [pthread_create created the thread (P0 pthread_create)]`; 나머지 행 값은 첫 빌드와 같다(A1 hard_before, A2 fixed_early_proved, A3 unordered, B1 unordered(짝 hard_before 1, unordered 1), B2 conditional_before(짝 conditional_before 1, hard_before 1), C1·C3·C4 hard_before, C2 unordered). 갱신 뒤(`ctest_full_build2.log`) 250 개, 실패 0, 건너뜀 1; `test_static_cli` 911, `test_static_reasons` 655, `test_static_plan` 182, lint 7/7, selftest 109; 단위 점검 15/15(`unit_tools_build2.txt`), 7/7(`unit_step2a_build2.txt`). 그 밖의 golden 은 바뀌지 않았다(`git status`).
+
+### 3.4 바이트 동일성 [M]
+
+| 비교 | 첫 빌드 (`b1bf545d`) | 둘째 빌드 (`b52db538`) |
+|---|---|---|
+| relations·키 목록 다섯 빌드 vs `relrev7_check` | 바이트 동일, `relations.log` 빈 파일 (`compare_relations.txt`, 15 OK) | 같음 (`compare_relations_build2.txt`, 15 OK) |
+| order 두 번 실행 | 다섯 모두 `order.txt`·`edges.tsv` 같은 바이트, `order.log` 빈 파일 (`compare_order.txt`) | 같음 (`compare_order_build2.txt`) |
+| 둘째 빌드 order vs 첫 빌드 | — | 다섯 모두 선언한 줄만 다름 (`compare_first_build2.txt`: order.txt 71/71/39/3/3 줄, edges.tsv 0 줄) |
+| 다시 뽑기 vs T8CF (`compare_build.py`, 허용 파일) | 허용 밖 0 (다섯) | 허용 밖 0 (다섯) |
+| facts.kz | 머리의 artifact·basis·부모·도구 해시, STRINGS crc32, BASIS `extract.units_from` 만 다름 | 같은 갈래 |
+| 다시 뽑은 facts 의 order vs T8CF facts 의 order | `order.txt` 둘째 줄 밖 같음, `edges.tsv` 같음; 다시 뽑기의 `relations.txt` 는 relations 재실행의 것과 둘째 줄 밖 같음 (`compare_extract.txt`, 15 OK) | 같음 (`compare_extract_build2.txt`, 15 OK) |
+| 계획 다섯 빌드 vs `relrev7_plans` | 선언한 줄만 (sidecar 둘째 줄, manifest 둘째 줄, module 표·실행 파일 목록 첫 줄; `compare_plans.txt`) | 같음 (`compare_plans_build2.txt`) |
+
+- **누적 목록**: `ledger_check.sh` 59 행, 실패 0(새 행 열하나: `OBS_orderrev1_order`, `OBS_orderrev1_relcheck`, `OBS_orderrev1_extract`, `OBS_orderrev1_onextract`, `OBS_orderrev1_plans`, 같은 다섯의 `…1b…`, `TOOLS_20261116d`). `tools_check.sh --deep` 34 행, 실패 0. 바깥 이름 점검(`--tree`)은 열 출력 디렉터리와 사본 디렉터리에서 깨끗하다.
+- **도구 보존**: `038cd9e3` 사본(`tools-20261116-d/kz-static.038cd9e3.xz`, 41,217,284 B)은 첫 빌드 전, `b1bf545d` 사본(`kz-static.b1bf545d.xz`, 42,426,196 B)은 둘째 빌드 전에 만들고 왕복 확인했다(`tool_copy/ROUNDTRIP.txt`, `ROUNDTRIP_first.txt`: `xz -t` OK, 스트림 sha256 같음, `cmp` 같음). 등록부: `038cd9e3` in-place → copy(그 relations·키 목록은 두 후속 도구가 바이트 동일하게 다시 냈으나 계획은 생성기 정체성 줄이 달라 "대체됨"으로 하지 않음), `b1bf545d` copy(출력이 남고, 둘째 빌드가 child without success 줄을 바꾸므로 대체되지 않음), `b52db538` in-place. 새 도구의 사본은 두지 않았다: 이 단계의 계획은 부팅에 닿지 않는다. 다음 제자리 빌드 전에 사본을 만든다.
+
+### 3.5 측정 [M]
+
+둘째 빌드의 출력(`/home/user/work/redesign/obs1/order_rev1b/<b>/`)이다. 행 값·간선·대기의 수는 첫 빌드와 같고, 다른 것은 child without success 뿐이다. 선언의 [I] 값(scratchpad 점검 프로그램)과 모두 같다.
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| 행 (= relations 행) | 367 | 367 | 295 | 178 | 175 |
+| A: unknown / unordered | 60 / 3 | 60 / 3 | 24 / 1 | 53 / 13 | 53 / 13 |
+| B: unknown / unordered / hard_before / fixed_early_proved | 8 / 162 / 0 / 0 | 8 / 162 / 0 / 0 | 43 / 74 / 34 / 4 | 16 / 55 / 2 / 0 | 15 / 54 / 2 / 0 |
+| C: unknown / unordered / hard_before | 7 / 127 / 0 | 7 / 127 / 0 | 1 / 114 / 0 | 0 / 21 / 18 | 0 / 2 / 36 |
+| 나열한 간선: HB-spawn / L0-script / HB-lock / HB-await / HB-seq; 그 가운데 observed-only | 69 / 8 / 0 / 0 / 402; 4 (L0-script) | 같음 | 40 / 0 / 0 / 0 / 477; 4 (HB-seq 반복) | 14 / 8 / 18 / 0 / 51; 4 (L0-script) | 14 / 8 / 48 / 0 / 51; 4 (L0-script) |
+| 닫힘이 따라간 HB-seq 걸음 | 30,956 | 30,956 | 15,067 | 8,763 | 8,760 |
+| spawn 호출, child without success possible / not found / unknown | 13: 12 / 1 / 0 | 13: 12 / 1 / 0 | 11: 9 / 2 / 0 | 6: 5 / 1 / 0 | 6: 5 / 1 / 0 |
+| 첫 빌드의 같은 칸 | 13: 8 / 4 / 1 | 같음 | 11: 6 / 4 / 1 | 6: 5 / 1 / 0 | 6: 5 / 1 / 0 |
+| 대기 (poll, count-bounded; 술어 인식) | 11 (10, 1; 5) | 12 (10, 2; 5) | 8 (8, 0; 3) | 7 (6, 1; 0) | 8 (7, 1; 1) |
+| order.txt 바이트 | 1,982,237 | 1,986,709 | 1,433,164 | 559,526 | 687,260 |
+
+(나열한 HB-seq 는 행의 나열한 짝이 쓴 hard 걸음, table walk 반복 간선과 그 observed-only 시작 차례; 머리의 `summary edges listed` 가 규칙·종류별로 센다. 경로 A 의 unknown 은 다른 스레드의 생성자가 없는 lookup 행이고(`pairs: none`), B·C 의 unknown 은 root 가 닿지 않는 함수의 짝이다.)
+
+**계획 문서의 예상(모두 [I])과 측정**:
+
+| 예상 [I] | 측정 [M] |
+|---|---|
+| c5_642 C30 → `hard_before`, 조건 `OS_TaskCreate status = OS_SUCCESS`, 전제 = 행의 rests-on | `hard_before`(짝 넷: 쓰기 `cfe_es_apps.c:652:18` → 읽기 `cfe_es_api.c:800:41`, 스레드 CI_Lab·SAMPLE·SCH_Lab·TO_Lab), 경로 HB-lock 하나; 적용 조건 `OS_TaskCreate returns 0 [OS_SUCCESS]` 와 쓰기의 WRITERS guard, 전제 = 잠금 #9(정적 인스턴스)와 행의 rests-on; child without success `possible`: `OS_TaskCreate` 가 `osapi.c:645:19` 의 `pthread_create` 뒤 `:657`, `:672`, `:684` 에서 `OS_ERROR` 를 돌려줌. 소스(`osal-4.1.1-release/src/os/posix/osapi.c`)를 읽으면 `:657` 은 `pthread_create` 가 실패한 갈래(스레드 없음)이고 `:672`(`pthread_detach` 실패), `:684`(`pthread_attr_destroy` 실패)는 스레드가 이미 있는 갈래다 [M] |
+| c5_641 C31 → `unordered`, 반대 "possible: lock window" | `unordered`(짝 넷), `opposite: possible` |
+| c1_pre_tx A21 → `unordered`, HB-spawn(ES→CF), HB-spawn(ES→BP), ES 스레드의 HB-seq(스크립트 줄 차례), BP 의 생성으로 가는 간선 없음 | `unordered`(짝 둘: BP `bp_flow.c:132:18`, SCH_LAB `sch_lab_app.c:168:16` → CF `cf_cfdp.c:993:19`), 어느 쪽 경로도 없음. CF·BP 를 시작한 HB-spawn 은 `cfe_es_apps.c:768:13`(`startup.entry[5]`, `[6]`; 그 아래 `:588:16`, `os-impl-tasks.c:543:19`, `:586:19` 의 단계도), L0-script `E02cf58c34fe36b45`(entry[5] CF → entry[6] BP, hard, L0 전제)와 `E8f0661325db43c8e`(entry[4] SCH_LAB → entry[5]), 시작 차례는 observed-only(`Ef406c0372ad4e25e`, `E9a8bef6c7e446327`). c1_post_tx 의 A21 도 같다 |
+| c1_pre_tx loop 177 → "predicate not recognised" | `cfe_es_apps.c:508:5` `CFE_ES_GetTaskFunction` poll: 술어 인식 안 됨(지역 `ReturnCode`), 조건 부분 `(eq local:ReturnCode 0)`, 예산 부분 `(le local:Timeout 0)`(같은 break), 지연 `OS_TaskDelay` 인자 50, 기다리는 위치 이름 없음, 의존하는 사용은 모두 대기 안 |
+| c1_post_tx CF 재시도 대기(`cf_cfdp.c:1001`) → 예산 탈출 뒤 사용은 성공 아래에서만, BP 생성 → 그 사용 hard(reads-from 전제), lookup 자체는 unordered | count-bounded, 예산 지역 `j`, trip 25, 지연 인자 100; 탈출 0 예산 부분 `(not (lt local:j 25))`, 탈출 1 조건 부분 `(ne local:ret -17)`; 술어 인식 안 됨(조건이 지역만 읽음), 기다리는 위치 이름 없음 → HB-await 없음; 루프 뒤 읽기와 호출은 `continue`. 예상한 hard 간선은 나오지 않았다: 조건이 읽는 `ret` 이 lookup 의 결과를 담은 지역이고, 이 facts 는 그 지역과 기다리는 객체를 잇지 않는다 |
+
+- **HB-await 0**(다섯 빌드): 술어가 인식된 대기(5/5/3/0/1)는 기다리는 필드와 다른 스레드의 writer 를 가진다(`awaited_build2.txt`: 예 `CFE_ES_Global_t.SystemState` writer 5). 그러나 그 함수 안에서 루프 뒤의 읽기·호출이 없고, 의존하는 사용은 대기 안의 것과 그 함수의 호출(호출자 쪽 사용)뿐이다. 이 개정은 호출자 쪽 사용으로 간선을 내지 않는다(호출의 조건이 facts 에 없음). fixture 에서는 hard 둘(skip), conditional 둘(continue)이 나온다.
+- **C1 의 child without success 12 possible**: 고침 1 로 사슬이 `OS_TaskCreate → OS_TaskCreate_Impl → OS_Posix_InternalTaskCreate_Impl → pthread_create` 까지 간다. 가장 아래 단계가 `possible`(`os-impl-tasks.c:547:9` 의 `return OS_ERROR`, `:543:19` 뒤)이고 고침 2 가 위로 올린다. 소스를 읽으면 `:547` 은 `pthread_create` 실패 갈래이고 성공 뒤에는 `:562` 의 `return OS_SUCCESS` 뿐이다(§3.0a) [M]: 이 `possible` 은 규칙의 과대 근사(조건의 지역 `return_code` 가 정의를 여럿 가져 펼쳐지지 않음)이고, C1 의 스레드가 성공 없이 남는다는 근거가 아니다. c5 의 `possible` 에는 `:672`, `:684` 처럼 스레드가 이미 있는 갈래의 반환이 들어 있다.
+- **r2_core B 의 hard_before 34, fixed_early_proved 4**: 쓰기와 사용 사이에 spawn 호출이 있는 짝(쓰기가 spawn 앞이면 hard_before, 사용이 다른 스레드의 spawn 앞이면 fixed_early_proved)이다. 측정이고 판정이 아니다.
+- 기록: `summary_build2.txt`(다섯 빌드의 머리 줄), `named_rows_build2.txt`(위 행과 대기의 글 그대로), `awaited_build2.txt`, `spawn_flags.txt`(첫 빌드의 spawn 간선 표시).
+
+### 3.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 이 단계 처음 | 3,627,954,176 | 시작 |
+| 11:22:19 | 3,147,370,496 | 첫 사본 시작(그 사이 scratchpad 점검 프로그램 약 0.49 GB) |
+| 11:24:16 | 3,106,140,160 | 사본 `038cd9e3` 끝(dip 41,230,336) |
+| 11:27:07 | 3,071,279,104 | 첫 빌드 끝(dip 53,276,672; 감시 문턱 637,036,480) |
+| 11:32:44 | 2,998,980,608 | 첫 빌드의 relations(dip 7,610,368), order(15,544,320), 다시 뽑기(47,054,848), 그 order(15,548,416), 계획(987,136) 뒤 |
+| 11:43:04 | 2,936,905,728 | 사본 `b1bf545d` 끝(dip 42,430,464) |
+| 11:45:57 | 2,936,463,360 | 둘째 빌드 끝(dip 26,386,432) |
+| 11:51:09 | 2,864,209,920 | 둘째 빌드의 relations·order·다시 뽑기·order·계획 뒤(dip 같은 크기) |
+
+- 하한을 넘지 않았다. 남긴 출력: 첫 빌드 70,771,546 B, 둘째 빌드 70,830,014 B(열 디렉터리, 장부 행), 사본 둘 83,643,480 B. 지운 것: 비교 뒤의 둘째 실행(`again/`), 그리고 이 단계 끝에 scratchpad 의 이 단계 작업 파일(점검 프로그램, 그 출력, golden 사본)뿐이다.
+
+### 3.7 계획과 다르게 한 것
+
+- **빌드가 둘이다.** 첫 빌드의 선언한 비교는 모두 선언 안이었으나 출력을 읽다가 child without success 규칙의 결함 둘을 찾았다(§3.0a). 고침과 덧붙임을 둘째 빌드 전에 커밋했고(`6ae9a41`), 첫 빌드의 도구는 사본으로, 출력은 그대로 남겼다. 빌드 전 점검 프로그램이 첫 빌드 뒤 한때 MC 라이브러리의 옛 `order.cpp.o` 를 링크하고 있었다(같은 이름의 멤버가 둘); 고친 뒤 다시 쟀다(`commands.txt` §2).
+- **"사용이 쓰기보다 앞" 의 값 이름.** 설계 연구의 값 목록(hard_before, conditional_before, fixed_early_proved, fixed_early_candidate, unordered, unknown)에 뜻이 적혀 있지 않아, fixed_early_proved / fixed_early_candidate 를 "사용이 쓰기·생성보다 앞(hard / conditional 경로)" 으로 정했다.
+- **HB-seq 는 facts 가 주는 꼴로만.** 한 스레드 안의 일반 프로그램 순서(CFG 차례)는 facts 에 spawn 호출 뒤 도달(LOCK_PATHS)밖에 없다. 그래서 같은 스레드의 두 사건은 `unknown` 이고, 쓰기에서 같은 스레드의 다른 쓰기로 가는 차례(예: 데이터 쓰기 뒤 플래그 쓰기)는 쓰지 않는다.
+- **전제는 글 줄이다.** 설계 연구는 기계가 읽는 전제 목록(`writer-set:<field>:<rule>` 꼴)을 적었다. 이 개정은 간선마다 `premise:` 줄과 TSV 의 `; ` 로 이은 칸이다.
+- **HB-lock 은 relations 경로 C 의 판정에 기댄다.** 같은 잠금 규칙을 다시 세우지 않고 `proven-impossible` 행에서 간선을 만들며, 잠금은 spawn 과 읽기에서 함께 잡힌 정적 인스턴스로 적는다.
+- **대기의 의존하는 사용은 그 함수의 루프 뒤 사건과 그 함수의 호출까지.** 호출자 쪽의 결과 시험은 `unknown(the conditions of its calls are not in these facts)` 이고 HB-await 간선은 호출자 쪽 사용으로 가지 않는다(다섯 빌드의 HB-await 0 의 까닭). 예산 탈출 뒤 사용 앞의 종료 호출은 읽지 않는다.
+- **행마다 값별 짝 줄 6 개**(출력 한도; 모든 짝을 계산하고 `pairs:` 줄이 센다). 경로 B 의 행 하나가 짝 5,240 개(그 행의 글만 2.5 MB)를 가져 c1_pre_tx 의 글이 11.6 MB 가 되었기 때문이다(점검 프로그램).
+- **L0-script 의 fixture 경우가 없다.** 시작 스크립트 진입은 basis 의 `startup.entry` 와 symbol lookup 사슬이 있어야 나오고 fixture 는 basis 없이 추출한다. 실제 빌드(C1·C5 의 8 개)에서만 나왔다.
+- **child without success 는 위치로 "뒤" 를 읽는다**(문서에 적은 과대 근사). C1 의 가장 아래 단계에서 그것이 거짓 `possible` 을 낸다(§3.5).
+
+### 3.8 열린 것
+
+- 호출의 guard(facts schema 개정 11 의 호출 행에 없음): 예산 탈출 뒤 호출자 쪽 사용의 결과, HB-await 의 호출자 쪽 간선, `skip` 의 판정이 그것을 기다린다. 조건의 지역을 그 정의에 잇는 사실(reaching definitions)이 있으면 child without success 의 위치 근사도 좁힐 수 있다(C1 의 거짓 `possible`).
+- 지역 플래그 술어(loop 177, CF 재시도 대기의 `ret`)와 2 세대 잠금의 handle 단위 정체성(C1 의 HB-lock 0): 추출과 잠금 정체성 단계의 일.
+- 인스턴스 키는 글이다. 런타임 1.4 는 생성 토큰을 기록하지 않으므로 HB-spawn 을 실행의 스레드에 잇는 것은 생성 인자 결합(C1)이거나 없음(C5)이다. order 출력을 계획(manifest 개정 4)과 설명 스크립트가 읽는 것은 뒤 단계다. 설명 스크립트(`env/obs1/explain.py` 개정 2)는 바꾸지 않았고 앞 단계에서 넘어온 `explain.py:970-973` 의 refuted 갈래도 그대로다.
+- 경로 A 의 unknown 60/60/24/53/53 은 다른 스레드의 생성자가 없는 lookup 행이다(§2.5 의 생성자 없음의 까닭). 이름 결합 입력이 채워지면 다시 잰다.

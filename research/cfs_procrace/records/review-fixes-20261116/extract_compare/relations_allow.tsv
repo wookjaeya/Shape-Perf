@@ -1,0 +1,10 @@
+# allowance of compare_classes.py revision 2 for relations.txt of the re-extraction of the extractor-fix step against
+# schema12_extract: records/extract-fixes-20261116/relations_allow.tsv with the head-C row tightened to the exact wording of
+# the path C head with only its numbers free (plan/full_stage_results_20261116.md 6.0 (나); declaration 5.0 allowed the
+# numbers of the [B] and [C] heads only)
+change	facts-hash	facts [0-9a-f]{64}	1
+change	rules	rules relations rules revision [0-9] \(2026-11-16\)	1
+insert	reading-options	  extract\.reading_options_vs_basis = same as basis front_end\.arguments_added and front_end	1
+mask	unresolved-calls	(?<=calls whose targets are not resolved \()\d+(?= in these facts)|(?<=creators may be in code not read \()\d+(?= indirect call)
+change	head-B	\[B\] \d+ \(field-argument groups \d+; left out: no writer \d+, one actor only \d+\)	1
+change	head-C	\[C\]\ \d+\ \(spawn\ calls\ \d+,\ with\ no\ resolved\ entry\ \d+,\ with\ no\ event\ after\ them\ on\ their\ control\-flow\ graph\ \d+;\ fields\ written\ after\ a\ spawn\ only\ in\ the\ functions\ the\ creator\ calls,\ not\ paired\ in\ this\ revision:\ \d+;\ record\ types\ written\ whole\ after\ a\ spawn\ with\ no\ typed\ write\ of\ a\ field\ of\ theirs\ by\ the\ creator,\ not\ paired:\ \d+;\ read\ contexts\ through\ a\ call\ the\ threads\ of\ the\ spawn\ \(the\ child\ and\ the\ threads\ its\ code\ starts\)\ do\ not\ reach\ \(rows\ with\ no\ grade\):\ \d+,\ such\ contexts\ of\ a\ spawn\ whose\ threads\ are\ not\ all\ resolved\ \(undecidable\):\ \d+,\ such\ contexts\ an\ indirect\ call\ of\ those\ threads\ whose\ targets\ are\ not\ resolved\ may\ reach\ \(undecidable\):\ \d+\ \(reads\ taken\ in\ only\ so:\ \d+\);\ contexts\ called\ back\ from\ a\ function\ without\ a\ body:\ \d+;\ contexts\ through\ indirect\ calls\ the\ facts\ do\ not\ resolve:\ \d+\)	1

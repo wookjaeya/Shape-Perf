@@ -705,3 +705,111 @@ kz-static 빌드가 없으므로 빌드 전 선언은 없다. 바뀌는 출력�
 - **달라도 되는 것(미리 기대하지 않음)**: 부팅 자체의 내용(시각, pid, thread id, 사건과 값, 수, 끝 상태, console 글, dump 크기). run.meta 의 label·manifest·bindings 줄의 경로. 결과는 측정으로 적는다. 조회의 결과(-17, 0, -35 어느 것이든)나 멈춤 사건의 도달을 미리 기대하지 않는다.
 - **PI 의 선택이 되는 것(하면 멈추고 보고)**: 대상 소스·표·시작 스크립트·시작 구성을 계측 밖에서 바꾸기, hold·gate·지향 순서, 앞선 C1 부팅에서 쓰지 않은 권한이나 시스템 설정, 있는 파생 트리나 기록 디렉터리를 다시 쓰거나 덮기, 공개, 바깥 출처. 여유가 하한 + 필요량 아래.
 - **지우는 것**: 이 단계가 scratchpad 에 만든 것(재생성 점검의 풀린 사본)만. 부팅 디렉터리, dump, 변환 출력은 지우지 않는다.
+
+### 6.1 바뀐 것 [F]
+
+- 커밋 `c9a680f`(선언, 재생성 점검의 기록, 스크립트; 부팅 전). 그 앞의 자동 스냅숏 커밋 `4f3ee54` 에 `chain_check.py` 의 바뀐 글이 먼저 들어갔다(선언 전, 부팅 전; 바깥 이름 점검 `--rev 719cb43 4f3ee54` rc 0). 규모: `chain_check.py` +156/−1, `stop_eval.py` 133줄(새), `run_unit.sh` +50, `run_boot.sh` 76줄(새, 기록 디렉터리).
+- 부팅 뒤 `run_boot.sh` 의 control 단계를 한 번 고쳤다: 처음 글은 dump 의 `check` 줄 가운데 ok/pass 로 끝나지 않는 줄을 셌는데(22), 그 줄들은 행위자별 셈과 용량 줄이라 판정이 아니다. kz-rt-dump 의 마지막 판정 줄("check ok (0 failures)")을 적게 바꾸고 다시 돌렸다(읽기만 하는 단계).
+- 대상 소스, 표, 시작 스크립트, 시작 구성, 하네스는 바꾸지 않았다.
+
+### 6.2 부팅 [M]
+
+공간 감시 아래 한 번(`boot.txt`, `df_boot.log`, `run_meta_excerpt.txt`, `conditions.txt`; 부팅 디렉터리 `/home/user/work/redesign/obs1/c1pre_boot/tx/`).
+
+| 항목 | 값 |
+|---|---|
+| 시작·끝 (UTC) | 08:03:26.653 – 08:03:37.089 (`instances.start_utc`, `instances.end_utc`) |
+| OPERATIONAL (5 s 대기 뒤) | tx yes, rx yes |
+| UDP 1234/1235 의 주인 | tx, rx (하네스의 확인 통과) |
+| 멈춤 | `stop=ci-es-restart-poweron (CI L196-L197)`; SIGKILL 줄 없음(두 인스턴스 모두 5 s 안에 끝남) |
+| 끝 상태 | tx_exit=0, rx_exit=0 |
+| dump | `tx.kzrt` 91,416 B, sha256 `fd05e211fb546046…`; 하네스의 kz-rt-dump(`eb12d09e`) exit 0 |
+| 인스턴스 파일 | 31(`inst_files.sha256` `4aac220a…`; 다른 종류 0). tx 의 `cf_def_config.tbl` `455d265e…`(W6 인스턴스의 값과 같음), `cfe_es_startup.scr` `8ddb9359…`(tx·rx 같음) |
+| console | tx·rx 모두 "entering OPERATIONAL state" 1, "Startup Sync failed" 0, "Unable to obtain Entry Point" 0. CF 줄(`cf_console.txt`): "CF: failed to get sem id for name BP0_tsem, error=-17"(64행) 뒤 BP 의 "Created semaphore: BP0_tsem", "BP1_tsem"(68, 69행) |
+
+- 조건 글: `conditions.txt` 는 W6 의 `pre_1df262a_tx` 의 것과 `cfs.build` 줄(빌드 경로) 하나만 다르다(`conditions_compare.txt`, 선언대로). run.meta 의 호스트 줄은 nproc, run_user, mqueue.msg_max 가 같고 kernel 이 다르다(값은 run.meta 에만 있다). 새 시스템 설정, 새 권한은 쓰지 않았다.
+- 부팅은 한 번이었다. 다시 부팅하지 않았다.
+
+### 6.3 dump, 변환 [M]
+
+- **관측만**(`control_check.txt`): dump 글(1,081줄, sha256 `1290a5f6…`)의 레코드 종류는 run 3, caps 1, runx 4, module 6, resource 2, actor 16, buf 17, ev 1,008, end 1, format 1, check 22. control 레코드(`ctl`, `plan`, `point`) 0. `runx window_mode=record mode_source=early`, `runx end=in-process … store=memory`. kz-rt-dump 의 판정 "check ok (0 failures)"; manifest 점검 "check manifest 5f015c5a… = plan.kzs"; 등록되지 않은 module 하나 "module 2 (bplib) never registered"(bplib 에는 site 가 없다, §5.3).
+- **RUN 레코드**: backend "kzgcc 0.3 (gcc-plugin)", runtime "kzrt 0.4.0", `manifest_sha256=5f015c5a…`; module 여섯(5 core-tx 등록 23, 4 ci_lab 1, 7 to_lab 1, 6 sch_lab 1, 3 cf 4, 1 bp 3), 모두 같은 manifest sha256.
+- **한계와 손실**: 행위자 16(최대 64), 모든 행위자 aseq 빠짐 0, overflow 0, dropped_bytes 0; 풀 4,194,304 B 가운데 chunk 32(1,024 가운데), committed 88,820 B, 가장 큰 행위자 수요 40,724 B(행위자 1); pool_dropped 0, boot 버퍼 0. 문자열 복사 14(`str=`), 잘림 표시(`str-trunc`) 0. 사건에 나온 site 는 301 가운데 82.
+- **두 판독기**(`rtdump_compare.txt`): 같은 dump 와 manifest 둘로 MC `kz-rt-dump` `4390d4f1` 의 글은 하네스의 글(런타임 트리 `eb12d09e`)과 바이트 동일하다.
+- **변환**(`convert.log`; MC kz `931dd39c`): rc 0. 중립 층 site 301, slot 671, 사건 1,008, 값 1,797, 행위자 16, 손실 0, control 레코드 0; 플래그 {loss-evidence, complete, stopped}; 끝은 프로세스 자신의 dump. `run.kzt` 234,528 B, sha256 `faa410e108546e97…`(`/home/user/work/redesign/obs1/c1pre_convert/`), 부모 basis = B′ basis `a57c227b…`. `--process` 는 주지 않았다(RUNX process 가 있다: "initial thread: run actor 1 of process …").
+- **관계 1 의 행의 site**(사용 지점 키 `17975444d83f6589`, §5.3 의 12개): 모두 사건이 있다. 2·3(SCH_LAB 생성자) 각 1, 279·280(BP 생성자, inlined) 각 2, 272·273(키 글) 각 3, 284–289(처리 사슬과 사용) 각 1. 이 값들이 무엇을 뜻하는지는 다음 절의 설명 기록이 적는다(여기서는 수만 적는다).
+
+### 6.4 사슬 [M]
+
+`chain_check.py`(`chain.txt`, rc 0): 16 연결 모두 confirmed, 사슬 confirmed.
+
+| 연결 | 비교한 것 |
+|---|---|
+| manifest | 계획 = 빌드 기록 = run.meta = dump(RUN, module) = run.kzt NRUN = run.kzt FILE_HASHES: 모두 `5f015c5a…` |
+| sidecar | 계획 머리 = `plan.side` `8f5f200c…` |
+| plan_inputs | sidecar 의 입력 = T8CF facts `0d7954fa…`, basis `87a80eb0…` |
+| inst_list, instance | run.meta 의 목록 sha256 = 파일; 31 항목 모두 `<W>/ws/exe` 의 같은 자리 파일과 같음 |
+| exe ×7 | 계획의 일곱 파일: 빌드 기록 = 트리 = 목록(core-tx, cf.so, bp.so 는 run.meta `file` 줄과도) |
+| facts_build | B′ basis 의 `binary.sha256` `c2aa181b…` = run 의 core-tx |
+| bprime | B′ basis `a57c227b…` = B′ facts 의 부모 = run.kzt 의 부모 |
+| dump | 파일 = run.meta = run.kzt `convert.dump.sha256`: `fd05e211…` |
+| bindings | 파일 = run.meta = run.kzt FILE_HASHES: `6a22b9ec…` |
+| same_build (따로) | `unconfirmed(no build-id in dump)`; 트리의 core-tx build-id `ca1ed0b1…` 를 옆에 적음 |
+
+- B 와 B′ 의 facts 가 선언 목록 밖에서 레코드마다 같다는 것은 §5.3 의 비교(`compare_after.tsv`, 선언 밖 0)다. 이 사슬은 그 B′ 에서 부팅 기록까지를 잇는다.
+
+### 6.5 예산의 결과 [M]
+
+선언(§6.0)의 예산마다, 부팅 뒤에 적는다.
+
+1. **멈춤 사건**(`stop_eval.tsv`, rc 0): 시작 스크립트의 앱 다섯이 모두 창 안에서 멈춤 사건에 이르렀다. 라이브러리 둘(tinycbor, bplib)은 규칙상 멈춤 사건이 없다. 시각은 t_init 뒤 ms(dump 의 시계).
+
+   | 앱 | 행위자 | root entry | 멈춤 사건 | 시각 |
+   |---|---|---|---|---|
+   | CI_LAB_APP | 10 | 1556.320 | CFE_ES_RunLoop (site 7, aseq 9) | 1556.705 |
+   | TO_LAB_APP | 11 | 1556.384 | CFE_ES_RunLoop (aseq 49) | 1556.664 |
+   | SCH_LAB_APP | 14 | 1556.758 | CFE_ES_RunLoop (aseq 20) | 1556.862 |
+   | CF | 12 | 1556.708 | CFE_ES_RunLoop (aseq 31) | 1556.953 |
+   | BP | 13 | 1556.966 | CFE_ES_RunLoop (aseq 41) | 1568.106 |
+
+   창(RUN 줄 t_init–t_stop)의 길이 5,679.559 ms. 평가는 각 앱의 첫 멈춤 사건만 본다(규칙). CF 의 행위자에는 그 뒤 `CFE_ES_ExitApp` 의 entry(site 6, aseq 34)도 있다. 그것이 무엇인지는 설명 기록의 일이다.
+2. **도구의 멈춤 예산**: 값 5 s + 명령 + 5 s(CI L176-L177, L196-L197, L199-L200), lead 판단(근거는 §6.0). 발동: 첫 5 s 대기 뒤의 ES 재시작 명령이 두 인스턴스를 끝냈다(exit 0; SIGKILL 없음). 다섯 앱의 멈춤 사건은 모두 t_init 뒤 1,568.106 ms 안에 있다. 첫 대기 5 s 는 인스턴스 시작(t_init 보다 앞이거나 같은 때)부터 센다. 그러므로 예산이 어느 앱의 멈춤 사건보다 먼저 오지 않았다. 다만 t_init 와 하네스의 시작 시각 사이의 차이는 기록되지 않았다(dump 는 단조 시계, run.meta 는 UTC) [미확인]. 1.57 s 와 5 s 의 거리가 그 차이보다 클 것이라는 것은 추정이다 [I]. 잘림: 프로세스 끝 뒤의 일은 기록되지 않았다. CI L179-L191(흐름 켜기, Class 1 전송, `sleep 30`)은 돌리지 않았다. 미해결: 없음(다섯 앱 모두 도달). 민감도: 재지 않음(부팅 하나). 예산의 멈춤은 실패로도 정상으로도 적지 않는다.
+3. **프로그램의 시간 제한**: console 에 "Startup Sync failed"(`cfe_es_start.c:210`, `:225`) 0, "Unable to obtain Entry Point" 0, OPERATIONAL 1(tx, rx). 동기화 지점의 시각은 기록되지 않아(그 자리에 site 가 없다) 1000 ms 한계까지 얼마나 남았는지는 [미확인]. `CFE_PLATFORM_CORE_MAX_STARTUP_MSEC` 30000 은 창보다 길다. 창은 OPERATIONAL 까지 덮었다(5 s 확인에서 yes).
+4. **실행 예산**: 부팅 하나. 다시 부팅하지 않았다.
+5. **계획 예산**: `tier:D07` 12행, 잘린 419행(sidecar). 기록 풀 쓰임 chunk 32/1,024, 88,820 B(풀의 약 2.1%). 다음 층이 풀에 들어가는지는 이 수로 추정할 수 있을 뿐 재지 않았다 [미확인]. 민감도: 재지 않음.
+6. **한계**: 손실 0(§6.3). 문자열 14 모두 잘림 없음. 행위자 16/64.
+7. **관측 효과**: §5.2 그대로(이 부팅이 바꾼 것 없음). rx 는 계측된 바이너리를 `KZ_RT_MODE=off` 로 돌았다.
+8. **같은 빌드 입력**: §6.4 의 사슬로 이어짐.
+9. **환경**: §6.2.
+10. **공간**: §6.7.
+
+### 6.6 바이트 동일성 [M]
+
+- MC: `post_mc.txt` 는 `pre_mc.txt` 와 시각·여유 줄 밖에서 같다. 도구를 빌드하지 않았다.
+- 누적 목록: `ledger_check.sh` 42행, 실패 0(새 행 둘: `OBS_c1pre_boot` 52 파일, `OBS_c1pre_convert` 5 파일). F1T, `641/b`, 플러그인 둘, kairos-build 도구, W6·C5 기록 묶음, 앞 단계의 출력(파생 작업 공간, 런타임 트리, B′, 계획)과 도구 사본 모두 같다. 부팅은 파생 트리를 읽기만 했다(`OBS_c1pre_derived` 같음).
+- 도구 등록부: `tools_check.sh --deep` 31행, 실패 0. 새 도구 행 없음.
+- 단위 점검: `run_unit.sh` 14/14, `step2a_tests_unit.sh` 7/7(선언 전).
+- 바깥 이름 점검(`--tree`): 부팅 디렉터리, 변환 디렉터리, 기록 디렉터리, `env/obs1` 깨끗함. 커밋 전 `--cached` 와 저장소 안 패턴 점검.
+
+### 6.7 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 07:58:30 | 3,751,940,096 | 재생성 점검 시작 |
+| 07:58:34 | 3,567,517,696 (가장 낮은 점) | 재생성 점검(dip 184,422,400; scratchpad 의 풀린 사본 184,395,429 B 를 점검 뒤 지움) |
+| 08:02:57 | 3,751,612,416 | 선언 커밋 전 |
+| 08:03:26–08:03:38 | 3,751,362,560 → 3,748,626,432 | 부팅(dip 2,736,128) |
+| 08:03:56–08:03:58 | 3,748,417,536 → 3,748,171,776 | 변환(dip 245,760) |
+| 08:06:20 | 3,747,467,264 | 기록 뒤 |
+
+- 하한을 넘지 않았다. 감시 문턱(부팅·변환 364,572,800, 재생성 점검 564,572,800) 아래로 가지 않았다. 남긴 크기(블록): 부팅 디렉터리 2,732,032 B(겉보기 3,613,913 B; 계획의 추정 약 3.9 MB 는 tx·rx 두 기록의 합이고 이 부팅은 tx 기록 하나다), 변환 디렉터리 864,256 B(run.kzt 234,528 B, 그 글 보기 447,903 B 포함).
+- 지운 것: scratchpad 의 재생성 점검 디렉터리(풀린 생성기 사본). 그 밖에 아무것도 지우지 않았다.
+
+### 6.8 계획과 다르게 한 것, 다음 단계로 넘기는 것
+
+- 사슬 점검기에 연결을 더했다(§6.0). 계획은 "facts, 계획, B′, run.meta, RUN 레코드, dump, run.kzt 위의 사슬"을 말했고, 앞의 점검기는 sidecar·계획 입력·인스턴스 목록·B′ 부모·dump·바인딩·run.kzt 를 보지 않았다. 앞의 점검기만으로는 이 빌드의 일곱 실행 파일 가운데 넷이 unconfirmed 로 남는다(run.meta 의 `file` 줄이 고정된 셋이다, `run_gi_c1.sh:52`). 하네스는 바꾸지 않고 run.meta 가 sha256 으로 이름 대는 인스턴스 목록을 둘째 출처로 썼다.
+- 멈춤 사건 평가를 이 단계의 스크립트(`env/obs1/stop_eval.py`)로 했다. 계획은 이 평가를 예산 기록의 일로 적었고 스크립트 이름은 정하지 않았다. 설명 기록 단계의 스크립트는 이 결과(`stop_eval.tsv`)나 같은 규칙을 다시 쓸 수 있다.
+- kz-rt-dump: 하네스 안에서는 런타임 트리의 것(`eb12d09e`), 뒤에 MC 의 것(`4390d4f1`)도 돌렸다. 두 글은 바이트 동일하다(§6.3).
+- 계획 3.1 이 적은 `run_gi_c1.sh` 의 줄 번호 가운데 rx 경로의 `:62`, `:91` 은 지금 파일에서 `:97`(sleep 8), `:91`(tx 경로의 SIGKILL)이다. 선언에는 지금 파일의 줄을 적었다.
+- 부팅 디렉터리의 크기는 계획의 추정(두 기록의 합)보다 작다. 이 부팅은 tx 기록 하나다(rx 는 기록하지 않는 인스턴스로 같은 디렉터리에 있다).
+- 다음 단계로: 설명 기록의 입력은 dump 글 `/home/user/work/redesign/obs1/c1pre_boot/tx/tx.dump.txt`(`1290a5f6…`), sidecar, manifest, 바인딩 파일 `<W>/binds_instr.kzs`, relations 의 행(T8CF c1_pre_tx, 사용 지점 키 `17975444d83f6589`), run.meta, 사슬 기록 `records/obs1-20261116-boot/chain.txt`, 멈춤 사건 평가 `stop_eval.tsv`. 창의 경계: 시작은 t_init(RUN 줄), 끝은 프로세스 자신의 dump(t_stop); 창 밖은 프로세스 끝 뒤와 CI L179-L191. t_init 와 하네스 시각의 차이는 기록되지 않았다 [미확인].

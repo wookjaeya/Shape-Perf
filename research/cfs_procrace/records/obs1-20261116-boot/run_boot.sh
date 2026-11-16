@@ -35,7 +35,8 @@ case "${1:-}" in
       echo "record kinds (first word, count):"; awk '{print $1}' "$D" | sort | uniq -c | sed 's/^/  /'
       echo "control records (ctl, plan, point): $(grep -cE '^(ctl|plan|point) ' "$D")"
       grep -E '^run abi|^runx window_mode|^runx pool_bytes|^runx end|^caps' "$D" | sed 's/^/  /'
-      echo "check lines that do not end in ok/pass (for the record): $(grep -E '^check ' "$D" | grep -cvE ' (ok|pass)$')"
+      echo "kz-rt-dump check summary: $(grep -E '^check ok|^check FAIL|^check .*failures' "$D" | tail -1)"
+      echo "kz-rt-dump check lines (count): $(grep -c '^check ' "$D")"
     } > "$HERE/control_check.txt"; cat "$HERE/control_check.txt" ;;
   rtdump-mc)
     # the registry's kz-rt-dump (MC 4390d4f1) on the same dump and manifests, its text against the harness's

@@ -1,0 +1,20 @@
+# chain_check.py --plan /home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.kzs --build-record /home/user/work/redesign/obs1/c1pre_derived/build_instr.record --run-meta /home/user/work/redesign/obs1/c1pre_boot/tx/run.meta --build-root /home/user/work/redesign/obs1/c1pre_derived/ws --dump-text /home/user/work/redesign/obs1/c1pre_boot/tx/tx.dump.txt --basis-text /home/user/work/redesign/obs1/c1pre_bprime/c1_pre_tx/NP/basis.txt --main exe/tx/core-tx
+# and --sidecar /home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.side --plan-facts /home/user/work/redesign/step2a/tests_8c_fix/c1_pre_tx/NP/facts.kz --plan-basis /home/user/work/redesign/step2a/tests_8c_fix/c1_pre_tx/NP/basis.kz --inst-list /home/user/work/redesign/obs1/c1pre_boot/tx/inst_files.sha256 --inst-tree /home/user/work/redesign/obs1/c1pre_derived/ws/exe --dump /home/user/work/redesign/obs1/c1pre_boot/tx/dump/tx.kzrt --bindings /home/user/work/redesign/obs1/c1pre_derived/binds_instr.kzs --bprime-basis /home/user/work/redesign/obs1/c1pre_bprime/c1_pre_tx/NP/basis.kz --facts-header /home/user/work/redesign/obs1/c1pre_convert/facts_header.txt --kzt-text /home/user/work/redesign/obs1/c1pre_convert/run.kzt.txt
+manifest	confirmed	plan=5f015c5aa86bf642 build_record=5f015c5aa86bf642 run.meta=5f015c5aa86bf642 dump=5f015c5aa86bf642 kzt.nrun=5f015c5aa86bf642 kzt.file_hashes=5f015c5aa86bf642
+sidecar	confirmed	plan header=8f5f200cbe436f58 = file
+plan_inputs	confirmed	facts=0d7954fa29aca643 basis=87a80eb0e3731b55
+inst_list	confirmed	run.meta list_sha256=4aac220ae1bed8bc = file (31 entries)
+instance	confirmed	entries=31 equal=31 differing=0 missing=0
+exe exe/tx/core-tx	confirmed	record=c2aa181b99226684 tree=c2aa181b99226684 run.meta[tx/core-tx]=c2aa181b99226684 inst_list[tx/core-tx]=c2aa181b99226684
+exe exe/tx/cf/bp.so	confirmed	record=6789ff75c7d12818 tree=6789ff75c7d12818 run.meta[tx/cf/bp.so]=6789ff75c7d12818 inst_list[tx/cf/bp.so]=6789ff75c7d12818
+exe exe/tx/cf/bplib.so	confirmed	record=f16c177cf09e1e4d tree=f16c177cf09e1e4d inst_list[tx/cf/bplib.so]=f16c177cf09e1e4d
+exe exe/tx/cf/cf.so	confirmed	record=f5af74f7fc41b770 tree=f5af74f7fc41b770 run.meta[tx/cf/cf.so]=f5af74f7fc41b770 inst_list[tx/cf/cf.so]=f5af74f7fc41b770
+exe exe/tx/cf/ci_lab.so	confirmed	record=d0c9adbe476f2eb1 tree=d0c9adbe476f2eb1 inst_list[tx/cf/ci_lab.so]=d0c9adbe476f2eb1
+exe exe/tx/cf/sch_lab.so	confirmed	record=9a6ae3c94d85d1ef tree=9a6ae3c94d85d1ef inst_list[tx/cf/sch_lab.so]=9a6ae3c94d85d1ef
+exe exe/tx/cf/to_lab.so	confirmed	record=ef83f6c2ab1cc777 tree=ef83f6c2ab1cc777 inst_list[tx/cf/to_lab.so]=ef83f6c2ab1cc777
+facts_build	confirmed	basis binary.sha256=c2aa181b99226684 = run main exe/tx/core-tx
+bprime	confirmed	basis=a57c227b2f9fd8dd facts.parent=a57c227b2f9fd8dd kzt.parent=a57c227b2f9fd8dd
+dump	confirmed	file=fd05e211fb546046 run.meta=fd05e211fb546046 kzt=fd05e211fb546046
+bindings	confirmed	file=6a22b9ec9fe5dfcf run.meta=6a22b9ec9fe5dfcf kzt=6a22b9ec9fe5dfcf
+same_build	unconfirmed(no build-id in dump)	build-id of exe/tx/core-tx in the tree=ca1ed0b12f7c8941cbc4dbc942b1f1b8bf616025 dump=none
+chain	confirmed	16 links

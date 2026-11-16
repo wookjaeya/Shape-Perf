@@ -1,0 +1,11 @@
+conditions.txt against /home/user/work/w6/run/c1nat/gi/pre_1df262a_tx/conditions.txt:
+  4c4
+  < item	cfs.build	/home/user/work/instr/gcc/f1/c1/pre_1df262a (derive_c1.sh instr; differences D1-D4 in /home/user/work/instr/gcc/f1/c1/pre_1df262a/build_instr.record)	deviation
+  ---
+  > item	cfs.build	/home/user/work/redesign/obs1/c1pre_derived (derive_c1.sh instr; differences D1-D4 in /home/user/work/redesign/obs1/c1pre_derived/build_instr.record)	deviation
+run.meta kernel/nproc/run_user/msg_max line equal to the earlier boot's: NO
+run.meta second line fields that differ (names only):
+  kernel differs
+  nproc same
+  run_user same
+  mqueue.msg_max same

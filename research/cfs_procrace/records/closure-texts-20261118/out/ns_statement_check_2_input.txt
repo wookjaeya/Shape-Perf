@@ -1,0 +1,19 @@
+semantics-data 2
+layer framework
+component c version="v"
+rule semantics coverage rule revision 2 (2026-11-18)
+layer-fn lookup L_Find def=l.c:60 kind-param=0
+layer-fn get L_Get def=l.c:70 kind-param=1
+layer-op clear-table L_Init def=l.c:5 at=l.c:7 form=fill
+layer-op clear-slot L_Slot def=l.c:20 at=l.c:31 form=assign field=name
+layer-op rollback L_FinNew def=l.c:40 status-param=0 out-param=2
+layer-op delete-finalize L_FinDel def=l.c:55 status-param=0
+kind K value=1 at=a.h:2 source=a.c:3
+  lookup G def=a.c:20 at=a.c:22 public=yes
+  create F def=a.c:9 at=a.c:10 public=yes
+  rollback F def=a.c:9 at=a.c:14 status-arg=0 out-arg=2
+  stored-name F at=a.c:11 extent=N element=char decl=a.h:5
+  not-covered no public lookup
+kind-unresolved H at=a.c:40
+  clear L_Init def=l.c:5 at=l.c:7
+end namespaces=1

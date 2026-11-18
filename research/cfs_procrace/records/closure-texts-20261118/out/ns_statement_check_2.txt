@@ -1,0 +1,19 @@
+skipped (statement the reader does not use)        | semantics-data 2
+skipped (statement the reader does not use)        | layer framework
+skipped (statement the reader does not use)        | component c version="v"
+skipped (statement the reader does not use)        | rule semantics coverage rule revision 2 (2026-11-18)
+REFUSED(is no statement of the namespace data)     | layer-fn lookup L_Find def=l.c:60 kind-param=0
+REFUSED(is no statement of the namespace data)     | layer-fn get L_Get def=l.c:70 kind-param=1
+REFUSED(is no statement of the namespace data)     | layer-op clear-table L_Init def=l.c:5 at=l.c:7 form=fill
+REFUSED(is no statement of the namespace data)     | layer-op clear-slot L_Slot def=l.c:20 at=l.c:31 form=assign field=name
+REFUSED(is no statement of the namespace data)     | layer-op rollback L_FinNew def=l.c:40 status-param=0 out-param=2
+REFUSED(is no statement of the namespace data)     | layer-op delete-finalize L_FinDel def=l.c:55 status-param=0
+entry                                              | kind K value=1 at=a.h:2 source=a.c:3
+operation                                          |   lookup G def=a.c:20 at=a.c:22 public=yes
+operation                                          |   create F def=a.c:9 at=a.c:10 public=yes
+REFUSED(is no statement of the namespace data)     |   rollback F def=a.c:9 at=a.c:14 status-arg=0 out-arg=2
+skipped (statement the reader does not use)        |   stored-name F at=a.c:11 extent=N element=char decl=a.h:5
+REFUSED(is no statement of the namespace data)     |   not-covered no public lookup
+REFUSED(is no statement of the namespace data)     | kind-unresolved H at=a.c:40
+operation                                          |   clear L_Init def=l.c:5 at=l.c:7
+skipped (statement the reader does not use)        | end namespaces=1

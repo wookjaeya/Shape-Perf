@@ -39,7 +39,7 @@ registry row.
 | `scripts/p7_items.py` | per control row of a revision-4 plan: which name-binding items have static inputs |
 | `scripts/row_extract.py` | the lines of one relations row with line numbers |
 | `scripts/open_reason_population.py` | rows and distinct call sites of the open reason the stored-field rule answers, per build |
-| `scripts/ns_statement_check.py` | a Python mirror of the three tests of the present name-space data reader (`kairos/lib/llvm/plan_gen.cpp` `read_namespaces`), run on the statement forms of coverage rule revision 2 (`out/ns_statement_check_input.txt` → `out/ns_statement_check.txt`).  A mirror is not the tool |
+| `scripts/ns_statement_check.py` | a Python mirror of the three tests of the present name-space data reader (`kairos/lib/llvm/plan_gen.cpp` `read_namespaces`), run on the statement forms of coverage rule revision 2: `out/ns_statement_check_2_input.txt` → `out/ns_statement_check_2.txt` (the forms as committed in `kairos/docs/semantics_coverage.md` section 8: 19 lines, 9 refused); `out/ns_statement_check_input.txt` → `out/ns_statement_check.txt` is the trial with draft forms, kept.  A mirror is not the tool |
 | `scripts/dup_outputs.py` | the listing of byte-identical kept directories; **not re-run**: the directories it found were removed by the reclaim step (records/reclaim-20261118 holds that step's own listing) |
 | `out/` | the outputs of the second run (29 commands) and of the statement check |
 | `out_trial1/` | the outputs of the first run (27 commands, two rows fewer for `p4_branch_i.py`); every file of the same name is byte-identical to `out/` |

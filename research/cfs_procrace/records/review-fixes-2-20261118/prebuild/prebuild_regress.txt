@@ -1,0 +1,72 @@
+OK tool kz-static 1a47abd05b8289bce90e6da8906d3b84d9bec48befc99634295d5350cd261086
+OK c1_pre_tx t8cf relations.txt same bytes
+OK c1_pre_tx t8cf keys.txt same bytes
+OK c1_pre_tx t8cf relations.log empty
+OK c1_pre_tx t8cf order.txt same bytes
+OK c1_pre_tx t8cf edges.tsv same bytes
+OK c1_pre_tx t8cf order.log empty
+OK c1_pre_tx final order.txt same bytes
+OK c1_pre_tx final edges.tsv same bytes
+OK c1_pre_tx final cdr.txt same bytes
+OK c1_pre_tx final relations.txt same bytes
+OK c1_pre_tx final keys.txt same bytes
+OK c1_pre_tx final relations.txt = the re-extraction's same bytes
+OK c1_pre_tx final order.log empty
+OK c1_pre_tx final relations.log empty
+OK c1_post_tx t8cf relations.txt same bytes
+OK c1_post_tx t8cf keys.txt same bytes
+OK c1_post_tx t8cf relations.log empty
+OK c1_post_tx t8cf order.txt same bytes
+OK c1_post_tx t8cf edges.tsv same bytes
+OK c1_post_tx t8cf order.log empty
+OK c1_post_tx final order.txt same bytes
+OK c1_post_tx final edges.tsv same bytes
+OK c1_post_tx final cdr.txt same bytes
+OK c1_post_tx final relations.txt same bytes
+OK c1_post_tx final keys.txt same bytes
+OK c1_post_tx final relations.txt = the re-extraction's same bytes
+OK c1_post_tx final order.log empty
+OK c1_post_tx final relations.log empty
+OK r2_core t8cf relations.txt same bytes
+OK r2_core t8cf keys.txt same bytes
+OK r2_core t8cf relations.log empty
+OK r2_core t8cf order.txt same bytes
+OK r2_core t8cf edges.tsv same bytes
+OK r2_core t8cf order.log empty
+OK r2_core final order.txt same bytes
+OK r2_core final edges.tsv same bytes
+OK r2_core final cdr.txt same bytes
+OK r2_core final relations.txt same bytes
+OK r2_core final keys.txt same bytes
+OK r2_core final relations.txt = the re-extraction's same bytes
+OK r2_core final order.log empty
+OK r2_core final relations.log empty
+OK c5_641 t8cf relations.txt same bytes
+OK c5_641 t8cf keys.txt same bytes
+OK c5_641 t8cf relations.log empty
+OK c5_641 t8cf order.txt same bytes
+OK c5_641 t8cf edges.tsv same bytes
+OK c5_641 t8cf order.log empty
+OK c5_641 final order.txt same bytes
+OK c5_641 final edges.tsv same bytes
+OK c5_641 final cdr.txt same bytes
+OK c5_641 final relations.txt same bytes
+OK c5_641 final keys.txt same bytes
+OK c5_641 final relations.txt = the re-extraction's same bytes
+OK c5_641 final order.log empty
+OK c5_641 final relations.log empty
+OK c5_642 t8cf relations.txt same bytes
+OK c5_642 t8cf keys.txt same bytes
+OK c5_642 t8cf relations.log empty
+OK c5_642 t8cf order.txt same bytes
+OK c5_642 t8cf edges.tsv same bytes
+OK c5_642 t8cf order.log empty
+OK c5_642 final order.txt same bytes
+OK c5_642 final edges.tsv same bytes
+OK c5_642 final cdr.txt same bytes
+OK c5_642 final relations.txt same bytes
+OK c5_642 final keys.txt same bytes
+OK c5_642 final relations.txt = the re-extraction's same bytes
+OK c5_642 final order.log empty
+OK c5_642 final relations.log empty
+prebuild_regress rc=0

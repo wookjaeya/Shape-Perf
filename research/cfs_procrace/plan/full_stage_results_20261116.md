@@ -1818,3 +1818,20 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 - **계획이 자료 파일의 절대 경로를 적는다**(site 의 `ref=` 와 sidecar 의 `lifetime`·`namespace-data` 줄). 다시 만들기는 같은 경로에서 바이트로 같았다. 주기의 연결 점검이 이 줄을 어떻게 견줄지는 그 단계의 선언에서 정한다.
 - `compare.sh parse_v4` 의 `head -1` 결함은 스크립트에 그대로 있다(선언과 함께 커밋된 스크립트라 고치지 않고 `parse_v4_full.sh` 를 더함). 다음 단계가 이 스크립트를 옮겨 쓸 때는 끝까지 읽는 쪽을 쓴다.
 - 앞 단계에서 넘어온 열린 것(의미 자료의 `lock-object` 역할, LOOP_DEFS 술어의 L1 인증, event type 의 등급, open 효과, c5 의 child without success, J?, 이름 결합의 구현)은 그대로다.
+
+## 12. 검토 뒤 고침 (둘째 묶음) (2026-11-18)
+
+§7–§11 의 검토가 확인한 지적(판정 규칙·자료 `rules-01`–`rules-08`, 빌드와 비교 `builds-01`–`builds-05`·`builds-07`–`builds-10`, 의미 `semantics-1`–`semantics-11`)을 고친다. 지적마다 무엇이 틀렸고 무엇을 바꿨고 무엇을 다시 돌렸는지는 §12.7 의 표에 둔다. 앞 절의 글은 지우지 않고, 고친 자리에 날짜 붙은 표시(“2026-11-18 검토 뒤 정정: §12.7 <id>”)를 단다. 기록: `../records/review-fixes-2-20261118/`. 출력: 저장소 밖 `/home/user/work/redesign/obs1/` 아래 새 디렉터리 `rf2_*`. cFS 를 부팅하지 않는다. 파생 빌드를 하지 않는다. push 하지 않는다. 이 묶음을 묶는 lead 의 판단(2026-11-18)은 §12.0 (다)에 옮겨 적는다.
+
+### 12.0 선언 [D]
+
+#### 12.0 (가) 빌드 전의 점검: 지금 도구의 기본 경로 회귀 (돌리기 전에 적고 커밋함)
+
+지금 MC 의 도구(kz-static `1a47abd05b8289bce90e6da8906d3b84d9bec48befc99634295d5350cd261086`, manifest 개정 4 단계의 빌드)만 쓰고 Kairos 를 빌드하지 않는다. 그 단계는 kz-static 을 바꾸고도(`9eb1395f` → `1a47abd0`, 커밋 `5011169` 가 `lib/llvm/plan_gen.{cpp,hpp}`·`tools/kz-static/{cmd_plan.cpp,main.cpp}` 를 고침) relations 와 order 의 기본 경로 회귀를 선언하지도 돌리지도 않았다(`builds-05`). 도구를 다시 덮기 전에 그 도구 자신의 기록을 남긴다.
+
+- 스크립트 `prebuild/prebuild_regress.sh`(이 선언과 함께 커밋), 공간 감시 아래(`env/tools/space_guard.sh`, 필요량 60,000,000: 출력 약 31 MB 와 여유). 새 출력 디렉터리 셋:
+  - `rf2_pre_relcheck/<b>`: T8CF facts(`/home/user/work/redesign/step2a/tests_8c_fix/<b>/NP/facts.kz`)의 `relations --keys`. 선언: `relations.txt`·`keys.txt` 가 `ll_relcheck/<b>` 의 것과 `cmp` 같음, `relations.log` 빈 파일.
+  - `rf2_pre_order/<b>`: 같은 facts 의 `order --edges`. 선언: `order.txt`·`edges.tsv` 가 `ll_order/<b>` 의 것과 `cmp` 같음, `order.log` 빈 파일.
+  - `rf2_pre_final_order/<b>`: 마지막 옵션 회차(`ll_final_extract/<b>/<b>/NP/facts.kz`)의 `order --edges --caller-dependent-report` 와 `relations --keys`. 선언: `order.txt`·`edges.tsv`·`cdr.txt`·`relations.txt`·`keys.txt` 가 `ll_final_order/<b>` 의 것과 `cmp` 같고, `relations.txt` 는 그 다시 뽑기의 것(`ll_final_extract/<b>/<b>/NP/relations.txt`)과도 같음, 로그 둘 빈 파일.
+- 선언: 도구 확인 1 줄과 다섯 빌드의 점검 14 씩, 모두 71 줄이 OK. 아래 밖의 차이는 결함이고, 결함이면 멈추고 까닭을 밝혀 새로 커밋한 덧붙임으로 선언하기 전에는 빌드로 가지 않는다. 다시 뽑기(`extract`)는 이 점검에 넣지 않는다: 빌드 뒤의 다섯 빌드 다시 뽑기가 `ll_off_extract`·`ll_final_extract` 와 견준다(§12.0 (나)).
+- 장부 행 `OBS_rf2_pre_relcheck`, `OBS_rf2_pre_order`, `OBS_rf2_pre_final_order`(sha256 목록은 기록 디렉터리).

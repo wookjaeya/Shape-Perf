@@ -1,0 +1,2 @@
+row A22 (relations line 664) use apps/sch_lab/fsw/src/sch_lab_app.c:176:16 -> OS_TimeBaseGetIdByName
+  branch (i): not established by this probe (the holder is a local or has no field: id holder: the lookup's arg 0 [&TimeBaseId] address base local <- OS_TimeBaseGetIdByName stores through its pa)

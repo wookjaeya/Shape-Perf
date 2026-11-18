@@ -1,0 +1,3 @@
+row A26 use cfe/modules/time/fsw/src/cfe_time_task.c:286:16 in CFE_TIME_TaskInit -> OS_TimeBaseGetIdByName; absence value -17; use call site ['35145'] (view line 22104)
+    frame cfe/modules/time/fsw/src/cfe_time_task.c:286:16 in CFE_TIME_TaskInit (call flags {result-used,result-tested}): effects of -17: fallthrough:complete 1, return-const:complete 1
+  alternatives [context CFE_TIME_TaskInit@cfe/modules/time/fsw/src/cfe_time_task.c:286:16]: not established (the value's effects end in CFE_TIME_TaskInit and the function returns to its caller: direct callers 1, flags {defined})

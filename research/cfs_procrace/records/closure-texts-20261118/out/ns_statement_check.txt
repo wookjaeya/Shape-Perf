@@ -1,0 +1,10 @@
+entry                                              | kind K value=1 at=a.h:2 source=a.c:3
+operation                                          |   create F def=a.c:9 at=a.c:10 public=yes
+REFUSED(is no statement of the namespace data)     |   rollback F def=a.c:9 at=a.c:14 status-arg=0 out-arg=2
+skipped (statement the reader does not use)        |   stored-name F at=a.c:11 extent=N element=char decl=a.h:5
+REFUSED(is no statement of the namespace data)     | layer-op clear init L_Init def=l.c:5 at=l.c:7 form=fill scope=table
+REFUSED(is no statement of the namespace data)     | layer-op clear slot L_Find def=l.c:20 at=l.c:31 form=assign scope=record
+REFUSED(is no statement of the namespace data)     | layer-op rollback L_FinNew def=l.c:40 at=l.c:52 status-param=0 out-param=2
+REFUSED(is no statement of the namespace data)     | layer-fn lookup L_Find2 def=l.c:60 kind-param=0
+operation                                          |   clear L_Init def=l.c:5 at=l.c:7
+skipped (statement the reader does not use)        | semantics-data 2

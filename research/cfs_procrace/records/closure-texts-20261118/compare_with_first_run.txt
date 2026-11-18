@@ -1,0 +1,31 @@
+# re-run outputs (out/) against the outputs of the first run of the same scripts (made before this step, not kept in the repository): file | result
+commands_rc.txt | no earlier file of this name
+open_reason_population.txt | no earlier file of this name
+p1_alternatives_c1_post_tx_A20.txt | byte-identical
+p1_alternatives_c1_post_tx_A21.txt | differs in 2 lines
+p1_alternatives_c1_pre_tx_A20.txt | byte-identical
+p1_alternatives_c1_pre_tx_A21.txt | differs in 2 lines
+p1_alternatives_c1_pre_tx_A22.txt | byte-identical
+p1_alternatives_c1_pre_tx_A26.txt | byte-identical
+p2_success_path_c1_post_tx.txt | byte-identical
+p2_success_path_c1_pre_tx.txt | byte-identical
+p3_buffer_writers_c1_post_tx.txt | differs in 2 lines
+p3_buffer_writers_c1_pre_tx.txt | differs in 2 lines
+p3b_name_entry_uses_c1_pre_tx.txt | byte-identical
+p4_branch_i_c1_post_tx_A20.txt | no earlier file of this name
+p4_branch_i_c1_post_tx_A21.txt | no earlier file of this name
+p4_branch_i_c1_pre_tx_A20.txt | no earlier file of this name
+p4_branch_i_c1_pre_tx_A21.txt | no earlier file of this name
+p4_branch_i_c1_pre_tx_A22.txt | no earlier file of this name
+p4_branch_i_c1_pre_tx_A26.txt | no earlier file of this name
+p5_pairs.txt | byte-identical
+p6_keys.txt | byte-identical
+p7_items_c1_post_tx.txt | byte-identical
+p7_items_c1_pre_tx.txt | byte-identical
+rel_post_A20.txt | byte-identical
+rel_post_A21.txt | byte-identical
+rel_pre_A20.txt | byte-identical
+rel_pre_A21.txt | byte-identical
+rel_pre_A22.txt | byte-identical
+rel_pre_A26.txt | differs in 78 lines
+rel_pre_A63.txt | differs in 1 lines

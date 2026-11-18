@@ -1,0 +1,4 @@
+# space_guard.sh kind=tool-copy need=220000000 floor=314572800 interval=2 cmd=cp /home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static <scratch>/closure_texts_work/bin/kz-static.1a47abd0
+start 2026-11-18T10:30:18.962Z free=1526853632 threshold=534572800
+sample 2026-11-18T10:30:18.974Z 1526849536
+end 2026-11-18T10:30:20.990Z kind=tool-copy verdict=completed rc=0 free=1312833536 lowest=1312833536 dip=214020096 change=-214020096

@@ -1,0 +1,66 @@
+# build c1_pre_tx; control rows planned 5; data: framework_namespaces_osal-f34759d.txt
+row A20 35f07539e7606e2e use callee OS_CountSemGetIdByName; consumer actors {BP_AppMain (script-entry)}; creator callees ['OS_CountSemCreate']; creator actors ['BP_AppMain (script-entry)', 'SCH_Lab_AppMain (script-entry)']
+   basis 1 same build           | data state: both                                           | needs the build-id records (runtime step); today the chain record says same_build unconfirmed
+   basis 2 ties                 | data state: both                                           | root sites in the plan for the consumer yes and the creators yes
+   basis 3 absence constant     | data state: both                                           | row absence line: value with a no-match chain, reached
+   basis 4 creator success      | data state: both                                           | OS_CountSemCreate: static line HELD (probe P2)
+   basis 5 key texts            | data state: both                                           | plan sites of this row: key-text 2, creator-call 4, use-call 2
+   basis 6 create after use     | data state: both                                           | decided by the record (times of the two calls)
+   (ga) name-space entry        | data state: both                                           | entry OS_OBJECT_TYPE_OS_COUNTSEM (data line 55) has the lookup OS_CountSemGetIdByName and the create ['OS_CountSemCreate']
+   (na) comparison semantics    | data state: state 2 only                                   | the comparison's C library call is in the row's layers line: P0-unverified(dlsym, strcmp)
+   (na) bound                   | data state: both, after the plan carries the extent value  | stored-name entry of the kind: yes
+   (da) no other name mapping   | data state: state 2 only, and with the buffer-escape rule  | buffer field row of probe P3: per-field=DISABLED, copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0
+   (ra) same kind               | data state: both                                           | static half: partition line says it selects the table; run half: lookup-side value at the key-text site of the lookup API; create-side value: no site today
+   (ma) no delete between       | data state: both                                           | object-delete need: planned
+row A21 17975444d83f6589 use callee OS_CountSemGetIdByName; consumer actors {CF_AppMain (script-entry)}; creator callees ['OS_CountSemCreate']; creator actors ['BP_AppMain (script-entry)', 'SCH_Lab_AppMain (script-entry)']
+   basis 1 same build           | data state: both                                           | needs the build-id records (runtime step); today the chain record says same_build unconfirmed
+   basis 2 ties                 | data state: both                                           | root sites in the plan for the consumer yes and the creators yes
+   basis 3 absence constant     | data state: both                                           | row absence line: value with a no-match chain, reached
+   basis 4 creator success      | data state: both                                           | OS_CountSemCreate: static line HELD (probe P2)
+   basis 5 key texts            | data state: both                                           | plan sites of this row: key-text 2, creator-call 4, use-call 2
+   basis 6 create after use     | data state: both                                           | decided by the record (times of the two calls)
+   (ga) name-space entry        | data state: both                                           | entry OS_OBJECT_TYPE_OS_COUNTSEM (data line 55) has the lookup OS_CountSemGetIdByName and the create ['OS_CountSemCreate']
+   (na) comparison semantics    | data state: state 2 only                                   | the comparison's C library call is in the row's layers line: P0-unverified(abort, dlsym, pthread_exit, strcmp)
+   (na) bound                   | data state: both, after the plan carries the extent value  | stored-name entry of the kind: yes
+   (da) no other name mapping   | data state: state 2 only, and with the buffer-escape rule  | buffer field row of probe P3: per-field=DISABLED, copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0
+   (ra) same kind               | data state: both                                           | static half: partition line says it selects the table; run half: lookup-side value at the key-text site of the lookup API; create-side value: no site today
+   (ma) no delete between       | data state: both                                           | object-delete need: planned
+row A22 f371687b47120887 use callee OS_TimeBaseGetIdByName; consumer actors {SCH_Lab_AppMain (script-entry)}; creator callees ['OS_TimeBaseCreate']; creator actors ['main (process)']
+   basis 1 same build           | data state: both                                           | needs the build-id records (runtime step); today the chain record says same_build unconfirmed
+   basis 2 ties                 | data state: both                                           | root sites in the plan for the consumer yes and the creators yes
+   basis 3 absence constant     | data state: both                                           | row absence line: value with a no-match chain, reached
+   basis 4 creator success      | data state: both                                           | OS_TimeBaseCreate: static line MISSING (probe P2)
+   basis 5 key texts            | data state: both                                           | plan sites of this row: key-text 2, creator-call 2, use-call 2
+   basis 6 create after use     | data state: both                                           | decided by the record (times of the two calls)
+   (ga) name-space entry        | data state: both                                           | NO entry names the lookup OS_TimeBaseGetIdByName
+   (na) comparison semantics    | data state: state 2 only                                   | the comparison's C library call is in the row's layers line: P0-unverified(dlsym, strcmp)
+   (na) bound                   | data state: both, after the plan carries the extent value  | stored-name entry of the kind: NO
+   (da) no other name mapping   | data state: state 2 only, and with the buffer-escape rule  | no stored-name entry for the row's kind
+   (ra) same kind               | data state: both                                           | static half: partition line says it selects the table; run half: lookup-side value at the key-text site of the lookup API; create-side value: no site today
+   (ma) no delete between       | data state: both                                           | object-delete need: not-planned
+row A26 ad9fc1058923aad9 use callee OS_TimeBaseGetIdByName; consumer actors {CFE_TIME_TaskMain (table-image-entry)}; creator callees ['OS_TimeBaseCreate']; creator actors ['main (process)']
+   basis 1 same build           | data state: both                                           | needs the build-id records (runtime step); today the chain record says same_build unconfirmed
+   basis 2 ties                 | data state: both                                           | root sites in the plan for the consumer yes and the creators yes
+   basis 3 absence constant     | data state: both                                           | row absence line: value with a no-match chain, reached
+   basis 4 creator success      | data state: both                                           | OS_TimeBaseCreate: static line MISSING (probe P2)
+   basis 5 key texts            | data state: both                                           | plan sites of this row: key-text 2, creator-call 2, use-call 2
+   basis 6 create after use     | data state: both                                           | decided by the record (times of the two calls)
+   (ga) name-space entry        | data state: both                                           | NO entry names the lookup OS_TimeBaseGetIdByName
+   (na) comparison semantics    | data state: state 2 only                                   | the comparison's C library call is in the row's layers line: P0-unverified(strcmp)
+   (na) bound                   | data state: both, after the plan carries the extent value  | stored-name entry of the kind: NO
+   (da) no other name mapping   | data state: state 2 only, and with the buffer-escape rule  | no stored-name entry for the row's kind
+   (ra) same kind               | data state: both                                           | static half: partition line says it selects the table; run half: lookup-side value at the key-text site of the lookup API; create-side value: no site today
+   (ma) no delete between       | data state: both                                           | object-delete need: not-planned
+row A63 b881269bea290f8b use callee OS_FileOpenCheck; consumer actors {}; creator callees ['OS_mv']; creator actors ['']
+   basis 1 same build           | data state: both                                           | needs the build-id records (runtime step); today the chain record says same_build unconfirmed
+   basis 2 ties                 | data state: both                                           | root sites in the plan for the consumer NO (no actor root reaches the use) and the creators yes
+   basis 3 absence constant     | data state: both                                           | row absence line: NOT evaluated (absence: unevaluated (the lookup's no-match value is not est)
+   basis 4 creator success      | data state: both                                           | OS_mv: static line MISSING (probe P2)
+   basis 5 key texts            | data state: both                                           | plan sites of this row: key-text 1, creator-call 2, use-call 2
+   basis 6 create after use     | data state: both                                           | decided by the record (times of the two calls)
+   (ga) name-space entry        | data state: both                                           | NO entry names the lookup OS_FileOpenCheck
+   (na) comparison semantics    | data state: state 2 only                                   | the comparison's C library call is in the row's layers line: P0-unverified(strcmp)
+   (na) bound                   | data state: both, after the plan carries the extent value  | stored-name entry of the kind: NO
+   (da) no other name mapping   | data state: state 2 only, and with the buffer-escape rule  | no stored-name entry for the row's kind
+   (ra) same kind               | data state: both                                           | static half: NO partition line that selects the table; run half: lookup-side value at the key-text site of the lookup API; create-side value: no site today
+   (ma) no delete between       | data state: both                                           | object-delete need: not-planned

@@ -1,0 +1,15 @@
+start 2026-11-18T10:25:16Z free 1462460416
+REMOVED orderrev1_relcheck (OBS_orderrev1_relcheck): 15 files 7564932 bytes, same as relrev7_check (OBS_relrev7_check) by diff -rq just before; free 1462456320 -> 1470062592
+REMOVED orderrev1b_relcheck (OBS_orderrev1b_relcheck): 15 files 7564932 bytes, same as relrev7_check (OBS_relrev7_check) by diff -rq just before; free 1470062592 -> 1477668864
+REMOVED schema12_relcheck (OBS_schema12_relcheck): 15 files 7564932 bytes, same as relrev7_check (OBS_relrev7_check) by diff -rq just before; free 1477668864 -> 1485275136
+REMOVED schema12_order (OBS_schema12_order): 15 files 7758336 bytes, same as order_rev1b (OBS_orderrev1b_order) by diff -rq just before; free 1485275136 -> 1493078016
+REMOVED objacc_relcheck (OBS_objacc_relcheck): 15 files 7630029 bytes, same as revfix_relcheck (OBS_revfix_relcheck) by diff -rq just before; free 1493078016 -> 1500749824
+REMOVED objacc_order (OBS_objacc_order): 15 files 7058482 bytes, same as revfix_order (OBS_revfix_order) by diff -rq just before; free 1500749824 -> 1507852288
+REMOVED sem_relcheck (OBS_sem_relcheck): 15 files 7630029 bytes, same as revfix_relcheck (OBS_revfix_relcheck) by diff -rq just before; free 1507852288 -> 1515524096
+REMOVED sem_order (OBS_sem_order): 15 files 7058482 bytes, same as revfix_order (OBS_revfix_order) by diff -rq just before; free 1515524096 -> 1522626560
+REMOVED rf_relcheck (OBS_rf_relcheck): 15 files 7630029 bytes, same as revfix_relcheck (OBS_revfix_relcheck) by diff -rq just before; free 1522626560 -> 1530298368
+REMOVED rf_order (OBS_rf_order): 15 files 7058482 bytes, same as revfix_order (OBS_revfix_order) by diff -rq just before; free 1530298368 -> 1537400832
+REMOVED ll_relcheck (OBS_ll_relcheck): 15 files 7630029 bytes, same as revfix_relcheck (OBS_revfix_relcheck) by diff -rq just before; free 1537400832 -> 1545072640
+REMOVED ll_order (OBS_ll_order): 15 files 7058482 bytes, same as revfix_order (OBS_revfix_order) by diff -rq just before; free 1545072640 -> 1552175104
+end 2026-11-18T10:25:16Z free 1552175104 (change 89714688)
+reclaim: 12 eligible, 12 removed, 0 failing

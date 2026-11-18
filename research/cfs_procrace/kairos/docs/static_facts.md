@@ -809,6 +809,89 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 **order rules revision 5**(모든 facts) — 대기의 awaited 필드는 술어가 스스로 읽는 필드다: 술어가 결과를 시험하는 호출의 인자 아래와 `addr` 아래의 필드는 awaited 가 아니다(out 인자나 열쇠이지 기다리는 값이 아님; `awaited:` 줄에 `not awaited, under the arguments …` 로 적음; 그런 필드뿐이면 `awaited: not named: the predicate reads no field of its own (…)`). awaited 필드의 writer 는 기다리는 스레드마다 센다: 쓰기의 스레드는 자기 아닌 모든 기다리는 스레드의 writer 다(앞판은 writer 의 스레드가 기다리는 스레드들 가운데 하나이기만 하면 모두에게서 뺐다: 시작할 때 스스로 기다리는 응용 스레드가 자식의 레코드를 쓰는 경우 그 writer 가 사라졌다). HB-await 간선은 (writer 스레드, 기다리는 스레드) 짝마다이고 hard 조건의 “writer 하나” 도 그 스레드의 writer 수로 본다. writer 스레드가 기다리는 스레드이기도 하면 `awaited:` 줄이 `writers N (a writer thread is itself a waiting thread: for each waiting thread the writers in another thread: …)` 꼴이다. 행위자는 entry 함수로 구분하므로 같은 entry 의 다른 스레드 인스턴스는 가르지 못한다(기다리는 행위자가 하나뿐일 때 그 행위자의 쓰기는 뺌).
 **order rules revision 6**(RESULT_FLOW 가 있을 때): `not-computed` guard 는 아무것도 정하지 않는다. **order rules revision 7**(LOOP_DEFS 가 있을 때): 위 revision 5 의 두 규칙이 LOOP_DEFS 술어에도 적용된다.
 
+## 5x. 다음 개정의 출력 형식: relations rules revision 14, order rules revision 8 의 쌍 파일 (2026-11-18; 글만, 그것을 내는 코드보다 먼저 커밋함) [D]
+
+이 절은 형식이다. 아래 줄을 내는 코드는 아직 없고, MC 의 kz-static 은 이 절을 구현하지 않는다. 뒤의 kz-static 빌드가 이 형식대로 내고, 그 선언이 앞판 출력과의 차이를 줄 종류마다 적는다. 이 줄을 읽는 것은 판정 규칙 8.13(`plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md`)과 설명 스크립트 개정 4 다. 형식을 바꿔야 하면 이 절을 먼저 고쳐 커밋한다. 스키마(`include/`)는 바뀌지 않는다. 함수·필드·사례 이름은 어느 규칙에도 없다. `<…>` 는 자리, `|` 는 택일이다.
+
+**머리의 도구 줄(relations 와 order 의 글 출력, 쌍 파일).** `rules` 줄 바로 뒤에 한 줄:
+
+```
+tool kz-static tool_sha256=<64 hex> tool_source=<64 hex>
+```
+
+계획 sidecar 의 `generator` 줄과 같은 두 값이다. 읽는 쪽은 relations 글, 쌍 파일, sidecar 의 `tool_sha256` 이 서로 같은지 본다. 이 줄 때문에 같은 사실의 글이 도구마다 한 줄 다르다(선언할 차이).
+
+**사용 지점 키의 글(§5l 에 더함).** 묶음 루트 밖에 정의된 내부 연결 함수·객체의 위치는 키 글에서 절대 경로 대신 소스 트리 토큰으로 쓴다: `<tree>/<트리 안 경로>`, 형 이름이 이미 쓰는 토큰이다(§5s). 토큰은 추출 때 파일 시스템에서 정해지므로 사실이 그것을 싣는다: BASIS 항목 `source_tree[i] = <기록된 디렉터리> <토큰>`(옵션 `--object-access` 아래에서만). 그러므로 **빌드 사이의 행 정체성은 옵션을 켠 사실의 키에서만 쓴다.** 옵션 없는 사실의 relations 는 앞판의 키 글을 그대로 내고, 그 키는 빌드 사이의 행 대응에 쓰지 않는다. 사실 안의 함수 이름은 바뀌지 않는다. 앞 도구의 사실에서 잰 것 [예비: 연구 `records/closure-texts-20261118/out/p6_keys.txt`]: 키 글에 절대 위치가 든 키는 c1_pre_tx 3, c1_post_tx 3, 나머지 세 빌드 0.
+
+**relations rules revision 14** (RESULT_FLOW·RESULT_EFFECT·OBJECT_ACCESS 가 있는 사실에서; 없는 사실은 앞판의 바이트에 도구 줄만 더함). 모든 줄은 더하는 줄이고, 있는 줄은 키와 머리 말고 바뀌지 않는다.
+
+1. 경로 A 행, 생성자 callee 마다 한 줄:
+
+   ```
+   callee-check (success path): <callee>: held: success value <v> [outcome class rule]; carried by <n> alternative(s): <위치> alt <i>/<m> = <기원> under <조건>; ...; excluded: <위치> alt <i>/<m> <constant <c> | its own branch <조건>>; ...; name store <위치> [<Type.field>] implied by the carrying condition; out-id store <위치> in <함수> through parameter <k> (PARAM_FLOW out-store) under <조건>, parameter non-null on the path; stored value: <정의> at <위치>, the only definition that reaches the store under <조건>
+   callee-check (success path): <callee>: missing(<까닭>): <보인 데까지의 같은 항들>
+   ```
+
+   까닭의 글: `the returns are not all followed`, `a second origin can carry the value`, `no name store on a carrying path`, `no out-id store on a carrying path`, `the stored value is not tied to the success path`, `an implication between conditions is not decided`. 조건 사이의 관계는 조건 나무의 함의로 본다(같은 글인지가 아니다; guard 의 `top` 항과 `@addr-taken` 항은 모르는 값, §5w). out-id 저장은 callee 사슬의 PARAM_FLOW `out-store` 행에서 읽는다. 개정 9 의 `callee-check (set)`·`(returns not followed)` 줄과 개정 10 의 `(result flow)` 줄은 그대로 둔다. 머리에 `summary success path: creator callees <n>: held <h>; missing <m> (<까닭> <수>; ...)`.
+
+2. 경로 A 행, `absence:` 줄 뒤에 한 줄:
+
+   ```
+   absence origins: <값> [<상수 이름>]: <n> origin(s): <함수> at <위치> when <조건> [search no-match]; <함수> at <위치> when <조건> [other]; ...
+   ```
+
+   조회 사슬의 함수들에서 그 값을 내는 RET_CONSTS 행 모두다. `[search no-match]` 는 `absence:` 줄의 사슬이 끝나는 검색의 것.
+
+3. 경로 A·B 행, 조회의 `id holder:` 줄 뒤에 한 줄:
+
+   ```
+   holder: <field <Type.field> | local <이름> in <함수>>; writers <n>: own out store <위치>; clearing <위치> in <함수> value=<상수> [<fill | assign>]; other definition <위치> in <함수> value=<값 종류>; ...; FIELD_STATUS per-field=<상태> type-level=<상태>[: <막은 까닭과 위치>]; readers <m>: <함수> at <위치>: <tests the cleared value before the dependent use at <위치> | uses the value without such a test | not decided: <까닭>>; ...
+   ```
+
+   writer 는 WRITERS 의 행 모두다(지우는 저장을 빼지 않는다). 값 종류는 WRITERS 의 `value=` 다(`const`, `symbolic`, `top`). "지운 값"은 `clearing` 줄들의 상수다. reader 의 가름은 그 reader 함수 안에서 그 필드의 값(또는 그것을 인자로 받은 호출의 결과)을 시험하는 분기가 의존하는 쓰임을 지배하는지를 RESULT_FLOW·READS 의 guard 로 본 것이다. 지역 holder 는 FIELD_STATUS 자리에 `local: definitions <n> (RESULT_FLOW)` 를 적는다.
+
+4. 경로 A·B 행, 부재 값의 효과를 걷는 호출 사슬(문맥)마다 한 줄:
+
+   ```
+   alternatives [context <k>: <root 함수>@<호출 위치> <- ... <- <사용의 함수>@<사용 위치>]: none found (exploration complete) | found: <retry | creation in the same name space and partition by the same function | another path>: <위치와 줄> | not established (<까닭>); rests on: <P0-unverified(...) sem-unverified(...) | none>; premises: <글; ... | none>; decided calls: <호출 위치> result <r> by the stored-field rule (store <위치> := <c>) | none
+   ```
+
+   문맥의 차례는 사실의 호출 site 차례다. `rests on` 은 그 문맥의 결론이 기대는 미대조 항목(끝의 종료 호출의 P0 항목과 프레임워크 항목을 포함), `premises` 는 사실로 보이지 못해 적어 둔 것(필드 단위 규칙만 선 완전성, 다른 행위자의 writer 없음 등)이다. 필드 저장값으로 호출 결과를 정하는 규칙은 판정 규칙 8.13 의 17번 그대로이고, "저장과 호출 사이"는 함수의 제어 흐름 사실의 경로 조건으로 본다. 다른 상수로 바꿔 돌려주는 틀(`return-const`)은 따라간다. 머리에 한 줄:
+
+   ```
+   rules with decided call results: relations rules revision 14 (...): open effects by reason: <까닭> <수>; ...; call sites decided by the stored-field rule <n> (rows <m>)
+   ```
+
+5. 이름 공간 블록, 종류(partition 값)마다:
+
+   ```
+   stored-name buffer [partition <v>]: <Type.field> extent <n>; writers <w>: create copy <위치> in <함수>; clear <위치> in <함수> [fill <c>]; other <위치> in <함수> value=<값 종류>; ...; FIELD_STATUS per-field=<상태> type-level=<상태>; causes: <cause>: discharged (<사실과 수>) | not discharged; ...; address uses <u>: <callee> parameter <k> at <위치> [body: followed, <그 안의 쓰임> | library: <항목의 상태> | no body]; ...; complete | not complete (<까닭>)
+   lifetime end [partition <v>]: clear-slot <위치> in <함수>: free-record condition shown (<조건>; <줄들>) | not shown (<까닭>)
+   ```
+
+   버퍼 필드는 이름 포인터 필드에 저장되는 주소의 배열 필드다(WRITERS 의 그 저장의 값). `causes` 는 그 필드의 FIELD_STATUS 가 `DISABLED` 인 원인 깃발 하나하나다(`array-element-stores-not-collected`, 주소 탈출, 형 없는 쓰기 등, §5h·§5s). `complete` 는 FIELD_STATUS 가 완전하고 writer 가 생성의 복사와 지우기뿐이며 주소의 쓰임이 모두 적혔을 때만 쓴다. 원인을 모두 풀었으나 FIELD_STATUS 가 `DISABLED` 면 `not complete (FIELD_STATUS disabled; every cause discharged)` 다. 이름 포인터 필드의 writer 줄(개정 7)은 그 writer 의 함수가 속한 종류로 나눈 `writers [partition <v>]:` 줄을 더한다.
+
+**order rules revision 8: 완전한 쌍 파일.** `kz-static order <facts> [-o OUT] [--edges TSV] --pairs FILE`. 글 출력과 `edges.tsv` 는 도구 줄 말고 바뀌지 않는다(글의 `listing:` 줄의 인쇄 한도도 그대로). 쌍 파일은 탭으로 나눈 글이고 줄 수 한도가 없다:
+
+```
+kz-order-pairs 1
+facts <64 hex>
+tool kz-static tool_sha256=<64 hex> tool_source=<64 hex>
+relations <relations 의 rules 줄들을 "; " 로 이은 것>
+order <order 의 rules 줄들을 "; " 로 이은 것>
+domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create; writers of path B and C); a pair in one thread has the value same_thread
+columns row_key<TAB>path<TAB>use_pos<TAB>use_function<TAB>use_root<TAB>other_kind<TAB>other_pos<TAB>other_function<TAB>other_root<TAB>value<TAB>edges<TAB>premises<TAB>row_line
+<쌍마다 한 줄>
+rows <행 수> pairs <쌍 수> hard_before <n> conditional_before <n> fixed_early_proved <n> fixed_early_candidate <n> unordered <n> unknown <n> same_thread <n> no_pair <n>
+end
+```
+
+- `row_key`: 사용 지점 키(§5l). `use_root`·`other_root`: 행위자의 뿌리 함수와 그 종류(`script-entry`, `process`, …)를 글 출력과 같은 글로. `other_kind`: `creator`, `creator-not-a-pair(key constants differ)`, `creator-not-a-pair(probe-create)`, `writer`. `row_line`: 그 생성자·writer 를 이름 댄 relations 글의 줄 종류.
+- `value`: `hard_before`, `conditional_before`, `fixed_early_proved`, `fixed_early_candidate`, `unordered`, `unknown(<까닭>)`, `same_thread`. 글 출력의 값과 같은 뜻이고 `same_thread` 만 새 값이다: 두 위치의 뿌리가 같은 스레드다(이 개정은 한 스레드 안의 차례를 값으로 말하지 않는다). 뿌리가 여럿인 사용·생성자는 (사용 뿌리, 다른 쪽 뿌리) 짝마다 한 줄이다.
+- `edges`: 그 값을 준 경로의 간선 id 들(`edges.tsv` 의 id, 쉼표; 없으면 `-`). `premises`: 그 간선들의 전제(`; `; 없으면 `-`).
+- 생성자도 writer 도 이름 붙지 않은 행은 `other_kind` 부터 `-` 이고 `value` 가 `no_pair(<까닭>)` 인 한 줄이다. 그래서 모든 행이 파일에 있다.
+- 읽는 쪽의 점검: `facts` 가 계획의 facts 와, `tool_sha256` 이 relations 머리와 같다; 글 출력에 적힌 `pair:` 줄마다 쌍 파일에 같은 값의 줄이 있다; 꼬리 줄의 수가 줄 수와 같다. 영역 안의 쌍에 줄이 없으면 파일이 완전하지 않은 것이다. 앞 도구의 글 출력에서 잰 것 [예비: `records/closure-texts-20261118/out/p5_pairs.txt`]: 쌍 24,796 / 24,796 / 8,739 / 4,406 / 4,395(다섯 빌드, `pairs:` 줄의 합; 다른 스레드의 생성자·writer 만), 적힌 `pair:` 줄 1,988 / 1,988 / 1,607 / 631 / 620.
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).

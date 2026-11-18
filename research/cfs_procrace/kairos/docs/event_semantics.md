@@ -503,3 +503,49 @@ CMake에 `KZ_RT_OSAL_INCLUDE_DIRS`·`KZ_RT_OSAL_LIBS`를 줄 때만 빌드한다
 - **재생 출력.** `record end: recovered from the runtime's store after the process ended (signal N): …` 한 줄이 붙는다. 프로세스 안의 1.4 dump는 `record end: the process's own dump (in-process)`다. 끝이 기록되지 않은 기록(F0, 1.3 이하)에는 줄이 없다. 그래서 보존 기록의 출력은 바뀌지 않는다.
 - **시험.** `tests/cfs-free/test_kzrt_recovered.cpp`(도구 시험 값). 이 문서 §12.5의 `rt_end_kill`·`rt_end_segv`·`rt_end_normal`이 남긴 dump를 읽는다. 회수 dump `rt_end_normal.rec.kzrt`를 남기도록 `test_rt_end.c`의 거부 시험 출력 경로를 따로 두었다(검사 내용은 같음). 결과는 `schema.md` §14.1에 적었다 [M].
 - **남은 것** [U]: cFS 실행의 회수 기록은 아직 없다(§12.6).
+
+## 13. dump 형식 1.5 의 글 줄과 같은 빌드 줄 (2026-11-18; 형식만, 그것을 쓰고 읽는 코드보다 먼저 커밋함) [D]
+
+이 절은 형식이다. 런타임은 아직 `kzrt 0.4.0`·dump 1.4 이고 아래 레코드를 쓰지 않는다. 뒤의 런타임 단계가 dump 형식의 부번호를 **한 번** 올리며(1.5) 아래 두 묶음을 함께 정한다: build-id 레코드(쓰는 쪽과 읽는 쪽을 모두 짓는다)와 생성 토큰 레코드 종류 셋(종류와 글 줄을 예약하고 읽는 쪽만 짓는다; 쓰는 쪽은 이 주기에 짓지 않는다). 레코드의 바이트 배치와 종류 번호는 그 단계의 선언이 정하고, **글 줄은 여기서 정한다**: 설명 스크립트 개정 4 와 연결 점검이 읽는 것은 `kz-rt-dump` 의 글이다. 형식을 바꿔야 하면 이 절을 먼저 고쳐 커밋한다. 그 단계는 `kairos/include/`·`cmake/`·최상위 빌드 파일을 바꾸지 않는다(바꾸면 kz-static 의 정체성이 따라 바뀐다): 중립 층에는 이미 있는 `build_id` 칸(`include/kz/schema/kz_neutral.h` 의 NBUILD)에 싣고, 같은 빌드의 판정은 연결 점검 스크립트에 둔다.
+
+### 13.1 build-id 레코드의 글 줄
+
+```
+buildid object=<main|module:<모듈 번호>> path="<적재기가 준 경로>" build_id=<소문자 16진|-> note=<present|absent|unreadable> source=<start|registration> actor=<행위자|-> t=<ns>
+```
+
+- `object=main` 은 주 실행 파일이고 실행의 시작 때 한 번 적는다(`source=start`). `object=module:<n>` 은 모듈 등록(`kz_rt_module`) 때 그 등록 호출이 든 적재 객체다(`source=registration`): 등록 호출의 인자 주소가 든 객체를 적재기의 프로그램 머리 훑기로 찾는다 [I: 방식은 런타임 단계가 시험으로 보인다]. 한 (모듈, 객체)에 한 줄이다.
+- `build_id` 는 그 객체의 GNU build-id note 의 바이트다. note 가 없으면 `build_id=- note=absent`, 읽지 못하면 `note=unreadable` 이고, 손실 줄 `loss no-build-id actor=- key=<모듈 번호 또는 0> count=<n>` 이 함께 센다(새 손실 종류의 글 이름 `no-build-id`).
+- `buildid` 줄은 `run`·`runx` 줄 뒤, `module` 줄들 가까이에 `main` 을 먼저 낸다. 지금의 연결 점검은 글에서 첫 `build_id=` 를 읽으므로(`env/tools/chain_check.py`), 칸 이름을 `build_id` 로 둔다.
+- 1.4 까지의 dump 에는 이 줄이 없다. 읽는 쪽은 그것을 "build-id 레코드 없음"으로 적고 값을 지어내지 않는다.
+
+### 13.2 예약하는 생성 토큰 레코드의 글 줄
+
+스레드 생성 호출과 만들어진 스레드의 첫 사건을 잇는 토큰이다(판정 규칙 3.2 축 1 의 `link.actor_token`; manifest 개정 4 의 `spawn` 문과 `identity … decoder=spawn-token`, `docs/plan_manifest.md` 8절).
+
+```
+tok-create actor=<행위자> aseq=<n> token=<10진 u64> site=<site> t=<ns>
+tok-return actor=<행위자> aseq=<n> token=<10진 u64> status=<10진 s64> handle=0x<16진> t=<ns>
+tok-start actor=<행위자> aseq=<n> token=<10진 u64> t=<ns>
+```
+
+- `tok-create`: 생성 호출의 at-call 에서 만드는 쪽이 토큰을 낸 것. `tok-return`: 그 호출의 반환(상태와 스레드 핸들). `tok-start`: 만들어진 스레드의 첫 사건이 같은 토큰을 실은 것.
+- 이 주기의 런타임은 이 셋을 쓰지 않는다. 그래서 이 주기의 dump 에는 이 줄이 0 줄이고, 생성 토큰이 없다는 사유(`link_unlinked(no creation token)`)는 그대로 남는다. 읽는 쪽(`kz-rt-dump`, 복호기)은 합성 dump 로 세 종류를 읽고 위 글로 찍는 것을 시험한다. 토큰의 결합(`kz convert`)은 짓지 않는다.
+- 예약의 뜻: 쓰는 쪽을 뒤에 지어도 부번호를 다시 올리지 않고 글을 읽는 스크립트를 바꾸지 않는다.
+
+### 13.3 형식 줄과 옛 dump
+
+`format kzrt-dump <major>.<minor> …` 줄은 그대로다. 1.5 의 읽는 쪽은 1.0–1.4 의 dump 를 앞판과 같은 글로 찍는다(`buildid`·`tok-*` 줄이 없을 뿐). 모르는 레코드 종류는 지금처럼 `unknown=` 수로 센다.
+
+### 13.4 연결 점검의 같은 빌드 줄
+
+`env/tools/chain_check.py` 의 `same_build` 는 지금 한 줄이고 늘 `unconfirmed(no build-id in dump)` 다. 다음 판은 객체마다 한 줄과 요약 한 줄을 낸다(탭으로 나눈 세 칸은 지금과 같다):
+
+```
+same_build_object<TAB><confirmed|refused|unconfirmed(<까닭>)><TAB><main|module:<n>> path=<경로> tree=<16진|not read> dump=<16진|none>
+same_build<TAB><confirmed|refused|unconfirmed(<까닭>)><TAB><m> objects: confirmed <a>, refused <b>, unconfirmed <c>
+```
+
+- 객체 줄: dump 의 `buildid` 줄의 값과, 빌드 트리의 같은 파일에서 `readelf -n` 으로 읽은 값이 같으면 `confirmed`, 다르면 `refused`. 까닭의 글: `no build-id in dump`(1.4 까지의 dump, 또는 그 객체의 줄이 없음), `no build-id note`(`note=absent|unreadable`), `no build-id in the build tree`, `object not in the build record`.
+- 요약 줄: 모든 객체가 `confirmed` 일 때만 `confirmed`; 하나라도 `refused` 면 `refused`; 아니면 `unconfirmed(<첫 까닭>)`. 객체가 없으면 `unconfirmed(no build-id in dump)`.
+- 사슬의 판정(`chain` 줄)은 지금처럼 `same_build` 를 넣지 않고 따로 낸다. **부팅의 문에도 넣지 않는다**: 같은 빌드는 쌍마다 기초 1 로 평가한다(판정 규칙 8.13 의 6번). 설명 스크립트는 쌍의 두 사건의 site 가 든 객체의 `same_build_object` 줄을 읽는다.

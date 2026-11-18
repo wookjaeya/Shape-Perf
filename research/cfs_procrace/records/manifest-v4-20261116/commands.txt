@@ -24,3 +24,18 @@ build_record pre rc=0
 /dev/vda       270553174016 39725060096 1597448192  97% /
 make kz-static rc=0
 make all rc=0
+## 3. after the session stop: the build tree checked, records after the build (2026-11-18T04:17Z); HEAD 3c7391a (kairos/ as in 5011169)
+(the session stopped after "make all rc=0"; nothing after the build had been run; the build is not run again)
+make -q all (under the guard, df_make_question.log) rc=1; make -n all > make_dryrun_after_build.log rc=0: 0 compile lines, 0 link lines (the one command besides echo and depend lines: cmake -P VerifyGlobs.cmake)
+build_start.txt (the start time of section 2); relink_result.txt: 50 declared to relink, changed 16 (the 11 the declaration says must change among them), 34 relinked to the same bytes, 0 older than the build start; not_relink 74 OK
+build_record post rc=0 (post_mc.txt); kz-static --identity -> identity_kz-static.txt; kz --identity -> identity_kz_post.txt
+records/TOOLS.tsv: the four overwritten tools' rows to copy (kz-static 9eb1395f, kz 913fcd99, kz-instr-clang 28db4017, kz-rt-dump 4390d4f1), four new rows in-place (kz-static 1a47abd0, kz fd40bc4d, kz-rt-dump 40e23d4d, kz-instr-clang 36becd04)
+tools after build rc=0 (tools_check_after_build.txt: 49 rows, 0 failing, deep; df_tools_check_after_build.log)
+ledger after build rc=0 (ledger_check_after_build.txt: 124 rows, 0 failing)
+ctest first rc=8 (ctest -V > ctest_first.log; 268 tests, 1 failed: test_static_plan, the declared one; df_ctest_first.log)
+golden update rc=0 (KZ_GOLDEN_UPDATE=1 ctest -V -R '^test_static_plan$' > golden_update.log)
+GOLDEN_SAME_AS_SCRATCH (cmp with <scratch>/mv/gkeep/planv4_np.plan.golden; sha256sum -c golden_scratch.sha256 OK; git status: no other file under kairos changed)
+ctest full rc=0 (ctest -V > ctest_full.log; 268 tests, 0 failed, 1 skipped; counts in ctest_counts.log)
+run_unit rc=0 (unit_tools.txt: 17 of 17; TMPDIR in <scratch>)
+step2a unit rc=0 (unit_step2a.txt: 7 of 7)
+sha256 of declared_addendum_1.txt: e17088e9a096ce5d198e8837e2bd857d5134b0147b3843b070d454c1779a2de9 (addendum 1: the session stop, the order of the runs, the added per-path measurement measure_paths.py / measure_paths.sh, the ledger rows; committed before any plan of this step is generated)

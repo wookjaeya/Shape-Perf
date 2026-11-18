@@ -22,3 +22,10 @@ runs.  Text records only.  No cFS boot, no derived build, no plugin build.  No p
 | `tool_copy/` | the copies' round trip before the tools are overwritten |
 | `tools_check_pre.txt`, `ledger_check_pre.txt` | the registry and the cumulative list before the build |
 | `scratch_guard/` | the space guard logs of the scratch check build and its runs |
+| `declared_addendum_1.txt` | addendum 1 of the declaration (results 11.0.1): the session stop on 2026-11-17, the order of the runs, the added per-path measurement, the ledger rows; committed before any plan of this step was generated |
+| `measure_paths.py`, `measure_paths.sh` | the added measurement: per path (A, B, C) the relation rows, the rows planned by the tier order, by the control selection, by neither (grouped by reason, tier, disposition and label), and the labels and tiers of every row |
+| `pre_mc.txt`, `post_mc.txt`, `build_start.txt`, `identity_kz_pre.txt`, `identity_kz-static.txt`, `identity_kz_post.txt`, `relink_result.txt`, `make_*.log`, `df_build_*.log` | the build: the build tree before and after, the new identities of kz-static and kz, which of the 50 relinked binaries changed, the space guard of each make |
+| `make_dryrun_after_build.log`, `df_make_dryrun.log`, `df_make_question.log` | the check after the session stop that the build was complete (a dry run names nothing to compile or link) |
+| `ctest_first.log`, `golden_update.log`, `ctest_full.log`, `ctest_counts.log`, `unit_tools.txt`, `unit_step2a.txt`, `df_ctest_*.log`, `df_golden_update.log`, `df_unit_*.log` | the tests: the first ctest (the one declared failure), the golden written, the full ctest, the check counts, the unit checks |
+| `tools_check_after_copy.txt`, `tools_check_after_build.txt`, `ledger_check_after_build.txt`, `df_tools_check_after_build.log`, `df_copy.log` | the registry and the cumulative list after the copy and after the build |
+| `regress_tools_old_run.txt`, `df_regress_tools_old.log` | the old tools' regression run before the build |

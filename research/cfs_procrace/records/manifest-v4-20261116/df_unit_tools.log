@@ -1,0 +1,7 @@
+# space_guard.sh kind=unit need=100000000 floor=314572800 interval=2 cmd=bash env/tools/tests/run_unit.sh
+start 2026-11-18T04:24:55.296Z free=1570635776 threshold=414572800
+sample 2026-11-18T04:24:55.300Z 1570631680
+sample 2026-11-18T04:24:57.306Z 1570594816
+sample 2026-11-18T04:24:59.311Z 1569562624
+sample 2026-11-18T04:25:01.316Z 1567047680
+end 2026-11-18T04:25:03.324Z kind=unit verdict=completed rc=0 free=1570627584 lowest=1567047680 dip=3588096 change=-8192

@@ -1,0 +1,4 @@
+# space_guard.sh kind=ctest need=100000000 floor=314572800 interval=2 cmd=ctest -V -R ^test_static_plan$
+start 2026-11-18T04:23:49.671Z free=1574318080 threshold=414572800
+sample 2026-11-18T04:23:49.674Z 1574313984
+end 2026-11-18T04:23:51.680Z kind=ctest verdict=completed rc=0 free=1575288832 lowest=1574313984 dip=4096 change=970752

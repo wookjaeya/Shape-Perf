@@ -1,0 +1,4 @@
+# space_guard.sh kind=make-question need=100000000 floor=314572800 interval=2 cmd=make -q all
+start 2026-11-18T04:17:37.783Z free=1576833024 threshold=414572800
+sample 2026-11-18T04:17:37.786Z 1576828928
+end 2026-11-18T04:17:39.793Z kind=make-question verdict=completed rc=1 free=1576828928 lowest=1576828928 dip=4096 change=-4096

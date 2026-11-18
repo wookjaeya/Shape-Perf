@@ -1,0 +1,18 @@
+plan /home/user/work/redesign/obs1/mv_plans_v4/c1_post_tx
+  plan-id 687ef3704cd4b967
+  budget value=tier:D07 reason="the record pool is fixed (KZ_RT_POOL_BYTES = KZ_RT_MAX_ACTORS x 65536, kairos/runtime/include/kz_rt.h:61-64) and no event volume of a generated plan is measured yet: the priority tier is planned whole, the next tier is not" disclosure="the value was chosen knowing which rows the priority tier holds on these builds (plan/ovm_rev1_20261116/S1_RETALLY.md 3.1 and its probe tables); which rows are in the plan is an output of the rule, checked after the generation" planned=8 truncation=359 rows cut (row lines with state cut) unresolved="whether the rows cut fit the record pool (no event volume measured)" sensitivity="not measured"
+  control-budget value=all reason="the path A control selection (lead decision, plan/full_stage_results_20261116.md 6.10 item 2; kairos/docs/plan_manifest.md section 7) is planned whole: a boot counts as the prior test of the name-binding rule only with every control row in its plan (judgement rules 8.12 (ㄷ)); no event volume of a generated plan is measured yet, so no row is cut by a volume estimate" rows=5 (a 1, b 4) planned=5 cut=0 complete=yes unresolved="whether the control rows fit the record pool (no event volume measured)" sensitivity="not measured"
+  requests sha256=d1ad7100b397c46327490d7c71d8019e8f3a9e992805286099d91da88b695a9f file=plan.req rows=4 requests=30 planned=24
+rows path A 63; control set 5 (a 0, b 4, a+b 1), planned 5, cut 0
+path A planned: tier 0 []; control 5 [A20 A21 A22 A26 A63]; either 5
+path A planned outside relation 1 (key 17975444d83f6589): 4 [A20(bdcc6978b9a41c8c) A22(f371687b47120887) A26(ad9fc1058923aad9) A63(b881269bea290f8b)]; relation 1 planned: yes
+probe-create rows (control a): A20(bdcc6978b9a41c8c) control-state=planned tier-state=cut
+revision 2 (/home/user/work/redesign/obs1/ll_plans_final/c1_post_tx): path A planned 0 []
+revision 3 sites 291 (load 0, spawn statements 1); by rule: actor-create 2, actor-owner 2, actor-root 15, actor-start 1, creator-call 8, effect-call 6, handling-chain 7, key-text 5, object-delete 2, stop-event 2, use-call 198, wait-cond 1, wait-exit 1, writer 45
+revision 2 sites 253 (load 0, spawn statements 0); by rule: actor-create 2, actor-owner 2, actor-root 15, actor-start 1, stop-event 2, use-call 188, writer 45
+needs: event-send not-planned 2, event-send planned 3, lock-result not-planned 13, object-delete not-planned 3, object-delete planned 2, use-result planned 13, wait-result not-planned 12, wait-result planned 1
+gaps 2: record_insufficient(key text) 1; record_insufficient(the exit is no statement) 1
+requests end rows=4 requests=30 planned=24; branch not-planned 6, effect planned 15, out planned 3, result planned 6
+  lifetime OS_OBJECT_TYPE_OS_COUNTSEM delete OS_CountSemDelete osal/src/os/shared/src/osapi-countsem.c:118 data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces_osal-f34759d.txt line 58: applies
+measurement (tier budget all) sites 1461 (load 45, spawn statements 1); by rule: actor-create 2, actor-owner 2, actor-root 17, actor-start 3, creator-call 8, effect-call 98, handling-chain 49, key-text 11, lock-call 63, object-delete 6, read-load 43, spawn-call 8, stop-event 2, use-call 762, wait-cond 6, wait-exit 3, writer 413, writer-after-spawn 17
+measurement needs: event-send not-planned 34, event-send planned 29, lock-result not-planned 255, lock-result planned 112, object-delete not-planned 49, object-delete planned 14, owner-request not-planned 2, read-subscript not-planned 134, read-value planned 134, use-result planned 233, value not-planned 23, wait-result not-planned 361, wait-result planned 6

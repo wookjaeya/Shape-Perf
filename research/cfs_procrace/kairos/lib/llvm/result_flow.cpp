@@ -11,7 +11,7 @@
 
 namespace kzs {
 
-const char* result_flow_revision() { return "result flow rules revision 1 (2026-11-16)"; }
+const char* result_flow_revision() { return "result flow rules revision 2 (2026-11-18)"; }
 
 std::shared_ptr<const ResultValues> build_result_values(const Model& first) {
   auto out = std::make_shared<ResultValues>();

@@ -121,3 +121,22 @@ event-type and run-status domains documented outside a parameter paragraph; defi
 accessor function rather than a field path (the comparison is in a function whose operand is a call); the platform
 support package and the applications. A later revision of this rule is written and committed before the data files it
 changes.
+
+2026-11-18, exclusions found by review that the list above did not state (the rule and the data files are unchanged;
+a revision is a later step):
+
+- **Named object kinds without a per-file kind macro.** Section 4 (N) says the lookup and the create are taken `with the
+  kind`; the scan (`env/tools/semantics_scan.py`) takes a kind only from a `LOCAL_OBJID_TYPE = …` line of the file and a
+  lookup or create only when the layer call passes that macro.  A file that passes the kind constant directly has no
+  lookup or create line (the time-base kind of the OSAL f34759d and 7.0.1 data has `delete` and `stored-name` only), and
+  a kind whose file has no such macro is absent (the timer-callback, condition-variable and console kinds of f34759d).
+- **The layer's own clears and the failed-create rollback.** Only stores in the kind's own file are entries; the
+  identifier layer's clear of the stored name and its rollback of a failed create are in no entry, so the OSAL data has
+  no `clear` or `retire` line.
+- **A documented return on a function declared void** is written as a collated return (`return=status by=doc` with a
+  `ret` line).  The facts mark such a row unverified from 2026-11-18 (static_facts.md 5w); the scan does not.
+- **The argument role of a domain kind says what the parameter's values are, not what the function does** (a run-status
+  role may stand on the pointer parameter of a check).  The engine does not name an effect from it alone
+  (static_facts.md 5w).
+- **The severity constants of a status space** are data rows (`status-space severity`); the outcome class rule reads
+  their values, not their names.

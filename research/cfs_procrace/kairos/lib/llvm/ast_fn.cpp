@@ -232,6 +232,7 @@ struct LocalEvent {
   // is held there (the walker's lock depth)
   std::vector<std::pair<const Expr*, bool>> body_guards;
   bool locked = false;
+  std::vector<size_t> switch_loops;  // per enclosing switch: the loop innermost at its entry ((size_t)-1: none)
 };
 
 // What a finished inner loop leaves for the counter pattern of its enclosing loop.
@@ -689,6 +690,12 @@ class FnWalker {
             continue;
           }
         }
+        // the element is itself an array that decays (a row of an array-of-arrays field): a pointer into the field goes on
+        if (const auto* ic = ep != nullptr ? dyn_cast<ImplicitCastExpr>(ep) : nullptr; ic != nullptr && ic->getCastKind() == CK_ArrayToPointerDecay) {
+          cur = ic;
+          at = ic;
+          continue;
+        }
         return;  // the element is read (or is the base of a member access of its own)
       }
       if (const auto* c = dyn_cast<CastExpr>(p)) {
@@ -739,7 +746,16 @@ class FnWalker {
         at = uo;
         break;
       }
-      if (isa<CallExpr>(p)) return;  // an argument: visit_call made its out-pointer call
+      if (const auto* pc = dyn_cast<CallExpr>(p)) {
+        // an argument visit_call made an out-pointer call of (decayed_target_arg reads the argument's shape): done.  An
+        // argument it does not read so (the pointer under a conditional or a comma operator), or the callee expression,
+        // is a use this rule does not read: an address escape
+        for (unsigned i = 0; i < pc->getNumArgs(); ++i)
+          if (pc->getArg(i) == cur && decayed_target_arg(pc->getArg(i)) == me) return;
+        escape = "passed to a call in an expression the out-pointer rule does not read (a conditional or comma operand)";
+        at = p;
+        break;
+      }
       if (isa<ReturnStmt>(p)) {
         escape = "returned";
         at = p;
@@ -790,6 +806,11 @@ class FnWalker {
       e = e->IgnoreParens();
       if (const auto* c = dyn_cast<CastExpr>(e)) {
         if (c->getCastKind() == CK_ArrayToPointerDecay) {
+          // an inner array of an array-of-arrays field (`x.f[i]` decaying): a pointer into the field, as `&x.f[i]` is
+          if (const auto* inner = dyn_cast<ArraySubscriptExpr>(c->getSubExpr()->IgnoreParens())) {
+            e = inner->getBase();
+            continue;
+          }
           const auto* me = dyn_cast<MemberExpr>(c->getSubExpr()->IgnoreParens());
           const auto* fl = me != nullptr ? dyn_cast<FieldDecl>(me->getMemberDecl()) : nullptr;
           return fl != nullptr && !tu_.targets_of_field(fl).empty() ? me : nullptr;
@@ -1080,7 +1101,13 @@ class FnWalker {
     if (ext_) note_param_truth(s->getCond(), KZ_PFLOW_FLAG_SWITCH);
     visit(s->getCond());
     breakables_.push_back(nullptr);
+    // the enclosing switches (lookup only: the guards of the default path do not hold the case conditions): the loop that
+    // is innermost at the entry of the switch, and its condition
+    switch_loops_.push_back(loops_.empty() ? static_cast<size_t>(-1) : loops_.back()->index);
+    switch_conds_.push_back(s->getCond());
     visit(s->getBody());
+    switch_conds_.pop_back();
+    switch_loops_.pop_back();
     breakables_.pop_back();
   }
 
@@ -1557,6 +1584,10 @@ class FnWalker {
             st = KZ_LOOPDEF_STATUS_UNRESOLVED;
           } else if (in.size() > 1) {
             st = KZ_LOOPDEF_STATUS_RESET_IN_BODY;
+          } else if (in.size() == 1 && std::find(in[0]->switch_loops.begin(), in[0]->switch_loops.end(), L) != in[0]->switch_loops.end()) {
+            // the definition runs under a case of a switch in the loop's body: the guards hold no case condition, so no
+            // guard of the definition is known (loop flag predicate rules revision 2)
+            st = KZ_LOOPDEF_STATUS_UNRESOLVED;
           } else if (in.size() == 1 && in[0]->rhs != nullptr) {
             const LocalEvent* ev = in[0];
             int64_t v1 = 0, v0 = 0;
@@ -1633,7 +1664,7 @@ class FnWalker {
             r.pos = tu_.pos_of(d.loc);
             r.local = lname;
             r.status = st;
-            r.flags = fl;
+            r.flags = 0;  // set below from this definition (loop flag predicate rules revision 2)
             r.pred = st == KZ_LOOPDEF_STATUS_RECOGNISED ? form : std::string();
             const bool inside = in_range(d.loc, lc->range);
             if (inside && lc->cond_e != nullptr && in_range(d.loc, lc->cond_e->getSourceRange())) r.where = KZ_LOOPDEF_WHERE_IN_CONDITION;
@@ -1641,9 +1672,13 @@ class FnWalker {
             else if (sm_.isBeforeInTranslationUnit(sm_.getExpansionLoc(d.loc), sm_.getExpansionLoc(lc->range.getBegin()))) r.where = KZ_LOOPDEF_WHERE_BEFORE_LOOP;
             else r.where = KZ_LOOPDEF_WHERE_NONE;
             r.value = d.rhs != nullptr ? ld_expr(d.rhs) : nullptr;
+            if (r.value != nullptr && r.value->op == KZ_EXPR_OP_CALL_RESULT) r.flags |= KZ_LOOPDEF_FLAG_CALL_RESULT;
             for (const LocalEvent& ev : local_events_)
-              if (ev.var == var && ev.pos.line == r.pos.line && ev.pos.col == r.pos.col && ev.pos.file == r.pos.file && std::find(ev.loops.begin(), ev.loops.end(), L) != ev.loops.end())
+              if (ev.var == var && ev.pos.line == r.pos.line && ev.pos.col == r.pos.col && ev.pos.file == r.pos.file && std::find(ev.loops.begin(), ev.loops.end(), L) != ev.loops.end()) {
                 r.guard = ev.guard_inner;
+                // the walker's lock depth is kept for the definitions inside a loop only
+                if (ev.locked) r.flags |= KZ_LOOPDEF_FLAG_UNDER_LOCK;
+              }
             rows.push_back(r);
           }
         } else {
@@ -2115,7 +2150,10 @@ class FnWalker {
   void visit_return(const ReturnStmt* s) {
     for (auto& lc : loops_) note_exit(lc.get(), s, KZ_LOOPEXIT_KIND_RETURN);
     if (ext_ && s->getRetValue() != nullptr) returns_.push_back(PendingReturn{s, guard_from(0), loops_.empty() ? std::string() : m_.loops[loops_.back()->index].key});
-    if (ext_ && spec_.result_flow && s->getRetValue() != nullptr) rf_guards_[s] = guards_;
+    if (ext_ && spec_.result_flow && s->getRetValue() != nullptr) {
+      rf_guards_[s] = guards_;
+      if (!switch_conds_.empty()) rf_switches_[s] = switch_conds_;
+    }
     if (ext_ && s->getRetValue() != nullptr) {
       std::set<const VarDecl*> seen;
       const Src src = trace_source(s->getRetValue(), &seen);
@@ -2555,6 +2593,7 @@ class FnWalker {
     const std::string ckey = tu_.next_key(cf.pos, fkey_, &cf.ordinal);
     if (ext_ && spec_.result_flow) {
       rf_guards_[ce] = guards_;
+      if (!switch_conds_.empty()) rf_switches_[ce] = switch_conds_;
       if (!loops_.empty()) rf_in_loop_.insert(ce);
     }
     if (ext_) {
@@ -3229,6 +3268,7 @@ class FnWalker {
     if (spec_.loop_defs) {
       for (size_t i = loops_.back()->body_guard_base; i < guards_.size(); ++i) ev.body_guards.emplace_back(guards_[i].cond, guards_[i].polarity);
       ev.locked = lock_depth_ > 0;
+      ev.switch_loops = switch_loops_;
     }
     local_events_.push_back(ev);
   }
@@ -5374,6 +5414,7 @@ class FnWalker {
     const VarDecl* local = nullptr;  // store into a local: the local, and the definition it is
     const void* def_key = nullptr;
     bool cast_void = false, discarded = false;
+    bool of_switch = false;          // branch: the condition of a switch
   };
   // the location an lvalue or a value names ("local:", "global:", "field:"), "" when none; `addr`: `&` of it
   std::string rf_loc_of(const Expr* e, bool* addr) {
@@ -5500,6 +5541,7 @@ class FnWalker {
       if (c != nullptr && c == cur) {
         u.kind = KZ_RFLOW_USE_BRANCH;
         u.cond = c;
+        u.of_switch = isa<SwitchStmt>(p);
         return u;
       }
       if (isa<Expr>(p)) {
@@ -5577,7 +5619,12 @@ class FnWalker {
       std::map<std::string, std::string> q;
       for (const VarDecl* vd : order) {
         const auto& f = found[vd];
-        const std::string qn = rf_qual_name(vd, f.first, f.second);
+        // an address-taken local has no definition that is shown to reach: a store through an alias or a call that takes
+        // its address may come between (result flow rules revision 2)
+        auto alit = locals_.find(vd);
+        const bool addr = alit != locals_.end() && alit->second.addr_taken;
+        const std::string qn = addr ? lid(vd) + "@addr-taken" : rf_qual_name(vd, f.first, f.second);
+        if (addr) rf_addr_names_.insert(qn);
         q[lid(vd)] = qn;
         for (const void* d : f.first) {
           const Expr* val = def_value(d, vd);
@@ -5758,12 +5805,8 @@ class FnWalker {
     }
     return out;
   }
-  static bool rf_fail_class(int64_t v) { return v < 0 || (v >= 0xC0000000LL && v <= 0xFFFFFFFFLL); }
-  static uint8_t rf_class(int64_t v) {
-    if (rf_fail_class(v)) return KZ_REFF_OUTCOME_FAILURE;
-    if (v >= 0x40000000LL && v < 0x80000000LL) return KZ_REFF_OUTCOME_OTHER;
-    return KZ_REFF_OUTCOME_SUCCESS;
-  }
+  // the outcome class of an enumerated value is given where the rows are written (serialize.cpp, by the outcome class rule
+  // of outcome.hpp in the callee's status space): none here
 
   // ---- the exploration of one outcome on the CFG
   struct RfOutcome {
@@ -6074,13 +6117,54 @@ class FnWalker {
     std::map<const CallExpr*, int> first_branch;  // lookup only
     std::set<const CallExpr*> explore;            // lookup only
     std::map<const CallExpr*, std::pair<const VarDecl*, const void*>> def_of_call;  // lookup only
-    auto qual_guard_at = [&](const std::map<const void*, std::vector<Guard>>& m, const void* k) -> ExprRef {
-      auto it = m.find(k);
-      return it == m.end() ? nullptr : rf_qual_guard(it->second);
+    // the guard of a call or a return; `undecided`: a term of it is not a condition these rows can decide (a case of a
+    // switch, whose case condition the guards do not hold: a term `top` over the switch's value stands for it)
+    auto qual_guard_full = [&](const void* k, bool* undecided) -> ExprRef {
+      auto it = rf_guards_.find(k);
+      auto st = rf_switches_.find(k);
+      if (it == rf_guards_.end() && st == rf_switches_.end()) return nullptr;
+      std::vector<ExprRef> terms;
+      if (it != rf_guards_.end())
+        for (const Guard& g : it->second) terms.push_back(rf_qualified(g.cond, g.polarity));
+      if (st != rf_switches_.end())
+        for (const Expr* sc : st->second) {
+          terms.push_back(pool().make(KZ_EXPR_OP_TOP, 0, 0, "a case of the switch at " + rf_pos_text(sc->getBeginLoc()) + " on", rf_qualified(sc, true), nullptr));
+          if (undecided != nullptr) *undecided = true;
+        }
+      return terms.empty() ? nullptr : pool().conj(KZ_EXPR_OP_AND, terms);
+    };
+    auto qual_guard_at = [&](const std::map<const void*, std::vector<Guard>>&, const void* k) -> ExprRef { return qual_guard_full(k, nullptr); };
+    // does an expression read an address-taken local
+    std::function<bool(ExprRef)> reads_addr_taken = [&](ExprRef e) -> bool {
+      if (e == nullptr) return false;
+      if (e->op == KZ_EXPR_OP_LOAD && e->ref == KZ_EXPR_REF_LOCAL && rf_addr_names_.count(e->name) != 0) return true;
+      return reads_addr_taken(e->a) || reads_addr_taken(e->b);
+    };
+    // the direct callees two different calls of which a guard's conditions hold (a call-result node names its callee
+    // only: the two results would read as one value)
+    auto twice_called = [&](const void* k) -> bool {
+      struct V : RecursiveASTVisitor<V> {
+        std::map<std::string, std::set<const CallExpr*>> by;
+        bool VisitCallExpr(CallExpr* c) {
+          if (const FunctionDecl* fd = c->getDirectCallee()) by[fd->getNameAsString()].insert(c);
+          return true;
+        }
+      } vis;
+      auto it = rf_guards_.find(k);
+      if (it != rf_guards_.end())
+        for (const Guard& g : it->second) vis.TraverseStmt(const_cast<Expr*>(g.cond));
+      auto st = rf_switches_.find(k);
+      if (st != rf_switches_.end())
+        for (const Expr* sc : st->second) vis.TraverseStmt(const_cast<Expr*>(sc));
+      for (const auto& [n, cs] : vis.by)
+        if (cs.size() > 1) return true;
+      return false;
     };
     auto fill_use = [&](RFlowFact* r, const RfUse& u) {
       r->use_kind = u.kind;
-      if (u.kind == KZ_RFLOW_USE_BRANCH) r->cond = rf_qualified(u.cond, true);
+      // a switch tests the value against its case constants: not the condition `value != 0` (result flow rules revision 2)
+      if (u.kind == KZ_RFLOW_USE_BRANCH)
+        r->cond = u.of_switch ? pool().make(KZ_EXPR_OP_TOP, 0, 0, "the value a switch selects its case by", rf_qualified(u.cond, true), nullptr) : rf_qualified(u.cond, true);
       if (u.kind == KZ_RFLOW_USE_ARG) {
         auto kt = ext_call_keys_.find(u.call);
         if (kt != ext_call_keys_.end()) r->use_call_key = kt->second;
@@ -6184,9 +6268,9 @@ class FnWalker {
     }
     // the guard rows: the calls that run under a condition that reads a call result
     for (const auto& [key, ce] : calls) {
-      auto g = rf_guards_.find(ce);
-      if (g == rf_guards_.end() || g->second.empty()) continue;
-      const ExprRef q = rf_qual_guard(g->second);
+      bool undecided = false;
+      const ExprRef q = qual_guard_full(ce, &undecided);
+      if (q == nullptr) continue;
       bool unique = true;
       if (!rf_reads_call_result(q, &unique)) continue;
       RFlowFact r;
@@ -6196,6 +6280,13 @@ class FnWalker {
       r.def_kind = KZ_RFLOW_DEF_NONE;
       r.use_kind = KZ_RFLOW_USE_NONE;
       r.reach = unique ? KZ_RFLOW_REACH_UNIQUE : KZ_RFLOW_REACH_SHARED;
+      // result flow rules revision 2: an address-taken local of the guard is named `x@addr-taken` (no definition is shown to
+      // reach: its value is unknown to a reader; flag addr-taken-local), a case of a switch is a term `top` (unknown), so
+      // a reader decides the guard only by its other terms; a guard whose conditions hold two calls of one callee is
+      // written not-computed (the two results would read as one value)
+      if (reads_addr_taken(q)) r.flags |= KZ_RFLOW_FLAG_ADDR_TAKEN_LOCAL;
+      (void)undecided;
+      if (twice_called(ce)) r.reach = KZ_RFLOW_REACH_NOT_COMPUTED;
       r.cond = q;
       r.target = callee_text(ce);
       if (rf_in_loop_.count(ce) != 0) r.flags |= KZ_RFLOW_FLAG_IN_LOOP;
@@ -6213,7 +6304,7 @@ class FnWalker {
         for (const RfVal& x : V.vals) {
           RfOutcome o;
           o.v = x.v;
-          o.cls = rf_class(x.v);
+          o.cls = KZ_REFF_OUTCOME_NONE;
           o.reach = x.present_only ? KZ_REFF_REACH_PRESENT_ONLY : KZ_REFF_REACH_REACHED;
           o.text = x.text + (x.via.empty() ? "" : " (" + x.via + ")");
           outs.push_back(o);
@@ -6438,6 +6529,10 @@ class FnWalker {
   std::vector<LoopCtx*> breakables_;
   std::map<std::tuple<const Expr*, bool, const VarDecl*>, ExprRef> cond_cache_;  // lookup only
   int lock_depth_ = 0;
+  std::vector<size_t> switch_loops_;        // visit_switch: the loop innermost at the entry of each enclosing switch
+  std::vector<const Expr*> switch_conds_;   // and the switch's condition
+  std::map<const void*, std::vector<const Expr*>> rf_switches_;  // a call or a return -> the switches it runs under a case of, lookup only
+  std::set<std::string> rf_addr_names_;     // qualified names of address-taken locals in conditions
   const VarDecl* elem_var_ = nullptr;  // set while an expression is built in element form
   std::vector<LocalEvent> local_events_;
   std::map<size_t, InnerInfo> inner_ctx_;  // Model::loops index -> what the finished loop left

@@ -159,10 +159,29 @@ void *maker_main(void *arg) {
   return 0;
 }
 
+/* a delete by name (2026-11-18): it looks the record up by its name and clears the key with a constant store: a
+ * key-clearing call, no creator (relations rules revision 12) */
+int sem_delete(const char *name) {
+  Token t;
+  int rc = get_by_search(LOCK_EXCL, KIND_SEM, name_match, name, &t);
+  if (rc == RC_OK) {
+    memset(table[KIND_SEM][t.idx].name, 0, sizeof table[KIND_SEM][t.idx].name);
+    table[KIND_SEM][t.idx].active = 0;
+  }
+  return rc;
+}
+
+void *cleaner_main(void *arg) {
+  (void)arg;
+  (void)sem_delete("alpha");
+  return 0;
+}
+
 int main(void) {
-  pthread_t a, b;
+  pthread_t a, b, c;
   pthread_create(&a, 0, user_main, 0);
   pthread_create(&b, 0, maker_main, 0);
+  pthread_create(&c, 0, cleaner_main, 0);
   (void)search_with(pick_match(), "gamma");
   return 0;
 }

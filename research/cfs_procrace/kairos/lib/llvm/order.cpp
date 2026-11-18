@@ -26,18 +26,26 @@
 
 namespace kzs {
 
-const char* order_rules_revision() { return "order rules revision 2 (2026-11-16)"; }
+// Revision 5 (2026-11-18) changes revision 2 in the waits: the writers of the awaited fields are taken per waiting
+// thread (a write in a thread counts for every waiting thread other than its own; revision 2 dropped a writer whose thread
+// was itself among the waiting ones, for all of them), and the awaited fields are the fields the predicate reads outside
+// the arguments of the calls whose results it tests and outside the operands of `addr` (static_facts.md 5w).
+const char* order_rules_revision() { return "order rules revision 5 (2026-11-18)"; }
 // Revision 3 adds to revision 2 only what facts with RESULT_FLOW and RESULT_EFFECT carry (static_facts.md 5u): child without
 // success read from the effects of the inner spawn call's success value, and the uses a wait's caller makes under the
 // result of the wait's function (its guard rows) with their HB-await edges.  Without those sections the output is
 // revision 2's to the byte.
-const char* order_result_flow_revision() { return "order rules revision 3 (2026-11-16)"; }
+// Revision 6 (2026-11-18): a guard row RESULT_FLOW writes not-computed (two calls of one callee in its conditions) decides
+// nothing: the caller-side use under it is unknown.  An address-taken local (`x@addr-taken`) and a case of a switch (a
+// `top` term) are unknown terms of a guard: it is decided only by its other terms.
+const char* order_result_flow_revision() { return "order rules revision 6 (2026-11-18)"; }
 // Revision 4 adds to revision 3 only what facts with LOOP_DEFS and LOCK_HANDLES carry (static_facts.md 5v): a wait whose
 // FACT_LOOPS row has no predicate reads the predicate LOOP_DEFS recognises through the local definitions; a budget exit
 // that leaves the loop gives the caller-side budget values through the flag (the function's returns after the loop, the
 // flag's in-body definition left out); and an HB-lock edge names the source of its lock identity.  Without the sections
 // the output is revision 3's (or 2's) to the byte.
-const char* order_loop_lock_revision() { return "order rules revision 4 (2026-11-16)"; }
+// Revision 7 (2026-11-18): the awaited fields and the writers of a LOOP_DEFS predicate follow revision 5.
+const char* order_loop_lock_revision() { return "order rules revision 7 (2026-11-18)"; }
 
 namespace {
 
@@ -148,6 +156,16 @@ class Ord : public RelFacts {
       if (e.op == KZ_EXPR_OP_LOAD && e.flags == flags) s.insert(str(e.name));
     });
     return s;
+  }
+  // order rules revision 5: the fields a predicate reads for itself (`own`), and those under the arguments of a call
+  // whose result it tests or under an `addr` (`passed`: an out argument or a key of the call, no value the wait waits for)
+  void awaited_refs(uint32_t root, bool under, std::set<std::string>* own, std::set<std::string>* passed, int depth = 0) const {
+    if (root == kN || root >= exprs_.size() || depth > 64) return;
+    const kz_fact_expr& e = exprs_[root];
+    if (e.op == KZ_EXPR_OP_LOAD && e.flags == KZ_EXPR_REF_FIELD) (under ? passed : own)->insert(str(e.name));
+    const bool u = under || e.op == KZ_EXPR_OP_CALL_RESULT || e.op == KZ_EXPR_OP_ADDR;
+    if (e.a < root) awaited_refs(e.a, u, own, passed, depth + 1);
+    if (e.b < root) awaited_refs(e.b, u, own, passed, depth + 1);
   }
   std::set<std::string> call_results(uint32_t root) const {
     std::set<std::string> s;
@@ -909,6 +927,7 @@ class Ord : public RelFacts {
     if (fit != rflow_of_site_.end())
       for (uint32_t i : fit->second) {
         const kz_fact_rflow& f = rflow_[i];
+        // (an address-taken local is named `x@addr-taken` in a guard: no value is put for it, order rules revision 6)
         if (f.def_kind == KZ_RFLOW_DEF_LOCAL_DEF) names.insert(str(f.local) + "@def:" + std::to_string(f.def_line) + ":" + std::to_string(f.def_col));
       }
     const std::string gname = str(funcs_[fn].name);
@@ -938,7 +957,10 @@ class Ord : public RelFacts {
             const int r = eval(f.cond_root, fl, cl);
             r0 = r0 == -2 ? r : (r0 == r ? r0 : -1);
           }
-          const std::string cons = r0 == 0 ? "skip" : r0 == 1 ? "continue" : "unknown(the guard is not decided by the budget value " + bs + ")";
+          // order rules revision 6: a guard RESULT_FLOW writes not-computed decides nothing
+          const bool nc = f.reach == KZ_RFLOW_REACH_NOT_COMPUTED;
+          const std::string cons = nc ? "unknown(the guard is not computed in RESULT_FLOW: its conditions hold two calls of one callee)"
+                                   : r0 == 0 ? "skip" : r0 == 1 ? "continue" : "unknown(the guard is not decided by the budget value " + bs + ")";
           out->push_back(Use{Ev{'c', u}, "caller-side: " + ev_text(Ev{'c', u}) + " in " + fname(c.caller_fn) + " under " + ex(f.cond_root) + " (the result of " + gname + " at " + call_pos(x) + ")", cons, c.caller_fn});
           ++n;
         }
@@ -1069,10 +1091,9 @@ class Ord : public RelFacts {
                                                      : "not recognised (" + str(L.cert_note) + ")");
       if (ld != nullptr && !by_defs) pline += "; LOOP_DEFS " + enum_text("KZ_LOOPDEF_STATUS", ld->status);
       w.lines.push_back(pline + (aw != nullptr ? "; AWAIT_L1 per-field " + enum_text("KZ_LOOP_CERT", aw->cert_field) : std::string("; no AWAIT_L1 row")));
-      std::set<std::string> awaited;
-      if (recognised) {
-        for (const std::string& f : refs(pred_root, KZ_EXPR_REF_FIELD)) awaited.insert(f);
-      }
+      std::set<std::string> awaited, passed;
+      if (recognised) awaited_refs(pred_root, false, &awaited, &passed);
+      for (const std::string& f : awaited) passed.erase(f);
       const std::set<std::string> cond_calls = call_results(L.cond_root);
       // the writers of the awaited fields in other threads (LOCKSET write rows)
       std::vector<std::pair<Ev, uint32_t>> writers;
@@ -1088,25 +1109,47 @@ class Ord : public RelFacts {
         for (size_t r = 0; r < lockset_.size(); ++r) {
           const kz_fact_lockset& s = lockset_[r];
           if (s.kind != KZ_LOCKSET_KIND_WRITE || str(s.type) + "." + str(s.field) != f) continue;
-          for (uint32_t pa : actor_set(s.fn))
-            if (as.count(pa) == 0) {
-              writers.push_back({Ev{'w', static_cast<uint32_t>(r)}, pa});
-              wtext.push_back(ev_text(Ev{'w', static_cast<uint32_t>(r)}) + " " + actor_text(pa));
-            }
+          // order rules revision 5: every thread of the writer; for a waiting thread the writers are those of another one
+          for (uint32_t pa : actor_set(s.fn)) {
+            if (as.size() == 1 && as.count(pa) != 0) continue;  // the only waiting thread's own write
+            writers.push_back({Ev{'w', static_cast<uint32_t>(r)}, pa});
+            wtext.push_back(ev_text(Ev{'w', static_cast<uint32_t>(r)}) + " " + actor_text(pa));
+          }
         }
       }
+      // the writers a waiting thread has in other threads
+      auto others_of = [&](uint32_t qa) {
+        size_t n = 0;
+        for (const auto& w2 : writers)
+          if (w2.second != qa) ++n;
+        return n;
+      };
+      bool own_writer = false;  // a writer thread is itself among the waiting ones
+      for (const auto& w2 : writers)
+        if (as.count(w2.second) != 0) own_writer = true;
+      std::string per_waiter;
+      if (own_writer)
+        for (uint32_t qa : as) per_waiter += (per_waiter.empty() ? "" : ", ") + actor_text(qa) + " " + std::to_string(others_of(qa));
+      const std::string passed_text = passed.empty() ? std::string()
+                                                     : "; not awaited, under the arguments of a call the predicate tests or under an address: " +
+                                                           join(std::vector<std::string>(passed.begin(), passed.end()), ", ");
       if (recognised && !awaited.empty()) {
         // the exit condition at the initial values: false means only a write can make the wait leave by it
         const int at_init = init_vals.size() == awaited.size() ? eval(by_defs ? pred_root : L.cond_root, init_vals, {}) : -1;
         init_ok = at_init == 0 ? 1 : at_init == 1 ? 0 : -1;
         std::vector<std::string> av(awaited.begin(), awaited.end());
-        w.lines.push_back("awaited: " + join(av, ", ") + "; writers in other threads " + std::to_string(writers.size()) + (wtext.empty() ? std::string() : ": " + join(wtext, "; ")) +
+        w.lines.push_back("awaited: " + join(av, ", ") + passed_text +
+                          (own_writer ? "; writers " + std::to_string(writers.size()) + " (a writer thread is itself a waiting thread: for each waiting thread the writers in another thread: " + per_waiter + ")"
+                                      : "; writers in other threads " + std::to_string(writers.size())) +
+                          (wtext.empty() ? std::string() : ": " + join(wtext, "; ")) +
                           "; writer sets complete under the per-field rule: " + (complete ? "yes" : "no") + "; the condition exit at the initial values: " +
                           (init_ok == 1 ? "false (only a write makes it true)" : init_ok == 0 ? "true (the wait may pass on the initial value)" : "not decided"));
       } else {
         std::vector<std::string> cc(cond_calls.begin(), cond_calls.end());
         w.lines.push_back(std::string("awaited: not named: ") +
-                          (recognised ? "the predicate reads no field" : "the condition exits read " + (cc.empty() ? std::string("locals only") : "the results of " + join(cc, ", ") + " (not followed into the calls)") +
+                          (recognised ? (passed.empty() ? std::string("the predicate reads no field")
+                                                        : "the predicate reads no field of its own (a call result; under its arguments or an address: " +
+                                                              join(std::vector<std::string>(passed.begin(), passed.end()), ", ") + ")") : "the condition exits read " + (cc.empty() ? std::string("locals only") : "the results of " + join(cc, ", ") + " (not followed into the calls)") +
                                                                              " and the predicate is not recognised"));
       }
       // the dependent uses: the reads and calls after the loop in its function, the calls of the function
@@ -1162,11 +1205,13 @@ class Ord : public RelFacts {
         for (const auto& [we, wa] : writers)
           for (const Use& u : w.uses) {
             if (u.consequence == "inside" || u.what.compare(0, 12, "the call of ") == 0) continue;
-            const bool hard = l1 && complete && writers.size() == 1 && init_ok == 1 && (u.consequence == "skip" || u.consequence == "no-budget");
             if (u.consequence.compare(0, 7, "unknown") == 0 && u.fn != kN) continue;  // a caller-side use the budget value does not decide
             const std::set<uint32_t> qas = u.fn != kN ? actor_set(u.fn) : as;
-            if (u.fn != kN) n_await_caller_side_ += qas.size();
             for (uint32_t qa : qas) {
+              if (qa == wa) continue;  // order rules revision 5: the waiting thread's own write is no write in another thread
+              const size_t n_others = others_of(qa);
+              const bool hard = l1 && complete && n_others == 1 && init_ok == 1 && (u.consequence == "skip" || u.consequence == "no-budget");
+              if (u.fn != kN) ++n_await_caller_side_;
               Edge e;
               e.rule = "HB-await";
               e.kind = hard ? "hard" : "conditional";
@@ -1175,7 +1220,7 @@ class Ord : public RelFacts {
               e.to = ev_text(u.e);
               e.to_actor = actor_text(qa);
               e.condition = "the wait at " + at + " was left by its condition exit, which read this write" + (u.consequence == "continue" ? "; its budget exit also reaches the use (continue)" : "");
-              e.premises.push_back("reads-from: the condition exit reads the value this write stored" + std::string(writers.size() == 1 ? " (the only write of the awaited fields in another thread)" : " (one of " + std::to_string(writers.size()) + " writes; which one is not decided)"));
+              e.premises.push_back("reads-from: the condition exit reads the value this write stored" + std::string(n_others == 1 ? " (the only write of the awaited fields in another thread)" : " (one of " + std::to_string(n_others) + " writes; which one is not decided)"));
               e.premises.push_back(std::string("the awaited fields' writer sets are ") + (complete ? "complete under the per-field rule of FIELD_STATUS" : "not complete under the per-field rule") );
               e.premises.push_back(std::string("L1 under the per-field rule: ") + (aw != nullptr ? enum_text("KZ_LOOP_CERT", aw->cert_field) : std::string("no AWAIT_L1 row")));
               e.premises.push_back(std::string("the condition exit is false at the initial values: ") + (init_ok == 1 ? "checked" : "not decided"));

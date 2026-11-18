@@ -234,6 +234,41 @@ void *waiter_main(void *arg) {
   return 0;
 }
 
+/* review cases (2026-11-18, result flow rules revision 2): a guard that reads an address-taken local (a store through an
+ * alias; a call that takes its address), calls under the cases of a switch on a call result, and a guard whose conditions
+ * hold two calls of one callee */
+static void bump(int *p) { *p = *p + 1; }
+
+void guard_alias(int c) {
+  int rc = obj_impl(0);
+  int *p = &rc;
+  if (c) *p = 5;
+  if (rc == RF_OK) report(50);
+  rc = obj_impl(1);
+  bump(&rc);
+  if (rc == RF_OK) report(51);
+}
+
+void guard_switch(void) {
+  int r = obj_impl(2);
+  switch (r) {
+    case RF_OK:
+      report(60);
+      break;
+    case RF_ERR_IMPL:
+      report(61);
+      break;
+    default:
+      report(62);
+      break;
+  }
+}
+
+void guard_twice(void) {
+  if (obj_impl(0) != RF_OK) return;
+  if (obj_impl(1) != RF_OK) report(70);
+}
+
 int main(void) {
   pthread_t a, b, c, d, e;
   (void)pthread_create(&a, 0, checker_main, 0);
@@ -245,5 +280,8 @@ int main(void) {
   (void)c;
   (void)d;
   (void)e;
+  guard_alias(reports);
+  guard_switch();
+  guard_twice();
   return 0;
 }

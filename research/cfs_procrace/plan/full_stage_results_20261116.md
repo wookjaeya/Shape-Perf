@@ -988,6 +988,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 336,981,82
 - 도구(`post_mc.txt`, `identity_kz-static.txt`): kz-static `6adc1bdd…` → `88f529b1acd7091571fe4a391022f12ebd663a277762c14e07bd0af9084e5477`; `--identity` 의 `tool_sha256` `7dba57267cfbc6bb255431c0ac97cb518a2ad39399bfb78374df084fc614f187`, `tool_source` `d7ae60a805f03df3a609f8b18563b04f30442d85895b2cd5a5cab21b705617a9`; `core_source` `568e5061…`, `schema_revision=12`, schema fingerprint `6fbff6c6…` 그대로; 나머지 여섯 도구 그대로. `CMakeCache.txt` `bc2f43b4…` 그대로. 빌드 시작 뒤 바뀐 소스 파일 0(`find -newer`, kairos 의 lib·tools·include·cmake·tests·runtime).
 - 출력은 kz-static 이 새 `--identity` 를 적은 뒤에만 냈다.
 - 도구 보존: 빌드 전 kz-static `6adc1bdd` 를 `/home/user/work/preserve/tools-20261116-h/kz-static.6adc1bdd.xz`(43,317,232 B)로 사본, 왕복 확인(`tool_copy/ROUNDTRIP.txt`: `xz -t` OK, 스트림 sha256 같음, `cmp` 같음). 등록부: 사본 직후 `6adc1bdd` in-place+copy, 빌드 뒤 copy, `88f529b1` in-place(빌드 뒤 첫 점검 전에 고침).
+- **2026-11-18 검토 뒤 정정: §12.7 `builds-10`.** “`not_relink.sha256` 110 OK” 의 남긴 출력은 빌드 직후의 것이 아니라 `records/object-access-20261116/resume_check.txt` 의 `not_relink.sha256: 110 OK`(2026-11-16T17:38:00Z, 모든 실행 뒤)다. `relink_result.txt` 에는 바뀐 14 줄과 sha256sum 의 경고뿐이다. 빌드 직후의 `sha256sum -c` 출력은 남기지 않았다.
 
 ### 7.3 시험 [M]
 
@@ -1044,6 +1045,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 336,981,82
 - **키 글의 상한**(plan rules revision 2): c1_pre_tx 의 계획에서 A21 의 사용 호출(`cf_cfdp.c:993`, `OS_CountSemGetIdByName` 인자 1)의 키 값이 `string=pointer-only` 에서 `string=validated bound=20` 이 되었다. 참조 글: `CF_ChannelConfig_t.sem_name`, 크기 20(`cf_tbldefs.h:74`), 읽기 `cf_cfdp.c:991:46` 이 호출을 지배; sidecar 에 `bound string-extent source=ARG_TYPES` 한 줄(`plan_key_c1.txt`). 옵션 없는 facts 의 계획은 개정 줄 밖에서 앞판과 같다(`compare_plans.txt`). c1_post_tx 의 계획에는 옵션 없음·있음 모두 키 값이 있는 사용·생성 호출이 없다(`compare/measure_c1_post_tx.txt`).
 - **같은 정의는 같은 이름**(`compare/names_c1.txt`, `names_c1_off.txt`): 옵션 있이 위치가 붙은 형 이름 pre 17, post 17, 공통 17, 한쪽에만 0(소스 트리 1, 루트 기준 16). 옵션 없이는 공통 16, 한쪽에만 2(`item@/home/user/work/procrace/c1_build/{pre,post}/src/cf/fsw/src/cf_cmd_c:945::type`). 옵션 있는 쪽의 이름은 `item@<cf>/fsw/src/cf_cmd_c:945::type` 이고 두 빌드의 facts 에 각각 66 줄로 있다(`names_in_dump_c1.txt`). BASIS 의 `count.type_names_outside_root` 는 `by source tree 2` 인데 facts 의 dump 에 든 서로 다른 이름은 1 이다(§7.7).
 - **회차의 섹션별 sha256**(`section_compare.txt`): 옵션 없는 회차 섹션 39, 옵션 있는 회차 42(새 셋), 같은 섹션은 c1·c5 3, r2 1. 나머지가 다른 것은 site 번호(`count.sites` 가 늘어남)와 문자열 표의 위치가 섹션의 레코드와 crc32 에 들기 때문이다; 뜻의 비교는 facts 보기의 갈래 비교(`compare/on_<b>.txt`)가 했다. 이 둘은 중간 회차이고, 마지막 옵션 회차가 섹션 단위로 견준다.
+- **2026-11-18 검토 뒤 정정: §12.7 `semantics-3`, `semantics-4`.** (1) 이 절이 “본문이 닫힌 프로그램에 없다”고 적은 호출 인자 탈출 가운데 c1 의 60 줄(`CFE_EVS_SendEventWithAppID` 25, `CFE_EVS_SendEvent` 20, `CFE_ES_WriteToSysLog` 15; 마지막 회차 facts 의 atype 절)은 본문이 **있는** 가변 인자 함수의 이름 없는 인자다(같은 facts 의 functions 절: 셋 다 `{defined,variadic}`). 탈출이라는 상태는 그대로이고 사유 글이 틀렸다(`finalize.cpp` 가 요약이 없는 경우와 인자가 이름 있는 매개변수 밖인 경우를 한 글로 적음). 이 묶음은 그 callee 자신에 대해서는 C 라이브러리 글에 기대지 않는다. (2) “배열 decay 의 열린 것을 닫았다”는 평이한 꼴(인자·저장·정수 변환·반환)에만 선다: 조건 연산자나 쉼표 연산자 아래의 decay, 배열의 배열 필드의 한 줄은 탈출 행을 얻지 못했다(검토의 scratch 실행; 실제 빌드에서 틀린 행은 드러나지 않았고 fixture 에 그 꼴이 없었다). 둘 다 코드로 고쳤고(`static_facts.md` §5w) MC 도구는 아직 앞판이다(§12.6).
 
 ### 7.6 공간 [M]
 
@@ -1066,6 +1068,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 336,981,82
 - **빌드 dip 이 필요량 계산의 바탕보다 컸다**: `make kz-static` 256,942,080 B 대 앞 최대 123,981,824 B. 그 까닭은 재지 않았다 [미확인]. 선언한 필요량(336,981,824) 과 감시 문턱(651,554,624) 안이었다. 다음 kz-static 빌드의 필요량은 이 값을 바탕으로 한다.
 - **BASIS `count.type_names_outside_root` 의 수**가 facts 에 든 이름의 수와 다르다(2 대 1, `names_in_dump_c1.txt`). 그 셈은 이름을 만든 차례마다 집합에 넣으므로(`lib/llvm/ast_tu.cpp:251-253`) facts 에 쓰이지 않는 이름도 든다 [미확인: 다른 하나가 무엇인지 남긴 출력으로 보이지 않음]. 선언은 이 항목의 값을 정하지 않았으므로 선언 밖의 차이는 아니고, 항목의 뜻은 `docs/static_facts.md` §5s 의 “둘을 센다”보다 넓다.
 - 선언 밖의 차이는 없었다. 덧붙임은 없다.
+- **2026-11-18 검토 뒤 정정: §12.7 `builds-04`.** scratch 의 다섯 빌드 추출(`one_build.sh` 를 scratch kz-static 으로)과 `status_change.py` 용 facts 보기(약 200 MB, §7.6 의 17:36 줄)는 공간 감시 기록 없이 돌렸다. 남긴 `df_scratch_*` 는 cmake·make 뿐이다.
 
 ### 7.8 열린 것
 
@@ -1075,6 +1078,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 336,981,82
 - **함수·객체 키의 절대 위치**: 형 이름만 소스 트리 기준이 되었고, 루트 밖 함수의 키(`initialize_throttling@/home/user/work/procrace/c1_build/pre/…`)와 위치는 절대 경로다. 그래서 같은 관계의 키가 c1_pre_tx 와 c1_post_tx 에서 다르다(A20 `35f07539e7606e2e` 대 `bdcc6978b9a41c8c`; 키 글 `A|OS_common_record_t.name_entry|initialize_throttling@/home/user/work/procrace/c1_build/{pre,post}/src/bp/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1`, `a20_keys.txt`). 빌드 사이 비교 단계가 이 키를 쓰기 전에 정한다. 계획의 ARG_TYPES 참조 글에도 절대 위치가 든다(`plan_key_c1.txt`).
 - **`count.type_names_outside_root` 의 뜻**(§7.7): facts 에 쓰인 이름만 세도록 할지, 문서의 글을 고칠지.
 - 이 회차의 출력은 중간 회차다. 마지막 옵션 회차(루프 술어·잠금 정체성 단계)가 섹션 단위로 견주고, 같으면 이 회차를 “뒤 회차로 다시 만들 수 있음”으로 적는다.
+- **2026-11-18 검토 뒤 정정: §12.7 `semantics-3`, `rules-06`.** “본문 없는 함수” 묶음에 넣은 `:129`·`:135`·`:140`·`:165` 의 `CFE_EVS_SendEvent` 는 본문이 있다(가변 인자의 이름 없는 인자; 위 §7.5 의 정정). 그리고 이 단계가 맡은(판정 규칙 8.12 (ㅈ)) 종류별 키 필드 writer 나눔은 주지 않았다: 마지막 회차의 A21 행은 여전히 `writers: OS_common_record_t.name_entry: 18 (assign 17, memset 1)` 한 줄이다(`ll_final_extract/c1_pre_tx/c1_pre_tx/NP/relations.txt:650`). §12.9 의 표.
 
 ## 8. 검증 상태가 붙은 의미: 범위 규칙, 기계적 훑기, 생성된 자료 파일, 추출 옵션 `--semantics` (kz-static·kz_lint 빌드 하나)
 
@@ -1222,6 +1226,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **`OS_CountSemGetIdByName`**(osal-f34759d, 첫 경로의 사용 호출): 문서 반환 {0, -2, -13, -17}, 본문은 그에 더해 -35, -16, -33(`OS_ObjectIdConvertToken` 을 거친 것)을 돌려준다: "the body returns a value the documentation omits". 본문 8 항목 body-derived, 문서 4 항목 doc-collated.
 - **비교 못 함의 큰 몫**은 본문이 돌려주는 값의 집합이 서지 않는 함수다(c1 111): 따라가지 못한 반환(간접 호출의 결과, 예: `OS_NotifyEvent` 가 `<indirect>` 의 결과를 돌려줌 — c1_pre_tx 에서 이 까닭을 적은 일치 행 16)이나, 상수가 뒤에 다시 정의되는 정의를 지나 반환에 닿는다고 보이지 않는 것(relations rules revision 9 와 같은 표시)이다. c5 의 문서 반환 없음 37/35 는 OSAL 4.1.1 에 함수별 문서가 없기 때문이다(규칙 §3).
 - **P0**: 검증된 P0 행은 선언 속성(doc-collated: 머리말의 `__attribute_pure__`, `__nonnull` 등)과 로컬 사본이 있는 `pthread_create` 의 두 줄(역할과 arg 0 의 out 동작, standard-collated)이다. 나머지 P0 행위 문장(역할, out 인자, 막힘)은 링크하는 판의 글이 이 환경에 없어 `unverified` 다.
+- **2026-11-18 검토 뒤 정정: §12.7 `rules-03`, `rules-04`, `rules-05`, `rules-07`.** (1) `osal-f34759d 11` 은 항목 수다: 서로 다른 종류는 10(STREAM 이 둘). 파일에 종류 macro(`LOCAL_OBJID_TYPE`)가 없는 종류(TIMECB, CONDVAR, CONSOLE)는 자료에 없고, 종류 상수를 직접 넘기는 TIMEBASE 는 `delete`·`stored-name` 만 있고 `lookup`·`create` 가 없다(`framework_namespaces_osal-f34759d.txt:100-102`; 7.0.1 도 같은 꼴). 층의 자체 지우기(`osapi-idmap.c:640`)와 실패한 생성의 되돌림(`:836-846`)은 어느 항목에도 없다(OSAL 자료에 `clear`·`retire` 줄 0). 범위 규칙의 글(“with the kind”)과 스크립트(“with the kind macro”)가 달랐다; `semantics_coverage.md` §7 에 적었다. 규칙의 개정과 자료의 다시 만들기는 뒤 단계다. (2) c5 두 빌드의 검증된 행 수에는 틀린 행이 들어 있다: `CFE_ES_RunLoop` 의 `framework success … value 0 body-derived [FALSE]` 와 `framework failure … value 1 body-derived [TRUE]`(적용된 판 파일마다 둘; 자료는 `return=none`, `cfe_es.h:536-537` 은 TRUE 가 계속)이고, `CFE_ES_ExitApp` 의 `documented-return … doc-collated` 는 void 선언 함수의 문서 반환이다(`cfe_es.h:515`). status space 의 severity 상수 넷은 `failure` 칸에 적혀 있었다(성공 severity 0 도). SEMANTICS 의 `failure` 칸은 “성공 상수가 아닌 body 상수”였고 RESULT_EFFECT 의 outcome 과 다른 정의였다(c1_pre_tx 에서 정보 코드 `CFE_TBL_INFO_UPDATED 1275068430` 등이 SEMANTICS 는 failure, RESULT_EFFECT 는 other). 모두 코드로 고쳤고(outcome class rule revision 1, `static_facts.md` §5w) MC 도구는 아직 앞판이라 이 절의 수는 다시 재지 않았다(§12.6).
 
 ### 8.6 공간 [M]
 
@@ -1249,6 +1254,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **옵션 켠 회차의 비교 둘**(8.0b): 머리의 `sections=` 줄과 섹션 바이트 비교를 선언이 너무 좁게 적었다. 문자열 풀이 정렬된 정규 풀이라 문자열이 더해지면 모든 섹션의 바이트가 바뀐다. 레코드 글 비교로 바꾸었고, 그 첫 스크립트가 dump 의 끝줄을 마지막 섹션에 넣는 결함이 있어(8.0c) 사본으로 고쳐 다시 돌렸다. 앞 스크립트와 출력은 그대로 남겼다.
 - **두 6.4 판의 항목이 c5 의 두 빌드 모두에 적용된다**: cfe-6.4.1 과 6.4.2 의 고정 파일 가운데 바이트가 같은 것이 있어, c5_641 에 6.4.2 항목 41(정의 파일로 24, 선언 머리말로 17)이, c5_642 에 6.4.1 항목 41(같은 갈래)이 함께 적용된다. 같은 API 에 판이 다른 두 줄이 생긴다(`component` 칸으로 구별). 선언의 [I] 에 적었지만 결합 규칙이 판 하나를 고르지 않는다는 것은 적지 않았다.
 - **가벼운 비교 여섯**(relations, order, onextract, plans, onextract_on, plans_on)은 공간 감시 없이 돌렸다. 기록 디렉터리에 글 파일만 쓰고(그 밖에는 order 의 둘째 실행 디렉터리를 지울 뿐) 그때 여유는 2,299,109,376 B 이상이었다. 무거운 비교 넷과 측정은 감시 아래 돌렸다(`df_compare_*.log`).
+- **2026-11-18 검토 뒤 정정: §12.7 `builds-04`.** scratch 의 다섯 빌드 추출과 facts 보기는 공간 감시 기록 없이 돌렸다(남긴 `df_scratch_*` 는 cmake·make 뿐).
 
 ### 8.8 열린 것
 
@@ -1318,7 +1324,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 
 #### 9.0a 옵션 켠 회차 relations 비교의 덧붙임 (그 비교를 다시 돌리기 전에 적고 커밋함) [D][M]
 
-`compare.sh extract_on`(`records/result-flow-20261116/compare_extract_on.txt`, rc 1)에서 c1_pre_tx·c1_post_tx·r2_core 의 `relations.txt` 비교가 선언 §9.0 의 허용 밖으로 나왔다(`compare/on_relations_<b>.txt`: 다른 줄 23/23/12; c5 두 빌드는 허용 안). 나머지 47 줄은 OK 다(basis, facts 머리, 섹션의 레코드 글, facts 보기, extract.txt, args.txt, basis.txt, sha256.txt, relations.log). 선언 밖의 차이이므로 여기서 멈추고 까닭을 적는다.
+`compare.sh extract_on`(`records/result-flow-20261116/compare_extract_on.txt`, rc 1)에서 c1_pre_tx·c1_post_tx·r2_core 의 `relations.txt` 비교가 선언 §9.0 의 허용 밖으로 나왔다(`compare/on_relations_<b>.txt`: 다른 줄 23/23/12; c5 두 빌드는 허용 안). 나머지 47 줄은 OK 다(basis, facts 머리, 섹션의 레코드 글, facts 보기, extract.txt, args.txt, basis.txt, sha256.txt, relations.log). 선언 밖의 차이이므로 여기서 멈추고(2026-11-18 검토 뒤 정정: 기록은 멈추지 않았음을 보인다. 측정 단계가 이 비교의 rc 1 바로 뒤, 이 덧붙임의 커밋 전에 돌았다: §9.7 의 정정, §12.7 `builds-01`) 까닭을 적는다.
 
 - **무엇이 다른가**: 다른 줄은 모두 행의 `layers:` 줄이고, ` sem-unverified(` 앞의 글은 같고, 새 줄의 `sem-unverified(…)` 항목 집합이 앞 줄의 것을 모두 담고 더 많다(예: c1_pre_tx A30 `sem-unverified(OS_FileSysAddFixedMap:agreement, OS_mount:agreement)` → `sem-unverified(OS_DirectoryOpen:agreement, OS_FileSysAddFixedMap:agreement, OS_TranslatePath:agreement, OS_mount:agreement)`). 다른 종류의 줄은 없다(세 빌드의 다른 줄 58 모두 이 꼴; 이 덧붙임을 쓰기 전에 scratchpad 에서 줄마다 확인함).
 - **까닭**: layers 칸의 `sem-unverified(…)` 는 "그 행이 이름 대는 함수"의 검증 안 된 framework 항목이다(`kairos/lib/llvm/relations.cpp:513-519` `row_sem_unverified`, 이름 댄 함수는 행을 쓰는 동안 함수 이름을 쓸 때마다 모임: `:143` `fn_notes_ = &row_fns_`). revision 10 의 새 줄(`absence:` 의 효과 사슬, `callee-check (result flow):`)이 함수를 더 이름 대므로(A30 의 `absence: -17 (no match: CF_CFDP_PlaybackDir_Initiate@… -> OS_DirectoryOpen -> OS_TranslatePath -> …)`) 그 함수들의 항목이 그 집합에 들어간다. 이는 앞 단계의 규칙(§8.0 4: 행이 이름 대는 함수의 항목) 그대로의 결과이고, 선언 §9.0 이 "그 줄을 빼면 나머지는 같은 줄"이라고 적어 이 귀결을 빠뜨렸다. 새 줄을 지운 비교 쪽의 결함이 아니라 선언의 허용이 좁았다.
@@ -1351,6 +1357,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - 갱신 뒤 전체 ctest(`ctest_full.log`): 264 개, 실패 0, 건너뜀 1(`test_probe_anchor_reached`).
 - 확인 수(`ctest_counts.log`, golden 뒤): `test_static_cli` 1,099, `test_static_reasons` 692, `test_static_plan` 195, `test_core_schema` 34,017, `lint_selftest` 114 경우 실패 0, lint 시험 여덟 통과. 선언의 "첫 ctest 의 `test_static_reasons` 666" 은 첫 ctest 를 `-V` 없이 돌려 세지 않았다(§9.7).
 - 단위 점검 `run_unit.sh` 16/16(`unit_tools.txt`), `step2a_tests_unit.sh` 7/7(`unit_step2a.txt`).
+- **2026-11-18 검토 뒤 정정: §12.7 `builds-07`.** 선언 §9.0(과 §8.0a, §10.0)의 “lint 규칙 여덟 clean”은 lint 시험 여덟(규칙 일곱과 selftest)을 뜻한다(§8.3 이 그렇게 적음). 남긴 출력의 `lint <rule>: clean` 줄은 일곱이다.
 
 ### 9.4 바이트 동일성 [M]
 
@@ -1370,6 +1377,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **옵션 있는 경로**: 섹션은 빌드마다 앞 회차의 43 가운데 42 가 같은 레코드 글(FACT_EXPRS 는 앞 회차의 줄이 앞에 그대로, 뒤에 c1_pre_tx 7,604 줄·c5_642 3,715 줄 등이 더해짐), 다른 것 BASIS, 새 것 RESULT_FLOW·RESULT_EFFECT(`compare/on_sections_<b>.txt`; 새 회차의 섹션별 레코드 글 sha256 `section_text_on.txt`). facts 보기는 `[resultflow]`·`[resulteffect]` 와 BASIS 새 항목 넷뿐(`compare/on_<b>.txt`). relations 는 2 번째 줄, 머리 두 줄, 행의 새 줄(c1_pre_tx: `absence:` 63, `handling_label:` 233, `callee-check (result flow):` 55, `… success):` 5), layers 줄의 커진 집합뿐(`compare/on_relations_2_<b>.txt`). order 는 2 번째 줄, 머리 한 줄, child without success 를 담은 줄 53/53/30/84/186, `use the call of` 의 결과 4/6/4/0/2(모두 `unknown(…)` 에서 다른 까닭의 `unknown(…)`), 호출자 쪽 사용 0; `edges.tsv` 는 c5 의 HB-lock 조건 18/48 줄만(`compare/on_order_<b>.txt`, `compare/on_edges_<b>.txt`).
 - **누적 목록과 등록부**: 빌드 전 `ledger_check_pre.txt` 104 행·`tools_check_pre.txt` 43 행 실패 0; 빌드 뒤 `ledger_check_after_build.txt` 104 행, `tools_check_after_build.txt` 44 행 실패 0(deep); 장부 행 열을 더한 뒤 `ledger_check_end.txt` 114 행 실패 0(새 행 `OBS_rf_relcheck`, `OBS_rf_order`, `OBS_rf_off_extract`, `OBS_rf_off_order`, `OBS_rf_on_extract`, `OBS_rf_on_order`, `OBS_rf_plans`, `OBS_rf_plans_off`, `OBS_rf_plans_on`, `TOOLS_20261116j`), `tools_check_end.txt` 44 행 실패 0.
 - 바깥 이름 점검(`--tree`)은 아홉 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다(`name_check_tree.txt`, 11 모두 rc 0).
+- **2026-11-18 검토 뒤 정정: §12.7 `builds-02`.** “43 가운데 42 가 같은 레코드 글, 다른 것 BASIS”는 틀렸다. STRINGS 는 레코드 줄이 없어(`lines=0`) 글로는 같다고 세어졌지만 count 가 다르다(c1_pre_tx: 의미 회차 1,609,737 → 이 회차 3,740,581). 빌드마다 글과 count 가 같은 섹션은 43 가운데 40 이고 다른 것은 STRINGS(풀), BASIS, FACT_EXPRS(뒤에 더해진 행; c5 는 같음)다. 선언 §9.0 은 앞 회차와의 비교에서 STRINGS 의 차이를 허용했으므로 선언 위반은 아니다. 다시 견준 출력: `records/review-fixes-2-20261118/recheck/recheck_rounds.txt`.
 
 ### 9.5 측정 [M]
 
@@ -1395,6 +1403,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
   - c1_post_tx 의 표지 **H**: 같은 lookup(`cf_cfdp.c:1003:23`)의 -17 은 재시도에 닿는다(지연 `OS_TaskDelay` 1011:17, 다시 부르는 호출 1003:23). 고친 판의 처리가 사실로 갈린다.
 - **child without success**: 위치 기반 모름이 c1 12 → 9, r2 9 → 6, c5 5 → 0 으로 줄었다. c5 두 빌드의 가능 다섯은 OSAL 4.1.1 의 `OS_TaskCreate` 가 `pthread_create`(`osal/src/os/posix/osapi.c:645:19`)의 성공 값 0 뒤에 -1 `OS_ERROR` 를 돌려주는 return(`:672`, `:684`; 그 값이 정하지 않는 분기를 지나는 경로)과, 그것을 부르는 `CFE_ES_CreateChildTask` 가 안쪽 호출의 실패 뒤 상수를 돌려주는 return(`cfe/fsw/cfe-core/src/es/cfe_es_api.c:1149`)이다(`rf_on_order/c5_641/order.txt` 의 `child without success: possible:` 줄; HB-lock 조건 18/48 줄이 그 표지를 담음).
 - **HB-await**: 다섯 빌드 모두 호출자 쪽 사용이 0 이라 새 간선이 없다. `use the call of` 의 결과는 c1 4(c1_post_tx 6), r2 4, c5_642 2 가 여전히 `unknown(…)` 이고, 까닭이 `unknown(a budget exit leaves the loop and goes on: the value the function returns after it is not followed)` 로 바뀌었다(예: `CFE_ES_GetTaskFunction` 을 부르는 `cfe_es_apps.c:552:9`, `CFE_ES_MainTaskSyncDelay` 를 부르는 `cfe_es_start.c:208:9`·`:223:9`). 선언 [I] 그대로다.
+- **2026-11-18 검토 뒤 정정: §12.7 `rules-04`, `rules-05`, `rules-01`.** (1) exit-app 이 c5 두 빌드에서 0 인 까닭: 6.4.x 의 의미 자료는 `run-status` 역할을 `CFE_ES_ExitApp` 이 아니라 `CFE_ES_RunLoop` 의 0 번 매개변수(포인터)에 준다(`framework_semantics_cfe-6.4.1.txt:139`; ExitApp 의 `\param` 은 상수를 이름 대지 않음, `cfe_es.h:506`). 엔진은 그 역할만으로 효과를 `exit-app` 이라 불렀다(`serialize.cpp` 옛 `:1296-1297`). c5 의 종료는 `terminal` 로 세어졌고, RunLoop 호출이 exit-app 으로 적힌 행은 0 이라 틀린 효과 행은 없었다. (2) outcome 등급(success·failure·other)은 엔진의 수 범위로 정했고 그 범위 가운데 `0x40000000..0x7FFFFFFF` = other 와 “그 밖은 success” 에는 적힌 근거가 없었다; 작은 양수는 모두 success 였다(c5_641: `CFE_ES_RunLoop … success 1`). (3) 47 의 T? 행에 든 c1_pre_tx 의 A21 은 계획 생성기의 층 차례에서는 글 label R 로 층 1 이다(§11.5 의 정정). (1)(2)는 코드로 고쳤고 MC 도구는 앞판이다(§12.6).
 
 ### 9.6 공간 [M]
 
@@ -1418,6 +1427,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **첫 ctest 의 `test_static_reasons` 확인 수**(선언 666)는 첫 ctest 를 `-V` 없이 돌려 세지 않았다. 시험은 통과했고, golden 뒤 수 692 는 `ctest_counts.log` 에 있다.
 - **T? 의 기준**: 계획의 "지금 125/125/75/47/46" 은 그때의 relations 규칙이 쓴 글에서 센 값이라, 이 단계의 효과는 같은 회차 꼴의 앞 단계 값 (다)와 견주었다(네 수를 모두 남김).
 - **가벼운 비교 여섯**(relations, order, onextract, plans, onextract_on, plans_on)과 `extract_on_rel` 은 공간 감시 없이 돌렸다. 기록 디렉터리에 글 파일만 쓰고 그때 여유는 1,940,000,000 B 이상이었다. 무거운 비교 셋은 감시 아래 돌렸다(`df_compare_*.log`).
+- **2026-11-18 검토 뒤 정정: §12.7 `builds-01`, `builds-03`.** 규칙 어긋남 둘을 적는다. (1) **측정이 덧붙임보다 먼저 돌았다.** `compare.sh extract_on` 이 rc 1 로 끝난 바로 뒤(`df_compare_extract_on.log` 의 끝 2026-11-16T21:07:01.937Z)에 측정 단계가 시작되었다(`df_compare_measure.log` 의 시작 21:07:01.947Z). 덧붙임 커밋 `b2110c6` 은 21:08:53Z 이고 그 커밋에 측정 출력(`compare/measure_*.txt`, `s1_*`)이 들어 있다. 선언 §9.0 은 선언 밖의 차이에서 멈춘다고 적었고 §9.0a 는 “여기서 멈추고”라 적었는데, 기록은 멈추지 않았음을 보인다: 그 글은 틀렸다. 측정은 덧붙임의 허용을 쓰지 않는다. (2) **고친 비교 스크립트를 커밋 전에 돌렸다**(세 빌드, 출력을 남기지 않음; §9.0a 와 이 절이 이미 적음). 남긴 커밋 뒤의 다시 비교(`compare_extract_on_rel.txt`, 5 OK)는 lead 의 판단(2026-11-18)대로 그대로 둔다; 다시 빌드하지 않는다. (3) **scratch 점검 빌드의 감시 기록이 없다.** §9.0 의 공간 줄과 `commands.txt:5-6` 은 감시 아래에서 했다고 적지만 `records/result-flow-20261116/` 에는 `df_scratch_*.log` 도 `scratch_guard/` 도 없다: 그 말은 남긴 출력으로 뒷받침되지 않는다.
 
 ### 9.8 열린 것
 
@@ -1427,6 +1437,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **c5 의 child without success 가능 다섯**: 스레드를 만든 뒤의 실패가 실제로 일어나는 조건(속성·detach 의 실패)을 판정 규칙이 어떻게 다룰지 정해야 한다 [미확인].
 - **J? 16**(c5): 부재 값이 정해지지 않은 버려지는 호출이다. 부재 값의 평가가 뒤 단계다.
 - 이 회차는 중간 회차다: 섹션별 레코드 글 sha256(`section_text_on.txt`)을 남겼고, 압축 보존하지 않았다.
+- **2026-11-18 검토 뒤 정정: §12.7 `rules-02`.** **기초 4 는 A21 에서 여전히 서지 않는다.** 마지막 회차의 A21 행에는 `callee-check (returns not followed): OS_CountSemCreate: OS_NotifyEvent returns the result of <indirect> …; OS_ObjectIdFinalizeNew returns param [operation_status]` 와 `callee-check (set): OS_CountSemCreate: not established (2 returns not followed, 14 constants not shown to reach the return)` 가 그대로 있다(`ll_final_extract/c1_pre_tx/c1_pre_tx/NP/relations.txt:635-636`). 판정 규칙 8.12 (ㄱ)은 두 줄이 모두 없을 때만 기초 4 를 세우고, 설명 스크립트(`env/obs1/explain.py:336-354`)는 `callee-check: <callee> returns`·`(returns not followed)`·`(set)` 줄만 읽는다: 새 줄 `callee-check (result flow, success)`(:648)를 읽는 쪽은 없다. 그래서 A21 의 기초 4 는 `record_insufficient(no success constant of the creator: the callee's returns are not all followed)` 이다. 남은 근거는 `OS_ObjectIdAllocateNew` 를 거쳐 올 수 있는 `OS_NotifyEvent` 의 간접 호출 결과(`osapi-countsem.c:94`)와 개정 9 의 줄들이다(:635 는 :647 이 따라간 FinalizeNew 의 매개변수를 여전히 “not followed” 로 적는다: 개정 9 의 줄은 RETURNS 와 RET_CONSTS 만 읽고 RESULT_EFFECT 를 읽지 않기 때문이며, 그대로 둔다; `static_facts.md` §5u 의 덧붙임). result flow 줄이 어떤 완전성 조건에서 기초 4 를 세울 수 있는지는 판정 규칙의 덧붙임이 정할 일이고(이름 결합을 구현하는 설명 판보다 먼저 커밋), 이 묶음에서는 판정 규칙 파일을 고치지 않았다(lead 의 판단).
 
 ## 10. 루프 플래그 술어와 핸들 단위 잠금 정체성, 마지막 옵션 회차: 추출 옵션 `--loop-defs`·`--lock-handles`, relations rules revision 11, order rules revision 4 (kz-static 빌드 하나)
 
@@ -1529,6 +1540,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **누적 목록과 등록부**: 빌드 전 `ledger_check_pre.txt` 114 행·`tools_check_pre.txt` 44 행 실패 0; 빌드 뒤 `ledger_check_after_build.txt` 114 행, `tools_check_after_build.txt` 45 행 실패 0(deep); 장부 행 열을 더한 뒤 `ledger_check_end.txt` 124 행 실패 0(새 행 `OBS_ll_relcheck`, `OBS_ll_order`, `OBS_ll_off_extract`, `OBS_ll_off_order`, `OBS_ll_final_extract`, `OBS_ll_final_order`, `OBS_ll_plans`, `OBS_ll_plans_off`, `OBS_ll_plans_final`, `TOOLS_20261116k`), `tools_check_end.txt` 45 행 실패 0(deep).
 - **마지막 facts**: `OBS_ll_final_extract` 의 비고가 “the final option-on round: the facts the next steps read (kz-static 9eb1395f, every extraction option …)”이다. 뒤 단계(계획 생성기 다음 판, 주기)는 `/home/user/work/redesign/obs1/ll_final_extract/<b>/<b>/NP/facts.kz` 를 읽는다.
 - 바깥 이름 점검(`--tree`)은 아홉 출력 디렉터리, 사본 디렉터리, 기록 디렉터리에서 깨끗하다(`name_check_tree.txt`, 11 모두 rc 0).
+- **2026-11-18 검토 뒤 정정: §12.7 `builds-02`.** “45 가운데 44 가 같은 레코드 글”과 중간 회차 비교의 “BASIS·FACT_EXPRS 뿐”은 틀렸다: STRINGS 는 레코드 줄이 없어 글로는 같다고 세어졌지만 count 가 회차마다 다르다(c1_pre_tx: 3,740,581 → 3,759,771). 빌드마다 글과 count 가 같은 섹션은 45 가운데 42 이고(c5 는 FACT_EXPRS 가 같아 43) 다른 것은 STRINGS·BASIS·FACT_EXPRS 다. 선언 §10.0 의 중간 회차 비교는 STRINGS 를 빠뜨렸다: 덧붙임 §12.0 (가-1) 을 커밋한 뒤 count 도 견주는 `rounds_cmp_2.py` 로 다시 돌렸다(`records/review-fixes-2-20261118/recheck/recheck_rounds.txt`: 열다섯 OK, 다른 것 STRINGS·BASIS·FACT_EXPRS 뿐). 장부의 네 행(`OBS_objacc_on_extract`, `OBS_sem_on_extract`, `OBS_rf_on_extract`, `OBS_ll_final_extract`)의 비고도 고쳤다. STRINGS 의 내용은 그 비교가 보지 않으므로, 지금의 비고만으로 중간 회차를 다시 만들 수 있다거나 지워도 된다고 읽지 않는다.
 
 ### 10.5 측정 [M]
 
@@ -1551,6 +1563,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **그 대기의 순서 간선**: 기다리는 필드 `CFE_ES_TaskRecord_t.AppId`·`.EntryFunc`, 다른 스레드의 writer 둘(`CFE_ES_StartAppTask` 의 `cfe_es_apps.c:619:9`, `:620:9`), 호출자 `CFE_ES_TaskEntryPoint` 의 호출(`cfe_es_apps.c:552:9`)에서 예산 값 3288334359(`CFE_ES_ERR_APP_REGISTER`, flag 의 루프 앞 값; 몸 안 정의 0 은 뺌)로 guard 를 평가해 그 아래 호출 넷(`:559`, `:560`, `:561`, `:566` 의 간접 호출)이 skip. 그래서 writer → 그 호출들의 HB-await 간선이 c1 두 빌드에 120, r2 에 64 생겼고, 모두 conditional 이다: L1 의 인증(AWAIT_L1 per-field)이 이 루프에 `star-closed` 이고 LOOP_DEFS 의 술어에는 await 인증이 없다(hard 조건 `l1 && …`, `order.cpp` waits). 행의 order.static 은 바뀌지 않았다(conditional 간선은 hard 닫힘에 들지 않고, 이 간선들의 끝은 relations 행의 사용이 아님).
 - **핸들 정체성**: c1·r2 의 행 가운데 `static-instance` 0, `semantics-unverified` 0 이다. `CFE_ES_LockSharedData` 의 핸들 `CFE_ES_Global_t.SharedDataMutex`(그 필드로 1,573 행 가운데 722)는 FIELD_STATUS 의 writer 인스턴스 2(memset `cfe_es_start.c:81` 과 `OS_MutSemCreate` out-pointer `:92`)라 not-static 이고, 의미 자료에 `lock-object` 항목이 없다는 것도 전제 글에 적힌다. 핸들이 전역 객체의 필드가 아닌 행(토큰의 `obj_type` 등) 718. c5 두 빌드는 1 세대 잠금이 LOCK_IDS 에서 이미 static instance 라 행이 없고, HB-lock 18/48 은 모두 `must-static-instance (LOCK_IDS)`.
 - **호출자에 기대는 spawn 규칙의 덜 잡음**(§6.10 의 4): 풀린 entry 를 넘기지 않는 호출자 2/2/3/1/1(c1: `OS_TimeBaseCreate_Impl` 의 `os-impl-timebase.c:350:19`, `OS_TimeBaseCreate` 의 `osapi-timebase.c:141:23`; `ll_final_order/<b>/cdr.txt` 의 `[callers]`). 그런 호출자가 그 호출의 자기 스레드 모두를 만든다고 둔 닫힘에서 값이 달라지는 짝은 r2_core 에서만 461(unordered → fixed_early_proved 239, → hard_before 222), 행 값이 바뀌는 행은 다섯 빌드 모두 0 이다(그 짝들이 든 행에는 다른 unordered·unknown 짝이 남음). 461 은 이 규칙이 unordered 로 남긴 짝의 위 한계이고, 그 가운데 실제로 순서가 있는 짝의 수는 정해지지 않았다 [미확인].
+- **2026-11-18 검토 뒤 정정: §12.7 `semantics-1`, `semantics-7`, `semantics-8`, `semantics-9`.** (1) **HB-await 120(c1)·64(r2)의 writer 스레드는 일부가 틀렸다.** 모든 간선의 from_actor 가 `main (process)` 인데, spawn entry 인 기다리는 스레드 다섯(`BP_CLA_InputTask`, `BP_CLA_OutputTask`, `CFE_ES_BackgroundTask`, `CFE_TIME_Local1HzTask`, `CFE_TIME_Tone1HzTask`)의 task 레코드는 만드는 응용 스레드가 쓴다(`CFE_ES_CreateChildTask` → `CFE_ES_StartAppTask`, `cfe_es_api.c:1329`; 호출자 `BP_AppMain`·`CFE_ES_TaskMain`·`CFE_TIME_TaskMain`). c1 의 120 가운데 그 다섯으로 가는 40 은 그 레코드를 쓰지 않는 스레드에서 온 간선이고, 실제 writer 에서 오는 간선은 빠져 있다; “다른 스레드의 writer 둘”도 틀렸다. 까닭: `order.cpp` 가 writer 의 스레드가 기다리는 스레드들 가운데 하나이면 모두에게서 뺐다. 모든 간선이 conditional 이라 행 값은 달라지지 않는다. (2) **CF 재시도 대기의 awaited 필드**(`CF_Channel_t.sem_id`, `CF_ChannelConfig_t.sem_name`)는 조회 호출의 out 인자와 열쇠다: 그 대기가 기다리는 것은 callee 의 이름 표다. 다른 스레드의 writer 가 0 이라 틀린 간선은 없었다. (3) **핸들 722 행**: `CFE_ES_Global_t.SharedDataMutex` 를 핸들로 가진 722 행 가운데 mutex family(`OS_impl_mutex_internal_record_t.id`)는 383 이고, 337 은 객체 종류 표 잠금(`OS_impl_objtype_lock_t.mutex`), 2 는 timebase 의 `handler_mutex` family 다: 뒤 둘은 그 핸들이 가리키는 잠금이 아니다. 그리고 63 행은 잠금 연산이 아닌 함수의 인자를 핸들로 적었다(`CFE_ES_ExitApp` 의 종료 상태, `CF_DoSuspRes` 의 명령 메시지 등; 검토의 집계). 모두 not-static 이라 order·relations 의 결과는 달라지지 않는다. (4) **LOOP_DEFS 정의 행의 깃발**은 정의마다가 아니라 지역마다 찍혔다(루프 앞 정의의 `under-lock`, 상수 정의의 `call-result`). 넷 다 코드로 고쳤고(`static_facts.md` §5w) MC 도구는 앞판이다. scratch 점검 [I, 근거 아님; 앞판 도구가 낸 마지막 회차 facts 를 고친 order 로 읽음; `records/review-fixes-2-20261118/scratch_measure.txt`]: HB-await 간선 줄 120 → 284(c1 두 빌드), 64 → 116(r2), order.static 이 바뀌는 행 0.
 
 ### 10.6 공간 [M]
 
@@ -1574,6 +1587,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **선언 전의 스냅숏 커밋 하나**(`08760d6`)가 있다. 그 뒤 선언 커밋 `ad30cf0` 에 변수 이름 고침(lint case-ids)이 들어갔고, 빌드·실행·비교는 모두 그 뒤다. scratchpad golden 은 이름 고침 전 빌드로 만들었고(출력이 같은 고침), MC 빌드의 golden 과 `cmp` 같았다.
 - **가벼운 비교도 감시 아래** 돌렸다(앞 단계는 감시 없이 돌림).
 - **호출자에 기대는 spawn 의 측정**은 위 한계(둘째 닫힘)로 쟀다: 실제로 순서가 있는 짝의 수가 아니다.
+- **2026-11-18 검토 뒤 정정: §12.7 `builds-04`.** scratch 의 다섯 빌드 추출과 facts 보기는 공간 감시 기록 없이 돌렸다(남긴 `df_scratch_*` 는 cmake·make 뿐).
 
 ### 10.8 열린 것
 
@@ -1585,6 +1599,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **c5 의 대기**: 6.4.x 의 대기 다섯은 flag·value 규칙에 맞지 않는다(refused-unresolved 3, refused-address-taken 1, not-examined 1). 그 꼴(주소를 넘겨 채우는 지역, 여러 정의)을 받을지는 뒤 단계다.
 - 앞 단계에서 넘어온 열린 것(event type 의 등급, open 효과, c5 의 child without success, J?, 이름 결합)은 그대로다.
 - **마지막 facts**: `ll_final_extract` 가 뒤 단계의 입력이다(장부 `OBS_ll_final_extract`). 계획 생성기의 다음 판(manifest 개정 4)은 이 facts 를 읽는다.
+- **2026-11-18 검토 뒤 정정: §12.7 `semantics-5`, `semantics-6`, `semantics-8`, `semantics-10`.** 이 절이 적지 않은 한계(앞판 도구): flag 의 몸 안 정의가 switch 의 case 아래이면 술어 `1` 의 recognised 가 나왔다(실제 빌드의 인식된 루프 셋은 그 꼴이 아님); RESULT_FLOW 의 guard 행은 주소가 잡힌 지역의 정의를 하나뿐인 도달 정의로 적었고, switch 의 case 아래의 호출에는 guard 행이 없었으며, 같은 callee 의 두 호출을 한 값으로 읽었다(c1_pre_tx·c5_641 에서 영향받은 guard 행 0: 검토의 집계); 핸들의 대체 규칙은 잠금 연산이 아닌 호출의 인자를 핸들로 적었다. 코드로 고쳤다(§5w); call-result 마디에 site 를 싣는 것은 하지 않았다(§12.8).
 
 ### 10.9 세션 재시작 뒤 확인 [M]
 
@@ -1779,6 +1794,7 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 - **경로마다 받을 수 있는 label 과 층(코드, `kairos/lib/llvm/plan_gen.cpp`).** 경로 A 는 H·R·J·T?·E·0(:143–149), 경로 B 는 J·T?·E·0(:179–183), 경로 C 는 F·0·E(:211) 를 받는다. 층 1 은 disposition D07 뿐이고(:246), D07 은 label 이 R 이나 J 이고 order class 가 RELOC 일 때만 선다(:234; ENF·FIXED·COND 의 D01–D03, H 의 D04, 0 의 D05, 짝 없는 D06, J·INDEPENDENT 의 D08 이 먼저 걸러짐, :227–233). 그래서 **경로 C 의 행은 어떤 facts 에서도 층 1 에 들 수 없다**: order class 가 RELOC 이면 층 2, 아니면 층 3 이다. 층 예산 `tier:D07` 은 층 1 까지만 계획하고(:381, :347), 대조 선택은 경로 A 행만 본다(:1335). 따라서 지금까지 만든 `tier:D07` 계획(첫 관측 경로의 것, 개정 2 의 것, 이 단계의 `mv_plans_v4`) 어디에도 경로 C 의 계획된 행이 없는 것은 그 빌드들에 볼 경로 C 관계가 없어서가 아니라 층 규칙과 예산의 조합이 그 경로를 뺀 결과다. 측정이 코드와 맞는다: 다섯 빌드의 경로 C 행에서 본 label 은 E(c1·r2)와 E·F(c5)뿐, 층은 2·3 뿐(c5_642 는 3 뿐)이고 층 차례 계획 행은 0 이다(`compare/paths_<b>.txt` 의 `path C:` 줄).
 - **경로 C 가 닿는 예산.** 층 예산 `tier:directed`(층 2 까지, :382)는 경로 C 의 층 2 행 112/112/79/11/0 을 계획할 것이고(행의 층은 예산과 무관하게 sidecar 에 적힘; 그 예산의 계획은 만들지 않았다), 층 3 의 22/22/36/28/38 은 `all` 이나 `rows:<n>` 에서만 든다. c5 의 label F 16 행(641: 층 2 에 3, 층 3 에 13; 642: 모두 층 3)이 그렇다. 층 예산 `all` 의 측정 계획에서 경로 C 의 규칙은 실제로 site 를 낸다(위 (2): `read-load` 43/43/41/9/8, `lock-result` planned 112/112/79/39/38, c5 의 `read-subscript` planned 32).
 - 경로 B 는 label J 로 층 1 에 든다(계획된 8/8/3/8/7 이 모두 J·RELOC). 경로 B 에는 대조 선택이 없다.
+- **2026-11-18 검토 뒤 정정: §12.7 `rules-01`, `semantics-2`, `semantics-11`.** (1) **A21 의 label 이 한 실행 안에서 둘이다.** c1_pre_tx 의 sidecar 는 `row 17975444d83f6589 A21 tier=1 … label=R … disposition=D07 state=planned`(`mv_plans_v4/c1_pre_tx/plan.side:73`), 값 요청은 `id=A21 label=T?`(`plan.req:5`)다. 층 차례는 행의 글에서 읽은 label(`handling: terminal` 줄 → R, `plan_gen.cpp:126-148`)을 쓰고, 값 요청만 사실에서 유도한 `handling_label:` 줄을 읽는다(같은 행: `handling_label: T? … exit-app at cf_app.c:366:5 is open`). 사실 label 로는 A21 이 D11 이라 `tier:D07` 예산 밖이고 대조 행으로만 계획될 것이다: “층 차례로 계획된 경로 A 행 1 (A21)”은 글 label 에 기댄 값이다. lead 의 판단(2026-11-18): 층 예산 `tier:D07` 은 글 label 을 그대로 쓴다(앞 예산의 다시 만들기 점검용); 생성기는 sidecar 행 줄에 두 label 을 쓴다(`label=`·`fact-label=`, plan rules revision 4, 소스만); 사실 label 로 계획을 다시 만들지 않으며, handling label 을 읽지 않는 선택 규칙은 뒤 단계다. (2) **c5 두 빌드의 대조 15 가운데 13(A20–A32)은 지우는 호출 때문에 (나)에 들었다.** 그 행들의 `creator:` 줄은 `cfe_sb_priv.c:123` 의 `CFE_SB_DeletePipeWithAppId` 다(`mv_plans_v4/c5_641/plan.kzs:533-534` 의 `creator-call` site): 그 호출은 pipe 를 지우고(`cfe_sb_api.c:431` `PipeId = CFE_SB_INVALID_PIPE`), 만드는 호출 `CFE_SB_CreatePipe`(`:235`)는 그 행들의 site 가 아니다. 위 글의 “조회·생성이 `CFE_SB_DeletePipeWithAppId` 와 …” 도 그 함수가 지운다는 것을 적지 않았다. relations rules revision 12(소스만)는 그런 호출을 생성자 site 로 세지 않는다. scratch 점검 [I, 근거 아님; `scratch_measure.txt`]: c5 두 빌드의 (나) 15 → 2(A20–A32 가 빠짐), 그 13 행의 order.static unordered → unknown, c1·r2 의 대조 집합은 그대로(5/5/4). **C5 의 계획과 행마다의 기대는 이 고침이 든 도구로 다시 만든 뒤에 커밋한다.** (3) **`event-send` planned 3(c1_pre_tx 의 관계 1)**: site 셋 가운데 조회의 실패·부재 값의 효과는 하나(`cf_cfdp.c:997`)이고, 둘(`:975`, `:985`; `CFE_SB_CreatePipe`·`CFE_SB_SubscribeLocal` 실패의 이벤트)은 성공 값의 open 효과다(다음 채널의 반복에서 닿음; site 의 ref 가 `on success 0 … (open: …)` 로 적음). plan rules revision 4(소스만)는 뒤 둘을 `event-send-other-outcome` need 로 따로 둔다.
 
 ### 11.6 공간 [M]
 
@@ -1805,6 +1821,7 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 - **선언에 없던 것 하나가 계획에 나왔다**: r2_core 의 `object-delete` planned 3(`OS_rmfs`). 선언의 [I] 는 c1 과 c5 만 적었다. 측정으로 적는다.
 - 설계 연구는 대기 규칙을 “대기의 조건 읽기와 나가는 갈래”로 적었다. 나가는 갈래 가운데 조건 출구는 문장이 아니어서 site 가 아니라 gap 이다(`record_insufficient(the exit is no statement)`); 선언 §11.0 이 그렇게 적었고 c1_post_tx 에서 하나 나왔다.
 - 플러그인은 `kzs-sites 4` 를 읽지 않으므로 이 계획들로 파생 빌드도 부팅도 하지 않았다. 계획의 site 가 실제로 묶이는지(GCC 의 호출 열과 `col=`·`nth=` 의 대응 포함)는 재지 않았다 [미확인].
+- **2026-11-18 검토 뒤 정정: §12.7 `builds-05`.** 이 단계는 kz-static 을 바꾸고도(`9eb1395f` → `1a47abd0`) relations·order 의 기본 경로 회귀를 선언하지도 돌리지도 않았다; “추출·relations·order 규칙은 그대로”는 소스 차이와 fixture 시험에 기댄 말이었다. 2026-11-18 에 그 도구로 돌렸다(§12.0 (가), §12.4): T8CF facts 와 마지막 옵션 회차 facts 의 relations·키·order·간선·보고 71 점검이 `ll_relcheck`·`ll_order`·`ll_final_order` 와 `cmp` 같다. 다시 뽑기는 돌리지 않았다.
 
 ### 11.8 열린 것
 
@@ -1818,6 +1835,7 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 - **계획이 자료 파일의 절대 경로를 적는다**(site 의 `ref=` 와 sidecar 의 `lifetime`·`namespace-data` 줄). 다시 만들기는 같은 경로에서 바이트로 같았다. 주기의 연결 점검이 이 줄을 어떻게 견줄지는 그 단계의 선언에서 정한다.
 - `compare.sh parse_v4` 의 `head -1` 결함은 스크립트에 그대로 있다(선언과 함께 커밋된 스크립트라 고치지 않고 `parse_v4_full.sh` 를 더함). 다음 단계가 이 스크립트를 옮겨 쓸 때는 끝까지 읽는 쪽을 쓴다.
 - 앞 단계에서 넘어온 열린 것(의미 자료의 `lock-object` 역할, LOOP_DEFS 술어의 L1 인증, event type 의 등급, open 효과, c5 의 child without success, J?, 이름 결합의 구현)은 그대로다.
+- **2026-11-18 검토 뒤 정정: §12.7 `rules-01`, `rules-03`, `rules-06`, `builds-08`, `builds-09`.** (1) 위 넷째 항목(“이름 공간 자료에 항목이 없는 삭제 자리”)의 까닭이 틀렸다: `OS_TimeBase*` 의 세 대조 행(c1 의 A22·A26, r2_core 의 A5)은 TIMEBASE 항목에 **delete 줄이 있는데도**(`framework_namespaces_osal-f34759d.txt:101`) 계획되지 않았다. 그 항목에 `lookup`·`create` 줄이 없어(종류 상수를 직접 넘기는 파일; §8.5 의 정정) 행의 조회·생성 callee 와 맞는 항목이 없기 때문이다. c5 의 SB pipe 13 행은 relations rules revision 12 뒤에는 `key clearing:` 줄의 호출이 object-delete site 가 된다(소스만). (2) A21 의 두 label(§11.5 의 정정). (3) `compare_measure.txt` 의 빌드별 `rc=0` 은 근거가 아니다(`compare.sh:45-46` 이 `|| rc=1` 뒤의 `$?` 를 찍음; 끝 줄의 rc 만 뜻이 있음). 다시 돌림: `recheck/recheck_measure.txt`(다섯 빌드 rc 0, 남긴 파일과 같은 바이트). (4) `compare_plans.py` 의 rules 줄 허용은 선언보다 넓었다(쓰인 적 없음): `recheck/recheck_plans.txt`(쉰다섯 “only declared differences”). (5) 판정 규칙 8.7 의 입력 가운데 아직 없는 것은 §12.9 의 표.
 
 ## 12. 검토 뒤 고침 (둘째 묶음) (2026-11-18)
 
@@ -1843,3 +1861,132 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 1. **중간 회차의 섹션 비교(`builds-02`)와 선언 §10.0 의 덧붙임(2026-11-18).** `records/loop-lock-20261116/rounds_cmp.py:44-45` 는 섹션의 레코드 글 sha256 만 견주고 count 를 보지 않는다. STRINGS 섹션은 kz-dump 글에 레코드 줄이 없어(모든 회차에서 `lines=0`, `text_sha256=e3b0c442…` = 빈 글의 sha256) 그 비교에서 늘 “같은 레코드 글”로 세어졌지만, 그 count(문자열 풀의 바이트 수)는 회차마다 다르다(c1_pre_tx: `records/semantics-20261116/section_text_new_2.txt` 1,609,737, `records/result-flow-20261116/section_text_on.txt` 3,740,581, `records/loop-lock-20261116/section_text_final.txt` 3,759,771). 선언 §10.0 의 중간 회차 비교는 “다른 섹션은 BASIS 와 FACT_EXPRS 여야 한다; 그 밖은 덧붙임”이라 적어 STRINGS 를 빠뜨렸다. **덧붙임**: 중간 회차와 마지막 회차의 섹션 비교에서 다를 수 있는 섹션은 STRINGS(풀은 참조된 문자열을 한 번씩 담으므로 뒤 옵션이 더한 섹션의 문자열만큼 커진다; 레코드 줄이 없어 글로는 견줄 수 없고 count 가 다름), BASIS(뒤 옵션의 항목과 도구 정체성), FACT_EXPRS(뒤 섹션이 뒤에 더한 뿌리)다. 그 밖의 섹션은 레코드 글과 count 가 모두 같아야 한다. `recheck/rounds_cmp_2.py`(count 도 견줌; 설명된 차이에 STRINGS). 선언: 열다섯(회차 셋 × 빌드 다섯) 모두 OK, 회차의 섹션 42/43/45 가운데 글과 count 가 같은 것 39/40/42 이고(c5 의 결과 흐름 회차는 FACT_EXPRS 가 같아 43), 다른 것은 STRINGS·BASIS·FACT_EXPRS 뿐 [I: 돌리기 전]. STRINGS 의 내용이 같은지는 이 비교가 보지 않는다(풀의 바이트는 섹션별 글에 없음): 풀을 가리키는 모든 레코드의 글이 같다는 것이 근거다.
 2. **계획 비교의 허용(`builds-08`).** `compare_plans.py`(의미·결과 흐름·루프 단계와 manifest 단계의 사본, `:23-24`)는 rules 줄에서 `plan rules revision [12]` 와 `relations rules revision [0-9]` 의 차이를 받는데, 선언 §8.0–§11.0 은 rules 줄의 차이를 허용하지 않았다. `recheck/compare_plans_2.py` 는 그 두 무늬를 뺀다(rules 줄과 manifest 첫 줄은 두 쪽이 같아야 함). 그 단계들이 견준 계획 짝 열하나(각각 다섯 빌드)를 다시 견준다: `objacc_plans`↔`sem_plans`, `objacc_plans_off`↔`sem_plans_off`, `objacc_plans_on`↔`sem_plans_on`, `sem_plans`↔`rf_plans`, `sem_plans_off`↔`rf_plans_off`, `sem_plans_on`↔`rf_plans_on`, `rf_plans`↔`ll_plans`, `rf_plans_off`↔`ll_plans_off`, `rf_plans_on`↔`ll_plans_final`, `ll_plans`↔`mv_plans_v3_t8cf`, `ll_plans_final`↔`mv_plans_v3_final`. 선언: 쉰다섯 모두 “only declared differences” [I: 넓은 허용이 쓰인 적이 없다는 검토의 읽기].
 3. **manifest 단계의 측정 줄(`builds-09`).** `records/manifest-v4-20261116/compare.sh:45-46` 은 `python3 … || rc=1` 뒤에 `rc=$?` 를 찍어, `measure_v4.py` 가 실패해도 빌드별 줄은 `rc=0` 이다. `recheck.sh measure` 는 상태를 먼저 잡아 찍고, 새로 낸 `recheck/measure/measure_<b>.txt` 를 남긴 `compare/measure_<b>.txt` 와 `cmp` 한다. 선언: 다섯 빌드 모두 rc 0 이고 같은 바이트.
+
+#### 12.0 (나) kz-static 빌드: 선언하지 않았고 빌드하지 않았다 [M]
+
+이 묶음의 코드 고침은 kz-static 빌드 하나로 싣기로 되어 있다(§12.0 (다)의 (a)). **그 빌드의 선언은 이 절을 쓰는 지금 적지 않았고, MC 의 kz-static 은 다시 빌드하지 않았다.** MC 의 도구는 그대로 `1a47abd0…` 이다. 한 것은 소스의 고침과 fixture·시험, 그리고 scratch 점검 빌드(감시 아래, `scratch_guard/`)까지다. 까닭과 남은 차례는 §12.8·§12.9 에 적는다. 따라서 §12.1 의 코드는 **MC 의 바이너리보다 앞선 소스**이고, 이 절 아래의 [I] 값은 scratch 점검 빌드의 것(근거 아님)이다.
+
+#### 12.0 (다) 이 묶음을 묶는 lead 의 판단 (2026-11-18)
+
+(a) 코드 고침은 kz-static 빌드 하나에 모두 싣는다; 선언을 빌드 전에 커밋하고, scratch 점검 빌드를 감시 아래 먼저 하며 그 감시 기록을 기록 디렉터리에 옮긴다; 다시 빌드하기 전에 지금 도구로 `builds-05` 가 찾은 기본 경로 회귀를 돌린다; 빌드 뒤 다섯 빌드의 옵션 없는 경로와 마지막 옵션 회차, relations·order, 대조 선택이 든 개정 4 계획을 선언과 견준다. (b) `rules-01`: 층 예산 `tier:D07` 은 글 label 을 그대로 쓰고, 생성기는 sidecar 행 줄에 두 label 을 쓴다; 사실 label 로 계획을 다시 만들지 않고 새 선택 규칙도 만들지 않는다. (c) `rules-02`·`rules-06`: 결과 문서의 정정과 날짜 붙은 입력 표, `static_facts.md` 의 적음만; 판정 규칙 파일은 고치지 않는다. (d) `rules-03`: 문서만; 범위 규칙과 자료는 고치지 않는다. (e) `rules-04`·`rules-05`·`rules-07`: 코드로. 값 영역의 종류만으로 효과를 이름 대지 않고, success·failure 행은 return kind 가 status 인 항목만, outcome 등급의 정의는 SEMANTICS 와 RESULT_EFFECT 에 하나. (f) `semantics-1`, `semantics-3`–`semantics-10`: 코드와 검토가 쓴 꼴마다의 fixture; `semantics-2`: 만들기와 지우기를 저장 값이나 이름 공간 자료로 가르고 엔진에 함수 이름을 넣지 않는다; `semantics-11`: 부재·실패 값의 효과 호출과 성공 값의 open 효과를 따로. (g) `builds-01`: 남긴 커밋 뒤의 비교는 그대로; `builds-02`–`builds-10`: 스크립트는 새 이름의 사본으로 고쳐 새 출력에 다시 돌린다. (h) 공간: 지우는 것은 스스로 만든 scratch 뿐. (i) 둘째 에이전트가 읽기만 하며 병행한다.
+
+### 12.1 바뀐 것 [F]
+
+- **커밋 차례**: `fb1d9ff`(선언 §12.0 (가)와 그 스크립트; 돌리기 전), `8bb5a81`(회귀 출력, 덧붙임 §12.0 (가-1), 고친 스크립트 셋; 돌리기 전), 그리고 이 절의 커밋(다시 돌린 출력, 소스의 고침, 문서, 장부).
+- **kairos 소스(MC 바이너리보다 앞섬; 빌드 전의 스냅숏)**: 새 `lib/llvm/outcome.hpp`(outcome class rule revision 1); `semantics.cpp`(return kind 행, status 항목만 success·failure, severity 상수의 행, 값을 돌려주지 않는 본문의 문서 반환은 unverified); `serialize.cpp`(RESULT_EFFECT 의 outcome 을 규칙으로, `exit-app` 은 terminal 표지가 있을 때만, lock handle rules revision 2, BASIS `extract.outcome_classes`); `ast_fn.cpp`(decay 의 조건·쉼표·안쪽 배열, switch 추적, LOOP_DEFS 의 switch 거절과 행별 깃발, guard 의 `@addr-taken`·switch 항·not-computed; 옛 `rf_class` 삭제); `finalize.cpp`(가변 인자의 사유); `relations.cpp`(revision 12: key-clearing call; revision 13: outcome 규칙); `order.cpp`(revision 5·6·7: 기다리는 스레드마다의 writer, awaited 필드, not-computed guard); `plan_gen.{hpp,cpp}`(plan rules revision 4: `fact-label=`, key-clearing 호출의 object-delete site, `event-send-other-outcome`); `result_flow.cpp`(개정 문자열).
+- **fixture 와 시험**: `tests/static/fixtures/{objaccess,resultflow,looplock,relcallback}.c` 의 끝에 검토가 쓴 꼴(조건·쉼표·배열의 배열·가변 인자; 별칭 저장·주소를 받는 호출·switch·같은 callee 두 호출; switch 아래의 flag·인자만 읽는 재시도·스스로 기다리는 writer 스레드·두 곳에서 unlock 하는 함수를 거치는 release·run-status 포인터 점검·void 함수의 문서 반환; 이름으로 지우는 delete), 손으로 쓴 시험 자료 `data/looplock_fixture/framework_semantics_fixture-lock.txt`(status space 와 항목 둘), `static_golden.cpp`(대상 넷), `test_static_cli.cpp`(확인 1,151 → 1,184 [I]), `test_static_plan.cpp`(275 → 277 [I]). **golden 은 고치지 않았다**(HEAD 그대로; scratch 도구가 낸 것은 `records/review-fixes-2-20261118/golden_scratch/` 에 [I] 로 둠).
+- **문서**: `kairos/docs/static_facts.md` §5w(새)와 §5t·§5u·§5v 의 날짜 줄, `plan_manifest.md`(§8 의 문장 `rules-08`, §9 새), `semantics_coverage.md` §7 의 날짜 붙은 제외 목록. 이 결과 문서 §7–§11 의 날짜 붙은 정정 19 곳. 장부의 네 행 비고(`builds-02`).
+- **바꾸지 않은 것**: `include/`(스키마 개정 12 그대로), `semantics/` 의 자료와 범위 규칙, 판정 규칙 파일, 설명 스크립트, `one_build.sh`, 런타임·계측, MC 의 모든 바이너리.
+
+### 12.2 빌드 [M]
+
+- **MC 빌드: 하지 않았다.** kz-static `1a47abd05b8289bce90e6da8906d3b84d9bec48befc99634295d5350cd261086` 그대로(`prebuild/prebuild_regress.txt` 첫 줄; 끝 점검 `tools_check_end.txt`). 도구 사본도 만들지 않았다.
+- **scratch 점검 빌드**(scratchpad, LLVM Release 구성, 모든 cmake·make·ctest·실행을 감시 아래; 기록 `scratch_guard/` 의 `0NN_*.log`): 첫 make 는 새 헤더의 include 잘못으로 실패(rc 2), 고친 뒤 rc 0. 가장 큰 dip 은 `scratch_guard/` 의 `dip=` 줄에 있다(첫 kz-static 빌드 144,699,392 B). 빌드 트리는 지웠다. scratch 출력은 근거가 아니다.
+
+### 12.3 시험 [M]/[I]
+
+- **MC 의 전체 ctest: 돌리지 않았다**(빌드가 없음). MC 의 지금 `kz_lint`(다시 빌드하지 않은 `3d4d5a8f…`)로 바뀐 소스 트리의 lint 만 돌렸다 [M]: lint 시험 여덟 통과(`mc_lint_present_tool.log`: selftest 114 경우 실패 0, 규칙 일곱 clean). 주의: fixture 넷과 시험 자료가 바뀌었으므로, 지금 MC 의 (앞판) 시험 프로그램으로 ctest 를 돌리면 golden 시험이 통과하지 않는다 [I: 돌려 보지 않음]. 선언된 빌드에서 첫 ctest 의 실패를 이름으로 적고 golden 을 갱신하는 차례다.
+- **scratch 의 정적·lint 시험** [I, 근거 아님; `scratch_ctest_static.log`, 다시 만든 빌드의 `scratch_ctest_static_2.log`]: scratch golden 으로 `test_static_cli` 1,184, `test_static_reasons` 763, `test_static_plan` 277 확인 통과, `lint selftest` 114 경우 실패 0, lint 규칙 일곱 clean. scratch 에서 만들지 않은 시험 프로그램 아홉(`test_static_{expr,flow,recipe,gitrev,unroll,wrappers,link,elf32}`, `test_trace_static_closure`)은 돌지 않았다.
+- scratch golden 이 HEAD 와 다른 것 17(`golden_scratch.sha256`): `relations`, `relations_np`, `relpaths_np`, `relsound_np`, `relincomplete_np`, `relincomplete_cut_np`, `relcallback_np`, `order_np`, `objaccess`, `objaccess_off`, `semantics_np`, `resultflow_np`, `resultflow_order_np`, `looplock_np`, `looplock_order_np`, `plangen_np.plan.golden`, `planv4_np.plan.golden`. 선언된 빌드의 첫 ctest 에서 실패할 시험은 이 golden 들의 `static_golden_*` 열다섯과 `test_static_plan`·`test_static_reasons`(golden 을 읽음) [I].
+- 저장소의 단위 점검 [M]: `env/tools/tests/run_unit.sh` 17/17(`unit_tools.txt`), `env/redesign/step2a_tests_unit.sh` 7/7(`unit_step2a.txt`).
+
+### 12.4 바이트 동일성 [M]
+
+| 비교 | 결과 |
+|---|---|
+| 지금 도구(`1a47abd0`)의 기본 경로 회귀 (`prebuild/prebuild_regress.txt`) | 71 OK: 도구 확인; 다섯 빌드의 T8CF `relations.txt`·`keys.txt` = `ll_relcheck`, `order.txt`·`edges.tsv` = `ll_order`; 마지막 옵션 회차의 `order.txt`·`edges.tsv`·`cdr.txt`·`relations.txt`·`keys.txt` = `ll_final_order`(relations 는 다시 뽑기의 것과도 같음); 로그 빈 파일 |
+| 중간 회차의 섹션, count 도 (`recheck/recheck_rounds.txt`) | 15 OK: 글과 count 가 같은 섹션 39/40/42(회차 objacc/sem/rf; c5 의 rf 회차 43), 다른 것 STRINGS·BASIS·FACT_EXPRS 뿐 |
+| 계획 짝 열하나 × 다섯 빌드, rules 줄 허용 없이 (`recheck/recheck_plans.txt`) | 55 “only declared differences” |
+| manifest 단계의 측정 다시 (`recheck/recheck_measure.txt`) | 다섯 빌드 rc 0, 남긴 `compare/measure_<b>.txt` 와 같은 바이트 |
+
+- 누적 목록과 등록부(끝 점검): `ledger_check_end.txt` 135 행 실패 0, `tools_check_end.txt` 49 행 실패 0(deep). 등록부(`TOOLS.tsv`)는 바꾸지 않았다(도구가 바뀌지 않음). 새 장부 행 `OBS_rf2_pre_relcheck`, `OBS_rf2_pre_order`, `OBS_rf2_pre_final_order`.
+- 빌드 뒤의 비교(다섯 빌드의 옵션 없는 경로, 마지막 옵션 회차, relations, order, 개정 4 계획)는 **하지 않았다**(빌드가 없음).
+
+### 12.5 측정 [M]/[I]
+
+- [M] 지금 도구의 출력은 앞 단계의 것과 같다(위 표): 그 도구가 낸 relations·order 의 수는 §10.5·§11.5 의 수 그대로다(정정은 그 수의 **읽기**에 대한 것이다).
+- [I, 근거 아님] scratch 점검 빌드의 kz-static 으로 **남긴 facts**(T8CF 와 앞판 도구의 마지막 옵션 회차)를 읽은 것(`scratch_measure.txt`; 다시 뽑지 않았으므로 추출 쪽 고침의 효과는 없음):
+  - c5_641·c5_642: 경로 A 대조 집합 (나) 15 → 2(A20–A32 가 빠짐; `key clearing:` 줄 26), 그 13 행의 order.static `unordered` → `unknown`(짝이 없어짐). c1 두 빌드와 r2_core: 행 수·대조 집합 (가) 1/1/0·(나) 5/5/4 그대로, order.static 이 바뀌는 행 0.
+  - HB-await 간선 줄(마지막 회차 facts): c1 두 빌드 120 → 284, r2_core 64 → 116, c5 0. T8CF facts 에서는 0 → 0.
+  - c1 의 `OS_common_record_t.name_entry` namespace: creators 53 → 47, key-clearing calls 6(조회 행과 같은 partition 이 아니어서 행의 줄은 0).
+- **재지 못한 것**(다시 뽑기가 필요): 고친 outcome 규칙 아래의 handling label 과 그 움직임(lead 의 판단 (e)), exit-app·terminal·event 의 수, SEMANTICS 의 검증된 행 수, LOCK_HANDLES 의 핸들별 행(722 의 나뉨이 고쳐지는지), decay 의 상태 움직임, 개정 4 계획의 site·need 수.
+
+### 12.6 공간 [M]
+
+| 시점 (UTC, 2026-11-18) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 시작 | 1,523,216,384 | (둘째 에이전트의 scratch 빌드가 병행: 여유가 이 묶음과 무관하게 오르내림) |
+| 09:24:42 | 1,354,162,176 | 회귀 스크립트를 쓴 뒤 |
+| 09:26:12 | 1,322,921,984 | 기본 경로 회귀 끝(dip 30,969,856; 출력 30,641,951 B 를 남김) |
+| scratch 점검 빌드 중 | 가장 낮은 값은 `scratch_guard/*.log` 의 `lowest=` | 첫 kz-static 빌드 dip 144,699,392 |
+| scratch 빌드를 지운 뒤 | 1,466,961,920 | |
+
+- 하한(314,572,800)을 넘지 않았다. 감시 기록: `df_prebuild_regress.log`, `df_recheck_{rounds,plans,measure}.log`, `scratch_guard/`(모두 `verdict=completed`).
+- 남긴 출력(장부 행): `rf2_pre_relcheck` 7,630,029, `rf2_pre_order` 7,058,482, `rf2_pre_final_order` 15,953,440 B. 지운 것: 스스로 만든 scratch(점검 빌드 둘, scratch 실행의 출력)뿐.
+
+### 12.7 지적마다: 무엇이 틀렸고, 무엇을 바꿨고, 무엇을 다시 돌렸는가
+
+“소스” = kairos 소스에 고쳤고 scratch 로 시험했으나 **MC 도구에는 아직 없음**(§12.0 (나)). 
+
+| id | 무엇이 틀렸나 | 무엇을 바꿨나 | 다시 돌린 것과 증거 |
+|---|---|---|---|
+| `rules-01` | 계획 생성기가 한 실행에서 A21 에 label 둘(sidecar R, 값 요청 T?)을 주고, 층 차례가 글 label 에 기대는데 §11.5 가 적지 않았다 | 문서: §9.5·§11.5·§11.8 의 정정. 소스: sidecar 행 줄에 `label=` 과 `fact-label=`(plan rules revision 4); 층 차례는 그대로(lead (b)) | `mv_plans_v4/c1_pre_tx/plan.side:73`, `plan.req:5` 대조; scratch fixture golden 의 `A1 … label=R fact-label=T?`(`golden_scratch/planv4_np.plan.golden`) [I]. 다섯 빌드의 계획은 다시 만들지 않음 |
+| `rules-02` | A21 의 기초 4 가 여전히 서지 않는데(개정 9 의 두 줄이 남음, result flow 줄을 읽는 쪽 없음) §7–§11 이 적지 않았다 | 문서: §9.8 의 정정, `static_facts.md` §5u 의 날짜 줄(개정 9 의 줄을 두는 까닭). 판정 규칙 파일은 고치지 않음(lead (c)) | `ll_final_extract/c1_pre_tx/c1_pre_tx/NP/relations.txt:635-636`, `:647-648`; `env/obs1/explain.py:336-354` |
+| `rules-03` | 이름 공간 자료가 층이 다루는 이름 있는 종류의 전부가 아니고(종류 macro 에 기댐), §8.5 의 11 은 항목 수이며, §11.8 이 계획되지 않은 대조 행의 까닭을 틀리게 적었다 | 문서: §8.5·§11.8 의 정정, `semantics_coverage.md` §7 의 제외 목록. 규칙·자료는 고치지 않음(lead (d)) | `framework_namespaces_osal-f34759d.txt:100-102`; `env/tools/semantics_scan.py:585,638,640`; `mv_plans_v4/c1_pre_tx/plan.side:1105-1106` |
+| `rules-04` | 엔진이 자료의 종류 `run-status` 를 효과 `exit-app` 으로 바꿨고, return kind none 인 `CFE_ES_RunLoop` 에 success·failure 행을 썼다; §9.5 의 c5 0/0 에 설명이 없었다 | 소스: `exit-app` 은 terminal 표지가 있는 호출에만; success·failure 행은 status 항목만(그 밖은 `none` 칸). 문서: §8.5·§9.5 의 정정, §5w | scratch fixture [I]: `is_running`(포인터 점검, return=none)의 행이 `framework none … returned constant (…no outcome class)`, application exit 0(`test_static_cli` 의 새 확인). c1 의 `CFE_ES_ExitApp` 호출 14 는 모두 terminal-op(마지막 회차 facts 의 calls 절)이라 c1 의 exit-app 은 남을 것 [I]. 다섯 빌드는 재지 않음 |
+| `rules-05` | RESULT_EFFECT 의 outcome 등급이 엔진의 수 범위였고(근거 없는 부분 포함) SEMANTICS 의 failure 칸과 다른 정의였다 | 소스: outcome class rule revision 1(`outcome.hpp` 하나; status-space 행의 성공 상수와 severity mask; 없으면 이름 붙은 대체; BASIS 에 규칙 이름); relations rules revision 13. 문서: §5w | scratch fixture [I]: `extract.outcome_classes = outcome class rule revision 1 … status spaces of these facts 1: […success 0, severity mask 3221225472]`. **handling label 의 재측정은 하지 못했다**(다시 뽑기 필요, §12.9) |
+| `rules-06` | 판정 규칙 8.2 의 입력 셋((다)의 종류별 writer, (라)의 생성 쪽 종류 값, (나)의 이름 공간 한도)이 아직 없는데 §7–§11 이 열린 것으로 적지 않았다 | 문서: §12.9 의 날짜 붙은 입력 표(8.7 을 줄마다), §7.8·§11.8 의 정정. 판정 규칙 파일은 고치지 않음 | `relations.txt:650`; `mv_plans_v4/c1_pre_tx/plan.side:1059-1062,1104`; `plan.kzs:845,932`; `framework_namespaces_osal-f34759d.txt:59` |
+| `rules-07` | severity 상수가 모두 failure 칸에 있었고, void 함수의 문서 반환이 collated 로 세어졌다 | 소스: severity 상수는 `status-space none … [severity constant …]`; 본문이 값을 돌려주지 않는 함수의 문서 반환은 `unverified` + `doc-declaration mismatch`. 훑기 스크립트는 고치지 않음(범위 규칙의 개정이 뒤 단계) | scratch fixture [I]: `exit_like` 의 행(`documented-return … unverified … (doc-declaration mismatch: …)`), `!has("status-space failure")` |
+| `rules-08` | “No API or kind name is in the generator” 가 글자 그대로는 틀렸다(`memchr`·`strnlen`·`kz_rt_posix_create`) | `plan_manifest.md` §8 의 문장을 좁히고 날짜 붙은 괄호 | `plan_gen.cpp` 의 그 세 이름(`grep`); framework API 이름은 없음 |
+| `builds-01` | 결과 흐름 단계가 선언 밖의 차이에서 멈추지 않았고(측정이 덧붙임 전에 돎), 고친 스크립트를 커밋 전에 돌렸다; §9.0a 는 멈췄다고 적었다 | §9.7 에 어긋남 둘, §9.0a 의 글에 날짜 붙은 정정. 남긴 커밋 뒤의 비교는 그대로(lead (g)) | `df_compare_extract_on.log` 의 끝 21:07:01.937Z, `df_compare_measure.log` 의 시작 21:07:01.947Z, 커밋 `b2110c6` 21:08:53Z |
+| `builds-02` | §9.4·§10.4 와 장부 비고가 STRINGS 를 “같은 레코드 글”로 셌다(count 가 다름); 선언 §10.0 의 중간 회차 비교가 STRINGS 를 빠뜨렸다 | 덧붙임 §12.0 (가-1); `recheck/rounds_cmp_2.py`(count 도 견줌); §9.4·§10.4 의 정정; 장부 네 행의 비고 | `recheck/recheck_rounds.txt` 15 OK |
+| `builds-03` | 결과 흐름 단계의 scratch 점검 빌드에 감시 기록이 없다 | §9.7 에 적음. 이 묶음은 scratch 의 모든 cmake·make·ctest·실행을 감시 아래 두고 기록을 남김 | `records/result-flow-20261116/` 에 `df_scratch_*` 없음; 이 묶음 `scratch_guard/` |
+| `builds-04` | 세 단계의 scratch 추출과 facts 보기에 감시 기록이 없다 | §7.7·§8.7·§10.7 의 한 줄씩 | 그 단계들의 `df_scratch_*` 의 `cmd=`(cmake·make 뿐) |
+| `builds-05` | manifest 단계가 kz-static 을 바꾸고 relations·order 의 기본 경로 회귀를 돌리지 않았다 | 선언 §12.0 (가)와 `prebuild/prebuild_regress.sh`; §11.7 의 정정 | `prebuild/prebuild_regress.txt` 71 OK; 장부 행 셋 |
+| `builds-07` | 선언들의 “lint 규칙 여덟”은 시험 여덟(규칙 일곱과 selftest)이다 | §9.3 의 한 줄 | `records/loop-lock-20261116/ctest_counts.log` 의 `lint <rule>: clean` 일곱 줄 |
+| `builds-08` | `compare_plans.py` 의 rules 줄 허용이 선언보다 넓었다(쓰인 적 없음) | `recheck/compare_plans_2.py`(두 무늬를 뺌) | `recheck/recheck_plans.txt` 55 “only declared differences” |
+| `builds-09` | manifest 단계 `compare.sh measure` 의 빌드별 `rc=$?` 가 늘 0 이다 | `recheck/recheck.sh measure`(상태를 먼저 잡음); §11.8 의 정정 | `recheck/recheck_measure.txt`: 다섯 빌드 rc 0, 같은 바이트 |
+| `builds-10` | 객체 접근 단계의 “110 OK” 에 빌드 직후의 남긴 출력이 없다 | §7.2 의 정정(`resume_check.txt` 와 그 시각을 가리킴) | `records/object-access-20261116/resume_check.txt` |
+| `semantics-1` | HB-await 간선의 writer 스레드가 spawn entry 로 가는 간선에서 틀렸다(스스로 기다리는 writer 스레드를 모두에게서 뺌) | 소스: order rules revision 5(기다리는 스레드마다의 writer, 짝마다 간선); fixture `parent_entry`. 문서: §10.5 의 정정, §5w | scratch [I]: fixture 의 `awaited:` 줄 `writers 4 (… parent_entry (spawn-entry) 2, task_entry_point (spawn-entry) 4)`; 남긴 마지막 회차 facts 에서 HB-await 줄 120 → 284(c1), 64 → 116(r2)(`scratch_measure.txt`). 간선별 대조는 하지 않음 |
+| `semantics-2` | c5 의 대조 13 행이 지우는 호출을 creator 로 가져 (나)에 들었다 | 소스: relations rules revision 12(WRITERS 의 저장 값이 상수뿐인 쓰기에만 닿는 사용은 key-clearing call; 함수 이름을 보지 않음), 생성기가 그 호출을 object-delete site 로; fixture `sem_delete`. 문서: §11.5·§11.8 의 정정 | scratch [I]: c5 두 빌드 (나) 15 → 2, A20–A32 가 빠짐(`scratch_measure.txt`); fixture golden 의 `key clearing:` 줄. **개정 4 계획의 대조 집합은 다시 만들지 않았다** |
+| `semantics-3` | 본문이 있는 가변 인자 함수의 인자 탈출에 “본문 없음” 사유가 붙었고 §7.5·§7.8 이 그렇게 분류했다 | 소스: `finalize.cpp` 의 사유를 가름. 문서: §7.5·§7.8 의 정정 | scratch fixture [I]: `Ent.n_var … passed to log_text: an argument beyond the named parameters of a callee defined in the closed program …`. 이 사유는 옵션 없는 경로에도 쓰이므로 기본 경로의 facts 가 달라질 수 있다 [I: 재지 않음] |
+| `semantics-4` | 조건·쉼표 연산자 아래의 decay 와 배열의 배열의 한 줄이 탈출 행을 얻지 못했다 | 소스: `note_array_decay`·`decayed_target_arg`; fixture `decay_cases` | scratch fixture [I]: `Ent.n_cond`·`Ent.n_comma` `per-field=DISABLED … escape 1`, `Ent.n_grid` 는 out-pointer 호출(`count.array_decay = out-pointer calls 8, address-escape hits 4, …`). 다섯 빌드의 상태 움직임은 재지 않음 |
+| `semantics-5` | guard 행이 주소 잡힌 지역의 정의를 하나뿐인 도달 정의로 적었다 | 소스: 그런 지역은 `x@addr-taken`(값을 넣지 않음), 행에 `addr-taken-local`; fixture `guard_alias` | scratch fixture [I]: `guard [report] shared cond (eq local:rc@addr-taken 0) {addr-taken-local}` 둘 |
+| `semantics-6` | switch 아래의 flag 정의가 술어 `1` 의 recognised 를 냈고, switch 의 case 아래 호출에 guard 가 없었다 | 소스: loop flag predicate rules revision 2(거절), guard 의 `top` 항과 switch 사용 행; fixture `wait_switch`, `guard_switch` | scratch fixture [I]: `in wait_switch refused-unresolved {}`; `guard [report] unique cond (top a case of the switch at 254:11 on …)` 셋 |
+| `semantics-7` | CF 재시도 대기의 awaited 필드가 조회의 out 인자와 열쇠였다 | 소스: order rules revision 5(호출 인자와 `addr` 아래는 awaited 아님); fixture `retry_fields` | scratch fixture [I]: `awaited: not named: the predicate reads no field of its own (… Named.id, Named.name)`. ES 루프의 awaited 는 `EntryFunc` 만 남고 `AppId`(호출 인자)는 빠진다 [I: 간선 수의 변화에 들어 있음] |
+| `semantics-8` | LOCK_HANDLES 가 다른 family 의 행과 잠금 연산이 아닌 호출의 인자에 핸들을 적었다; 722 는 383 + 337 + 2 다 | 소스: lock handle rules revision 2(사슬의 호출이 모두 찾아질 때만 핸들); fixture `finish_with`. 문서: §10.5 의 정정 | scratch fixture [I]: `finish_with … not-static {} lock #0`(핸들 없음), `the calls of the chain are not all located (1 of 4; …)`. **c1 의 722 의 나뉨은 다시 재지 못했다**(다시 뽑기 필요) |
+| `semantics-9` | LOOP_DEFS 정의 행의 깃발이 지역마다 찍혔다 | 소스: 행별 깃발 | scratch fixture [I]: `rc@172:7 before-loop … recognised flag {} value -5`, 몸 안 행만 `{under-lock}` |
+| `semantics-10` | guard 가 호출 결과를 callee 이름만으로 구분했다 | 소스: 같은 callee 의 두 호출을 담은 guard 는 `not-computed`, order 는 unknown; fixture `guard_twice`. **마디에 site 를 싣는 것은 하지 않았다**(§12.8) | scratch fixture [I]: `guard [report] not-computed cond (and (not (ne (call-result obj_impl (seq 0)) 0)) (ne (call-result obj_impl (seq 1)) 0))` |
+| `semantics-11` | 관계 1 의 `event-send` planned 3 가운데 둘은 성공 값의 open 효과다 | 소스: 실패·부재 outcome 의 효과만 `event-send`, 그 밖은 `event-send-other-outcome`. 문서: §11.5 의 정정 | `mv_plans_v4/c1_pre_tx/plan.kzs:916,921`. 다섯 빌드의 계획은 다시 만들지 않음 |
+
+### 12.8 계획과 다르게 한 것
+
+- **선언된 kz-static 빌드와 그 뒤의 다섯 빌드를 하지 않았다.** lead 의 판단 (a)는 이 묶음에서 빌드 하나와 그 뒤의 비교까지를 요구한다. 이 세션에서 한 것은 빌드 전의 점검, 문서 고침, 소스의 고침과 fixture, scratch 점검까지이고, 선언(허용되는 차이의 기록 종류·칸별 목록, 다시 링크되는 바이너리, 첫 ctest 의 실패 이름, 공간 필요량)과 그것에 맞춘 비교 스크립트를 쓰기 전에 멈췄다. 까닭: 고침 열다섯이 기본 경로의 출력도 바꾸어(relations·order 의 개정 줄과 행, 가변 인자 사유 글) 다섯 빌드의 허용 차이를 출력 종류마다 새로 선언하고 견줄 스크립트를 써야 하는데, 그 선언의 [I] 를 댈 scratch 의 다섯 빌드 다시 뽑기까지 이 세션의 작업 한도 안에서 끝낼 수 없었다. 반쯤 선언된 채 MC 를 덮지 않으려고 빌드 앞에서 멈췄다. MC 도구와 앞의 출력은 하나도 바뀌지 않았다.
+- **소스가 MC 바이너리보다 앞선 채 커밋되었다**(선언 전의 스냅숏; 루프·잠금 단계의 `08760d6` 과 같은 꼴). fixture 가 바뀌었으므로 지금 MC 의 시험 프로그램으로 돌리는 ctest 는 통과하지 않을 것이다 [I].
+- **scratch golden 을 한 번 잃고 다시 만들었다.** scratch 도구로 쓴 golden 을 기록 디렉터리로 옮기는 명령이 경로를 잘못 써 복사에 실패했는데, 이어진 명령이 작업 트리의 golden 을 HEAD 로 되돌리고 scratch 빌드를 지웠다. scratch 빌드를 다시 만들어(감시 아래, `scratch_guard/021-024`) golden 을 다시 내어 `golden_scratch/` 에 두었다. 잃은 것은 근거가 아닌 scratch 출력이다.
+- **`semantics-10` 은 약한 쪽으로 고쳤다**: call-result 마디에 호출 site 를 싣지 않고, 같은 callee 의 두 호출을 담은 guard 를 결정되지 않음으로 둔다(검토가 “빌드 전까지”로 든 방법). site 를 싣는 것은 식의 이름을 바꾸어 RESULT_FLOW 의 모든 조건 글과 그것을 읽는 쪽(order, 계획 생성기)을 함께 바꿔야 한다.
+- **`semantics-5`·`semantics-6` 의 guard 는 통째로 “결정 안 됨”이 아니라 모르는 항으로 두었다.** 처음에는 주소 잡힌 지역을 읽는 guard 를 not-computed 로 썼는데, 그러면 `if (f(&x) == OK && x != 0)` 꼴(첫 경로의 `CFE_ES_TaskEntryPoint` 가 이 꼴이다)의 호출자 쪽 사용이 모두 unknown 이 되어 HB-await 간선이 사라졌다(scratch fixture 에서 18 → 0). 예산 값이 다른 항을 거짓으로 만들면 guard 는 거짓이므로, 그 지역과 switch 의 case 를 모르는 값의 항으로 두고 셋값 논리로 읽게 했다.
+- **`semantics-8` 은 대체 규칙을 없애지 않고 조건을 달았다**(사슬의 호출이 모두 찾아질 때만). 검토의 두 꼴은 모두 잘린 사슬에서 나왔다(`serialize.cpp` 의 걸음 찾기가 한 함수가 다음 함수를 여러 곳에서 부르면 멈춤). 모두 찾아진 사슬에서도 그 값이 그 family 의 잠금을 가리킨다는 증명은 아니다(§5w 의 남은 한계).
+- **`rules-07` 의 훑기 쪽**(문서 반환이 void 선언 함수에 있으면 자료에 mismatch 로 적기)은 하지 않았다: 범위 규칙과 자료를 고치지 않는다는 판단 (d). 엔진이 facts 로 같은 것을 적는다.
+- **개정 번호**: relations 는 바탕 줄 9 → 12, result flow 줄 10 → 13, 핸들 줄 11 그대로; order 는 바탕 줄 2 → 5, result flow 줄 3 → 6, 루프·핸들 줄 4 → 7. 바탕 줄의 번호가 옵션 줄의 옛 번호보다 커지도록 하나의 차례로 올렸다.
+- 기본 경로 회귀에 다시 뽑기를 넣지 않았다(선언 §12.0 (가)대로).
+
+### 12.9 열린 것
+
+- **이 묶음의 남은 차례**(다음 실행이 이어서 할 것): (1) scratch 점검 빌드로 다섯 빌드를 옵션 없이·마지막 옵션 회차로 다시 뽑아 허용 차이의 [I] 를 잰다(기본 경로: relations·order 의 개정 줄, `uses:`·`summary A`·`key clearing:`·`dependency:` 줄, `awaited:` 줄, c5 의 13 행의 값, 가변 인자 사유 글이 든 A-TYPE 행; 옵션 경로: SEMANTICS·RESULT_FLOW·RESULT_EFFECT·LOOP_DEFS·LOCK_HANDLES·BASIS 의 행). (2) 선언(§12.0 (나))과 비교 스크립트를 커밋한다. (3) kz-static `1a47abd0` 을 사본하고 MC 에서 빌드, 첫 ctest 의 실패(golden 열일곱의 시험과 `test_static_plan`·`test_static_reasons` [I])를 이름으로 확인, golden 을 갱신해 `golden_scratch/` 와 `cmp`. (4) 다섯 빌드의 옵션 없는 경로와 마지막 옵션 회차, relations, order, 개정 4 계획과 대조 선택을 선언과 견준다. (5) handling label 의 재측정과 움직인 행의 목록, c5 두 빌드의 대조 집합, HB-await 의 간선별 대조, LOCK_HANDLES 의 핸들별 행, exit-app·terminal 의 수. 그때까지 §12.7 의 “소스” 고침은 도구에 없다.
+- **판정 규칙 8.7 의 입력 표, 2026-11-18 의 상태**(8.7 을 줄마다; “준 것”은 그 출력 줄):
+
+| 8.7 의 입력 | 쓰는 곳 | 2026-11-18 의 상태 | 지금 맡은 단계 |
+|---|---|---|---|
+| 이름 공간 항목(종류, 표, 키 필드, 종류 선택 값, 비교 함수, 한도와 설정 줄, 부재 상수와 경로, 조회·생성·삭제·회수 API, 판, 원문 줄) | (가), (나), 기초 3, (마) | **일부만.** 자료 `framework_namespaces_*.txt` 다섯이 있음(종류·표·키 필드·비교·조회·생성·삭제, 판, 원문 줄). 없는 것: 한도의 값과 설정 줄(이름만: `extent=OS_MAX_API_NAME`, `osal-f34759d.txt:59`), 부재 상수 항목(`chain-status` 목록뿐), 종류 macro 가 없는 종류와 TIMEBASE 의 조회·생성(`rules-03`), 층의 clear·rollback | 범위 규칙의 다음 개정(자료보다 먼저 커밋) |
+| P0 `strcmp` 의 소스 대조 | (나) | 주지 않음(“source unverified”; 새 외부 자원이 필요) | PI 의 선택(새 외부 자원) |
+| 종류별로 나뉜 키 필드 writer 와 완전성, 표 선택 상수만 받는 partition, 콜백으로 정하는 소속 | (다), (라) | **일부만.** partition 과 소속은 relations 개정 7 이 줌. 종류별 writer 나눔은 주지 않음: A21 의 `writers: OS_common_record_t.name_entry: 18 (assign 17, memset 1)` 한 줄(`relations.txt:650`). (다)는 `link_unlinked(name binding: a name mapping into the table is not excluded)` | OBJECT_ACCESS 를 읽는 relations 의 뒤 개정(8.12 (ㅈ)) |
+| 생성자 callee 의 성공 상수를 행에 | 기초 4 | **서지 않음.** 개정 9 의 `returns not followed`·`set: not established` 줄이 A21 에 남음; result flow 의 줄(`:648`)은 규칙도 스크립트도 읽지 않음. 기초 4 는 `record_insufficient(no success constant of the creator: the callee's returns are not all followed)` | 판정 규칙의 덧붙임(완전성 조건)과 설명 스크립트 개정 4 |
+| 삭제·회수 site 의 계획, 삭제 사건이 이름이나 out id 를 실음 | (마) | **일부만.** c1 의 관계 1·A20 과 r2 의 셋에 `object-delete` planned(§11.5). (라)의 실행 반쪽이 요구하는 생성 쪽 종류 값(`OS_ObjectIdAllocateNew`, `osapi-countsem.c:94`)의 site 나 not-planned need 는 계획에 없음: (라)는 `link_unlinked(name binding: the object kind of the lookup and the create is not shown the same)`. 조회 안의 키 글은 `string=validated bound=64`(런타임 상수; `plan.kzs:845`)이고 사용 호출의 bound=20 은 호출자 배열의 크기(`:932`): (나)는 `link_unlinked(name binding: key text not validated against the namespace bound)`. 판 4 를 읽는 런타임·플러그인이 없음 | 계획 생성기의 뒤 개정, 런타임·플러그인 단계 |
+| 이름의 수명, 삭제 사건의 기록 분석 | (마) | 주지 않음 | 기록 분석 단계 |
+| 이름 결합을 구현한 설명 스크립트 판 | 전부 | 주지 않음(개정 3 은 기초 4 의 생성자 쪽만) | 위 입력 뒤 |
+
+  **사전 등록된 부팅은 위 셋((다), (라)의 실행 반쪽, (나))이 선다는 가정 위에 계획하지 않는다.** 그 셋이 없는 동안 연결 결론은 `unlinked` 를 넘지 않는다(8.7 의 “그때까지의 값”).
+- `rules-01`: handling label 을 읽지 않는 선택 규칙(뒤 단계). `rules-02`: 판정 규칙의 덧붙임. `rules-03`: 범위 규칙의 개정과 자료의 다시 만들기, 다섯 계획. `semantics-10`: call-result 마디의 site.
+- relations rules revision 12 의 한계 둘(값 없는 쓰기는 살아 있는 쓰기로 둠; 상수 열쇠의 생성)과 order rules revision 5 의 한계(같은 entry 의 스레드 인스턴스)는 `static_facts.md` §5w 에 있다 [미확인: 다섯 빌드에 그런 경우가 있는지].
+- 앞 절에서 넘어온 열린 것은 그대로다.

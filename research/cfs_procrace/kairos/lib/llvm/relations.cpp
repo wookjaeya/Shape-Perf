@@ -4,6 +4,7 @@
 // type: the program's own facts and the P0 tables are the vocabulary.  The rules are written down in
 // docs/static_facts.md §5e (revision 1), §5f (revision 2), §5g (revision 3), §5h (revision 4), §5i (revision 5) and §5m
 // (revision 6: the image cut at the budget, the incompleteness line); the revision string names them.
+#include "outcome.hpp"
 #include "relations.hpp"
 
 #include <algorithm>
@@ -26,11 +27,11 @@
 
 namespace kzs {
 
-const char* relations_rules_revision() { return "relations rules revision 9 (2026-11-16)"; }
+const char* relations_rules_revision() { return "relations rules revision 12 (2026-11-18)"; }
 // Revision 10 adds to revision 9 only what facts with RESULT_FLOW and RESULT_EFFECT carry (static_facts.md 5u): on path A
 // rows the lines absence and handling_label, on the creators the lines callee-check (result flow), on path B rows the line
 // handling_label.  Without those sections the rows are revision 9's to the byte, and the line `rules` names revision 9.
-const char* relations_result_flow_revision() { return "relations rules revision 10 (2026-11-16)"; }
+const char* relations_result_flow_revision() { return "relations rules revision 13 (2026-11-18)"; }
 // Revision 11 adds to revision 10 only what facts with LOCK_HANDLES carry (static_facts.md 5v): on path C, a lock whose
 // identity is no static instance is one mutex at the spawn and at the read when every acquisition that holds it there passes
 // the same handle and that handle is a static instance with a verified semantics item (LOCK_HANDLES static-instance);
@@ -762,7 +763,9 @@ class Rel : public RelFacts {
         first = false;
       }
     }
-    os << "]\n";
+    os << "]";
+    if (n_a_clearing_ != 0) os << "; key-clearing calls, no creator sites (relations rules revision 12): " << n_a_clearing_;
+    os << "\n";
     // relations rules revision 6: the rows per incompleteness reason (the reason, then its sub-reasons)
     os << "summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m):";
     const std::vector<RelReason>& table = relations_incomplete_reasons();
@@ -3411,20 +3414,40 @@ class Rel : public RelFacts {
   }
 
   void path_a_uses(const Namespace& n, std::ostream& rows, std::vector<RelRow>* out) {
-    // the functions that reach a write of the key (direct calls): a use of one is a creator
-    std::set<uint32_t> writer_fns;
+    // the functions that reach a write of the key (direct calls).  relations rules revision 12: a write whose stored
+    // value WRITERS gives as a constant clears or initialises the key (a clearing store); a function is a live writer when
+    // one of its writes of the key is not shown to be such a store (a WRITERS row with another value kind, or a FWRITES
+    // row no WRITERS row of that line covers).  A use that reaches a live writer is a creator; a use that reaches clearing
+    // stores only is a key-clearing call: no creator site and no lookup row
+    std::set<uint32_t> writer_fns, live_fns;
+    std::map<uint32_t, std::vector<std::string>> clear_stores;  // function -> its clearing stores of the key
     {
-      auto fit = fwrites_of_.find(n.key);
-      if (fit != fwrites_of_.end())
-        for (uint32_t i : fit->second) writer_fns.insert(fwrites_[i].fn);
+      std::map<std::tuple<uint32_t, std::string, uint32_t>, int> at;  // (function, file, line) -> 1 constant stores only, 2 another value kind
       auto wit = writers_of_.find(n.key);
       if (wit != writers_of_.end())
-        for (uint32_t i : wit->second)
-          if (writers_[i].kind != KZ_WRITER_KIND_MEMSET || !(writers_[i].flags & KZ_WRITER_FLAG_EARLY_INIT)) writer_fns.insert(writers_[i].fn);
+        for (uint32_t i : wit->second) {
+          const kz_fact_writer& w = writers_[i];
+          int& k = at[std::make_tuple(w.fn, str(w.file), w.line)];
+          k = std::max(k, w.value_kind == KZ_ARG_KIND_CONST ? 1 : 2);
+          if (w.kind == KZ_WRITER_KIND_MEMSET && (w.flags & KZ_WRITER_FLAG_EARLY_INIT)) continue;
+          writer_fns.insert(w.fn);
+          if (w.value_kind != KZ_ARG_KIND_CONST) live_fns.insert(w.fn);
+          else clear_stores[w.fn].push_back(pos(str(w.file), w.line, w.col) + " in " + fname(w.fn) + " := " + std::to_string(w.value) + " [" + str(w.value_text) + "]");
+        }
+      auto fit = fwrites_of_.find(n.key);
+      if (fit != fwrites_of_.end())
+        for (uint32_t i : fit->second) {
+          const kz_fact_fwrite& w = fwrites_[i];
+          writer_fns.insert(w.fn);
+          auto it = at.find(std::make_tuple(w.fn, str(w.file), w.line));
+          if (it == at.end() || it->second != 1) live_fns.insert(w.fn);
+        }
     }
     struct Use {
       uint32_t ci = kN, callee = kN, param = kN;
       bool creator = false;
+      bool clears = false;      // relations rules revision 12: reaches clearing stores of the key only
+      std::string clear_text;   // those stores
       std::string part, part_desc, nonsel;
       KeyValue key;
       std::set<uint32_t> actors;
@@ -3449,10 +3472,23 @@ class Rel : public RelFacts {
         u.ci = ci;
         u.callee = F;
         u.param = k;
-        bool creates = false;
-        for (uint32_t f : reach_direct(F))
-          if (writer_fns.count(f) != 0) creates = true;
+        bool creates = false, writes = false;
+        for (uint32_t f : reach_direct(F)) {
+          if (writer_fns.count(f) != 0) writes = true;
+          if (live_fns.count(f) != 0) creates = true;
+        }
         u.creator = creates;
+        u.clears = writes && !creates;
+        if (u.clears) {
+          std::vector<std::string> cs;
+          for (uint32_t f : reach_direct(F)) {
+            auto ct = clear_stores.find(f);
+            if (ct != clear_stores.end()) cs.insert(cs.end(), ct->second.begin(), ct->second.end());
+          }
+          std::sort(cs.begin(), cs.end());
+          cs.erase(std::unique(cs.begin(), cs.end()), cs.end());
+          u.clear_text = join(cs, "; ");
+        }
         u.member = use_membership(cbst, ci, F, k, &u.member_text);
         if (u.member == 1) {
           // another callback only: the use searches with another comparison function, so it is no use of this namespace
@@ -3473,7 +3509,7 @@ class Rel : public RelFacts {
     // the key-parameter functions, as lookups or creators; for a creator, the writes of the key and the
     // active fields in the functions it reaches through direct calls (its publication writes)
     {
-      std::string lk, cr;
+      std::string lk, cr, kc;
       std::set<std::string> watch(n.active.begin(), n.active.end());
       watch.insert(n.key);
       std::vector<WriterRow> all;
@@ -3485,13 +3521,19 @@ class Rel : public RelFacts {
         }
       }
       for (const auto& [F, k] : n.key_params) {
-        bool creates = false;
+        bool creates = false, writes = false;
         const std::set<uint32_t> reach = reach_direct(F);
-        for (uint32_t f : reach)
-          if (writer_fns.count(f) != 0) creates = true;
+        for (uint32_t f : reach) {
+          if (writer_fns.count(f) != 0) writes = true;
+          if (live_fns.count(f) != 0) creates = true;
+        }
         const std::string name = fname(F) + "#" + std::to_string(k);
-        if (!creates) {
+        if (!writes) {
           lk += " " + name;
+          continue;
+        }
+        if (!creates) {  // relations rules revision 12: reaches clearing stores of the key only
+          kc += " " + name;
           continue;
         }
         cr += " " + name;
@@ -3501,22 +3543,27 @@ class Rel : public RelFacts {
             pub += std::string(pub.empty() ? "" : "; ") + w.kind + " " + pos(w.file, w.line, w.col) + " in " + fname(w.fn) + (w.known ? " := " + std::to_string(w.value) : "");
         if (!pub.empty()) rows << "      publication writes of the creator " << name << ": " << pub << "\n";
       }
-      rows << "      key-parameter functions: lookups" << (lk.empty() ? " none" : lk) << "; creators" << (cr.empty() ? " none" : cr) << "\n";
+      rows << "      key-parameter functions: lookups" << (lk.empty() ? " none" : lk) << "; creators" << (cr.empty() ? " none" : cr)
+           << (kc.empty() ? std::string() : "; key-clearing (they reach constant stores of the key only)" + kc) << "\n";
     }
-    uint32_t lookups = 0, creators = 0;
+    uint32_t lookups = 0, creators = 0, clearing = 0;
     bool ns_l0 = false;
     for (const Use& u : uses) {
-      (u.creator ? creators : lookups)++;
+      (u.creator ? creators : u.clears ? clearing : lookups)++;
       if (uses_script_root(u.actors)) ns_l0 = true;
     }
+    n_a_clearing_ += clearing;
+    cur_ns_clearing_ = clearing;
     rows << "      uses: lookups " << lookups << ", creators " << creators << " (calls from outside the key-parameter functions; a creator reaches a write of the key)";
+    if (clearing != 0)
+      rows << "; key-clearing calls " << clearing << " (every write of the key they reach stores a constant, WRITERS: no creator site and no lookup row)";
     // relations rules revision 7 (O3): a use whose every chain passes another comparison function to the search is no use here
     rows << "; left out, another callback passed to the search: lookups " << other_lookups << ", creators " << other_creators << "\n";
     std::sort(left_out.begin(), left_out.end());
     for (const auto& [site, l] : left_out) rows << "      left out: " << l << "\n";
     rows << "      namespace layers: " << layers_text(true, ns_l0) << "\n";
     for (const Use& u : uses) {
-      if (u.creator) continue;
+      if (u.creator || u.clears) continue;
       begin_row();
       // the comparison functions of P0 the namespace's searches use
       for (const KeyCmp& k : n.cmps)
@@ -3658,6 +3705,12 @@ class Rel : public RelFacts {
       if (any_match) ++n_a_keymatch_;
       for (const std::string& p : paired) L.line("creator") << "creator: " << p;
       for (const std::string& x : excluded) L.line("not a pair") << "not a pair: " << x;
+      // relations rules revision 12: the key-clearing calls of the row's partition (a delete or a reset of the key: the
+      // plan generator reads the position as the first of the line)
+      for (const Use& w : uses)
+        if (w.clears && w.part == u.part)
+          L.line("key clearing") << "key clearing: " << call_pos(w.ci) << " in " << fname(calls_[w.ci].caller_fn) << " -> " << fname(w.callee) << " key " << w.key.text << " actors "
+                                 << actors_text(w.actors) << "; no creator: every write of the key it reaches stores a constant (" << w.clear_text << ")";
       // relations rules revision 7 (O5): the out-pointer arguments and the resolved pointer fields of the creators named
       // above; the constants their callees may return (a creator's out is read under its callee's success constant)
       std::set<uint32_t> creator_callees;
@@ -3702,7 +3755,7 @@ class Rel : public RelFacts {
         const std::set<int64_t> nm = nomatch_values(n, calls_[u.ci].callee_fn, nullptr, &nm_via);
         std::set<int64_t> absence;
         for (int64_t v : nm)
-          if (rf_fail(v)) absence.insert(v);
+          if (rf_fail(v, calls_[u.ci].callee_fn)) absence.insert(v);
         a_result_flow(L, u.ci, absence, nm_via, !probes.empty());
         L.done();
       }
@@ -3715,7 +3768,7 @@ class Rel : public RelFacts {
         std::set<std::string> other_parts;
         for (const Use& w : uses)
           if (w.creator && w.part != u.part) other_parts.insert("{" + w.part + "}");
-        std::vector<std::string> why = no_creator_reasons(n, other_parts, writer_fns, creators, u.member == 2, &unread_writes);
+        std::vector<std::string> why = no_creator_reasons(n, other_parts, live_fns, creators, u.member == 2, &unread_writes);  // revision 12: the live writers
         if (n_probe + n_differ + n_same_actor == 0) dep = "no creator of this partition";
         else
           dep = "no creator left after exclusions (probe-create " + std::to_string(n_probe) + ", key constants differ " + std::to_string(n_differ) + ", same actor only " +
@@ -3787,7 +3840,10 @@ class Rel : public RelFacts {
     if (!ws.empty() && creators == 0) {
       std::set<std::string> kf;
       for (const WriterRow& w : ws) kf.insert(w.kind + " in " + fname(w.fn));
-      why.push_back("key written without a key parameter (no key-parameter function reaches a writer of " + n.key + ": " + join(std::vector<std::string>(kf.begin(), kf.end()), ", ") + ")");
+      // relations rules revision 12: a key-parameter function may reach a writer whose stores of the key are all constants
+      const bool reaches_writer = cur_ns_clearing_ != 0;  // the namespace has key-clearing calls
+      why.push_back(std::string(reaches_writer ? "key written under a key parameter by clearing stores only (every write of " : "key written without a key parameter (no key-parameter function reaches a writer of ") +
+                    n.key + (reaches_writer ? " the namespace's key-clearing calls reach stores a constant; the writers: " : ": ") + join(std::vector<std::string>(kf.begin(), kf.end()), ", ") + ")");
     }
     std::set<std::string> fields(n.active.begin(), n.active.end());
     fields.insert(n.key);
@@ -3853,7 +3909,18 @@ class Rel : public RelFacts {
     auto fits = [](int64_t x) { return x >= -2147483648LL && x <= 4294967295LL; };
     return fits(a) && fits(b) && (static_cast<uint64_t>(a) & 0xFFFFFFFFu) == (static_cast<uint64_t>(b) & 0xFFFFFFFFu);
   }
-  static bool rf_fail(int64_t v) { return v < 0 || (v >= 0xC0000000LL && v <= 0xFFFFFFFFLL); }
+  // the outcome class rule (outcome.hpp, static_facts.md 5w) in the status space of the function `fn` (kN: a function
+  // without a semantics entry), read from the SEMANTICS rows of the facts
+  const OutcomeSpaces& spaces() const {
+    if (!spaces_built_) {
+      for (const kz_fact_sem& r : sem_) spaces_.add(r.layer, r.column, str(r.component), r.fn, str(r.item), r.value);
+      spaces_built_ = true;
+    }
+    return spaces_;
+  }
+  bool rf_fail(int64_t v, uint32_t fn = kN) const { return spaces().cls(fn, v) == KZ_REFF_OUTCOME_FAILURE; }
+  mutable OutcomeSpaces spaces_;
+  mutable bool spaces_built_ = false;
   std::string reff_pos(const kz_fact_reffect& e) const {
     if (e.effect_site != kN) {
       auto it = call_by_site_.find(e.effect_site);
@@ -3917,7 +3984,7 @@ class Rel : public RelFacts {
         case KZ_REFF_EFFECT_RETURN_CONST: {
           const int64_t c = e.effect == KZ_REFF_EFFECT_RETURN_CONST ? e.effect_value : v;
           if (!complete) out->add(kLabOpen, "T?: the return at " + where + " is on a path that is open: " + str(e.reason));
-          if (!rf_fail(c)) {
+          if (!rf_fail(c, e.fn)) {
             out->add(kLabT, "T: " + fname(e.fn) + " returns " + std::to_string(c) + " at " + where + " (not of failure class)");
             break;
           }
@@ -4078,7 +4145,7 @@ class Rel : public RelFacts {
     std::vector<std::string> succ;
     for (const auto& [v, p] : vals) {
       L.line("callee-check (result flow)") << "callee-check (result flow): " << fname(F) << " returns " << v << ": " << p.first;
-      if (p.second && !rf_fail(v) && !(v >= 0x40000000LL && v < 0x80000000LL)) succ.push_back(std::to_string(v));
+      if (p.second && spaces().cls(F, v) == KZ_REFF_OUTCOME_SUCCESS) succ.push_back(std::to_string(v));
     }
     L.line("callee-check (result flow, success)") << "callee-check (result flow, success): " << fname(F) << ": "
                                                   << (succ.empty() ? std::string("no value of success class is shown to reach the return") : "shown to reach the return: " + join(succ, ", "))
@@ -4198,6 +4265,8 @@ class Rel : public RelFacts {
   std::map<std::string, uint32_t> inc_reason_rows_;  // reason of the vocabulary -> rows that carry it with any sub-reason
   std::string last_feas_grade_;  // the grade tally_feas counted last (the row's feasibility grade)
   std::map<std::string, std::set<int64_t>> in_use_, empty_;
+  uint32_t n_a_clearing_ = 0;  // relations rules revision 12: key-clearing calls (no creator sites)
+  uint32_t cur_ns_clearing_ = 0;  // those of the namespace whose rows are being written
   uint32_t n_a_other_lookups_ = 0, n_a_other_creators_ = 0, n_a_member_unres_ = 0, n_a_nocreator_ = 0;  // relations rules revision 7: uses left out, another callback
   std::map<std::string, uint32_t> no_creator_why_;            // relations rules revision 7: lookup rows per no-creator sub-reason
   uint32_t n_a_ = 0, n_ns_ = 0, n_a_paired_ = 0, n_a_keymatch_ = 0, n_b_ = 0, n_b_check_ = 0, n_c_ = 0, n_c_self_ = 0;

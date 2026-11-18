@@ -74,3 +74,22 @@ void init(void) {
   (void)lookup(&h, local.name);
   if (mem.flag != 0) mem.count = 4;
 }
+
+/* review cases (2026-11-18): the pointer of a target array under a conditional and under a comma operator, a row of an
+ * array-of-arrays field, and an argument beyond the named parameters of a variadic function defined here */
+typedef struct {
+  char n_cond[NAMELEN];
+  char n_comma[NAMELEN];
+  char n_grid[2][NAMELEN];
+  char n_var[NAMELEN];
+} Ent;
+Ent ent;
+int ext_read(const char *name);
+int log_text(const char *fmt, ...) { return fmt != 0; }
+
+void decay_cases(int c) {
+  (void)ext_read(c ? ent.n_cond : "x");
+  (void)ext_read(((void)c, ent.n_comma));
+  (void)ext_read(ent.n_grid[1]);
+  (void)log_text("%s", ent.n_var);
+}

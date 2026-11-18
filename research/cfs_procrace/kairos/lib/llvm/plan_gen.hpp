@@ -92,6 +92,10 @@ struct PlanPriority {
   std::string id;     // "A21" (the row's number in the relations text)
   std::string key;    // the row's use-site key
   std::string label, label_class, order_class, reach, disposition, why;
+  // the handling label the relations text derives from the facts (its `handling_label:` line, with RESULT_FLOW and
+  // RESULT_EFFECT), "-" when the row has none.  The tier order does not read it (docs/plan_manifest.md section 8): it is
+  // written beside the text label on the sidecar row line of manifest revision 4
+  std::string fact_label = "-";
   uint32_t tier = 3;  // 1 priority directed candidate (D07), 2 other directed candidate (RELOC), 3 the rest
 };
 

@@ -67,7 +67,8 @@ const std::vector<std::string> kResultFlowSections = {"functions", "returns", "r
 // lock operations the handles are read from.
 const std::vector<std::string> kLoopLockSections = {"functions", "lockops", "lockids", "loopdefs", "lockhandles"};
 const std::vector<std::string> kObjectTargets = {"--extended-facts", "--target", "Mem.pool", "--target", "Mem.buf", "--target", "Mem.label", "--target", "Mem.tag",
-                                                 "--target", "Mem.data", "--target", "Mem.raw", "--target", "Mem.count", "--target", "Chan.name"};
+                                                 "--target", "Mem.data", "--target", "Mem.raw", "--target", "Mem.count", "--target", "Chan.name",
+                                                 "--target", "Ent.n_cond", "--target", "Ent.n_comma", "--target", "Ent.n_grid", "--target", "Ent.n_var"};
 std::vector<std::string> with_option(std::vector<std::string> v, const std::string& o) {
   v.push_back(o);
   return v;

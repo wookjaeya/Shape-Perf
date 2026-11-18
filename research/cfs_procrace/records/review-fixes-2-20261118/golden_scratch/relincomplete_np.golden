@@ -1,0 +1,228 @@
+extract
+  translation units          1
+  functions                  15 (bodies read 11, in system headers skipped 0)
+  call sites                 15
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                1 (entry resolved 0)
+  loops                      5 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 4, await 0, star-closed 1
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 2, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location NameDef.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Reg.name   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Reg.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Seeker.handle   writers 2 (direct 0, data function 0, out-pointer 2, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location State.started   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location TaskEntry.main   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 11, control-flow graphs 11, call-graph components 11 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 0 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               6 (R-T1 4, R-T2 3, both 1; left out, reached only through an unshared base: R-T1 0, R-T2 0)
+facts-view 1
+[functions] 15
+  fn 0 blue_main relincomplete.c:115-119 params=1 {defined}
+  fn 1 green_main relincomplete.c:107-113 params=1 {defined}
+  fn 2 main relincomplete.c:145-150 params=0 {defined}
+  fn 3 name_source relincomplete.c:69 params=0 {}
+  fn 4 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 5 red_main relincomplete.c:99-105 params=1 {defined}
+  fn 6 reg_create relincomplete.c:43-59 params=2 {defined}
+  fn 7 reg_find relincomplete.c:32-41 params=2 {defined}
+  fn 8 seek_known relincomplete.c:79-83 params=0 {defined}
+  fn 9 seek_opaque relincomplete.c:85-88 params=0 {defined}
+  fn 10 setup_hook relincomplete.c:121-121 params=0 {defined,static}
+  fn 11 start_tasks relincomplete.c:138-143 params=1 {defined}
+  fn 12 state_check relincomplete.c:97-97 params=0 {defined}
+  fn 13 strcmp /usr/include/string.h:156 params=2 {builtin}
+  fn 14 strncpy /usr/include/string.h:144 params=3 {builtin}
+[argflow] 20
+  arg 0 of site 1 relincomplete.c:35:30 [regs[i].name] <- field Reg.name root=regs base=global-array-element object=regs@relincomplete.c:29 hops=0 {array-contents} index=[local:i] read=1 chain=field:Reg.name
+  arg 1 of site 1 relincomplete.c:35:30 [name] <- param root=name param=0 hops=0 {} chain=param:name#0
+  arg 0 of site 3 relincomplete.c:46:30 [regs[i].name] <- field Reg.name root=regs base=global-array-element object=regs@relincomplete.c:29 hops=0 {array-contents} index=[local:i] read=3 chain=field:Reg.name
+  arg 1 of site 3 relincomplete.c:46:30 [name] <- param root=name param=0 hops=0 {} chain=param:name#0
+  arg 0 of site 5 relincomplete.c:52:7 [regs[i].name] <- field Reg.name root=regs base=global-array-element object=regs@relincomplete.c:29 hops=0 {array-contents} index=[local:i] read=5 chain=field:Reg.name
+  arg 1 of site 5 relincomplete.c:52:7 [name] <- param root=name param=0 hops=0 {} chain=param:name#0
+  arg 2 of site 5 relincomplete.c:52:7 [NAMELEN - 1] <- const 15 hops=0 {in-macro} chain=15
+  arg 0 of site 9 relincomplete.c:82:33 [seeker.known[i].name] <- field NameDef.name root=Seeker.known base=pointer-field object=seeker@relincomplete.c:77 hops=0 {through-pointer} index=[local:i] read=8 chain=field:NameDef.name
+  arg 1 of site 9 relincomplete.c:82:33 [&seeker.handle] <- address Seeker.handle root=seeker base=global object=seeker@relincomplete.c:77 hops=0 {} chain=(addr field:Seeker.handle)
+  arg 0 of site 11 relincomplete.c:87:9 [seeker.opaque[0].name] <- field NameDef.name root=Seeker.opaque base=pointer-field object=seeker@relincomplete.c:77 hops=0 {through-pointer} index=[0] read=10 chain=field:NameDef.name
+  arg 1 of site 11 relincomplete.c:87:9 [&seeker.handle] <- address Seeker.handle root=seeker base=global object=seeker@relincomplete.c:77 hops=0 {} chain=(addr field:Seeker.handle)
+  arg 0 of site 13 relincomplete.c:103:9 ["lime"] <- string root="lime" hops=0 {} chain=string:lime
+  arg 1 of site 13 relincomplete.c:103:9 [&h] <- address root=h base=local hops=0 {} chain=(addr local:h)
+  arg 0 of site 15 relincomplete.c:111:9 ["lime"] <- string root="lime" hops=0 {} chain=string:lime
+  arg 1 of site 15 relincomplete.c:111:9 [&h] <- address root=h base=local hops=0 {} chain=(addr local:h)
+  arg 0 of site 19 relincomplete.c:141:27 [&t] <- address root=t base=local hops=0 {} chain=(addr local:t)
+  arg 1 of site 19 relincomplete.c:141:27 [0] <- const 0 hops=0 {null} chain=0
+  arg 2 of site 19 relincomplete.c:141:27 [task_defs[i].u.main] <- field TaskEntry.main root=task_defs base=global-array-element object=task_defs@relincomplete.c:136 hops=0 {} index=[local:i] read=12 chain=field:TaskEntry.main
+  arg 3 of site 19 relincomplete.c:141:27 [0] <- const 0 hops=0 {null} chain=0
+  arg 0 of site 23 relincomplete.c:148:3 [4] <- const 4 hops=0 {} chain=4
+[paramflow] 6
+  reg_create#0 d0 call-argument -> strcmp#1 at site 3 relincomplete.c:46:30 {callee-without-body,result-tested,in-loop} [name] guard=(and (lt local:i 4) (eq field:Reg.used 1))
+  reg_create#0 d0 call-argument -> strncpy#1 at site 5 relincomplete.c:52:7 {callee-without-body,in-loop} [name] guard=(and (lt local:i 4) (eq field:Reg.used 0))
+  reg_create#1 d0 out-store at relincomplete.c:54:7 {} [i] guard=(and (lt local:i 4) (eq field:Reg.used 0))
+  reg_find#0 d0 call-argument -> strcmp#1 at site 1 relincomplete.c:35:30 {callee-without-body,result-tested,in-loop} [name] guard=(and (lt local:i 4) (eq field:Reg.used 1))
+  reg_find#1 d0 out-store at relincomplete.c:36:7 {} [i] guard=(and (lt local:i 4) (and (eq field:Reg.used 1) (eq (call-result strcmp (seq field:Reg.name (seq param:name#0))) 0)))
+  start_tasks#0 d0 comparison at relincomplete.c:141:15 {in-loop} [i < n] expr=(lt local:i param:n#0)
+[ptrfields] 3
+  0 address-write Seeker.known at relincomplete.c:81:3 in seek_known root=seeker@relincomplete.c:77 -> name_defs@relincomplete.c:66[0] [name_defs] other-writes=0 {}
+  1 read Seeker.known at relincomplete.c:82:58 in seek_known read=8 root=seeker@relincomplete.c:77 resolved candidates=1 write=0 -> name_defs@relincomplete.c:66 path=.name index=local:i elements=0+1k (k<4) {write-before-read,same-root,index-from-counted-loop}
+      name_defs@relincomplete.c:66[0].name = string "red" at relincomplete.c:66:39 {const-object}
+      name_defs@relincomplete.c:66[1].name = string "green" at relincomplete.c:66:48 {const-object}
+      name_defs@relincomplete.c:66[2].name = string "blue" at relincomplete.c:66:59 {const-object}
+      name_defs@relincomplete.c:66[3].name = string "grey" at relincomplete.c:66:69 {const-object}
+  2 read Seeker.opaque at relincomplete.c:87:35 in seek_opaque read=10 root=seeker@relincomplete.c:77 needs-field-points-to candidates=0 index=0 {}
+[gimages] 10
+  name_defs@relincomplete.c:66[0].name string "red" at relincomplete.c:66:39 {const-object} reach={pointer-field} field=NameDef.name
+  name_defs@relincomplete.c:66[1].name string "green" at relincomplete.c:66:48 {const-object} reach={pointer-field} field=NameDef.name
+  name_defs@relincomplete.c:66[2].name string "blue" at relincomplete.c:66:59 {const-object} reach={pointer-field} field=NameDef.name
+  name_defs@relincomplete.c:66[3].name string "grey" at relincomplete.c:66:69 {const-object} reach={pointer-field} field=NameDef.name
+  regs@relincomplete.c:29 int 0 at relincomplete.c:29:12 {zero-initialized} reach={argument}
+  seeker@relincomplete.c:77 int 0 at relincomplete.c:77:15 {zero-initialized} reach={argument,pointer-field}
+  task_defs@relincomplete.c:136[0].u.call function setup_hook at relincomplete.c:136:43 {} reach={argument}
+  task_defs@relincomplete.c:136[1].u.main function red_main at relincomplete.c:136:67 {} reach={argument}
+  task_defs@relincomplete.c:136[2].u.main function green_main at relincomplete.c:136:89 {} reach={argument}
+  task_defs@relincomplete.c:136[3].u.main function blue_main at relincomplete.c:136:113 {} reach={argument}
+
+# relations
+kz-relations 1
+rules relations rules revision 12 (2026-11-18)
+mode profile-free
+  extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
+  extract.profile = kz-static-builtin-minimal / 
+  extract.p0_table = P0 table revision 3 (2026-10-30), 72 entries
+  extract.p0_table_scope = families of this revision: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread or process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Of a family the members that take, release, wait, signal, sleep, end, name a thread, bind or create a key, push or pop a handler, load or look up, or store memory are entries; a family is not listed whole where this list names members left out.  Not in this revision: read-write locks (pthread_rwlock_*; their shared acquisitions are not read by the lock-set analysis, so the family is left out whole and its acquisitions are no lock operations), barriers (pthread_barrier_*), one-time initialization (pthread_once, call_once), thread cancellation of another thread (pthread_cancel and the cancellation state functions), signals (kill, raise, pthread_kill, sigwait), dlclose, dlerror and dladdr, functions a compiler or a fortify wrapper calls without a call in the source (__stack_chk_fail, __chk_fail and the *_chk functions); thread join and detach (pthread_join, pthread_tryjoin_np, pthread_timedjoin_np, pthread_detach, thrd_join, thrd_detach); POSIX timers (timer_create, timer_settime, timer_gettime, timer_getoverrun, timer_delete; a timer with SIGEV_THREAD notification starts its function on a new thread, which is no actor here); I/O multiplexing (select, pselect, poll, ppoll); the initialization, destruction, attribute and query members of the mutex, spin lock, semaphore and condition variable families and of thread creation (pthread_mutex_init, pthread_mutex_destroy, pthread_mutexattr_*, pthread_spin_init, pthread_spin_destroy, sem_init, sem_destroy, sem_open, sem_close, sem_unlink, sem_getvalue, pthread_cond_init, pthread_cond_destroy, pthread_condattr_*, mtx_init, mtx_destroy, cnd_init, cnd_destroy, pthread_attr_*); scheduling (sched_*, pthread_setschedparam, pthread_getschedparam, pthread_setschedprio); data functions not in this revision (stpcpy, stpncpy, strlcpy and strlcat (glibc 2.38 and later), mempcpy, memccpy, explicit_bzero, and the wide-character members); formatted input, which stores through its arguments (sscanf, vsscanf, fscanf, vfscanf, scanf, vscanf); handlers registered for process exit (atexit, at_quick_exit, on_exit)
+  extract.derivation_rules = wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  extract.targets_rule = R-T1,R-T2 (target rules revision 1): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)
+  extract.reading_options_vs_basis = not compared: no basis (--source)
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
+run order: no record given (this revision reads no run record; the column says so in every row)
+functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
+actors: roots 4 (process 1, spawn-entry 0, table-walk-entry 0, table-image-entry 3, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 1 [relincomplete.c:141:27: blue_main green_main red_main; the member TaskEntry.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written; besides the function leaves of TaskEntry.main, the image of task_defs has 1 function leaf/leaves of another member of its record (task_defs[0].u.call setup_hook@relincomplete.c:121; a union member read gives that value): that the spawn reads only the elements whose main is a function leaf rests on its guard, which this revision does not read (so the threads of this spawn are taken as not complete)]
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
+summary A 3 (namespaces 1, lookup uses 3, with a creator of the same partition in another actor 2, key-matched 1) B 0 (with a callee check 0) C 3 (self-identity reads 0); flip static-possible 1, static-undetermined 1, none 4; feasibility proven-impossible 0, possible 3, undecidable 3, not graded 0
+summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 0, creators 0; lookup rows with the membership unresolved 0; lookup rows without a creator of their partition 1 [writer set not complete 1]
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 6 [no run record read 6]; actor_not_extracted 3 [child threads not all resolved 3]; key_unresolved 1 [pointer field without points-to 1]; writer_set_incomplete 3 [FIELD_STATUS not complete 3, zero writers under the rules 1]; fixed_proof_open 2 [no static order between the actors 2]; link_unlinked 3 [identity of the reader and the created thread not decided 3]; reasons of the whole facts on every row: none
+[A] 3 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
+  namespace Reg.name (record type Reg; tables regs)
+      search: A1 search loop relincomplete.c:34:3 in reg_find: key Reg.name strcmp at relincomplete.c:35:30 compared with parameter 0 [name] (search parameter 0)
+      search: A1 search loop relincomplete.c:45:3 in reg_create: key Reg.name strcmp at relincomplete.c:46:30 compared with parameter 0 [name] (search parameter 0)
+      active fields: Reg.used 
+      active test: Reg.used == 1 is in use (a search with the key comparison requires it)
+      lifecycle Reg.name: writers 1 from WRITERS (the field is an extraction target)
+        memcpy at relincomplete.c:52:7 in reg_create value=top [copy of name] guard=(and (lt local:i 4) (eq field:Reg.used 0))
+      lifecycle Reg.used: writers 1 from WRITERS (the field is an extraction target)
+        assign at relincomplete.c:53:7 in reg_create value=1 [1] guard=(and (lt local:i 4) (eq field:Reg.used 0)) class=reservation or activation (writes the in-use value)
+      publication writes of the creator reg_create#0: Reg.name memcpy relincomplete.c:52:7 in reg_create; Reg.used assign relincomplete.c:53:7 in reg_create := 1
+      key-parameter functions: lookups reg_find#0; creators reg_create#0
+      uses: lookups 3, creators 1 (calls from outside the key-parameter functions; a creator reaches a write of the key); left out, another callback passed to the search: lookups 0, creators 0
+      namespace layers: B P0 R
+  A1 lookup relincomplete.c:82:33 in seek_known -> reg_find#0 namespace Reg.name partition {} key known
+      membership: reaches the comparison strcmp at relincomplete.c:35:30 in its own search loop
+      key: read through the pointer field Seeker.known -> name_defs@relincomplete.c:66 (PTR_FIELDS resolved), elements from 0 step 1 count 4; image name_defs[0].name = "red"; image name_defs[1].name = "green"; image name_defs[2].name = "blue"; image name_defs[3].name = "grey"
+      aliases: the key is read through the pointer field Seeker.known -> name_defs@relincomplete.c:66 (PTR_FIELDS resolved)
+      actors: {main (process)}; result=discarded
+      id holder: the lookup's arg 1 [&seeker.handle] address Seeker.handle base global object seeker@relincomplete.c:77 <- reg_find stores through its parameter 1 in reg_find at relincomplete.c:36:7 [i]
+      not a pair: key constants differ: relincomplete.c:111:9 in green_main -> reg_create key string literal "lime" actors {green_main (table-image-entry)}
+      writers: NameDef.name: no writer found under these premises; premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 0: direct 0, data-function 0, out-pointer 0, initial values 1; instances 0); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Reg.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Reg.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: in the loop relincomplete.c:82:3 kind constant-trip trip exact 4 exit (not (lt local:i 4))
+      handling: result discarded; no return of it and no terminal operation under it found
+      dependency: path A: no creator left after exclusions (probe-create 0, key constants differ 1, same actor only 0): writer set not complete (Reg.name not complete)
+      run-order: no record given
+      feasibility: undecidable: no pair
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no creator of the same partition and key in another actor; search returns: reg_create returns -17 [ERR_NOT_FOUND], reg_create returns -5 [ERR_ILLEGAL], reg_create returns 0 [0], reg_find returns -17 [ERR_NOT_FOUND], reg_find returns 0 [0]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); writer_set_incomplete(zero writers under the rules)
+  A2 lookup relincomplete.c:87:9 in seek_opaque -> reg_find#0 namespace Reg.name partition {} key unresolved
+      membership: reaches the comparison strcmp at relincomplete.c:35:30 in its own search loop
+      key: read through the pointer field Seeker.opaque: needs field points-to (PTR_FIELDS)
+      actors: {main (process)}; result=discarded
+      id holder: the lookup's arg 1 [&seeker.handle] address Seeker.handle base global object seeker@relincomplete.c:77 <- reg_find stores through its parameter 1 in reg_find at relincomplete.c:36:7 [i]
+      creator: key unresolved (lookup): relincomplete.c:111:9 in green_main -> reg_create key string literal "lime" actors {green_main (table-image-entry)}
+      id holder: the creator relincomplete.c:111:9 -> reg_create: arg 1 [&h] address base local <- reg_create stores through its parameter 1 in reg_create at relincomplete.c:54:7 [i]
+      callee-check: reg_create returns -17 [ERR_NOT_FOUND] with no condition
+      callee-check: reg_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Reg.used 1)) (eq (call-result strcmp (seq field:Reg.name (seq param:name#0))) 0))
+      callee-check: reg_create returns 0 [0] when (and (lt local:i 4) (eq field:Reg.used 0))
+      callee-check (set): reg_create: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
+      writers: Reg.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Reg.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result discarded; no return of it and no terminal operation under it found
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-undetermined: the key of the lookup or of a creator is not resolved statically; search returns: reg_create returns -17 [ERR_NOT_FOUND], reg_create returns -5 [ERR_ILLEGAL], reg_create returns 0 [0], reg_find returns -17 [ERR_NOT_FOUND], reg_find returns 0 [0]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); key_unresolved(pointer field without points-to); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+  A3 lookup relincomplete.c:103:9 in red_main -> reg_find#0 namespace Reg.name partition {} key known
+      membership: reaches the comparison strcmp at relincomplete.c:35:30 in its own search loop
+      key: string literal "lime"
+      actors: {red_main (table-image-entry)}; result=discarded
+      id holder: the lookup's arg 1 [&h] address base local <- reg_find stores through its parameter 1 in reg_find at relincomplete.c:36:7 [i]
+      creator: same key: relincomplete.c:111:9 in green_main -> reg_create key string literal "lime" actors {green_main (table-image-entry)}
+      id holder: the creator relincomplete.c:111:9 -> reg_create: arg 1 [&h] address base local <- reg_create stores through its parameter 1 in reg_create at relincomplete.c:54:7 [i]
+      callee-check: reg_create returns -17 [ERR_NOT_FOUND] with no condition
+      callee-check: reg_create returns -5 [ERR_ILLEGAL] when (and (and (lt local:i 4) (eq field:Reg.used 1)) (eq (call-result strcmp (seq field:Reg.name (seq param:name#0))) 0))
+      callee-check: reg_create returns 0 [0] when (and (lt local:i 4) (eq field:Reg.used 0))
+      callee-check (set): reg_create: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
+      writers: Reg.name: 1 (memcpy 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 1: direct 0, data-function 1, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Reg.used: 1 (assign 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 1: direct 1, data-function 0, out-pointer 0, initial values 1; instances 1); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-in-loop; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result discarded; no return of it and no terminal operation under it found
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: reg_create returns -17 [ERR_NOT_FOUND], reg_create returns -5 [ERR_ILLEGAL], reg_create returns 0 [0], reg_find returns -17 [ERR_NOT_FOUND], reg_find returns 0 [0]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+[B] 0 (field-argument groups 1; left out: no writer 1, one actor only 0)
+[C] 3 (spawn calls 1, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 0, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)
+  C1 spawn relincomplete.c:141:27 in start_tasks -> pthread_create; field State.started; read relincomplete.c:97:38 in state_check (via the call relincomplete.c:102:9 in red_main)
+      spawn: callee pthread_create, entries blue_main green_main red_main (from the static image of the table the entry argument is read from); child actors {blue_main (table-image-entry), green_main (table-image-entry), red_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
+      write after the spawn: relincomplete.c:142:3 key=state value=1 [1] locks {}
+      read: [state.started] use=#3 index=- guard=- locks {}; at the call {}
+      writers: State.started: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      dependency: path C: the creator writes State.started after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: possible: the read holds no lock
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: the reader's function returns no constant that depends on State.started
+      layers: B P0 R
+      incomplete: no_run(no run record read); actor_not_extracted(child threads not all resolved); link_unlinked(identity of the reader and the created thread not decided)
+  C2 spawn relincomplete.c:141:27 in start_tasks -> pthread_create; field State.started; read relincomplete.c:97:38 in state_check (via the call relincomplete.c:110:9 in green_main)
+      spawn: callee pthread_create, entries blue_main green_main red_main (from the static image of the table the entry argument is read from); child actors {blue_main (table-image-entry), green_main (table-image-entry), red_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
+      write after the spawn: relincomplete.c:142:3 key=state value=1 [1] locks {}
+      read: [state.started] use=#3 index=- guard=- locks {}; at the call {}
+      writers: State.started: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      dependency: path C: the creator writes State.started after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: possible: the read holds no lock
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: the reader's function returns no constant that depends on State.started
+      layers: B P0 R
+      incomplete: no_run(no run record read); actor_not_extracted(child threads not all resolved); link_unlinked(identity of the reader and the created thread not decided)
+  C3 spawn relincomplete.c:141:27 in start_tasks -> pthread_create; field State.started; read relincomplete.c:97:38 in state_check (via the call relincomplete.c:117:9 in blue_main)
+      spawn: callee pthread_create, entries blue_main green_main red_main (from the static image of the table the entry argument is read from); child actors {blue_main (table-image-entry), green_main (table-image-entry), red_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
+      write after the spawn: relincomplete.c:142:3 key=state value=1 [1] locks {}
+      read: [state.started] use=#3 index=- guard=- locks {}; at the call {}
+      writers: State.started: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      dependency: path C: the creator writes State.started after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: possible: the read holds no lock
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: the reader's function returns no constant that depends on State.started
+      layers: B P0 R
+      incomplete: no_run(no run record read); actor_not_extracted(child threads not all resolved); link_unlinked(identity of the reader and the created thread not decided)

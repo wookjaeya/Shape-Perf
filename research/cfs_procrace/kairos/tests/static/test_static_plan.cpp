@@ -402,7 +402,7 @@ int main(int argc, char** argv) {
     const std::string vreq = read(work / "v4a" / "plan.req");
     KZ_CHECK(vreq == read(work / "v4b" / "plan.req"));
     KZ_CHECK(has(v.sidecar, "\nrequests sha256=" + kz::to_hex(kz::sha256(vreq)) + " file=plan.req rows="));
-    KZ_CHECK(has(v.sidecar, "kz-plan-sidecar 2\n") && has(v.sidecar, "\nmanifest-revision 4 (kzs-sites 4)\n") && has(v.sidecar, "plan rules revision 3 (2026-11-16)"));
+    KZ_CHECK(has(v.sidecar, "kz-plan-sidecar 2\n") && has(v.sidecar, "\nmanifest-revision 4 (kzs-sites 4)\n") && has(v.sidecar, "plan rules revision 4 (2026-11-18)"));
     KZ_CHECK(vreq.compare(0, 19, "kz-plan-requests 1\n") == 0 && has(vreq, "\nend rows="));
     KZ_CHECK(has(v.sidecar, "\ninput namespace-data sha256=" + kz::to_hex(kz::sha256(read(vns))) + " path="));
     // the control budget line before the first row line
@@ -416,7 +416,11 @@ int main(int argc, char** argv) {
     KZ_CHECK(kzrt::parse_manifest(v.manifest, "planv4.kzs", &mv, &ve));
     if (!ve.empty()) std::fprintf(stderr, "%s\n", ve.c_str());
     KZ_CHECK_EQ(mv.version, 4u);
-    KZ_CHECK(mv.has_plan && mv.plan.obsrules.find("plan rules revision 3") == 0 && mv.plan.control == "all" && mv.plan.budget == "all");
+    KZ_CHECK(mv.has_plan && mv.plan.obsrules.find("plan rules revision 4") == 0 && mv.plan.control == "all" && mv.plan.budget == "all");
+    // plan rules revision 4: the fact-derived handling label beside the text label the tier order uses (they differ on A1:
+    // R by the row's `handling: terminal` text, T? by its handling_label line)
+    KZ_CHECK(has(v.sidecar, " A1 tier=1 position=1 label=R fact-label=T? class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned"));
+    KZ_CHECK(has(v.sidecar, " C1 tier=3 position=4 label=E fact-label=- class="));
     {
       kz::Container fc;
       KZ_CHECK(kz::Container::read_file((work / "planv4.kz").string(), &fc).ok());

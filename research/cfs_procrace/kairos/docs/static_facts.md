@@ -705,6 +705,8 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 
 ## 5t. 검증 상태가 붙은 의미: `extract --semantics` (추출 옵션, 2026-11-16) [D]
 
+2026-11-18: 이 절의 판에서 SEMANTICS 의 `failure` 칸은 “성공 상수가 아닌 body 상수”였고(RESULT_EFFECT 의 outcome 과 다른 정의), status space 의 severity 상수는 모두(성공 severity 도) `failure` 칸에 `severity mask <이름>` 으로 적혔다. 둘 다 §5w 가 고쳤다(MC 도구는 아직 앞판).
+
 결과는 `plan/full_stage_results_20261116.md` §8. 범위 규칙은 `docs/semantics_coverage.md`(개정 1, 어떤 자료 파일보다 먼저 커밋)이고, 자료 파일 `semantics/framework_semantics_<판>.txt`, `semantics/p0_declarations_<판>.txt`, `semantics/framework_namespaces_<판>.txt` 는 그 규칙의 기계적 훑기(연구 `env/tools/semantics_scan.py generate`)가 만든 것이며 `semantics_scan.py check` 가 다시 만들어 대조한다. 옵션을 주지 않은 추출은 앞판과 같은 바이트다(같은 코드 경로; 섹션·BASIS 항목·출력 줄은 모두 옵션 아래). 옵션은 확장 사실과 함께만 받고(그 밖이면 종료 코드 2), 자료 파일이 형식에 맞지 않거나(첫 줄, 알 수 없는 줄, 끝 줄 없음, 고정되지 않은 파일) 읽히지 않으면 아무것도 읽기 전에 종료 코드 2.
 
 1. **결합(join).** 추출은 facts 를 한 번 쓰고 그 컨테이너를 다시 읽어(relations 와 같은 적재기 `RelFacts`, 그리고 FILE_HASHES) 의미 행을 계산한 뒤, 섹션 SEMANTICS 와 BASIS 항목을 더해 한 번 더 쓴다. 다른 섹션의 레코드는 같다(SEMANTICS 의 글은 다른 모든 글 다음에 STRINGS 에 들어간다).
@@ -725,6 +727,8 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - 이 층이 방법이 받아들이는 framework-adapter 층인지는 PI 의 물음이다(가정하지 않음).
 
 ## 5u. 결과 흐름과 효과: `extract --result-flow`, relations rules revision 10, order rules revision 3 (2026-11-16) [D]
+
+2026-11-18: (1) 개정 9 의 `callee-check (returns not followed)`·`callee-check (set)` 줄은 이 절의 줄이 생긴 뒤에도 그대로 둔다: 그 둘은 RETURNS 와 RET_CONSTS 만 읽은 집합의 완전성을 말하고(RESULT_EFFECT 를 읽지 않음), 판정 규칙 8.12 (ㄱ)과 설명 스크립트가 읽는 줄이다. 그래서 `callee-check (result flow)` 가 따라간 반환(매개변수를 그대로 돌려주는 마무리 함수)이 개정 9 의 줄에는 여전히 “not followed” 로 남는다. 두 줄을 하나의 완전성 규칙으로 맞추는 것은 판정 규칙의 덧붙임과 함께 할 뒤 단계다. (2) 이 절의 outcome 등급(success·failure·other)은 정의 없이 쓰였다: 정의와 그 고침은 §5w(outcome class rule revision 1). (3) guard 행의 주소 잡힌 지역, switch, 같은 callee 의 두 호출은 §5w(result flow rules revision 2). MC 도구는 아직 앞판이다.
 
 옵션 `kz-static extract --no-profile --result-flow` (프로필 없는 방식에서만; 프로필 방식은 종료 코드 2). 옵션이 없으면 추출의 출력은 앞판 그대로이고, relations 와 order 는 RESULT_FLOW·RESULT_EFFECT 가 없는 facts 에서 revision 9·2 의 바이트를 낸다. 규칙의 판: `result flow rules revision 1 (2026-11-16)` (BASIS `extract.result_flow`). 섹션은 schema revision 12 의 142·143 이고 레코드·열거형은 바뀌지 않는다(`include/` 그대로).
 
@@ -747,6 +751,8 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 **알려진 한계.** event type·run status 의 등급을 쓰지 않는다(자료에 없음). 루프 출구의 지역 플래그 값(예산 출구 뒤 return 되는 지역)은 따라가지 않는다. 몸이 없는 함수의 매개변수 저장은 알 수 없음으로 둔다. 효과의 "닿음"은 CFG 경로이며 무한히 도는 루프는 따로 가르지 않는다.
 
 ## 5v. 루프 플래그 술어와 핸들 단위 잠금 정체성: `extract --loop-defs`, `extract --lock-handles`, relations rules revision 11, order rules revision 4 (2026-11-16) [D]
+
+2026-11-18: 이 절의 규칙 가운데 flag 정의의 switch, 정의 행의 깃발, 핸들의 대체 규칙, awaited 필드와 writer 는 §5w 가 고쳤다(MC 도구는 아직 앞판).
 
 옵션 `kz-static extract --no-profile --loop-defs`, `--lock-handles` (프로필 없는 방식에서만; 프로필 방식은 종료 코드 2). 옵션이 없으면 추출의 출력은 앞판 그대로이고, relations 와 order 는 LOOP_DEFS·LOCK_HANDLES 가 없는 facts 에서 revision 10·3 의 바이트를 낸다. 규칙의 판: `loop flag predicate rules revision 1 (2026-11-16)` (BASIS `extract.loop_defs`), `lock handle rules revision 1 (2026-11-16)` (BASIS `extract.lock_handles`). 섹션은 schema revision 12 의 140·144 이고 레코드·열거형은 바뀌지 않는다(`include/` 그대로).
 
@@ -771,6 +777,37 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 **호출자에 기대는 spawn 규칙의 측정 (`kz-static order --caller-dependent-report FILE`).** order 글과 간선 목록은 바뀌지 않는다. 따로 쓰는 보고: 풀린 스레드가 있는 spawn 호출 수, 그 가운데 호출자에 기대는 것, 그 함수의 호출자와 그 가운데 풀린 entry 를 넘기지 않는 것(그 호출자를 코드에 가진 어느 스레드에서도 그 호출자의 `children_on` 이 비어 있음); 그리고 그런 호출자가 그 호출의 자기 스레드 모두를 만들 수 있다고 둔 둘째 닫힘(위 근사)에서 값이 달라지는 짝과 행. 둘째 닫힘은 실행이 순서를 주지 않는 짝도 순서 짓을 수 있으므로, 달라지는 짝의 수는 이 규칙이 unordered 로 남긴 짝의 위 한계다.
 
 **알려진 한계.** flag 규칙은 루프 앞의 정의 하나와 몸 안의 정의 하나만 본다(분기마다 다른 상수를 주는 꼴은 거절). value 규칙은 같은 `if` 문 안의 앞선 정의만 본다(goto 를 따로 보지 않음). LOOP_DEFS 의 술어에는 L1 인증이 없다. 핸들 정체성은 핸들 값이 같으면 같은 객체라는 의미 항목에 기대고, 그 항목이 자료에 없으면 쓰이지 않는다. 핸들의 writer 판단은 LOCK_IDS 의 값 읽기 규칙(per-field 완전, 한 번 도는 writer 하나)과 같다.
+
+## 5w. 2026-11-18 의 고침: outcome class rule, 열쇠를 지우는 호출, 대기의 writer 와 awaited 필드, 결정되지 않는 guard, 핸들 (relations rules revision 12·13, order rules revision 5·6·7) [D]
+
+검토가 확인한 지적을 코드로 고친 것이다(연구 결과 문서 `plan/full_stage_results_20261116.md` §12). 이 절의 규칙은 소스에 있고, **MC 의 kz-static 은 아직 다시 빌드하지 않았다**(그 문서 §12.6): 아래는 규칙의 글이고 다섯 빌드의 측정이 아니다. 스키마(`include/`)는 바뀌지 않는다.
+
+**outcome class rule revision 1 (2026-11-18)** — `lib/llvm/outcome.hpp` 하나가 SEMANTICS 의 success·failure 칸(`semantics.cpp`), RESULT_EFFECT 의 outcome(`serialize.cpp`), relations 의 failure·success 등급(`relations.cpp`)을 정한다. 함수가 돌려주는 값 v 의 등급은 그 함수의 status space 에서:
+- `success`: v 가 그 space 의 성공 상수(의미 자료의 `status-space success` 줄).
+- `failure`: 성공 상수가 아니고, v 가 음수이거나, 그 space 에 severity 상수가 있고 그 상수들의 비트 합(mask)의 모든 비트가 32 비트 값 v 에 서 있음.
+- `other`: 나머지.
+- 함수의 space: 그 함수에 적용되는 의미 항목의 component 의 space. 항목의 return kind 가 `status` 가 아니면 모든 값이 `other`(SEMANTICS 에는 success·failure 행을 쓰지 않고 `none` 칸의 `returned constant (the return kind is …: no outcome class)` 행). 항목이 없는 함수는 facts 의 component 들이 함께 갖는 space(성공 상수가 모두 같을 때 그 값, mask 는 합). SEMANTICS 가 없는 facts 는 규칙의 대체값(성공 상수 0, mask 0xC0000000).
+- 1차 근거: 값은 자료 행에서 온다(`kairos/semantics/framework_semantics_cfe-6.4.1.txt:122-126` 의 `status-space success CFE_SUCCESS 0 …cfe_error.h:158`, `severity CFE_SEVERITY_BITMASK 3221225472 …:132`, `CFE_SEVERITY_ERROR 3221225472 …:136`, `CFE_SEVERITY_INFO 1073741824 …:135`; OSAL 은 `status-space success OS_SUCCESS 0` 뿐). “mask 의 모든 비트가 서면 failure” 와 “음수면 failure” 는 method rule 이다: 앞의 failure 범위 규칙(`plan_gen.cpp` `fail_class`, `order.cpp` `fail_class`; 근거는 `plan/observation_path_results_20261116.md` 의 실패 등급 줄)과 같은 값 집합이고, mask 와 같은 값의 severity 상수가 error severity 라는 것은 자료 행의 이름(`CFE_SEVERITY_ERROR`)이 말한다. 엔진은 그 이름을 읽지 않는다. 대체값의 성공 상수 0 은 생성된 자료 일곱의 `status-space success` 줄이 모두 0 이라는 것에 기댄 method rule 이다 [I: 그 밖의 framework 에서는 확인하지 않음].
+- BASIS: `extract.outcome_classes`(규칙 이름, facts 의 space 들, 항목 없는 함수의 space), `extract.semantics_outcome_rule`.
+- 앞판과 달라지는 것: 앞판 RESULT_EFFECT 는 엔진의 범위(`0x40000000..0x7FFFFFFF` other, 그 밖의 비실패 success; `ast_fn.cpp` 의 옛 `rf_class`)로, SEMANTICS 는 “성공 상수가 아닌 body 상수는 모두 failure” 로 나눴다. 이제 성공 상수가 아닌 양수는 `other` 이고(앞판은 success), 정보 코드(severity 가 mask 전부가 아닌 값)는 SEMANTICS 에서도 `other` 다(앞판은 failure 칸).
+- status space 의 severity 상수는 `status-space none … [severity constant <이름>]` 행이다(앞판은 failure 칸의 `severity mask <이름>`; 읽는 쪽은 옛 꼴도 받는다). 항목마다 `framework none <api> … [return kind <kind> (<by>)]` 행 하나가 더 생긴다.
+- 문서가 반환을 적었는데 이 facts 의 본문이 값을 돌려주지 않는 함수(모든 RETURNS 행이 값 없음: void 로 선언된 함수)의 `documented-return` 행은 `unverified` 이고 항목 글에 `(doc-declaration mismatch: the body in these facts returns no value)` 가 붙는다(앞판은 `doc-collated`).
+
+**효과의 이름(RESULT_EFFECT)** — 인자 역할 `run-status` 만으로는 `exit-app` 이라 부르지 않는다: 그 역할의 인자를 받는 호출이 facts 의 terminal operation 표지(`KZ_CALL_FLAG_TERMINAL_OP`)도 가질 때만 `exit-app` 이다. 역할은 매개변수의 값 영역만 말한다(`framework_semantics_cfe-6.4.1.txt:139` 는 run-loop 점검 함수의 포인터 매개변수에 그 역할을 준다). 그런 호출이 terminal 도 아니면 효과가 아니다.
+
+**result flow rules revision 2** — guard 의 조건에서 주소가 잡힌 지역은 `x@addr-taken` 으로 적는다(도달하는 정의가 하나라는 주장을 하지 않음: 별칭을 통한 저장이나 주소를 받는 호출이 사이에 올 수 있다; 행에 `addr-taken-local`). switch 의 case 아래의 호출은 guard 에 `(top a case of the switch at L:C on <switch 의 값>)` 항을 갖고, switch 로 가는 사용 행의 조건은 `(top the value a switch selects its case by …)` 다(앞판은 case 조건이 없는 guard 와 `(ne 값 0)`). 읽는 쪽은 이 두 항을 모르는 값으로 두고 나머지 항으로만 guard 를 정한다(셋값 논리: 거짓인 항이 하나 있으면 거짓). 조건들이 같은 callee 의 서로 다른 호출 둘을 담는 guard 는 `not-computed` 다(call-result 마디가 callee 이름만 가져 두 결과가 한 값으로 읽힘): order 는 그런 guard 를 `unknown(…two calls of one callee)` 로 둔다. **남은 한계**: call-result 마디에 호출 site 를 싣지 않았다.
+
+**loop flag predicate rules revision 2** — 몸 안 정의가 그 루프 안의 switch 의 case 아래에 있으면 flag·value 규칙을 쓰지 않고 `refused-unresolved` 다(guard 가 case 조건을 갖지 않아 정의의 guard 를 모름; 앞판은 술어 `1` 의 recognised 를 냈다). 정의 행의 깃발은 그 정의의 것이다: `call-result` 는 그 행의 value 가 호출 결과일 때, `under-lock` 은 루프 안의 정의에서 걷는 쪽의 잠금 깊이가 0 이 아닐 때만(루프 밖 정의의 잠금 상태는 적지 않는다; 앞판은 지역의 깃발을 모든 행에 되풀이했다). 루프 자신의 행은 인식된 정의들의 깃발을 모은다(앞판과 같음).
+
+**lock handle rules revision 2** — 핸들은 연산의 사슬의 호출이 모두 찾아졌을 때만 이름 댄다(사슬의 함수가 다음 함수를 한 곳에서만 부름; 끝은 그 행의 잠금 family 의 잠금 연산). 아니면 핸들이 없고 전제 글은 `the calls of the chain are not all located (…): no handle is named` 다. 앞판은 따라간 앞부분의 가장 깊은 호출의 값 인자를 썼다: 그래서 다른 family 의 행에 한 family 의 핸들이, 잠금 연산이 아닌 함수의 인자가 핸들로 적혔다. **남은 한계**: 사슬이 모두 찾아진 행에서도 “값 하나를 넘기는 가장 깊은 호출” 은 그 값이 그 family 의 잠금을 가리킨다는 증명이 아니다(검증된 `lock-object` 항목이 있을 때만 `static-instance`).
+
+**배열의 decay(`--object-access`)** — 대상 배열 필드의 포인터가 조건 연산자나 쉼표 연산자를 거쳐 호출 인자가 되면 주소 탈출이다(out-pointer 호출이 그 꼴을 읽지 않음: `passed to a call in an expression the out-pointer rule does not read`). 배열의 배열인 필드의 한 줄(`x.f[i]` 가 decay)은 `&x.f[i]` 처럼 out-pointer 호출이다. 본문이 있는 가변 인자 함수의 이름 없는 인자로 넘어간 주소의 사유는 `an argument beyond the named parameters of a callee defined in the closed program: …` 다(앞판은 “the callee has no body in the closed program”; 이 사유 글은 옵션 없는 경로의 out-pointer 호출에도 쓰인다).
+
+**relations rules revision 12** — 경로 A 의 열쇠 필드에 대한 쓰기 가운데 WRITERS 가 저장 값을 상수로 주는 것은 열쇠를 지우거나 초기화하는 저장이다. 열쇠 매개변수 함수의 사용이 닿는 열쇠 쓰기가 모두 그런 저장이면(값이 상수가 아닌 WRITERS 행도, WRITERS 행이 없는 FUNC_WRITES 행도 닿지 않음) 그 사용은 **key-clearing call** 이다: 생성자 site 도 조회 행도 아니고, 같은 partition 의 조회 행에 `key clearing: <위치> in <함수> -> <callee> …; no creator: every write of the key it reaches stores a constant (…)` 줄로 적힌다. namespace 머리의 `key-parameter functions:` 줄에 `key-clearing (…)` 목록, `uses:` 줄과 `summary A membership and creators` 줄에 그 수(0 이 아닐 때만). 함수 이름을 보지 않는다. 1차 근거: cFE 6.4.1 의 `cfe_sb_api.c:431` `PipeId = CFE_SB_INVALID_PIPE`(지우기)와 `:235` `PipeId = PipeTblIdx`(만들기); 앞판은 `cfe_sb_priv.c:123` 의 지우는 호출을 13 행의 creator 로 적었다. **한계**: 값을 주는 WRITERS 행이 없는 쓰기는 살아 있는 쓰기로 둔다(덜 지우는 쪽); 상수를 열쇠로 저장하는 생성(드묾)은 지우는 저장으로 읽힌다 [미확인: 다섯 빌드에서 그런 생성이 있는지].
+**relations rules revision 13**(RESULT_FLOW·RESULT_EFFECT 가 있을 때): failure·success 등급을 outcome class rule 로 읽는다.
+
+**order rules revision 5**(모든 facts) — 대기의 awaited 필드는 술어가 스스로 읽는 필드다: 술어가 결과를 시험하는 호출의 인자 아래와 `addr` 아래의 필드는 awaited 가 아니다(out 인자나 열쇠이지 기다리는 값이 아님; `awaited:` 줄에 `not awaited, under the arguments …` 로 적음; 그런 필드뿐이면 `awaited: not named: the predicate reads no field of its own (…)`). awaited 필드의 writer 는 기다리는 스레드마다 센다: 쓰기의 스레드는 자기 아닌 모든 기다리는 스레드의 writer 다(앞판은 writer 의 스레드가 기다리는 스레드들 가운데 하나이기만 하면 모두에게서 뺐다: 시작할 때 스스로 기다리는 응용 스레드가 자식의 레코드를 쓰는 경우 그 writer 가 사라졌다). HB-await 간선은 (writer 스레드, 기다리는 스레드) 짝마다이고 hard 조건의 “writer 하나” 도 그 스레드의 writer 수로 본다. writer 스레드가 기다리는 스레드이기도 하면 `awaited:` 줄이 `writers N (a writer thread is itself a waiting thread: for each waiting thread the writers in another thread: …)` 꼴이다. 행위자는 entry 함수로 구분하므로 같은 entry 의 다른 스레드 인스턴스는 가르지 못한다(기다리는 행위자가 하나뿐일 때 그 행위자의 쓰기는 뺌).
+**order rules revision 6**(RESULT_FLOW 가 있을 때): `not-computed` guard 는 아무것도 정하지 않는다. **order rules revision 7**(LOOP_DEFS 가 있을 때): 위 revision 5 의 두 규칙이 LOOP_DEFS 술어에도 적용된다.
 
 ## 6. core-cpu1 결과 [M]
 

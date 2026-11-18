@@ -191,8 +191,11 @@ of sections 2-3 apply, and:
   data's sha256 and define the function on that line); for each `delete` of the entry, the entry of the function with
   its parameters and the after-call of the calls on the line of its `at=` (the retire call); for each `clear`, the
   store at its `at=` line.  No entry: `need … object-delete not-planned reason=plan_missing(no namespace data entry)`.
-  The sidecar's `lifetime` lines list each operation and whether it applies.  No API or kind name is in the generator:
-  they come from the data file, which the lint keeps free of case identifiers.
+  The sidecar's `lifetime` lines list each operation and whether it applies.  No framework API or kind name of the
+  object rule is in the generator: they come from the data file, which the lint keeps free of case identifiers.
+  (2026-11-18: the sentence read `No API or kind name is in the generator`; the generator does hold three names of its
+  own, each with its ground: the two C library length checks of the key-text rule, section 3, and the name of this
+  repository's runtime wrapper in the spawn binding, section 8.)
 - **Effect calls** (`effect-call`): for the use of a planned path A or B row, the at-call of each event send, system log,
   application exit or terminal effect of RESULT_EFFECT that has a call, with the argument a SEMANTICS arg-role row
   names for its callee (the role's first word).  A path A row's `event-send` need names those sites.
@@ -205,3 +208,21 @@ of sections 2-3 apply, and:
 
 Not planned in revision 3, each named: the lock calls of path A and B rows
 (`plan_missing(no rule of this revision)`), the branch taken, an effect with no call.
+
+## 9. Plan rules revision 4 (2026-11-18; source only, the MC kz-static is not rebuilt yet)
+
+Revision 4 is revision 3 with three changes of `--manifest 4`; the default path is revision 2 as before.
+
+- **Both handling labels on the row line.** The tier order (sections 2 and 8) uses the label the generator reads from the
+  row's text (`handling: terminal` gives R, and so on).  The relations text of facts with RESULT_FLOW and RESULT_EFFECT
+  also carries a fact-derived label (`handling_label:`), which the value-request rule reads.  The two can disagree on a
+  row.  The sidecar row line now writes both: `label=<text label> fact-label=<fact label or ->`.  The tier order is
+  unchanged: it still uses the text label (the earlier budget stays regenerable); a selection rule that reads no
+  handling label is a later step.
+- **Key-clearing calls.** A row's `key clearing:` lines (relations rules revision 12: a call every write of the key it
+  reaches stores a constant) are no creator sites.  Each is an at-call site of the rule `object-delete`, and the row's
+  `object-delete` need is planned with those sites (and with the sites of a matching name-space entry, when one applies).
+  A row whose only `creator:` lines named such calls is no longer in control set (b).
+- **Event sends of the other outcomes.** The row's `event-send` need lists the event sends and system logs of
+  RESULT_EFFECT on a failure or absence outcome of the row's use.  Those on another outcome (often open effects of the
+  success value, reached on a later pass of a loop) are a need of their own, `event-send-other-outcome`.

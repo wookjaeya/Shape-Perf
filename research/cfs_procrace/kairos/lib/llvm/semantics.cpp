@@ -1,4 +1,5 @@
 // semantics.cpp -- see semantics.hpp.
+#include "outcome.hpp"
 #include "semantics.hpp"
 
 #include <algorithm>
@@ -333,8 +334,19 @@ kz::Status semantics_rows(const kz::Container& facts, const std::vector<SemDataF
           continue;
         }
         // framework: documented returns, argument roles and domains
+        // a documented return of a function whose body in these facts returns no value (every RETURNS row of it has no
+        // value: a function declared void) is a mismatch of the documentation and the declaration: unverified, not collated
+        bool no_value = false;
+        if (rf.defined(fn)) {
+          auto vit = rf.returns_of_.find(fn);
+          no_value = true;
+          if (vit != rf.returns_of_.end())
+            for (uint32_t ri : vit->second)
+              if (rf.returns_[ri].vkind != KZ_RET_VALUE_NONE) no_value = false;
+        }
         for (const SemDataFile::Ret& r : a.rets) {
-          SemRow& x = row(KZ_SEM_LAYER_FRAMEWORK, KZ_SEM_COLUMN_DOC_RETURN, KZ_SEM_VERIFY_DOC_COLLATED, KZ_SEM_ORIGIN_DOC_ONLY, a.name, fn, d.version, r.name,
+          SemRow& x = row(KZ_SEM_LAYER_FRAMEWORK, KZ_SEM_COLUMN_DOC_RETURN, no_value ? KZ_SEM_VERIFY_UNVERIFIED : KZ_SEM_VERIFY_DOC_COLLATED, KZ_SEM_ORIGIN_DOC_ONLY, a.name, fn, d.version,
+                          no_value ? r.name + " (doc-declaration mismatch: the body in these facts returns no value)" : r.name,
                           r.file + ":" + std::to_string(r.line) + where);
           x.value = r.value;
           x.src_line = r.line;
@@ -360,13 +372,25 @@ kz::Status semantics_rows(const kz::Container& facts, const std::vector<SemDataF
         }
         // the constants the body returns in these facts (RET_CONSTS, through the call results it returns), and the returns
         // not followed
-        int64_t success = 0;
-        bool has_success = false;
-        for (const SemDataFile::Const& c : d.status_space)
+        // the outcome classes (outcome.hpp, static_facts.md 5w): the space of the entry's component; success and failure
+        // rows only for an entry whose return kind is status
+        OutcomeSpace space;
+        for (const SemDataFile::Const& c : d.status_space) {
           if (c.kind == "success") {
-            success = c.value;
-            has_success = true;
+            space.has_success = true;
+            space.success = c.value;
+          } else {
+            space.mask |= static_cast<uint64_t>(c.value) & 0xFFFFFFFFULL;
           }
+        }
+        const bool status_return = a.ret_kind == "status";
+        {
+          SemRow& x = row(KZ_SEM_LAYER_FRAMEWORK, KZ_SEM_COLUMN_NONE, KZ_SEM_VERIFY_DOC_COLLATED, a.by == "typed" ? KZ_SEM_ORIGIN_DECLARED : KZ_SEM_ORIGIN_DOC_ONLY, a.name, fn, d.version,
+                          std::string(outcome_return_kind_item()) + (a.ret_kind.empty() ? std::string("unstated") : a.ret_kind) + " (" + (a.by.empty() ? std::string("-") : a.by) + ")",
+                          a.decl_file + ":" + std::to_string(a.decl_line) + where);
+          x.src_line = a.decl_line;
+          x.flags = KZ_SEM_FLAG_VERSION_PINNED;
+        }
         // a constant that comes through a definition RETURNS flags redefined later on a path to the return is marked "not
         // shown to reach the return" (relations rules revision 9, static_facts.md 5o): the body's set is then not established
         std::map<int64_t, std::string> body;
@@ -416,9 +440,13 @@ kz::Status semantics_rows(const kz::Container& facts, const std::vector<SemDataF
               ++marked;
             }
           for (const auto& [v, t] : body) {
-            const bool ok = has_success && v == success;
-            SemRow& x = row(KZ_SEM_LAYER_FRAMEWORK, ok ? KZ_SEM_COLUMN_SUCCESS : KZ_SEM_COLUMN_FAILURE, KZ_SEM_VERIFY_BODY_DERIVED, KZ_SEM_ORIGIN_DERIVED, a.name, fn, d.version,
-                            t, "RET_CONSTS of " + rf.short_fname(fn) + " in these facts");
+            const uint8_t cls = status_return ? outcome_class(space, v) : static_cast<uint8_t>(KZ_REFF_OUTCOME_NONE);
+            const uint8_t col = cls == KZ_REFF_OUTCOME_SUCCESS ? KZ_SEM_COLUMN_SUCCESS : cls == KZ_REFF_OUTCOME_FAILURE ? KZ_SEM_COLUMN_FAILURE : KZ_SEM_COLUMN_NONE;
+            const std::string item = cls == KZ_REFF_OUTCOME_OTHER ? "returned constant of the class other: " + t
+                                     : cls == KZ_REFF_OUTCOME_NONE ? "returned constant (the return kind is " + (a.ret_kind.empty() ? std::string("unstated") : a.ret_kind) + ": no outcome class): " + t
+                                                                   : t;
+            SemRow& x = row(KZ_SEM_LAYER_FRAMEWORK, col, KZ_SEM_VERIFY_BODY_DERIVED, KZ_SEM_ORIGIN_DERIVED, a.name, fn, d.version,
+                            item, "RET_CONSTS of " + rf.short_fname(fn) + " in these facts");
             x.value = v;
             x.flags = KZ_SEM_FLAG_VALUE_SET;
           }
@@ -485,8 +513,8 @@ kz::Status semantics_rows(const kz::Container& facts, const std::vector<SemDataF
     // the status space of a component one of whose entries applies
     if (d.layer == "framework" && applied != 0)
       for (const SemDataFile::Const& c : d.status_space) {
-        SemRow& x = row(KZ_SEM_LAYER_STATUS, c.kind == "success" ? KZ_SEM_COLUMN_SUCCESS : KZ_SEM_COLUMN_FAILURE, KZ_SEM_VERIFY_DOC_COLLATED, KZ_SEM_ORIGIN_DOC_ONLY, "", KZ_NONE32,
-                        d.version, c.kind == "success" ? "success constant " + c.name : "severity mask " + c.name, c.file + ":" + std::to_string(c.line) + " (" + dname + ", " + d.label + ")");
+        SemRow& x = row(KZ_SEM_LAYER_STATUS, c.kind == "success" ? KZ_SEM_COLUMN_SUCCESS : KZ_SEM_COLUMN_NONE, KZ_SEM_VERIFY_DOC_COLLATED, KZ_SEM_ORIGIN_DOC_ONLY, "", KZ_NONE32,
+                        d.version, c.kind == "success" ? "success constant " + c.name : outcome_severity_item() + c.name, c.file + ":" + std::to_string(c.line) + " (" + dname + ", " + d.label + ")");
         x.value = c.value;
         x.src_line = c.line;
         x.decl_fh = d.files.count(c.file) ? held(c.file, d.files.at(c.file)) : KZ_NONE32;
@@ -517,6 +545,9 @@ kz::Status semantics_rows(const kz::Container& facts, const std::vector<SemDataF
   }
   out->notes.push_back({"extract.semantics", std::string(semantics_revision()) + ": the semantics data joined to the build (--semantics; docs/semantics_coverage.md, static_facts.md 5t), " +
                                                  std::to_string(data.size()) + " files"});
+  out->notes.push_back({"extract.semantics_outcome_rule", std::string(outcome_rule_revision()) + ": the success and failure columns of the framework rows are the outcome classes of the "
+                                                             "body's constants in the status space of the entry's component, for entries whose return kind is status; the "
+                                                             "severity constants of a status space are rows of their own (static_facts.md 5w)"});
   for (size_t i = 0; i < data.size(); ++i)
     out->notes.push_back({"extract.semantics[" + std::to_string(i) + "]", base_name(data[i].path) + " sha256=" + data[i].sha256 + " layer=" + data[i].layer + " component=" + data[i].label});
   out->notes.push_back({"count.semantics", "rows " + std::to_string(rows.size()) + " (collated / rows: P0 " + std::to_string(c[1]) + "/" + std::to_string(n[1]) + ", framework " +

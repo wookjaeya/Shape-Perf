@@ -18,7 +18,8 @@ namespace kzs {
 
 const char* plan_rules_revision() { return "plan rules revision 2 (2026-11-16)"; }
 const char* plan_rules_v4_revision() {
-  return "plan rules revision 3 (2026-11-16): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules";
+  return "plan rules revision 4 (2026-11-18): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; "
+         "both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart";
 }
 const char* plan_control_revision() { return "control selection rule revision 1 (2026-11-16)"; }
 const char* plan_requests_revision() { return "value requests rule revision 1 (2026-11-16)"; }
@@ -238,6 +239,11 @@ PlanPriority classify(const RelRow& row) {
   else if (lab == "E") d = "D12", why = "the row gives no absence result; order class " + oc;
   else d = "D13", why = "no rule matched";
   p.label = lab;
+  for (const std::string& x : L)
+    if (starts(x, "handling_label: ")) {
+      p.fact_label = x.substr(16);
+      p.fact_label = p.fact_label.substr(0, p.fact_label.find(' '));
+    }
   p.label_class = (lab == "R" || lab == "J" || lab == "H" || lab == "0") ? "decided" : (lab == "T?" || lab == "F") ? "effect-undetermined" : "absence-undetermined";
   p.order_class = oc;
   p.reach = reach;
@@ -1006,6 +1012,16 @@ class Gen : public RelFacts {
                 break;
               }
           key_call(ci, cf, kp, "creator-call", rowref);
+        } else if (v4_ && starts(l, "key clearing: ")) {
+          // plan rules revision 4: a call relations names key-clearing (every write of the key it reaches stores a
+          // constant) is a delete or reset of the row's object kind: an object-delete site, no creator site
+          std::vector<std::tuple<std::string, uint32_t, uint32_t>> ps = positions(l);
+          const uint32_t ci = ps.empty() ? kN : call_of(ps[0]);
+          if (ci == kN) {
+            gap(rowref, "key-clearing position", reason(kNoPos), "object-delete");
+            continue;
+          }
+          if (Site* st = at_call(ci, "object-delete", rowref + " key-clearing call " + call_pos(ci), {})) row_clearing_[i].insert(st->key());
         } else if (starts(l, "handling:")) {
           handling(l.substr(10), r, rowref);
         }
@@ -1260,7 +1276,7 @@ class Gen : public RelFacts {
     const std::vector<uint32_t> uses = r.path == 'A' ? (r.call != kN ? std::vector<uint32_t>{r.call} : std::vector<uint32_t>{}) : r.site_calls;
     const std::string id = std::string(1, r.path) + std::to_string(r.number);
     const std::string why = "label " + lab + (open ? ", an open effect in its absence line" : "");
-    std::set<std::string> effect_keys;
+    std::set<std::string> effect_keys, other_effect_keys;
     if (asked) ++request_rows_;
     auto request = [&](const std::string& value, const std::string& what, const std::string& state, const std::string& site, const std::string& slot,
                        const std::string& reason_text, const std::string& note) {
@@ -1306,15 +1322,21 @@ class Gen : public RelFacts {
             request("effect", ek + " " + call_pos(ec), "not-planned", "-", "-", reason(kNoPos), "no at-call site of the effect call (see the gap lines)");
             continue;
           }
-          if (x.effect == KZ_REFF_EFFECT_EVENT_SEND || x.effect == KZ_REFF_EFFECT_SYSLOG) effect_keys.insert(es->key());
+          // plan rules revision 4: the event sends on the row's failure and absence outcomes are its event-send need; those
+          // on another outcome (the success value's, often open effects reached on a later pass) are a need of their own
+          if (x.effect == KZ_REFF_EFFECT_EVENT_SEND || x.effect == KZ_REFF_EFFECT_SYSLOG)
+            (x.outcome == KZ_REFF_OUTCOME_FAILURE || x.outcome == KZ_REFF_OUTCOME_ABSENCE ? effect_keys : other_effect_keys).insert(es->key());
           request("effect", ek + " " + str(calls_[ec].callee) + " at " + call_pos(ec) + " on the outcome " + otext, "planned", es->key(), slot, "-",
                   x.status == KZ_REFF_STATUS_OPEN ? "open: " + str(x.reason) : "complete");
         }
       request("branch", "the branch the result takes at " + cpos, "not-planned", "-", "-", reason(kNoRule),
               "a branch is no site kind of the manifest; the result and the effect calls reached stand for it");
     }
-    if (r.path == 'A')
-      need_sites(rowref, "event-send", effect_keys, kNotPlanned, "no event send or system log of RESULT_EFFECT with a call for the row's use");
+    if (r.path == 'A') {
+      need_sites(rowref, "event-send", effect_keys, kNotPlanned, "no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use");
+      for (const std::string& k : effect_keys) other_effect_keys.erase(k);
+      if (!other_effect_keys.empty()) need_sites(rowref, "event-send-other-outcome", other_effect_keys, kNotPlanned, "-");
+    }
   }
   // the site of a call already planned (nullptr when none)
   Site* find_call_site(uint32_t ci, bool after) {
@@ -1385,6 +1407,12 @@ class Gen : public RelFacts {
       for (uint32_t ci : row_creators_[i]) names.insert(str(calls_[ci].callee));
       std::set<std::string> keys;
       bool entry_found = false;
+      // plan rules revision 4: the key-clearing calls of the row (relations rules revision 12) are delete sites
+      auto rc = row_clearing_.find(i);
+      if (rc != row_clearing_.end() && !rc->second.empty()) {
+        keys = rc->second;
+        entry_found = true;
+      }
       for (const NsFile& f : ns_)
         for (const NsEntry& e : f.entries) {
           bool match = false;
@@ -1859,7 +1887,10 @@ class Gen : public RelFacts {
     for (size_t i = 0; i < prio_.size(); ++i) {
       const PlanPriority& p = prio_[i];
       const bool in = std::find(planned_.begin(), planned_.end(), i) != planned_.end();
-      sc << "row " << p.key << " " << p.id << " tier=" << p.tier << " position=" << position_.at(i) << " label=" << p.label << " class=" << p.label_class
+      sc << "row " << p.key << " " << p.id << " tier=" << p.tier << " position=" << position_.at(i) << " label=" << p.label;
+      // plan rules revision 4: the fact-derived label beside the text label the tier order uses
+      if (v4_) sc << " fact-label=" << p.fact_label;
+      sc << " class=" << p.label_class
          << " order=" << p.order_class << " reach=" << p.reach << " disposition=" << p.disposition << " state=" << (in ? "planned" : "cut");
       const auto ck = control_kind_.find(i);
       const bool cin = std::find(control_planned_.begin(), control_planned_.end(), i) != control_planned_.end();
@@ -2025,6 +2056,7 @@ class Gen : public RelFacts {
   std::map<size_t, std::string> control_kind_;                        // row -> a | b | a+b
   std::vector<size_t> control_order_, control_planned_;
   std::set<size_t> rows_planned_;
+  std::map<size_t, std::set<std::string>> row_clearing_;              // row -> the site keys of its key-clearing calls (plan rules revision 4)
   std::map<size_t, std::set<uint32_t>> row_creators_;                 // row -> its creator calls (creator and not-a-pair lines)
   std::set<std::string> last_after_;
   std::vector<Request> requests_;

@@ -1,0 +1,18 @@
+OK: 15 rounds x builds compared with the final round; every difference explained (STRINGS, BASIS, FACT_EXPRS)
+OK objacc_on_extract c1_post_tx: sections 42, the same record text and count 39, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK objacc_on_extract c1_pre_tx: sections 42, the same record text and count 39, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK objacc_on_extract c5_641: sections 42, the same record text and count 39, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK objacc_on_extract c5_642: sections 42, the same record text and count 39, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK objacc_on_extract r2_core: sections 42, the same record text and count 39, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK sem_on_extract c1_post_tx: sections 43, the same record text and count 40, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK sem_on_extract c1_pre_tx: sections 43, the same record text and count 40, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK sem_on_extract c5_641: sections 43, the same record text and count 40, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK sem_on_extract c5_642: sections 43, the same record text and count 40, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK sem_on_extract r2_core: sections 43, the same record text and count 40, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK rf_on_extract c1_post_tx: sections 45, the same record text and count 42, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK rf_on_extract c1_pre_tx: sections 45, the same record text and count 42, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+OK rf_on_extract c5_641: sections 45, the same record text and count 43, differing ['BASIS', 'STRINGS'], not in the final round []
+OK rf_on_extract c5_642: sections 45, the same record text and count 43, differing ['BASIS', 'STRINGS'], not in the final round []
+OK rf_on_extract r2_core: sections 45, the same record text and count 42, differing ['BASIS', 'FACT_EXPRS', 'STRINGS'], not in the final round []
+rounds_cmp_2 rc=0
+recheck.sh rounds rc=0

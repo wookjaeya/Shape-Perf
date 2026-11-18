@@ -62,6 +62,7 @@ namespace {
 struct OutResult {
   bool store_only = false;
   bool body_known = false;
+  bool beyond_params = false;  // the callee has a body, the argument is beyond its named parameters (a variadic function's variable arguments)
   std::vector<OutStore> stores;
   std::string reason;
 };
@@ -92,8 +93,14 @@ class OutPtr {
   OutResult compute(const std::string& fkey, uint32_t k) {
     OutResult r;
     auto it = m_.summaries.find(fkey);
-    if (it == m_.summaries.end() || k >= it->second.params.size()) {
+    if (it == m_.summaries.end()) {
       r.reason = "no body in the closed program";
+      return r;
+    }
+    if (k >= it->second.params.size()) {
+      // the callee is defined: the argument is one of its variable arguments, which no parameter summary covers
+      r.reason = "beyond the named parameters";
+      r.beyond_params = true;
       return r;
     }
     r.body_known = true;
@@ -483,7 +490,8 @@ void finalize(Model* mp, const ExtractSpec& spec) {
       const OutResult& r = outptr.get(oc.callee_key, oc.arg_index);
       if (!r.body_known) {
         oc.summary = KZ_OUTPTR_SUMMARY_UNSUMMARIZED;
-        why = "the callee has no body in the closed program";
+        why = r.beyond_params ? "an argument beyond the named parameters of a callee defined in the closed program: it reaches the callee through its variable argument list, which is not summarized"
+                              : "the callee has no body in the closed program";
         escape = true;
       } else if (!r.store_only) {
         oc.summary = KZ_OUTPTR_SUMMARY_ESCAPES;

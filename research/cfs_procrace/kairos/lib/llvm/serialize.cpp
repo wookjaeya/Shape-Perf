@@ -1,4 +1,5 @@
 // serialize.cpp -- see serialize.hpp.
+#include "outcome.hpp"
 #include "serialize.hpp"
 
 #include <algorithm>
@@ -1265,6 +1266,11 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     // the roles of the parameters of the functions the SEMANTICS rows name, and the domains' constant names
     std::map<std::pair<uint32_t, uint32_t>, std::string> role_of;     // (fn, parameter) -> "event-type", "run-status"
     std::map<std::pair<uint32_t, uint32_t>, std::string> domain_of;   // (fn, parameter) -> "A=1, B=2"
+    // the outcome classes of the values (outcome.hpp, static_facts.md 5w): the status spaces and the entries' return kinds
+    // of the SEMANTICS rows; without them the rule's fallback
+    OutcomeSpaces spaces;
+    if (opt.write_semantics)
+      for (const SemRow& x : opt.semantics) spaces.add(x.layer, x.column, x.component, x.fn, x.item, x.value);
     for (const SemRow& x : opt.semantics) {
       if (!opt.write_semantics || x.layer != KZ_SEM_LAYER_FRAMEWORK || x.fn == KZ_NONE32) continue;
       if (x.column == KZ_SEM_COLUMN_ARG_ROLE) role_of[{x.fn, x.pos}] = x.item.substr(0, x.item.find(" ("));
@@ -1294,6 +1300,9 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
       for (uint32_t p = 0; p < c.args.size(); ++p) {
         auto rit = role_of.find({fn, p});
         if (rit == role_of.end() || (rit->second != "event-type" && rit->second != "run-status")) continue;
+        // the domain of an argument alone names no effect: a call that takes a run-status value is an application exit
+        // only when the facts flag it a terminal operation (a check that reads a run status through a pointer is none)
+        if (rit->second == "run-status" && !(c.flags & KZ_CALL_FLAG_TERMINAL_OP)) continue;
         *effect = rit->second == "event-type" ? KZ_REFF_EFFECT_EVENT_SEND : KZ_REFF_EFFECT_EXIT_APP;
         auto ac = m.rf_arg_consts.find(ck);
         const bool is_const = ac != m.rf_arg_consts.end() && ac->second.count(p) != 0;
@@ -1327,6 +1336,11 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
       x.r.effect_line = e.effect_pos.line;
       x.r.effect_fh = e.effect_pos.file.empty() ? KZ_NONE32 : fh_of(e.effect_pos.file);
       x.r.outcome = e.outcome;
+      if (e.reach != KZ_REFF_REACH_NONE) {
+        // a value the callee is shown to return: its class by the outcome class rule, in the callee's status space
+        auto oc = R.call_index.find(e.call_key);
+        x.r.outcome = spaces.cls(oc != R.call_index.end() ? fn_of(m.calls[oc->second].callee_key) : KZ_NONE32, e.outcome_value);
+      }
       x.r.reach = e.reach;
       x.r.effect = e.effect;
       x.r.status = e.status;
@@ -1400,6 +1414,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
                                     ", terminal " + num(rf_terminal) + "; calls on the paths that are none of these, no row: " + num(rf_calls_dropped) +
                                     "); calls explored " + num(m.rf_stats.calls_explored) + ", outcomes " + num(m.rf_stats.outcomes),
          KZ_POLICY_UNSET, KZ_NONE32);
+    item("extract.outcome_classes", spaces.basis_text(), KZ_POLICY_UNSET, KZ_NONE32);
     item("count.result_flow_depth_cut", num(m.rf_stats.depth_cut) + " subexpressions cut at param.walk_bounds' expression depth in the conditions of RESULT_FLOW (not in count.walk_bounds_hit)",
          KZ_POLICY_UNSET, KZ_NONE32);
   }
@@ -1435,7 +1450,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
       loopdef_rows.push_back(r);
     }
     item("extract.loop_defs",
-         "loop flag predicate rules revision 1 (2026-11-16) (--loop-defs; kz_facts.h revision 10): LOOP_DEFS, for each poll and count-bounded loop whose "
+         "loop flag predicate rules revision 2 (2026-11-18) (--loop-defs; kz_facts.h revision 10): LOOP_DEFS, for each poll and count-bounded loop whose "
          "condition exits read locals (FACT_LOOPS has no predicate), the definitions of those locals and the predicate with each local replaced: a flag (one "
          "constant before the loop, one other constant in the loop's own body under a guard, the exits that test it the loop condition or decided directly "
          "in the body: the guard) or a value (one definition in the body by a call result or an object read, before every use and under a prefix of its "
@@ -1511,6 +1526,15 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
       }
       // the step whose callee has a verified semantics item of argument role lock-object at a handle argument; else the
       // deepest step whose call passes exactly one handle argument
+      // lock handle rules revision 2: a handle is named only when every call of the chain is located, down to the lock
+      // operation of the row's own family (a chain cut where a function calls the next one at several sites would give the
+      // argument of an outer call, which may be no handle of this family's lock or no lock operation's argument at all)
+      const bool located = c0 != R.call_index.end() && steps.size() + 1 == names.size();
+      if (!located) {
+        why = "the calls of the chain are not all located (" + std::to_string(steps.size()) + " of " + std::to_string(names.size() > 0 ? names.size() - 1 : 0) +
+              "; a function of the chain calls the next one at more than one site): no handle is named";
+        steps.clear();
+      }
       size_t hstep = kNone;
       uint32_t hpos = KZ_NONE32;
       for (size_t k = 0; k < steps.size() && hstep == kNone; ++k) {
@@ -1555,7 +1579,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
       std::string family = op.may.empty() ? op.ident : op.may, field, premise;
       // the operation's own parameter, when a semantics item names it the lock object
       uint32_t own_param = KZ_NONE32;
-      if (hstep == kNone) {
+      if (hstep == kNone && located) {
         const uint32_t ofn = fn_of(op.func_key);
         for (const auto& [k, row] : lock_object_role)
           if (k.first == ofn) {
@@ -1641,9 +1665,9 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
       lockh_rows.push_back(r);
     }
     item("extract.lock_handles",
-         "lock handle rules revision 1 (2026-11-16) (--lock-handles; kz_facts.h revision 10): LOCK_HANDLES, for each acquire and release of LOCK_OPS whose lock "
-         "identity is lost behind a call result, the handle the chain passes (the deepest call of the chain with one value argument, followed up while it is a "
-         "parameter), its field, the field's out-pointer writer and the SEMANTICS item of argument role lock-object of that call; static-instance when the "
+         "lock handle rules revision 2 (2026-11-18) (--lock-handles; kz_facts.h revision 10): LOCK_HANDLES, for each acquire and release of LOCK_OPS whose lock "
+         "identity is lost behind a call result, the handle the chain passes when every call of the chain is located down to the lock operation (the deepest "
+         "call of the chain with one value argument, followed up while it is a parameter; no handle otherwise), its field, the field's out-pointer writer and the SEMANTICS item of argument role lock-object of that call; static-instance when the "
          "field's writer set is complete per field with one instance that runs once and the item is verified (static_facts.md 5v)",
          KZ_POLICY_UNSET, KZ_NONE32);
     item("count.lock_handles", num(lockh_rows.size()) + " rows (static-instance " + num(n_static) + ", semantics-unverified " + num(n_sem) + ", writer-set-incomplete " +

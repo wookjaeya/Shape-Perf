@@ -275,6 +275,89 @@ int wait_addr(void) {
   return flag;
 }
 
+/* ---- review cases (2026-11-18) ---------------------------------------------------------------------------------- */
+#define FX_OK 0
+#define FX_SEV_MASK 0xC0000000u
+#define FX_SEV_INFO 0x40000000u
+#define FX_ERR_NOT_IMPL 0xC0000001u
+#define FX_RUN 1
+
+/* a flag whose definition in the body runs under a case of a switch: no guard of it is known, the flag is refused */
+int wait_switch(void) {
+  int rc = -1;
+  int left = 100;
+  struct timespec ts = {0, 1000};
+  while (1) {
+    nanosleep(&ts, 0);
+    switch (ready_flag) {
+      case 3:
+        rc = 0;
+        break;
+      default:
+        break;
+    }
+    if (rc == 0 || left <= 0) break;
+    left--;
+  }
+  return rc;
+}
+
+/* a retry whose tested call takes an out argument (the address of a field) and a key (a field): neither is awaited */
+int retry_fields(void) {
+  int ret = -17;
+  int j;
+  struct timespec ts = {0, 1000};
+  for (j = 0; j < 25; ++j) {
+    ret = name_lookup(named_table[1].name, &named_table[1].id);
+    if (ret != -17) break;
+    nanosleep(&ts, 0);
+  }
+  return ret;
+}
+
+/* a second thread that waits at its own start and then creates a child and writes the child's record: the writer thread
+ * is itself a waiting thread */
+void *parent_entry(void *arg) {
+  void (*f)(void) = 0;
+  pthread_t t;
+  (void)arg;
+  if (get_task_function(&f) != 0) return 0;
+  (void)pthread_create(&t, 0, task_entry_point, 0);
+  shared_lock();
+  task_table[0].entry = task_child;
+  task_table[0].app_id = 2;
+  shared_unlock();
+  return 0;
+}
+
+int parent_start(void) {
+  pthread_t t;
+  return pthread_create(&t, 0, parent_entry, 0);
+}
+
+/* a function that takes one value and releases the shared lock its caller holds, at two sites: the chain of its lock
+ * operation is not located, so no handle is named (the value is no handle).  The semantics data of the
+ * fixture documents a return for it although it is declared void */
+void exit_like(int status) {
+  if (status != 0) {
+    task_runs = status;
+    shared_unlock();
+    return;
+  }
+  shared_unlock();
+}
+
+/* its caller passes the value on: the chain of this function's release goes through exit_like, which calls the unlock
+ * at two sites, so no handle is named here (lock handle rules revision 2; revision 1 named the value `status`) */
+void finish_with(int status) { exit_like(status); }
+
+/* a check that reads a run status through a pointer (the data gives the parameter the run-status domain and the return
+ * kind none): no exit, and no success or failure row for the constants it returns */
+int is_running(int *state) {
+  if (*state == FX_RUN) return 1;
+  return 0;
+}
+
 int main(void) {
   int id = 0;
   init_locks();
@@ -286,5 +369,14 @@ int main(void) {
   (void)retry_lookup(&id);
   (void)wait_reset();
   (void)wait_addr();
+  (void)wait_switch();
+  (void)retry_fields();
+  (void)parent_start();
+  shared_lock();
+  finish_with(id);
+  if (is_running(&id)) {
+    shared_lock();
+    exit_like(1);
+  }
   return 0;
 }

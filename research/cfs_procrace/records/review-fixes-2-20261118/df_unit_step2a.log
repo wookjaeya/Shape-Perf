@@ -1,0 +1,7 @@
+# space_guard.sh kind=unit need=100000000 floor=314572800 interval=2 cmd=bash env/redesign/step2a_tests_unit.sh
+start 2026-11-18T10:11:46.747Z free=1465556992 threshold=414572800
+sample 2026-11-18T10:11:46.750Z 1465552896
+sample 2026-11-18T10:11:48.754Z 1463316480
+sample 2026-11-18T10:11:50.758Z 1462390784
+sample 2026-11-18T10:11:52.763Z 1460629504
+end 2026-11-18T10:11:54.767Z kind=unit verdict=completed rc=0 free=1465548800 lowest=1460629504 dip=4927488 change=-8192

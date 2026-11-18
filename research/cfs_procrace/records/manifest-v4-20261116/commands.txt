@@ -67,3 +67,4 @@ sha256 lists of the seven output directories -> mv_*.sha256; records/LEDGER.tsv:
 name_check.sh --tree on the seven output directories, the copy directory and this directory -> name_check_tree.txt (9 lines, all rc 0)
 removed from <scratch>/mv: printers/ (the two check programs and their sources), regen/ (the regenerated plans, compared in compare_regen.txt), tmp_unit/ (empty)
 results: plan/full_stage_results_20261116.md sections 11.0.1-11.0.3 and 11.1-11.8
+name_check.sh --rev 3c7391a fb2c6c5 -> name_check_rev.txt (rc 0); free at the end (df -B1 /): 1538666496

@@ -27,3 +27,4 @@ env/tools/tests/run_unit.sh -> unit_tools.txt (17 of 17); env/redesign/step2a_te
 ctest -V -R '^lint' in the MC tree with the present kz_lint on the changed source tree -> mc_lint_present_tool.log (8 of 8 pass: selftest 114 cases, 7 rules clean)
 NOT done: the declaration of the kz-static build, the tool copy, the MC build, the full ctest, the five builds, their comparisons and measurements (results 12.8, 12.9)
 the scratchpad directory is written as <scratch> in the kept logs of this directory (its path was replaced in scratch_guard/*.log, the scratch ctest logs and the unit logs after the runs; nothing else in them was changed)
+name_check.sh --rev 36d61db d564a01 (the three commits of this step) -> name_check_rev.txt (rc 0); free at the end (df -B1 /): 1465200640

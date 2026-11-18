@@ -39,3 +39,11 @@ ctest full rc=0 (ctest -V > ctest_full.log; 268 tests, 0 failed, 1 skipped; coun
 run_unit rc=0 (unit_tools.txt: 17 of 17; TMPDIR in <scratch>)
 step2a unit rc=0 (unit_step2a.txt: 7 of 7)
 sha256 of declared_addendum_1.txt: e17088e9a096ce5d198e8837e2bd857d5134b0147b3843b070d454c1779a2de9 (addendum 1: the session stop, the order of the runs, the added per-path measurement measure_paths.py / measure_paths.sh, the ledger rows; committed before any plan of this step is generated)
+## 4. the regressions and the five builds' plans (start 2026-11-18T04:26:48Z); HEAD a2c8dbc (addendum 1 commit)
+/dev/vda       270553174016 39752704000 1569804288  97% /
+build_printers rc=0 (regress/build_printers.sh <scratch>/mv/printers; each compile under the guard)
+compare manifest rc=0
+regress_tools new rc=0
+compare tools rc=1
+(compare tools rc=1: compare_tools.txt names 4 lines outside the declaration, all artifact_sha256 lines; stopped at this comparison)
+sha256 of declared_addendum_2.txt: 7b1423ebae9d5ff3dc26e473c188ce3c45926f01f2a8197cc49d4179a8ba520a (addendum 2: the artifact_sha256 lines follow the declared tool hash; compare_tools_2.py; committed before the re-run)

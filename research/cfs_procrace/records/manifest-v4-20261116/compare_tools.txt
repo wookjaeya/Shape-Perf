@@ -1,0 +1,9 @@
+OK rc.txt: lines 8, allowed differences 1, other differences 0
+OK c1.dump.txt: lines 1082, allowed differences 0, other differences 0
+BAD c1.convert.log: lines 11, allowed differences 0, other differences 1 ([10])
+BAD c1.run.kzt.txt: lines 3824, allowed differences 1, other differences 1 ([3823])
+OK c5.dump.txt: lines 1190, allowed differences 0, other differences 0
+BAD c5.convert.log: lines 12, allowed differences 0, other differences 1 ([11])
+BAD c5.run.kzt.txt: lines 2722, allowed differences 1, other differences 1 ([2721])
+compare_tools: 4 undeclared differences
+compare.sh tools rc=1

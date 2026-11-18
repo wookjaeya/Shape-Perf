@@ -226,3 +226,125 @@ Revision 4 is revision 3 with three changes of `--manifest 4`; the default path 
 - **Event sends of the other outcomes.** The row's `event-send` need lists the event sends and system logs of
   RESULT_EFFECT on a failure or absence outcome of the row's use.  Those on another outcome (often open effects of the
   success value, reached on a later pass of a loop) are a need of their own, `event-send-other-outcome`.
+
+## 10. Plan rules revision 5 (2026-11-18; text only, committed before the code that implements it)
+
+Revision 5 is revision 4 (`--manifest 4`) with the sites and sidecar lines that the name-binding items and the
+use-condition elements of the judgement rules read (`plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md` 8.13 items 9-16).
+It is written before the generator is changed; the build that implements it declares its differences against the kept
+revision-4 plans.  The manifest grammar is `kzs-sites 4` as it is: every new site is an entry, an at-call, an after-call
+or a store, so no parser changes.  The default path (no `--manifest`) is revision 2 as before.
+
+**What does not change.**  The selection (`observation-set`), the priority port, the budgets and the control selection
+of section 7 are those of revision 4.  **The tier order keeps the text label** (section 9): the row line carries both
+labels, `label=<text label> fact-label=<fact label or ->`, and no rule of revision 5 selects or orders rows by either.
+A selection rule that reads no handling label is a later text of its own and is not built with this revision.  A plan
+made from the revision-1 name-space files has the output of revision 4 apart from the generator identity and the
+`rules` line; the lines below need the files of coverage rule revision 2 (`docs/semantics_coverage.md` section 8).  A plan
+names one set of name-space files only, and its sidecar `input namespace-data` lines say which.
+
+**Wording of the control budget reason.**  Section 7 calls a boot with every control row in its plan "the prior test of
+the name-binding rule".  The rows that sentence was written for were read when the rules were written: their runs are
+control runs of design rows, not a prior test (judgement rules 8.13 item 1).  `--control-budget-reason` is a
+command-line text; the plans of the next cycle give it in these words.  The earlier wording stays in the kept plans
+only.
+
+### 10.1 Sidecar lines of a name-space entry
+
+For every planned path A row (tier or control) whose use or creator callee is a `lookup` or `create` of an entry that
+applies to the build (section 8, object rules), one line; fields in this order, `-` for a field with no value:
+
+```
+namespace-entry row=<use-site key> data=<path> sha256=<hex> line=<n> kind=<constant> value=<integer> kind-at=<file>:<line>
+  lookup=<function>:<applies|not-applicable> create=<function>:<applies|not-applicable>[,...]
+  compare=<function>:<applies|not-applicable> compare-call=<library function>@<file>:<line>
+  stored-name=<Type.field> decl=<file>:<line> extent=<constant> extent-value=<integer> extent-source=FIELD_TYPES
+  copy-call=<library function>@<file>:<line>[,...] length-call=<library function>@<file>:<line>[,...]
+  success-path=<creator callee>:<held|missing>
+```
+
+(one physical line; broken here for reading).
+
+- `kind`, `value`, `kind-at` and the operations come from the data file; `applies` is the rule of section 4 (the facts
+  hold the file of the operation's `def=` with the data's sha256 and define the function on that line).
+- `extent-value` is the element count of the stored-name field's array type in FIELD_TYPES of the facts
+  (`docs/static_facts.md` 5s); `extent` is the constant the data names.  Both are carried so that the judgement reads the
+  bound of the name space, not the runtime's copy bound (judgement rules 8.11 item 13, 8.13 item 10).  Facts without
+  FIELD_TYPES give `extent-value=-`.
+- `compare-call`, `copy-call` and `length-call` are the P0 data-function and comparison calls the facts hold (CALLS) in
+  the comparison function, on the line of the `stored-name` statement, and at the bounded NUL search of the key
+  parameter in the lookup and the create (the search the `key-text` rule of section 3 already finds).  They are read from
+  the facts, where macros are expanded; the data file does not name them.  They are what the candidate list of
+  unverified entries is generated from (judgement rules 8.13 item 3).
+- `success-path` repeats whether the row's `callee-check (success path)` line of the relations is held
+  (`docs/static_facts.md` 5x).
+
+One line per name-space file whose component applies:
+
+```
+namespace-layer data=<path> sha256=<hex> clear-table=<function>@<file>:<line>:<applies|not-applicable>
+  clear-slot=<function>@<file>:<line>:<applies|not-applicable> rollback=<function>:<applies|not-applicable> status-param=<i> out-param=<j>
+  delete-finalize=<function>:<applies|not-applicable> fill-call=<library function>@<file>:<line>
+```
+
+### 10.2 The kind value on the create side (`kind-value`)
+
+Condition (라) needs the kind value of both calls in the record.  For every planned path A row with a `namespace-entry`
+line: an at-call site of the layer call on the `at=` line of the entry's `lookup` operation and of each `create`
+operation, in that operation's function, with the argument at the `kind-param` of the layer function's `layer-fn` line.
+The lookup side is often planned already by the `key-text` rule (the same call); the create side is new.  A site that
+does not bind (for example a call inlined away) is listed by the binding report with its reason, and the item is then
+missing for the pairs of that row; nothing is assumed from the static partition alone.
+
+### 10.3 Context frames (`context-frame`)
+
+A use that the relations reach through more than one caller chain has one `alternatives [context …]:` line per chain
+(`docs/static_facts.md` 5x).  For every planned row with more than one context: for each context, the at-call and the
+after-call of **the lowest call site of its chain that lies on no other chain of that row**.  A use event that lies, in
+its actor, between the at-call and the after-call of exactly one such site belongs to that context (judgement rules
+8.13 item 16).  Sidecar: `context row=<key> id=<n> frame=<site id>|- chain="<call sites from the root to the use>"`.  A
+context with no such call site: `need row <key> context-frame <n> not-planned reason=plan_missing(no call site tells the
+context apart)`.  A row with one context needs no frame.
+
+### 10.4 Lifetime ends: the site form of each, and how its event names the id
+
+Per kind of a `namespace-entry` line, from the data's `delete` and `rollback` lines and the component's `layer-op` lines.
+The sidecar's `lifetime` lines list every operation with `applies` or not and its sites, and close with
+`lifetime-complete kind=<constant> yes|no(<what is not planned>)`.
+
+| Lifetime end | Sites | How the event names the id |
+|---|---|---|
+| delete (`object-delete`, as revision 3) | the entry of each `delete` function with its parameters; the after-call (`ret`) of the `delete-finalize` call on the line of its `at=` | the id is the delete function's id parameter at its entry; the end is successful when `ret` of the finalize call in the same execution of the function is the success value |
+| failed-create rollback (`object-rollback`) | in each `create` function of the kind: the at-call of the `create-finalize` call on the line of the `rollback` statement's `at=`, with the argument `status-arg`; its after-call with `out<out-arg>` | it names **no id**: no id was handed out.  The event belongs to the execution of the create function it lies in, and the name is the key text of that execution (the `key-text` site of the same function that precedes it in the same actor).  It is a rollback when the status argument is not the success value |
+| table initialisation (`object-clear`) | the at-call of the fill call on the line of `layer-op clear-table`, once per component | it names **no id**: it ends every open generation of that table |
+| slot clear (`object-clear`) | a store site (`place=store`) on the line of `layer-op clear-slot`, **only when** the relations' `lifetime end:` line of the name-space block does not show that the store runs only on a record whose id field holds the cleared value | no id; the event belongs to the execution of the create it lies in.  When the line shows the condition, the store is no lifetime end, no site is planned, and the `lifetime` line says `clear-slot=not-a-lifetime-end(<the relations line>)` |
+
+- Pairing a callee-side event with the key text of "the same execution" by actor order is valid only when the create
+  function is not re-entered by the same actor in between.  The `lifetime` line prints `reentry=none` when the create
+  function reaches itself through no call of the facts (CALLS), else `reentry=possible`; with `possible` a rollback
+  event has no name and counts against every name of its kind in the interval.
+- A kind with no `rollback` or `delete` line in the data, or a component with no `layer-op` lines (the files of
+  revision 1): `need row <key> object-delete|object-rollback|object-clear not-planned reason=plan_missing(no lifetime-end
+  entry in the namespace data)`, and `lifetime-complete … no(…)`.
+- The key-clearing calls of revision 4 (section 9) stay `object-delete` sites of the row.
+
+### 10.5 Key text bound from the extent
+
+Where the `namespace-entry` line has an `extent-value` smaller than the bound the `key-text` rule would use for the use's
+or the creator's key (the bound of a tested NUL search, else `KZ_RT_STR_MAX`), the key text is recorded with
+`bound=extent-value`; the sidecar `bound` line names the source `namespace-entry extent`.  The validation of the lookup
+side's key text against the bound of the name space is done by the judgement from the recorded length and the
+`extent-value`; the plan only makes sure the copy is not cut below it.
+
+### 10.6 Needs and reasons
+
+New need names: `kind-value`, `context-frame`, `object-rollback`, `object-clear`.  New sub-reasons, each under a reason
+of the judgement rules' vocabulary and each added to `plan_reasons()` with the code: `plan_missing(no call site tells the
+context apart)`, `plan_missing(no lifetime-end entry in the namespace data)`.  Not planned in revision 5, each named per
+planned row: the branch taken (no site kind), an effect with no call, the lock calls of path A and B rows.
+
+### 10.7 What the build that implements revision 5 measures
+
+Per build of the five: the `namespace-entry` and `namespace-layer` lines; sites added per rule; contexts per planned row
+and frames found; `lifetime-complete` per kind; the sites of the new rules that the binding report lists as unbound
+(after a derived build).  Every count from a kept output of that step.

@@ -1,0 +1,13 @@
+# commands of the reclaim of kept directories that are byte-identical copies (plan/full_stage_results_20261116.md
+# section 12.10 item 2, space; note in section 12.6); times UTC, 2026-11-18; <scratch> is this session's scratchpad
+# directory.  No build, no extraction, no boot.  Run from this directory unless a path says otherwise.
+## 1. before the removal
+df -B1 / > free_start.txt                                                        (available 1463078912)
+selftest.sh <scratch>/reclaim_selftest > selftest.txt                             rc=0 (one eligible, five not eligible, no overwrite); the scratch tree removed
+identity_listing.py /home/user/work/redesign/obs1 pairs.tsv . before > identity_listing_before.log   rc=0
+    -> identity_summary_before.txt (12 pairs, 12 identical-no-extra: 180 files, 89207176 bytes, allocated 89423872), listing_before_<candidate>.txt (12)
+../../env/tools/ledger_check.sh > ledger_check_start.txt                         rc=0 (135 rows, 0 failing; the ledger of commit 8c01893, sha256 6f209300...)
+ledger_rewrite.py ../LEDGER.tsv identity_summary_before.txt . before /home/user/work/redesign/obs1 <research directory> 2026-11-18 LEDGER_proposed.tsv > ledger_rewrite.txt   rc=0 (12 rows changed, 4 comment lines added, 130 lines unchanged)
+../../env/tools/ledger_check.sh LEDGER_proposed.tsv > ledger_check_proposed_before_removal.txt   rc=0 (135 rows, 0 failing; the twelve rows read the reference directories while the candidates are still there)
+cp LEDGER_proposed.tsv ../LEDGER.tsv; cmp; rm LEDGER_proposed.tsv               (records/LEDGER.tsv sha256 05158a40...)
+the listing, the scripts and the ledger are committed before the removal

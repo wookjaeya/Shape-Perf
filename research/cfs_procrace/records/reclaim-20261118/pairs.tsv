@@ -1,0 +1,17 @@
+# Candidate directories for removal and the kept directory each is compared with (2026-11-18).
+# Both names are directories under /home/user/work/redesign/obs1.  The ledger row ids are those of records/LEDGER.tsv.
+# A candidate is removed only when identity_listing.py finds every file of it byte-identical in the reference
+# (same relative path, same size, same sha256) and nothing else in it.
+# candidate	reference	candidate_row	reference_row
+orderrev1_relcheck	relrev7_check	OBS_orderrev1_relcheck	OBS_relrev7_check
+orderrev1b_relcheck	relrev7_check	OBS_orderrev1b_relcheck	OBS_relrev7_check
+schema12_relcheck	relrev7_check	OBS_schema12_relcheck	OBS_relrev7_check
+schema12_order	order_rev1b	OBS_schema12_order	OBS_orderrev1b_order
+objacc_relcheck	revfix_relcheck	OBS_objacc_relcheck	OBS_revfix_relcheck
+objacc_order	revfix_order	OBS_objacc_order	OBS_revfix_order
+sem_relcheck	revfix_relcheck	OBS_sem_relcheck	OBS_revfix_relcheck
+sem_order	revfix_order	OBS_sem_order	OBS_revfix_order
+rf_relcheck	revfix_relcheck	OBS_rf_relcheck	OBS_revfix_relcheck
+rf_order	revfix_order	OBS_rf_order	OBS_revfix_order
+ll_relcheck	revfix_relcheck	OBS_ll_relcheck	OBS_revfix_relcheck
+ll_order	revfix_order	OBS_ll_order	OBS_revfix_order

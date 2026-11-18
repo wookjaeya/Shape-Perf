@@ -1,0 +1,189 @@
+[  8%] Built target kz-core
+[  8%] Building CXX object runtime/CMakeFiles/kzrt-manifest.dir/tools/manifest/kz_rt_manifest.cpp.o
+[  8%] Linking CXX static library libkzrt-manifest.a
+[  8%] Built target kzrt-manifest
+[  9%] Building CXX object instrument/clang/CMakeFiles/kz-instr-clang.dir/kz_instr_clang.cpp.o
+[  9%] Linking CXX executable kz-instr-clang
+[  9%] Built target kz-instr-clang
+[ 18%] Built target kz-llvm
+[ 19%] Built target kz-predict
+[ 20%] Built target kzrt-decode
+[ 20%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/kzrt_convert.cpp.o
+[ 20%] Linking CXX static library libkz-trace.a
+[ 25%] Built target kz-trace
+[ 26%] Built target kz-anchor
+[ 27%] Built target kz-plan
+[ 28%] Building CXX object probe/hold/CMakeFiles/kz-hold.dir/rt_plan.cpp.o
+[ 28%] Linking CXX static library libkz-hold.a
+[ 28%] Built target kz-hold
+[ 30%] Built target kz-loader
+[ 30%] Built target kzrt
+[ 31%] Built target kzrt-posix
+[ 31%] Built target kzrt-posix-auto
+[ 32%] Building CXX object runtime/CMakeFiles/kz-rt-dump.dir/tools/kz-rt-dump/kz_rt_dump.cpp.o
+[ 32%] Linking CXX executable kz-rt-dump
+[ 32%] Built target kz-rt-dump
+[ 33%] Built target test_rt_bootstrap
+[ 33%] Built target test_rt_order
+[ 34%] Built target test_rt_loss
+[ 35%] Built target test_rt_serial
+[ 36%] Built target test_rt_gate
+[ 36%] Built target test_rt_holdsem
+[ 36%] Building CXX object runtime/tests/CMakeFiles/test_rt_manifest.dir/test_rt_manifest.cpp.o
+[ 37%] Linking CXX executable test_rt_manifest
+[ 37%] Built target test_rt_manifest
+[ 38%] Built target test_rt_auto
+[ 39%] Built target test_rt_pool
+[ 39%] Built target test_rt_mode
+[ 40%] Built target kzrt-pool4
+[ 40%] Built target test_rt_pool4
+[ 40%] Built target kzrt-build-info-test
+[ 41%] Built target kzrt-build-info-bad
+[ 41%] Built target test_rt_auto_bad
+[ 42%] Built target test_rt_mode_api
+[ 43%] Built target test_rt_auto_bi
+[ 44%] Built target test_rt_plan
+[ 44%] Built target test_rt_plan_nb
+[ 44%] Built target test_rt_end
+[ 44%] Built target kz-dump
+[ 44%] Built target kz-phi
+[ 46%] Built target kz-static
+[ 46%] Building CXX object tools/kz/CMakeFiles/kz.dir/main.cpp.o
+[ 46%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_anchor.cpp.o
+[ 47%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_convert.cpp.o
+[ 47%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_hits.cpp.o
+[ 47%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_hold.cpp.o
+[ 48%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_observe.cpp.o
+[ 48%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_occ.cpp.o
+[ 48%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_predict.cpp.o
+[ 48%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_replay.cpp.o
+[ 49%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_rtplan.cpp.o
+[ 49%] Linking CXX executable kz
+[ 49%] Built target kz
+[ 50%] Built target kz-testsupport
+[ 50%] Built target kz_schema_c99
+[ 50%] Built target kz_schema_c11
+[ 51%] Built target test_core_schema
+[ 51%] Built target test_core_identity
+[ 52%] Built target test_core_kzdump
+[ 52%] Built target test_core_container
+[ 53%] Built target test_core_container_corrupt
+[ 54%] Built target test_core_crc32
+[ 54%] Built target test_core_dump
+[ 55%] Built target test_core_eval
+[ 56%] Built target test_core_monitor
+[ 56%] Built target test_core_phi_allowed
+[ 57%] Built target test_core_phi_canonical
+[ 58%] Built target test_core_phi_check
+[ 58%] Built target test_core_phi_parser
+[ 59%] Built target test_core_phi_provenance
+[ 59%] Built target test_core_realrecord
+[ 60%] Built target test_core_replay
+[ 60%] Built target test_core_sha256
+[ 61%] Built target test_core_state_order
+[ 61%] Built target test_core_verdict
+[ 62%] Built target test_core_verify
+[ 63%] Built target test_core_vocab
+[ 63%] Built target kz_golden
+[ 64%] Built target kz_lint
+[ 64%] Linking CXX executable test_trace_decode_fetch
+[ 64%] Built target test_trace_decode_fetch
+[ 64%] Linking CXX executable test_trace_decode_merge
+[ 65%] Built target test_trace_decode_merge
+[ 66%] Linking CXX executable test_trace_decode_perf
+[ 66%] Built target test_trace_decode_perf
+[ 66%] Linking CXX executable test_trace_decode_real
+[ 66%] Built target test_trace_decode_real
+[ 66%] Linking CXX executable test_trace_decode_sites
+[ 67%] Built target test_trace_decode_sites
+[ 67%] Linking CXX executable test_trace_hold_nctl
+[ 67%] Built target test_trace_hold_nctl
+[ 67%] Linking CXX executable test_trace_identity
+[ 68%] Built target test_trace_identity
+[ 69%] Linking CXX executable test_trace_key_separation
+[ 69%] Built target test_trace_key_separation
+[ 69%] Linking CXX executable test_trace_merge_order
+[ 69%] Built target test_trace_merge_order
+[ 69%] Linking CXX executable test_trace_neutral
+[ 70%] Built target test_trace_neutral
+[ 70%] Linking CXX executable test_trace_neutral_rev12
+[ 70%] Built target test_trace_neutral_rev12
+[ 70%] Linking CXX executable test_trace_occ_basis
+[ 71%] Built target test_trace_occ_basis
+[ 72%] Linking CXX executable test_trace_occ_match
+[ 72%] Built target test_trace_occ_match
+[ 72%] Linking CXX executable test_trace_replay_out
+[ 72%] Built target test_trace_replay_out
+[ 72%] Linking CXX executable test_trace_static_closure
+[ 73%] Built target test_trace_static_closure
+[ 74%] Linking CXX executable test_trace_symbols
+[ 74%] Built target test_trace_symbols
+[ 74%] Linking CXX executable test_realrecord_derived
+[ 74%] Built target test_realrecord_derived
+[ 74%] Linking CXX executable test_neutral_kzrt
+[ 75%] Built target test_neutral_kzrt
+[ 76%] Linking CXX executable test_kzrt_identity
+[ 76%] Built target test_kzrt_identity
+[ 76%] Linking CXX executable test_kzrt_app_request
+[ 77%] Built target test_kzrt_app_request
+[ 77%] Linking CXX executable test_kzrt_recovered
+[ 77%] Built target test_kzrt_recovered
+[ 77%] Built target target_prog
+[ 79%] Built target target_prog_variants
+[ 80%] Linking CXX executable test_probe_anchor_compilers
+[ 80%] Built target test_probe_anchor_compilers
+[ 80%] Linking CXX executable test_probe_anchor_reached
+[ 80%] Built target test_probe_anchor_reached
+[ 80%] Linking CXX executable test_probe_basis
+[ 81%] Built target test_probe_basis
+[ 81%] Linking CXX executable test_probe_elf_dwarf
+[ 81%] Built target test_probe_elf_dwarf
+[ 81%] Linking CXX executable test_probe_golden
+[ 82%] Built target test_probe_golden
+[ 83%] Linking CXX executable test_probe_observe
+[ 83%] Built target test_probe_observe
+[ 83%] Linking CXX executable test_probe_profile
+[ 83%] Built target test_probe_profile
+[ 83%] Linking CXX executable test_probe_record
+[ 84%] Built target test_probe_record
+[ 84%] Built target hold_prog
+[ 85%] Built target test_hold_ptrace
+[ 86%] Built target hold_seq_prog
+[ 86%] Built target test_hold_sequence
+[ 86%] Linking CXX executable test_hold_plan
+[ 86%] Built target test_hold_plan
+[ 86%] Building CXX object tests/cfs-free/CMakeFiles/test_rt_plan_convert.dir/test_rt_plan_convert.cpp.o
+[ 87%] Linking CXX executable test_rt_plan_convert
+[ 87%] Built target test_rt_plan_convert
+[ 88%] Built target kz_phi_golden
+[ 88%] Built target test_phi_cli
+[ 89%] Built target test_predict_model
+[ 90%] Built target test_property_eval_agreement
+[ 91%] Built target static_golden
+[ 91%] Linking CXX executable test_static_expr
+[ 92%] Built target test_static_expr
+[ 93%] Linking CXX executable test_static_flow
+[ 93%] Built target test_static_flow
+[ 94%] Linking CXX executable test_static_recipe
+[ 94%] Built target test_static_recipe
+[ 94%] Linking CXX executable test_static_gitrev
+[ 94%] Built target test_static_gitrev
+[ 94%] Linking CXX executable test_static_unroll
+[ 94%] Built target test_static_unroll
+[ 95%] Linking CXX executable test_static_wrappers
+[ 95%] Built target test_static_wrappers
+[ 95%] Built target kz_static_main_obj
+[ 96%] Built target kz_static_whole_member
+[ 96%] Built target kz_static_lazy_used
+[ 97%] Built target kz_static_lazy_unused
+[ 98%] Linking CXX executable test_static_link
+[ 98%] Built target test_static_link
+[ 98%] Linking CXX executable test_static_elf32
+[ 98%] Built target test_static_elf32
+[ 99%] Building CXX object tests/static/CMakeFiles/test_static_reasons.dir/test_static_reasons.cpp.o
+[ 99%] Linking CXX executable test_static_reasons
+[ 99%] Built target test_static_reasons
+[ 99%] Building CXX object tests/static/CMakeFiles/test_static_plan.dir/test_static_plan.cpp.o
+[ 99%] Linking CXX executable test_static_plan
+[ 99%] Built target test_static_plan
+[100%] Built target test_static_cli

@@ -14,3 +14,13 @@ scratch check build <scratch>/mv/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_B
   these outputs are scratch and no evidence; the scratch build and outputs are removed before the build
 relink set: make -n all in the MC tree (dry run) names the recompiled sources; the relinked binaries are counted from the link.txt files that name libkzrt-manifest.a, libkz-llvm.a, libkz-trace.a or libkz-hold.a (50); the rest of the 124 of the earlier lists: 74
 tools_check.sh --deep -> tools_check_pre.txt (45 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (124 rows, 0 failing)
+## 1. tool copies, the old tools' regression run, build record (start 2026-11-16T23:49:23Z); HEAD 5011169 (declaration commit)
+/dev/vda       270553174016 39637991424 1684516864  96% /
+copy rc=0
+tools after copy rc=0
+regress_tools old rc=0
+build_record pre rc=0
+## 2. build (start 2026-11-16T23:55:08Z)
+/dev/vda       270553174016 39725060096 1597448192  97% /
+make kz-static rc=0
+make all rc=0

@@ -1,0 +1,19 @@
+# round trip of the tool copies before the build of the manifest revision 4 step (2026-11-16T23:49:23Z)
+copy: /home/user/work/preserve/tools-20261116-l/kz-static.9eb1395f.xz (46996316 B)
+xz -t: OK
+sha256 of the xz file: dea65fa7d0b0ca667e5227fb0bb35fd2f1615bcae0992b3ddd3674b3e82f50dd
+xz -dc | sha256sum: 9eb1395f3bd02fb4b4dc9b8be72b4e336845c3715481b0e38398b0dbd40f9452
+in place: 9eb1395f3bd02fb4b4dc9b8be72b4e336845c3715481b0e38398b0dbd40f9452
+xz -dc | cmp in place: SAME
+copy: /home/user/work/preserve/tools-20261116-l/kz.913fcd99.xz (17780736 B)
+xz -t: OK
+sha256 of the xz file: 6171a5582a27b7924642e725fdaa9b64ce95375422d513dbf2830b640038d58d
+xz -dc | sha256sum: 913fcd99064b5aeca3b2c52da6f6f9e72584680ea783e6edb2f959eeb22eccfa
+in place: 913fcd99064b5aeca3b2c52da6f6f9e72584680ea783e6edb2f959eeb22eccfa
+xz -dc | cmp in place: SAME
+copy: /home/user/work/preserve/tools-20261116-l/kz-instr-clang.28db4017.xz (20725428 B)
+xz -t: OK
+sha256 of the xz file: 68fefb60899fc4aa777c062b5bfff96254934e6b07e058ff059315bf04f50697
+xz -dc | sha256sum: 28db40172dbdb06faa0e607b9a494805b19768ca888e865d0a5c3859dab8bcaf
+in place: 28db40172dbdb06faa0e607b9a494805b19768ca888e865d0a5c3859dab8bcaf
+xz -dc | cmp in place: SAME

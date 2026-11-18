@@ -47,3 +47,14 @@ regress_tools new rc=0
 compare tools rc=1
 (compare tools rc=1: compare_tools.txt names 4 lines outside the declaration, all artifact_sha256 lines; stopped at this comparison)
 sha256 of declared_addendum_2.txt: 7b1423ebae9d5ff3dc26e473c188ce3c45926f01f2a8197cc49d4179a8ba520a (addendum 2: the artifact_sha256 lines follow the declared tool hash; compare_tools_2.py; committed before the re-run)
+compare tools_2 rc=0 (compare_tools_2.py mv_regress_tools_old mv_regress_tools_new > compare_tools_2.txt; HEAD 6474cd5, the addendum 2 commit)
+plans_v3_t8cf rc=0
+plans_v3_final rc=0
+compare plans_v3 rc=0
+plans_v4 rc=0
+plans_v4_all rc=0
+compare regen rc=0 (SCRATCH=<scratch>/mv/regen)
+compare parse_v4 rc=0
+compare measure rc=0
+measure_paths rc=0
+sha256 of declared_addendum_3.txt: e2f305ae10ed84983adb32cb4b8d895cd9e839d971129e55eb68bccc90ba928d (addendum 3: the full read of the version 4 plans with the summary line, parse_v4_full.sh; the per-path measurement of the first observation path's plans, measure_paths_first.sh; committed before the two runs)

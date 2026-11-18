@@ -1,0 +1,10 @@
+OK rc.txt: lines 8, allowed differences 1, other differences 0
+OK c1.dump.txt: lines 1082, allowed differences 0, other differences 0
+OK c1.convert.log: lines 11, allowed differences 1, other differences 0
+OK c1.run.kzt.txt: lines 3824, allowed differences 2, other differences 0
+OK c5.dump.txt: lines 1190, allowed differences 0, other differences 0
+OK c5.convert.log: lines 12, allowed differences 1, other differences 0
+OK c5.run.kzt.txt: lines 2722, allowed differences 2, other differences 0
+OK c1.run.kzt: size 234528, differing bytes 36 (offsets 120..155), outside tool_sha256 and header_crc 0
+OK c5.run.kzt: size 149872, differing bytes 36 (offsets 120..155), outside tool_sha256 and header_crc 0
+compare_tools_2: only declared differences

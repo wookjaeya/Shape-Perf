@@ -1,0 +1,31 @@
+c1_pre_tx same      -o /home/user/work/redesign/obs1/mv_plans_v4/c1_pre_tx/plan.kzs sha256 55e54ed050234f0852b88d17f59dfcc47acf5f923118188c9f5ce4377924098c
+c1_pre_tx same      --sidecar /home/user/work/redesign/obs1/mv_plans_v4/c1_pre_tx/plan.side sha256 36b8ea623e8bddc5a47016a056105fbc45ce5d19df90e489f9cd41e562d6d548
+c1_pre_tx same      --requests-out /home/user/work/redesign/obs1/mv_plans_v4/c1_pre_tx/plan.req sha256 4a1ea72b1b80283f5bbae7f2d5313fa29b9d728d1083786afbceb27750d35c20
+c1_pre_tx same      --modules-out /home/user/work/redesign/obs1/mv_plans_v4/c1_pre_tx/plan.mod (first line except the sidecar path)
+c1_pre_tx same      --exes-out /home/user/work/redesign/obs1/mv_plans_v4/c1_pre_tx/plan.exe (first line except the sidecar path)
+c1_pre_tx PASS: the plan regenerates byte-identically
+c1_post_tx same      -o /home/user/work/redesign/obs1/mv_plans_v4/c1_post_tx/plan.kzs sha256 542edd3d9ee2b6f93b6fdd6363a2a386a1dfb6b05fb3d50b347b83fa74fa248e
+c1_post_tx same      --sidecar /home/user/work/redesign/obs1/mv_plans_v4/c1_post_tx/plan.side sha256 7a2ddb77c9cc62cc9f48f6fb575f39906facf460968116790ba7461a53b31fc5
+c1_post_tx same      --requests-out /home/user/work/redesign/obs1/mv_plans_v4/c1_post_tx/plan.req sha256 d1ad7100b397c46327490d7c71d8019e8f3a9e992805286099d91da88b695a9f
+c1_post_tx same      --modules-out /home/user/work/redesign/obs1/mv_plans_v4/c1_post_tx/plan.mod (first line except the sidecar path)
+c1_post_tx same      --exes-out /home/user/work/redesign/obs1/mv_plans_v4/c1_post_tx/plan.exe (first line except the sidecar path)
+c1_post_tx PASS: the plan regenerates byte-identically
+r2_core same      -o /home/user/work/redesign/obs1/mv_plans_v4/r2_core/plan.kzs sha256 fbcd06f5b145fce533b8c5754d46593b6ed517dfe527f37a0372817b0caec657
+r2_core same      --sidecar /home/user/work/redesign/obs1/mv_plans_v4/r2_core/plan.side sha256 e685be22dc8bc8d2659d796981997e7b8417e73d79ad346d1c78e1db67b2f9d8
+r2_core same      --requests-out /home/user/work/redesign/obs1/mv_plans_v4/r2_core/plan.req sha256 a869948538b269b2b78cc4eeeaa672137fd031ee5df438271d426bc6dcb62580
+r2_core same      --modules-out /home/user/work/redesign/obs1/mv_plans_v4/r2_core/plan.mod (first line except the sidecar path)
+r2_core same      --exes-out /home/user/work/redesign/obs1/mv_plans_v4/r2_core/plan.exe (first line except the sidecar path)
+r2_core PASS: the plan regenerates byte-identically
+c5_641 same      -o /home/user/work/redesign/obs1/mv_plans_v4/c5_641/plan.kzs sha256 695f7a6120a89003554549c2584a46f0f5537f13a106b0ca94b9ce10cc64ecb3
+c5_641 same      --sidecar /home/user/work/redesign/obs1/mv_plans_v4/c5_641/plan.side sha256 05e3ef9b424e85711dc462889964a9506b450a720d762234ce5398b0c61d5f6d
+c5_641 same      --requests-out /home/user/work/redesign/obs1/mv_plans_v4/c5_641/plan.req sha256 cd176cc7e47b5f706e6867e034ad4e9abcfd7fb1f4796fae80e9be6f915d30d1
+c5_641 same      --modules-out /home/user/work/redesign/obs1/mv_plans_v4/c5_641/plan.mod (first line except the sidecar path)
+c5_641 same      --exes-out /home/user/work/redesign/obs1/mv_plans_v4/c5_641/plan.exe (first line except the sidecar path)
+c5_641 PASS: the plan regenerates byte-identically
+c5_642 same      -o /home/user/work/redesign/obs1/mv_plans_v4/c5_642/plan.kzs sha256 9124b64e3da0d75977ebfadc64270f673f26be97a6ed1529f5073c375be85fa7
+c5_642 same      --sidecar /home/user/work/redesign/obs1/mv_plans_v4/c5_642/plan.side sha256 210c156a2a6efb4e6ce4166c819184b2470dba06ffa170e7b540f5ea51c18ac8
+c5_642 same      --requests-out /home/user/work/redesign/obs1/mv_plans_v4/c5_642/plan.req sha256 cd868ca1a10096080b83ff6b423fdfaadd8612065e6cc57bcd93597275b6029f
+c5_642 same      --modules-out /home/user/work/redesign/obs1/mv_plans_v4/c5_642/plan.mod (first line except the sidecar path)
+c5_642 same      --exes-out /home/user/work/redesign/obs1/mv_plans_v4/c5_642/plan.exe (first line except the sidecar path)
+c5_642 PASS: the plan regenerates byte-identically
+compare.sh regen rc=0

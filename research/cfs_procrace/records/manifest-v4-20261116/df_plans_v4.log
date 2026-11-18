@@ -1,0 +1,5 @@
+# space_guard.sh kind=plan need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/manifest-v4-20261116/plans.sh /home/user/work/redesign/obs1/ll_final_extract /home/user/work/redesign/obs1/mv_plans_v4 v4
+start 2026-11-18T04:29:04.256Z free=1548795904 threshold=414572800
+sample 2026-11-18T04:29:04.262Z 1548791808
+sample 2026-11-18T04:29:06.268Z 1548087296
+end 2026-11-18T04:29:08.274Z kind=plan verdict=completed rc=0 free=1547427840 lowest=1547427840 dip=1368064 change=-1368064

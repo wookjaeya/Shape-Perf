@@ -1,0 +1,87 @@
+c1_pre_tx measure_paths rc=0 159 lines
+c1_pre_tx ll_plans_final A 63 1 0 1 62
+c1_pre_tx ll_plans_final B 170 8 0 8 162
+c1_pre_tx ll_plans_final C 134 0 0 0 134
+c1_pre_tx ll_plans_final all 367 9 0 9 358
+c1_pre_tx mv_plans_v3_final A 63 1 0 1 62
+c1_pre_tx mv_plans_v3_final B 170 8 0 8 162
+c1_pre_tx mv_plans_v3_final C 134 0 0 0 134
+c1_pre_tx mv_plans_v3_final all 367 9 0 9 358
+c1_pre_tx mv_plans_v4 A 63 1 5 5 58
+c1_pre_tx mv_plans_v4 B 170 8 0 8 162
+c1_pre_tx mv_plans_v4 C 134 0 0 0 134
+c1_pre_tx mv_plans_v4 all 367 9 5 13 354
+c1_pre_tx mv_plans_v4_all A 63 63 5 63 0
+c1_pre_tx mv_plans_v4_all B 170 170 0 170 0
+c1_pre_tx mv_plans_v4_all C 134 134 0 134 0
+c1_pre_tx mv_plans_v4_all all 367 367 5 367 0
+c1_post_tx measure_paths rc=0 155 lines
+c1_post_tx ll_plans_final A 63 0 0 0 63
+c1_post_tx ll_plans_final B 170 8 0 8 162
+c1_post_tx ll_plans_final C 134 0 0 0 134
+c1_post_tx ll_plans_final all 367 8 0 8 359
+c1_post_tx mv_plans_v3_final A 63 0 0 0 63
+c1_post_tx mv_plans_v3_final B 170 8 0 8 162
+c1_post_tx mv_plans_v3_final C 134 0 0 0 134
+c1_post_tx mv_plans_v3_final all 367 8 0 8 359
+c1_post_tx mv_plans_v4 A 63 0 5 5 58
+c1_post_tx mv_plans_v4 B 170 8 0 8 162
+c1_post_tx mv_plans_v4 C 134 0 0 0 134
+c1_post_tx mv_plans_v4 all 367 8 5 13 354
+c1_post_tx mv_plans_v4_all A 63 63 5 63 0
+c1_post_tx mv_plans_v4_all B 170 170 0 170 0
+c1_post_tx mv_plans_v4_all C 134 134 0 134 0
+c1_post_tx mv_plans_v4_all all 367 367 5 367 0
+r2_core measure_paths rc=0 177 lines
+r2_core ll_plans_final A 25 0 0 0 25
+r2_core ll_plans_final B 155 3 0 3 152
+r2_core ll_plans_final C 115 0 0 0 115
+r2_core ll_plans_final all 295 3 0 3 292
+r2_core mv_plans_v3_final A 25 0 0 0 25
+r2_core mv_plans_v3_final B 155 3 0 3 152
+r2_core mv_plans_v3_final C 115 0 0 0 115
+r2_core mv_plans_v3_final all 295 3 0 3 292
+r2_core mv_plans_v4 A 25 0 4 4 21
+r2_core mv_plans_v4 B 155 3 0 3 152
+r2_core mv_plans_v4 C 115 0 0 0 115
+r2_core mv_plans_v4 all 295 3 4 7 288
+r2_core mv_plans_v4_all A 25 25 4 25 0
+r2_core mv_plans_v4_all B 155 155 0 155 0
+r2_core mv_plans_v4_all C 115 115 0 115 0
+r2_core mv_plans_v4_all all 295 295 4 295 0
+c5_641 measure_paths rc=0 179 lines
+c5_641 ll_plans_final A 66 0 0 0 66
+c5_641 ll_plans_final B 67 8 0 8 59
+c5_641 ll_plans_final C 39 0 0 0 39
+c5_641 ll_plans_final all 172 8 0 8 164
+c5_641 mv_plans_v3_final A 66 0 0 0 66
+c5_641 mv_plans_v3_final B 67 8 0 8 59
+c5_641 mv_plans_v3_final C 39 0 0 0 39
+c5_641 mv_plans_v3_final all 172 8 0 8 164
+c5_641 mv_plans_v4 A 66 0 15 15 51
+c5_641 mv_plans_v4 B 67 8 0 8 59
+c5_641 mv_plans_v4 C 39 0 0 0 39
+c5_641 mv_plans_v4 all 172 8 15 23 149
+c5_641 mv_plans_v4_all A 66 66 15 66 0
+c5_641 mv_plans_v4_all B 67 67 0 67 0
+c5_641 mv_plans_v4_all C 39 39 0 39 0
+c5_641 mv_plans_v4_all all 172 172 15 172 0
+c5_642 measure_paths rc=0 165 lines
+c5_642 ll_plans_final A 66 0 0 0 66
+c5_642 ll_plans_final B 65 7 0 7 58
+c5_642 ll_plans_final C 38 0 0 0 38
+c5_642 ll_plans_final all 169 7 0 7 162
+c5_642 mv_plans_v3_final A 66 0 0 0 66
+c5_642 mv_plans_v3_final B 65 7 0 7 58
+c5_642 mv_plans_v3_final C 38 0 0 0 38
+c5_642 mv_plans_v3_final all 169 7 0 7 162
+c5_642 mv_plans_v4 A 66 0 15 15 51
+c5_642 mv_plans_v4 B 65 7 0 7 58
+c5_642 mv_plans_v4 C 38 0 0 0 38
+c5_642 mv_plans_v4 all 169 7 15 22 147
+c5_642 mv_plans_v4_all A 66 66 15 66 0
+c5_642 mv_plans_v4_all B 65 65 0 65 0
+c5_642 mv_plans_v4_all C 38 38 0 38 0
+c5_642 mv_plans_v4_all all 169 169 15 169 0
+columns of the lines above: build plan path rows tier-planned control-planned either neither
+measure_paths.sh rc=0

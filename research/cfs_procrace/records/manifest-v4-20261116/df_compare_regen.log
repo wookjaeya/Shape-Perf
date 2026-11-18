@@ -1,0 +1,5 @@
+# space_guard.sh kind=run need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/manifest-v4-20261116/compare.sh regen
+start 2026-11-18T04:29:14.325Z free=1540440064 threshold=414572800
+sample 2026-11-18T04:29:14.329Z 1540435968
+sample 2026-11-18T04:29:16.335Z 1539731456
+end 2026-11-18T04:29:18.343Z kind=run verdict=completed rc=0 free=1539072000 lowest=1539072000 dip=1368064 change=-1368064

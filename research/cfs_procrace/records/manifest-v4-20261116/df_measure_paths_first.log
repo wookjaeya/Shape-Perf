@@ -1,0 +1,4 @@
+# space_guard.sh kind=run need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/manifest-v4-20261116/measure_paths_first.sh
+start 2026-11-18T04:31:09.880Z free=1538314240 threshold=414572800
+sample 2026-11-18T04:31:09.884Z 1538310144
+end 2026-11-18T04:31:11.890Z kind=run verdict=completed rc=0 free=1538285568 lowest=1538285568 dip=28672 change=-28672

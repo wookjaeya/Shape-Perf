@@ -1671,3 +1671,150 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 1. **판 4 읽기의 요약 줄.** `compare.sh parse_v4` 는 rc 0 이고 계획 열 개가 모두 첫 줄 `version 4` 를 냈다(`compare_parse_v4.txt`). 그러나 그 단계는 점검 프로그램의 표준 출력을 `head -1` 에 잇는다. `head` 가 첫 줄 뒤에 관을 닫으므로 프로그램은 출력 도중에 끝나고, 맨 끝에 표준 오류로 내는 판 4 요약 줄(`v4 plan= needs= gaps= spawn= load= skey=`)에 이르지 못한다: 요약 파일 `compare/parse_<dir>_<b>.v4` 열 개 가운데 아홉이 비었다(r2_core 의 `mv_plans_v4` 하나만 줄이 있음). 점검 프로그램은 모든 입력을 다 읽은 뒤에야 첫 줄을 내므로(`regress/manifest_print.cpp`: `parse_manifest` 가 실패하면 `error …` 한 줄만 냄) "판 4 로 읽힌다"는 선언의 조건은 그 출력으로 섰지만, 요약은 남지 않았다. 스크립트의 결함이다. 새 스크립트 `parse_v4_full.sh`(이 덧붙임과 함께 커밋; `compare.sh` 는 그대로 둠)는 관을 끝까지 읽고, 요약 줄을 `compare/parsefull_<dir>_<b>.v4` 에 남기며, 그 수(need·gap·spawn 문, `place=load` site, `skey=` site, plan id)를 계획 글에서 `grep` 으로 센 수와 견준다(`compare_parse_v4_full.txt`). 열 개가 모두 같아야 한다.
 
 2. **첫 관측 경로의 계획의 경로별 분모.** 덧붙임 1 의 3 과 같은 스크립트 `measure_paths.py` 를 첫 관측 경로 단계가 남긴 계획 다섯(`/home/user/work/redesign/obs1/plangen/<b>/plan.side`, 그 단계의 facts 와 층 예산 `tier:D07`)에 돌린다(`measure_paths_first.sh` → `compare_paths_first.txt`, `compare/paths_first_<b>.txt`). 그 계획의 계획된 행이 경로별로 몇이었는지를 같은 잣대로 적기 위해서다(그 단계의 결과 문서는 층 1 곧 D07 의 행 수를 12/11/3/8/7 로 적었다: `plan/observation_path_results_20261116.md` 의 층별 행 수 줄). 측정이고 판정이 아니다. 덧붙임 1 의 3 에서 코드로 읽은 것대로면 경로 C 의 층 차례 계획 행은 다섯 빌드 모두 0 이다 [I: 측정 전].
+
+### 11.1 바뀐 것 [F]
+
+- 커밋 차례: `037c047`(경로 A 대조 선택 규칙의 글, `kairos/docs/plan_manifest.md` §7; 어느 계획보다 먼저), `5011169`(선언 §11.0, 파서·생성기·fixture·시험·문서, 스크립트와 빌드 전 목록; 빌드 전), `dad3e06`(세션이 멈춘 때의 사본·빌드 기록 스냅숏), `a2c8dbc`(빌드 뒤 기록, 새 golden, 등록부 행, 덧붙임 1; 어느 계획 생성보다 먼저), `6474cd5`(파싱 회귀, 덧붙임 2; 다시 돌리기 전), `9ff7b95`(도구 비교의 다시 돌림, 다섯 빌드의 계획과 측정, 덧붙임 3; 그 점검 둘 전), 그리고 이 절의 커밋.
+- 규모(`d56ca0d` 에서 `5011169` 까지, `kairos/` 와 `env/tools/`; `git diff --stat`): 17 파일 +1,786 −66. `lib/llvm/plan_gen.cpp` +822(개정 3: `kzs-sites 4` 출력, 대조 선택 `select_controls`, 생성자 site, 대기·객체·효과 규칙, 값 요청, sidecar 2), `plan_gen.hpp` +20, `runtime/tools/manifest/kz_rt_manifest.cpp` +195·`.hpp` +70(판 4 의 문과 칸), `runtime/tests/test_rt_manifest.cpp` +117, `tools/kz-static/cmd_plan.cpp` +39·`main.cpp` +3, `tests/static/test_static_plan.cpp` +192, fixture `planv4.c` 216 줄과 손으로 쓴 시험 자료 셋(32 줄), `docs/plan_manifest.md` +93, `docs/event_semantics.md` +1, `env/tools/plan_regen.sh` +13, `env/tools/tests/run_unit.sh` +22. golden `tests/static/data/planv4_np.plan.golden` 254 줄(`a2c8dbc`).
+- 바꾸지 않은 것: `include/`, `cmake/`, 최상위 CMakeLists, `runtime/src`·`runtime/include`, `instrument/`, `lib/llvm` 의 추출·relations·order 규칙, `semantics/` 의 자료와 coverage rule, 판정 규칙과 어휘 자료, 설명 스크립트, `one_build.sh`. 층 차례의 규칙(label·order class·disposition·층, `plan_gen.cpp:113-246`)과 대조 선택 규칙(`:1331-1354`)은 `5011169` 뒤로 손대지 않았다.
+- 생성기가 받는 옵션은 `--basis --framework --select --order --budget --budget-reason --budget-disclosure --manifest --control-budget --control-budget-reason --namespaces --requests-out` 와 출력 경로 넷뿐이다(`tools/kz-static/cmd_plan.cpp`, 계획의 `args.txt`). 행 id·키·사례 값을 받는 옵션이 없다.
+
+### 11.2 빌드 [M]
+
+MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 479,942,080). 빌드 전 HEAD `5011169`(`pre_mc.txt`), kairos 아래 커밋 안 된 줄 0(`pre_mc.txt`, `post_mc.txt`). 사본·옛 도구의 회귀 실행·빌드는 2026-11-16 에, 그 뒤의 것은 세션이 멈췄다가 이어진 2026-11-18 에 했다(덧붙임 1). 빌드는 다시 하지 않았다: `make -n all` 의 마른 실행에 컴파일·링크 줄이 0 이다(`make_dryrun_after_build.log`; `make -q all` 은 rc 1 인데, 마른 실행이 이름 대는 명령은 echo·depend 줄과 `cmake -P VerifyGlobs.cmake` 하나뿐).
+
+| 일 | 때 (UTC) | dip (B) |
+|---|---|---|
+| 사본 셋 (`df_copy.log`) | 11-16 23:49:23–23:52:49 | 85,532,672 |
+| 옛 도구의 회귀 실행 (`df_regress_tools_old.log`) | 11-16 23:54:59–23:55:01 | 1,490,944 |
+| `make kz-static` (`df_build_kz-static.log`) | 11-16 23:55:08–23:55:52 | 31,473,664 |
+| `make all` (`df_build_all.log`) | 11-16 23:55:56–23:58:33 | 55,345,152 |
+
+- 다시 링크된다고 적은 50 은 모두 빌드 시작 뒤의 mtime 이고, 16 이 바뀌었으며 34 는 같은 바이트로 다시 링크되었다(`relink_result.txt`). 바뀐 16: 선언이 반드시 바뀐다고 적은 11(kz-static, kz, kz-rt-dump, kz-instr-clang, `test_rt_manifest`, `test_static_plan`, `test_static_reasons`, 정적 라이브러리 넷)과 `tests/cfs-free` 의 `test_kzrt_app_request`·`test_kzrt_identity`·`test_kzrt_recovered`·`test_neutral_kzrt`·`test_rt_plan_convert`. `not_relink.sha256` 74 모두 같은 바이트.
+- 도구(`post_mc.txt`, `identity_kz-static.txt`, `identity_kz_post.txt`): kz-static `9eb1395f…` → `1a47abd05b8289bce90e6da8906d3b84d9bec48befc99634295d5350cd261086`(`--identity` 의 `tool_sha256` `0e1d8599…` → `b6a64d83…`, `tool_source` `a2365b19…` → `88806cfe…`); kz `913fcd99…` → `fd40bc4dc76939abbd3a03ae1d3a6fbe5d387f49625e8b74f9066d13e0c140fe`(`tool_sha256` `c19937fd…` → `80064cc3…`, `tool_source` `fb7f09f9…` → `500185a6…`); kz-rt-dump `4390d4f1…` → `40e23d4db230806c08742f7a33da5abda67dce7eb6e0f2d81532d890cb859ddc`; kz-instr-clang `28db4017…` → `36becd040abec0b0bd302d59ae26b88252ad1e7c65ad1fb26cc31c5da86343f6`. `core_source` `568e5061…`, `schema_revision=12`, `schema_fingerprint` `6fbff6c6…`, kz-dump `32a96ae7…`, kz-phi `df79fb82…`, kz_lint `3d4d5a8f…`, `CMakeCache.txt` `bc2f43b4…` 는 그대로다. 플러그인은 빌드하지 않았다.
+- 도구 보존: 빌드 전 kz-static `9eb1395f`(46,996,316 B)·kz `913fcd99`(17,780,736 B)·kz-instr-clang `28db4017`(20,725,428 B)를 `/home/user/work/preserve/tools-20261116-l/` 에 xz 로 사본하고 왕복 확인(`tool_copy/ROUNDTRIP.txt`: 셋 다 xz -t OK, 푼 sha256 같음, cmp 같음; 푼 것은 파이프로만). kz-rt-dump `4390d4f1` 은 앞선 사본이 있다. 등록부: 사본 직후 세 행 in-place+copy(`tools_check_after_copy.txt` 45 행 실패 0, deep), 빌드 뒤 덮인 네 행을 copy 로, 새 도구 넷을 in-place 로(`tools_check_after_build.txt` 49 행 실패 0, deep).
+
+### 11.3 시험 [M]
+
+- 첫 ctest(`ctest_first.log`, `-V`): 268 개 가운데 실패 1, 선언한 그 하나(`test_static_plan`: golden 없음, “1 of 275 checks FAILED”). 건너뜀 1(`test_probe_anchor_reached`).
+- `KZ_GOLDEN_UPDATE=1` 로 그 시험만 돌려 golden 을 썼다(`golden_update.log`). scratchpad 점검 빌드의 것과 `cmp` 같다(`dd26c7dd…`, `golden_scratch.sha256`; `commands.txt`). 다른 golden 은 바뀌지 않았다(`git status` 에 새 파일 하나뿐).
+- 갱신 뒤 전체 ctest(`ctest_full.log`, `-V`): 268 개, 실패 0, 건너뜀 1.
+- 확인 수(`ctest_counts.log`, golden 뒤): `test_static_plan` 275, `test_static_reasons` 751, `test_static_cli` 1,151, `test_core_schema` 34,017, `lint_selftest` 114 경우 실패 0, lint 규칙 일곱 clean. `rt_manifest` 의 요약 줄: “version 4: a plan with 4 sites, 2 needs, 1 gap and a spawn binding accepted, 38 rejected”(판 1–3 의 수는 앞과 같은 줄: 18 malformed rejected; version 2 의 8 accepted·18 rejected, 5 placed·7 rejected; version 3 의 4 accepted·13 rejected). 모두 선언의 [I] 와 같다.
+- 단위 점검 `run_unit.sh` 17/17(`unit_tools.txt`; 점검 17 은 값 요청 파일이 있는 계획의 다시 만들기), `step2a_tests_unit.sh` 7/7(`unit_step2a.txt`).
+
+### 11.4 바이트 동일성과 회귀 [M]
+
+| 비교 | 결과 |
+|---|---|
+| 판 1–3 의 파싱, 옛 파서 대 새 파서 (`compare_manifest.txt`, `mv_regress_manifest/compare.txt`) | 묶음 129, 같음 129, 다름 0 (옛 파서가 오류로 읽는 묶음 4 도 같은 오류 글) |
+| 유도되는 묶음, 옛 도구 대 새 도구, 첫 비교 (`compare_tools.txt`) | **rc 1: 선언 밖 4 줄** → 멈춤, 덧붙임 2 |
+| 같은 비교, 덧붙임 2 뒤 (`compare_tools_2.txt`) | 아홉 줄 모두 OK: 글 일곱은 선언한 줄만, 컨테이너 둘은 다른 바이트 36(오프셋 120–155)뿐 |
+| 기본 경로의 계획, T8CF facts 와 마지막 옵션 회차 (`compare_plans_v3.txt`) | 열 모두 "only declared differences" |
+| 개정 3 계획의 다시 만들기 (`compare_regen.txt`) | 다섯 모두 PASS: manifest·sidecar·값 요청이 같은 sha256, module 표·실행 파일 목록 같음 |
+| 개정 3 계획의 판 4 읽기 (`compare_parse_v4.txt`, `compare_parse_v4_full.txt`) | 열 모두 `version 4`; 끝까지 읽은 요약의 수가 계획 글에서 센 수와 열 모두 같음 |
+
+- **판 1–3 은 앞과 똑같이 읽힌다.** 점검 프로그램 둘(커밋 `d56ca0d` 의 파서와 작업 트리의 파서; 소스 sha256 `printers_sources.sha256`)이 저장소의 `.kzs` 22, 앞 단계들의 생성된 계획 105, binding 목록이 딸린 계획 둘에서 모든 칸과 오류 문장을 같은 바이트로 낸다. 옛 파서가 오류로 읽는 넷은 혼자 읽으면 site 선언이 없는 binding·identity 목록이다(`instrument/clang/out/{c1,r2}/binds.kzs`, `instrument/gcc/sites/{c1_post_1df262a,r2_v701}.identity.kzs`).
+- **옛 계획에서 유도되는 묶음은 같다.** C1 부팅 dump 와 C5 6.4.1 부팅 dump 를 남긴 판 3 계획과 binding 목록으로 다시 읽은 `kz-rt-dump --manifest` 의 글(1,082 줄, 1,190 줄)은 옛 도구와 새 도구에서 차이 0 이다. `kz convert` 의 컨테이너를 kz-dump 로 푼 글(3,824 줄, 2,722 줄)은 `tool_sha256=` 줄과 `artifact_sha256=` 줄만 다르고, 컨테이너 자체는 크기가 같고(234,528 B, 149,872 B) 머리의 `tool_sha256`·`header_crc`(오프셋 120–155) 36 바이트만 다르다.
+- **멈춘 곳 하나(덧붙임 2).** 첫 비교는 `artifact_sha256` 네 줄에서 rc 1 로 멈췄다. 그 값은 컨테이너 파일 전체의 sha256 이고(`kairos/lib/core/container_reader.cpp:136`) 머리에 도구 해시가 들어 있으므로(`kairos/include/kz/schema/kz_schema.h:279-293`), 선언한 도구 해시의 변화를 따라 바뀐다. 선언이 이 따름 결과를 허용 목록에 넣지 않았다. 까닭을 밝히고 덧붙임 2 를 커밋한(`6474cd5`) 뒤 새 스크립트로 다시 견주었다. 첫 출력은 그대로 남겼다.
+- **기본 경로(`--manifest` 없음)는 개정 2 의 출력 그대로다.** 다른 것은 생성기 정체성 줄, sidecar sha256 줄, module 표·실행 파일 목록의 첫 줄뿐이다(빌드마다 `plan.kzs`·`plan.side`·`plan.mod`·`plan.exe` 한 줄씩).
+- **누적 목록과 등록부**: 빌드 전 `ledger_check_pre.txt` 124 행·`tools_check_pre.txt` 45 행 실패 0; 빌드 뒤 `ledger_check_after_build.txt` 124 행, `tools_check_after_build.txt` 49 행 실패 0(deep); 장부 행 여덟을 더한 뒤 `ledger_check_end.txt` 132 행 실패 0(새 행 `OBS_mv_regress_tools_old`, `OBS_mv_regress_tools_new`, `OBS_mv_regress_manifest`, `OBS_mv_plans_v3_t8cf`, `OBS_mv_plans_v3_final`, `OBS_mv_plans_v4`, `OBS_mv_plans_v4_all`, `TOOLS_20261116l`), `tools_check_end.txt` 49 행 실패 0(deep).
+- 바깥 이름 점검(`--tree`)은 출력 디렉터리 일곱, 사본 디렉터리, 기록 디렉터리에서 깨끗하다(`name_check_tree.txt`, 9 모두 rc 0).
+
+### 11.5 측정 [M]
+
+facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extract`), 도구는 kz-static `1a47abd0`. 계획 `mv_plans_v4/<b>`(층 예산 `tier:D07`, 대조 예산 `all`, 이름 공간 자료 다섯, 값 요청 `plan.req`)와 측정 계획 `mv_plans_v4_all/<b>`(층 예산 `all`; 부팅용이 아님). 수의 출처: `compare/measure_<b>.txt`(`measure_v4.py`), `compare/paths_<b>.txt`·`compare_paths.txt`(`measure_paths.py`), `compare_parse_v4_full.txt`. 측정이고 판정이 아니다. 아래 표의 모든 값이 선언 §11.0 의 scratchpad [I] 와 같다([I] 에 없던 것: r2_core 의 `object-delete`, 경로별 분모).
+
+**(1) 경로 A 대조 선택**
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| 경로 A 행 | 63 | 63 | 25 | 66 | 66 |
+| 대조 집합 (a+b / b) | 5 (1 / 4) | 5 (1 / 4) | 4 (0 / 4) | 15 (0 / 15) | 15 (0 / 15) |
+| 대조로 계획된 행 / 잘린 행 / `complete` | 5 / 0 / yes | 5 / 0 / yes | 4 / 0 / yes | 15 / 0 / yes | 15 / 0 / yes |
+| 층 차례로 계획된 경로 A 행 (개정 2 의 계획과 같음) | 1 (A21) | 0 | 0 | 0 | 0 |
+| 어느 쪽으로든 계획된 경로 A 행 | 5 | 5 | 4 | 15 | 15 |
+| 그 가운데 관계 1(키 `17975444d83f6589`) 밖 | 4 | 4 | 4 | 15 | 15 |
+| probe-create 행 | A20: 층 cut, 대조 planned | A20: 층 cut, 대조 planned | 없음 | 없음 | 없음 |
+| site (개정 2 의 같은 facts 계획) | 291 (267) | 291 (253) | 65 (42) | 201 (147) | 193 (139) |
+| `creator-call` site (개정 2) | 8 (4) | 8 (0) | 4 (0) | 6 (0) | 6 (0) |
+| spawn 문 (`decoder=spawn-token`) | 1 | 1 | 1 | 1 | 1 |
+
+- **C1 의 A20 과 관계 1 밖의 행이 이제 계획에 든다.** c1_pre_tx 의 대조 집합은 A20(`35f07539e7606e2e`, probe-create, a+b), A21(관계 1, b), A22(`f371687b47120887`), A26(`ad9fc1058923aad9`), A63(`b881269bea290f8b`)이고 모두 계획되었다. c1_post_tx 는 같은 다섯(A20 의 키는 `bdcc6978b9a41c8c`)인데 관계 1 은 층 차례로는 계획되지 않고 대조로만 계획된다. 개정 2 의 계획에서 경로 A 의 계획된 행은 c1_pre_tx 의 A21 하나였다.
+- r2_core 의 대조 넷(A2–A5) 가운데 A2–A4 는 order class NOPAIR 의 층 3 행이다: `creator:` 줄은 없고 `not a pair: key constants differ` 줄의 생성 호출이 site 로 세어져 (나)에 든 행이다(판정 규칙 8.12 (ㅁ)). c5 두 빌드의 대조 15 는 모두 (나)이고 관계 1 은 그 facts 의 행이 아니다.
+- 대조 예산은 `all` 이고 sidecar 의 `control-budget` 줄은 첫 row 줄보다 앞에 있다(`measure_<b>.txt` 의 `control-budget` 줄: `rows= planned= cut=0 complete=yes`, `unresolved="whether the control rows fit the record pool (no event volume measured)"`). 사건 양은 재지 않았다.
+
+**(2) 규칙별로 계획된 것**(need 의 종류·상태, `measure_<b>.txt`)
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| `object-delete` planned / not-planned | 2 / 3 | 2 / 3 | 3 / 1 | 0 / 15 | 0 / 15 |
+| `wait-result` planned / not-planned | 0 / 13 | 1 / 12 | 0 / 7 | 0 / 23 | 0 / 22 |
+| `event-send` planned / not-planned | 3 / 2 | 3 / 2 | 0 / 4 | 8 / 7 | 8 / 7 |
+| `lock-result` not-planned (경로 A·B: 이 개정에 규칙 없음) | 13 | 13 | 7 | 23 | 22 |
+| gap | 1 | 2 | 0 | 5 | 5 |
+| 값 요청: 행 / 요청 / planned | 4 / 36 / 30 | 4 / 30 / 24 | 1 / 6 / 3 | 12 / 41 / 29 | 12 / 41 / 29 |
+| 측정 계획(층 예산 all): site | 1,461 | 1,461 | 1,179 | 700 | 682 |
+| 측정 계획: `read-load` site / `read-subscript` planned | 43 / 0 | 43 / 0 | 41 / 0 | 9 / 32 | 8 / 32 |
+| 측정 계획: `lock-result` planned (경로 C) | 112 | 112 | 79 | 39 | 38 |
+| 측정 계획: `wait-result` planned | 5 | 6 | 5 | 0 | 0 |
+
+- **삭제·회수 자리(판정 규칙 8.2 (마))**: c1 두 빌드에서 관계 1 과 A20 의 `object-delete` 가 계획되었다: `OS_CountSemDelete` 의 입구(site 257)와 `osapi-countsem.c:129` 의 `OS_ObjectIdFinalizeDelete` after-call(site 258, `col=23 nth=1`); 자료는 `framework_namespaces_osal-f34759d.txt` 58 째 줄의 `OS_OBJECT_TYPE_OS_COUNTSEM delete`(sidecar 의 `lifetime` 줄 `applies`). r2_core 는 A2–A4 에 `OS_rmfs` 의 입구와 `osapi-filesys.c:360` 의 retire 호출(`framework_namespaces_osal-7.0.1.txt` 73 째 줄, `OS_OBJECT_TYPE_OS_FILESYS`). 계획되지 않은 것은 모두 `plan_missing(no namespace data entry)`: c1 의 A22·A26(조회·생성이 `OS_TimeBaseGetIdByName`·`OS_TimeBaseCreate`)과 A63(`OS_FileOpenCheck`·`OS_mv`), r2_core 의 A5, c5 두 빌드의 15 행(조회·생성이 `CFE_SB_DeletePipeWithAppId` 와 `CFE_SB_Subscribe`·`SubscribeEx`·`Unsubscribe` 13 행, `CFE_ES_DeleteCDS`·`CFE_ES_RegisterCDSEx` 2 행).
+- **대기 규칙**: c1_post_tx 의 관계 1 에 CF 재시도 대기(`cf_cfdp.c:1001:13`, LOOP_DEFS value)의 `wait-result` 가 planned(site 282·286: 조회의 after-call 과 나가는 문장)이고, 조건 출구는 문장이 아니어서 gap `record_insufficient(the exit is no statement)` 하나다. 그 밖의 행의 `wait-result` 는 not-planned(`no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions`).
+- **spawn 묶음**: 빌드마다 행위자 규칙이 계획한 thread 생성 호출의 at-call 하나에 `spawn <site> wrapper=kz_rt_posix_create start=arg2 arg=arg3 out=arg0` 와 `identity <site> decoder=spawn-token` 이 있다(P0 표의 `pthread_create` 항목에서). c5 두 빌드에는 gap `link_unlinked(no creation-argument channel)` 하나가 그대로 있다(생성 인자 0). 이 문을 읽는 런타임 래퍼와 플러그인은 아직 없다 [I: 뒤 단계가 만든다].
+- **판 4 의 수**(`compare_parse_v4_full.txt`, 파서가 읽은 수 = 계획 글에서 센 수): `mv_plans_v4` 의 need 49/49/29/99/96, gap 1/2/0/5/5, spawn 1/1/1/1/1, `place=load` 0, `skey=` site 291/291/65/201/193; `mv_plans_v4_all` 의 need 1,386/1,386/1,062/695/685, gap 54/55/22/18/18, spawn 1/1/2/1/1, `place=load` 45/45/43/9/8, `skey=` 1,461/1,461/1,179/700/682.
+
+**(3) 경로별 분모: 층 차례와 대조 선택이 닿는 곳**(`compare_paths.txt`, `compare/paths_<b>.txt`; 칸은 관계 행 / 층 차례로 계획 / 대조로 계획 / 어느 쪽으로든 / 어느 쪽으로도 아님)
+
+| 계획 | 경로 | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|---|
+| 개정 3, 층 `tier:D07`, 대조 `all` (`mv_plans_v4`) | A | 63 / 1 / 5 / 5 / 58 | 63 / 0 / 5 / 5 / 58 | 25 / 0 / 4 / 4 / 21 | 66 / 0 / 15 / 15 / 51 | 66 / 0 / 15 / 15 / 51 |
+| | B | 170 / 8 / 0 / 8 / 162 | 170 / 8 / 0 / 8 / 162 | 155 / 3 / 0 / 3 / 152 | 67 / 8 / 0 / 8 / 59 | 65 / 7 / 0 / 7 / 58 |
+| | C | 134 / 0 / 0 / 0 / 134 | 134 / 0 / 0 / 0 / 134 | 115 / 0 / 0 / 0 / 115 | 39 / 0 / 0 / 0 / 39 | 38 / 0 / 0 / 0 / 38 |
+| | 모두 | 367 / 9 / 5 / 13 / 354 | 367 / 8 / 5 / 13 / 354 | 295 / 3 / 4 / 7 / 288 | 172 / 8 / 15 / 23 / 149 | 169 / 7 / 15 / 22 / 147 |
+| 개정 2, 층 `tier:D07` (`ll_plans_final` = `mv_plans_v3_final`) | A / B / C 의 계획된 행 | 1 / 8 / 0 | 0 / 8 / 0 | 0 / 3 / 0 | 0 / 8 / 0 | 0 / 7 / 0 |
+| 첫 관측 경로의 계획 (`plangen`, 그 단계의 facts; `compare_paths_first.txt`) | A / B / C 의 행과 계획된 행 | 127·170·134 행, 5 / 7 / 0 | 127·170·134 행, 4 / 7 / 0 | 68·155·115 행, 0 / 3 / 0 | 66·73·39 행, 0 / 8 / 0 | 66·71·38 행, 0 / 7 / 0 |
+| 측정 계획, 층 `all` (`mv_plans_v4_all`) | A / B / C 의 계획된 행 | 63 / 170 / 134 | 63 / 170 / 134 | 25 / 155 / 115 | 66 / 67 / 39 | 66 / 65 / 38 |
+
+- **계획되지 않은 행의 사유는 하나다.** 어느 쪽으로도 계획되지 않은 행(354/354/288/149/147)은 모두 그 행의 `need row <key> observation not-planned reason=budget_not_run(row outside the budget)` 줄을 가진다. 다른 사유는 없다. 층·disposition·label 로 나누면(`compare/paths_<b>.txt` 의 `rows planned by neither`): c1_pre_tx 의 경로 A 58 = 층 3 의 D11/T? 44, D05/0 9, D06/J 2, D06/R 2, D12/E 1; 경로 B 162 = 층 2 의 D12/E 132, D11/T? 22, D08/J 5, D05/0 3; 경로 C 134 = 층 2 의 D12/E 112, 층 3 의 D12/E 22. c5_641 의 경로 C 39 = 층 2 의 D12/E 8 과 D10/F 3, 층 3 의 D10/F 7, D12/E 7, D03/E 4, D03/F 4, D01/E 4, D01/F 2. c5_642 의 경로 C 38 은 모두 층 3 이다(D01/E 9, D01/F 5, D03/E 6, D03/F 4, D10/F 7, D12/E 7).
+- **경로마다 받을 수 있는 label 과 층(코드, `kairos/lib/llvm/plan_gen.cpp`).** 경로 A 는 H·R·J·T?·E·0(:143–149), 경로 B 는 J·T?·E·0(:179–183), 경로 C 는 F·0·E(:211) 를 받는다. 층 1 은 disposition D07 뿐이고(:246), D07 은 label 이 R 이나 J 이고 order class 가 RELOC 일 때만 선다(:234; ENF·FIXED·COND 의 D01–D03, H 의 D04, 0 의 D05, 짝 없는 D06, J·INDEPENDENT 의 D08 이 먼저 걸러짐, :227–233). 그래서 **경로 C 의 행은 어떤 facts 에서도 층 1 에 들 수 없다**: order class 가 RELOC 이면 층 2, 아니면 층 3 이다. 층 예산 `tier:D07` 은 층 1 까지만 계획하고(:381, :347), 대조 선택은 경로 A 행만 본다(:1335). 따라서 지금까지 만든 `tier:D07` 계획(첫 관측 경로의 것, 개정 2 의 것, 이 단계의 `mv_plans_v4`) 어디에도 경로 C 의 계획된 행이 없는 것은 그 빌드들에 볼 경로 C 관계가 없어서가 아니라 층 규칙과 예산의 조합이 그 경로를 뺀 결과다. 측정이 코드와 맞는다: 다섯 빌드의 경로 C 행에서 본 label 은 E(c1·r2)와 E·F(c5)뿐, 층은 2·3 뿐(c5_642 는 3 뿐)이고 층 차례 계획 행은 0 이다(`compare/paths_<b>.txt` 의 `path C:` 줄).
+- **경로 C 가 닿는 예산.** 층 예산 `tier:directed`(층 2 까지, :382)는 경로 C 의 층 2 행 112/112/79/11/0 을 계획할 것이고(행의 층은 예산과 무관하게 sidecar 에 적힘; 그 예산의 계획은 만들지 않았다), 층 3 의 22/22/36/28/38 은 `all` 이나 `rows:<n>` 에서만 든다. c5 의 label F 16 행(641: 층 2 에 3, 층 3 에 13; 642: 모두 층 3)이 그렇다. 층 예산 `all` 의 측정 계획에서 경로 C 의 규칙은 실제로 site 를 낸다(위 (2): `read-load` 43/43/41/9/8, `lock-result` planned 112/112/79/39/38, c5 의 `read-subscript` planned 32).
+- 경로 B 는 label J 로 층 1 에 든다(계획된 8/8/3/8/7 이 모두 J·RELOC). 경로 B 에는 대조 선택이 없다.
+
+### 11.6 공간 [M]
+
+| 시점 (UTC) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 11-16 23:49:23 | 1,684,516,864 | 사본 시작(dip 85,532,672) |
+| 11-16 23:55:08 | 1,597,448,192 | `make kz-static`(가장 낮은 1,565,974,528, dip 31,473,664), `all`(가장 낮은 1,537,474,560, dip 55,345,152) |
+| 11-16 23:58:33 | 1,580,347,392 | 빌드 끝 |
+| 11-18 04:17:37 | 1,576,833,024 | 이어서 시작: 마른 실행, 빌드 뒤 기록, 등록부·장부 점검 |
+| 11-18 04:22:32–04:25:13 | 1,575,919,616 → 1,570,615,296 | 첫 ctest(dip 5,853,184), golden, 전체 ctest(8,081,408), 단위 점검 둘 |
+| 11-18 04:26:49–04:29:36 | 1,569,755,136 → 1,538,945,024 | 점검 프로그램 둘의 컴파일, 파싱 회귀(dip 16,478,208), 새 도구의 회귀 실행, 계획 넷(가장 큰 dip `mv_plans_v4_all` 6,983,680), 다시 만들기, 측정 |
+| 11-18 04:33:41 | 1,537,904,640 | 끝 점검(등록부 deep) 뒤 |
+
+- 하한(314,572,800)을 넘지 않았다. 감시 기록 30 개(`df_*.log`)와 점검 빌드의 40 개(`scratch_guard/`)가 모두 `verdict=completed` 다. 빌드 dip 은 필요량(479,942,080) 안이었다(가장 큰 것 55,345,152).
+- 남긴 출력(장부 행): `mv_regress_tools_old` 1,451,851, `mv_regress_tools_new` 1,451,851, `mv_regress_manifest` 15,465,021, `mv_plans_v3_t8cf` 886,531, `mv_plans_v3_final` 894,503, `mv_plans_v4` 1,267,187, `mv_plans_v4_all` 6,881,805 B(합 28,298,749); 사본 셋 85,502,480 B. 지운 것: scratchpad 의 점검 빌드와 그 출력(빌드 전), 점검 프로그램 둘과 다시 만들기의 출력·단위 점검의 임시 디렉터리(scratchpad, 비교를 남긴 뒤).
+
+### 11.7 계획과 다르게 한 것
+
+- **세션이 멈췄다가 이어졌다.** 빌드까지는 2026-11-16, 빌드 뒤의 모든 것은 2026-11-18 이다. 빌드를 다시 하지 않고 완결을 재서 이어갔다(덧붙임 1). `post_mc.txt` 의 시각과 HEAD 는 2026-11-18 의 것이고, 그 사이 `kairos/` 는 바뀌지 않았다.
+- **선언 밖의 차이 하나로 멈췄다(덧붙임 2).** 유도되는 묶음의 첫 비교가 `artifact_sha256` 네 줄에서 rc 1 이었다. 선언이 도구 해시의 따름 결과를 허용 목록에 빠뜨린 것이다. 까닭을 코드로 밝히고, 덧붙임을 커밋한 뒤, 컨테이너의 바이트 비교를 더한 새 스크립트로 다시 견주었다. 도구와 출력은 다시 만들지 않았다.
+- **`compare.sh parse_v4` 의 요약 줄이 남지 않았다(덧붙임 3).** 그 단계가 점검 프로그램을 `head -1` 에 이어 요약 파일 열 가운데 아홉이 비었다. 선언의 조건(첫 줄 `version 4`)은 섰다. 끝까지 읽는 점검을 새 스크립트로 더해 요약을 남기고 계획 글의 수와 견주었다.
+- **더한 측정 둘**: 경로별 분모(덧붙임 1 의 3; lead 가 이 단계에 더한 것)와 첫 관측 경로의 계획에 대한 같은 측정(덧붙임 3 의 2). 도구는 바꾸지 않았고 선택 규칙도 바꾸지 않았다.
+- **`relink_expected` 50 가운데 34 는 같은 바이트로 다시 링크되었다.** 선언은 “바뀔 수 있음”으로 적었고 반드시 바뀐다고 적은 11 은 모두 바뀌었다.
+- **선언에 없던 것 하나가 계획에 나왔다**: r2_core 의 `object-delete` planned 3(`OS_rmfs`). 선언의 [I] 는 c1 과 c5 만 적었다. 측정으로 적는다.
+- 설계 연구는 대기 규칙을 “대기의 조건 읽기와 나가는 갈래”로 적었다. 나가는 갈래 가운데 조건 출구는 문장이 아니어서 site 가 아니라 gap 이다(`record_insufficient(the exit is no statement)`); 선언 §11.0 이 그렇게 적었고 c1_post_tx 에서 하나 나왔다.
+- 플러그인은 `kzs-sites 4` 를 읽지 않으므로 이 계획들로 파생 빌드도 부팅도 하지 않았다. 계획의 site 가 실제로 묶이는지(GCC 의 호출 열과 `col=`·`nth=` 의 대응 포함)는 재지 않았다 [미확인].
+
+### 11.8 열린 것
+
+- **층 규칙이 경로 C 를 층 1 에서 구조적으로 뺀다**(§11.5 (3)). label F·0·E 뿐인 경로 C 는 D07 이 될 수 없고, `tier:D07` 예산에서는 대조 선택도 경로 A 뿐이라 경로 C 의 계획된 행이 다섯 빌드 모두 0 이다. c5 의 사례가 속한 경로이므로(label F 16 행, 641 은 층 2 에 3) C5 주기의 계획을 만들기 전에 정해야 한다: 경로 C 의 대조 선택 규칙을 둘지, 층 예산을 `tier:directed` 로 둘지(그러면 경로 A·B 의 층 2 도 함께 든다: c5_641 에서 경로 B 59, 경로 C 11), 층 규칙에 경로 C 의 우선 층을 둘지. 어느 쪽이든 규칙 글을 어느 계획보다 먼저 커밋하고 예산을 사건 양의 측정 뒤에 정하는 차례다. 이 단계에서는 선택 규칙을 바꾸지 않았다.
+- **경로 B 의 대조 선택이 없다.** 경로 B 는 label J·RELOC 의 행만 층 1 로 계획되고(8/8/3/8/7), 층 2 의 E·T?·0 행(c1 에서 157)은 `tier:D07` 에서 계획되지 않는다. 대조가 필요한지는 경로 B 의 연결 규칙이 설 때 함께 정할 일이다.
+- **대조 예산과 사건 양.** 대조 집합은 다섯 빌드 모두 통째로 계획되었다(`complete=yes`). 기록 풀에 드는지는 재지 않았다(sidecar 의 `unresolved`). C1 주기의 부팅 전에 행마다의 기대([I])를 커밋하고, 풀이 넘치면 그 부팅은 사전 시험이 아니다(§6.10 의 2).
+- **이름 공간 자료에 항목이 없는 삭제 자리**: `OS_TimeBase*`(c1 의 A22·A26, r2_core 의 A5), `OS_FileOpenCheck`·`OS_mv`(c1 의 A63), c5 두 빌드의 15 행(SB 의 pipe·구독, ES 의 CDS). 조건 (마)를 이 행들에서 보려면 semantics coverage rule 의 이름 공간 자료에 그 종류의 delete·clear 항목이 있어야 한다(자료의 다음 개정; 엔진에 이름을 넣지 않음).
+- **대기 규칙이 닿는 곳이 좁다.** 계획된 `wait-result` 는 c1_post_tx 의 하나(측정 계획에서 5/6/5/0/0)다. 조건 출구는 site 종류가 없어 gap 이고, c5 의 대기 다섯은 LOOP_DEFS 가 알아보지 못한다(§10.8).
+- **경로 A·B 의 잠금 호출, 분기, 호출 없는 효과**는 이 개정에 규칙이 없다(`lock-result` not-planned 13/13/7/23/22, 값 요청의 branch not-planned 6/6/3/12/12).
+- **판 4 를 읽는 쪽이 없다.** 런타임의 생성 래퍼(`kz_rt_posix_create`)와 `decoder=spawn-token`, 플러그인의 `col=`·`nth=`·`place=load`·`spawn` 묶음은 뒤 단계다. 그때까지 `mv_plans_v4` 는 형식과 생성의 근거일 뿐 관측의 근거가 아니다. c5 의 `link_unlinked(no creation-argument channel)` gap 은 그 토큰이 생긴 뒤에 다시 잰다.
+- **계획이 자료 파일의 절대 경로를 적는다**(site 의 `ref=` 와 sidecar 의 `lifetime`·`namespace-data` 줄). 다시 만들기는 같은 경로에서 바이트로 같았다. 주기의 연결 점검이 이 줄을 어떻게 견줄지는 그 단계의 선언에서 정한다.
+- `compare.sh parse_v4` 의 `head -1` 결함은 스크립트에 그대로 있다(선언과 함께 커밋된 스크립트라 고치지 않고 `parse_v4_full.sh` 를 더함). 다음 단계가 이 스크립트를 옮겨 쓸 때는 끝까지 읽는 쪽을 쓴다.
+- 앞 단계에서 넘어온 열린 것(의미 자료의 `lock-object` 역할, LOOP_DEFS 술어의 L1 인증, event type 의 등급, open 효과, c5 의 child without success, J?, 이름 결합의 구현)은 그대로다.

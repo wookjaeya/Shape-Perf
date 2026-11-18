@@ -1,0 +1,43 @@
+plan /home/user/work/redesign/obs1/plangen/c1_pre_tx
+  classes rows 431 tier1 12 tier2 306 tier3 113
+  budget value=tier:D07 ... planned=12 truncation=419 rows cut (row lines with state cut)
+path rows tier-planned control-planned either neither
+A 127 5 0 5 122
+B 170 7 0 7 163
+C 134 0 0 0 134
+all 431 12 0 12 419
+rows planned by neither, by path, reason, tier, disposition, label:
+  A reason=budget_not_run(row outside the budget) tier=2 disposition=D11 label=T?: 31
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D04 label=H: 1
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D05 label=0: 9
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D06 label=J: 3
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D06 label=R: 5
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D11 label=T?: 72
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D12 label=E: 1
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D05 label=0: 3
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D08 label=J: 6
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D11 label=T?: 22
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D12 label=E: 132
+  C reason=budget_not_run(row outside the budget) tier=2 disposition=D12 label=E: 112
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D12 label=E: 22
+every row by path, label, tier, order class (planned by the tier order / rows):
+  A label=0 tier=3 order=NOPAIR: 0 / 9
+  A label=E tier=3 order=NOPAIR: 0 / 1
+  A label=H tier=3 order=NOPAIR: 0 / 1
+  A label=J tier=1 order=RELOC: 4 / 4
+  A label=J tier=3 order=NOPAIR: 0 / 3
+  A label=R tier=1 order=RELOC: 1 / 1
+  A label=R tier=3 order=NOPAIR: 0 / 5
+  A label=T? tier=2 order=RELOC: 0 / 31
+  A label=T? tier=3 order=NOPAIR: 0 / 72
+  B label=0 tier=2 order=RELOC: 0 / 3
+  B label=E tier=2 order=RELOC: 0 / 132
+  B label=J tier=1 order=RELOC: 7 / 7
+  B label=J tier=2 order=RELOC: 0 / 6
+  B label=T? tier=2 order=RELOC: 0 / 22
+  C label=E tier=2 order=RELOC: 0 / 112
+  C label=E tier=3 order=NOPAIR: 0 / 1
+  C label=E tier=3 order=UNK: 0 / 21
+path A: labels seen {0, E, H, J, R, T?}; tiers seen {1, 2, 3}
+path B: labels seen {0, E, J, T?}; tiers seen {1, 2}
+path C: labels seen {E}; tiers seen {2, 3}

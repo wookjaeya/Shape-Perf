@@ -58,3 +58,12 @@ compare parse_v4 rc=0
 compare measure rc=0
 measure_paths rc=0
 sha256 of declared_addendum_3.txt: e2f305ae10ed84983adb32cb4b8d895cd9e839d971129e55eb68bccc90ba928d (addendum 3: the full read of the version 4 plans with the summary line, parse_v4_full.sh; the per-path measurement of the first observation path's plans, measure_paths_first.sh; committed before the two runs)
+parse_v4_full rc=0 (HEAD 9ff7b95, the addendum 3 commit)
+measure_paths_first rc=0
+ledger_check end rc=0 (ledger_check: 132 rows, 0 failing)
+tools_check --deep end rc=0 (tools_check: 49 rows, 0 failing (deep))
+## 5. end (2026-11-18T04:33Z)
+sha256 lists of the seven output directories -> mv_*.sha256; records/LEDGER.tsv: rows OBS_mv_regress_tools_old, OBS_mv_regress_tools_new, OBS_mv_regress_manifest, OBS_mv_plans_v3_t8cf, OBS_mv_plans_v3_final, OBS_mv_plans_v4, OBS_mv_plans_v4_all, TOOLS_20261116l
+name_check.sh --tree on the seven output directories, the copy directory and this directory -> name_check_tree.txt (9 lines, all rc 0)
+removed from <scratch>/mv: printers/ (the two check programs and their sources), regen/ (the regenerated plans, compared in compare_regen.txt), tmp_unit/ (empty)
+results: plan/full_stage_results_20261116.md sections 11.0.1-11.0.3 and 11.1-11.8

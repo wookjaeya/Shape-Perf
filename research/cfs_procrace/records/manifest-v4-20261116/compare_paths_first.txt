@@ -1,0 +1,42 @@
+c1_pre_tx measure_paths rc=0 43 lines
+c1_pre_tx plangen A 127 5 0 5 122
+c1_pre_tx plangen B 170 7 0 7 163
+c1_pre_tx plangen C 134 0 0 0 134
+c1_pre_tx plangen all 431 12 0 12 419
+c1_pre_tx plangen path A: labels seen {0, E, H, J, R, T?}; tiers seen {1, 2, 3}
+c1_pre_tx plangen path B: labels seen {0, E, J, T?}; tiers seen {1, 2}
+c1_pre_tx plangen path C: labels seen {E}; tiers seen {2, 3}
+c1_post_tx measure_paths rc=0 44 lines
+c1_post_tx plangen A 127 4 0 4 123
+c1_post_tx plangen B 170 7 0 7 163
+c1_post_tx plangen C 134 0 0 0 134
+c1_post_tx plangen all 431 11 0 11 420
+c1_post_tx plangen path A: labels seen {0, E, H, J, R, T?}; tiers seen {1, 2, 3}
+c1_post_tx plangen path B: labels seen {0, E, J, T?}; tiers seen {1, 2}
+c1_post_tx plangen path C: labels seen {E}; tiers seen {2, 3}
+r2_core measure_paths rc=0 47 lines
+r2_core plangen A 68 0 0 0 68
+r2_core plangen B 155 3 0 3 152
+r2_core plangen C 115 0 0 0 115
+r2_core plangen all 338 3 0 3 335
+r2_core plangen path A: labels seen {J, T?}; tiers seen {2, 3}
+r2_core plangen path B: labels seen {0, E, J, T?}; tiers seen {1, 2, 3}
+r2_core plangen path C: labels seen {E}; tiers seen {2, 3}
+c5_641 measure_paths rc=0 46 lines
+c5_641 plangen A 66 0 0 0 66
+c5_641 plangen B 73 8 0 8 65
+c5_641 plangen C 39 0 0 0 39
+c5_641 plangen all 178 8 0 8 170
+c5_641 plangen path A: labels seen {0, E, J, T?}; tiers seen {2, 3}
+c5_641 plangen path B: labels seen {0, E, J, T?}; tiers seen {1, 2}
+c5_641 plangen path C: labels seen {E, F}; tiers seen {2, 3}
+c5_642 measure_paths rc=0 42 lines
+c5_642 plangen A 66 0 0 0 66
+c5_642 plangen B 71 7 0 7 64
+c5_642 plangen C 38 0 0 0 38
+c5_642 plangen all 175 7 0 7 168
+c5_642 plangen path A: labels seen {0, E, J, T?}; tiers seen {2, 3}
+c5_642 plangen path B: labels seen {0, E, J, T?}; tiers seen {1, 2}
+c5_642 plangen path C: labels seen {E, F}; tiers seen {3}
+columns of the count lines: build plan path rows tier-planned control-planned either neither
+measure_paths_first.sh rc=0

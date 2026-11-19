@@ -4,3 +4,4 @@
 { date -u; df -B1 /; } > out/free_start.txt                                      21:53:48Z (available 456785920)  rc 0
 ../../env/tools/ledger_check.sh > out/ledger_check_start.txt                     rc 0 (245 rows, 0 failing)
 findings.tsv, README.md, commands.txt (this text, before any script)            committed as (next commit)
+scripts/review27.py, scripts/compare_dev.sh (after the README text)            bash -n rc 0; python ast parse ok; committed as (next commit)

@@ -1,0 +1,3 @@
+cdiff old_lines=24 new_lines=24 only_old=6 only_new=6 other=0
+class - args-output-path pairs=4
+class - args-input-path pairs=2

@@ -1,0 +1,2 @@
+cdiff old_lines=346 new_lines=346 only_old=1 only_new=1 other=0
+class - rules-line-revision pairs=1

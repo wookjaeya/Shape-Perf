@@ -1,0 +1,50 @@
+OK c1_pre_tx basis.kz: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK c1_pre_tx facts.kz: summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+OK c1_pre_tx facts view: cdiff old_lines=149111 new_lines=149111 only_old=1 only_new=1 other=0
+OK c1_pre_tx extract.txt: cdiff old_lines=363 new_lines=363 only_old=1 only_new=1 other=0
+OK c1_pre_tx relations.txt: cdiff old_lines=7260 new_lines=7256 only_old=19 only_new=15 other=0
+OK c1_pre_tx basis.txt: cdiff old_lines=129 new_lines=129 only_old=1 only_new=1 other=0
+OK c1_pre_tx sha256.txt: cdiff old_lines=5 new_lines=5 only_old=3 only_new=3 other=0
+OK c1_pre_tx args.txt: cdiff old_lines=6 new_lines=6 only_old=0 only_new=0 other=0
+OK c1_pre_tx relations.log the same bytes as the kept one
+BAD c1_pre_tx status.txt
+OK c1_post_tx basis.kz: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK c1_post_tx facts.kz: summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+OK c1_post_tx facts view: cdiff old_lines=149147 new_lines=149147 only_old=1 only_new=1 other=0
+OK c1_post_tx extract.txt: cdiff old_lines=363 new_lines=363 only_old=1 only_new=1 other=0
+OK c1_post_tx relations.txt: cdiff old_lines=7260 new_lines=7256 only_old=19 only_new=15 other=0
+OK c1_post_tx basis.txt: cdiff old_lines=129 new_lines=129 only_old=1 only_new=1 other=0
+OK c1_post_tx sha256.txt: cdiff old_lines=5 new_lines=5 only_old=3 only_new=3 other=0
+OK c1_post_tx args.txt: cdiff old_lines=6 new_lines=6 only_old=0 only_new=0 other=0
+OK c1_post_tx relations.log the same bytes as the kept one
+BAD c1_post_tx status.txt
+OK r2_core basis.kz: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK r2_core facts.kz: summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+OK r2_core facts view: cdiff old_lines=96823 new_lines=96823 only_old=1 only_new=1 other=0
+OK r2_core extract.txt: cdiff old_lines=263 new_lines=263 only_old=1 only_new=1 other=0
+OK r2_core relations.txt: cdiff old_lines=5114 new_lines=5113 only_old=9 only_new=8 other=0
+OK r2_core basis.txt: cdiff old_lines=67 new_lines=67 only_old=1 only_new=1 other=0
+OK r2_core sha256.txt: cdiff old_lines=5 new_lines=5 only_old=3 only_new=3 other=0
+OK r2_core args.txt: cdiff old_lines=6 new_lines=6 only_old=0 only_new=0 other=0
+OK r2_core relations.log the same bytes as the kept one
+BAD r2_core status.txt
+OK c5_641 basis.kz: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK c5_641 facts.kz: summary sections old=39 new=39 same=37 differing=2 only-old=0 only-new=0
+OK c5_641 facts view: cdiff old_lines=64542 new_lines=64542 only_old=6 only_new=6 other=0
+OK c5_641 extract.txt: cdiff old_lines=281 new_lines=281 only_old=1 only_new=1 other=0
+OK c5_641 relations.txt: cdiff old_lines=3659 new_lines=3611 only_old=150 only_new=102 other=0
+OK c5_641 basis.txt: cdiff old_lines=122 new_lines=122 only_old=1 only_new=1 other=0
+OK c5_641 sha256.txt: cdiff old_lines=5 new_lines=5 only_old=3 only_new=3 other=0
+OK c5_641 args.txt: cdiff old_lines=6 new_lines=6 only_old=0 only_new=0 other=0
+OK c5_641 relations.log the same bytes as the kept one
+BAD c5_641 status.txt
+OK c5_642 basis.kz: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK c5_642 facts.kz: summary sections old=39 new=39 same=37 differing=2 only-old=0 only-new=0
+OK c5_642 facts view: cdiff old_lines=64695 new_lines=64695 only_old=6 only_new=6 other=0
+OK c5_642 extract.txt: cdiff old_lines=283 new_lines=283 only_old=1 only_new=1 other=0
+OK c5_642 relations.txt: cdiff old_lines=3607 new_lines=3559 only_old=150 only_new=102 other=0
+OK c5_642 basis.txt: cdiff old_lines=122 new_lines=122 only_old=1 only_new=1 other=0
+OK c5_642 sha256.txt: cdiff old_lines=5 new_lines=5 only_old=3 only_new=3 other=0
+OK c5_642 args.txt: cdiff old_lines=6 new_lines=6 only_old=0 only_new=0 other=0
+OK c5_642 relations.log the same bytes as the kept one
+BAD c5_642 status.txt

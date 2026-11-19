@@ -1,0 +1,5 @@
+cdiff old_lines=9 new_lines=9 only_old=3 only_new=3 other=0
+class - header-revision pairs=1
+class - facts-hash pairs=1
+class - summary:pairs-of-the-rows removed=1
+class - summary:pairs-of-the-rows added=1

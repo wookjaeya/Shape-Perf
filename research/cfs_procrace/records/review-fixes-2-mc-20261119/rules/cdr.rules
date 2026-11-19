@@ -1,0 +1,5 @@
+# cdr.txt of one build (order --caller-dependent-report): the header lines name the order rules revision and the facts.
+mask	header-revision	.*	^(kz-static order caller-dependent report \(order rules revision )[0-9]+ \([0-9-]+\)	\1R
+mask	facts-hash	.*	^facts [0-9a-f]{64}$	facts H
+del	summary:pairs-of-the-rows	.*	^pairs of the rows 
+add	summary:pairs-of-the-rows	.*	^pairs of the rows 

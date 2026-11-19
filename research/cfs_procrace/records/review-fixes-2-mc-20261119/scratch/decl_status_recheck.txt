@@ -1,0 +1,10 @@
+OK off c1_pre_tx status.txt result PASS
+OK off c1_post_tx status.txt result PASS
+OK off r2_core status.txt result PASS
+OK off c5_641 status.txt result PASS
+OK off c5_642 status.txt result PASS
+OK final c1_pre_tx status.txt result PASS
+OK final c1_post_tx status.txt result PASS
+OK final r2_core status.txt result PASS
+OK final c5_641 status.txt result PASS
+OK final c5_642 status.txt result PASS

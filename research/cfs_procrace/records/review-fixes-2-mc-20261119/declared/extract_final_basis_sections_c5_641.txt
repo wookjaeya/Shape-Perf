@@ -1,0 +1,8 @@
+header same=6 differing=1 [tool_sha256]
+section STRINGS old=0 new=0 same
+section BASIS old=104 new=104 same
+section FILE_HASHES old=81 new=81 same
+section PROVENANCE old=10 new=10 same
+section DEVIATIONS old=4 new=4 same
+section TUS old=58 new=58 same
+summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0

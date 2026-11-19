@@ -1,0 +1,8 @@
+# extract.txt of one build (one_build.sh): the facts line, and the count lines of the options whose rows change.
+mask	facts-hash	.*	^facts [0-9a-f]{64}$	facts H
+del	count:semantics	.*	^ *semantics  +rows 
+add	count:semantics	.*	^ *semantics  +rows 
+del	count:result-flow	.*	^ *result flow  +[0-9]+ rows 
+add	count:result-flow	.*	^ *result flow  +[0-9]+ rows 
+del	count:lock-handles	.*	^ *lock handles  +[0-9]+ rows 
+add	count:lock-handles	.*	^ *lock handles  +[0-9]+ rows 

@@ -1,0 +1,50 @@
+header same=4 differing=4 [basis_sha256 container parent[0] tool_sha256]
+section STRINGS old=0 new=0 same
+count STRINGS old=2590609 new=2612929
+section BASIS old=413 new=415 differs removed=26 added=28
+section FILE_HASHES old=315 new=315 same
+section PROVENANCE old=4 new=4 same
+section FACTS old=5948 new=5948 same
+section FACT_ARGS old=12778 new=12778 same
+section DERIVES old=0 new=0 same
+section FACT_EXPRS old=22790 new=22808 differs removed=5025 added=5043
+section FACT_LOOPS old=257 new=257 same
+section FACT_INIT old=233 new=233 same
+section FACT_CONSTS old=55 new=55 same
+section FACT_ATYPE old=18543 new=18543 differs removed=22 added=22
+section WRITERS old=845 new=845 same
+section FUNCS old=1591 new=1591 same
+section CALL_TARGETS old=187 new=187 same
+section STATIC_IMAGE old=72 new=72 same
+section FACT_LOCS old=241 new=241 same
+section TERMINALS old=77 new=77 same
+section OUTCALLS old=342 new=342 same
+section LOOP_ITERS old=314 new=314 same
+section SPAWN_PARAMS old=3 new=3 same
+section FUNC_WRITES old=2997 new=2997 same
+section P0_TABLE old=72 new=72 same
+section OP_DERIV old=158 new=158 same
+section SPAWN_WRAP old=32 new=32 same
+section READS old=2884 new=2884 same
+section RETURNS old=2427 new=2427 same
+section RET_CONSTS old=1263 new=1263 same
+section LOOP_EXITS old=684 new=684 same
+section ARGFLOW old=12778 new=12778 same
+section PARAM_FLOW old=5135 new=5135 same
+section PTR_FIELDS old=132 new=132 same
+section GLOBAL_IMAGES old=362 new=362 same
+section LOCK_OPS old=1547 new=1547 same
+section LOCK_IDS old=4 new=4 same
+section LOCKSET old=13386 new=13386 same
+section FIELD_STATUS old=1222 new=1222 same
+section AWAIT_L1 old=8 new=8 same
+section LOCK_PATHS old=5882 new=5882 same
+section OBJECT_ACCESS old=3729 new=3729 same
+section FIELD_TYPES old=1222 new=1222 same
+section ARG_TYPES old=12778 new=12778 same
+section LOOP_DEFS old=13 new=13 differs removed=4 added=4
+section SEMANTICS old=1476 new=1613 differs removed=1401 added=1538
+section RESULT_FLOW old=9622 new=9645 differs removed=9357 added=9380
+section RESULT_EFFECT old=11198 new=11198 differs removed=9349 added=9349
+section LOCK_HANDLES old=967 new=967 differs removed=83 added=83
+summary sections old=47 new=47 same=39 differing=8 only-old=0 only-new=0

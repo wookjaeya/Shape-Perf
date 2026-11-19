@@ -1,0 +1,2 @@
+cdiff old_lines=122 new_lines=122 only_old=1 only_new=1 other=0
+class - basis-hash pairs=1

@@ -1,0 +1,5 @@
+# edges.tsv of one build (order --edges): one line per edge, the id first.  New and gone edges are whole lines.
+del	edge:HB-await	.*	^E[0-9a-f]{16}\tHB-await\t
+add	edge:HB-await	.*	^E[0-9a-f]{16}\tHB-await\t
+del	edge:HB-seq	.*	^E[0-9a-f]{16}\tHB-seq\t
+add	edge:HB-seq	.*	^E[0-9a-f]{16}\tHB-seq\t

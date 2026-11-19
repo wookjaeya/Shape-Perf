@@ -1,0 +1,6 @@
+cdiff old_lines=46 new_lines=23 only_old=41 only_new=18 other=0
+class - hex64-field pairs=1
+class - statement:request removed=39
+class - statement:request added=16
+class - statement:end-rows removed=1
+class - statement:end-rows added=1

@@ -1,0 +1,42 @@
+# order.txt of one build: the lines that may differ between the earlier tool (order rules revision 2, 3, 4 on the
+# default path, with result flow, with loops and handles; relations rules revision 9, 10, 11) and the rebuilt one (order
+# rules revision 5, 6, 7; relations rules revision 12, 13, 11).  A class is a line label of the order text.
+mask	tool-line-revision	.*	^kz-static order \(order rules revision [0-9]+ \([0-9-]+\)\)$	kz-static order (order rules revision R)
+mask	facts-hash	.*	^facts [0-9a-f]{64}$	facts H
+mask	relations-line-revision	.*	^relations relations rules revision [0-9]+ \([0-9-]+\)$	relations relations rules revision R
+del	summary	.*	^summary
+add	summary	.*	^summary
+del	row:order-static	.*	^  [ABC][0-9]+ key [0-9a-f]{16} order\.static
+add	row:order-static	.*	^  [ABC][0-9]+ key [0-9a-f]{16} order\.static
+del	row:pair	.*	^      pair:
+add	row:pair	.*	^      pair:
+del	row:pairs	.*	^      pairs:
+add	row:pairs	.*	^      pairs:
+del	row:threads-started-by	.*	^      threads started by:
+add	row:threads-started-by	.*	^      threads started by:
+del	row:opposite	.*	^      opposite:
+add	row:opposite	.*	^      opposite:
+del	row:awaited	.*	^      awaited:
+add	row:awaited	.*	^      awaited:
+del	header:rules-with-options	.*	^rules with (result flow|loop definitions and lock handles): 
+add	header:rules-with-options	.*	^rules with (result flow|loop definitions and lock handles): 
+del	edge:header	.*	^  E[0-9a-f]{16} HB-[a-z]+ [a-z-]+$
+add	edge:header	.*	^  E[0-9a-f]{16} HB-[a-z]+ [a-z-]+$
+del	edge:from	.*	^      from: 
+add	edge:from	.*	^      from: 
+del	edge:to	.*	^      to: 
+add	edge:to	.*	^      to: 
+del	edge:condition	.*	^      condition: 
+add	edge:condition	.*	^      condition: 
+del	edge:premise	.*	^      premise: 
+add	edge:premise	.*	^      premise: 
+del	edge:scope	.*	^      scope: 
+add	edge:scope	.*	^      scope: 
+del	edge:instance-key	.*	^      instance key: 
+add	edge:instance-key	.*	^      instance key: 
+del	edge:wait	.*	^      wait W[0-9a-f]{16}; 
+add	edge:wait	.*	^      wait W[0-9a-f]{16}; 
+del	section-count	.*	^\[[a-z]+\] [0-9]+$
+add	section-count	.*	^\[[a-z]+\] [0-9]+$
+del	wait:use	.*	^      use 
+add	wait:use	.*	^      use 

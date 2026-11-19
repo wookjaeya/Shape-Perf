@@ -1,0 +1,30 @@
+OK c1_pre_tx plan.kzs: cdiff old_lines=860 new_lines=860 only_old=3 only_new=3 other=0
+OK c1_pre_tx plan.side: cdiff old_lines=1055 new_lines=1055 only_old=6 only_new=6 other=0
+OK c1_pre_tx plan.mod: cdiff old_lines=9 new_lines=9 only_old=1 only_new=1 other=0
+OK c1_pre_tx plan.exe: cdiff old_lines=9 new_lines=9 only_old=1 only_new=1 other=0
+OK c1_pre_tx args.txt: cdiff old_lines=24 new_lines=24 only_old=6 only_new=6 other=0
+OK c1_pre_tx plan.log the same bytes as the kept one
+OK c1_post_tx plan.kzs: cdiff old_lines=816 new_lines=816 only_old=3 only_new=3 other=0
+OK c1_post_tx plan.side: cdiff old_lines=1038 new_lines=1038 only_old=6 only_new=6 other=0
+OK c1_post_tx plan.mod: cdiff old_lines=9 new_lines=9 only_old=1 only_new=1 other=0
+OK c1_post_tx plan.exe: cdiff old_lines=9 new_lines=9 only_old=1 only_new=1 other=0
+OK c1_post_tx args.txt: cdiff old_lines=24 new_lines=24 only_old=6 only_new=6 other=0
+OK c1_post_tx plan.log the same bytes as the kept one
+OK r2_core plan.kzs: cdiff old_lines=110 new_lines=110 only_old=3 only_new=3 other=0
+OK r2_core plan.side: cdiff old_lines=661 new_lines=661 only_old=6 only_new=6 other=0
+OK r2_core plan.mod: cdiff old_lines=3 new_lines=3 only_old=1 only_new=1 other=0
+OK r2_core plan.exe: cdiff old_lines=3 new_lines=3 only_old=1 only_new=1 other=0
+OK r2_core args.txt: cdiff old_lines=24 new_lines=24 only_old=6 only_new=6 other=0
+OK r2_core plan.log the same bytes as the kept one
+OK c5_641 plan.kzs: cdiff old_lines=433 new_lines=433 only_old=3 only_new=3 other=0
+OK c5_641 plan.side: cdiff old_lines=541 new_lines=541 only_old=107 only_new=107 other=0
+OK c5_641 plan.mod: cdiff old_lines=8 new_lines=8 only_old=1 only_new=1 other=0
+OK c5_641 plan.exe: cdiff old_lines=8 new_lines=8 only_old=1 only_new=1 other=0
+OK c5_641 args.txt: cdiff old_lines=24 new_lines=24 only_old=6 only_new=6 other=0
+OK c5_641 plan.log the same bytes as the kept one
+OK c5_642 plan.kzs: cdiff old_lines=413 new_lines=413 only_old=3 only_new=3 other=0
+OK c5_642 plan.side: cdiff old_lines=525 new_lines=525 only_old=95 only_new=95 other=0
+OK c5_642 plan.mod: cdiff old_lines=8 new_lines=8 only_old=1 only_new=1 other=0
+OK c5_642 plan.exe: cdiff old_lines=8 new_lines=8 only_old=1 only_new=1 other=0
+OK c5_642 args.txt: cdiff old_lines=24 new_lines=24 only_old=6 only_new=6 other=0
+OK c5_642 plan.log the same bytes as the kept one

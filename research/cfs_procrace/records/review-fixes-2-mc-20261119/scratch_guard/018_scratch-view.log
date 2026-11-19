@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-view need=150000000 floor=314572800 interval=2 cmd=bash <scratch>/rfb/view.sh final c1_pre_tx
+start 2026-11-19T01:24:24.283Z free=1036541952 threshold=464572800
+sample 2026-11-19T01:24:24.288Z 1036537856
+sample 2026-11-19T01:24:26.295Z 992567296
+end 2026-11-19T01:24:28.303Z kind=scratch-view verdict=completed rc=0 free=948453376 lowest=948453376 dip=88088576 change=-88088576

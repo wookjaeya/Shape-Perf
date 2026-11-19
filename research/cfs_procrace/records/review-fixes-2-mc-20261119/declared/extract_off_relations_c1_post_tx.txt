@@ -1,0 +1,14 @@
+cdiff old_lines=7260 new_lines=7256 only_old=19 only_new=15 other=0
+class - facts-hash pairs=1
+class - rules-line-revision pairs=1
+class - summary-A-membership-and-creators removed=1
+class - summary-A-membership-and-creators added=1
+class - namespace:publication-writes-of-the-creator removed=4
+class - namespace:key-parameter-functions removed=2
+class - namespace:key-parameter-functions added=2
+class - namespace:uses removed=2
+class - namespace:uses added=2
+class - namespace:left-out removed=4
+class - namespace:left-out added=4
+class - row:dependency removed=4
+class - row:dependency added=4

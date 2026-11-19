@@ -1,0 +1,331 @@
+# declared_summary.txt: the reports in declared/ (the comparison of the scratch check build's outputs with the kept outputs of kz-static 1a47abd0), one line per report; [I], not evidence
+== extract_final_args
+  c1_post_tx only_old=0 only_new=0 other=0 | no difference
+  c1_pre_tx only_old=0 only_new=0 other=0 | no difference
+  c5_641 only_old=0 only_new=0 other=0 | no difference
+  c5_642 only_old=0 only_new=0 other=0 | no difference
+  r2_core only_old=0 only_new=0 other=0 | no difference
+== extract_final_basis
+  c1_post_tx only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+== extract_final_basis_sections
+  c1_post_tx | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+  c1_pre_tx | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+  c5_641 | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+  c5_642 | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+  r2_core | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+== extract_final_extract
+  c1_post_tx only_old=4 only_new=4 other=0 | - facts-hash pairs=1; - count:semantics removed=1; - count:semantics added=1; - count:result-flow removed=1; - count:result-flow added=1; - count:lock-handles removed=1; - count:lock-handles added=1
+  c1_pre_tx only_old=4 only_new=4 other=0 | - facts-hash pairs=1; - count:semantics removed=1; - count:semantics added=1; - count:result-flow removed=1; - count:result-flow added=1; - count:lock-handles removed=1; - count:lock-handles added=1
+  c5_641 only_old=3 only_new=3 other=0 | - facts-hash pairs=1; - count:semantics removed=1; - count:semantics added=1; - count:result-flow removed=1; - count:result-flow added=1
+  c5_642 only_old=3 only_new=3 other=0 | - facts-hash pairs=1; - count:semantics removed=1; - count:semantics added=1; - count:result-flow removed=1; - count:result-flow added=1
+  r2_core only_old=4 only_new=4 other=0 | - facts-hash pairs=1; - count:semantics removed=1; - count:semantics added=1; - count:result-flow removed=1; - count:result-flow added=1; - count:lock-handles removed=1; - count:lock-handles added=1
+== extract_final_facts_sections
+  c1_post_tx | header same=4 differing=4 [basis_sha256 container parent[0] tool_sha256]; count STRINGS old=3762046 new=3783804; section BASIS old=513 new=515 differs removed=26 added=28; section FACT_EXPRS old=32745 new=32824 differs removed=7255 added=7334; section FACT_ATYPE old=36635 new=36635 differs removed=65 added=65; section LOOP_DEFS old=19 new=19 differs removed=7 added=7; section SEMANTICS old=1773 new=1931 differs removed=1696 added=1854; section RESULT_FLOW old=12919 new=13036 differs removed=11351 added=11468; section RESULT_EFFECT old=15933 new=15933 differs removed=11371 added=11371; section LOCK_HANDLES old=1573 new=1573 differs removed=171 added=171; summary sections old=47 new=47 same=39 differing=8 only-old=0 only-new=0
+  c1_pre_tx | header same=4 differing=4 [basis_sha256 container parent[0] tool_sha256]; count STRINGS old=3759771 new=3781557; section BASIS old=513 new=515 differs removed=26 added=28; section FACT_EXPRS old=32715 new=32794 differs removed=7247 added=7326; section FACT_ATYPE old=36635 new=36635 differs removed=65 added=65; section LOOP_DEFS old=13 new=13 differs removed=4 added=4; section SEMANTICS old=1773 new=1931 differs removed=1696 added=1854; section RESULT_FLOW old=12916 new=13033 differs removed=11348 added=11465; section RESULT_EFFECT old=15930 new=15930 differs removed=11368 added=11368; section LOCK_HANDLES old=1573 new=1573 differs removed=171 added=171; summary sections old=47 new=47 same=39 differing=8 only-old=0 only-new=0
+  c5_641 | header same=4 differing=4 [basis_sha256 container parent[0] tool_sha256]; count STRINGS old=1318171 new=1338423; section BASIS old=436 new=438 differs removed=26 added=28; section FACT_EXPRS old=15662 new=15709 differs removed=3614 added=3661; section FACT_ATYPE old=16633 new=16633 differs removed=68 added=68; section LOOP_DEFS old=11 new=11 differs removed=1 added=1; section SEMANTICS old=795 new=910 differs removed=727 added=842; section RESULT_FLOW old=5568 new=5701 differs removed=5540 added=5673; section RESULT_EFFECT old=6864 new=6864 differs removed=6555 added=6555; summary sections old=47 new=47 same=40 differing=7 only-old=0 only-new=0
+  c5_642 | header same=4 differing=4 [basis_sha256 container parent[0] tool_sha256]; count STRINGS old=1319970 new=1339935; section BASIS old=438 new=440 differs removed=26 added=28; section FACT_EXPRS old=15662 new=15710 differs removed=3615 added=3663; section FACT_ATYPE old=16762 new=16762 differs removed=69 added=69; section LOOP_DEFS old=11 new=11 differs removed=1 added=1; section SEMANTICS old=786 new=899 differs removed=718 added=831; section RESULT_FLOW old=5561 new=5694 differs removed=5533 added=5666; section RESULT_EFFECT old=6867 new=6867 differs removed=6558 added=6558; summary sections old=47 new=47 same=40 differing=7 only-old=0 only-new=0
+  r2_core | header same=4 differing=4 [basis_sha256 container parent[0] tool_sha256]; count STRINGS old=2590609 new=2612929; section BASIS old=413 new=415 differs removed=26 added=28; section FACT_EXPRS old=22790 new=22808 differs removed=5025 added=5043; section FACT_ATYPE old=18543 new=18543 differs removed=22 added=22; section LOOP_DEFS old=13 new=13 differs removed=4 added=4; section SEMANTICS old=1476 new=1613 differs removed=1401 added=1538; section RESULT_FLOW old=9622 new=9645 differs removed=9357 added=9380; section RESULT_EFFECT old=11198 new=11198 differs removed=9349 added=9349; section LOCK_HANDLES old=967 new=967 differs removed=83 added=83; summary sections old=47 new=47 same=39 differing=8 only-old=0 only-new=0
+== extract_final_relations
+  c1_post_tx only_old=40 only_new=36 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - header:semantics-of-these-facts removed=1; - header:semantics-of-these-facts added=1; - header:rules-with-result-flow removed=1; - header:rules-with-result-flow added=1; - header:rules-with-lock-handles removed=1; - header:rules-with-lock-handles added=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - summary-incomplete removed=1; - summary-incomplete added=1; - namespace:publication-writes-of-the-creator removed=4; - namespace:key-parameter-functions removed=2; - namespace:key-parameter-functions added=2; - namespace:uses removed=2; - namespace:uses added=2; - namespace:left-out removed=4; - namespace:left-out added=4; - row:dependency removed=12; - row:dependency added=12; - row:incomplete removed=9; - row:incomplete added=9
+  c1_pre_tx only_old=40 only_new=36 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - header:semantics-of-these-facts removed=1; - header:semantics-of-these-facts added=1; - header:rules-with-result-flow removed=1; - header:rules-with-result-flow added=1; - header:rules-with-lock-handles removed=1; - header:rules-with-lock-handles added=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - summary-incomplete removed=1; - summary-incomplete added=1; - namespace:publication-writes-of-the-creator removed=4; - namespace:key-parameter-functions removed=2; - namespace:key-parameter-functions added=2; - namespace:uses removed=2; - namespace:uses added=2; - namespace:left-out removed=4; - namespace:left-out added=4; - row:dependency removed=12; - row:dependency added=12; - row:incomplete removed=9; - row:incomplete added=9
+  c5_641 only_old=192 only_new=105 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - header:semantics-of-these-facts removed=1; - header:semantics-of-these-facts added=1; - header:rules-with-result-flow removed=1; - header:rules-with-result-flow added=1; - summary-A removed=1; - summary-A added=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - summary-incomplete removed=1; - summary-incomplete added=1; - namespace:publication-writes-of-the-creator removed=9; - namespace:key-parameter-functions removed=3; - namespace:key-parameter-functions added=3; - namespace:uses removed=3; - namespace:uses added=3; - row:key-clearing added=26; - row:dependency removed=26; - row:dependency added=26; - row:creator removed=13; - row:not-a-pair removed=13; - row:callee-check removed=78; - row:flip removed=13; - row:flip added=13; - row:feasibility removed=13; - row:feasibility added=13; - row:incomplete removed=13; - row:incomplete added=13; - row:layers removed=1; - row:layers added=1
+  c5_642 only_old=192 only_new=105 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - header:semantics-of-these-facts removed=1; - header:semantics-of-these-facts added=1; - header:rules-with-result-flow removed=1; - header:rules-with-result-flow added=1; - summary-A removed=1; - summary-A added=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - summary-incomplete removed=1; - summary-incomplete added=1; - namespace:publication-writes-of-the-creator removed=9; - namespace:key-parameter-functions removed=3; - namespace:key-parameter-functions added=3; - namespace:uses removed=3; - namespace:uses added=3; - row:key-clearing added=26; - row:dependency removed=26; - row:dependency added=26; - row:creator removed=13; - row:not-a-pair removed=13; - row:callee-check removed=78; - row:flip removed=13; - row:flip added=13; - row:feasibility removed=13; - row:feasibility added=13; - row:incomplete removed=13; - row:incomplete added=13; - row:layers removed=1; - row:layers added=1
+  r2_core only_old=12 only_new=11 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - header:semantics-of-these-facts removed=1; - header:semantics-of-these-facts added=1; - header:rules-with-result-flow removed=1; - header:rules-with-result-flow added=1; - header:rules-with-lock-handles removed=1; - header:rules-with-lock-handles added=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - namespace:publication-writes-of-the-creator removed=1; - namespace:key-parameter-functions removed=1; - namespace:key-parameter-functions added=1; - namespace:uses removed=1; - namespace:uses added=1; - row:dependency removed=3; - row:dependency added=3
+== extract_final_sha256
+  c1_post_tx only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+  c1_pre_tx only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+  c5_641 only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+  c5_642 only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+  r2_core only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+== extract_final_view
+  c1_post_tx only_old=21478 only_new=21755 other=0 | basis section:basis removed=8; basis section:basis added=10; atype section:atype removed=65; atype section:atype added=65; semantics section:semantics removed=32; semantics section:semantics added=190; resultflow row-index pairs=8810; resultflow condition-and-flags pairs=853; resultflow section:resultflow removed=91; resultflow section:resultflow added=208; resulteffect flow-row-reference pairs=11009; resulteffect outcome-class pairs=362; loopdefs section:loopdefs removed=5; loopdefs section:loopdefs added=5; lockhandles section:lockhandles removed=243; lockhandles section:lockhandles added=243
+  c1_pre_tx only_old=21470 only_new=21747 other=0 | basis section:basis removed=8; basis section:basis added=10; atype section:atype removed=65; atype section:atype added=65; semantics section:semantics removed=32; semantics section:semantics added=190; resultflow row-index pairs=8807; resultflow condition-and-flags pairs=853; resultflow section:resultflow removed=91; resultflow section:resultflow added=208; resulteffect flow-row-reference pairs=11006; resulteffect outcome-class pairs=362; loopdefs section:loopdefs removed=3; loopdefs section:loopdefs added=3; lockhandles section:lockhandles removed=243; lockhandles section:lockhandles added=243
+  c5_641 only_old=12208 only_new=12458 other=0 | basis section:basis removed=7; basis section:basis added=9; atype section:atype removed=68; atype section:atype added=68; semantics section:semantics removed=35; semantics section:semantics added=150; resultflow row-index pairs=5055; resultflow condition-and-flags pairs=367; resultflow section:resultflow removed=120; resultflow section:resultflow added=253; resulteffect flow-row-reference pairs=6276; resulteffect outcome-class pairs=279; loopdefs section:loopdefs removed=1; loopdefs section:loopdefs added=1
+  c5_642 only_old=12205 only_new=12453 other=0 | basis section:basis removed=7; basis section:basis added=9; atype section:atype removed=69; atype section:atype added=69; semantics section:semantics removed=35; semantics section:semantics added=148; resultflow row-index pairs=5045; resultflow condition-and-flags pairs=370; resultflow section:resultflow removed=120; resultflow section:resultflow added=253; resulteffect flow-row-reference pairs=6279; resulteffect outcome-class pairs=279; loopdefs section:loopdefs removed=1; loopdefs section:loopdefs added=1
+  r2_core only_old=18861 only_new=19023 other=0 | basis section:basis removed=8; basis section:basis added=10; atype section:atype removed=22; atype section:atype added=22; semantics section:semantics removed=14; semantics section:semantics added=151; resultflow row-index pairs=8715; resultflow condition-and-flags pairs=518; resultflow section:resultflow removed=135; resultflow section:resultflow added=158; resulteffect flow-row-reference pairs=9160; resulteffect outcome-class pairs=189; loopdefs section:loopdefs removed=3; loopdefs section:loopdefs added=3; lockhandles section:lockhandles removed=97; lockhandles section:lockhandles added=97
+== extract_off_args
+  c1_post_tx only_old=0 only_new=0 other=0 | no difference
+  c1_pre_tx only_old=0 only_new=0 other=0 | no difference
+  c5_641 only_old=0 only_new=0 other=0 | no difference
+  c5_642 only_old=0 only_new=0 other=0 | no difference
+  r2_core only_old=0 only_new=0 other=0 | no difference
+== extract_off_basis
+  c1_post_tx only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - basis-hash pairs=1
+== extract_off_basis_sections
+  c1_post_tx | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+  c1_pre_tx | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+  c5_641 | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+  c5_642 | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+  r2_core | header same=6 differing=1 [tool_sha256]; summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+== extract_off_extract
+  c1_post_tx only_old=1 only_new=1 other=0 | - facts-hash pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - facts-hash pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - facts-hash pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - facts-hash pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - facts-hash pairs=1
+== extract_off_facts_sections
+  c1_post_tx | header same=5 differing=3 [basis_sha256 parent[0] tool_sha256]; section BASIS old=481 new=481 differs removed=1 added=1; summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+  c1_pre_tx | header same=5 differing=3 [basis_sha256 parent[0] tool_sha256]; section BASIS old=481 new=481 differs removed=1 added=1; summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+  c5_641 | header same=4 differing=4 [basis_sha256 container parent[0] tool_sha256]; count STRINGS old=376427 new=376545; section BASIS old=404 new=404 differs removed=1 added=1; section FACT_ATYPE old=13222 new=13222 differs removed=5 added=5; summary sections old=39 new=39 same=37 differing=2 only-old=0 only-new=0
+  c5_642 | header same=4 differing=4 [basis_sha256 container parent[0] tool_sha256]; count STRINGS old=377890 new=378008; section BASIS old=406 new=406 differs removed=1 added=1; section FACT_ATYPE old=13350 new=13350 differs removed=5 added=5; summary sections old=39 new=39 same=37 differing=2 only-old=0 only-new=0
+  r2_core | header same=5 differing=3 [basis_sha256 parent[0] tool_sha256]; section BASIS old=381 new=381 differs removed=1 added=1; summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+== extract_off_relations
+  c1_post_tx only_old=19 only_new=15 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - namespace:publication-writes-of-the-creator removed=4; - namespace:key-parameter-functions removed=2; - namespace:key-parameter-functions added=2; - namespace:uses removed=2; - namespace:uses added=2; - namespace:left-out removed=4; - namespace:left-out added=4; - row:dependency removed=4; - row:dependency added=4
+  c1_pre_tx only_old=19 only_new=15 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - namespace:publication-writes-of-the-creator removed=4; - namespace:key-parameter-functions removed=2; - namespace:key-parameter-functions added=2; - namespace:uses removed=2; - namespace:uses added=2; - namespace:left-out removed=4; - namespace:left-out added=4; - row:dependency removed=4; - row:dependency added=4
+  c5_641 only_old=150 only_new=102 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - summary-A removed=1; - summary-A added=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - summary-incomplete removed=1; - summary-incomplete added=1; - namespace:publication-writes-of-the-creator removed=9; - namespace:key-parameter-functions removed=3; - namespace:key-parameter-functions added=3; - namespace:uses removed=3; - namespace:uses added=3; - row:key-clearing added=26; - row:dependency removed=26; - row:dependency added=26; - row:creator removed=13; - row:not-a-pair removed=13; - row:callee-check removed=39; - row:flip removed=13; - row:flip added=13; - row:feasibility removed=13; - row:feasibility added=13; - row:incomplete removed=13; - row:incomplete added=13
+  c5_642 only_old=150 only_new=102 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - summary-A removed=1; - summary-A added=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - summary-incomplete removed=1; - summary-incomplete added=1; - namespace:publication-writes-of-the-creator removed=9; - namespace:key-parameter-functions removed=3; - namespace:key-parameter-functions added=3; - namespace:uses removed=3; - namespace:uses added=3; - row:key-clearing added=26; - row:dependency removed=26; - row:dependency added=26; - row:creator removed=13; - row:not-a-pair removed=13; - row:callee-check removed=39; - row:flip removed=13; - row:flip added=13; - row:feasibility removed=13; - row:feasibility added=13; - row:incomplete removed=13; - row:incomplete added=13
+  r2_core only_old=9 only_new=8 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - namespace:publication-writes-of-the-creator removed=1; - namespace:key-parameter-functions removed=1; - namespace:key-parameter-functions added=1; - namespace:uses removed=1; - namespace:uses added=1; - row:dependency removed=3; - row:dependency added=3
+== extract_off_sha256
+  c1_post_tx only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+  c1_pre_tx only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+  c5_641 only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+  c5_642 only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+  r2_core only_old=3 only_new=3 other=0 | - container-sha256 pairs=2; - tool-sha256-and-path pairs=1
+== extract_off_view
+  c1_post_tx only_old=1 only_new=1 other=0 | basis section:basis removed=1; basis section:basis added=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | basis section:basis removed=1; basis section:basis added=1
+  c5_641 only_old=6 only_new=6 other=0 | basis section:basis removed=1; basis section:basis added=1; atype section:atype removed=5; atype section:atype added=5
+  c5_642 only_old=6 only_new=6 other=0 | basis section:basis removed=1; basis section:basis added=1; atype section:atype removed=5; atype section:atype added=5
+  r2_core only_old=1 only_new=1 other=0 | basis section:basis removed=1; basis section:basis added=1
+== final_order_cdr
+  c1_post_tx only_old=2 only_new=2 other=0 | - header-revision pairs=1; - facts-hash pairs=1
+  c1_pre_tx only_old=2 only_new=2 other=0 | - header-revision pairs=1; - facts-hash pairs=1
+  c5_641 only_old=3 only_new=3 other=0 | - header-revision pairs=1; - facts-hash pairs=1; - summary:pairs-of-the-rows removed=1; - summary:pairs-of-the-rows added=1
+  c5_642 only_old=3 only_new=3 other=0 | - header-revision pairs=1; - facts-hash pairs=1; - summary:pairs-of-the-rows removed=1; - summary:pairs-of-the-rows added=1
+  r2_core only_old=2 only_new=2 other=0 | - header-revision pairs=1; - facts-hash pairs=1
+== final_order_edges
+  c1_post_tx only_old=121 only_new=286 other=0 | - edge:HB-await removed=120; - edge:HB-await added=284; - edge:HB-seq removed=1; - edge:HB-seq added=2
+  c1_pre_tx only_old=121 only_new=286 other=0 | - edge:HB-await removed=120; - edge:HB-await added=284; - edge:HB-seq removed=1; - edge:HB-seq added=2
+  c5_641 only_old=0 only_new=0 other=0 | no difference
+  c5_642 only_old=0 only_new=0 other=0 | no difference
+  r2_core only_old=65 only_new=118 other=0 | - edge:HB-await removed=64; - edge:HB-await added=116; - edge:HB-seq removed=1; - edge:HB-seq added=2
+== final_order_keys
+  c1_post_tx only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+  c1_pre_tx only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+  c5_641 only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+  c5_642 only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+  r2_core only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+== final_order_order
+  c1_post_tx only_old=257 only_new=2067 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - summary removed=1; - summary added=1; - row:pair removed=1; - row:pair added=1; - row:awaited removed=3; - row:awaited added=3; - header:rules-with-options removed=2; - header:rules-with-options added=2; - edge:header removed=61; - edge:header added=226; - edge:from removed=60; - edge:from added=225; - edge:to removed=1; - edge:to added=166; - edge:condition added=164; - edge:premise removed=120; - edge:premise added=777; - edge:scope added=165; - edge:instance-key added=165; - edge:wait added=164; - section-count removed=1; - section-count added=1; - wait:use removed=4; - wait:use added=4
+  c1_pre_tx only_old=256 only_new=2066 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - summary removed=1; - summary added=1; - row:pair removed=1; - row:pair added=1; - row:awaited removed=2; - row:awaited added=2; - header:rules-with-options removed=2; - header:rules-with-options added=2; - edge:header removed=61; - edge:header added=226; - edge:from removed=60; - edge:from added=225; - edge:to removed=1; - edge:to added=166; - edge:condition added=164; - edge:premise removed=120; - edge:premise added=777; - edge:scope added=165; - edge:instance-key added=165; - edge:wait added=164; - section-count removed=1; - section-count added=1; - wait:use removed=4; - wait:use added=4
+  c5_641 only_old=58 only_new=32 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - summary removed=1; - summary added=1; - row:order-static removed=13; - row:order-static added=13; - row:pair removed=13; - row:pairs removed=13; - row:pairs added=13; - row:threads-started-by removed=13; - header:rules-with-options removed=2; - header:rules-with-options added=2
+  c5_642 only_old=58 only_new=32 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - summary removed=1; - summary added=1; - row:order-static removed=13; - row:order-static added=13; - row:pair removed=13; - row:pairs removed=13; - row:pairs added=13; - row:threads-started-by removed=13; - header:rules-with-options removed=2; - header:rules-with-options added=2
+  r2_core only_old=144 only_new=722 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - summary removed=1; - summary added=1; - row:pair removed=1; - row:pair added=1; - row:awaited removed=2; - row:awaited added=2; - header:rules-with-options removed=2; - header:rules-with-options added=2; - edge:header removed=33; - edge:header added=86; - edge:from removed=32; - edge:from added=85; - edge:to removed=1; - edge:to added=54; - edge:condition added=52; - edge:premise removed=64; - edge:premise added=273; - edge:scope added=53; - edge:instance-key added=53; - edge:wait added=52; - section-count removed=1; - section-count added=1; - wait:use removed=4; - wait:use added=4
+== off_order_edges
+  c1_post_tx only_old=0 only_new=0 other=0 | no difference
+  c1_pre_tx only_old=0 only_new=0 other=0 | no difference
+  c5_641 only_old=0 only_new=0 other=0 | no difference
+  c5_642 only_old=0 only_new=0 other=0 | no difference
+  r2_core only_old=0 only_new=0 other=0 | no difference
+== off_order_keys
+  c1_post_tx only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+  c1_pre_tx only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+  c5_641 only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+  c5_642 only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+  r2_core only_old=2 only_new=2 other=0 | - facts-hash pairs=1; - rules-line-revision pairs=1
+== off_order_order
+  c1_post_tx only_old=4 only_new=4 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - row:awaited removed=1; - row:awaited added=1
+  c1_pre_tx only_old=4 only_new=4 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - row:awaited removed=1; - row:awaited added=1
+  c5_641 only_old=56 only_new=30 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - summary removed=1; - summary added=1; - row:order-static removed=13; - row:order-static added=13; - row:pair removed=13; - row:pairs removed=13; - row:pairs added=13; - row:threads-started-by removed=13
+  c5_642 only_old=56 only_new=30 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - summary removed=1; - summary added=1; - row:order-static removed=13; - row:order-static added=13; - row:pair removed=13; - row:pairs removed=13; - row:pairs added=13; - row:threads-started-by removed=13
+  r2_core only_old=4 only_new=4 other=0 | - tool-line-revision pairs=1; - facts-hash pairs=1; - relations-line-revision pairs=1; - row:awaited removed=1; - row:awaited added=1
+== order_edges
+  c1_post_tx only_old=0 only_new=0 other=0 | no difference
+  c1_pre_tx only_old=0 only_new=0 other=0 | no difference
+  c5_641 only_old=0 only_new=0 other=0 | no difference
+  c5_642 only_old=0 only_new=0 other=0 | no difference
+  r2_core only_old=0 only_new=0 other=0 | no difference
+== order_order
+  c1_post_tx only_old=3 only_new=3 other=0 | - tool-line-revision pairs=1; - relations-line-revision pairs=1; - row:awaited removed=1; - row:awaited added=1
+  c1_pre_tx only_old=3 only_new=3 other=0 | - tool-line-revision pairs=1; - relations-line-revision pairs=1; - row:awaited removed=1; - row:awaited added=1
+  c5_641 only_old=55 only_new=29 other=0 | - tool-line-revision pairs=1; - relations-line-revision pairs=1; - summary removed=1; - summary added=1; - row:order-static removed=13; - row:order-static added=13; - row:pair removed=13; - row:pairs removed=13; - row:pairs added=13; - row:threads-started-by removed=13
+  c5_642 only_old=55 only_new=29 other=0 | - tool-line-revision pairs=1; - relations-line-revision pairs=1; - summary removed=1; - summary added=1; - row:order-static removed=13; - row:order-static added=13; - row:pair removed=13; - row:pairs removed=13; - row:pairs added=13; - row:threads-started-by removed=13
+  r2_core only_old=3 only_new=3 other=0 | - tool-line-revision pairs=1; - relations-line-revision pairs=1; - row:awaited removed=1; - row:awaited added=1
+== plans_final_args_txt
+  c1_post_tx only_old=6 only_new=6 other=0 | - args-output-path pairs=4; - args-input-path pairs=2
+  c1_pre_tx only_old=6 only_new=6 other=0 | - args-output-path pairs=4; - args-input-path pairs=2
+  c5_641 only_old=6 only_new=6 other=0 | - args-output-path pairs=4; - args-input-path pairs=2
+  c5_642 only_old=6 only_new=6 other=0 | - args-output-path pairs=4; - args-input-path pairs=2
+  r2_core only_old=6 only_new=6 other=0 | - args-output-path pairs=4; - args-input-path pairs=2
+== plans_final_plan_exe
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_final_plan_kzs
+  c1_post_tx only_old=3 only_new=3 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1; - hex64-field pairs=1
+  c1_pre_tx only_old=3 only_new=3 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1; - hex64-field pairs=1
+  c5_641 only_old=3 only_new=3 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1; - hex64-field pairs=1
+  c5_642 only_old=3 only_new=3 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1; - hex64-field pairs=1
+  r2_core only_old=3 only_new=3 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1; - hex64-field pairs=1
+== plans_final_plan_mod
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_final_plan_side
+  c1_post_tx only_old=6 only_new=6 other=0 | - hex64-field pairs=3; - revision-field pairs=1; - statement:input removed=2; - statement:input added=2
+  c1_pre_tx only_old=6 only_new=6 other=0 | - hex64-field pairs=3; - revision-field pairs=1; - statement:input removed=2; - statement:input added=2
+  c5_641 only_old=107 only_new=107 other=0 | - hex64-field pairs=3; - revision-field pairs=1; - statement:row removed=100; - statement:row added=100; - statement:input removed=2; - statement:input added=2; - statement:classes removed=1; - statement:classes added=1
+  c5_642 only_old=95 only_new=95 other=0 | - hex64-field pairs=3; - revision-field pairs=1; - statement:row removed=88; - statement:row added=88; - statement:input removed=2; - statement:input added=2; - statement:classes removed=1; - statement:classes added=1
+  r2_core only_old=6 only_new=6 other=0 | - hex64-field pairs=3; - revision-field pairs=1; - statement:input removed=2; - statement:input added=2
+== plans_t8cf_args_txt
+  c1_post_tx only_old=4 only_new=4 other=0 | - args-output-path pairs=4
+  c1_pre_tx only_old=4 only_new=4 other=0 | - args-output-path pairs=4
+  c5_641 only_old=4 only_new=4 other=0 | - args-output-path pairs=4
+  c5_642 only_old=4 only_new=4 other=0 | - args-output-path pairs=4
+  r2_core only_old=4 only_new=4 other=0 | - args-output-path pairs=4
+== plans_t8cf_plan_exe
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_t8cf_plan_kzs
+  c1_post_tx only_old=2 only_new=2 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1
+  c1_pre_tx only_old=2 only_new=2 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1
+  c5_641 only_old=2 only_new=2 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1
+  c5_642 only_old=2 only_new=2 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1
+  r2_core only_old=2 only_new=2 other=0 | - kzs-header-revisions pairs=1; - sidecar-sha256 pairs=1
+== plans_t8cf_plan_mod
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_t8cf_plan_side
+  c1_post_tx only_old=2 only_new=2 other=0 | - hex64-field pairs=1; - revision-field pairs=1
+  c1_pre_tx only_old=2 only_new=2 other=0 | - hex64-field pairs=1; - revision-field pairs=1
+  c5_641 only_old=109 only_new=109 other=0 | - hex64-field pairs=1; - revision-field pairs=1; - statement:row removed=106; - statement:row added=106; - statement:classes removed=1; - statement:classes added=1
+  c5_642 only_old=97 only_new=97 other=0 | - hex64-field pairs=1; - revision-field pairs=1; - statement:row removed=94; - statement:row added=94; - statement:classes removed=1; - statement:classes added=1
+  r2_core only_old=2 only_new=2 other=0 | - hex64-field pairs=1; - revision-field pairs=1
+== plans_v4_all_args_txt
+  c1_post_tx only_old=9 only_new=9 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1; - args:budget-reason-of-the-measurement-plan removed=1; - args:budget-reason-of-the-measurement-plan added=1
+  c1_pre_tx only_old=9 only_new=9 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1; - args:budget-reason-of-the-measurement-plan removed=1; - args:budget-reason-of-the-measurement-plan added=1
+  c5_641 only_old=9 only_new=9 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1; - args:budget-reason-of-the-measurement-plan removed=1; - args:budget-reason-of-the-measurement-plan added=1
+  c5_642 only_old=9 only_new=9 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1; - args:budget-reason-of-the-measurement-plan removed=1; - args:budget-reason-of-the-measurement-plan added=1
+  r2_core only_old=9 only_new=9 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1; - args:budget-reason-of-the-measurement-plan removed=1; - args:budget-reason-of-the-measurement-plan added=1
+== plans_v4_all_plan_exe
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_v4_all_plan_kzs
+  c1_post_tx only_old=1365 only_new=1386 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:need removed=1361; - statement:need added=1382; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  c1_pre_tx only_old=1389 only_new=1410 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:need removed=1385; - statement:need added=1406; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  c5_641 only_old=677 only_new=705 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:site removed=2; - statement:site added=2; - statement:need removed=670; - statement:need added=698; - statement:value removed=1; - statement:value added=1; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  c5_642 only_old=670 only_new=698 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:site removed=2; - statement:site added=2; - statement:need removed=663; - statement:need added=691; - statement:value removed=1; - statement:value added=1; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  r2_core only_old=446 only_new=448 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:need removed=442; - statement:need added=444; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+== plans_v4_all_plan_mod
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_v4_all_plan_req
+  c1_post_tx only_old=1 only_new=1 other=0 | - hex64-field pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - hex64-field pairs=1
+  c5_641 only_old=119 only_new=119 other=0 | - hex64-field pairs=1; - statement:request removed=118; - statement:request added=118
+  c5_642 only_old=117 only_new=117 other=0 | - hex64-field pairs=1; - statement:request removed=116; - statement:request added=116
+  r2_core only_old=1 only_new=1 other=0 | - hex64-field pairs=1
+== plans_v4_all_plan_side
+  c1_post_tx only_old=432 only_new=453 other=0 | - hex64-field pairs=4; - statement:row removed=367; - statement:row added=367; - statement:need removed=55; - statement:need added=76; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1; - statement:budget removed=1; - statement:budget added=1
+  c1_pre_tx only_old=432 only_new=453 other=0 | - hex64-field pairs=4; - statement:row removed=367; - statement:row added=367; - statement:need removed=55; - statement:need added=76; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1; - statement:budget removed=1; - statement:budget added=1
+  c5_641 only_old=299 only_new=327 other=0 | - hex64-field pairs=4; - statement:row removed=172; - statement:row added=172; - statement:site removed=2; - statement:site added=2; - statement:need removed=88; - statement:need added=116; - statement:map removed=26; - statement:map added=26; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1; - statement:classes removed=1; - statement:classes added=1; - statement:budget removed=1; - statement:budget added=1
+  c5_642 only_old=296 only_new=324 other=0 | - hex64-field pairs=4; - statement:row removed=169; - statement:row added=169; - statement:site removed=2; - statement:site added=2; - statement:need removed=88; - statement:need added=116; - statement:map removed=26; - statement:map added=26; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1; - statement:classes removed=1; - statement:classes added=1; - statement:budget removed=1; - statement:budget added=1
+  r2_core only_old=326 only_new=328 other=0 | - hex64-field pairs=4; - statement:row removed=295; - statement:row added=295; - statement:need removed=21; - statement:need added=23; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1; - statement:budget removed=1; - statement:budget added=1
+== plans_v4_args_txt
+  c1_post_tx only_old=8 only_new=8 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+  c1_pre_tx only_old=8 only_new=8 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+  c5_641 only_old=8 only_new=8 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+  c5_642 only_old=8 only_new=8 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+  r2_core only_old=8 only_new=8 other=0 | - args-output-path pairs=5; - args-input-path pairs=2; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+== plans_v4_kept_args_txt
+  c1_post_tx only_old=6 only_new=6 other=0 | - args-output-path pairs=5; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+  c1_pre_tx only_old=6 only_new=6 other=0 | - args-output-path pairs=5; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+  c5_641 only_old=6 only_new=6 other=0 | - args-output-path pairs=5; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+  c5_642 only_old=6 only_new=6 other=0 | - args-output-path pairs=5; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+  r2_core only_old=6 only_new=6 other=0 | - args-output-path pairs=5; - args:control-budget-reason removed=1; - args:control-budget-reason added=1
+== plans_v4_kept_plan_exe
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_v4_kept_plan_kzs
+  c1_post_tx only_old=27 only_new=30 other=0 | - sidecar-sha256 pairs=1; - statement:need removed=24; - statement:need added=27; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  c1_pre_tx only_old=51 only_new=54 other=0 | - sidecar-sha256 pairs=1; - statement:need removed=48; - statement:need added=51; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  c5_641 only_old=591 only_new=421 other=0 | - sidecar-sha256 pairs=1; - statement:site removed=200; - statement:site added=164; - statement:need removed=83; - statement:need added=20; - statement:value removed=303; - statement:value added=232; - statement:spawn removed=1; - statement:spawn added=1; - statement:identity removed=1; - statement:identity added=1; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  c5_642 only_old=569 only_new=399 other=0 | - sidecar-sha256 pairs=1; - statement:site removed=192; - statement:site added=156; - statement:need removed=82; - statement:need added=19; - statement:value removed=290; - statement:value added=219; - statement:spawn removed=1; - statement:spawn added=1; - statement:identity removed=1; - statement:identity added=1; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  r2_core only_old=7 only_new=7 other=0 | - sidecar-sha256 pairs=1; - statement:need removed=4; - statement:need added=4; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+== plans_v4_kept_plan_mod
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_v4_kept_plan_req
+  c1_post_tx only_old=0 only_new=0 other=0 | no difference
+  c1_pre_tx only_old=0 only_new=0 other=0 | no difference
+  c5_641 only_old=40 only_new=17 other=0 | - statement:request removed=39; - statement:request added=16; - statement:end-rows removed=1; - statement:end-rows added=1
+  c5_642 only_old=40 only_new=17 other=0 | - statement:request removed=39; - statement:request added=16; - statement:end-rows removed=1; - statement:end-rows added=1
+  r2_core only_old=0 only_new=0 other=0 | no difference
+== plans_v4_kept_plan_side
+  c1_post_tx only_old=376 only_new=379 other=0 | - hex64-field pairs=1; - statement:row removed=367; - statement:row added=367; - statement:need removed=5; - statement:need added=8; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1
+  c1_pre_tx only_old=376 only_new=379 other=0 | - hex64-field pairs=1; - statement:row removed=367; - statement:row added=367; - statement:need removed=5; - statement:need added=8; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1
+  c5_641 only_old=480 only_new=381 other=0 | - hex64-field pairs=1; - statement:row removed=172; - statement:row added=172; - statement:site removed=200; - statement:site added=164; - statement:need removed=77; - statement:need added=27; - statement:map removed=23; - statement:map added=10; - statement:spawn removed=1; - statement:spawn added=1; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1; - statement:classes removed=1; - statement:classes added=1; - statement:requests removed=1; - statement:requests added=1; - statement:bound removed=1; - statement:bound added=1
+  c5_642 only_old=467 only_new=368 other=0 | - hex64-field pairs=1; - statement:row removed=169; - statement:row added=169; - statement:site removed=192; - statement:site added=156; - statement:need removed=76; - statement:need added=26; - statement:map removed=22; - statement:map added=9; - statement:spawn removed=1; - statement:spawn added=1; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1; - statement:classes removed=1; - statement:classes added=1; - statement:requests removed=1; - statement:requests added=1; - statement:bound removed=1; - statement:bound added=1
+  r2_core only_old=303 only_new=303 other=0 | - hex64-field pairs=1; - statement:row removed=295; - statement:row added=295; - statement:need removed=4; - statement:need added=4; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1
+== plans_v4_plan_exe
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_v4_plan_kzs
+  c1_post_tx only_old=28 only_new=31 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:need removed=24; - statement:need added=27; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  c1_pre_tx only_old=52 only_new=55 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:need removed=48; - statement:need added=51; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  c5_641 only_old=592 only_new=422 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:site removed=200; - statement:site added=164; - statement:need removed=83; - statement:need added=20; - statement:value removed=303; - statement:value added=232; - statement:spawn removed=1; - statement:spawn added=1; - statement:identity removed=1; - statement:identity added=1; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  c5_642 only_old=570 only_new=400 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:site removed=192; - statement:site added=156; - statement:need removed=82; - statement:need added=19; - statement:value removed=290; - statement:value added=219; - statement:spawn removed=1; - statement:spawn added=1; - statement:identity removed=1; - statement:identity added=1; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+  r2_core only_old=8 only_new=8 other=0 | - sidecar-sha256 pairs=1; - hex64-field pairs=1; - statement:need removed=4; - statement:need added=4; - statement:plan removed=1; - statement:plan added=1; - header:kzs-generator-line removed=1; - header:kzs-generator-line added=1
+== plans_v4_plan_mod
+  c1_post_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - table-header-path-and-sha256 pairs=1
+== plans_v4_plan_req
+  c1_post_tx only_old=1 only_new=1 other=0 | - hex64-field pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - hex64-field pairs=1
+  c5_641 only_old=41 only_new=18 other=0 | - hex64-field pairs=1; - statement:request removed=39; - statement:request added=16; - statement:end-rows removed=1; - statement:end-rows added=1
+  c5_642 only_old=41 only_new=18 other=0 | - hex64-field pairs=1; - statement:request removed=39; - statement:request added=16; - statement:end-rows removed=1; - statement:end-rows added=1
+  r2_core only_old=1 only_new=1 other=0 | - hex64-field pairs=1
+== plans_v4_plan_side
+  c1_post_tx only_old=381 only_new=384 other=0 | - hex64-field pairs=4; - statement:row removed=367; - statement:row added=367; - statement:need removed=5; - statement:need added=8; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1
+  c1_pre_tx only_old=381 only_new=384 other=0 | - hex64-field pairs=4; - statement:row removed=367; - statement:row added=367; - statement:need removed=5; - statement:need added=8; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1
+  c5_641 only_old=484 only_new=385 other=0 | - hex64-field pairs=3; - statement:row removed=172; - statement:row added=172; - statement:site removed=200; - statement:site added=164; - statement:need removed=77; - statement:need added=27; - statement:map removed=23; - statement:map added=10; - statement:spawn removed=1; - statement:spawn added=1; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1; - statement:classes removed=1; - statement:classes added=1; - statement:requests removed=1; - statement:requests added=1; - statement:bound removed=1; - statement:bound added=1
+  c5_642 only_old=471 only_new=372 other=0 | - hex64-field pairs=3; - statement:row removed=169; - statement:row added=169; - statement:site removed=192; - statement:site added=156; - statement:need removed=76; - statement:need added=26; - statement:map removed=22; - statement:map added=9; - statement:spawn removed=1; - statement:spawn added=1; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1; - statement:classes removed=1; - statement:classes added=1; - statement:requests removed=1; - statement:requests added=1; - statement:bound removed=1; - statement:bound added=1
+  r2_core only_old=308 only_new=308 other=0 | - hex64-field pairs=4; - statement:row removed=295; - statement:row added=295; - statement:need removed=4; - statement:need added=4; - statement:control-budget removed=1; - statement:control-budget added=1; - statement:input removed=2; - statement:input added=2; - statement:rules removed=1; - statement:rules added=1; - statement:plan-id removed=1; - statement:plan-id added=1
+== relations_keys
+  c1_post_tx only_old=1 only_new=1 other=0 | - rules-line-revision pairs=1
+  c1_pre_tx only_old=1 only_new=1 other=0 | - rules-line-revision pairs=1
+  c5_641 only_old=1 only_new=1 other=0 | - rules-line-revision pairs=1
+  c5_642 only_old=1 only_new=1 other=0 | - rules-line-revision pairs=1
+  r2_core only_old=1 only_new=1 other=0 | - rules-line-revision pairs=1
+== relations_relations
+  c1_post_tx only_old=18 only_new=14 other=0 | - rules-line-revision pairs=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - namespace:publication-writes-of-the-creator removed=4; - namespace:key-parameter-functions removed=2; - namespace:key-parameter-functions added=2; - namespace:uses removed=2; - namespace:uses added=2; - namespace:left-out removed=4; - namespace:left-out added=4; - row:dependency removed=4; - row:dependency added=4
+  c1_pre_tx only_old=18 only_new=14 other=0 | - rules-line-revision pairs=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - namespace:publication-writes-of-the-creator removed=4; - namespace:key-parameter-functions removed=2; - namespace:key-parameter-functions added=2; - namespace:uses removed=2; - namespace:uses added=2; - namespace:left-out removed=4; - namespace:left-out added=4; - row:dependency removed=4; - row:dependency added=4
+  c5_641 only_old=149 only_new=101 other=0 | - rules-line-revision pairs=1; - summary-A removed=1; - summary-A added=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - summary-incomplete removed=1; - summary-incomplete added=1; - namespace:publication-writes-of-the-creator removed=9; - namespace:key-parameter-functions removed=3; - namespace:key-parameter-functions added=3; - namespace:uses removed=3; - namespace:uses added=3; - row:key-clearing added=26; - row:dependency removed=26; - row:dependency added=26; - row:creator removed=13; - row:not-a-pair removed=13; - row:callee-check removed=39; - row:flip removed=13; - row:flip added=13; - row:feasibility removed=13; - row:feasibility added=13; - row:incomplete removed=13; - row:incomplete added=13
+  c5_642 only_old=149 only_new=101 other=0 | - rules-line-revision pairs=1; - summary-A removed=1; - summary-A added=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - summary-incomplete removed=1; - summary-incomplete added=1; - namespace:publication-writes-of-the-creator removed=9; - namespace:key-parameter-functions removed=3; - namespace:key-parameter-functions added=3; - namespace:uses removed=3; - namespace:uses added=3; - row:key-clearing added=26; - row:dependency removed=26; - row:dependency added=26; - row:creator removed=13; - row:not-a-pair removed=13; - row:callee-check removed=39; - row:flip removed=13; - row:flip added=13; - row:feasibility removed=13; - row:feasibility added=13; - row:incomplete removed=13; - row:incomplete added=13
+  r2_core only_old=8 only_new=7 other=0 | - rules-line-revision pairs=1; - summary-A-membership-and-creators removed=1; - summary-A-membership-and-creators added=1; - namespace:publication-writes-of-the-creator removed=1; - namespace:key-parameter-functions removed=1; - namespace:key-parameter-functions added=1; - namespace:uses removed=1; - namespace:uses added=1; - row:dependency removed=3; - row:dependency added=3

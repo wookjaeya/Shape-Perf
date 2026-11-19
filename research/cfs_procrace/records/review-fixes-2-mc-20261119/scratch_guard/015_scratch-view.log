@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-view need=150000000 floor=314572800 interval=2 cmd=bash -c <scratch>/rfb/sbuild/tools/kz-static/kz-static show /home/user/work/redesign/obs1/ll_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz > <scratch>/rfb/v/old_c1_pre_tx.txt && <scratch>/rfb/sbuild/tools/kz-static/kz-static show <scratch>/rfb/x/rf2_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz > <scratch>/rfb/v/new_c1_pre_tx.txt
+start 2026-11-18T10:43:43.723Z free=1044320256 threshold=464572800
+sample 2026-11-18T10:43:43.728Z 1044316160
+end 2026-11-18T10:43:45.735Z kind=scratch-view verdict=completed rc=0 free=956231680 lowest=956231680 dip=88088576 change=-88088576

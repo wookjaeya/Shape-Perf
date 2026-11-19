@@ -1,0 +1,2 @@
+cdiff old_lines=459 new_lines=459 only_old=1 only_new=1 other=0
+class - hex64-field pairs=1

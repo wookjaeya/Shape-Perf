@@ -2364,3 +2364,68 @@ scratch Release 빌드는 kz-static, static_golden, kz_lint, test_static_reasons
   - (7) 나머지 줄의 fixture: `source_tree`, `absence origins`, 위 (3)–(5)
   - (8) scratch 점검 빌드 → 선언 → 사본 → MC 빌드 → 다시 뽑기 → 끝 점검 → 결과 절
 - §15.7 의 key-clearing 이름 문제와 absence origins 의 이름 칸 문제, §12.10 5 항의 PI 결정(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함))은 그대로 남아 있다.
+
+## 17. C1 닫기의 kz-static 한 빌드: 소스 진행분 셋째 (2026-11-19, 선언 전에 멈춤)
+
+§16.6 의 다음 차례 (3)(문맥별 대안 줄과 필드 저장값 규칙)을 형식 덧붙임 → 소스 → scratch 점검의 차례로 넣었다. **선언, 도구 사본, MC 빌드, 다섯 빌드의 선언된 다시 뽑기는 하지 않았다**: 넣을 것이 아직 다 들어가지 않았으므로 §12.10 6 항대로 선언 전에 멈췄다. MC 의 kz-static 은 `bf2ec2ee…` 그대로이고 소스가 그 바이너리보다 더 앞서 있다. 기록: `../records/closure-kzstatic-20261119/`(`scratch3/`, `scratch_guard3/`, `scripts/alt_counts.py`, README). cFS 를 부팅하지 않았고 push 하지 않았다. 아래 수는 모두 기록 디렉터리의 출력 파일에서 왔고, scratch 도구의 수라서 [I] 다.
+
+### 17.1 바뀐 것 [F]
+- 형식 덧붙임 일곱째(`cc0f38b`, 고침 `a5b4c31`, `kairos/docs/static_facts.md` 5x): 4 항을 자세히 정한다. 규칙은 판정 규칙 8.13 의 17 번 그대로다. 이 사실에는 함수의 제어 흐름 그래프가 없다. 그래서 (5)의 경로 조건은 추출이 그 그래프에서 구해 exit·terminal 행의 `chain` 글에 싣는다. (0)–(6)을 사실의 어느 행에서 보는지, 정한 결과로 열린 효과를 닫는 조건, 호출자를 따라 올라가는 걷기(`return-const` 도 따라감), `rests on`·`premises`, 프로그램 전체를 세는 머리 줄을 정한다. 고침은 `toward` 를 "K 를 다시 지나지 않고 효과에 닿는 후속"으로 좁힌다. 그래야 K 위의 고리 몸이 효과로 가는 갈래로 읽히지 않는다.
+- 소스(`6b48311`):
+  - `lib/llvm/ast_fn.cpp`: 저장한 위치의 주소를 받는 호출 K 마다 `chain` 끝에 ` [path from the store at …]` 덩이를 붙인다(`rf_span`, `rf_path_chunk`). S 에서 K 까지 경로 위의 다른 호출 수와 그 위치의 저장 수, S 에서 효과까지의 분기와 그 `toward` 를 담는다. `reason`·`status` 와 다른 행은 바뀌지 않는다. `include/` 는 그대로다.
+  - `lib/llvm/relations.cpp`: `alternatives [context k: …]:` 줄과 머리의 `rules with decided call results:` 줄을 쓴다(`sf_rule`, `sf_closes`, `alt_walk`, `alternatives_lines`, `sf_header`). layers 칸에는 아무것도 더하지 않는다.
+  - `tests/static/fixtures/closure.c`, `tests/static/CMakeLists.txt`(설명): 다음 경우를 더했다.
+    - 줄로는 저장과 호출 사이에 있으나 어느 경로에도 없는 저장(`goto`)이 있는 경우 — 규칙이 정한다.
+    - 줄로는 exit 뒤에 있으나 경로에서는 호출 앞에 오는 저장이 있는 경우 — (5)로 정하지 않는다.
+    - 실패를 다른 상수로 바꿔 돌려주는 틀, 둘째 호출자 문맥, 재시도.
+    - 널 검사가 없는 같은 표의 조회 API. 처음 있던 조회는 앞의 널 검사 때문에 부재 값이 정해지지 않는다.
+- 바꾸지 않은 것: 규칙 개정 이름. 저장소의 golden 도 바꾸지 않았다. 새 golden 은 `scratch3/golden_scratch/`(`closure_np.golden_3`, `resultflow_np.golden`)에만 있고 선언된 빌드에서 커밋한다.
+
+### 17.2 scratch 점검 [I]
+scratch Release 빌드는 kz-static, static_golden, kz_lint, test_static_reasons 이고, 모두 감시 아래에서 돌렸다(`scratch_guard3/u01`–`u08`). 다섯 빌드는 scratch 도구로 `run.sh extract_final` 한 번(`u05`, rc 0)으로 다시 뽑았다. facts sha256 은 `scratch3/facts_scratch_sha256.txt` 에 있다.
+
+| 점검 | 결과 | 출력 |
+|---|---|---|
+| fixture 의 대안 줄 | runner: `none found (exploration complete)`, `decided calls: run_loop … result 0 by the stored-field rule (store …:229:5 := 3)`, `rests on: P0-unverified(exit)`. 둘째 문맥(cmd): 스레드 뿌리까지 돌아가 `none found`. runner2: (5)로 정하지 않음(`stores of field:RunState.mode 1 (first 238:3)`, 줄로는 exit 뒤). waiter: `found: retry`. 처음 조회 셋: `absence value is not evaluated`. 머리: 주소 넘김 3(호출 자리 2), 정함 2, 정한 호출 자리 1(행 1) | `scratch3/golden_scratch/closure_np.golden_3` |
+| golden·fixture 컴파일·lint 68 | 실패 5: order golden 셋(§15.3), `resultflow_np`(facts 의 `chain` 덩이 하나만 다름, `resultflow_np.golden` 과 diff 한 줄), `closure_np`(저장소에 golden 없음). lint 8 통과 | `scratch3/logs/ctest_golden_lint_3.log` |
+| relations 글(다섯 빌드, 다시 뽑은 사실) | `rf2_final_order` 와 비교해 없어진 줄은 `facts` 줄 하나뿐. 더한 줄 166/165/89/159/159(도구 줄, 개정 14 의 줄들) | `scratch3/relations_text_diff.txt` |
+| 머리의 필드 저장값 규칙(c1_pre_tx/c1_post_tx/r2/c5_641/c5_642) | 주소 넘김 72/72/0/0/0(호출 자리 2/2/0/0/0), **정함 0**. 정하지 않은 까닭(C1 두 빌드 같음): (5)·(6)이 전제 66, 저장이 값이 정하지 않는 경로 위 2, 저장한 위치가 필드가 아님 4 | `scratch3/alternatives/header_<b>.txt` |
+| 열린 효과의 까닭 종류 | branch not decided 6,812/6,817/4,176/4,150/4,157; outcome not enumerated 3,857/3,857/2,771/1,929/1,929; address passed 72/72/0/0/0; other 2,398/2,398/1,884/984/984 | 같은 파일 |
+| 대안 줄 | 줄이 있는 행 63/63/25/66/66, 줄 65/64/26/66/66. `none found` 3/3/3/0/0. found(retry 또는 같은 함수의 생성; 모두 정해지지 않은 문맥과 함께) 5/6/2/0/0. not established: 부재 값 없음 24/24/8/43/43, 열린 효과 17/16/7/19/19, 효과가 돌아가는 함수에서 끝남 9/8/1/4/4, 그 지점에 그 값의 RESULT_EFFECT 행 없음 7/7/5/0/0. 전제가 적힌 줄 1/0/0/0/0, 정한 호출이 있는 줄 0 | `scratch3/alternatives/counts_<b>.txt`, `lines_<b>.txt` |
+
+### 17.3 대안 줄이 보인 것 [I]
+- **결함 빌드의 관계 1(A21), 초기화 문맥에서 규칙이 결과를 정하지 않는다.**
+  - (5)는 경로로 선다. 저장 `cf_app.c:333` 에서 `CFE_ES_RunLoop`(`cf_app.c:338:12`)까지 다른 호출 0, 저장 0 이다.
+  - (6)이 서지 않는다. 판정 규칙 17 번은 X 의 writer 집합이 **필드 단위와 형 단위 모두** 완전하기를 요구한다. 그런데 `CF_AppData_t.run_status` 는 per-field=writer-set-complete, type-level=DISABLED 다. 그래서 줄은 `not established (open: exit-app at cf_app.c:366:5 …)` 이고 `premises: (6) the writer set of CF_AppData_t.run_status is complete under both rules (…type-level=DISABLED)` 다.
+  - §12.10 4 항의 [예비] 읽기("(c3)(iii): 초기화 문맥에서는 대안이 없음을 보일 수 있다")는 이 규칙 글로는 도구 줄이 되지 않는다. 탐침 P1 은 필드 단위 상태만 보았다(`p1_alternatives.py` 의 `pf[0] == "writer-set-complete"`). **도구 줄과 탐침의 차이는 이 규칙 차이 하나다.**
+  - 규칙을 그 행에 맞춰 풀지 않았다. 형 단위 조건을 빼는 것은 판정 규칙의 글을 바꾸는 일이라, lead 또는 PI 의 판단을 기다린다(17.5).
+- 같은 행의 둘째 문맥(`CF_CmdEnableEngine@cf_cmd.c:1119:13`)은 탐침과 같다: `not established (the value's effects end in CF_CmdEnableEngine and it returns to its caller: direct callers 0, called through a function pointer: yes)`.
+- 탐침 행 A20(두 빌드): `found: creation in the same name space and partition by the same function (bp_flow.c:132:18 -> OS_CountSemCreate …); retry (… open)`. 탐침과 같은 두 항목이다. 다만 도구 줄은 그 틀의 열린 event-send 둘을 `[not established (…)]` 로 함께 적는다.
+- 고친 빌드의 A21: `found: retry (cf_cfdp.c:1003:23 …)` 이고, 문맥은 하나다. 첫 틀에 열린 `return-result`(`cf_cfdp.c:1053`)가 있으면 도구는 거기서 그 문맥을 끝낸다(17.5). 탐침은 반환을 따라 문맥 둘을 냈다.
+- 시간 기준 대조 행: 탐침이 따라가지 않았던 `return-const` 틀을 도구는 따라간다.
+  - A22: `SCH_Lab_AppMain` 의 열린 exit-app 에서 `not established`.
+  - A26: `CFE_TIME_TaskMain` 의 호출에 값 0 의 RESULT_EFFECT 행이 없어 `not established`.
+- 다섯 빌드 어디에서도 규칙이 정한 호출 자리는 0 이다. 모집단은 C1 의 호출 자리 둘이고, 그 가운데 하나가 `CFE_ES_RunLoop` 의 자리다(전제 66 을 가진 덩이, 17.3). 다른 자리가 머리의 "저장한 위치가 필드가 아님 4"·"값이 정하지 않는 경로 2"의 덩이인지는 이 실행에서 따로 보지 않았다 [미확인]. 앞 탐침의 모집단(`probes/out/open_reason_population.txt`: 필드의 주소를 넘기는 자리 1/1/0/0/0)과 함께 읽으면, 규칙이 필드에 적용되는 자리는 하나다. 이 결과를 설계 행 밖의 진술에 쓰지 않는다.
+
+### 17.4 공간 [M]
+- 시작: 1,219,821,568 B(`free_start_attempt3.txt`, 03:31Z).
+- 감시 기록의 가장 낮은 값: 924,598,272 B(`scratch_guard3/`).
+- 크기: scratch 빌드 tree 203 MB, 다시 뽑은 다섯 빌드 70 MB, relations 출력 7.8 MB.
+- scratch 를 모두 지운 뒤: 1,218,379,776 B(`free_end_attempt3.txt`, 03:41Z).
+- 압축 대체는 쓰지 않았다.
+
+### 17.5 계획과 다르게 한 것, 열린 것
+- **(5)를 추출에서 구한다.** 이 사실에는 함수의 제어 흐름이 없다. 그래서 경로 조건은 추출이 CFG 에서 구해 RESULT_EFFECT 의 `chain` 글에 싣는다. 선언된 빌드에서 다섯 빌드의 facts 가 이 글만큼 바뀐다: RESULT_EFFECT 의 글과 STRINGS. fixture 에서는 `resultflow_np` 의 한 줄이다. 열린 행의 `chain` 은 어느 출력 줄도 인쇄하지 않으므로 relations·order·plan 의 있는 줄은 바뀌지 않는다(17.2).
+- **(6)의 형 단위 조건이 설계 행을 막는다.** 위 17.3. 규칙 17 번의 글을 그대로 썼다. 읽는 방법은 lead 의 판단을 기다린다. 필드 단위만으로 읽는 것도 갈래로 둘 수 있다. 다만 그것은 판정 규칙의 덧붙임이고, 부팅 전에 커밋해야 한다.
+- **열린 효과가 있는 틀에서 문맥을 끝낸다.** 그 틀의 반환을 따라 올라가지 않는다. 그 문맥의 결론은 어차피 `not established` 다. 그래서 고친 빌드의 A21 은 문맥이 하나다. 덧붙임 일곱째의 "닫히지 않은 열린 행이 있으면 `not established`"를 그대로 따른 것이다.
+- 경로 B 행에는 이 줄이 없다(부재 값이 없음; 덧붙임에 적음).
+- 열린 효과의 까닭 가운데 `other`(C1 에서 2,398)가 무엇인지는 보지 않았다 [미확인].
+- test_static_reasons 는 이번 scratch 에서 돌리지 않았다(새 golden 을 저장소 자료 디렉터리에 놓지 않았기 때문).
+- 선언의 첫 ctest 실패 목록에 `static_golden_resultflow_np` 가 더해진다. 지금까지는 order golden 셋과 `static_golden_closure_np` 였다.
+- §16.6 의 다음 차례 가운데 남은 것:
+  - (4) 저장된 이름 버퍼 줄과 수명 끝 줄. 탐침 P3 의 출력(`probes/out/p3_buffer_writers_c1_pre_tx.txt`)에서 이름 버퍼 열하나는 모두 per-field·type-level DISABLED 이고, 깃발은 `address-escape` 다. 그 출력이 적은 FIELD_STATUS 깃발마다 원소 저장·decay·형 없는 쓰기가 풀리는지 scratch 출력으로 정해야 한다. 그다음 줄을 쓴다.
+  - (5) 계획 규칙 개정 5.
+  - (6) 개정 이름 바꾸기.
+  - (7) 나머지 줄의 fixture(`source_tree`, `absence origins`, (4)·(5)).
+  - (8) scratch 점검 빌드 → 선언 → 사본 → MC 빌드 → 다시 뽑기 → 끝 점검 → 결과 절.
+- §15.7 의 key-clearing 이름 문제, absence origins 의 이름 칸 문제, §12.10 5 항의 PI 결정(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함))은 그대로 남아 있다.

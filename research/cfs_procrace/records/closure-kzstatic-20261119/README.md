@@ -30,3 +30,16 @@ Second run (2026-11-19, results section 16; the MC tool is still `bf2ec2ee…`):
 | `scratch2/golden_scratch/` | the golden of the new fixture case `closure_np`: `closure_np.golden` (with the success path line only) and `closure_np.golden_2` (with the holder cases too; the one to commit with the declared build) |
 | `scratch2/logs/` | ctest logs of the scratch build: the goldens, fixture compiles and lint (`ctest_golden_lint_2.log`: 3 failures, the order goldens), the reasons test |
 | `scripts/holder_counts.py` | counts of the holder lines of a relations text (a check, not a tool of the method) |
+
+Third run (2026-11-19, results section 17; the MC tool is still `bf2ec2ee…`):
+
+| Path | Content |
+|---|---|
+| `free_start_attempt3.txt`, `free_end_attempt3.txt` | free space at the start and the end of the third run (the end after its scratch was removed) |
+| `scratch_guard3/` | the guard logs of the third run's scratch build, re-extraction of the five builds, relations runs and ctest (`u01`-`u08`) |
+| `scratch3/facts_scratch_sha256.txt` | sha256 and size of the five builds' facts re-extracted by the scratch tool (removed after the run) |
+| `scratch3/alternatives/` | the alternatives lines of the scratch tool over the five re-extracted builds (`lines_<b>.txt`: row id, line), the header line of the stored-field rule (`header_<b>.txt`) and the counts (`counts_<b>.txt`, by `scripts/alt_counts.py`) |
+| `scratch3/relations_text_diff.txt` | the scratch relations texts against `rf2_final_order`: lines gone (only the facts line) and lines added |
+| `scratch3/golden_scratch/` | `closure_np.golden_3` (the new fixture cases) and `resultflow_np.golden` (one chain chunk more): to commit with the declared build |
+| `scratch3/logs/ctest_golden_lint_3.log` | goldens, fixture compiles and lint of the scratch build: 5 failures (the three order goldens, resultflow_np, closure_np) |
+| `scripts/alt_counts.py` | counts of the alternatives lines of a relations text (a check, not a tool of the method) |

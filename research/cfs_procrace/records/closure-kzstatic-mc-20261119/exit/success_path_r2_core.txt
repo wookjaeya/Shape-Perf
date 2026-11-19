@@ -1,0 +1,5 @@
+summary success path: creator callees 12: held 0; missing 12 (no out-id store on a carrying path 2; the stored value is not tied to the success path 3; an implication between conditions is not decided 7)
+# per creator callee (the namespace-block lines), by state:
+      8 missing(an implication between conditions is not decided)
+      2 missing(no out-id store on a carrying path)
+      3 missing(the stored value is not tied to the success path)

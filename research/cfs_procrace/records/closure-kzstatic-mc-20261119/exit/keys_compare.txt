@@ -1,0 +1,17 @@
+c1_pre_tx: rows old 367 new 367; rows whose key text moved 3; rows only in one 0
+  A20 35f07539e7606e2e A|OS_common_record_t.name_entry|initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1 -> bb0951052e63f1bc A|OS_common_record_t.name_entry|initialize_throttling@<bp>/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+  A27 bc5b8f661dacf8e0 A|OS_filesys_internal_record_t.virtual_mountpt|AppInit@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c|BP_FlowLoad#0|1 -> c025f98401a2b54f A|OS_filesys_internal_record_t.virtual_mountpt|AppInit@<bp>/fsw/src/bp_app.c|BP_FlowLoad#0|1
+  A30 860bfe0ec713c4b9 A|OS_filesys_internal_record_t.virtual_mountpt|CF_CFDP_ProcessPollingDirectories|CF_CFDP_PlaybackDir_Initiate@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c#1|1 -> f2384cdd5b46b3ac A|OS_filesys_internal_record_t.virtual_mountpt|CF_CFDP_ProcessPollingDirectories|CF_CFDP_PlaybackDir_Initiate@<cf>/fsw/src/cf_cfdp.c#1|1
+  keys shared by different texts (new): 0
+c1_post_tx: rows old 367 new 367; rows whose key text moved 3; rows only in one 0
+  A20 bdcc6978b9a41c8c A|OS_common_record_t.name_entry|initialize_throttling@/home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1 -> bb0951052e63f1bc A|OS_common_record_t.name_entry|initialize_throttling@<bp>/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+  A27 a0b994d463e3fcd4 A|OS_filesys_internal_record_t.virtual_mountpt|AppInit@/home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_app.c|BP_FlowLoad#0|1 -> c025f98401a2b54f A|OS_filesys_internal_record_t.virtual_mountpt|AppInit@<bp>/fsw/src/bp_app.c|BP_FlowLoad#0|1
+  A30 4e6704577032ef8b A|OS_filesys_internal_record_t.virtual_mountpt|CF_CFDP_ProcessPollingDirectories|CF_CFDP_PlaybackDir_Initiate@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c#1|1 -> f2384cdd5b46b3ac A|OS_filesys_internal_record_t.virtual_mountpt|CF_CFDP_ProcessPollingDirectories|CF_CFDP_PlaybackDir_Initiate@<cf>/fsw/src/cf_cfdp.c#1|1
+  keys shared by different texts (new): 0
+r2_core: rows old 295 new 295; rows whose key text moved 0; rows only in one 0
+  keys shared by different texts (new): 0
+c5_641: rows old 172 new 172; rows whose key text moved 0; rows only in one 0
+  keys shared by different texts (new): 0
+c5_642: rows old 169 new 169; rows whose key text moved 0; rows only in one 0
+  keys shared by different texts (new): 0
+c1_pre_tx against c1_post_tx: rows with the same id 367; equal key texts 367 of 367; equal key sets: True

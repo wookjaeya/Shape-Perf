@@ -1,0 +1,32 @@
+diffkinds old_lines=3741 new_lines=4038 only_old=0 only_new=297 labels=31
+label removed=0 added=1 0|tool kz-static
+label removed=0 added=1 0|rules with object access
+label removed=0 added=1 0|summary success path
+label removed=0 added=1 0|rules with decided call results
+label removed=0 added=1 0|summary stored-name
+label removed=0 added=31 6|success path
+label removed=0 added=79 6|writers [..]
+label removed=0 added=38 6|lifetime end [..]
+label removed=0 added=18 6|holder
+label removed=0 added=23 6|absence origins
+label removed=0 added=66 6|alternatives [..]
+label removed=0 added=15 8|callee-check (success path)
+label removed=0 added=1 6|writers [..] of CFE_ES_CDS_RegRec_t.Name
+label removed=0 added=2 6|callee-check (success path)
+label removed=0 added=1 6|writers [..] of CFE_ES_GenCounterRecord_t.CounterName
+label removed=0 added=1 6|writers [..] of CFE_ES_TaskRecord_t.AppId
+label removed=0 added=1 6|writers [..] of CFE_SB_PipeD_t.PipeId
+label removed=0 added=3 6|lifetime end
+label removed=0 added=1 6|writers [..] of CFE_TBL_RegistryRec_t.OwnerAppId
+label removed=0 added=1 6|writers [..] of CFE_TIME_SynchCallbackRegEntry_t.App
+label removed=0 added=1 6|writers [..] of CFE_TIME_SynchCallbackRegEntry_t.Ptr
+label removed=0 added=1 6|writers [..] of OS_FDTableEntry.Path
+label removed=0 added=1 6|writers [..] of OS_VolumeInfo_t.DeviceName
+label removed=0 added=1 6|writers [..] of OS_VolumeInfo_t.MountPoint
+label removed=0 added=1 6|writers [..] of OS_bin_sem_record_t.name
+label removed=0 added=1 6|writers [..] of OS_count_sem_record_t.name
+label removed=0 added=1 6|writers [..] of OS_module_record_t.name
+label removed=0 added=1 6|writers [..] of OS_mut_sem_record_t.name
+label removed=0 added=1 6|writers [..] of OS_queue_record_t.name
+label removed=0 added=1 6|writers [..] of OS_task_record_t.name
+label removed=0 added=1 6|writers [..] of OS_timer_record_t.name

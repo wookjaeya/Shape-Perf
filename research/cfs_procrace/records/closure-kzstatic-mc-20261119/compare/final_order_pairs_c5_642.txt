@@ -1,0 +1,25 @@
+lines 5230 bytes 1344266 sha256 f0ff2d4e7e42f6c4ac15c2794b2984d42da96c7b8b9ab0e99b957b54606e6130
+kz-order-pairs 1
+facts <masked>
+tool kz-static <masked>
+relations rules relations rules revision 12 (2026-11-18); rules with lock handles: relations rules revision 11 (2026-11-16), over LOCK_HANDLES (extract --lock-handles, docs/static_facts.md 5v): 0 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 0, not-static 0, of them no handle found 0); path C rows whose common lock is identified by its handle 0, of them with a static-instance handle 0; rules with result flow: relations rules revision 13 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): 5694 rows (uses: branch 996, return 229, argument 589, store 140, other 233, none 1495; guard rows 2012); calls with a result 2683; 6867 rows (open 4667; event send 589, application exit 0, terminal 165; calls on the paths that are none of these, no row: 4562); calls explored 902, outcomes 2494; rules with object access: relations rules revision 14 (2026-11-19), over OBJECT_ACCESS (extract --object-access, docs/static_facts.md 5x): key texts by source tree 0 (BASIS source_tree items); with RESULT_FLOW and RESULT_EFFECT: the success path, absence origins, holder, alternatives, stored-name buffer and lifetime-end lines; rules with decided call results: relations rules revision 14 (the stored-field rule, judgement rules 8.13 item 17): open effects by reason: branch not decided by the value 4157; other 984; outcome not enumerated 1929; address-passing calls on stored-location paths 0 (call sites 0): decided 0; not decided: none; call sites decided by the stored-field rule 0 (rows 0)
+order order rules revision 8 (2026-11-19): the complete pair file; order rules revision 5 (2026-11-18); rules with result flow: order rules revision 6 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects 8; caller-side uses of waits 0, HB-await edges to them 0; rules with loop definitions and lock handles: order rules revision 7 (2026-11-18), over LOOP_DEFS and LOCK_HANDLES (extract --loop-defs, --lock-handles, docs/static_facts.md 5v): waits with a predicate through local definitions 0; caller-side budget values through a flag 0; HB-lock edges whose lock is identified by its handle 0
+domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B and C); a pair in one thread has the value same_thread
+columns row_key	path	use_pos	use_function	use_root	other_kind	other_pos	other_function	other_root	value	edges	premises	row_line
+rows 169 pairs 5149 hard_before 195 conditional_before 0 fixed_early_proved 1 fixed_early_candidate 0 unordered 4019 unknown 84 same_thread 850 no_pair 58 edges_not_in_tsv 14
+end
+value-counts:
+58	-	no_pair
+2	CI_Lab_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+2	SAMPLE_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+4	SCH_Lab_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+4	TO_Lab_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+4	creator	unknown
+18	creator-not-a-pair(same actor only)	same_thread
+2	main (process)	program order of one thread: the event is inside the call 
+1	other_kind	value
+1	writer	fixed_early_proved
+195	writer	hard_before
+832	writer	same_thread
+80	writer	unknown
+4019	writer	unordered

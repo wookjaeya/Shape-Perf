@@ -1,0 +1,8 @@
+diffkinds old_lines=208 new_lines=268 only_old=39 only_new=99 labels=7
+label removed=1 added=1 0|# kz plan written by kz-static plan (plan rules revision N (N-N-N)
+label removed=1 added=1 0|# sidecar
+label removed=1 added=1 0|plan H
+label removed=1 added=1 0|source build
+label removed=11 added=25 0|site N
+label removed=20 added=54 0|value N
+label removed=4 added=16 0|need N

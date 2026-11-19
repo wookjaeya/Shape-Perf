@@ -1,0 +1,6 @@
+# space_guard.sh kind=check need=20000000 floor=314572800 interval=2 cmd=bash -c bash env/tools/ledger_check.sh > records/closure-kzstatic-mc-20261119/ledger_check_end.txt 2>&1
+start 2026-11-19T06:28:20.624Z free=832552960 threshold=334572800
+sample 2026-11-19T06:28:20.627Z 832548864
+sample 2026-11-19T06:28:22.633Z 832540672
+sample 2026-11-19T06:28:24.638Z 832532480
+end 2026-11-19T06:28:26.644Z kind=check verdict=completed rc=0 free=832532480 lowest=832532480 dip=20480 change=-20480

@@ -1,0 +1,5 @@
+# space_guard.sh kind=run-plans_t8cf need=30000000 floor=314572800 interval=2 cmd=bash -c bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/run.sh plans_t8cf > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/run_plans_t8cf.txt 2>&1
+start 2026-11-19T06:25:29.747Z free=741990400 threshold=344572800
+sample 2026-11-19T06:25:29.755Z 741986304
+sample 2026-11-19T06:25:31.761Z 741142528
+end 2026-11-19T06:25:33.768Z kind=run-plans_t8cf verdict=completed rc=0 free=741003264 lowest=741003264 dip=987136 change=-987136

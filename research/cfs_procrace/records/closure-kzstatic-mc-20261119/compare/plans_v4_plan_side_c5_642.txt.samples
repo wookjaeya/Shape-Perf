@@ -1,0 +1,16 @@
+- 0|generator tool=kz-static	generator tool=kz-static tool_sha256=73c3491cead05ce1f4f6adb999970a41e680569182848a644646fca65613ecff tool_source=2b8834da4c83efe08b12d090bf2db4b269edf14d67fac0b8da25cc3ef012c13b core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
++ 0|generator tool=kz-static	generator tool=kz-static tool_sha256=36e0299521014b926b2f7d2bf6784b5b4ec97a929ff67799a34f72d610509eb5 tool_source=3b89477d1e4fe817d172d12fa839005f3f598e39143a21ff0fb3120279be972c core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+- 0|input facts	input facts sha256=d2eb9875e9eead7932b1040b39f9290ca32d03e811f5265f1bc38a6270850d20 path=/home/user/work/redesign/obs1/rf2_final_extract/c5_642/c5_642/NP/facts.kz
++ 0|input facts	input facts sha256=bf0da400558b2a037547ebb66b0c8c1d1adf54d031fc2448eb9335c7b422e1e6 path=/home/user/work/redesign/obs1/cz_final_extract/c5_642/c5_642/NP/facts.kz
+- 0|input basis	input basis sha256=f301ec70b7148775af89841d3d972d4bb17e1f51342bc661e5356f48b2eda7d6 path=/home/user/work/redesign/obs1/rf2_final_extract/c5_642/c5_642/NP/basis.kz
++ 0|input basis	input basis sha256=407ea604958089f205bb4920d68d876a82baa7a2226c1bd6377fba7ec0794bdd path=/home/user/work/redesign/obs1/cz_final_extract/c5_642/c5_642/NP/basis.kz
+- 0|facts-artifact H	facts-artifact d2eb9875e9eead7932b1040b39f9290ca32d03e811f5265f1bc38a6270850d20
++ 0|facts-artifact H	facts-artifact bf0da400558b2a037547ebb66b0c8c1d1adf54d031fc2448eb9335c7b422e1e6
+- 0|basis-artifact H	basis-artifact f301ec70b7148775af89841d3d972d4bb17e1f51342bc661e5356f48b2eda7d6
++ 0|basis-artifact H	basis-artifact 407ea604958089f205bb4920d68d876a82baa7a2226c1bd6377fba7ec0794bdd
+- 0|rules plan rules revision N (N-N-N)	rules plan rules revision 4 (2026-11-18): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; relations rules revision 12 (2026-11-18)
++ 0|rules plan rules revision N (N-N-N)	rules plan rules revision 5 (2026-11-19): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; with the name-space files of coverage rule revision 2: the namespace-entry and namespace-layer lines, the kind-
+- 0|plan-id H	plan-id 4beec09e6c685609
++ 0|plan-id H	plan-id 2df37d77fa24a126
+- 0|requests shaN=H	requests sha256=8b3134d6960882bbc4986a3c660aa3cca0442df35807da2efb460526dd2b36e7 file=plan.req rows=2 requests=18 planned=16
++ 0|requests shaN=H	requests sha256=dc3adf3c7078b5a7c3d5bd6c99747756464a71871da9d151dfb7cc56765c5755 file=plan.req rows=2 requests=18 planned=16

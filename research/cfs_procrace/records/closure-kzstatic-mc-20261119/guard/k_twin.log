@@ -1,0 +1,5 @@
+# space_guard.sh kind=compare-twin need=30000000 floor=314572800 interval=2 cmd=bash -c TWIN_SCRATCH=<scratch>/kz6 bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/compare.sh twin > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/compare_twin.txt 2>&1
+start 2026-11-19T06:26:46.373Z free=735653888 threshold=344572800
+sample 2026-11-19T06:26:46.377Z 735649792
+sample 2026-11-19T06:26:48.383Z 735649792
+end 2026-11-19T06:26:50.390Z kind=compare-twin verdict=completed rc=0 free=735633408 lowest=735633408 dip=20480 change=-20480

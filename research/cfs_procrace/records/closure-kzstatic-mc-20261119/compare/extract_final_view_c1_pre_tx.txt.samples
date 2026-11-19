@@ -1,0 +1,10 @@
+- 0|[..] N	[basis] 515
++ 0|[..] N	[basis] 518
++ 2|source_tree[..]	  source_tree[0] = /home/user/work/procrace/c1_build/pre/src/bp <bp>  (unset)
++ 2|source_tree[..]	  source_tree[1] = /home/user/work/procrace/c1_build/pre/src/bplib <bplib>  (unset)
+- 2|extract.units_from	  extract.units_from = basis ef87126efb90fce0  (unset)
++ 2|extract.units_from	  extract.units_from = basis 09606e23af3902f0  (unset)
+- 6|chain	      chain: call AppInit at 812:9 -> value 0 -> branches decided by it at 812:9 -> 844:5 (the store at 814:9 of local:run_status := CFE_ES_RunStatus_APP_RUN is its argument)
+- 6|chain	      chain: call CFE_SB_ReceiveBuffer at 822:25 -> def sb_rcv_result at 822:23 -> value 3388997634 -> branches decided by it at 826:13, 830:18 -> 844:5 (the store at 834:13 of local:run_status := CFE_ES_RunStatus_APP_ERROR is its argument)
++ 6|chain	      chain: call AppInit at 812:9 -> value 0 -> branches decided by it at 812:9 -> 844:5 (the store at 814:9 of local:run_status := CFE_ES_RunStatus_APP_RUN is its argument) [path from the store at 814:9: value constant 1; to CFE_ES_RunLoop at 818:12 argument 0: other calls 0, stores of local:run_status 0; to the effect at 844:5: branches 818:12 reads the result of the call at 818:12 toward false
++ 6|chain	      chain: call CFE_SB_ReceiveBuffer at 822:25 -> def sb_rcv_result at 822:23 -> value 3388997634 -> branches decided by it at 826:13, 830:18 -> 844:5 (the store at 834:13 of local:run_status := CFE_ES_RunStatus_APP_ERROR is its argument) [path from the store at 834:13: value constant 3; to CFE_ES_RunLoop at 818:12 argument 0: other calls 0, stores of local:run_status 0; to the effect at 844:5: 

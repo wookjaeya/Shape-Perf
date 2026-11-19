@@ -1,0 +1,7 @@
+lines 39
+# by number of origins:
+     32 : 1 origin(s)
+      7 : 2 origin(s)
+# origins by class:
+      7 [other]
+     39 [search no-match]

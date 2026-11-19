@@ -1,0 +1,6 @@
+# space_guard.sh kind=exit-pairs need=150000000 floor=314572800 interval=2 cmd=bash -c SCRATCH=<scratch>/czexit bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/exit_checks.sh pairs > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/exit_pairs.log 2>&1
+start 2026-11-19T06:26:59.563Z free=833269760 threshold=464572800
+sample 2026-11-19T06:26:59.567Z 833265664
+sample 2026-11-19T06:27:01.574Z 833261568
+sample 2026-11-19T06:27:03.580Z 833253376
+end 2026-11-19T06:27:05.587Z kind=exit-pairs verdict=completed rc=0 free=833224704 lowest=833224704 dip=45056 change=-45056

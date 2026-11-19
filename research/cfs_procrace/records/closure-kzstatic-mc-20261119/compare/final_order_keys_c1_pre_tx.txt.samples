@@ -1,0 +1,5 @@
++ 0|rules with object access	rules with object access: relations rules revision 14 (2026-11-19), over OBJECT_ACCESS (extract --object-access, docs/static_facts.md 5x): key texts by source tree 3 (BASIS source_tree items); with RESULT_FLOW and RESULT_EFFECT: the success path, absence origins, holder, alternatives, stored-name buffer and lifetime-end lines
+- 0|<row> H	A20 35f07539e7606e2e A|OS_common_record_t.name_entry|initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+- 0|<row> H	A27 bc5b8f661dacf8e0 A|OS_filesys_internal_record_t.virtual_mountpt|AppInit@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c|BP_FlowLoad#0|1
++ 0|<row> H	A20 bb0951052e63f1bc A|OS_common_record_t.name_entry|initialize_throttling@<bp>/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
++ 0|<row> H	A27 c025f98401a2b54f A|OS_filesys_internal_record_t.virtual_mountpt|AppInit@<bp>/fsw/src/bp_app.c|BP_FlowLoad#0|1

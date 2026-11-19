@@ -1,0 +1,2 @@
+OK declared reports match declared_reports.sha256
+summary declared reports 260, the same bytes 260

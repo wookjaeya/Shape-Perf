@@ -2814,3 +2814,109 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - `test_static_reasons` 는 자료 디렉터리의 `.golden` 파일을 모두 읽는다. relations golden 의 행마다 `incomplete:` 줄의 까닭이 표에 있는지 확인한다(`kairos/tests/static/test_static_reasons.cpp:105-138`). 그래서 확인 수는 자료 디렉터리의 golden 에 따라 달라진다.
 - 선언의 771 은 scratch 점검 빌드의 **첫** ctest 의 수다. 그때 자료 디렉터리에는 HEAD 의 golden 만 있었고 새 `closure_np.golden` 은 없었다. 같은 점검 빌드가 갱신한 golden 일곱을 둔 scratch 자료 디렉터리에서 돌린 수는 804 다(`../records/closure-kzstatic-20261119/scratch6/checkbuild/logs/cb_golden_scratchdata.log`). 이 빌드의 첫 ctest 도 771 이었다(`ctest_first.log`). 그러므로 선언이 golden 갱신 뒤의 수로 잘못 옮겨 적은 것이다. 도구의 차이가 아니다.
 - **덧붙임**: golden 갱신 뒤 `test_static_reasons` 의 확인 수는 804 다. 첫 ctest 에서는 771 이다. 그 밖의 (마)는 그대로다.
+
+### 21.1 바뀐 것 [F]
+- 커밋: 선언 `4bef01f`(21.0 (가)–(자)), 덧붙임 `44b65bf`(21.0 (차)), 빌드와 빌드 뒤 점검 `5d2b3c3`, 실행·비교·끝 점검과 이 절은 그 뒤 커밋이다.
+- 저장소에서 바뀐 것:
+  - golden 일곱(`kairos/tests/static/data/`): `order_np`, `resultflow_np`, `resultflow_order_np`, `looplock_order_np`, `planv4_np.plan` 은 바뀌었고 `closure_np`, `planv5_np.plan` 은 새로 생겼다.
+  - `records/TOOLS.tsv`: `bf2ec2ee` 행은 in-place → in-place+copy → copy 로 바뀌었고, 새 행 `6f40dd60` 이 생겼다.
+  - `records/LEDGER.tsv`: 행 열하나가 생겼다(`TOOLS_20261119_B`, `OBS_cz_*` 열).
+  - 기록 디렉터리와 이 절.
+- `kairos/` 의 소스는 바꾸지 않았다. 빌드한 소스는 `aa8968f` 의 `kairos/` 와 같다(21.0 (나)).
+
+### 21.2 빌드 [M]
+- 사본: `/home/user/work/preserve/tools-20261119-b/kz-static.bf2ec2ee.xz`(47,808,316 B, sha256 `698d4d06…`). `xz -t` OK 이고, 푼 스트림의 sha256 과 `cmp` 가 제자리 파일과 같다(`tool_copy/ROUNDTRIP.txt`, 감시 `guard/b01_tool_copy.log`).
+- `make kz-static`, `make all`: 모두 감시 아래에서 rc 0 이다(`make_kz-static.log`, `make_all.log`, `guard/b02`·`b03`).
+- 새 kz-static 의 파일 sha256 은 `6f40dd60b29bb6bdf9b38f0a1a8c6e6159e8b448941ff66da06e8f363db10a5b` 다(222,216,240 B). `--identity` 는 `tool_sha256=36e02995…`, `tool_source=3b89477d…` 로 선언과 scratch 점검 빌드의 값 그대로다. `core_source`·스키마 12·`schema_fingerprint` 도 그대로다(`identity_kz-static.txt`).
+- relink(`relink_result.txt`): 다시 링크될 수 있는 14 가 모두 바뀌었다. 다시 링크되지 않아야 할 110 은 모두 같은 sha256 이고, `CMakeCache.txt` 도 같다. 다른 도구 여섯의 파일 sha256 도 같다. 정체성이 바뀐 도구는 kz-static 하나다. 다시 구성으로 시험은 271 이 되었다.
+
+### 21.3 시험 [M]
+| 시험 | 결과 | 출력 |
+|---|---|---|
+| 첫 ctest(271, `-V`) | 실패 6. 이름이 선언과 같다: `static_golden_{order_np,resultflow_np,resultflow_order_np,looplock_order_np,closure_np}`, `test_static_plan`(389 가운데 2: planv4·planv5 의 plan golden). 건너뜀 1 | `ctest_first.log`, `ctest_first_check.txt`(`FIRST_CTEST_FAILURES_AS_DECLARED`) |
+| golden 갱신(`KZ_GOLDEN_UPDATE=1`, 여섯 시험) | 6/6 통과. 바뀐 golden 일곱이 scratch 사본과 모두 같은 바이트다. `kairos/` 에서 바뀐 것은 이 일곱뿐이다. `plangen_np.plan.golden` 은 다시 쓰였지만 같은 바이트다 | `golden_update.log`, `golden_cmp.txt`, `golden_git_status.txt` |
+| 전체 ctest | 271 가운데 실패 0, 건너뜀 1(`test_probe_anchor_reached`). `test_static_reasons` 804 는 선언 밖이었다. 21.0 (차)를 커밋한 뒤 다시 돌렸다 | `ctest_full.log`, `ctest_full_2.log` |
+| 확인 수(`ctest_counts_2.txt`) | `test_static_cli` 1,217, `test_static_reasons` 804, `test_static_plan` 389, `test_core_schema` 34,017, lint selftest 114 경우 실패 0, lint 규칙 일곱 clean | |
+| 단위 점검 | `run_unit.sh` 17/17, `step2a_tests_unit.sh` 7/7 | `unit_tools.txt`, `unit_step2a.txt` |
+| 누적 바이트 동일성, 빌드 뒤 | `ledger_check` 148 행 실패 0, `tools_check --deep` 51 행 실패 0 | `ledger_check_after_build.txt`, `tools_check_after_build.txt` |
+| 누적 바이트 동일성, 끝 | `ledger_check` 158 행 실패 0, `tools_check --deep` 51 행 실패 0 | `ledger_check_end.txt`, `tools_check_end.txt` |
+
+- 두 전체 ctest 사이에 `test_probe_observe` 의 확인 수가 3,334 → 3,342 로 달랐다. 그 바이너리는 다시 링크되지 않는 110 가운데 하나다(sha256 같음). 앞 기록에도 같은 시험의 수로 3,334, 3,342, 3,350 이 있다(`records/*/ctest*`). 그러므로 실행마다 달라지는 수로 읽는다 [미확인: 그 시험의 코드에서 까닭을 따라가지 않음]. 도구 정체성의 차이는 아니다.
+
+### 21.4 바이트 동일성과 비교 [M]
+| 비교 | 결과 | 출력 |
+|---|---|---|
+| 실행 단계 열 | 모두 rc 0. 다섯 빌드 모두 `result PASS` | `run_all.txt`, `run_<step>.txt` |
+| 고친 도구의 출력과의 보고 | OK 15/35/50/50/50/60/30/30/35/35, BAD 0(relcheck, order, extract_off, extract_final, off_order, final_order, plans_t8cf, plans_final, plans_v4, plans_v4_ns2). 수는 여섯째 실행의 scratch 비교와 같다 | `compare_<step>.txt`, `compare/` |
+| 보고의 바이트(`declared`) | 260/260 이 커밋된 `compare_2/` 의 보고와 같은 바이트다. 이름 집합도 같다 | `compare_declared.txt` |
+| 쌍둥이(`twin`) | 320/320 같음. DIFF 0, 한 쪽에만 있음 0, 견주지 않음 85(`again/` 65, `space_guard.log` 10, `status.txt` 10). 둘째 걸음의 바꿈 58. facts.kz·basis.kz 20 도 바이트로 같다 | `compare_twin.txt` |
+| `again/` | 두 실행이 같은 바이트임을 본 뒤 15 디렉터리를 지웠다 | `compare_again_rm.txt` |
+
+그러므로 이 빌드의 출력은 선언한 그대로다. 고친 도구 `bf2ec2ee` 의 출력과 다른 줄은 모두 §20.3 표의 종류와 수 그대로이고, 파일은 완전한 소스의 scratch 점검 빌드의 출력과 바이트로 같다(선언된 문자열 셋을 바꾼 뒤). 출력: `/home/user/work/redesign/obs1/cz_*`(245,512,941 B, `outputs_sizes.txt`). 파일마다 sha256 은 장부 행 `OBS_cz_*`(`cz_<step>.sha256`)에 있다.
+
+### 21.5 끝 점검과 측정 [M]
+수는 `exit/` 의 파일에서 왔다(`exit_checks.sh`, `probe_vs_tool.py`). 판정이 아니다. 차례는 c1_pre_tx/c1_post_tx/r2_core/c5_641/c5_642 다.
+1. **키 글**(`exit/keys_compare.txt`): 두 C1 빌드의 키 글이 367 가운데 367 같고, 키 집합도 같다. 고친 도구와 견주면 키 글이 움직인 행은 3/3/0/0/0(A20, A27, A30)이다. 서로 다른 글이 키를 나누는 경우는 0 이다.
+2. **쌍 파일**(`exit/pair_check_*.txt`): 열 사실 모두 `result PASS` 다(마지막 옵션 22 점검, 기본 경로 20 점검). 두 C1 계획(개정 1·2 자료)의 계획된 행 13 이 모두 쌍 파일에 줄을 가진다(그 줄 1,125: unordered 1,051, unknown 35, same_thread 39; writer 1,118, creator 6, creator-not-a-pair(probe-create) 1). 텍스트의 listed 쌍 1,988 은 모두 같은 값의 줄을 가진다.
+3. **새 줄이 서는 곳과 빠지는 곳**(다섯 빌드 모두):
+   - 성공 경로(`exit/success_path_*.txt`): creator callee 14/14/12/15/15, held 0/0/0/0/0 이다. missing 의 까닭은 이렇다.
+     - c1 둘: out-id 저장 없음 3, 저장값이 성공 경로에 묶이지 않음 4, 조건 사이의 함의를 정하지 못함 7.
+     - r2: 2/3/7.
+     - c5 둘: returns 를 다 따라가지 못함 1, 5/4/5.
+     - 이름 공간 블록의 callee 줄도 모두 missing 이다(19/19/13/17/17).
+   - absence origins(`exit/absence_origins_*.txt`): 줄 39/39/17/23/23 이다. 기원이 둘인 줄은 7/7/4/0/0 이다. 기원의 종류는 `[search no-match]` 39/39/17/23/23, `[other]` 7/7/4/0/0 이다.
+   - holder(`exit/holder_*.txt`): 줄 26/26/21/18/18, 그 가운데 필드 holder 8/8/2/0/0 이다(c5 는 모두 지역 변수). 값을 시험하는 reader 18/18/5/0/0, 시험 없이 쓰는 reader 26/26/4/0/0 이다.
+   - alternatives(`exit/alternatives_*.txt`): 줄 65/64/26/66/66 이다. found(문맥이 세워지지 않음) 5/6/2/0/0, none found 3/3/3/0/0 이고, 나머지는 not established 다. 정한 호출 0/0/0/0/0 이다. 전제 (6)이 걸린 줄은 c1_pre_tx 에 1 이다.
+   - 저장된 이름 버퍼(`exit/buffer_*.txt`, `heads_*.txt`): 버퍼 16/16/17/0/0, complete 0 이다. FIELD_STATUS disabled 11/11/12, 다른 writer 5/5/5 이다. 깃발 address-escape 는 모든 버퍼에서 풀리지 않았다. array-element 깃발은 모든 버퍼에서 풀렸다(lead 의 판단 (c), §18.2). 주소 사용 20/20/21 가운데 풀린 것 6/6/6 이다.
+   - 수명 끝: clear-table 5/5/6/0/0, clear-slot 10/10/6/18/18(free-record 조건이 보인 것 0), release 1/1/0/23/23, 매개변수를 통한 release 1/1/1/0/0 이다.
+   - 이 수들은 §16–§20 의 scratch 수와 같다. 줄이 설계 행에만 있지 않다. 다섯 빌드 모두에 서는 곳과 빠지는 곳이 있다.
+4. **탐침과 도구 줄**(`exit/probe_vs_tool.txt`; 탐침은 고친 도구의 사실에서 돌린 §15.1 의 출력):
+   - P6 키: 탐침은 "소스 트리 토큰이면 367/367" 이다. 도구 줄도 그렇다(1). 재현된다.
+   - 열린 까닭 모집단: 탐침은 필드 호출 자리 1/1/0/0/0 이다. 도구 머리 줄은 호출 자리 2/2/0/0/0 이고, 그 가운데 필드 1 이다. 다른 하나는 `bp_app.c:818:12` 의 지역 변수 `run_status`, 덩이 4 다(`exit/address_passing_*.txt`: 338:12 의 68, 818:12 의 4). 재현된다.
+   - P4 holder:
+     - A20(두 빌드): 탐침은 "다른 정의 `bp_flow.c:132:18`(OS_CountSemCreate)로 성립하지 않음" 이다. 도구 holder 줄도 그 다른 정의를 writer 로 적는다.
+     - A21: 탐침은 "writer 집합이 완전하지 않아(per-field DISABLED) 세우지 못함" 이다. 도구도 FIELD_STATUS DISABLED 와 깃발 다섯을 적는다.
+     - A22·A26: 지역 holder 다. 도구는 readers not decided 다.
+     - 재현된다.
+   - P1 alternatives:
+     - A20(두 빌드): 탐침은 retry 와 같은 함수의 생성을 찾았다. 도구도 둘을 적고, retry 는 열린 event-send 둘 때문에 문맥을 세우지 않는다.
+     - A21 c1_pre_tx 의 첫 문맥: 탐침은 "none found" 다. 도구는 "not established" 다. 열린 exit-app 이 있고, `CFE_ES_RunLoop 338:12` 의 필드 저장값 규칙이 (5)·(6) 전제에 걸리기 때문이다. lead 의 판단 (a) 대로다. 둘째 문맥은 둘 다 not established 다.
+     - A21 c1_post_tx: 탐침은 문맥 둘(위로 걸어 올라간 것)이다. 도구는 `CF_CFDP_InitEngine@cf_cfdp.c:1003:23` 의 문맥 하나에서 retry 를 찾고, 열린 return-result 때문에 세우지 않는다. 문맥을 나누는 꼴이 탐침과 다르다 [미확인: 두 빌드의 호출 꼴 차이를 따라가지 않음].
+     - A22·A26: 탐침은 "효과가 호출자로 돌아가는 함수에서 끝남" 이다. 도구는 호출자까지 걸어 올라가 다른 까닭으로 not established 다(열린 exit-app, RESULT_EFFECT 행 없음).
+     - 읽기(세우지 못함)는 모두 같다. 글은 다르다.
+   - P2 성공 경로: 탐침은 `OS_CountSemCreate` 를 HELD 로 읽었다. 도구는 "저장값이 성공 경로에 묶이지 않음" 으로 missing 이다. 이것은 lead 의 판단 (b)의 추출 틈이다(out 으로 저장되는 지역 변수). 재현되지 않으며 열린 것이다. 나머지 넷(OS_TimeBaseCreate, OS_mkfs, OS_initfs, OS_mv)은 둘 다 missing 이지만 까닭의 글이 다르다.
+   - P5 쌍: 탐침의 C1 텍스트 쌍 합은 24,796 이다. 남긴 쌍 측정과의 차이 187 은 §15 에서 설명했다. 쌍 파일의 쌍은 26,572 다(same_thread 1,920 포함). 계획된 행의 줄은 1,125 다. 탐침이 센 그 행의 텍스트 쌍 1,087 보다 38 많다. 쌍 파일의 영역은 not-a-pair 생성자와 같은 스레드의 생성자까지 넣는다(§15.2). 그것으로 보이지만, 행마다 맞춰 보지 않았다 [미확인].
+5. **lead 의 판단 (e)**(`exit/address_passing_*.txt`, `exit/open_other_*.txt`, 보기는 감시 아래에서 만들고 지움, sha256 은 `exit/ruling_e_views.sha256`):
+   - 둘째 주소 넘김 호출 자리는 `CFE_ES_RunLoop` at `bp_app.c:818:12` 다(덩이 4, 지역 변수). 필드 저장값 규칙이 필드에 적용되는 자리는 C1 에서 `cf_app.c:338:12` 하나다(덩이 68).
+   - `other` 종류는 2,398 행이다(c1 두 빌드, 열린 행 8,549/8,554). 2,065 행은 "상수도 그 호출의 결과도 아닌 값을 돌려줌" 이다. 392 행은 괄호 안의 `; ` 에서 잘린 꼬리이고, 그 가운데 333 행은 잘림 때문에만 `other` 로 세어진다. §20.5 의 scratch 수와 같다.
+
+### 21.6 공간 [M]
+| 시점 (UTC, 2026-11-19) | 여유 (df -B1 /) | 일 |
+|---|---|---|
+| 시작(05:51) | 1,190,694,912 | `free_start.txt` |
+| 선언 직전 | 1,188,790,272 | `guard/p03` 끝 |
+| 사본 뒤 | 1,138,950,144 | 사본 47.8 MB |
+| `make kz-static` 중 가장 낮은 값 | 798,343,168 | dip 340,557,824(선언의 [I] 170 MB 보다 큼; 감시 필요량 480,000,000 안) |
+| `make all` 중 가장 낮은 값 | 1,073,557,504 | dip 33,517,568 |
+| 실행 중 가장 낮은 값 | 737,320,960 | 새 출력과 `again/` |
+| 비교 중 가장 낮은 값 | 692,862,976 | 마지막 옵션 회차의 facts 보기(`guard/k_extract_final.log`) |
+| 끝(06:30) | 833,384,448 | `again/` 를 지우고 scratch 를 모두 지운 뒤(`free_end.txt`) |
+
+- 하한(314,572,800)을 넘지 않았다. 감시 기록 45 가 모두 `verdict=completed` 다(`guard/`). 압축 대체는 쓰지 않았다.
+- 남긴 것: 새 출력 245,512,941 B, 사본 47,808,316 B, 기록 디렉터리 약 6 MB.
+
+### 21.7 계획과 다르게 한 것
+- **확인 수 하나의 선언 오기.** `test_static_reasons` 의 golden 갱신 뒤 수를 scratch 첫 ctest 의 수(771)로 적었다. 전체 ctest 에서 804 로 멈췄고, 까닭(그 시험은 자료 디렉터리의 golden 을 모두 읽음)을 덧붙임 21.0 (차)로 커밋한 뒤 전체 ctest 를 다시 돌렸다. 첫 전체 ctest 의 출력(`ctest_full.log`, `ctest_counts.txt`)은 덮어쓰지 않고 남겼다.
+- **쌍둥이 비교의 꼴.** scratch 출력은 여섯째 실행이 지웠다. 그래서 그 sha256 목록과 견주었다. 그러려면 scratch 쪽 뿌리의 바이트가 필요했다. 남긴 기록에서는 `<scratch>` 로 가려져 있었다. 그것을 가린 sidecar 사본의 sha256 을 맞추어 되찾았고(선언 21.0 (바)), 커밋한 파일에는 `<scratch>` 로만 적었다.
+- **`make kz-static` 의 dip** 은 340 MB 로 선언의 예상(약 170 MB)의 두 배였다. 감시 필요량(480,000,000) 안이고 하한 위다. 이번 빌드는 `CMakeLists.txt` 가 바뀌어 다시 구성까지 했기 때문으로 보인다 [미확인].
+- 탐침과 도구 줄의 대조(21.5 4)는 탐침마다 대상을 짝지어 놓은 것이다. 글이 다른 곳은 읽기만 견주었다. 도구도 탐침도 고치지 않았다.
+
+### 21.8 열린 것
+- **끝 조건**: 모두 섰다. MC 의 kz-static 은 새 도구 `6f40dd60…`(`tool_sha256=36e02995…`)이고, 빌드 뒤 점검이 모두 통과했으며, 지금까지의 차이는 모두 선언되었다(21.0, 21.0 (차)).
+- lead 의 판단 (a): 평가 갈래 Re 가 판정 규칙 8.13 의 17 번 조건 (6)을 덮는지는 설명 스크립트 단계가 본다. 덮지 않으면 PI 의 열린 것이다. 이 빌드에서 그 조건이 걸린 것은 C1 두 빌드의 덩이 66 이다(머리 줄 "(5) or (6) rests on a premise 66").
+- lead 의 판단 (b): 성공 경로 줄의 추출 틈(out 으로 저장되는 지역 변수)은 그대로다. 탐침 P2 의 `OS_CountSemCreate` HELD 를 도구가 재현하지 않는 까닭이 이것이다.
+- lead 의 판단 (c): 버퍼는 모두 not complete 다. address-escape 깃발이 풀리지 않았기 때문이다. 아무것도 느슨하게 하지 않았다.
+- 머리 줄의 `other` 세기(괄호 안의 `; ` 로 나눔, c1 에서 333 행)는 그대로 냈다. 고칠지는 lead 의 판단을 기다린다.
+- 탐침 P1 의 A21 c1_post_tx 문맥 꼴과, 계획된 행의 쌍 줄 1,125 와 텍스트 쌍 1,087 의 차이 38 을 행마다 맞추는 일은 하지 않았다 [미확인].
+- `test_probe_observe` 의 확인 수가 실행마다 달라지는 까닭은 보지 않았다.
+- §20.8 의 그 밖의 열린 것은 그대로 기다린다: 틀 없는 문맥의 시험, `framework_namespaces2_*.txt` 머리 글, §18.8 의 배열 표시와 key-clearing 이름 문제(lead), C 라이브러리 항목(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)), absence origins 의 이름 칸 문제.

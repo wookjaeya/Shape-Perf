@@ -1,0 +1,14 @@
+diffkinds old_lines=42 new_lines=42 only_old=12 only_new=12 labels=13
+label removed=1 added=1 0|path .../facts.kz
+label removed=1 added=1 0|path .../basis.kz
+label removed=1 added=1 0|path .../plan.kzs
+label removed=1 added=1 0|path .../plan.side
+label removed=1 added=1 0|path .../plan.mod
+label removed=1 added=1 0|path .../plan.exe
+label removed=1 added=1 0|path .../plan.req
+label removed=0 added=2 0|path .../framework_namespacesN_cfe-N.N.N.txt
+label removed=0 added=2 0|path .../framework_namespacesN_osal-N.N.N.txt
+label removed=0 added=1 0|path .../framework_namespacesN_osal-fNd.txt
+label removed=2 added=0 0|path .../framework_namespaces_cfe-N.N.N.txt
+label removed=2 added=0 0|path .../framework_namespaces_osal-N.N.N.txt
+label removed=1 added=0 0|path .../framework_namespaces_osal-fNd.txt

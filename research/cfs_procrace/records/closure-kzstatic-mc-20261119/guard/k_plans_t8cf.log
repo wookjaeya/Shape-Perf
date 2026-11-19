@@ -1,0 +1,4 @@
+# space_guard.sh kind=compare-plans_t8cf need=30000000 floor=314572800 interval=2 cmd=bash -c SCRATCH=<scratch>/czviews bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/compare.sh plans_t8cf > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/compare_plans_t8cf.txt 2>&1
+start 2026-11-19T06:26:30.240Z free=736690176 threshold=344572800
+sample 2026-11-19T06:26:30.244Z 736686080
+end 2026-11-19T06:26:32.250Z kind=compare-plans_t8cf verdict=completed rc=0 free=736473088 lowest=736473088 dip=217088 change=-217088

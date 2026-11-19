@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-ctest need=30000000 floor=314572800 interval=2 cmd=ctest -R ^static_golden_ -E core_cpu1
+start 2026-11-19T02:33:47.508Z free=1034825728 threshold=344572800
+sample 2026-11-19T02:33:47.512Z 1034821632
+sample 2026-11-19T02:33:49.517Z 1034784768
+end 2026-11-19T02:33:51.523Z kind=scratch-ctest verdict=completed rc=8 free=1034780672 lowest=1034780672 dip=45056 change=-45056

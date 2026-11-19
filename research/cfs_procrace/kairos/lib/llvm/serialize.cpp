@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <map>
@@ -1191,6 +1192,24 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
          KZ_POLICY_UNSET, KZ_NONE32);
     item("count.type_names_outside_root", "by source tree " + num(m.type_names_tree.size()) + ", absolute (no source tree) " + num(m.type_names_absolute.size()),
          KZ_POLICY_UNSET, KZ_NONE32);
+    // the source trees of the functions recorded with an absolute path (outside the root), each with the token the type
+    // names use (static_facts.md 5s, 5x): "source_tree[i] = <recorded directory> <token>", in the order of the directory;
+    // the relations key text reads them (a facts container carries the absolute path only)
+    std::map<std::string, std::string> trees;
+    for (const auto& [k, f] : m.funcs) {
+      const std::string& file = f.pos.file;
+      if (file.empty() || file[0] != '/') continue;
+      const std::filesystem::path p(file);
+      for (std::filesystem::path d = p.parent_path(); !d.empty() && d != d.root_path(); d = d.parent_path()) {
+        std::error_code ec;
+        if (std::filesystem::exists(d / ".git", ec)) {
+          trees.emplace(d.generic_string(), "<" + d.filename().generic_string() + ">");
+          break;
+        }
+      }
+    }
+    size_t ti = 0;
+    for (const auto& [d, t] : trees) item("source_tree[" + num(ti++) + "]", d + " " + t, KZ_POLICY_UNSET, KZ_NONE32);
   }
   for (const auto& n : opt.notes) item(n.first, n.second, KZ_POLICY_UNSET, KZ_NONE32);
   for (const auto& n : opt.deviation_notes) item(n.first, n.second, KZ_POLICY_DEVIATION, KZ_NONE32);

@@ -1,0 +1,3 @@
+  source_tree[0] = /home/user/work/procrace/c1_build/post/src/bp <bp>  (unset)
+  source_tree[1] = /home/user/work/procrace/c1_build/post/src/bplib <bplib>  (unset)
+  source_tree[2] = /home/user/work/procrace/c1_build/post/src/cf <cf>  (unset)

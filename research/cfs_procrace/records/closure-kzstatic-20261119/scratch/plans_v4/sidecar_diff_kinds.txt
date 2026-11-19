@@ -1,0 +1,91 @@
+== c1_pre_tx
+      1 < basis-artifact
+      1 < facts-artifact
+      1 < generator
+      2 < input
+      1 < map
+      8 < need
+      1 < plan-id
+      1 < requests
+      3 < row
+     11 < site
+      1 > basis-artifact
+      1 > facts-artifact
+      1 > generator
+      2 > input
+      1 > map
+      8 > need
+      1 > plan-id
+      1 > requests
+      3 > row
+     11 > site
+-- sites whose line differs only in the row key of refs (old key -> new key of the three moved rows):
+2
+== c1_post_tx
+      1 < basis-artifact
+      1 < facts-artifact
+      1 < generator
+      2 < input
+      1 < map
+      8 < need
+      1 < plan-id
+      1 < requests
+      3 < row
+     11 < site
+      1 > basis-artifact
+      1 > facts-artifact
+      1 > generator
+      2 > input
+      1 > map
+      8 > need
+      1 > plan-id
+      1 > requests
+      3 > row
+     11 > site
+-- sites whose line differs only in the row key of refs (old key -> new key of the three moved rows):
+0
+== r2_core
+      1 < basis-artifact
+      1 < facts-artifact
+      1 < generator
+      2 < input
+      1 < plan-id
+      1 < requests
+      1 > basis-artifact
+      1 > facts-artifact
+      1 > generator
+      2 > input
+      1 > plan-id
+      1 > requests
+-- sites whose line differs only in the row key of refs (old key -> new key of the three moved rows):
+0
+== c5_641
+      1 < basis-artifact
+      1 < facts-artifact
+      1 < generator
+      2 < input
+      1 < plan-id
+      1 < requests
+      1 > basis-artifact
+      1 > facts-artifact
+      1 > generator
+      2 > input
+      1 > plan-id
+      1 > requests
+-- sites whose line differs only in the row key of refs (old key -> new key of the three moved rows):
+0
+== c5_642
+      1 < basis-artifact
+      1 < facts-artifact
+      1 < generator
+      2 < input
+      1 < plan-id
+      1 < requests
+      1 > basis-artifact
+      1 > facts-artifact
+      1 > generator
+      2 > input
+      1 > plan-id
+      1 > requests
+-- sites whose line differs only in the row key of refs (old key -> new key of the three moved rows):
+0

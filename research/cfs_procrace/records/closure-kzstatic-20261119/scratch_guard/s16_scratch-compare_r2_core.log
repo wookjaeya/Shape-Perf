@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-compare need=200000000 floor=314572800 interval=2 cmd=bash -c python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/sections_cmp.py /home/user/work/merge-check/kz-llvm/tools/kz-dump/kz-dump /home/user/work/redesign/obs1/rf2_final_extract/r2_core/r2_core/NP/facts.kz <scratch>/kzc_out/rf2_final_extract/r2_core/r2_core/NP/facts.kz > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-20261119/scratch/facts_cmp/facts_r2_core.txt
+start 2026-11-19T02:36:50.980Z free=953823232 threshold=514572800
+sample 2026-11-19T02:36:50.984Z 953819136
+end 2026-11-19T02:36:52.990Z kind=scratch-compare verdict=completed rc=0 free=953815040 lowest=953815040 dip=8192 change=-8192

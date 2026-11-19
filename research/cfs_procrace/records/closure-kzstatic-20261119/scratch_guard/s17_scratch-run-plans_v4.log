@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-run need=100000000 floor=314572800 interval=2 cmd=env KZB=<scratch>/kzc_build/tools OROOT=<scratch>/kzc_out bash /home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/run.sh plans_v4
+start 2026-11-19T02:37:07.706Z free=951848960 threshold=414572800
+sample 2026-11-19T02:37:07.710Z 951844864
+sample 2026-11-19T02:37:09.716Z 951115776
+end 2026-11-19T02:37:11.724Z kind=scratch-run verdict=completed rc=0 free=950534144 lowest=950534144 dip=1314816 change=-1314816

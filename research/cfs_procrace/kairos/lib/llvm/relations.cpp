@@ -827,12 +827,32 @@ class Rel : public RelFacts {
   // A key names where the row's use is in the program, not what the rules found there: no line or column, no
   // creator, writer, partition, counter or verdict.  It reads names only and notes no file (it is no part of the text).
   // A function: its name, and for a function of internal linkage the file it is defined in.
+  // The file of a function outside the root is written by its source tree (BASIS `source_tree[i]`, option
+  // --object-access, static_facts.md 5x): "<tree>/<path in the tree>"; facts without those items keep the recorded path.
   std::string key_fn(uint32_t fn) const {
     if (fn == kN || fn >= funcs_.size()) return "-";
     std::string n = str(funcs_[fn].name);
-    if (funcs_[fn].flags & KZ_FUNC_FLAG_STATIC) n += "@" + str(funcs_[fn].file);
+    if (funcs_[fn].flags & KZ_FUNC_FLAG_STATIC) n += "@" + key_file(str(funcs_[fn].file));
     return n;
   }
+  std::string key_file(const std::string& f) const {
+    if (f.empty() || f[0] != '/') return f;
+    if (!trees_read_) {
+      trees_read_ = true;
+      for (const auto& [k, v] : basis_map_) {
+        if (k.rfind("source_tree[", 0) != 0) continue;
+        const size_t sp = v.rfind(' ');
+        if (sp != std::string::npos) trees_.emplace_back(v.substr(0, sp), v.substr(sp + 1));
+      }
+      // the longest directory first: a tree inside another tree is its own tree
+      std::sort(trees_.begin(), trees_.end(), [](const auto& a, const auto& b) { return a.first.size() != b.first.size() ? a.first.size() > b.first.size() : a.first < b.first; });
+    }
+    for (const auto& [d, t] : trees_)
+      if (f.size() > d.size() && f.compare(0, d.size(), d) == 0 && f[d.size()] == '/') return t + f.substr(d.size());
+    return f;
+  }
+  mutable bool trees_read_ = false;
+  mutable std::vector<std::pair<std::string, std::string>> trees_;
   // the callee of a call: the function it calls, or the name the call gives (a function without a body, an indirect call)
   std::string key_callee(uint32_t ci) const {
     const kz_fact_call& c = calls_[ci];

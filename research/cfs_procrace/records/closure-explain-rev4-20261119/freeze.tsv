@@ -1,0 +1,17 @@
+# Explanation script revision 4, frozen (2026-11-19) -- the file the boot declaration of the C1 cycle cites
+# (plan/c1_closure_explain_rev4_spec_20261118.md 2 and 8; plan/c1_closure_evaluation_protocol_20261118.md 12 item 6).
+# Source commit e4b2b98 (the code of cb9a4d4 with one fix of the judgement part found on the static dry run); the
+# specification at 6c459f7 (sections 1-10.7).  Exit checks before the freeze: fixtures 127 of 127 (out/fixtures.txt),
+# the regression on the 2026-11-16 inputs (out/compare_r3_r4_2_*.txt), the dry runs (out/dry_*_2.log).
+# A change of the reader part only (the judge's sha256 the same, the diff kept) leaves a boot's standing; a change of the
+# judgement part after a boot makes that boot a record seen before the rules.  The summary and the expectation
+# comparison change no record: a later fix is rerun with its diff kept (evaluation protocol 12 item 6).
+# part	path	sha256
+reader	research/cfs_procrace/env/obs1/explain_read.py	ff0a06252cf74db9862588913384b0dd82989636b2b22e18c7b5c9f1b2d97752
+judge	research/cfs_procrace/env/obs1/explain_judge.py	531a6b3e91ba3e574c9263d2eb9307a282dd06f09dcbf9ee8e8f10717afc4587
+driver	research/cfs_procrace/env/obs1/explain.py	af9d4395cbc099d91b46e3608a4241ffe3601ab7084c323b0e2d73fb3a7d0dc2
+branches	research/cfs_procrace/env/obs1/explain_branches.py	a722e4af36e1adb84606ecdc826cb3425a38fd4c145458417d22e814a795f07a
+summary	research/cfs_procrace/env/obs1/explain_summary.py	17c3a9eb9b456ea05f417e925bb30156f5344809ca9148b0ec4ab7c33dbcdc59
+expect	research/cfs_procrace/env/obs1/explain_expect.py	442d2e7d47d6564a27feff7a101fd10ab023fbd3183fff61b88fd78160a02581
+fixtures	research/cfs_procrace/env/obs1/tests/test_explain4.py	b0bf84ae1f6fa0b9a8d77100698e90ee4021131e557618100327cececced6548
+revision3	research/cfs_procrace/env/obs1/explain_rev3.py	acfd427147d8a24f1314b4ba1c0187adf75bc1e977160638e8c6dff5ecd53a70

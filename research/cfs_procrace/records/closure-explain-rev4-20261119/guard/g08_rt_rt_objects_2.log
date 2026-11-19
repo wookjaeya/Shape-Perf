@@ -1,0 +1,4 @@
+# space_guard.sh kind=explain need=30000000 floor=314572800 interval=2 cmd=records/closure-explain-rev4-20261119/scripts/dryrun.sh rtread rt_objects
+start 2026-11-19T08:28:58.820Z free=576749568 threshold=344572800
+sample 2026-11-19T08:28:58.825Z 576745472
+end 2026-11-19T08:29:00.833Z kind=explain verdict=completed rc=0 free=563974144 lowest=563974144 dip=12775424 change=-12775424

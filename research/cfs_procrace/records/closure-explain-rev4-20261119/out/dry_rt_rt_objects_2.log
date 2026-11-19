@@ -1,0 +1,27 @@
+kz-rt-dump rc=0
+manifest	refused	plan=69a278b019281fd3 build_record=69a278b019281fd3 run.meta=missing dump=0900000000000000
+exe manifest	unconfirmed	record=69a278b019281fd3 tree=missing run.meta=no-such-file
+exe test_rt_objects	unconfirmed	record=609bdbb81680cf46 tree=609bdbb81680cf46 run.meta=no-such-file
+exe librt_objects_mod_id.so	unconfirmed	record=ab79abe53569582a tree=ab79abe53569582a run.meta=no-such-file
+exe librt_objects_mod_noid.so	unconfirmed	record=266e85d4bef12ac2 tree=266e85d4bef12ac2 run.meta=no-such-file
+facts_build	unconfirmed	no basis of the facts given (main test_rt_objects run=missing)
+same_build_object	confirmed	main path=test_rt_objects tree=e840b203a07d9b1b3dc313500115b642681cac32 dump=e840b203a07d9b1b3dc313500115b642681cac32
+same_build_object	confirmed	module:3 path=test_rt_objects tree=e840b203a07d9b1b3dc313500115b642681cac32 dump=e840b203a07d9b1b3dc313500115b642681cac32
+same_build_object	unconfirmed(no build-id note)	module:9 path=- tree=not read dump=none
+same_build_object	confirmed	module:7 path=librt_objects_mod_id.so tree=03cb9ef045a0bc9a9d477a4834909d16dea1c250 dump=03cb9ef045a0bc9a9d477a4834909d16dea1c250
+same_build_object	unconfirmed(no build-id note)	module:8 path=librt_objects_mod_noid.so tree=not read dump=none
+same_build	unconfirmed(no build-id note)	5 objects: confirmed 3, refused 0, unconfirmed 2
+chain	refused	6 links
+chain_check rc=1
+normal /home/user/work/redesign/obs1/xr4_dry_rt_rt_objects_2/normal.json inputs 13 checks refused 0 unparsed 0 mismatch 3 branches 8
+reader rc=0
+branch D1-R0 records 46 refused 0 uses 0
+branch D1-Ra records 46 refused 0 uses 0
+branch D1-Rb records 46 refused 0 uses 0
+branch D1-Rc records 46 refused 0 uses 0
+branch D1-Rd records 46 refused 0 uses 0
+branch D1-Re records 46 refused 0 uses 0
+branch D1-Rf records 46 refused 0 uses 0
+branch D1-all records 46 refused 0 uses 0
+compat refused: run.meta names another manifest; the dump's RUN or module records carry another manifest sha256; chain links refused: manifest, chain
+judge rc=3

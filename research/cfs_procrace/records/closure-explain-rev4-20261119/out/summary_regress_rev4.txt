@@ -1,0 +1,481 @@
+# explain_summary.py revision 4 (2026-11-19): tables per evaluation branch; decided = observed, not_observed_in_runs, refuted_link; unordered (static) = this revision found no edge
+
+branch D1-R0
+boots 1: boot_20261116
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	1
+  undetermined	app-app	unknown	1
+  undetermined	core-app	unknown	18
+  undetermined	core-core	unknown	4
+  undetermined	process-app	unknown	29
+  undetermined	unknown	unknown	14
+per record over boots (row, use-site key, consumer root: values):
+  A21 17975444d83f6589 CF_AppMain: 1 boots: undetermined 1
+  A22 8d4cf4782b58cce9 CF_AppMain: 1 boots: undetermined 1
+  A23 07c71974e959fbc6 CF_AppMain: 1 boots: undetermined 1
+  A50 5a9acfc186eb25ed CF_AppMain: 1 boots: undetermined 1
+  A51 ad0b0b74b319721e CF_AppMain: 1 boots: undetermined 1
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B119 152f17981365b27d CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B13 3c1a14a1e86af631 None: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CF_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b BP_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CF_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 1 boots: undetermined 1
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 63, static input 211, structure 2
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  none (no pair with both at-calls recorded)
+
+branch D1-Ra [4.2 의 읽기 갈래(PI 결정 전)]
+boots 1: boot_20261116
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	1
+  undetermined	app-app	unknown	1
+  undetermined	core-app	unknown	18
+  undetermined	core-core	unknown	4
+  undetermined	process-app	unknown	29
+  undetermined	unknown	unknown	14
+per record over boots (row, use-site key, consumer root: values):
+  A21 17975444d83f6589 CF_AppMain: 1 boots: undetermined 1
+  A22 8d4cf4782b58cce9 CF_AppMain: 1 boots: undetermined 1
+  A23 07c71974e959fbc6 CF_AppMain: 1 boots: undetermined 1
+  A50 5a9acfc186eb25ed CF_AppMain: 1 boots: undetermined 1
+  A51 ad0b0b74b319721e CF_AppMain: 1 boots: undetermined 1
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B119 152f17981365b27d CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B13 3c1a14a1e86af631 None: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CF_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b BP_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CF_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 1 boots: undetermined 1
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 63, static input 211, structure 2
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  none (no pair with both at-calls recorded)
+
+branch D1-Rb [4.2 의 읽기 갈래(PI 결정 전)]
+boots 1: boot_20261116
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	1
+  undetermined	app-app	unknown	1
+  undetermined	core-app	unknown	18
+  undetermined	core-core	unknown	4
+  undetermined	process-app	unknown	29
+  undetermined	unknown	unknown	14
+per record over boots (row, use-site key, consumer root: values):
+  A21 17975444d83f6589 CF_AppMain: 1 boots: undetermined 1
+  A22 8d4cf4782b58cce9 CF_AppMain: 1 boots: undetermined 1
+  A23 07c71974e959fbc6 CF_AppMain: 1 boots: undetermined 1
+  A50 5a9acfc186eb25ed CF_AppMain: 1 boots: undetermined 1
+  A51 ad0b0b74b319721e CF_AppMain: 1 boots: undetermined 1
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B119 152f17981365b27d CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B13 3c1a14a1e86af631 None: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CF_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b BP_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CF_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 1 boots: undetermined 1
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 63, static input 211, structure 2
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  none (no pair with both at-calls recorded)
+
+branch D1-Rc [4.2 의 읽기 갈래(PI 결정 전)]
+boots 1: boot_20261116
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	1
+  undetermined	app-app	unknown	1
+  undetermined	core-app	unknown	18
+  undetermined	core-core	unknown	4
+  undetermined	process-app	unknown	29
+  undetermined	unknown	unknown	14
+per record over boots (row, use-site key, consumer root: values):
+  A21 17975444d83f6589 CF_AppMain: 1 boots: undetermined 1
+  A22 8d4cf4782b58cce9 CF_AppMain: 1 boots: undetermined 1
+  A23 07c71974e959fbc6 CF_AppMain: 1 boots: undetermined 1
+  A50 5a9acfc186eb25ed CF_AppMain: 1 boots: undetermined 1
+  A51 ad0b0b74b319721e CF_AppMain: 1 boots: undetermined 1
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B119 152f17981365b27d CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B13 3c1a14a1e86af631 None: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CF_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b BP_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CF_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 1 boots: undetermined 1
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 63, static input 211, structure 2
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  none (no pair with both at-calls recorded)
+
+branch D1-Rd [4.2 의 읽기 갈래(PI 결정 전)]
+boots 1: boot_20261116
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	1
+  undetermined	app-app	unknown	1
+  undetermined	core-app	unknown	18
+  undetermined	core-core	unknown	4
+  undetermined	process-app	unknown	29
+  undetermined	unknown	unknown	14
+per record over boots (row, use-site key, consumer root: values):
+  A21 17975444d83f6589 CF_AppMain: 1 boots: undetermined 1
+  A22 8d4cf4782b58cce9 CF_AppMain: 1 boots: undetermined 1
+  A23 07c71974e959fbc6 CF_AppMain: 1 boots: undetermined 1
+  A50 5a9acfc186eb25ed CF_AppMain: 1 boots: undetermined 1
+  A51 ad0b0b74b319721e CF_AppMain: 1 boots: undetermined 1
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B119 152f17981365b27d CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B13 3c1a14a1e86af631 None: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CF_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b BP_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CF_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 1 boots: undetermined 1
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 63, static input 211, structure 2
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  none (no pair with both at-calls recorded)
+
+branch D1-Re [4.2 의 읽기 갈래(PI 결정 전)]
+boots 1: boot_20261116
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	1
+  undetermined	app-app	unknown	1
+  undetermined	core-app	unknown	18
+  undetermined	core-core	unknown	4
+  undetermined	process-app	unknown	29
+  undetermined	unknown	unknown	14
+per record over boots (row, use-site key, consumer root: values):
+  A21 17975444d83f6589 CF_AppMain: 1 boots: undetermined 1
+  A22 8d4cf4782b58cce9 CF_AppMain: 1 boots: undetermined 1
+  A23 07c71974e959fbc6 CF_AppMain: 1 boots: undetermined 1
+  A50 5a9acfc186eb25ed CF_AppMain: 1 boots: undetermined 1
+  A51 ad0b0b74b319721e CF_AppMain: 1 boots: undetermined 1
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B119 152f17981365b27d CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B13 3c1a14a1e86af631 None: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CF_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b BP_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CF_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 1 boots: undetermined 1
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 63, static input 211, structure 2
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  none (no pair with both at-calls recorded)
+
+branch D1-Rf [4.2 의 읽기 갈래(PI 결정 전)]
+boots 1: boot_20261116
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	1
+  undetermined	app-app	unknown	1
+  undetermined	core-app	unknown	18
+  undetermined	core-core	unknown	4
+  undetermined	process-app	unknown	29
+  undetermined	unknown	unknown	14
+per record over boots (row, use-site key, consumer root: values):
+  A21 17975444d83f6589 CF_AppMain: 1 boots: undetermined 1
+  A22 8d4cf4782b58cce9 CF_AppMain: 1 boots: undetermined 1
+  A23 07c71974e959fbc6 CF_AppMain: 1 boots: undetermined 1
+  A50 5a9acfc186eb25ed CF_AppMain: 1 boots: undetermined 1
+  A51 ad0b0b74b319721e CF_AppMain: 1 boots: undetermined 1
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B119 152f17981365b27d CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B13 3c1a14a1e86af631 None: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CF_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b BP_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CF_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 1 boots: undetermined 1
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 63, static input 211, structure 2
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  none (no pair with both at-calls recorded)
+
+branch D1-all [4.2 의 읽기 갈래(PI 결정 전)]
+boots 1: boot_20261116
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	1
+  undetermined	app-app	unknown	1
+  undetermined	core-app	unknown	18
+  undetermined	core-core	unknown	4
+  undetermined	process-app	unknown	29
+  undetermined	unknown	unknown	14
+per record over boots (row, use-site key, consumer root: values):
+  A21 17975444d83f6589 CF_AppMain: 1 boots: undetermined 1
+  A22 8d4cf4782b58cce9 CF_AppMain: 1 boots: undetermined 1
+  A23 07c71974e959fbc6 CF_AppMain: 1 boots: undetermined 1
+  A50 5a9acfc186eb25ed CF_AppMain: 1 boots: undetermined 1
+  A51 ad0b0b74b319721e CF_AppMain: 1 boots: undetermined 1
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B119 152f17981365b27d CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B13 3c1a14a1e86af631 None: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CF_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 1 boots: undetermined 1
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b BP_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b CF_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 1 boots: undetermined 1
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 1 boots: undetermined 1
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 63, static input 211, structure 2
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  none (no pair with both at-calls recorded)

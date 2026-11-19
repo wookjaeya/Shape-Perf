@@ -1,0 +1,4 @@
+# space_guard.sh kind=explain need=60000000 floor=314572800 interval=2 cmd=records/closure-explain-rev4-20261119/scripts/dryrun.sh static c1_post_tx
+start 2026-11-19T08:28:56.802Z free=590774272 threshold=374572800
+sample 2026-11-19T08:28:56.806Z 590770176
+end 2026-11-19T08:28:58.812Z kind=explain verdict=completed rc=0 free=576749568 lowest=576749568 dip=14024704 change=-14024704

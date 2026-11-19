@@ -3129,3 +3129,74 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 4. 실제 cFS 파생 빌드의 모듈(`dlopen` 한 앱 .so)에서 BUILDID 가 나오는지는 부팅 전이라 재지 않았다 [미확인]; 시험 모듈로만 보였다. 파생 빌드는 주기 준비 단계에서 새 런타임 트리(0.5.0)와 kzgcc 0.4 로 다시 짓는다.
 5. lead 의 판단 (a)–(c)의 열린 점은 그대로(§22.9).
 6. 설명 스크립트 개정 4 는 이 빌드의 끝 점검 뒤에 동결한다(§12.10 4 항 (6)): 읽는 쪽은 `buildid` 줄과 `same_build_object` 줄을 13 절의 글로 읽는다.
+
+## 24. 설명 스크립트 개정 4 와 그 요약, 동결 (2026-11-19)
+
+§12.10 4 항 (6)의 단계다: 명세(`plan/c1_closure_explain_rev4_spec_20261118.md`)와 판정 규칙 8.13 대로 개정 4 를 짓고, 2026-11-16 입력의 회귀, 두 C1 빌드의 정적 출력과 런타임 단계의 시험 dump 에 대한 예행 뒤에 동결했다. 도구 빌드는 없고(MC 바이너리를 바꾸지 않음), cFS 를 부팅하지 않았으며 push 하지 않았다. 기록: `../records/closure-explain-rev4-20261119/`(README). 출력: `/home/user/work/redesign/obs1/xr4_*`(새 디렉터리 열둘).
+
+### 24.0 lead 의 판단 (2026-11-19, §17 의 열린 점; 이 단계에서 본 것)
+
+(a) 판정 규칙 8.13 17 항 조건 (6)은 글대로 적용한다(필드별 규칙과 형 수준 규칙 둘 다). 도구를 바꾸지 않는다. 커밋된 평가 갈래 `Re` 가 그것을 덮는지는 이 단계의 몫이다 — 아래 24.4 (라). (b) 성공 경로 줄의 out 저장 지역 변수 추출 빈틈은 그대로이고 그 줄은 missing 이다: 기초 4 는 그 까닭으로 빠진다(24.4). (c) 저장된 이름 버퍼는 어느 것도 complete 가 아니다: 조건 (다)는 `Rf` 가 아니면 빠진다. (d) golden 은 이 단계와 관계없다(도구 빌드 없음). (e) 둘째 주소 넘김 호출 자리와 `other` 부류는 §22 가 다뤘고 이 단계는 건드리지 않았다.
+
+### 24.1 바뀐 것 [F]
+
+- 명세: 10 절(`55edd4b`, 코드보다 먼저)과 10.7(`6c459f7`, 코드 커밋보다 먼저). **고침 하나**: 평가 갈래를 명령줄 인자(`--data-branch`·`--readings`)가 아니라 규칙으로 만든 입력 파일 `kz-eval-branches 1`(`--branches`, `explain_branches.py` 가 만듦; 행 번호·키·기대 판정 없음)로 받는다. 그 밖은 실제 출력에 맞춘 읽기(개정 14 줄의 자리, 쌍 파일의 `edge` 줄과 꼬리, 쌍 줄 찾기, `bind=` 로 정한 사건의 객체, dump 1.5 줄, 문맥 틀, 지역 holder, `Re` 와 필드 저장값 규칙, (다)의 두 집합, 후보 목록이 없을 때)와 코드를 쓰며 정한 것(서식 검사 16 과 읽기 갈래, 자기 sha256, 프로세스 첫 스레드의 생성과 기초 2, 사용의 수, 순서 근거는 연결된 쌍에서만, 삭제의 성공 값, 경로 B·C 의 writer 호출, 요약의 미확정 종류)이다.
+- 코드(`cb9a4d4`, 고침 `e4b2b98`): `env/obs1/explain_read.py`(읽는 부분: 입력·형식 점검·중간 글 `kz-explain-normal 1`), `env/obs1/explain_judge.py`(판정 부분: 집계 전 사용 표 `uses.tsv`, 생성과 수명 끝 사건, (종류 값, 이름 글)로 맞춘 세대와 이름 상태, 이름 결합 쌍의 열두 항목과 하위 사유, 모든 항목·사용 조건 요소에 거는 자료 상태 규칙, 열린 세대에만 하는 인스턴스 연결, 8.3 의 규칙으로만 내는 refuted, 쌍 파일에서만 읽는 순서(사실·도구 sha256 을 relations 머리와 sidecar 와 대조, 대신하는 값 없음, `order_basis_unknown`), 쌍 종류, 중립 필드, 서식 검사 1–17), `env/obs1/explain.py`(구동부), `explain_branches.py`, `explain_summary.py`(요약), `explain_expect.py`(기대 대조, 기록을 바꾸지 않음). 개정 3 은 바이트 그대로 `env/obs1/explain_rev3.py`(`acfd4271…`). `env/tools/tests/run_unit.sh`: 점검 15 를 개정 3 사본으로, 점검 19(개정 4 fixture)를 더함.
+- `e4b2b98` 의 고침은 정적 예행에서 드러났다: 실제 대안 줄에서 필드 저장값 규칙의 전제 글이 600 글자 뒤에 있어 `Re` 의 판단이 그것을 읽지 못했고, holder 줄이 없는 행(A63)이 "개정 14 줄이 없음"이라고 잘못 적혔다. 첫 실행 출력(`_2` 없는 디렉터리)은 남겼다.
+
+### 24.2 시험 [M]
+
+- fixture(`out/fixtures.txt`): **127 점검 모두 통과**. 합성 이름만 쓴다(설계 행이 아닌 꼴: 모든 항목이 서서 `observed` 에 닿는 경로 A 행, 경로 B 행, 지역 holder 등). 항목 열둘이 하나씩 빠진 것, 기초 1 의 refused·옛 dump, 기초 3 의 널 키·다른 기원, 기초 4 의 두 하위 사유와 실패한 생성, 기초 6 의 겹침과 모순(`contradicted`), (다)의 버퍼·종류에 묶이지 않은 writer·FIELD_STATUS, (라)의 종류 값·계획되지 않음, (마)의 완전하지 않음·묶이지 않음·표 초기화·되돌림·`reentry=possible`·빈 자리 지우기(보인 것과 보이지 않은 것), refuted 쌍·기록과 세 모자람, `differs_from_use_key`, bound 둘, 찾은 사용의 인스턴스 연결(열린 세대, 삭제된 세대, 수명 끝 불완전), 부재 뒤 찾음(바탕이 다름), 키 글 둘, 쌍 종류 넷, 쌍 파일(다른 사실·다른 도구·쌍 없음·꼬리 어긋남·`same_thread`·`hard_before` 와 `unmet`), 문맥 둘과 틀 없는 사용, (i)·(iii)의 각 상태, 필드 저장값 규칙 표지, 읽기 `Ra`–`Rf` 하나씩, 부분 인정, 인정 파일 점검 셋(모두 rc 2), 후보 목록 없음, `tok-*` 줄, 실행 없음, 판정 부분이 중간 글·어휘·자기 파일 말고 열면 실패하는 시험과 그 시험이 실패를 잡는지, 서식 검사 9–17 을 하나씩 깬 기록 12(모두 `--check` rc 4), 요약과 기대 대조(2 match, 1 mismatch; 기록 불변).
+- 단위 점검: `out/unit_tools_3.txt` 19/19(점검 15 개정 3 22/22, 점검 19 127/127), `out/unit_step2a_2.txt` 7/7. 첫 실행 `out/unit_tools.txt` 는 18/19 였다: fixture 의 열기 시험이 어휘 파일 경로가 절대 경로일 때 다른 자리를 바꿨다(시험 코드의 결함). 고친 뒤 `unit_tools_2.txt` 19/19.
+- 원장 `out/ledger_check.txt` 178 행 실패 0(새 행 `OBS_xr4_*` 12), 등록부 `out/tools_check_deep.txt` 56 행 실패 0(이 단계는 도구를 바꾸지 않음).
+
+### 24.3 회귀: 2026-11-16 입력, 규칙을 정하기 전에 본 기록 [M]
+
+- 기준: 개정 3 을 같은 입력(`records/obs1-20261116-reviewfix/inputs.txt` 의 15 파일, sha256 모두 그대로)에 먼저 돌림 → 45 기록, 물림 0(`out/regress_rev3.log`, `obs1/xr4_regress_rev3`). 남긴 개정 2 의 `index.tsv` 와 1–12 칸이 45/45 같다(`out/rev2_vs_rev3_index.txt`).
+- 개정 4(동결본) 를 같은 입력과 D1 갈래 여덟에(`obs1/xr4_regress_rev4_2`, 기록마다 `record_label = seen before the rules`): 갈래마다 45 기록, 물림 0. **축 상태와 판정 값이 여덟 갈래 모두 45/45 같다**(`out/compare_r3_r4_2_<갈래>.txt`): unlinked/partial/events_only/undetermined 22, unlinked/partial/record_insufficient/undetermined 23.
+- 다른 칸(필드 경로 부류별 목록, `out/compare_r3_r4_2_D1-R0.txt`)은 선언한 것이다: 더한 칸(`eval_branch`, `data_branch`, `uses`·`uses_reached`·`uses_decided`, `same_build`, `order_ground`, `other_order_seen_in_boots`, `pair_kind`, `events`, `link.name_binding`, `use_cond.branch_i`·`branch_iii`, `order.pairs`, 사건 참조의 `object`·`src`, `script` 의 두 sha256, `record_label`); 이름 바뀜(프로세스 쪽 앱 부류 `creator` → `process`, 쌍 종류 `creator-app` → `process-app`, 10.5); `use_cond.caller_dependence` 가 처리 줄의 종료 호출 대신 (i)·(iii)에서 옴(8.13-15); `order.per_consumer` 는 연결된 생성에서만(8.13-14, 같은 키 글의 게시 사건은 더 이상 w 를 정하지 않음); `link.instance_evidence` 의 같은 글 증거는 쌍 목록으로 옮김.
+- 그 입력에는 쌍 파일·개정 14 줄·새 sidecar 줄·`buildid` 줄이 없어 새 항목은 그 입력을 이름 대며 빠진다: 사용 표 177 사용(`D1-R0/uses.tsv`) 가운데 경로 A 사용 1(A21)의 이름 상태는 `undecided(the use's kind value is not recorded)`(옛 계획에 종류 값 site 가 없음).
+
+### 24.4 예행 [M]
+
+**(가) 두 C1 빌드의 정적 출력, 실행 없음**(`obs1/xr4_dry_static_<빌드>_2`; 입력: `cz_final_order` 의 relations·keys·pairs, `cz_plans_v4_ns2` 의 계획, 그 계획이 이름 댄 이름 공간 파일 다섯, `obs1/xr4_dry_inputs` 의 facts 보기와 런타임 단계 묶음 점검의 binding 줄). 두 빌드 모두 rc 0, 갈래 여덟마다 46 기록 물림 0, 입력 점검 refused 0, 읽지 못한 줄 0(`input_checks.txt`; 개정 14 줄·쌍 파일의 꼴과 꼬리·도구 sha256 세 곳 같음·이름 공간 sha256 다섯 모두 ok). 경로 A 의 다섯 행(`out/dry_static_path_a_rows_2.txt`, D1-R0):
+
+| 행 | (i) | (iii) 문맥마다 | `use_cond` |
+|---|---|---|---|
+| A21 c1_pre_tx | `not_held`: 지우는 채움(`cf_cfdp.c:965:5`, reader 는 지운 값을 가른 뒤 씀) | 1 `not_established`(열린 효과, 필드 저장값 규칙이 전제에 기댐), 2 `not_established`(호출자에게 돌아감) | partial |
+| A21 c1_post_tx | 같음 | 1 `not_held`(found: retry) | partial |
+| A20 (두 빌드) | `not_held`: 같은 함수의 생성 out 저장 | 1 `not_held`(같은 이름 공간·partition 의 자기 생성) | partial |
+| A22, A26 (두 빌드) | `not_established`(지역 holder) | 1 `not_established` | partial |
+| A63 (두 빌드) | `not_established`(holder 줄 없음) | `-` `not_established`(부재 값이 평가되지 않음) | partial |
+
+평가 절차 6 절의 F5(고친 빌드의 행과 탐침 행의 (iii)이 `held` 가 아님, 탐침 행의 (i)이 `held` 가 아님)는 정적 줄 수준에서 선다 [I: 부팅 기록이 없으므로 사용의 문맥 배정은 아직 없음]. 읽기 갈래: `Rb` 에서 A21 의 (i)은 `not_established`(지우기를 빼도 FIELD_STATUS 가 두 규칙 모두 DISABLED), `Rc` 에서 (c2) present, `Rd` 에서 (c4) present(전제 표지), `Re` 에서 (i)은 그대로 `not_held`(그 holder 는 필드별 규칙도 DISABLED). 어느 갈래에서도 `derived` 는 없다.
+
+**(나) 런타임 단계의 시험 dump**(`obs1/xr4_dry_rt_<이름>_2`; `kz-rt-dump` `d83fdde9` 의 글, 연결 점검은 그 시험 바이너리 셋의 대역 빌드 기록으로). 읽는 부분 rc 0 둘: `rt_objects` 의 `buildid` 다섯(main, module:3·7 present, module:9 unreadable, module:8 absent)과 연결 점검의 `same_build_object` 다섯(confirmed 3, `no build-id note` 2), `rt_format15` 의 `buildid` 셋(module:4 `path_cut=yes`)과 `tok-*` 셋(수만 셈). 판정 부분은 둘 다 rc 3: 그 dump 는 계획의 manifest 를 싣지 않으므로 결합 점검이 거부하고 모든 기록이 `build_mismatch` 다(계약대로; 46 기록 물림 0). 그래서 끝 조건 "예행 rc 0" 은 읽는 부분의 rc 로 본다(24.6).
+
+**(라) lead 의 판단 (a) — `Re` 가 8.13 17 항 (6)을 덮는가.** 커밋된 `Re` 의 글(8.13-5: "필드 단위 완전성 규칙만 선 writer 집합(형 단위 상태는 DISABLED)을 사실로 받는다", 움직이는 요소에 "(c3)(iii)의 저장값 규칙")은 도구가 적는 전제(`premises: (6) the writer set of CF_AppData_t.run_status is complete under both rules (FIELD_STATUS per-field=writer-set-complete type-level=DISABLED)`, `cz_final_order/c1_pre_tx/relations.txt` 의 A21 문맥 1)를 글로 덮는다. 그러나 그 줄은 전제 아래에서 규칙이 정할 호출 결과와 그 결과로 닫히는 효과를 적지 않는다(`[the stored-field rule at CFE_ES_RunLoop 338:12: not decided: (5) or (6) rests on a premise]`). 그래서 판정 부분은 `Re` 의 어느 갈래에서도 그 문맥의 (iii)을 `not_established(the alternatives line gives no call result under the premise (reading Re): …)` 로 둔다(`out/dry_static_path_a_rows_2.txt` 의 D1-Re). 어느 글도 넓히지 않았다. **PI 의 열린 점**: `Re` 가 실제로 움직이려면 도구가 전제 아래의 호출 결과를 내야 한다(도구 빌드가 필요; 글은 그대로).
+
+### 24.5 동결 [M]
+
+`../records/closure-explain-rev4-20261119/freeze.tsv`(부팅 선언이 인용): 읽는 부분 `explain_read.py` `ff0a06252cf74db9862588913384b0dd82989636b2b22e18c7b5c9f1b2d97752`, 판정 부분 `explain_judge.py` `531a6b3e91ba3e574c9263d2eb9307a282dd06f09dcbf9ee8e8f10717afc4587`; 함께 구동부 `af9d4395…`, 갈래 파일 생성 `a722e4af…`, 요약 `17c3a9eb…`, 기대 대조 `442d2e7d…`, fixture `b0bf84ae…`, 개정 3 사본 `acfd4271…`. 저장소의 파일과 8/8 같음(`out/freeze_check_2.txt`). 동결한 코드는 `e4b2b98` 이고, 동결본으로 낸 기록(`_2` 디렉터리)은 모두 그 두 sha256 을 싣는다.
+
+### 24.6 공간 [M]
+
+시작 728,752,128 B(07:50Z), 끝 548,642,816 B(08:33Z), 바닥 314,572,800. 감시 기록 14, 모두 completed; 가장 큰 dip 72,712,192 B(fixture 실행의 scratch, 끝에 지움), 가장 낮은 값 478,576,640 B. 남긴 출력 열둘 합 약 145 MB(`xr4_regress_rev4*` 23 MB 씩, 정적 예행 13 MB 씩, 시험 dump 예행 11–12 MB 씩, 기준 2.5 MB). 압축 허용은 쓰지 않았다. scratch 는 이 단계가 만든 것만 지웠다.
+
+### 24.7 계획과 다르게 한 것
+
+1. **평가 갈래를 입력 파일로**(10.2): 명세 3 절 1 의 인자 대신. 명세를 코드보다 먼저 고쳐 커밋했다.
+2. **서식 검사 16 의 읽기**(10.7 1): 글자대로면 전제를 받는 읽기(`Rd`, `Re`)의 `D1` 기록이 모두 물린다(첫 정적 예행 scratch: `D1-Rd` 46/46). 읽기가 이름 댄 전제는 그 갈래에서만 받고 칸 `reading` 을 단다. lead 의 확인이 필요하다.
+3. **D2 갈래는 실제 출력에서 돌리지 않았다**: 후보 목록과 인정 파일은 주기 준비 단계가 규칙으로 만들어 커밋할 것이라(평가 절차 4·12 절) 이 단계는 fixture 로만 시험했다. 예행과 회귀는 D1 여덟 갈래다.
+4. **시험 dump 예행의 rc**: 판정 부분 rc 3 은 결합 점검의 계약이다(24.4 (나)).
+5. **동결 전 고침 한 번**(`e4b2b98`)과 첫 실행 출력·첫 단위 점검·첫 동결 대조(`freeze_check.txt`, 첫 줄을 빠뜨린 7 줄) 를 남겼다.
+6. 요약이 두 빌드를 "부팅"의 자리로 읽은 예행 요약(`out/summary_dry_static_2.txt`)은 형식 시험일 뿐이다.
+
+### 24.8 열린 점
+
+1. lead 의 판단 (a): 24.4 (라) — `Re` 의 글은 (6)을 덮지만 입력 줄이 결과를 주지 않아 움직이지 않는다. PI 의 열린 점.
+2. 기초 2 는 프로세스의 첫 스레드가 만든 생성에서 글대로 서지 않는다(생성 인자 묶기가 없음; 시간 기준 행의 생성자가 그렇다). 규칙을 바꾸지 않았다. lead·PI 의 판단.
+3. 서식 검사 16 의 읽기(24.7 2)의 확인.
+4. 후보 목록·인정 파일·기대 파일(`kz-expect 1`)·미리 정한 사용 목록은 주기 준비 단계의 것이다. 판독지와 읽는 사람은 PI 결정 그대로다.
+5. 적재된 cFS 모듈의 `buildid` 줄은 부팅 전이라 본 적이 없다 [미확인]. 줄을 읽는 쪽의 고침만 부팅 뒤에 생기면 판정 부분의 sha256 이 같고 diff 를 남긴다(명세 2 절).
+6. lead 의 판단 (b), (c)의 열린 점(성공 경로 줄의 지역 변수 빈틈, 완전하지 않은 버퍼)은 그대로이고, 이 판정 부분에서는 기초 4 와 (다)의 `missing` 으로 나온다.

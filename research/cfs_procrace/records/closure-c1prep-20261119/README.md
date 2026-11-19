@@ -12,3 +12,4 @@ declaration. No cFS boot. Nothing is pushed.
 | `out/free_start.txt`, `out/space_need.txt` | free space at the start; the step's space need, written before any action |
 | `out/ledger_check_start.txt`, `out/tools_check_deep_start.txt` | the cumulative byte-identity list and the tool registry at the start |
 | `reclaim/archive.sh`, `reclaim/roundtrip_<name>.txt` | the replacement of the four option-off extract rounds by xz tar archives (round trip file by file) |
+| `reclaim/ledger_rewrite.txt`, `reclaim/ledger_check_after_archive.txt`, `reclaim/free_after.txt`, `../../guard` logs `guard/a_*.log` | the four rows rewritten (method parts on the archive directory); the ledger after the replacement; free space after |

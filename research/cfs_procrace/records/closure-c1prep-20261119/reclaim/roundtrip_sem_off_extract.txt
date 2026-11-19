@@ -1,0 +1,6 @@
+# archive.sh sem_off_extract records/semantics-20261116/sem_off_extract.sha256 2026-11-19T08:46:15Z
+1. directory = list: 50 files, 46967422 bytes (apparent), 47149056 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/sem_off_extract/sem_off_extract.tar.xz 3394656 bytes sha256 5e7061b3ecb59676a4cf7db8601739c6960f3e382f3264fd0b4dd5c323e6c309
+4. round trip: 50 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/sem_off_extract removed 2026-11-19T08:46:26Z
+PASS

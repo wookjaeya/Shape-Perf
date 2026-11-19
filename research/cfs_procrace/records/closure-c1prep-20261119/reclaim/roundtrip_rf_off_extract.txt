@@ -1,0 +1,6 @@
+# archive.sh rf_off_extract records/result-flow-20261116/rf_off_extract.sha256 2026-11-19T08:46:27Z
+1. directory = list: 50 files, 46967440 bytes (apparent), 47149056 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/rf_off_extract/rf_off_extract.tar.xz 3383000 bytes sha256 d6732f369f4993b1ed9e99d17b556fa5753991ee1c49196c9c3235d86d6dc9dc
+4. round trip: 50 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/rf_off_extract removed 2026-11-19T08:46:38Z
+PASS

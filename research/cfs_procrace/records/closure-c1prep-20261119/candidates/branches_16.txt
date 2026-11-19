@@ -1,0 +1,21 @@
+kz-eval-branches 1
+rule judgement rules 8.13 item 5 (2026-11-18): data branches D1 and D2 (and D2[<kinds>] for each admission file given) x readings R0, each of Ra-Rf alone, all six
+candidates 6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73
+branch D1-R0 data=D1 readings=R0 admitted=none admitted_sha256=none
+branch D1-Ra data=D1 readings=Ra admitted=none admitted_sha256=none
+branch D1-Rb data=D1 readings=Rb admitted=none admitted_sha256=none
+branch D1-Rc data=D1 readings=Rc admitted=none admitted_sha256=none
+branch D1-Rd data=D1 readings=Rd admitted=none admitted_sha256=none
+branch D1-Re data=D1 readings=Re admitted=none admitted_sha256=none
+branch D1-Rf data=D1 readings=Rf admitted=none admitted_sha256=none
+branch D1-all data=D1 readings=Ra,Rb,Rc,Rd,Re,Rf admitted=none admitted_sha256=none
+branch D2-R0 data=D2 readings=R0 admitted=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/admitted_D2.tsv admitted_sha256=d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4
+branch D2-Ra data=D2 readings=Ra admitted=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/admitted_D2.tsv admitted_sha256=d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4
+branch D2-Rb data=D2 readings=Rb admitted=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/admitted_D2.tsv admitted_sha256=d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4
+branch D2-Rc data=D2 readings=Rc admitted=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/admitted_D2.tsv admitted_sha256=d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4
+branch D2-Rd data=D2 readings=Rd admitted=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/admitted_D2.tsv admitted_sha256=d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4
+branch D2-Re data=D2 readings=Re admitted=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/admitted_D2.tsv admitted_sha256=d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4
+branch D2-Rf data=D2 readings=Rf admitted=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/admitted_D2.tsv admitted_sha256=d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4
+branch D2-all data=D2 readings=Ra,Rb,Rc,Rd,Re,Rf admitted=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/admitted_D2.tsv admitted_sha256=d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4
+lines 16
+end

@@ -1,0 +1,26 @@
+== c1_pre_tx facts sha256 7403a3775bb49f9f0e1e347236ac4b11ed655f5b8fbe69625f8743fe14c1f3f9
+SEMANTICS records verify=unverified: 159
+memchr: SEMANTICS records 0, of them unverified 0
+memset: SEMANTICS records 3, of them unverified 2
+strncpy: SEMANTICS records 3, of them unverified 2
+strcmp: SEMANTICS records 3, of them unverified 1
+named library calls of planned and other rows (sidecar, all namespace-entry lines):
+      4 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271
+      2 copy-call=memset@osal/src/os/shared/src/osapi-countsem.c:100,strncpy@osal/src/os/shared/src/osapi-countsem.c:100
+      2 copy-call=memset@osal/src/os/shared/src/osapi-timebase.c:128,strncpy@osal/src/os/shared/src/osapi-timebase.c:128
+      1 fill-call=memset@osal/src/os/shared/src/osapi-idmap.c:120
+      2 length-call=memchr@osal/src/os/shared/src/osapi-countsem.c:91,memchr@osal/src/os/shared/src/osapi-idmap.c:973
+      2 length-call=memchr@osal/src/os/shared/src/osapi-idmap.c:973,memchr@osal/src/os/shared/src/osapi-timebase.c:109,memchr@osal/src/os/shared/src/osapi-timebase.c:256
+== c1_post_tx facts sha256 77532840db27038edd009421060b5cdead8ebab6fe32ab9f317637cd470bd979
+SEMANTICS records verify=unverified: 159
+memchr: SEMANTICS records 0, of them unverified 0
+memset: SEMANTICS records 3, of them unverified 2
+strncpy: SEMANTICS records 3, of them unverified 2
+strcmp: SEMANTICS records 3, of them unverified 1
+named library calls of planned and other rows (sidecar, all namespace-entry lines):
+      4 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271
+      2 copy-call=memset@osal/src/os/shared/src/osapi-countsem.c:100,strncpy@osal/src/os/shared/src/osapi-countsem.c:100
+      2 copy-call=memset@osal/src/os/shared/src/osapi-timebase.c:128,strncpy@osal/src/os/shared/src/osapi-timebase.c:128
+      1 fill-call=memset@osal/src/os/shared/src/osapi-idmap.c:120
+      2 length-call=memchr@osal/src/os/shared/src/osapi-countsem.c:91,memchr@osal/src/os/shared/src/osapi-idmap.c:973
+      2 length-call=memchr@osal/src/os/shared/src/osapi-idmap.c:973,memchr@osal/src/os/shared/src/osapi-timebase.c:109,memchr@osal/src/os/shared/src/osapi-timebase.c:256

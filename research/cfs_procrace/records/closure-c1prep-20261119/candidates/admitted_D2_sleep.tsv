@@ -1,0 +1,8 @@
+kz-admitted 1
+candidates 6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73
+branch D2[sleep]
+ground sleep: none: evaluation branch written before the PI's answer
+columns layer	function	column	data_file	data_sha256	data_line	named_by	kind
+P0	clock_nanosleep	role	kairos/lib/llvm/p0.cpp	b9d3cc57375d014024cb447260a038b31eeaf49d72bfa7af517ddfb150c6e035	125	P0-unverified	sleep
+lines 1
+end

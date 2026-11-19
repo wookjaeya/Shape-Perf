@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # run_cycle.sh STEP BUILD N -- the boots of one automatic C1 cycle, as declared in results 25.12 (written and committed
 # by the cycle preparation step; NOT RUN by it).  Revised before any boot (results 26.0 (e), (h); spec 11 items 14-15):
-# the verify step first, the eval step after explain, the named-calls input of explain, the uses list of summary.  BUILD c1_pre_tx | c1_post_tx; N is the boot's number: 1, then 2-5 only
+# the verify step first, the eval step after explain, the named-calls input of explain, the uses list of summary.  Revised again
+# before any boot (results 26.4): the declaration it verifies is boot/declaration2.tsv (it supersedes declaration.tsv of
+# 860c2cd, kept unchanged), and the eval and expect steps read expect/expect_c1_2.tsv (the expectations rewritten from
+# the rules; expect_c1.tsv is kept unchanged and read by no step).  BUILD c1_pre_tx | c1_post_tx; N is the boot's number: 1, then 2-5 only
 # after boot 1 (or its one retry 1r) passed the gate, or 1r only after boot 1 failed it and the cause is committed in
 # <build>/addendum_1r.txt.  Every output directory is new; nothing is replaced.  Logs and small records go into
 # <build>/boot<N>/ beside this script; large outputs into /home/user/work/redesign/obs1/c1cyc_<s>_<what><N>.
-#   verify    re-hash every sha256 row and re-read every build-id row of boot/declaration.tsv (readelf -n, as when the
+#   verify    re-hash every sha256 row and re-read every build-id row of boot/declaration2.tsv (readelf -n, as when the
 #             declaration was written; a plan-id row against its plan.side) into <build>/boot<N>/verify.txt (kz-verify 1);
 #             rc 0 when no row differs and none is missing, 1 otherwise, 64 on usage
 #   boot      the natural boot (run_gi_c1.sh, tx records, rx off) of the derived build with kzgcc 0.5; only after a clean
@@ -34,7 +37,7 @@ GUARD=$R/env/tools/space_guard.sh
 EX=$R/env/obs1
 SEM=$R/kairos/semantics
 O=${RUN_CYCLE_OBS:-/home/user/work/redesign/obs1}
-DECL=$HERE/declaration.tsv
+DECL=$HERE/declaration2.tsv
 MC=/home/user/work/merge-check/kz-llvm
 STEP=${1:?usage: run_cycle.sh STEP BUILD N}; B=${2:?build}; N=${3:-}
 case "$B" in c1_pre_tx) S=pre; CFG=pre ;; c1_post_tx) S=post; CFG=post ;; *) echo "run_cycle.sh: BUILD is c1_pre_tx or c1_post_tx" >&2; exit 64 ;; esac
@@ -169,7 +172,7 @@ case "$STEP" in
       --dump-text "$RUN/tx.dump.txt" --run-meta "$RUN/run.meta" --chain "$L/chain.txt" --stop-eval "$L/stop_eval.tsv" \
       --startup-script "$RUN/inst/tx/cf/cfe_es_startup.scr" --instance-list "$IL" \
       --branches "$D/candidates/branches_16.txt" --candidates "$D/candidates/candidates.tsv" --named-calls "$D/candidates/named_calls.tsv" \
-      --label-record "C1 cycle boot $N of $B (results 25.12)" \
+      --label-record "C1 cycle boot $N of $B (results 26.4, boot/declaration2.tsv)" \
       --vocabulary "$R/kairos/tests/static/data/reason_vocabulary.txt" --out "$XO" > "$L/explain.txt" 2>&1; rc=$?
     echo "rc=$rc" >> "$L/explain.txt"; tail -20 "$L/explain.txt"; exit $rc ;;
   eval)
@@ -177,10 +180,10 @@ case "$STEP" in
     SB=none; [ -f "$L/sheet_boot.tsv" ] && SB=$L/sheet_boot.tsv
     g eval 20000000 python3 -I "$EX/explain_eval.py" --explain "$XO" --build "$B" --boot "boot$N" --gate "$L/gate.txt" --pairs "$ORD/pairs.tsv" \
       --sidecar "$P/plan.side" --relations "$ORD/relations.txt" --uses "$D/uses/uses_$B.tsv" --sheets-static "$D/sheets/sheets_static.tsv" \
-      --sheets-boot "$SB" --expect "$D/expect/expect_c1.tsv" --out "$L/eval.txt" > "$L/eval_run.txt" 2>&1; rc=$?
+      --sheets-boot "$SB" --expect "$D/expect/expect_c1_2.tsv" --out "$L/eval.txt" > "$L/eval_run.txt" 2>&1; rc=$?
     echo "rc=$rc" >> "$L/eval_run.txt"; tail -6 "$L/eval_run.txt"; exit $rc ;;
   expect)
-    python3 -I "$EX/explain_expect.py" --expect "$D/expect/expect_c1.tsv" --records "$XO" --out "$L/expect_compare.txt"; rc=$?
+    python3 -I "$EX/explain_expect.py" --expect "$D/expect/expect_c1_2.tsv" --records "$XO" --out "$L/expect_compare.txt"; rc=$?
     echo "rc=$rc"; tail -1 "$L/expect_compare.txt"; exit $rc ;;
   summary)
     A=(); for d in "$HERE/$B"/boot*; do n=${d##*/boot}; [ "$(gate_of "$n")" = PASS ] && A+=("boot$n=$O/c1cyc_${S}_explain$n"); done

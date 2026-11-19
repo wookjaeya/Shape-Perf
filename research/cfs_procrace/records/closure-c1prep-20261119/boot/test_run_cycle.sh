@@ -7,7 +7,8 @@
 # test seam RUN_CYCLE_BOOT_CMD (it writes a marker file), so nothing is booted.  Cases: a clean declaration (verify rc 0,
 # the boot runs the mock); a changed declared value (differs, rc 1, the boot refuses and the mock is not called); a
 # missing file (missing, rc 1, no boot); a declaration changed after a clean verify (no boot); no verify.txt (no boot).
-# One line per check and a count; rc 0 when every check passes.  Writes only under WORK_DIR.
+# One line per check and a count; rc 0 when every check passes.  Writes only under WORK_DIR.  (2026-11-19, results 26.4:
+# the stub declaration is named declaration2.tsv, the file run_cycle.sh now verifies.)
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WK=${1:?usage: test_run_cycle.sh WORK_DIR}
@@ -34,7 +35,7 @@ tree() { # NAME: a stub tree; prints its boot directory
     printf 'cycle\t*\tf_r.txt\t%s\trecords/x/f_r.txt\n' "$(sha256sum < "$t/root/research/cfs_procrace/records/x/f_r.txt" | cut -c1-64)"
     printf 'frozen\t*\tf_repo\t%s\tresearch/cfs_procrace/env/f_repo.txt\n' "$(sha256sum < "$t/root/research/cfs_procrace/env/f_repo.txt" | cut -c1-64)"
     printf 'tool\t*\ttool.bin\t%s\t%s\n' "$(sha256sum < "$t/abs/tool.bin" | cut -c1-64)" "$t/abs/tool.bin"
-  } > "$b/declaration.tsv"
+  } > "$b/declaration2.tsv"
   echo "$b"
 }
 rc_step() { # TREE STEP: run a step of the tree's run_cycle.sh with the two seams; prints rc
@@ -48,7 +49,7 @@ b=$(tree clean); r1=$(rc_step clean verify); r2=$(rc_step clean boot)
 ok=0; [ "$r1" = 0 ] && grep -qx 'rows 6 ok 6 differs 0 missing 0' "$b/c1_pre_tx/boot1/verify.txt" && [ "$r2" = 0 ] && [ -f "$WK/clean/booted" ] || ok=1
 res "clean declaration: verify rc 0, the boot step runs" $ok "verify rc $r1, boot rc $r2, $(tail -1 "$b/c1_pre_tx/boot1/verify.txt")"
 # 2 a changed declared value
-b=$(tree differs); Z=$(printf '0%.0s' $(seq 64)); sed -i "s/^\(elf\tc1_pre_tx\tprog\t\)[0-9a-f]\{64\}/\1$Z/" "$b/declaration.tsv"
+b=$(tree differs); Z=$(printf '0%.0s' $(seq 64)); sed -i "s/^\(elf\tc1_pre_tx\tprog\t\)[0-9a-f]\{64\}/\1$Z/" "$b/declaration2.tsv"
 r1=$(rc_step differs verify); r2=$(rc_step differs boot)
 ok=0; [ "$r1" = 1 ] && grep -qP '\telf\t.*\tdiffers$' "$b/c1_pre_tx/boot1/verify.txt" && grep -qx 'rows 6 ok 5 differs 1 missing 0' "$b/c1_pre_tx/boot1/verify.txt" \
   && [ "$r2" = 1 ] && [ ! -e "$WK/differs/booted" ] || ok=1
@@ -60,7 +61,7 @@ ok=0; [ "$r1" = 1 ] && grep -qP '\ttool\t.*\tmissing$' "$b/c1_pre_tx/boot1/verif
   && [ "$r2" = 1 ] && [ ! -e "$WK/missing/booted" ] || ok=1
 res "a missing file: missing, rc 1; no boot" $ok "verify rc $r1, boot rc $r2, $(tail -1 "$b/c1_pre_tx/boot1/verify.txt")"
 # 4 the declaration changed after a clean verify
-b=$(tree changed); r1=$(rc_step changed verify); echo "# a later line" >> "$b/declaration.tsv"; r2=$(rc_step changed boot)
+b=$(tree changed); r1=$(rc_step changed verify); echo "# a later line" >> "$b/declaration2.tsv"; r2=$(rc_step changed boot)
 ok=0; [ "$r1" = 0 ] && [ "$r2" = 1 ] && [ ! -e "$WK/changed/booted" ] && grep -q 'not booting' "$WK/changed/boot.out" || ok=1
 res "the declaration changed after a clean verify: no boot" $ok "verify rc $r1, boot rc $r2"
 # 5 no verify.txt

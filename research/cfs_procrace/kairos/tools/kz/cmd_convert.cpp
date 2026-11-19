@@ -154,6 +154,17 @@ int run(int argc, char** argv) {
     std::printf("kz convert --kzrt %s (instrumented run)\ndump_sha256 %s\n", dump.c_str(), kz::to_hex(kz::sha256(ki.dump.data(), ki.dump.size())).c_str());
     for (const auto& m : ki.manifests) std::printf("manifest %s sha256 %s\n", m.first.c_str(), kz::to_hex(kz::sha256(m.second)).c_str());
     print_layer(r.layer);
+    {  // dump 1.5 (event_semantics.md 13.5 (bar)): the build-id records, or a line that the dump has none
+      const kz::Bytes& d = ki.dump;
+      size_t nb = 0;
+      for (const kz::trace::NBuild& b : r.layer.build_checks) nb += b.r.link == KZ_NBUILD_LINK_BUILD_ID ? 1u : 0u;
+      if (nb != 0)
+        std::printf("build-id records: %zu\n", nb);
+      else if (d.size() >= 12)
+        std::printf("build-id records: none (kzrt-dump %u.%u)\n", static_cast<unsigned>(d[8] | (d[9] << 8)), static_cast<unsigned>(d[10] | (d[11] << 8)));
+      else
+        std::printf("build-id records: none\n");
+    }
     for (const std::string& note : r.notes) std::printf("note: %s\n", note.c_str());
   }
   s = kz::write_whole_file(out, bytes);

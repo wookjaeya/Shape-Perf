@@ -79,6 +79,25 @@ static int buffer_record(const unsigned char *b, uint32_t size, uint32_t type, u
     c->ctx = g16(b + 62);
     return 1;
   }
+  if (type == KZ_RT_REC_TOK_CREATE || type == KZ_RT_REC_TOK_RETURN || type == KZ_RT_REC_TOK_START) { /* 1.5, reserved */
+    kz_rt_dec_token *k = &it->u.token;
+    const uint32_t need = type == KZ_RT_REC_TOK_RETURN ? KZ_RT_TOK_RETURN_SIZE : type == KZ_RT_REC_TOK_CREATE ? KZ_RT_TOK_CREATE_SIZE : KZ_RT_TOK_START_SIZE;
+    if (size < need) return 0;
+    k->owner = owner;
+    k->flags = sub;
+    k->actor = g32(b + 8);
+    k->aseq = g32(b + 12);
+    k->site = g32(b + 16);
+    k->token = g64(b + 24);
+    if (type == KZ_RT_REC_TOK_RETURN) {
+      k->status = (int64_t)g64(b + 32);
+      k->handle = g64(b + 40);
+      k->t = g64(b + 48);
+    } else {
+      k->t = g64(b + 32);
+    }
+    return 1;
+  }
   if (type == KZ_RT_REC_AEXIT) {
     kz_rt_dec_aexit *x = &it->u.aexit;
     if (size < KZ_RT_AEXIT_SIZE) return 0;
@@ -219,6 +238,24 @@ static int stream_record(const unsigned char *b, uint32_t size, uint32_t type, k
       q->satisfied = g32(b + 44);
       q->held_actor = g32(b + 48);
       q->holds = g32(b + 52);
+      return 1;
+    }
+    case KZ_RT_REC_BUILDID: { /* 1.5 */
+      kz_rt_dec_buildid *q = &it->u.buildid;
+      if (size < KZ_RT_BUILDID_FIXED) return 0;
+      q->object = g32(b + 8);
+      q->source = g32(b + 12);
+      q->note = g32(b + 16);
+      q->actor = g32(b + 20);
+      q->t = g64(b + 24);
+      q->id_len = g16(b + 32);
+      q->path_len = g16(b + 34);
+      q->flags = g32(b + 36);
+      if (q->id_len > KZ_RT_BUILDID_MAX || q->path_len > KZ_RT_OBJPATH_MAX) return 0;
+      if (KZ_RT_BUILDID_FIXED + q->id_len + q->path_len > size) return 0;
+      memcpy(q->id, b + KZ_RT_BUILDID_FIXED, q->id_len);
+      memcpy(q->path, b + KZ_RT_BUILDID_FIXED + q->id_len, q->path_len);
+      q->path[q->path_len] = 0;
       return 1;
     }
     case KZ_RT_REC_PLAN: {

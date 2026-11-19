@@ -1,4 +1,6 @@
-// kz-rt-dump -- print a "kzrt-dump" file (format major 1, minor 0 to 4) and check it against site manifests.
+// kz-rt-dump -- print a "kzrt-dump" file (format major 1, minor 0 to 5) and check it against site manifests.
+// Format 1.5 adds the "buildid" lines (one per loaded object: the main executable and each module registration's object)
+// and the reserved "tok-create", "tok-return" and "tok-start" lines of the creation token (event_semantics.md 13.1-13.5).
 //
 //   kz-rt-dump [--manifest <kzs-sites file>]... [--plan <kzrt-plan file>] [--events-only] <dump-file>
 //   kz-rt-dump --recover <store file> --out <dump-file> [--signal <n> | --exit-status <n>] [the options above]
@@ -113,6 +115,8 @@ const char* loss_name(uint32_t k) {
     case KZ_RT_LOSS_AFTER_STOP: return "after-stop";
     case KZ_RT_LOSS_NOTE_TABLE: return "note-table";
     case KZ_RT_LOSS_ABNORMAL_END: return "abnormal-end";
+    case KZ_RT_LOSS_NO_BUILD_ID: return "no-build-id";
+    case KZ_RT_LOSS_OBJECT_TABLE: return "object-table";
     default: return "?";
   }
 }
@@ -388,6 +392,24 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
         std::printf("module %u actor=%s t=%" PRIu64 " registrations=%u manifest_sha256=%s\n", it->u.module.module, actor_name(it->u.module.actor).c_str(),
                     it->u.module.t, it->u.module.registrations, hex(it->u.module.manifest_sha256, 32).c_str());
       break;
+    case KZ_RT_REC_BUILDID: { /* 1.5 (event_semantics.md 13.1) */
+      const kz_rt_dec_buildid& q = it->u.buildid;
+      if (meta) {
+        static const char* const d = "0123456789abcdef";
+        std::string id;
+        for (uint32_t i = 0; i < q.id_len; ++i) {
+          id.push_back(d[q.id[i] >> 4]);
+          id.push_back(d[q.id[i] & 15]);
+        }
+        const std::string obj = q.object == 0 ? std::string("main") : "module:" + std::to_string(q.object);
+        const char* note = q.note == KZ_RT_NOTE_PRESENT ? "present" : q.note == KZ_RT_NOTE_ABSENT ? "absent" : "unreadable";
+        const char* src = q.source == KZ_RT_OBJSRC_START ? "start" : q.source == KZ_RT_OBJSRC_REGISTRATION ? "registration" : "?";
+        std::printf("buildid object=%s path=%s build_id=%s note=%s source=%s actor=%s t=%" PRIu64 "%s\n", obj.c_str(),
+                    quoted(reinterpret_cast<const unsigned char*>(q.path), q.path_len).c_str(), id.empty() ? "-" : id.c_str(), note, src,
+                    q.actor != 0 ? actor_name(q.actor).c_str() : "-", q.t, (q.flags & KZ_RT_OBJF_PATH_CUT) != 0 ? " path_cut=yes" : "");
+      }
+      break;
+    }
     case KZ_RT_REC_RESOURCE:
       if (meta)
         std::printf("resource kind=%u origin=%s count=%" PRIu64 " what=\"%s\"\n", it->u.resource.kind,
@@ -479,6 +501,21 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
       st->aseqs[c.actor].push_back(c.aseq);
       break;
     }
+    case KZ_RT_REC_TOK_CREATE: /* 1.5, reserved (event_semantics.md 13.2) */
+      std::printf("tok-create actor=%s aseq=%u token=%" PRIu64 " site=%s t=%" PRIu64 "\n", actor_name(it->u.token.actor).c_str(), it->u.token.aseq,
+                  it->u.token.token, st->site_text(it->u.token.site).c_str(), it->u.token.t);
+      st->aseqs[it->u.token.actor].push_back(it->u.token.aseq);
+      break;
+    case KZ_RT_REC_TOK_RETURN:
+      std::printf("tok-return actor=%s aseq=%u token=%" PRIu64 " status=%" PRId64 " handle=0x%" PRIx64 " t=%" PRIu64 "\n", actor_name(it->u.token.actor).c_str(),
+                  it->u.token.aseq, it->u.token.token, it->u.token.status, it->u.token.handle, it->u.token.t);
+      st->aseqs[it->u.token.actor].push_back(it->u.token.aseq);
+      break;
+    case KZ_RT_REC_TOK_START:
+      std::printf("tok-start actor=%s aseq=%u token=%" PRIu64 " t=%" PRIu64 "\n", actor_name(it->u.token.actor).c_str(), it->u.token.aseq, it->u.token.token,
+                  it->u.token.t);
+      st->aseqs[it->u.token.actor].push_back(it->u.token.aseq);
+      break;
     case KZ_RT_REC_AEXIT:
       std::printf("aexit actor=%s aseq=%u t=%" PRIu64 "\n", actor_name(it->u.aexit.actor).c_str(), it->u.aexit.aseq, it->u.aexit.t);
       st->aseqs[it->u.aexit.actor].push_back(it->u.aexit.aseq);

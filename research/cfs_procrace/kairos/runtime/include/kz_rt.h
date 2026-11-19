@@ -47,10 +47,11 @@ extern "C" {
 /* ---- versions -------------------------------------------------------------------------- */
 #define KZ_RT_ABI_VERSION 1u        /* hooks, control points, config, adapter (0.2.0 only adds calls) */
 #define KZ_RT_FORMAT_MAJOR 1u       /* dump format "kzrt-dump"; a reader accepts only its major */
-#define KZ_RT_FORMAT_MINOR 4u       /* added record types or fields at the end of a record (1.1: RUNX,
+#define KZ_RT_FORMAT_MINOR 5u       /* added record types or fields at the end of a record (1.1: RUNX,
                                        MODULE registrations, ACTOR demand and chunks; 1.2: RUNX process;
-                                       1.3: the PLAN record; 1.4: RUNX end and store, the recovered dump) */
-#define KZ_RT_RUNTIME_VERSION "kzrt 0.4.0"
+                                       1.3: the PLAN record; 1.4: RUNX end and store, the recovered dump;
+                                       1.5: BUILDID, the reserved creation-token records, two LOSS kinds) */
+#define KZ_RT_RUNTIME_VERSION "kzrt 0.5.0"
 
 /* ---- static sizes (override with -D when building the runtime; recorded in the dump) ---- */
 /* Tool capacities, not research conditions (event_semantics.md 8.3, 8.9: how the defaults were derived
@@ -142,9 +143,12 @@ enum {
   KZ_RT_LOSS_MODULE_TABLE = 11,/* kz_rt_module calls beyond KZ_RT_MAX_MODULES */
   KZ_RT_LOSS_AFTER_STOP = 12,  /* hook calls after kz_rt_stop (outside the observation window) */
   KZ_RT_LOSS_NOTE_TABLE = 13,  /* kz_rt_note_loss calls beyond KZ_RT_MAX_NOTES */
-  KZ_RT_LOSS_ABNORMAL_END = 14 /* recovered dump only (count 1): the process ended without its own dump after
+  KZ_RT_LOSS_ABNORMAL_END = 14,/* recovered dump only (count 1): the process ended without its own dump after
                                   kz_rt_stop; the records are the prefix the store held when it ended, and what
                                   the actors did after their last record is not known */
+  KZ_RT_LOSS_NO_BUILD_ID = 15, /* 1.5 (key = module, 0 = the main executable): objects whose build-id is not recorded
+                                  (note absent or unreadable, or no object reader was ever given); no event is lost */
+  KZ_RT_LOSS_OBJECT_TABLE = 16 /* 1.5: (module, address) registrations beyond KZ_RT_MAX_OBJECTS; no event is lost */
 };
 
 /* ---- the per-thread cell ---------------------------------------------------------------- */
@@ -332,6 +336,38 @@ KZ_RT_API int kz_rt_ctl_state(uint32_t point, kz_rt_point_state *out);
 KZ_RT_API void kz_rt_module(uint32_t module, const uint8_t *manifest_sha256);
 KZ_RT_API void kz_rt_note_loss(uint32_t kind, uint32_t key, uint32_t count);  /* EXCLUDED, UNLOADED, ... */
 KZ_RT_API void kz_rt_actor_exit(void);  /* the calling thread ends (its actor id is never reused) */
+
+/* ---- loaded objects and their build-ids (kzrt 0.5.0, dump 1.5 BUILDID; event_semantics.md 13.5) ---------- */
+/* The core calls no library, so an adapter-side reader finds the loaded object that holds an address and reads its
+ * GNU build-id note.  kz_rt_objects gives the reader once: the main executable is read at once (source start), then
+ * every module registration received so far, then each later one when it is made (source registration).  The
+ * address of a registration is its manifest_sha256 argument (the binding's constant in the registering unit).  One
+ * BUILDID record per (module, object); everything is kept as values in the store.  The reader must not call
+ * instrumented code; it is called with no runtime lock held. */
+#define KZ_RT_BUILDID_MAX 64u
+#define KZ_RT_OBJPATH_MAX 1023u
+#define KZ_RT_OBJSRC_START 1u        /* the main executable, read when the object reader was given */
+#define KZ_RT_OBJSRC_REGISTRATION 2u /* the object that holds a module registration's argument */
+#define KZ_RT_NOTE_PRESENT 0u        /* the GNU build-id note was read */
+#define KZ_RT_NOTE_ABSENT 1u         /* the object has no such note */
+#define KZ_RT_NOTE_UNREADABLE 2u     /* no object holds the address, or its note segments are not well formed */
+#define KZ_RT_OBJF_PATH_CUT 1u       /* the path was cut at KZ_RT_OBJPATH_MAX bytes */
+#ifndef KZ_RT_MAX_OBJECTS
+#define KZ_RT_MAX_OBJECTS (KZ_RT_MAX_MODULES + 1u) /* (module, object) and (module, address) entries */
+#endif
+typedef struct kz_rt_object {
+  uint64_t base;     /* the object's load base (its identity within the process; never written to the dump) */
+  uint32_t found;    /* 1 = an object holds the address */
+  uint32_t note;     /* KZ_RT_NOTE_* of kz_rt_format.h */
+  uint32_t id_len;   /* <= KZ_RT_BUILDID_MAX */
+  uint32_t path_len; /* <= KZ_RT_OBJPATH_MAX */
+  uint32_t flags;    /* KZ_RT_OBJF_* */
+  unsigned char id[KZ_RT_BUILDID_MAX];
+  char path[KZ_RT_OBJPATH_MAX + 1u];
+} kz_rt_object;
+/* Fills *out for the object that holds addr (NULL = the main executable); returns 0 when it filled it. */
+typedef int (*kz_rt_object_fn)(void *ctx, const void *addr, kz_rt_object *out);
+KZ_RT_API void kz_rt_objects(kz_rt_object_fn reader, void *ctx); /* once; a second call is ignored */
 
 /* ---- observation hooks (hook ABI 1) -------------------------------------------------------- */
 /* site: logical site id; bind: binding id (both manifest constants).  link: the aseq of a related

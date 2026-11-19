@@ -7,6 +7,9 @@
 #                         it, check the stored values and addresses, the call points, the line start and the gap
 #   mode owner-O0|O2      build kzgcc_owner.c with kzgcc_owner.kzs (kzs-sites 3): the owner-publish and owner-check
 #                         stores name the function's entry record as their link (kzgcc 0.3); at a call: unsupported
+#   mode v4-O0|O2         build kzgcc_v4.c with kzgcc_v4.kzs (kzs-sites 4, kzgcc 0.4): two calls on one line told apart
+#                         by col=, a column no call has (unsupported), a nested call whose GCC column differs, place=load
+#                         (unsupported, counted), a spawn statement (a plain at-call, noted), the counted header lines
 # Unit test of the plugin; the values are unit-test values.
 set -uo pipefail
 MODE=$1 CC=$2 PLUGIN=$3 RT=$4 EVENTS=$5 T=$6 W=$7
@@ -65,6 +68,38 @@ case "$MODE" in
     awk -F'\t' '$1=="ev" && $4>=1 && $4<=7 && $6!=0 {bad=1} END {exit bad}' "$W/events.tsv" || fail "a point has a link"
     for s in 1 2 3 4 5 6 7 8; do grep -E "^bind [0-9]+ site=$s .*status=(bound|inlined)" "$B" > /dev/null || fail "site $s not bound: $(grep "site=$s " "$B")"; done
     grep -q 'site=9 .*status=unsupported reason="phase=point with callee= needs place=' "$B" || fail "site without place not declared a gap"
+    echo "ok: $MODE"; exit 0 ;;
+  v4-*)
+    OPT=-${MODE#v4-}
+    SP=(-fplugin="$PLUGIN" -fplugin-arg-kzgcc-manifest="$T/kzgcc_v4.kzs" -fplugin-arg-kzgcc-out="$W/binds")
+    "$CC" $OPT -c "$T/kzgcc_v4.c" -o "$W/v.o" "${SP[@]}" 2> "$W/cc.err" || { cat "$W/cc.err"; fail "compile"; }
+    [ -s "$W/cc.err" ] && { cat "$W/cc.err"; fail "compiler diagnostics"; }
+    "$CC" $OPT "$W/v.o" -o "$W/v" -Wl,--whole-archive "$RT/libkzrt-posix.a" "$RT/libkzrt.a" -Wl,--no-whole-archive \
+        "$RT/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o" -lpthread || fail "link"
+    KZ_RT_DUMP="$W/dump.bin" "$W/v" > "$W/out.txt" || fail "target exit"
+    grep -q "^v4 401 5 0$" "$W/out.txt" || fail "target output: $(cat "$W/out.txt")"
+    B=$(ls "$W"/binds/*.kzs); [ -n "$B" ] || fail "no binding file"
+    "$RT/kz-rt-dump" --manifest "$T/kzgcc_v4.kzs" --manifest "$B" "$W/dump.bin" > "$W/dump.txt" || { tail -5 "$W/dump.txt"; fail "kz-rt-dump check"; }
+    "$EVENTS" "$W/dump.bin" > "$W/events.tsv" || fail "kzgcc-events"
+    ev() { awk -F'\t' -v s="$1" '$1=="ev" && $4==s' "$W/events.tsv"; }
+    for s in 1 2 4 5 7 8; do grep -E "^bind [0-9]+ site=$s .*status=(bound|inlined)" "$B" > /dev/null || fail "site $s not bound: $(grep "site=$s " "$B")"; done
+    grep -q 'site=3 .*status=unsupported reason="2 calls of pick on line 16 and col=99 names none of them in GCC.s locations (gcc columns 11,21)"' "$B" || fail "site 3: $(grep 'site=3 ' "$B")"
+    grep -q 'site=6 .*status=unsupported reason="place=load is not bound by kzgcc 0.4 (no load site kind)"' "$B" || fail "site 6: $(grep 'site=6 ' "$B")"
+    grep -q '^# bind [0-9]* kind=at-call .*notes=.* gcc-col=11 gcc-nth=1 (by column)' "$B" || fail "site 1 notes"
+    grep -q '^# bind [0-9]* kind=after-call .*notes=.* gcc-col=21 gcc-nth=2 (by column)' "$B" || fail "site 2 notes"
+    grep -q '^# bind [0-9]* kind=at-call .*notes=.* gcc-col=8 gcc-nth=3 (one call on the line)' "$B" || fail "site 4 notes"
+    grep -q 'spawn wrapper not applied (bound as a plain at-call)' "$B" || fail "spawn note"
+    grep -q '^# plan 0123456789abcdef$' "$B" || fail "plan line"
+    grep -q '^# unsupported-kind place=load sites=1 reason="place=load is not bound by kzgcc 0.4 (no load site kind)"$' "$B" || fail "unsupported-kind load"
+    grep -q '^# unsupported-kind at-call sites=1 reason="2 calls of pick on line 16' "$B" || fail "unsupported-kind col"
+    grep -q '^# not-applied spawn-wrapper sites=1$' "$B" && grep -q '^# not-applied spawn-token-read sites=1$' "$B" || fail "not-applied lines"
+    grep -q '^# v4 calls: sites=6 line-unique=3 by-col=2 unsupported=1 col-differs=1 nth-differs=0$' "$B" || fail "v4 calls: $(grep '^# v4 calls' "$B")"
+    # the two calls of line 16: the first with a=1, the second with b=2 (and its result 20); the nested call with r=30
+    ev 1 | awk -F'\t' '$9=="0x1"' | grep -q . || fail "site 1 value: $(ev 1)"
+    ev 2 | awk -F'\t' '$9=="0x2" && $10=="0x14"' | grep -q . || fail "site 2 values: $(ev 2)"
+    ev 4 | awk -F'\t' '$9=="0x1e"' | grep -q . || fail "site 4 value: $(ev 4)"
+    [ "$(ev 3 | wc -l)" = 0 ] && [ "$(ev 6 | wc -l)" = 0 ] || fail "an unbound site has events"
+    [ "$(ev 7 | wc -l)" = 1 ] || fail "site 7: one event expected"
     echo "ok: $MODE"; exit 0 ;;
   owner-*)
     OPT=-${MODE#owner-}

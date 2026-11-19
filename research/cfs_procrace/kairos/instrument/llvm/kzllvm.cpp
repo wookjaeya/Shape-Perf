@@ -38,6 +38,13 @@
 //   -kzllvm-skip-coverage        do not instrument units compiled with -fprofile-arcs (llvm.gcov metadata)
 // The runtime itself is never instrumented: a unit that defines a kz_rt_* function is refused.
 //
+// kzllvm 0.2 (kzs-sites 4, docs/event_semantics.md 13.6): only in a version 4 manifest, a site of a kind kzllvm does not
+// bind (a place= site, a site with an identity read or a spawn statement) is declared unsupported with the reason
+// "<kind> is not bound by kzllvm 0.2" and counted in the binding file's "# unsupported-kind" lines; a call site with
+// col=/nth= binds the one call of its callee on its line, or with several there the one whose debug location column is
+// col= (else unsupported); the notes give llvm-col= and llvm-nth=; the lines "# plan" and "# v4 calls" are added.  With
+// a manifest of version 1, 2 or 3 everything is as in kzllvm 0.1 apart from the version text.
+//
 // LLVM API: the plugin is built against the exact LLVM build that loads it (LLVM_PLUGIN_API_VERSION and
 // the C++ API of that revision); no compatibility across LLVM revisions is assumed.
 
@@ -76,7 +83,7 @@ using namespace llvm;
 
 namespace {
 
-const char* const kVersion = "kzllvm 0.1";
+const char* const kVersion = "kzllvm 0.2";
 const char* const kBackend = "llvm-pass";
 
 cl::opt<std::string> OptManifest("kzllvm-manifest", cl::desc("kzllvm: the logical site manifest (kzs-sites 1)"), cl::init(""));
@@ -112,8 +119,19 @@ struct State {
   std::map<std::string, int> ctl_copies;
   std::string opt_level;
   bool has_debug_locs = false;
+  // kzs-sites 4 (kzllvm 0.2): call sites with col=/nth= and their selection
+  uint32_t v4_sites = 0, v4_unique = 0, v4_by_col = 0, v4_unsupported = 0, v4_col_differs = 0, v4_nth_differs = 0;
 };
 State kz;
+
+// kzs-sites 4: the kind of a site kzllvm 0.2 does not bind ("" = a kind it binds)
+std::string v4_unbound_kind(const kzrt::Site& s) {
+  if (kz.m.version < 4) return "";
+  if (!s.place.empty()) return "place=" + s.place;
+  if (s.has_spawn) return "spawn";
+  if (s.has_identity) return "identity " + s.identity.decoder;
+  return "";
+}
 
 bool ends_with_path(const std::string& path, const std::string& suffix) {
   if (suffix.empty() || path.size() < suffix.size()) return false;
@@ -212,6 +230,11 @@ uint32_t bind_id(uint32_t module, uint32_t site, uint32_t n) { return (module <<
 unsigned dl_line(const Instruction* I) {
   const DebugLoc& d = I->getDebugLoc();
   return d ? d.getLine() : 0;
+}
+
+unsigned dl_col(const Instruction* I) {
+  const DebugLoc& d = I->getDebugLoc();
+  return d ? d.getCol() : 0;
 }
 
 std::string where(const Instruction* I, const std::string& func) {
@@ -518,7 +541,7 @@ bool instrument_function(Function& F, const Hooks& h) {
   const std::string fname = F.getName().str();
   std::vector<const kzrt::Site*> here;
   for (const kzrt::Site* s : kz.sites)
-    if (s->func == fname) here.push_back(s);
+    if (s->func == fname && v4_unbound_kind(*s).empty()) here.push_back(s);
   if (here.empty()) return false;
   bool changed = false;
   IRBuilder<> B(F.getContext());
@@ -535,6 +558,7 @@ bool instrument_function(Function& F, const Hooks& h) {
   // 1. calls: the candidates of each call site first (line= is checked against the debug location when the
   //    unit has one; without debug information a line= site binds only if it is the only call of its callee)
   std::map<const kzrt::Site*, std::vector<CallBase*>> cand;
+  std::map<const kzrt::Site*, std::string> v4_note;
   for (const kzrt::Site* s : here) {
     if (s->callee.empty()) continue;
     std::vector<CallBase*> exact, noloc;
@@ -544,6 +568,49 @@ bool instrument_function(Function& F, const Hooks& h) {
       if (s->src_line == 0) exact.push_back(cb);
       else if (dl_line(cb) == s->src_line) exact.push_back(cb);
       else if (dl_line(cb) == 0) noloc.push_back(cb);
+    }
+    if (s->col != 0 || s->nth != 0) {  // kzs-sites 4: one call (docs/event_semantics.md 13.6)
+      if (exact.empty() && noloc.size() != 1) continue;
+      ++kz.v4_sites;
+      std::vector<CallBase*> pick;
+      std::string how;
+      if (exact.size() == 1) pick = exact, how = " (one call on the line)", ++kz.v4_unique;
+      else if (exact.empty()) pick = noloc, how = " (the only call of the callee; no debug location)", ++kz.v4_unique;
+      else {
+        std::string cols;
+        for (CallBase* cb : exact) {
+          cols += (cols.empty() ? "" : ",") + std::to_string(dl_col(cb));
+          if (s->col != 0 && dl_col(cb) == s->col) pick.push_back(cb);
+        }
+        if (pick.size() != 1) {
+          ++kz.v4_unsupported;
+          BindRec& b = new_bind(*s, std::string("call-") + s->phase, fname + " calls " + s->callee);
+          b.status = "unsupported";
+          b.reason = std::to_string(exact.size()) + " calls of " + s->callee + " on line " + std::to_string(s->src_line) + " and col=" + std::to_string(s->col) +
+                     " names " + (pick.empty() ? "none" : std::to_string(pick.size())) + " of them in the debug locations (columns " + cols + ")";
+          continue;
+        }
+        how = " (by column)";
+        ++kz.v4_by_col;
+      }
+      // the ordinal among the calls of the callee in the function, by (line, column), then instruction order
+      std::vector<std::pair<std::pair<unsigned, unsigned>, size_t>> ord;
+      std::vector<CallBase*> all;
+      for (CallBase* cb : calls) {
+        auto* callee = dyn_cast<Function>(cb->getCalledOperand()->stripPointerCasts());
+        if (callee == nullptr || callee->getName() != s->callee) continue;
+        ord.push_back({{dl_line(cb), dl_col(cb)}, all.size()});
+        all.push_back(cb);
+      }
+      std::sort(ord.begin(), ord.end());
+      unsigned nth = 0;
+      for (size_t i = 0; i < ord.size(); ++i)
+        if (all[ord[i].second] == pick[0]) nth = (unsigned)i + 1;
+      if (s->col != 0 && dl_col(pick[0]) != s->col) ++kz.v4_col_differs;
+      if (s->nth != 0 && nth != s->nth) ++kz.v4_nth_differs;
+      v4_note[s] = " llvm-col=" + std::to_string(dl_col(pick[0])) + " llvm-nth=" + std::to_string(nth) + how;
+      cand[s] = pick;
+      continue;
     }
     if (!exact.empty()) cand[s] = exact;
     else if (noloc.size() == 1) cand[s] = noloc;
@@ -577,6 +644,7 @@ bool instrument_function(Function& F, const Hooks& h) {
     for (const kzrt::Site* s : before) {
       BindRec& b = new_bind(*s, "call-before", at);
       b.notes += lnote(s);
+      if (v4_note.count(s)) b.notes += v4_note[s];
       if (b.status != "bound") continue;
       position(B, cb, cb->getDebugLoc());
       std::string why;
@@ -604,6 +672,7 @@ bool instrument_function(Function& F, const Hooks& h) {
     for (const kzrt::Site* s : after) {
       BindRec& b = new_bind(*s, "call-after", at);
       b.notes += lnote(s);
+      if (v4_note.count(s)) b.notes += v4_note[s];
       if (b.status != "bound") continue;
       position(B, next, cb->getDebugLoc());
       std::string why;
@@ -816,6 +885,23 @@ void write_binding_file(Module& M, ThinOrFullLTOPhase phase) {
     << " debug_locs=" << (kz.has_debug_locs ? 1 : 0) << " triple=" << M.getTargetTriple().str() << "\n";
   o << "# passes: insertion at PipelineStart, check at OptimizerLast\n";
   for (const std::string& n : kz.notes) o << "# note " << n << "\n";
+  if (kz.m.version >= 4) {  // kzs-sites 4 (docs/event_semantics.md 13.6)
+    if (kz.m.has_plan) o << "# plan " << kz.m.plan.id << "\n";
+    std::map<std::pair<std::string, std::string>, uint32_t> kinds;
+    std::set<uint32_t> bound_somewhere;
+    for (const BindRec& b : kz.binds)
+      if (b.status != "unsupported") bound_somewhere.insert(b.site);
+    for (const BindRec& b : kz.binds)
+      if (b.status == "unsupported" && bound_somewhere.count(b.site) == 0) ++kinds[{b.kind, b.reason}];
+    for (const kzrt::Site* st : kz.sites) {
+      if (kz.matched.count(st->id)) continue;
+      const std::string k = v4_unbound_kind(*st);
+      ++kinds[{k.empty() ? "phase=" + st->phase : k, k.empty() ? (kz.refused ? "unit refused" : "no matching function, call or store in the unit") : k + " is not bound by kzllvm 0.2"}];
+    }
+    for (const auto& kd : kinds) o << "# unsupported-kind " << kd.first.first << " sites=" << kd.second << " reason=\"" << kd.first.second << "\"\n";
+    o << "# v4 calls: sites=" << kz.v4_sites << " line-unique=" << kz.v4_unique << " by-col=" << kz.v4_by_col << " unsupported=" << kz.v4_unsupported
+      << " col-differs=" << kz.v4_col_differs << " nth-differs=" << kz.v4_nth_differs << "\n";
+  }
   for (const BindRec& b : kz.binds) {
     std::string copies;
     for (const auto& c : b.copies) copies += (copies.empty() ? "" : ",") + c.first + ":" + std::to_string(c.second);
@@ -836,7 +922,9 @@ void write_binding_file(Module& M, ThinOrFullLTOPhase phase) {
     if (kz.matched.count(s->id)) continue;
     uint32_t id = bind_id(kz.module, s->id, 15);
     o << "bind " << id << " site=" << s->id << " backend=" << kBackend << " module=" << kz.module << " at=\"" << kz.tu << " " << s->func
-      << "\" status=unsupported reason=\"" << (kz.refused ? "unit refused" : "no matching function, call or store in the unit") << "\"\n";
+      << "\" status=unsupported reason=\""
+      << (kz.refused ? "unit refused" : !v4_unbound_kind(*s).empty() ? v4_unbound_kind(*s) + " is not bound by kzllvm 0.2" : "no matching function, call or store in the unit")
+      << "\"\n";
   }
 }
 

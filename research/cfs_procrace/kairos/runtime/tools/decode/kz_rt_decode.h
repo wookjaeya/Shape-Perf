@@ -1,4 +1,4 @@
-/* kz_rt_decode.h -- host-side reader of the "kzrt-dump" format (kz_rt_format.h), major 1 (minor 0 to 4;
+/* kz_rt_decode.h -- host-side reader of the "kzrt-dump" format (kz_rt_format.h), major 1 (minor 0 to 5;
  * a field an older stream does not have reads as 0, and a 1.0 MODULE's registrations as 1).
  * Reads the explicit little-endian bytes field by field (independent of the host's layout) and
  * hands each record to a callback, in stream order and, inside a BUF, in buffer order. */
@@ -41,6 +41,19 @@ typedef struct kz_rt_dec_module {
   unsigned char manifest_sha256[32];
   uint32_t registrations; /* 1.1; 1 in a 1.0 stream */
 } kz_rt_dec_module;
+
+typedef struct kz_rt_dec_buildid { /* 1.5 BUILDID */
+  uint32_t object, source, note, actor, flags, id_len, path_len;
+  uint64_t t;
+  unsigned char id[KZ_RT_BUILDID_MAX];
+  char path[KZ_RT_OBJPATH_MAX + 1u]; /* NUL terminated; the bytes as recorded (path_len of them) */
+} kz_rt_dec_buildid;
+
+typedef struct kz_rt_dec_token { /* 1.5 TOK_CREATE / TOK_RETURN / TOK_START (reserved records; item type says which) */
+  uint32_t owner, flags, actor, aseq, site;
+  uint64_t token, handle, t;
+  int64_t status;
+} kz_rt_dec_token;
 
 typedef struct kz_rt_dec_resource {
   uint32_t kind, origin;
@@ -103,6 +116,8 @@ typedef struct kz_rt_dec_item {
     kz_rt_dec_run run;
     kz_rt_dec_runx runx;
     kz_rt_dec_module module;
+    kz_rt_dec_buildid buildid;
+    kz_rt_dec_token token;
     kz_rt_dec_resource resource;
     kz_rt_dec_actor actor;
     kz_rt_dec_loss loss;

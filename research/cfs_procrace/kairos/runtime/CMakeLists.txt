@@ -1,4 +1,4 @@
-# Kairos instrumentation runtime (kzrt 0.4.0: hook ABI 1, dump format 1.4, plan format kzrt-plan 1, store 1): kairos/docs/event_semantics.md.
+# Kairos instrumentation runtime (kzrt 0.5.0: hook ABI 1, dump format 1.5, plan format kzrt-plan 1, store 1): kairos/docs/event_semantics.md.
 #
 # Targets
 #   kzrt           static C99 core: hooks, bootstrap buffer and the actors' chunk pool, control (kzp-hold 1),

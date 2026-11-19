@@ -37,6 +37,12 @@ KZ_RT_API int kz_rt_posix_dump_fd(int fd);
  * refusal the store stays in process memory and the file is truncated to 0 bytes, so it is never taken for a store.
  * KZ_RT_OK = mapped. */
 KZ_RT_API int kz_rt_posix_store_file(const char *path);
+/* Gives the runtime the POSIX object reader (kz_rt_objects, kzrt 0.5.0): the loaded object that holds an address is
+ * found with the loader's program headers (dl_iterate_phdr: the object whose PT_LOAD segment holds it; the first object,
+ * the main executable, for the start record), and its GNU build-id is read from its PT_NOTE segments in memory.  Path:
+ * the main executable's AT_EXECFN, else the loader's dlpi_name.  The POSIX start-up object calls it after attach and init;
+ * a harness without it calls it once itself (event_semantics.md 13.5). */
+KZ_RT_API void kz_rt_posix_objects(void);
 
 #ifdef __cplusplus
 }

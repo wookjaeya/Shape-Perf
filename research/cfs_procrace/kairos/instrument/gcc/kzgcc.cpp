@@ -22,6 +22,13 @@
 // read is owner-publish or owner-check: bound at a store, it names the function's entry record too (the identity join
 // pairs it with the app-request of the same function instance by that link); bound at a call or a line start it is
 // declared unsupported.  Without these readers the objects and bind lines are kzgcc 0.2's; the version text differs.
+// kzgcc 0.4 (kzs-sites 4, docs/event_semantics.md 13.6): a call site with col=/nth= binds the one call of its callee on
+// its line, or, with several there, the one whose GIMPLE column equals col= (else unsupported with the columns); the
+// binding's notes give GCC's column and ordinal (gcc-col=, gcc-nth=).  place=load is not bound (unsupported, counted);
+// an at-call with a spawn statement is bound as a plain at-call (the creation wrapper is not applied, noted); the
+// identity read decoder=spawn-token has no reader here (counted).  The binding file of a version 4 manifest gets the
+// lines "# plan", "# unsupported-kind", "# not-applied" and "# v4 calls".  With a manifest of version 1, 2 or 3 the
+// objects and bind lines are kzgcc 0.3's; the version text differs.
 // Values are the GIMPLE operands the original statement uses (SSA names or invariants), converted to
 // 64 bits per the manifest type: nothing is evaluated twice, no shared variable is re-read (except the
 // out<k> read the manifest declares), no store is changed.  A string is copied only at a slot the
@@ -91,7 +98,7 @@ int plugin_is_GPL_compatible;
 namespace {
 
 const char* const kPluginName = "kzgcc";
-const char* const kVersion = "kzgcc 0.3";
+const char* const kVersion = "kzgcc 0.4";
 const char* const kBackend = "gcc-plugin";
 
 // ---- plugin state (one translation unit per cc1 process) -----------------------------------------
@@ -119,6 +126,8 @@ struct State {
   std::map<std::string, int> ctl_copies; // final function -> kz_rt_ctl calls
   std::vector<std::pair<uint32_t, std::string>> modules;
   bool skip_coverage = false;
+  // kzs-sites 4 (kzgcc 0.4): per call site with col=/nth=, the outcome of the selection (counted in "# v4 calls")
+  uint32_t v4_sites = 0, v4_unique = 0, v4_by_col = 0, v4_unsupported = 0, v4_col_differs = 0, v4_nth_differs = 0;
 };
 State kzg;
 
@@ -463,6 +472,7 @@ Shape shape_of(const kzrt::Site& s) {
 // Why a site of this unit got no binding (the declared gap of the binding file).
 std::string gap_reason(const kzrt::Site& s) {
   if (kzg.refused) return "unit refused";
+  if (s.place == "load") return "place=load is not bound by kzgcc 0.4 (no load site kind)";  // kzs-sites 4 only
   if (shape_of(s) == Shape::None) return "phase=" + s.phase + (s.callee.empty() ? "" : " with callee=") + " needs place= (kzs-sites 2)";
   switch (shape_of(s)) {
     case Shape::Store: return "no store statement on line " + std::to_string(s.src_line) + " of the function (a call with a memory result is not a store site)";
@@ -561,6 +571,73 @@ unsigned instrument_function(function* fun) {
     changed = true;
   }
 
+  // 2a. kzs-sites 4: a call site with col= or nth= names one call (docs/event_semantics.md 13.6): the one call of its
+  //     callee on its line, else the one whose GIMPLE column is col=; the others of the line are not bound by it
+  std::map<const kzrt::Site*, gimple*> v4_pick;
+  std::map<const kzrt::Site*, std::string> v4_note;
+  for (const kzrt::Site* s : here) {
+    if (s->callee.empty() || (s->col == 0 && s->nth == 0)) continue;
+    std::vector<gimple*> all, on_line;
+    for (gimple* st : calls) {
+      tree cd = gimple_call_fndecl(as_a<gcall*>(st));
+      if (cd == NULL_TREE || s->callee != fn_name(cd)) continue;
+      all.push_back(st);
+      if (s->src_line == 0 || (uint32_t)stmt_line(st) == s->src_line) on_line.push_back(st);
+    }
+    if (on_line.empty()) continue;  // the gap of the binding file: no matching call in the unit
+    ++kzg.v4_sites;
+    auto col_of = [](gimple* st) -> uint32_t {
+      location_t l = gimple_location(st);
+      return l == UNKNOWN_LOCATION ? 0u : (uint32_t)LOCATION_COLUMN(l);
+    };
+    gimple* pick = NULL;
+    if (on_line.size() == 1) {
+      pick = on_line[0];
+      ++kzg.v4_unique;
+    } else {
+      std::vector<gimple*> same;
+      std::string cols;
+      for (gimple* st : on_line) {
+        cols += (cols.empty() ? "" : ",") + std::to_string(col_of(st));
+        if (s->col != 0 && col_of(st) == s->col) same.push_back(st);
+      }
+      if (same.size() == 1) {
+        pick = same[0];
+        ++kzg.v4_by_col;
+      } else {
+        ++kzg.v4_unsupported;
+        BindRec& b = new_bind(*s, shape_of(*s) == Shape::AfterCall ? "after-call" : shape_of(*s) == Shape::AtCall ? "at-call" : "call", fname);
+        b.status = "unsupported";
+        b.reason = std::to_string(on_line.size()) + " calls of " + s->callee + " on line " + std::to_string(s->src_line) + " and col=" +
+                   std::to_string(s->col) + " names " + (same.empty() ? "none" : std::to_string(same.size())) + " of them in GCC's locations (gcc columns " + cols + ")";
+        v4_pick[s] = NULL;
+        continue;
+      }
+    }
+    // GCC's ordinal of the picked call among the calls of the callee in the function: source order (line, column),
+    // then statement order
+    std::vector<std::pair<std::pair<uint32_t, uint32_t>, size_t>> ord;
+    for (size_t i = 0; i < all.size(); ++i) ord.push_back({{(uint32_t)stmt_line(all[i]), col_of(all[i])}, i});
+    std::sort(ord.begin(), ord.end());
+    uint32_t nth = 0;
+    for (size_t i = 0; i < ord.size(); ++i)
+      if (all[ord[i].second] == pick) nth = (uint32_t)i + 1u;
+    const uint32_t gcol = col_of(pick);
+    if (s->col != 0 && gcol != s->col) ++kzg.v4_col_differs;
+    if (s->nth != 0 && nth != s->nth) ++kzg.v4_nth_differs;
+    v4_pick[s] = pick;
+    v4_note[s] = " gcc-col=" + std::to_string(gcol) + " gcc-nth=" + std::to_string(nth) + (on_line.size() == 1 ? " (one call on the line)" : " (by column)");
+  }
+  auto v4_skip = [&](const kzrt::Site* s, gimple* st) {
+    const auto it = v4_pick.find(s);
+    return it != v4_pick.end() && it->second != st;
+  };
+  auto v4_notes = [&](const kzrt::Site& s, BindRec& b) {
+    const auto it = v4_note.find(&s);
+    if (it != v4_note.end()) b.notes += it->second;
+    if (s.has_spawn) b.notes += " spawn wrapper not applied (bound as a plain at-call)";
+  };
+
   // 2. calls: the call/return of the callee at its call site (phase=before/after) and points at it (at-call/after-call)
   for (gimple* st : calls) {
     gcall* call = as_a<gcall*>(st);
@@ -570,6 +647,7 @@ unsigned instrument_function(function* fun) {
       if (s->callee.empty()) continue;
       if (callee == NULL_TREE || s->callee != fn_name(callee)) continue;
       if (s->src_line != 0 && (uint32_t)stmt_line(call) != s->src_line) continue;
+      if (v4_skip(s, call)) continue;
       const Shape sh = shape_of(*s);
       if (sh == Shape::CallBefore || sh == Shape::AtCall) before.push_back(s);
       else if (sh == Shape::CallAfter || sh == Shape::AfterCall) after.push_back(s);
@@ -585,6 +663,7 @@ unsigned instrument_function(function* fun) {
     for (const kzrt::Site* s : before) {
       const bool point = shape_of(*s) == Shape::AtCall;
       BindRec& b = new_bind(*s, point ? "at-call" : "call-before", at);
+      v4_notes(*s, b);
       if (b.status != "bound") continue;
       if (links_entry(*s)) {
         b.status = "unsupported";
@@ -603,6 +682,7 @@ unsigned instrument_function(function* fun) {
     if (stmt_ends_bb_p(call)) {
       for (const kzrt::Site* s : after) {
         BindRec& b = new_bind(*s, shape_of(*s) == Shape::AfterCall ? "after-call" : "call-after", at);
+        v4_notes(*s, b);
         b.status = "unsupported";
         b.reason = "the call ends its basic block (noreturn, returns-twice or abnormal edge)";
       }
@@ -638,6 +718,7 @@ unsigned instrument_function(function* fun) {
     for (const kzrt::Site* s : after) {
       const bool point = shape_of(*s) == Shape::AfterCall;
       BindRec& b = new_bind(*s, point ? "after-call" : "call-after", at);
+      v4_notes(*s, b);
       if (b.status != "bound") continue;
       if (links_entry(*s)) {
         b.status = "unsupported";
@@ -879,6 +960,26 @@ void finish_unit(void*, void*) {
     << (flag_fat_lto_objects ? " fat" : "") << " pic=" << flag_pic << " pie=" << flag_pie << " profile_arcs=" << profile_arc_flag << "\n";
   o << "# passes: insertion after \"ssa\" (first instance), check after \"optimized\"\n";
   for (const std::string& n : kzg.notes) o << "# note " << n << "\n";
+  if (kzg.m.version >= 4) {  // kzs-sites 4 (docs/event_semantics.md 13.6): what this unit did not bind, by kind and reason
+    if (kzg.m.has_plan) o << "# plan " << kzg.m.plan.id << "\n";
+    std::map<std::pair<std::string, std::string>, uint32_t> kinds;
+    std::set<uint32_t> bound_somewhere;
+    for (const BindRec& b : kzg.binds)
+      if (b.status != "unsupported") bound_somewhere.insert(b.site);
+    for (const BindRec& b : kzg.binds)
+      if (b.status == "unsupported" && bound_somewhere.count(b.site) == 0) ++kinds[{b.kind, b.reason}];
+    uint32_t spawn = 0, token = 0;
+    for (const kzrt::Site* st : kzg.sites) {
+      if (!kzg.matched.count(st->id)) ++kinds[{st->place.empty() ? "phase=" + st->phase : "place=" + st->place, gap_reason(*st)}];
+      if (st->has_spawn) ++spawn;
+      if (st->has_identity && st->identity.decoder == "spawn-token") ++token;
+    }
+    for (const auto& kd : kinds) o << "# unsupported-kind " << kd.first.first << " sites=" << kd.second << " reason=\"" << kd.first.second << "\"\n";
+    if (spawn != 0) o << "# not-applied spawn-wrapper sites=" << spawn << "\n";
+    if (token != 0) o << "# not-applied spawn-token-read sites=" << token << "\n";
+    o << "# v4 calls: sites=" << kzg.v4_sites << " line-unique=" << kzg.v4_unique << " by-col=" << kzg.v4_by_col << " unsupported=" << kzg.v4_unsupported
+      << " col-differs=" << kzg.v4_col_differs << " nth-differs=" << kzg.v4_nth_differs << "\n";
+  }
   for (const BindRec& b : kzg.binds) {
     std::string copies;
     for (const auto& c : b.copies) copies += (copies.empty() ? "" : ",") + c.first + ":" + std::to_string(c.second);

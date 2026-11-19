@@ -27,6 +27,21 @@ kzrt_test(test_rt_manifest SOURCES test_rt_manifest.cpp LIBS kzrt-manifest)
 kzrt_test(test_rt_auto SOURCES test_rt_auto.c LIBS kzrt-posix-auto kzrt-posix kzrt kzrt-decode)
 kzrt_test(test_rt_pool SOURCES test_rt_pool.c LIBS ${kzrt_test_libs})
 kzrt_test(test_rt_mode SOURCES test_rt_mode.c LIBS kzrt-posix-auto kzrt-posix kzrt kzrt-decode)
+# kzrt 0.5.0 (dump 1.5, event_semantics.md 13.5): the build-id records of the executable and of two loaded modules (one
+# built without a build-id note), and the readers of the reserved creation-token records on a synthetic dump.
+kzrt_test(test_rt_objects SOURCES test_rt_objects.c LIBS ${kzrt_test_libs} ${CMAKE_DL_LIBS})
+target_link_options(test_rt_objects PRIVATE -Wl,--build-id -rdynamic)
+foreach(m id noid)
+  add_library(rt_objects_mod_${m} SHARED rt_objects_module.c)
+  target_include_directories(rt_objects_mod_${m} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+  set_target_properties(rt_objects_mod_${m} PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON C_EXTENSIONS OFF)
+  kzrt_settings(rt_objects_mod_${m})
+endforeach()
+target_compile_definitions(rt_objects_mod_id PRIVATE RT_OBJECTS_MODULE=7)
+target_link_options(rt_objects_mod_id PRIVATE -Wl,--build-id)
+target_compile_definitions(rt_objects_mod_noid PRIVATE RT_OBJECTS_MODULE=8)
+target_link_options(rt_objects_mod_noid PRIVATE -Wl,--build-id=none)
+kzrt_test(test_rt_format15 SOURCES test_rt_format15.c LIBS kzrt-decode)
 
 # The sha256 of the example manifest goes into the serial dump, so that kz-rt-dump --manifest finds it.
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/data/sites_example.kzs kzrt_example_sha)
@@ -198,6 +213,21 @@ set_tests_properties(rt_end_normal PROPERTIES PASS_REGULAR_EXPRESSION
   "runx end=recovered end_flags=dumped,exit end_value=0 store=file.*check end recovered from the store: the process had completed its own dump.*check ok.*recover refused: the file has [0-9]+ bytes.*recover: the store has pool_bytes=.*normal: recovered dump checked")
 kzrt_case(rt_end_notstore kz-rt-dump --recover ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt --out ${CMAKE_CURRENT_BINARY_DIR}/rt_end_notstore.kzrt)
 set_tests_properties(rt_end_notstore PROPERTIES PASS_REGULAR_EXPRESSION "not a kzrt store")
+
+# Build-ids (kzrt 0.5.0): the dump's BUILDID records against readelf -n of the files; without a reader, no record.
+kzrt_case(rt_objects test_rt_objects ${CMAKE_CURRENT_BINARY_DIR}/rt_objects.kzrt $<TARGET_FILE:rt_objects_mod_id> $<TARGET_FILE:rt_objects_mod_noid>)
+set_tests_properties(rt_objects PROPERTIES FIXTURES_SETUP rt_objects_dump)
+add_test(NAME rt_objects_readelf COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/check_buildid.sh $<TARGET_FILE:kz-rt-dump> ${CMAKE_CURRENT_BINARY_DIR}/rt_objects.kzrt
+         $<TARGET_FILE:test_rt_objects> $<TARGET_FILE:rt_objects_mod_id> $<TARGET_FILE:rt_objects_mod_noid>)
+set_tests_properties(rt_objects_readelf PROPERTIES LABELS runtime TIMEOUT 60 FIXTURES_REQUIRED rt_objects_dump
+  PASS_REGULAR_EXPRESSION "same main .*same module:3 .*same module:7 .*build-ids: dump = readelf")
+kzrt_case(rt_objects_noreader test_rt_objects ${CMAKE_CURRENT_BINARY_DIR}/rt_objects_noreader.kzrt noreader)
+# The reserved token records and BUILDID on a synthetic 1.5 dump, read by the decoder and printed by kz-rt-dump.
+kzrt_case(rt_format15 test_rt_format15 ${CMAKE_CURRENT_BINARY_DIR}/rt_format15.kzrt)
+set_tests_properties(rt_format15 PROPERTIES FIXTURES_SETUP rt_format15_dump)
+kzrt_case(rt_format15_dump kz-rt-dump ${CMAKE_CURRENT_BINARY_DIR}/rt_format15.kzrt)
+set_tests_properties(rt_format15_dump PROPERTIES FIXTURES_REQUIRED rt_format15_dump PASS_REGULAR_EXPRESSION
+  "buildid object=main path=\"\\./core-test\" build_id=deadbeef0102030405060708090a0b0c0d0e0f10 note=present source=start actor=1 t=100\nbuildid object=module:4 path=\"cf/a \\\\\"q\\\\\"\\.so\" build_id=abcdef0123456789 note=present source=registration actor=1 t=200 path_cut=yes\nbuildid object=module:5 path=\"cf/b\\.so\" build_id=- note=absent source=registration actor=- t=300\nbuf owner=1 bytes=136 cap=65536\ntok-create actor=1 aseq=1 token=77 site=12 t=1000\ntok-return actor=1 aseq=2 token=77 status=-5 handle=0x7f00deadbeef t=1001\ntok-start actor=1 aseq=3 token=77 t=1002\n.*format kzrt-dump 1\\.5 .*check actor 1 aseq 1\\.\\.3 missing=0 .*check ok")
 
 # The OSAL adapter where OSAL is initialized (stage F): only with a target OSAL build (KZ_RT_OSAL_INCLUDE_DIRS and
 # KZ_RT_OSAL_LIBS, e.g. the C1 reference build's osal/libosal.a and libosal_bsp.a; its BSP main calls the test's

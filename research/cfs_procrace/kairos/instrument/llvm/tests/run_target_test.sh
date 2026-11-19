@@ -5,6 +5,9 @@
 #   mode untouched      a unit no site names: the object is byte-identical with and without the plugin (-O2, -O0 -g)
 #   mode lines          line= with and without debug locations (tests/kzllvm_lines.kzs)
 #   mode refuse         a manifest naming a runtime function: the runtime unit is refused, not changed
+#   mode v4             kzs-sites 4 (kzllvm 0.2, tests/kzllvm_v4.kzs on kzgcc_v4.c, -O0 -g): two calls on one line told
+#                       apart by col=, a column no call has, the kinds kzllvm does not bind (place=, a load, an at-call
+#                       with a spawn statement) counted
 # Unit test of the plugin; the values are unit-test values.
 set -uo pipefail
 MODE=$1 CC=$2 PLUGIN=$3 RT=$4 EVENTS=$5 T=$6 W=$7
@@ -30,6 +33,30 @@ case "$MODE" in
     grep -q "refused: the unit defines runtime function" "$W"/binds/*.kzs || fail "no refusal note"
     grep -q 'status=unsupported reason="unit refused"' "$W"/binds/*.kzs || fail "the site is not declared a gap"
     echo "ok: runtime unit refused and unchanged"; exit 0 ;;
+  v4)
+    V=(-fpass-plugin="$PLUGIN" -mllvm -kzllvm-manifest="$(dirname "$0")/kzllvm_v4.kzs" -mllvm -kzllvm-out="$W/binds")
+    "$CC" -O0 -g -c "$T/kzgcc_v4.c" -o "$W/v.o" "${V[@]}" 2> "$W/cc.err" || { cat "$W/cc.err"; fail "compile"; }
+    "$CC" -O0 "$W/v.o" -o "$W/v" -Wl,--whole-archive "$RT/libkzrt-posix.a" "$RT/libkzrt.a" -Wl,--no-whole-archive \
+        "$RT/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o" -lpthread || fail "link"
+    KZ_RT_DUMP="$W/dump.bin" "$W/v" > "$W/out.txt" || fail "target exit"
+    grep -q "^v4 401 5 0$" "$W/out.txt" || fail "target output: $(cat "$W/out.txt")"
+    B=$(ls "$W"/binds/*.kzs); [ -n "$B" ] || fail "no binding file"
+    "$RT/kz-rt-dump" --manifest "$(dirname "$0")/kzllvm_v4.kzs" --manifest "$B" "$W/dump.bin" > "$W/dump.txt" || { tail -5 "$W/dump.txt"; fail "kz-rt-dump check"; }
+    "$EVENTS" "$W/dump.bin" > "$W/events.tsv" || fail "kz-events"
+    ev() { awk -F'\t' -v s="$1" '$1=="ev" && $4==s' "$W/events.tsv"; }
+    for s in 1 2 4 8; do grep -E "^bind [0-9]+ site=$s .*status=bound" "$B" > /dev/null || fail "site $s not bound: $(grep "site=$s " "$B")"; done
+    grep -q 'site=3 .*status=unsupported reason="2 calls of pick on line 16 and col=99 names none of them in the debug locations (columns 11,21)"' "$B" || fail "site 3: $(grep 'site=3 ' "$B")"
+    grep -q 'site=5 .*status=unsupported reason="place=at-call is not bound by kzllvm 0.2"' "$B" || fail "site 5: $(grep 'site=5 ' "$B")"
+    grep -q 'site=6 .*status=unsupported reason="place=load is not bound by kzllvm 0.2"' "$B" || fail "site 6: $(grep 'site=6 ' "$B")"
+    grep -q 'site=7 .*status=unsupported reason="place=at-call is not bound by kzllvm 0.2"' "$B" || fail "site 7: $(grep 'site=7 ' "$B")"
+    grep -q 'llvm-col=11 llvm-nth=1 (by column)' "$B" && grep -q 'llvm-col=21 llvm-nth=2 (by column)' "$B" && grep -q 'llvm-col=13 llvm-nth=3 (one call on the line)' "$B" || fail "notes"
+    grep -q '^# plan 0123456789abcdef$' "$B" || fail "plan line"
+    grep -q '^# unsupported-kind place=load sites=1 ' "$B" && grep -q '^# unsupported-kind place=at-call sites=2 ' "$B" || fail "unsupported-kind lines"
+    grep -q '^# v4 calls: sites=4 line-unique=1 by-col=2 unsupported=1 col-differs=0 nth-differs=0$' "$B" || fail "v4 calls: $(grep '^# v4 calls' "$B")"
+    ev 1 | awk -F'\t' '$9=="0x1"' | grep -q . || fail "site 1 value: $(ev 1)"
+    ev 2 | awk -F'\t' '$9=="0x14"' | grep -q . || fail "site 2 value: $(ev 2)"
+    ev 4 | awk -F'\t' '$9=="0x1e"' | grep -q . || fail "site 4 value: $(ev 4)"
+    echo "ok: v4"; exit 0 ;;
   lines)
     L=(-mllvm -kzllvm-manifest="$(dirname "$0")/kzllvm_lines.kzs")
     "$CC" -O0 -g -c "$T/kzgcc_target.c" -o "$W/g.o" -fpass-plugin="$PLUGIN" "${L[@]}" -mllvm -kzllvm-out="$W/binds" || fail "compile -O0 -g"

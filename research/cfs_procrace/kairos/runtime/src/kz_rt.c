@@ -116,6 +116,22 @@ typedef struct module_entry {
   uint64_t t;
   unsigned char sha[32];
 } module_entry;
+/* A loaded object of a module registration or the main executable (kzrt 0.5.0, dump 1.5 BUILDID), as values. */
+typedef struct object_entry {
+  uint32_t used; /* 0 = free, 1 = being written, 2 = written (published with a release store) */
+  uint32_t module, source, actor, note, id_len, path_len, flags, found, rsv;
+  uint64_t t, addr, base;
+  unsigned char id[KZ_RT_BUILDID_MAX];
+  char path[KZ_RT_OBJPATH_MAX + 1u];
+} object_entry;
+/* A module registration received before the object reader was given (kz_rt_objects): read when it is given. */
+typedef struct pending_entry {
+  uint32_t used, module, actor, done;
+  uint64_t t, addr;
+} pending_entry;
+#ifndef KZ_RT_MAX_PENDING
+#define KZ_RT_MAX_PENDING 256u
+#endif
 typedef struct res_entry { /* an adapter resource, as values (kzrt 0.4.0) */
   uint32_t kind, origin, len, rsv;
   uint64_t count;
@@ -157,6 +173,10 @@ typedef struct run_state {
   uint32_t bi_len[3];
   char bi_tags[3][KZ_RT_TAG_MAX + 1];
   unsigned char bi_manifest[32];
+  /* kzrt 0.5.0: the loaded objects and their build-ids (kz_rt_objects, kz_rt_module) */
+  uint32_t obj_lock, obj_reader_set, objects_n, pending_n, obj_table_lost;
+  object_entry objects[KZ_RT_MAX_OBJECTS];
+  pending_entry pending[KZ_RT_MAX_PENDING];
 } run_state;
 
 typedef struct ctl_state {
@@ -204,6 +224,9 @@ static union {
 
 /* Process-local, outside the store: this process makes a dump of a recovered image (kz_rt_store_recover). */
 static uint32_t g_recovered, g_recover_once, g_end_flags, g_end_value;
+/* Process-local, outside the store: the object reader (a function of this process; kz_rt_objects). */
+static kz_rt_object_fn g_obj_reader;
+static void *g_obj_ctx;
 
 static uint32_t mode_get(void) { return LDR(&g_store.s.mode_x) ^ (uint32_t)KZ_RT_MODE_RECORD; }
 static void mode_set(uint32_t m) { ST(&g_store.s.mode_x, m ^ (uint32_t)KZ_RT_MODE_RECORD); }
@@ -707,6 +730,115 @@ KZ_RT_API void kz_rt_stop(void) {
   }
 }
 
+/* ---- loaded objects (kzrt 0.5.0) ------------------------------------------------------------------ */
+static void obj_lock(void) {
+  while (__atomic_exchange_n(&g.obj_lock, 1u, __ATOMIC_ACQUIRE) != 0u) {
+  }
+}
+static void obj_unlock(void) { __atomic_store_n(&g.obj_lock, 0u, __ATOMIC_RELEASE); }
+
+/* Adds the object o read for (module, addr) unless that (module, object) is there; under obj_lock. */
+static void object_add(uint32_t module, uint32_t source, uint32_t actor, uint64_t t, uint64_t addr, const kz_rt_object *o) {
+  uint32_t i, n = g.objects_n;
+  object_entry *e;
+  for (i = 0; i < n; ++i) {
+    e = &g.objects[i];
+    if (e->module != module) continue;
+    if (o->found != 0 && e->found != 0 && e->base == o->base) return;
+    if (o->found == 0 && e->found == 0 && e->addr == addr) return;
+  }
+  if (n >= KZ_RT_MAX_OBJECTS) {
+    ++g.obj_table_lost;
+    return;
+  }
+  e = &g.objects[n];
+  e->module = module;
+  e->source = source;
+  e->actor = actor;
+  e->t = t;
+  e->addr = addr;
+  e->found = o->found != 0 ? 1u : 0u;
+  e->base = o->base;
+  e->note = o->found != 0 && o->note <= KZ_RT_NOTE_UNREADABLE ? o->note : KZ_RT_NOTE_UNREADABLE;
+  e->id_len = e->note == KZ_RT_NOTE_PRESENT && o->id_len <= KZ_RT_BUILDID_MAX ? o->id_len : 0u;
+  cpy(e->id, o->id, e->id_len);
+  e->path_len = o->path_len <= KZ_RT_OBJPATH_MAX ? o->path_len : KZ_RT_OBJPATH_MAX;
+  cpy((unsigned char *)e->path, (const unsigned char *)o->path, e->path_len);
+  e->flags = (o->flags & KZ_RT_OBJF_PATH_CUT) | (o->path_len > KZ_RT_OBJPATH_MAX ? KZ_RT_OBJF_PATH_CUT : 0u);
+  g.objects_n = n + 1u;
+  ST(&e->used, 2u);
+}
+
+/* Reads the object of addr with the reader (no runtime lock held), then adds it. */
+static void object_read(uint32_t module, uint32_t source, uint32_t actor, uint64_t t, const void *addr) {
+  kz_rt_object o;
+  zero((unsigned char *)&o, (uint32_t)sizeof o);
+  if (g_obj_reader(g_obj_ctx, addr, &o) != 0) zero((unsigned char *)&o, (uint32_t)sizeof o); /* not found */
+  obj_lock();
+  object_add(module, source, actor, t, (uint64_t)(uintptr_t)addr, &o);
+  obj_unlock();
+}
+
+/* A module registration: its argument's object now, or kept until the reader is given. */
+static void object_note(uint32_t module, const void *addr) {
+  const kz_rt_adapter *ad;
+  kz_rt_cell *c = self_cell(&ad);
+  const uint32_t actor = c != NULL ? c->actor : 0u;
+  uint32_t ef = 0, i;
+  const uint64_t t = now(ad, &ef);
+  if (addr == NULL) return; /* no address: no object to read (counted with the module's other losses at the dump) */
+  obj_lock();
+  if (g.obj_reader_set == 0) {
+    for (i = 0; i < g.pending_n; ++i)
+      if (g.pending[i].module == module && g.pending[i].addr == (uint64_t)(uintptr_t)addr) {
+        obj_unlock();
+        return;
+      }
+    if (g.pending_n < KZ_RT_MAX_PENDING) {
+      pending_entry *p = &g.pending[g.pending_n];
+      p->module = module;
+      p->addr = (uint64_t)(uintptr_t)addr;
+      p->actor = actor;
+      p->t = t;
+      p->done = 0;
+      ST(&p->used, 1u);
+      ++g.pending_n;
+    } else {
+      ++g.obj_table_lost;
+    }
+    obj_unlock();
+    return;
+  }
+  obj_unlock();
+  object_read(module, KZ_RT_OBJSRC_REGISTRATION, actor, t, addr);
+}
+
+KZ_RT_API void kz_rt_objects(kz_rt_object_fn reader, void *ctx) {
+  const kz_rt_adapter *ad;
+  kz_rt_cell *c;
+  uint32_t ef = 0, i, n;
+  uint64_t t;
+  if (reader == NULL || g_recovered != 0) return;
+  obj_lock();
+  if (g.obj_reader_set != 0) {
+    obj_unlock();
+    return;
+  }
+  g_obj_reader = reader;
+  g_obj_ctx = ctx;
+  g.obj_reader_set = 1u;
+  n = g.pending_n; /* registrations after this point read their object themselves */
+  obj_unlock();
+  c = self_cell(&ad);
+  t = now(ad, &ef);
+  object_read(0u, KZ_RT_OBJSRC_START, c != NULL ? c->actor : 0u, t, NULL);
+  for (i = 0; i < n; ++i) {
+    pending_entry *p = &g.pending[i];
+    object_read(p->module, KZ_RT_OBJSRC_REGISTRATION, p->actor, p->t, (const void *)(uintptr_t)p->addr);
+    ST(&p->done, 1u);
+  }
+}
+
 KZ_RT_API void kz_rt_module(uint32_t module, const uint8_t *sha) {
   static const unsigned char none[32] = {0};
   const unsigned char *key = sha != NULL ? sha : none;
@@ -717,6 +849,7 @@ KZ_RT_API void kz_rt_module(uint32_t module, const uint8_t *sha) {
   if (n > KZ_RT_MAX_MODULES) n = KZ_RT_MAX_MODULES;
   /* the same (module, sha256) again (one constructor per unit): count it.  Two first registrations
    * racing on different threads can both take an entry; the reader adds such entries up. */
+  object_note(module, sha);
   for (idx = 0; idx < n; ++idx) {
     m = &g.modules[idx];
     if (LD(&m->used) != 0 && m->module == module && bytes_eq(m->sha, key, 32u)) {
@@ -1266,6 +1399,28 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
     put32(b + 60, 0);
     emit(&o, b, KZ_RT_MODULE_SIZE);
   }
+  /* BUILDID (1.5): the objects read so far, in the order they were read (the main executable first) */
+  n = LD(&g.objects_n);
+  if (n > KZ_RT_MAX_OBJECTS) n = KZ_RT_MAX_OBJECTS;
+  for (i = 0; i < n; ++i) {
+    unsigned char ob[KZ_RT_BUILDID_FIXED + KZ_RT_BUILDID_MAX + KZ_RT_OBJPATH_MAX + 4u];
+    const object_entry *e = &g.objects[i];
+    if (LD(&e->used) != 2u) continue;
+    off = pad4(KZ_RT_BUILDID_FIXED + e->id_len + e->path_len);
+    zero(ob, off);
+    rec_header(ob, off, KZ_RT_REC_BUILDID, 0);
+    put32(ob + 8, e->module);
+    put32(ob + 12, e->source);
+    put32(ob + 16, e->note);
+    put32(ob + 20, e->actor);
+    put64(ob + 24, e->t);
+    put16(ob + 32, e->id_len);
+    put16(ob + 34, e->path_len);
+    put32(ob + 36, e->flags);
+    cpy(ob + KZ_RT_BUILDID_FIXED, e->id, e->id_len);
+    cpy(ob + KZ_RT_BUILDID_FIXED + e->id_len, (const unsigned char *)e->path, e->path_len);
+    emit(&o, ob, off);
+  }
   /* RESOURCE (a recovered image: what the adapter had taken when it was attached) */
   {
     kz_rt_resource r[8];
@@ -1334,6 +1489,34 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
   if (n > KZ_RT_MAX_NOTES) n = KZ_RT_MAX_NOTES;
   for (i = 0; i < n; ++i)
     if (LD(&g.notes[i].used) != 0) emit_loss(&o, g.notes[i].kind, 0, g.notes[i].key, LDR(&g.notes[i].count));
+  /* 1.5: objects whose build-id is not recorded, per module (a note absent or unreadable; a registration whose object
+   * was never read because no reader was given), and registrations the object tables could not take */
+  {
+    uint32_t j, mods[KZ_RT_MAX_OBJECTS + KZ_RT_MAX_PENDING], cnt[KZ_RT_MAX_OBJECTS + KZ_RT_MAX_PENDING], nm = 0;
+    const uint32_t no = LD(&g.objects_n) < KZ_RT_MAX_OBJECTS ? LD(&g.objects_n) : KZ_RT_MAX_OBJECTS;
+    const uint32_t np = LD(&g.pending_n) < KZ_RT_MAX_PENDING ? LD(&g.pending_n) : KZ_RT_MAX_PENDING;
+    for (i = 0; i < no + np; ++i) {
+      uint32_t mod;
+      if (i < no) {
+        const object_entry *e = &g.objects[i];
+        if (LD(&e->used) != 2u || e->note == KZ_RT_NOTE_PRESENT) continue;
+        mod = e->module;
+      } else {
+        const pending_entry *p = &g.pending[i - no];
+        if (LD(&p->used) == 0 || LD(&g.obj_reader_set) != 0) continue; /* read (or being read) once the reader is given */
+        mod = p->module;
+      }
+      for (j = 0; j < nm && mods[j] != mod; ++j) {
+      }
+      if (j == nm) {
+        mods[nm] = mod;
+        cnt[nm++] = 0;
+      }
+      ++cnt[j];
+    }
+    for (j = 0; j < nm; ++j) emit_loss(&o, KZ_RT_LOSS_NO_BUILD_ID, 0, mods[j], cnt[j]);
+    emit_loss(&o, KZ_RT_LOSS_OBJECT_TABLE, 0, 0, LDR(&g.obj_table_lost));
+  }
   /* a recovered image whose process did not complete its own dump after kz_rt_stop: the records are a prefix */
   if (recovered && LD(&g.dumped_stopped) == 0) emit_loss(&o, KZ_RT_LOSS_ABNORMAL_END, 0, 0, 1u);
   /* POINT */
@@ -1458,7 +1641,9 @@ static uint32_t store_layout(void) {
                                (uint32_t)offsetof(run_state, run_id), (uint32_t)offsetof(run_state, loss), (uint32_t)offsetof(run_state, modules),
                                (uint32_t)offsetof(run_state, proc_id), (uint32_t)offsetof(run_state, res), (uint32_t)offsetof(run_state, bi_manifest),
                                (uint32_t)offsetof(actor_slot, native_key), (uint32_t)offsetof(actor_slot, def_ev), (uint32_t)offsetof(ctl_state, pt),
-                               (uint32_t)offsetof(kz_rt_point, val), (uint32_t)offsetof(kz_rt_point, timeout_ns)};
+                               (uint32_t)offsetof(kz_rt_point, val), (uint32_t)offsetof(kz_rt_point, timeout_ns),
+                               (uint32_t)sizeof(object_entry), (uint32_t)sizeof(pending_entry), (uint32_t)offsetof(run_state, objects),
+                               (uint32_t)offsetof(run_state, pending)};
   unsigned char w[4];
   uint32_t i, crc = 0xFFFFFFFFu;
   for (i = 0; i < (uint32_t)(sizeof v / sizeof v[0]); ++i) {

@@ -18,9 +18,11 @@ Links (each one is confirmed, refused or unconfirmed, with what was compared):
   facts_build   the binary.sha256 of --basis-text (the basis the facts were made from) = the run.meta sha256 of
                 --main (the executable that basis describes; default: the first executable of the build record).
                 Unconfirmed when no basis text is given (for example, no basis of the derived build yet).
-  same_build    the GNU build-id of --main under --build-root (readelf -n), recorded beside; the dump of runtime 1.4
-                carries no build-id, so this link is always unconfirmed(no build-id in dump) unless the dump text has
-                a build_id field, which is then compared.
+  same_build    (kairos/docs/event_semantics.md 13.4, 13.5 (sa)) one same_build_object line per object and a summary
+                line: the build-id of each "buildid" line of the dump text (dump 1.5) against readelf -n of the same file
+                under --build-root (object=main: --main; object=module:<n>: the one build record path whose end matches
+                the line's path); a module of the dump's "module" lines without a buildid line, or a dump without a
+                main line, is unconfirmed(no build-id in dump).  A dump before 1.5 has no buildid line.
 Optional links (added 2026-11-16 for a generated plan; each is emitted only when its inputs are given):
   sidecar       the "# sidecar sha256=<hex>" header line of --plan = sha256 of --sidecar.
   plan_inputs   the sidecar's "input facts sha256=" and "input basis sha256=" = sha256 of --plan-facts and --plan-basis
@@ -38,7 +40,7 @@ Optional links (added 2026-11-16 for a generated plan; each is emitted only when
   The manifest link also compares, with --kzt-text, the run container's NRUN manifest_sha256 and its FILE_HASHES entry
   of the plan path.
 The chain verdict is refused when any link is refused, else unconfirmed when any of manifest, exe or facts_build is
-unconfirmed, else confirmed.  same_build is reported apart (it is unconfirmed for every dump of runtime 1.4).
+unconfirmed, else confirmed.  same_build is reported apart and is no part of the chain verdict (nor of a boot's gate).
 Exit status: 0 confirmed, 1 refused, 3 unconfirmed, 2 usage or read error.
 """
 import argparse
@@ -145,13 +147,18 @@ def main():
         bman, exes = build_record(a.build_record)
         mman, mfiles = run_meta(a.run_meta)
         dman = []
-        did = None
+        dobj = []      # (object, path, build_id or None, note, path_cut) of the dump's buildid lines (dump 1.5)
+        dmods = []     # the module numbers of the dump's module lines
         if a.dump_text:
             for line in read(a.dump_text):
                 dman += re.findall(r'manifest_sha256=([0-9a-f]{64})', line)
-                m = re.search(r'build_id=([0-9a-f]+)', line)
-                if m and did is None:
-                    did = m.group(1)
+                m = re.match(r'buildid object=(main|module:\d+) path="((?:[^"\\]|\\.)*)" build_id=([0-9a-f]+|-) note=(present|absent|unreadable) ', line)
+                if m:
+                    path = re.sub(r'\\x([0-9a-f]{2})', lambda x: chr(int(x.group(1), 16)), m.group(2)).replace('\\"', '"').replace('\\\\', '\\')
+                    dobj.append((m.group(1), path, None if m.group(3) == '-' else m.group(3), m.group(4), ' path_cut=yes' in line))
+                m = re.match(r'module (\d+) actor=', line)
+                if m and int(m.group(1)) not in dmods:
+                    dmods.append(int(m.group(1)))
         btxt = None
         if a.basis_text:
             for line in read(a.basis_text):
@@ -328,16 +335,55 @@ def main():
         st = 'refused' if len(set(pres)) > 1 else ('unconfirmed' if len(pres) < len(vals_n) or kzt is None else 'confirmed')
         link('bindings', st, ' '.join('%s=%s' % (k, (v or 'missing')[:16]) for k, v in vals_n.items()))
 
-    bid = None
-    if a.build_root and mainp and os.path.isfile(os.path.join(a.build_root, mainp)):
-        bid = build_id(os.path.join(a.build_root, mainp))
-    if did is None:
-        st = 'unconfirmed(no build-id in dump)'
-    elif bid is None:
-        st = 'unconfirmed(no build-id in the build tree)'
+    # same_build (event_semantics.md 13.4, 13.5 (sa)): per object, then the summary; never part of the chain verdict
+    def tree_id(rel):
+        if a.build_root and rel and os.path.isfile(os.path.join(a.build_root, rel)):
+            return build_id(os.path.join(a.build_root, rel))
+        return None
+
+    def record_path(dpath):
+        hits = [p for p, _ in exes if dpath and (p == dpath or p.endswith('/' + dpath) or dpath.endswith('/' + p))]
+        return hits[0] if len(hits) == 1 else None
+
+    objs = []  # (verdict, object, path, tree id, dump id)
+    seen_main = False
+    seen_mods = set()
+    for obj, dpath, did, note, cut in dobj:
+        if obj == 'main':
+            seen_main = True
+            rel = mainp
+        else:
+            seen_mods.add(int(obj.split(':')[1]))
+            rel = None if cut else record_path(dpath)
+        bid = tree_id(rel) if rel else None
+        if did is None:
+            st = 'unconfirmed(no build-id note)'
+        elif rel is None:
+            st = 'unconfirmed(object not in the build record)'
+        elif bid is None:
+            st = 'unconfirmed(no build-id in the build tree)'
+        else:
+            st = 'confirmed' if did == bid else 'refused'
+        objs.append((st, obj, rel or dpath, bid, did))
+    if not seen_main and a.dump_text:
+        objs.insert(0, ('unconfirmed(no build-id in dump)', 'main', mainp, tree_id(mainp), None))
+    for n in dmods:
+        if n not in seen_mods:
+            objs.append(('unconfirmed(no build-id in dump)', 'module:%d' % n, '-', None, None))
+    for st, obj, path, bid, did in objs:
+        lines.append('same_build_object\t%s\t%s path=%s tree=%s dump=%s' % (st, obj, path or '-', bid or 'not read', did or 'none'))
+    nconf = sum(1 for o in objs if o[0] == 'confirmed')
+    nref = sum(1 for o in objs if o[0] == 'refused')
+    nunc = len(objs) - nconf - nref
+    if not objs:
+        sb = 'unconfirmed(no build-id in dump)'
+    elif nref:
+        sb = 'refused'
+    elif nunc:
+        sb = [o[0] for o in objs if o[0].startswith('unconfirmed')][0]
     else:
-        st = 'confirmed' if did == bid else 'refused'
-    lines.append('same_build\t%s\tbuild-id of %s in the tree=%s dump=%s' % (st, mainp, bid or 'not read', did or 'none'))
+        sb = 'confirmed'
+    lines.append('same_build\t%s\t%d objects: confirmed %d, refused %d, unconfirmed %d' % (sb, len(objs), nconf, nref, nunc))
 
     core = [v for k, v in status.items()]
     verdict = 'refused' if 'refused' in core else ('unconfirmed' if 'unconfirmed' in core else 'confirmed')

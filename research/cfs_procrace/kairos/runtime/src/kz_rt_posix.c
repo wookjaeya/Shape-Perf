@@ -4,8 +4,11 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <link.h>
 #include <pthread.h>
 #include <stdint.h>
+#include <string.h>
+#include <sys/auxv.h>
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <time.h>
@@ -203,3 +206,106 @@ KZ_RT_API int kz_rt_posix_store_file(const char *path) {
   (void)close(fd); /* the mapping keeps the file */
   return KZ_RT_OK;
 }
+
+/* ---- the loaded objects and their build-ids (kzrt 0.5.0; event_semantics.md 13.5) --------------------------------- */
+/* The loader's program headers (dl_iterate_phdr): the object whose PT_LOAD segments hold the address (the first object,
+ * the main executable, for NULL), and its GNU build-id note read from its PT_NOTE segments in memory. */
+typedef struct obj_search {
+  uintptr_t addr;
+  int want_main;
+  kz_rt_object *out;
+  int found, index; /* index: the objects visited so far (0 = the first: the main executable) */
+} obj_search;
+
+static size_t align_to(size_t n, size_t a) { return (n + a - 1u) & ~(a - 1u); }
+
+/* note of the object: KZ_RT_NOTE_PRESENT with the id, ABSENT, or UNREADABLE (a note segment whose notes do not fit it,
+ * or a build-id note of no or more than KZ_RT_BUILDID_MAX bytes) */
+static uint32_t read_note(const struct dl_phdr_info *info, kz_rt_object *out) {
+  uint32_t note = KZ_RT_NOTE_ABSENT;
+  int i;
+  for (i = 0; i < (int)info->dlpi_phnum; ++i) {
+    const ElfW(Phdr) *ph = &info->dlpi_phdr[i];
+    const unsigned char *p, *end;
+    const size_t al = ph->p_align == 8u ? 8u : 4u;
+    if (ph->p_type != PT_NOTE) continue;
+    p = (const unsigned char *)(info->dlpi_addr + ph->p_vaddr);
+    end = p + ph->p_memsz;
+    while (p < end) {
+      uint32_t namesz, descsz, type;
+      size_t desc_off, next;
+      if ((size_t)(end - p) < 12u) {
+        note = KZ_RT_NOTE_UNREADABLE;
+        break;
+      }
+      memcpy(&namesz, p, 4);
+      memcpy(&descsz, p + 4, 4);
+      memcpy(&type, p + 8, 4);
+      desc_off = align_to(12u + (size_t)namesz, al);
+      next = align_to(desc_off + (size_t)descsz, al);
+      if (next < desc_off || (size_t)(end - p) < desc_off + (size_t)descsz) {
+        note = KZ_RT_NOTE_UNREADABLE;
+        break;
+      }
+      if (type == 3u && namesz == 4u && memcmp(p + 12, "GNU", 4) == 0) { /* NT_GNU_BUILD_ID */
+        if (descsz == 0u || descsz > KZ_RT_BUILDID_MAX) return KZ_RT_NOTE_UNREADABLE;
+        memcpy(out->id, p + desc_off, descsz);
+        out->id_len = descsz;
+        return KZ_RT_NOTE_PRESENT;
+      }
+      if ((size_t)(end - p) <= next) break;
+      p += next;
+    }
+  }
+  return note;
+}
+
+static int find_object(struct dl_phdr_info *info, size_t size, void *data) {
+  obj_search *s = (obj_search *)data;
+  int i, hit = s->want_main;
+  const int first = s->index++ == 0;
+  (void)size;
+  for (i = 0; !hit && i < (int)info->dlpi_phnum; ++i) {
+    const ElfW(Phdr) *ph = &info->dlpi_phdr[i];
+    const uintptr_t lo = (uintptr_t)(info->dlpi_addr + ph->p_vaddr);
+    if (ph->p_type == PT_LOAD && s->addr >= lo && s->addr - lo < (uintptr_t)ph->p_memsz) hit = 1;
+  }
+  if (!hit) return 0;
+  {
+    kz_rt_object *o = s->out;
+    const char *path = info->dlpi_name != NULL ? info->dlpi_name : "";
+    size_t n;
+    if (first) { /* the main executable, also for a registration made in it */
+      const char *exe = (const char *)getauxval(AT_EXECFN);
+      if (exe != NULL) path = exe;
+    }
+    n = strlen(path);
+    o->found = 1;
+    o->base = (uint64_t)info->dlpi_addr;
+    if (n > KZ_RT_OBJPATH_MAX) {
+      n = KZ_RT_OBJPATH_MAX;
+      o->flags |= KZ_RT_OBJF_PATH_CUT;
+    }
+    memcpy(o->path, path, n);
+    o->path[n] = 0;
+    o->path_len = (uint32_t)n;
+    o->note = read_note(info, o);
+    if (o->note != KZ_RT_NOTE_PRESENT) o->id_len = 0;
+  }
+  s->found = 1;
+  return 1; /* stop */
+}
+
+static int posix_read_object(void *ctx, const void *addr, kz_rt_object *out) {
+  obj_search s;
+  (void)ctx;
+  s.addr = (uintptr_t)addr;
+  s.want_main = addr == NULL;
+  s.out = out;
+  s.found = 0;
+  s.index = 0;
+  (void)dl_iterate_phdr(find_object, &s);
+  return s.found ? 0 : 1;
+}
+
+KZ_RT_API void kz_rt_posix_objects(void) { kz_rt_objects(posix_read_object, NULL); }

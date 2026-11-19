@@ -48,6 +48,7 @@ struct Collected {
   kz_rt_dec_run run{};
   kz_rt_dec_runx runx{};
   std::vector<kz_rt_dec_module> modules;
+  std::vector<kz_rt_dec_buildid> buildids;  // dump 1.5
   std::vector<kz_rt_dec_actor> actors;
   std::vector<kz_rt_dec_loss> losses;
   std::vector<kz_rt_dec_point> points;
@@ -69,6 +70,10 @@ int collect(void* ctx, const kz_rt_dec_item* it) {
       c.runx = it->u.runx;
       break;
     case KZ_RT_REC_MODULE: c.modules.push_back(it->u.module); break;
+    case KZ_RT_REC_BUILDID: c.buildids.push_back(it->u.buildid); break;
+    case KZ_RT_REC_TOK_CREATE:
+    case KZ_RT_REC_TOK_RETURN:
+    case KZ_RT_REC_TOK_START: c.other_aseq.push_back({it->u.token.actor, it->u.token.aseq}); break;  // reserved: no join
     case KZ_RT_REC_ACTOR: c.actors.push_back(it->u.actor); break;
     case KZ_RT_REC_LOSS: c.losses.push_back(it->u.loss); break;
     case KZ_RT_REC_POINT: c.points.push_back(it->u.point); break;
@@ -558,6 +563,9 @@ Status neutral_from_kzrt(const KzrtConvertInput& in, KzrtConvertResult* out) {
     return 0;
   };
   for (const kz_rt_dec_loss& l : c.losses) {
+    // dump 1.5: an object whose build-id is not recorded, or a full object table, loses no event (the NBUILD records
+    // carry the objects; event_semantics.md 13.5 (bar))
+    if (l.kind == KZ_RT_LOSS_NO_BUILD_ID || l.kind == KZ_RT_LOSS_OBJECT_TABLE) continue;
     kz_nloss nl = nloss_init();
     nl.kind = nloss_kind(l.kind);
     nl.count = l.count;
@@ -623,6 +631,25 @@ Status neutral_from_kzrt(const KzrtConvertInput& in, KzrtConvertResult* out) {
     n.losses.push_back(nl);
   }
   if (lossy) nr.r.flags |= KZ_NRUN_FLAG_LOSS_PRESENT;
+
+  // ---- dump 1.5: the loaded objects the run recorded, as NBUILD records of link build-id (event_semantics.md 13.5 (bar));
+  // the conversion compares nothing (no build tree): every record is unconfirmed, and no `run` record is written ----
+  for (const kz_rt_dec_buildid& b : c.buildids) {
+    NBuild x;
+    x.r = zeroed<kz_nbuild>();
+    x.r.link = KZ_NBUILD_LINK_BUILD_ID;
+    x.r.verdict = KZ_NBUILD_VERDICT_UNCONFIRMED;
+    x.r.index = b.object;
+    x.path.assign(b.path, b.path_len);
+    if (b.note == KZ_RT_NOTE_PRESENT) {
+      x.r.flags = KZ_NBUILD_FLAG_OBSERVED_KNOWN;
+      x.build_id = hex(b.id, b.id_len);
+      x.reason = "not compared by the conversion";
+    } else {
+      x.reason = b.note == KZ_RT_NOTE_ABSENT ? "no build-id note (absent)" : "no build-id note (unreadable)";
+    }
+    n.build_checks.push_back(std::move(x));
+  }
 
   // ---- the start: every hook from the first is recorded (static bootstrap buffer, no pre-init loss) ----
   bool boot_whole = complete && (rr.phase & KZ_RT_PHASE_INIT) != 0 && (rr.mode == KZ_RT_MODE_RECORD || rr.mode == KZ_RT_MODE_CONTROL || rr.mode == KZ_RT_MODE_STOPPED);

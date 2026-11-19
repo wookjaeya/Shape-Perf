@@ -14,6 +14,8 @@
  *      records the process id and its own thread as the process's initial thread (kz_rt_process, RUNX
  *      1.2): glibc runs the executable's constructors in the initial thread before main, and the thread
  *      id is compared with the process id (gettid(2) = getpid(2) only for the thread-group leader).
+ *      Since kzrt 0.5.0 it then gives the runtime the POSIX object reader (kz_rt_posix_objects): the build-id of the
+ *      main executable and of the object of every module registration (dump 1.5 BUILDID, event_semantics.md 13.5).
  *
  * Configuration comes from the environment, so a run that uses it adds these names to the target's
  * environment (record them as a difference from the reference run's environment):
@@ -150,6 +152,7 @@ __attribute__((constructor)) static void kz_rt_auto_start(void) {
   }
   (void)kz_rt_attach(kz_rt_posix_adapter());
   (void)kz_rt_init(&c);
+  kz_rt_posix_objects(); /* kzrt 0.5.0: the main executable's build-id, then the modules registered so far and later */
   {
     const char *plan = getenv("KZ_RT_PLAN");
     if (c.mode == KZ_RT_MODE_CONTROL) {

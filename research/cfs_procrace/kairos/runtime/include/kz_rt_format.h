@@ -1,4 +1,4 @@
-/* kz_rt_format.h -- the dump format "kzrt-dump" 1.4 (byte layout; shared by the runtime and the
+/* kz_rt_format.h -- the dump format "kzrt-dump" 1.5 (byte layout; shared by the runtime and the
  * host decoder).  Every multi-byte field is little-endian and written byte by byte, so the bytes
  * do not depend on the target's byte order, alignment or struct layout.
  *
@@ -6,7 +6,7 @@
  *   file header (16 bytes): "KZRTDUMP", u16 major, u16 minor, u32 dump_flags
  *   records, each: u32 size (bytes of the whole record, a multiple of 4), u16 type, u16 sub,
  *                  then the body.  A reader skips a record type it does not know (by size).
- *   order: RUN, RUNX, MODULE*, RESOURCE*, ACTOR*, LOSS*, POINT*, PLAN?, BUF*, END
+ *   order: RUN, RUNX, MODULE*, BUILDID*, RESOURCE*, ACTOR*, LOSS*, POINT*, PLAN?, BUF*, END
  *   END: u64 bytes (stream bytes before END), u32 crc32 (IEEE, of those bytes).
  *   1.1 added (minor: a 1.0 reader skips or ignores them): the RUNX record, MODULE registrations,
  *   the ACTOR demand and chunk fields.  A 1.1 reader reads a 1.0 stream (missing fields = not recorded).
@@ -14,6 +14,9 @@
  *   1.3 added the PLAN record (the serialized control plan the run was given, after the POINT records).
  *   1.4 added how the run ended and where the store was, at the end of RUNX (a 1.3 RUNX has none: not recorded), the
  *   dump flag RECOVERED and the LOSS kind abnormal-end (a dump made from a store file after the process ended).
+ *   1.5 added the BUILDID record (the GNU build-id of the main executable and of each module registration's loaded
+ *   object), the reserved buffer records of the creation token (TOK_CREATE, TOK_RETURN, TOK_START: read, never written
+ *   by this runtime) and the LOSS kinds no-build-id and object-table (event_semantics.md 13.5).
  *
  * A BUF record's body is u32 owner (0 = the bootstrap/shared buffer, else a run actor id),
  * u32 nbytes, u32 cap, u32 rsv, then nbytes of buffer records (EVENT, CTL, AEXIT) exactly as the
@@ -41,12 +44,16 @@
 #define KZ_RT_REC_LOSS 0x0005u
 #define KZ_RT_REC_POINT 0x0006u
 #define KZ_RT_REC_RUNX 0x0007u   /* 1.1: mode source and capacity of the run */
+#define KZ_RT_REC_BUILDID 0x0009u /* 1.5: a loaded object and its build-id */
 #define KZ_RT_REC_BUF 0x0010u
 #define KZ_RT_REC_END 0x00FFu
 /* buffer record types */
 #define KZ_RT_REC_EVENT 0x0101u
 #define KZ_RT_REC_CTL 0x0102u
 #define KZ_RT_REC_AEXIT 0x0103u
+#define KZ_RT_REC_TOK_CREATE 0x0104u /* 1.5, reserved (no writer in this runtime): the creation call's token */
+#define KZ_RT_REC_TOK_RETURN 0x0105u /* 1.5, reserved: the creation call's return (status, thread handle) */
+#define KZ_RT_REC_TOK_START 0x0106u  /* 1.5, reserved: the created thread's first record of the same token */
 #define KZ_RT_REC_PAD 0x0100u /* filler to the end of the shared buffer after a lost reservation race */
 
 /* RUN (sub = 0):
@@ -154,6 +161,23 @@
 
 /* AEXIT: 8 u32 actor, 12 u32 aseq, 16 u64 t; size 24 */
 #define KZ_RT_AEXIT_SIZE 24u
+
+/* BUILDID (1.5, stream record after the MODULE records, sub = 0; event_semantics.md 13.5):
+ *   8 u32 object (0 = the main executable, else the module number), 12 u32 source (KZ_RT_OBJSRC_*), 16 u32 note
+ *  (KZ_RT_NOTE_*), 20 u32 actor (0 = none), 24 u64 t (0 = not known), 32 u16 id_len (<= KZ_RT_BUILDID_MAX), 34 u16
+ *  path_len (<= KZ_RT_OBJPATH_MAX), 36 u32 flags (KZ_RT_OBJF_*), 40 the build-id bytes, then the path bytes (no NUL),
+ *  padded to 4 */
+#define KZ_RT_BUILDID_FIXED 40u
+/* (KZ_RT_OBJSRC_*, KZ_RT_NOTE_*, KZ_RT_OBJF_*, KZ_RT_BUILDID_MAX and KZ_RT_OBJPATH_MAX are in kz_rt.h) */
+/* The creation token's buffer records (1.5, reserved: the readers are built and tested on synthetic dumps; this runtime
+ * writes none).  sub = event flags (KZ_RT_EF_*).  Each takes one aseq of its actor.
+ *   TOK_CREATE: 8 u32 actor, 12 u32 aseq, 16 u32 site, 20 u32 rsv, 24 u64 token, 32 u64 t; size 40
+ *   TOK_RETURN: 8 u32 actor, 12 u32 aseq, 16 u32 site, 20 u32 rsv, 24 u64 token, 32 s64 status, 40 u64 handle, 48 u64 t;
+ *               size 56
+ *   TOK_START:  8 u32 actor, 12 u32 aseq, 16 u32 site (0 = none), 20 u32 rsv, 24 u64 token, 32 u64 t; size 40 */
+#define KZ_RT_TOK_CREATE_SIZE 40u
+#define KZ_RT_TOK_RETURN_SIZE 56u
+#define KZ_RT_TOK_START_SIZE 40u
 
 /* ---- the control plan (kzrt 0.3.0) ---------------------------------------------------------------
  * PLAN (stream record, after the POINT records; a reader that does not know it skips it by size):

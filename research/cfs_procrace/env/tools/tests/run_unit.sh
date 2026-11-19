@@ -49,6 +49,12 @@
 #  17 plan regeneration with a value requests file (env/tools/plan_regen.sh, manifest revision 4, stand-in generator):
 #     the requests file is regenerated into the scratch dir and compared (rc 0); another requests text -> rc 1; the
 #     original requests file is not written
+#  18 same-build lines of the chain checker (kairos/docs/event_semantics.md 13.4, 13.5): two system executables copied
+#     into a stub tree stand for the main executable and a module (their GNU build-ids, read by readelf -n); dump-text
+#     buildid lines equal to them -> same_build confirmed with two object lines; another module build-id -> refused; a dump
+#     text without buildid lines but with a module line -> unconfirmed(no build-id in dump) for main and the module;
+#     note=absent -> unconfirmed(no build-id note); a module path no build record line ends with -> unconfirmed(object not
+#     in the build record); the chain verdict is the same in every case
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../../.." && pwd)"
@@ -411,6 +417,31 @@ RG_REQ=other bash "$HERE/../plan_regen.sh" "$X/gen" "$X/args.txt" "$X/s2" > "$X/
 h1=$(sha256sum < "$X/o/plan.req")
 ok=0; [ $c -eq 0 ] && grep -q '^same      --requests-out ' "$X/c.log" && [ $f1 -eq 1 ] && grep -q '^DIFFERENT --requests-out ' "$X/f.log" && [ "$h0" = "$h1" ] || ok=1
 res "plan regeneration with a value requests file (stand-in generator)" $ok "control rc $c, other requests rc $f1, the original requests file unchanged: $([ "$h0" = "$h1" ] && echo yes || echo no)"
+
+# 18 same-build lines (dump 1.5 buildid lines against readelf -n of the stub tree)
+X=$W/sb; mkdir -p "$X/b/exe/tx/cf"
+cp /usr/bin/true "$X/b/exe/tx/core-tx"; cp /usr/bin/false "$X/b/exe/tx/cf/m.so"
+echo "site 1 x" > "$X/plan.kzs"
+mh=$(sha256sum < "$X/plan.kzs" | cut -c1-64); eh=$(sha256sum < "$X/b/exe/tx/core-tx" | cut -c1-64); oh=$(sha256sum < "$X/b/exe/tx/cf/m.so" | cut -c1-64)
+mid=$(readelf -n "$X/b/exe/tx/core-tx" | sed -n 's/^ *Build ID: //p'); oid=$(readelf -n "$X/b/exe/tx/cf/m.so" | sed -n 's/^ *Build ID: //p')
+printf 'plugin sha256 %s manifest sha256 %s\nexe/tx/core-tx sha256 %s (reference x)\nexe/tx/cf/m.so sha256 %s (reference y)\n' "$(printf 0%.0s {1..64})" "$mh" "$eh" "$oh" > "$X/build.record"
+printf 'file tx/core-tx sha256=%s (build %s)\nfile tx/cf/m.so sha256=%s (build %s)\nmanifest %s sha256=%s\n' "$eh" "$eh" "$oh" "$oh" "$X/plan.kzs" "$mh" > "$X/run.meta"
+dt() { # MODULE-ID NOTE PATH: a dump text with a main line, a module line and that module's buildid line
+  printf 'run backend="stub" manifest_sha256=%s\nmodule 3 actor=1 t=1 registrations=1 manifest_sha256=%s\n' "$mh" "$mh"
+  printf 'buildid object=main path="./core-tx" build_id=%s note=present source=start actor=- t=1\n' "$mid"
+  printf 'buildid object=module:3 path="%s" build_id=%s note=%s source=registration actor=1 t=2\n' "$3" "$1" "$2"
+}
+sb() { python3 -I "$TL/chain_check.py" --plan "$X/plan.kzs" --build-record "$X/build.record" --run-meta "$X/run.meta" --dump-text "$X/dump.txt" --main exe/tx/core-tx --build-root "$X/b" > "$X/out.txt" 2>&1; echo "$(grep -c '^same_build_object' "$X/out.txt") $(grep '^same_build	' "$X/out.txt" | cut -f2) $(tail -1 "$X/out.txt" | cut -f2)"; }
+dt "$oid" present cf/m.so > "$X/dump.txt"; r1=$(sb)
+dt 0123abcd present cf/m.so > "$X/dump.txt"; r2=$(sb)
+printf 'run backend="stub" manifest_sha256=%s\nmodule 3 actor=1 t=1 registrations=1 manifest_sha256=%s\n' "$mh" "$mh" > "$X/dump.txt"; r3=$(sb)
+dt - absent cf/m.so > "$X/dump.txt"; r4=$(sb)
+dt "$oid" present other/m.so > "$X/dump.txt"; r5=$(sb)
+ok=0
+[ -n "$mid" ] && [ -n "$oid" ] && [ "$mid" != "$oid" ] || ok=1
+[ "$r1" = "2 confirmed unconfirmed" ] && [ "$r2" = "2 refused unconfirmed" ] && [ "$r3" = "2 unconfirmed(no build-id in dump) unconfirmed" ] || ok=1
+[ "$r4" = "2 unconfirmed(no build-id note) unconfirmed" ] && [ "$r5" = "2 unconfirmed(object not in the build record) unconfirmed" ] || ok=1
+res "same-build lines (stub tree, system executables)" $ok "equal ids: $r1; other module id: $r2; no buildid line: $r3; note absent: $r4; path not in the record: $r5"
 
 echo "unit checks: $((NC - NF)) of $NC pass"
 exit $((NF > 0))

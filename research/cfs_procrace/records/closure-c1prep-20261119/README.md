@@ -21,3 +21,7 @@ declaration. No cFS boot. Nothing is pushed.
 | `derived/pre/attempt1/` | the first derived build of c1_pre_tx (kzgcc 0.4): its records and the compiler-stop excerpt of its build log (results 25.4) |
 | `scripts/unit_check.py`, `scratch/unitcheck_kzgcc04_<pre|post>.txt`, `..._units.tsv` | every planned unit of a plan compiled with a plugin in scratch (kzgcc 0.4: one unit stops the compiler in each plan) |
 | `guard/s_*.log` | the space guard logs of scratch actions (scratch paths replaced by `<scratch>`) |
+| `scratch/plugin05/` | the scratch check build of kzgcc 0.5 from the committed source: build log, ctest (20/20), the versions 1-3 regression against kzgcc 0.4; `scratch/compare_units_k04_k05scratch_<pre|post>.txt` (and the first, faulty `_trial1`) |
+| `scripts/compare_units.py`, `scripts/compare_manifest_2.py`, `scripts/plugin05.sh` | unit-by-unit comparison of two plugins on a plan; the versions 1-3 comparison with the version texts as arguments; the kzgcc 0.5 build and its checks |
+| `plugin05/` | the kzgcc 0.5 build: MC dry run (nothing to rebuild), build and ctest logs, regression and unit comparisons |
+| `scripts/run2.sh`, `derived2/<pre|post>/` | the derived builds again with kzgcc 0.5 into new directories (results 25.5 (da)) |

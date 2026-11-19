@@ -1,0 +1,6 @@
+# space_guard.sh kind=unitcheck need=30000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/scripts/unit_check.py --plan /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/plan.kzs --modules /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/plan.mod --compile-db /home/user/work/procrace/c1_build/post/1df262a/build/native/default/compile_commands.json --plugin <scratch>/c1prep/kzb5/kzgcc.so --out <scratch>/c1prep/uc_k05_post
+start 2026-11-19T09:03:42.165Z free=639258624 threshold=344572800
+sample 2026-11-19T09:03:42.169Z 639254528
+sample 2026-11-19T09:03:44.177Z 638873600
+sample 2026-11-19T09:03:46.183Z 638488576
+end 2026-11-19T09:03:48.191Z kind=unitcheck verdict=completed rc=0 free=638222336 lowest=638222336 dip=1036288 change=-1036288

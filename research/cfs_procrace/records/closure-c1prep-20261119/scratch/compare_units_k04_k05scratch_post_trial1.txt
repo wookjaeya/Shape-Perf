@@ -1,0 +1,33 @@
+DIFFERENT apps/ci_lab/fsw/src/ci_lab_app.c object same bindings differ
+DIFFERENT apps/sch_lab/fsw/src/sch_lab_app.c object same bindings differ
+DIFFERENT apps/to_lab/fsw/src/to_lab_app.c object same bindings differ
+DIFFERENT cfe/modules/es/fsw/src/cfe_es_api.c object same bindings differ
+DIFFERENT cfe/modules/es/fsw/src/cfe_es_apps.c object same bindings differ
+DIFFERENT cfe/modules/es/fsw/src/cfe_es_backgroundtask.c object same bindings differ
+DIFFERENT cfe/modules/es/fsw/src/cfe_es_start.c object same bindings differ
+DIFFERENT cfe/modules/es/fsw/src/cfe_es_task.c object same bindings differ
+DIFFERENT cfe/modules/evs/fsw/src/cfe_evs_task.c object same bindings differ
+DIFFERENT cfe/modules/sb/fsw/src/cfe_sb_api.c object same bindings differ
+DIFFERENT cfe/modules/sb/fsw/src/cfe_sb_buf.c object same bindings differ
+DIFFERENT cfe/modules/sb/fsw/src/cfe_sb_init.c object same bindings differ
+DIFFERENT cfe/modules/sb/fsw/src/cfe_sb_task.c object same bindings differ
+DIFFERENT cfe/modules/tbl/fsw/src/cfe_tbl_api.c object same bindings differ
+DIFFERENT cfe/modules/tbl/fsw/src/cfe_tbl_internal.c object same bindings differ
+DIFFERENT cfe/modules/tbl/fsw/src/cfe_tbl_task.c object same bindings differ
+A-FAILED cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c (A rc=1, B rc=0): B binding lines bound 17, unsupported 1
+DIFFERENT cfe/modules/time/fsw/src/cfe_time_task.c object same bindings differ
+DIFFERENT cfe/modules/time/fsw/src/cfe_time_tone.c object same bindings differ
+DIFFERENT osal/src/os/posix/src/os-impl-tasks.c object same bindings differ
+DIFFERENT osal/src/os/shared/src/osapi-countsem.c object same bindings differ
+DIFFERENT osal/src/os/shared/src/osapi-file.c object same bindings differ
+DIFFERENT osal/src/os/shared/src/osapi-idmap.c object same bindings differ
+DIFFERENT osal/src/os/shared/src/osapi-timebase.c object same bindings differ
+DIFFERENT psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c object same bindings differ
+DIFFERENT src/bp/fsw/src/bp_app.c object same bindings differ
+DIFFERENT src/bp/fsw/src/bp_cla_bundle_io.c object same bindings differ
+DIFFERENT src/bp/fsw/src/bp_flow.c object same bindings differ
+DIFFERENT src/cf/fsw/src/cf_app.c object same bindings differ
+DIFFERENT src/cf/fsw/src/cf_cfdp.c object same bindings differ
+DIFFERENT src/cf/fsw/src/cf_cfdp_r.c object same bindings differ
+DIFFERENT src/cf/fsw/src/cf_cfdp_s.c object same bindings differ
+units 32: same apart from the version text 0, different 31, failed in A 1

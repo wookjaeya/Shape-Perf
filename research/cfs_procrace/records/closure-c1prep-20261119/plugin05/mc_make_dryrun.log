@@ -1,0 +1,509 @@
+/usr/bin/cmake -P /home/user/work/merge-check/kz-llvm/CMakeFiles/VerifyGlobs.cmake
+/usr/bin/cmake -S/home/user/Shape-Perf/research/cfs_procrace/kairos -B/home/user/work/merge-check/kz-llvm --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/cmake -E cmake_progress_start /home/user/work/merge-check/kz-llvm/CMakeFiles /home/user/work/merge-check/kz-llvm//CMakeFiles/progress.marks
+make -s -f CMakeFiles/Makefile2 all
+make -s -f lib/core/CMakeFiles/kz-core.dir/build.make lib/core/CMakeFiles/kz-core.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/lib/core /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/lib/core /home/user/work/merge-check/kz-llvm/lib/core/CMakeFiles/kz-core.dir/DependInfo.cmake "--color="
+make -s -f lib/core/CMakeFiles/kz-core.dir/build.make lib/core/CMakeFiles/kz-core.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=6,7,8,9,10,11,12 "Built target kz-core"
+make -s -f runtime/CMakeFiles/kzrt-manifest.dir/build.make runtime/CMakeFiles/kzrt-manifest.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime /home/user/work/merge-check/kz-llvm/runtime/CMakeFiles/kzrt-manifest.dir/DependInfo.cmake "--color="
+make -s -f runtime/CMakeFiles/kzrt-manifest.dir/build.make runtime/CMakeFiles/kzrt-manifest.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target kzrt-manifest"
+make -s -f instrument/clang/CMakeFiles/kz-instr-clang.dir/build.make instrument/clang/CMakeFiles/kz-instr-clang.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/clang /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/instrument/clang /home/user/work/merge-check/kz-llvm/instrument/clang/CMakeFiles/kz-instr-clang.dir/DependInfo.cmake "--color="
+make -s -f instrument/clang/CMakeFiles/kz-instr-clang.dir/build.make instrument/clang/CMakeFiles/kz-instr-clang.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=15 "Built target kz-instr-clang"
+make -s -f lib/llvm/CMakeFiles/kz-llvm.dir/build.make lib/llvm/CMakeFiles/kz-llvm.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/lib/llvm /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/lib/llvm /home/user/work/merge-check/kz-llvm/lib/llvm/CMakeFiles/kz-llvm.dir/DependInfo.cmake "--color="
+make -s -f lib/llvm/CMakeFiles/kz-llvm.dir/build.make lib/llvm/CMakeFiles/kz-llvm.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=16,17,18,19,20,21,22,23 "Built target kz-llvm"
+make -s -f lib/predict/CMakeFiles/kz-predict.dir/build.make lib/predict/CMakeFiles/kz-predict.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/lib/predict /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/lib/predict /home/user/work/merge-check/kz-llvm/lib/predict/CMakeFiles/kz-predict.dir/DependInfo.cmake "--color="
+make -s -f lib/predict/CMakeFiles/kz-predict.dir/build.make lib/predict/CMakeFiles/kz-predict.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=28 "Built target kz-predict"
+make -s -f runtime/CMakeFiles/kzrt-decode.dir/build.make runtime/CMakeFiles/kzrt-decode.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime /home/user/work/merge-check/kz-llvm/runtime/CMakeFiles/kzrt-decode.dir/DependInfo.cmake "--color="
+make -s -f runtime/CMakeFiles/kzrt-decode.dir/build.make runtime/CMakeFiles/kzrt-decode.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=42 "Built target kzrt-decode"
+make -s -f lib/trace/CMakeFiles/kz-trace.dir/build.make lib/trace/CMakeFiles/kz-trace.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/lib/trace /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/lib/trace /home/user/work/merge-check/kz-llvm/lib/trace/CMakeFiles/kz-trace.dir/DependInfo.cmake "--color="
+make -s -f lib/trace/CMakeFiles/kz-trace.dir/build.make lib/trace/CMakeFiles/kz-trace.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=33,34,35,36 "Built target kz-trace"
+make -s -f probe/anchor/CMakeFiles/kz-anchor.dir/build.make probe/anchor/CMakeFiles/kz-anchor.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/probe/anchor /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/probe/anchor /home/user/work/merge-check/kz-llvm/probe/anchor/CMakeFiles/kz-anchor.dir/DependInfo.cmake "--color="
+make -s -f probe/anchor/CMakeFiles/kz-anchor.dir/build.make probe/anchor/CMakeFiles/kz-anchor.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=5 "Built target kz-anchor"
+make -s -f probe/plan/CMakeFiles/kz-plan.dir/build.make probe/plan/CMakeFiles/kz-plan.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/probe/plan /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/probe/plan /home/user/work/merge-check/kz-llvm/probe/plan/CMakeFiles/kz-plan.dir/DependInfo.cmake "--color="
+make -s -f probe/plan/CMakeFiles/kz-plan.dir/build.make probe/plan/CMakeFiles/kz-plan.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=27 "Built target kz-plan"
+make -s -f probe/hold/CMakeFiles/kz-hold.dir/build.make probe/hold/CMakeFiles/kz-hold.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/probe/hold /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/probe/hold /home/user/work/merge-check/kz-llvm/probe/hold/CMakeFiles/kz-hold.dir/DependInfo.cmake "--color="
+make -s -f probe/hold/CMakeFiles/kz-hold.dir/build.make probe/hold/CMakeFiles/kz-hold.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=14 "Built target kz-hold"
+make -s -f probe/loader/CMakeFiles/kz-loader.dir/build.make probe/loader/CMakeFiles/kz-loader.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/probe/loader /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/probe/loader /home/user/work/merge-check/kz-llvm/probe/loader/CMakeFiles/kz-loader.dir/DependInfo.cmake "--color="
+make -s -f probe/loader/CMakeFiles/kz-loader.dir/build.make probe/loader/CMakeFiles/kz-loader.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=24,25 "Built target kz-loader"
+make -s -f runtime/CMakeFiles/kzrt.dir/build.make runtime/CMakeFiles/kzrt.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime /home/user/work/merge-check/kz-llvm/runtime/CMakeFiles/kzrt.dir/DependInfo.cmake "--color="
+make -s -f runtime/CMakeFiles/kzrt.dir/build.make runtime/CMakeFiles/kzrt.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target kzrt"
+make -s -f runtime/CMakeFiles/kzrt-posix.dir/build.make runtime/CMakeFiles/kzrt-posix.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime /home/user/work/merge-check/kz-llvm/runtime/CMakeFiles/kzrt-posix.dir/DependInfo.cmake "--color="
+make -s -f runtime/CMakeFiles/kzrt-posix.dir/build.make runtime/CMakeFiles/kzrt-posix.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=44 "Built target kzrt-posix"
+make -s -f runtime/CMakeFiles/kzrt-posix-auto.dir/build.make runtime/CMakeFiles/kzrt-posix-auto.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime /home/user/work/merge-check/kz-llvm/runtime/CMakeFiles/kzrt-posix-auto.dir/DependInfo.cmake "--color="
+make -s -f runtime/CMakeFiles/kzrt-posix-auto.dir/build.make runtime/CMakeFiles/kzrt-posix-auto.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target kzrt-posix-auto"
+make -s -f runtime/CMakeFiles/kz-rt-dump.dir/build.make runtime/CMakeFiles/kz-rt-dump.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime /home/user/work/merge-check/kz-llvm/runtime/CMakeFiles/kz-rt-dump.dir/DependInfo.cmake "--color="
+make -s -f runtime/CMakeFiles/kz-rt-dump.dir/build.make runtime/CMakeFiles/kz-rt-dump.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=29 "Built target kz-rt-dump"
+make -s -f runtime/tests/CMakeFiles/test_rt_bootstrap.dir/build.make runtime/tests/CMakeFiles/test_rt_bootstrap.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_bootstrap.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_bootstrap.dir/build.make runtime/tests/CMakeFiles/test_rt_bootstrap.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=74 "Built target test_rt_bootstrap"
+make -s -f runtime/tests/CMakeFiles/test_rt_order.dir/build.make runtime/tests/CMakeFiles/test_rt_order.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_order.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_order.dir/build.make runtime/tests/CMakeFiles/test_rt_order.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=80 "Built target test_rt_order"
+make -s -f runtime/tests/CMakeFiles/test_rt_loss.dir/build.make runtime/tests/CMakeFiles/test_rt_loss.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_loss.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_loss.dir/build.make runtime/tests/CMakeFiles/test_rt_loss.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=77 "Built target test_rt_loss"
+make -s -f runtime/tests/CMakeFiles/test_rt_serial.dir/build.make runtime/tests/CMakeFiles/test_rt_serial.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_serial.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_serial.dir/build.make runtime/tests/CMakeFiles/test_rt_serial.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_rt_serial"
+make -s -f runtime/tests/CMakeFiles/test_rt_gate.dir/build.make runtime/tests/CMakeFiles/test_rt_gate.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_gate.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_gate.dir/build.make runtime/tests/CMakeFiles/test_rt_gate.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=76 "Built target test_rt_gate"
+make -s -f runtime/tests/CMakeFiles/test_rt_holdsem.dir/build.make runtime/tests/CMakeFiles/test_rt_holdsem.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_holdsem.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_holdsem.dir/build.make runtime/tests/CMakeFiles/test_rt_holdsem.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_rt_holdsem"
+make -s -f runtime/tests/CMakeFiles/test_rt_manifest.dir/build.make runtime/tests/CMakeFiles/test_rt_manifest.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_manifest.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_manifest.dir/build.make runtime/tests/CMakeFiles/test_rt_manifest.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=78 "Built target test_rt_manifest"
+make -s -f runtime/tests/CMakeFiles/test_rt_auto.dir/build.make runtime/tests/CMakeFiles/test_rt_auto.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_auto.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_auto.dir/build.make runtime/tests/CMakeFiles/test_rt_auto.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_rt_auto"
+make -s -f runtime/tests/CMakeFiles/test_rt_pool.dir/build.make runtime/tests/CMakeFiles/test_rt_pool.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_pool.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_pool.dir/build.make runtime/tests/CMakeFiles/test_rt_pool.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_rt_pool"
+make -s -f runtime/tests/CMakeFiles/test_rt_mode.dir/build.make runtime/tests/CMakeFiles/test_rt_mode.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_mode.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_mode.dir/build.make runtime/tests/CMakeFiles/test_rt_mode.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_rt_mode"
+make -s -f runtime/tests/CMakeFiles/test_rt_objects.dir/build.make runtime/tests/CMakeFiles/test_rt_objects.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_objects.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_objects.dir/build.make runtime/tests/CMakeFiles/test_rt_objects.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_rt_objects"
+make -s -f runtime/tests/CMakeFiles/rt_objects_mod_id.dir/build.make runtime/tests/CMakeFiles/rt_objects_mod_id.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/rt_objects_mod_id.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/rt_objects_mod_id.dir/build.make runtime/tests/CMakeFiles/rt_objects_mod_id.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=45 "Built target rt_objects_mod_id"
+make -s -f runtime/tests/CMakeFiles/rt_objects_mod_noid.dir/build.make runtime/tests/CMakeFiles/rt_objects_mod_noid.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/rt_objects_mod_noid.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/rt_objects_mod_noid.dir/build.make runtime/tests/CMakeFiles/rt_objects_mod_noid.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target rt_objects_mod_noid"
+make -s -f runtime/tests/CMakeFiles/test_rt_format15.dir/build.make runtime/tests/CMakeFiles/test_rt_format15.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_format15.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_format15.dir/build.make runtime/tests/CMakeFiles/test_rt_format15.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_rt_format15"
+make -s -f runtime/tests/CMakeFiles/kzrt-pool4.dir/build.make runtime/tests/CMakeFiles/kzrt-pool4.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/kzrt-pool4.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/kzrt-pool4.dir/build.make runtime/tests/CMakeFiles/kzrt-pool4.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=43 "Built target kzrt-pool4"
+make -s -f runtime/tests/CMakeFiles/test_rt_pool4.dir/build.make runtime/tests/CMakeFiles/test_rt_pool4.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_pool4.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_pool4.dir/build.make runtime/tests/CMakeFiles/test_rt_pool4.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=83 "Built target test_rt_pool4"
+make -s -f runtime/tests/CMakeFiles/kzrt-build-info-test.dir/build.make runtime/tests/CMakeFiles/kzrt-build-info-test.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/kzrt-build-info-test.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/kzrt-build-info-test.dir/build.make runtime/tests/CMakeFiles/kzrt-build-info-test.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target kzrt-build-info-test"
+make -s -f runtime/tests/CMakeFiles/kzrt-build-info-bad.dir/build.make runtime/tests/CMakeFiles/kzrt-build-info-bad.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/kzrt-build-info-bad.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/kzrt-build-info-bad.dir/build.make runtime/tests/CMakeFiles/kzrt-build-info-bad.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=41 "Built target kzrt-build-info-bad"
+make -s -f runtime/tests/CMakeFiles/test_rt_auto_bad.dir/build.make runtime/tests/CMakeFiles/test_rt_auto_bad.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_auto_bad.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_auto_bad.dir/build.make runtime/tests/CMakeFiles/test_rt_auto_bad.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=73 "Built target test_rt_auto_bad"
+make -s -f runtime/tests/CMakeFiles/test_rt_mode_api.dir/build.make runtime/tests/CMakeFiles/test_rt_mode_api.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_mode_api.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_mode_api.dir/build.make runtime/tests/CMakeFiles/test_rt_mode_api.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=79 "Built target test_rt_mode_api"
+make -s -f runtime/tests/CMakeFiles/test_rt_auto_bi.dir/build.make runtime/tests/CMakeFiles/test_rt_auto_bi.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_auto_bi.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_auto_bi.dir/build.make runtime/tests/CMakeFiles/test_rt_auto_bi.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_rt_auto_bi"
+make -s -f runtime/tests/CMakeFiles/test_rt_plan.dir/build.make runtime/tests/CMakeFiles/test_rt_plan.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_plan.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_plan.dir/build.make runtime/tests/CMakeFiles/test_rt_plan.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=81 "Built target test_rt_plan"
+make -s -f runtime/tests/CMakeFiles/test_rt_plan_nb.dir/build.make runtime/tests/CMakeFiles/test_rt_plan_nb.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_plan_nb.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_plan_nb.dir/build.make runtime/tests/CMakeFiles/test_rt_plan_nb.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=82 "Built target test_rt_plan_nb"
+make -s -f runtime/tests/CMakeFiles/test_rt_end.dir/build.make runtime/tests/CMakeFiles/test_rt_end.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tests /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/runtime/tests /home/user/work/merge-check/kz-llvm/runtime/tests/CMakeFiles/test_rt_end.dir/DependInfo.cmake "--color="
+make -s -f runtime/tests/CMakeFiles/test_rt_end.dir/build.make runtime/tests/CMakeFiles/test_rt_end.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=75 "Built target test_rt_end"
+make -s -f tools/kz-dump/CMakeFiles/kz-dump.dir/build.make tools/kz-dump/CMakeFiles/kz-dump.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tools/kz-dump /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tools/kz-dump /home/user/work/merge-check/kz-llvm/tools/kz-dump/CMakeFiles/kz-dump.dir/DependInfo.cmake "--color="
+make -s -f tools/kz-dump/CMakeFiles/kz-dump.dir/build.make tools/kz-dump/CMakeFiles/kz-dump.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=13 "Built target kz-dump"
+make -s -f tools/kz-phi/CMakeFiles/kz-phi.dir/build.make tools/kz-phi/CMakeFiles/kz-phi.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tools/kz-phi /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tools/kz-phi /home/user/work/merge-check/kz-llvm/tools/kz-phi/CMakeFiles/kz-phi.dir/DependInfo.cmake "--color="
+make -s -f tools/kz-phi/CMakeFiles/kz-phi.dir/build.make tools/kz-phi/CMakeFiles/kz-phi.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=26 "Built target kz-phi"
+make -s -f tools/kz-static/CMakeFiles/kz-static.dir/build.make tools/kz-static/CMakeFiles/kz-static.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tools/kz-static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tools/kz-static /home/user/work/merge-check/kz-llvm/tools/kz-static/CMakeFiles/kz-static.dir/DependInfo.cmake "--color="
+make -s -f tools/kz-static/CMakeFiles/kz-static.dir/build.make tools/kz-static/CMakeFiles/kz-static.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=30 "Built target kz-static"
+make -s -f tools/kz/CMakeFiles/kz.dir/build.make tools/kz/CMakeFiles/kz.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tools/kz /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tools/kz /home/user/work/merge-check/kz-llvm/tools/kz/CMakeFiles/kz.dir/DependInfo.cmake "--color="
+make -s -f tools/kz/CMakeFiles/kz.dir/build.make tools/kz/CMakeFiles/kz.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=2,3,4 "Built target kz"
+make -s -f tests/unit/CMakeFiles/kz-testsupport.dir/build.make tests/unit/CMakeFiles/kz-testsupport.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/kz-testsupport.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/kz-testsupport.dir/build.make tests/unit/CMakeFiles/kz-testsupport.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=31,32 "Built target kz-testsupport"
+make -s -f tests/unit/CMakeFiles/kz_schema_c99.dir/build.make tests/unit/CMakeFiles/kz_schema_c99.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/kz_schema_c99.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/kz_schema_c99.dir/build.make tests/unit/CMakeFiles/kz_schema_c99.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target kz_schema_c99"
+make -s -f tests/unit/CMakeFiles/kz_schema_c11.dir/build.make tests/unit/CMakeFiles/kz_schema_c11.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/kz_schema_c11.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/kz_schema_c11.dir/build.make tests/unit/CMakeFiles/kz_schema_c11.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target kz_schema_c11"
+make -s -f tests/unit/CMakeFiles/test_core_schema.dir/build.make tests/unit/CMakeFiles/test_core_schema.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_schema.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_schema.dir/build.make tests/unit/CMakeFiles/test_core_schema.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_core_schema"
+make -s -f tests/unit/CMakeFiles/test_core_identity.dir/build.make tests/unit/CMakeFiles/test_core_identity.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_identity.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_identity.dir/build.make tests/unit/CMakeFiles/test_core_identity.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_core_identity"
+make -s -f tests/unit/CMakeFiles/test_core_kzdump.dir/build.make tests/unit/CMakeFiles/test_core_kzdump.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_kzdump.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_kzdump.dir/build.make tests/unit/CMakeFiles/test_core_kzdump.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=52 "Built target test_core_kzdump"
+make -s -f tests/unit/CMakeFiles/test_core_container.dir/build.make tests/unit/CMakeFiles/test_core_container.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_container.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_container.dir/build.make tests/unit/CMakeFiles/test_core_container.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_core_container"
+make -s -f tests/unit/CMakeFiles/test_core_container_corrupt.dir/build.make tests/unit/CMakeFiles/test_core_container_corrupt.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_container_corrupt.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_container_corrupt.dir/build.make tests/unit/CMakeFiles/test_core_container_corrupt.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=49 "Built target test_core_container_corrupt"
+make -s -f tests/unit/CMakeFiles/test_core_crc32.dir/build.make tests/unit/CMakeFiles/test_core_crc32.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_crc32.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_crc32.dir/build.make tests/unit/CMakeFiles/test_core_crc32.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=50 "Built target test_core_crc32"
+make -s -f tests/unit/CMakeFiles/test_core_dump.dir/build.make tests/unit/CMakeFiles/test_core_dump.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_dump.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_dump.dir/build.make tests/unit/CMakeFiles/test_core_dump.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_core_dump"
+make -s -f tests/unit/CMakeFiles/test_core_eval.dir/build.make tests/unit/CMakeFiles/test_core_eval.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_eval.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_eval.dir/build.make tests/unit/CMakeFiles/test_core_eval.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=51 "Built target test_core_eval"
+make -s -f tests/unit/CMakeFiles/test_core_monitor.dir/build.make tests/unit/CMakeFiles/test_core_monitor.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_monitor.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_monitor.dir/build.make tests/unit/CMakeFiles/test_core_monitor.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=53 "Built target test_core_monitor"
+make -s -f tests/unit/CMakeFiles/test_core_phi_allowed.dir/build.make tests/unit/CMakeFiles/test_core_phi_allowed.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_phi_allowed.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_phi_allowed.dir/build.make tests/unit/CMakeFiles/test_core_phi_allowed.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_core_phi_allowed"
+make -s -f tests/unit/CMakeFiles/test_core_phi_canonical.dir/build.make tests/unit/CMakeFiles/test_core_phi_canonical.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_phi_canonical.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_phi_canonical.dir/build.make tests/unit/CMakeFiles/test_core_phi_canonical.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=54 "Built target test_core_phi_canonical"
+make -s -f tests/unit/CMakeFiles/test_core_phi_check.dir/build.make tests/unit/CMakeFiles/test_core_phi_check.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_phi_check.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_phi_check.dir/build.make tests/unit/CMakeFiles/test_core_phi_check.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_core_phi_check"
+make -s -f tests/unit/CMakeFiles/test_core_phi_parser.dir/build.make tests/unit/CMakeFiles/test_core_phi_parser.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_phi_parser.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_phi_parser.dir/build.make tests/unit/CMakeFiles/test_core_phi_parser.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=55 "Built target test_core_phi_parser"
+make -s -f tests/unit/CMakeFiles/test_core_phi_provenance.dir/build.make tests/unit/CMakeFiles/test_core_phi_provenance.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_phi_provenance.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_phi_provenance.dir/build.make tests/unit/CMakeFiles/test_core_phi_provenance.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=56 "Built target test_core_phi_provenance"
+make -s -f tests/unit/CMakeFiles/test_core_realrecord.dir/build.make tests/unit/CMakeFiles/test_core_realrecord.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_realrecord.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_realrecord.dir/build.make tests/unit/CMakeFiles/test_core_realrecord.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_core_realrecord"
+make -s -f tests/unit/CMakeFiles/test_core_replay.dir/build.make tests/unit/CMakeFiles/test_core_replay.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_replay.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_replay.dir/build.make tests/unit/CMakeFiles/test_core_replay.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=57 "Built target test_core_replay"
+make -s -f tests/unit/CMakeFiles/test_core_sha256.dir/build.make tests/unit/CMakeFiles/test_core_sha256.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_sha256.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_sha256.dir/build.make tests/unit/CMakeFiles/test_core_sha256.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=58 "Built target test_core_sha256"
+make -s -f tests/unit/CMakeFiles/test_core_state_order.dir/build.make tests/unit/CMakeFiles/test_core_state_order.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_state_order.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_state_order.dir/build.make tests/unit/CMakeFiles/test_core_state_order.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=59 "Built target test_core_state_order"
+make -s -f tests/unit/CMakeFiles/test_core_verdict.dir/build.make tests/unit/CMakeFiles/test_core_verdict.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_verdict.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_verdict.dir/build.make tests/unit/CMakeFiles/test_core_verdict.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_core_verdict"
+make -s -f tests/unit/CMakeFiles/test_core_verify.dir/build.make tests/unit/CMakeFiles/test_core_verify.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_verify.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_verify.dir/build.make tests/unit/CMakeFiles/test_core_verify.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=60 "Built target test_core_verify"
+make -s -f tests/unit/CMakeFiles/test_core_vocab.dir/build.make tests/unit/CMakeFiles/test_core_vocab.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/unit /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/unit /home/user/work/merge-check/kz-llvm/tests/unit/CMakeFiles/test_core_vocab.dir/DependInfo.cmake "--color="
+make -s -f tests/unit/CMakeFiles/test_core_vocab.dir/build.make tests/unit/CMakeFiles/test_core_vocab.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_core_vocab"
+make -s -f tests/golden/CMakeFiles/kz_golden.dir/build.make tests/golden/CMakeFiles/kz_golden.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/golden /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/golden /home/user/work/merge-check/kz-llvm/tests/golden/CMakeFiles/kz_golden.dir/DependInfo.cmake "--color="
+make -s -f tests/golden/CMakeFiles/kz_golden.dir/build.make tests/golden/CMakeFiles/kz_golden.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=37 "Built target kz_golden"
+make -s -f tests/lint/CMakeFiles/kz_lint.dir/build.make tests/lint/CMakeFiles/kz_lint.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/lint /home/user/work/merge-check/kz-llvm/tests/lint/CMakeFiles/kz_lint.dir/DependInfo.cmake "--color="
+make -s -f tests/lint/CMakeFiles/kz_lint.dir/build.make tests/lint/CMakeFiles/kz_lint.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target kz_lint"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_fetch.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_fetch.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_decode_fetch.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_fetch.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_fetch.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=91 "Built target test_trace_decode_fetch"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_merge.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_merge.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_decode_merge.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_merge.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_merge.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_trace_decode_merge"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_perf.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_perf.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_decode_perf.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_perf.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_perf.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=92 "Built target test_trace_decode_perf"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_real.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_real.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_decode_real.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_real.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_real.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_trace_decode_real"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_sites.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_sites.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_decode_sites.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_decode_sites.dir/build.make tests/cfs-free/CMakeFiles/test_trace_decode_sites.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=93 "Built target test_trace_decode_sites"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_hold_nctl.dir/build.make tests/cfs-free/CMakeFiles/test_trace_hold_nctl.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_hold_nctl.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_hold_nctl.dir/build.make tests/cfs-free/CMakeFiles/test_trace_hold_nctl.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=94 "Built target test_trace_hold_nctl"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_identity.dir/build.make tests/cfs-free/CMakeFiles/test_trace_identity.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_identity.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_identity.dir/build.make tests/cfs-free/CMakeFiles/test_trace_identity.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_trace_identity"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_key_separation.dir/build.make tests/cfs-free/CMakeFiles/test_trace_key_separation.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_key_separation.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_key_separation.dir/build.make tests/cfs-free/CMakeFiles/test_trace_key_separation.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=95 "Built target test_trace_key_separation"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_merge_order.dir/build.make tests/cfs-free/CMakeFiles/test_trace_merge_order.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_merge_order.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_merge_order.dir/build.make tests/cfs-free/CMakeFiles/test_trace_merge_order.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_trace_merge_order"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_neutral.dir/build.make tests/cfs-free/CMakeFiles/test_trace_neutral.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_neutral.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_neutral.dir/build.make tests/cfs-free/CMakeFiles/test_trace_neutral.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=96 "Built target test_trace_neutral"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_neutral_rev12.dir/build.make tests/cfs-free/CMakeFiles/test_trace_neutral_rev12.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_neutral_rev12.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_neutral_rev12.dir/build.make tests/cfs-free/CMakeFiles/test_trace_neutral_rev12.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=97 "Built target test_trace_neutral_rev12"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_occ_basis.dir/build.make tests/cfs-free/CMakeFiles/test_trace_occ_basis.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_occ_basis.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_occ_basis.dir/build.make tests/cfs-free/CMakeFiles/test_trace_occ_basis.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_trace_occ_basis"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_occ_match.dir/build.make tests/cfs-free/CMakeFiles/test_trace_occ_match.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_occ_match.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_occ_match.dir/build.make tests/cfs-free/CMakeFiles/test_trace_occ_match.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=98 "Built target test_trace_occ_match"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_replay_out.dir/build.make tests/cfs-free/CMakeFiles/test_trace_replay_out.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_replay_out.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_replay_out.dir/build.make tests/cfs-free/CMakeFiles/test_trace_replay_out.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_trace_replay_out"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_static_closure.dir/build.make tests/cfs-free/CMakeFiles/test_trace_static_closure.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_static_closure.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_static_closure.dir/build.make tests/cfs-free/CMakeFiles/test_trace_static_closure.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=99 "Built target test_trace_static_closure"
+make -s -f tests/cfs-free/CMakeFiles/test_trace_symbols.dir/build.make tests/cfs-free/CMakeFiles/test_trace_symbols.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_trace_symbols.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_trace_symbols.dir/build.make tests/cfs-free/CMakeFiles/test_trace_symbols.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=100 "Built target test_trace_symbols"
+make -s -f tests/cfs-free/CMakeFiles/test_realrecord_derived.dir/build.make tests/cfs-free/CMakeFiles/test_realrecord_derived.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_realrecord_derived.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_realrecord_derived.dir/build.make tests/cfs-free/CMakeFiles/test_realrecord_derived.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=72 "Built target test_realrecord_derived"
+make -s -f tests/cfs-free/CMakeFiles/test_neutral_kzrt.dir/build.make tests/cfs-free/CMakeFiles/test_neutral_kzrt.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_neutral_kzrt.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_neutral_kzrt.dir/build.make tests/cfs-free/CMakeFiles/test_neutral_kzrt.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_neutral_kzrt"
+make -s -f tests/cfs-free/CMakeFiles/test_kzrt_identity.dir/build.make tests/cfs-free/CMakeFiles/test_kzrt_identity.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_kzrt_identity.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_kzrt_identity.dir/build.make tests/cfs-free/CMakeFiles/test_kzrt_identity.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_kzrt_identity"
+make -s -f tests/cfs-free/CMakeFiles/test_kzrt_app_request.dir/build.make tests/cfs-free/CMakeFiles/test_kzrt_app_request.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_kzrt_app_request.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_kzrt_app_request.dir/build.make tests/cfs-free/CMakeFiles/test_kzrt_app_request.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=63 "Built target test_kzrt_app_request"
+make -s -f tests/cfs-free/CMakeFiles/test_kzrt_recovered.dir/build.make tests/cfs-free/CMakeFiles/test_kzrt_recovered.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_kzrt_recovered.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_kzrt_recovered.dir/build.make tests/cfs-free/CMakeFiles/test_kzrt_recovered.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=64 "Built target test_kzrt_recovered"
+make -s -f tests/cfs-free/CMakeFiles/target_prog.dir/build.make tests/cfs-free/CMakeFiles/target_prog.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/target_prog.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/target_prog.dir/build.make tests/cfs-free/CMakeFiles/target_prog.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target target_prog"
+make -s -f tests/cfs-free/CMakeFiles/target_prog_variants.dir/build.make tests/cfs-free/CMakeFiles/target_prog_variants.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/target_prog_variants.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/target_prog_variants.dir/build.make tests/cfs-free/CMakeFiles/target_prog_variants.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=47,48 "Built target target_prog_variants"
+make -s -f tests/cfs-free/CMakeFiles/test_probe_anchor_compilers.dir/build.make tests/cfs-free/CMakeFiles/test_probe_anchor_compilers.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_probe_anchor_compilers.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_probe_anchor_compilers.dir/build.make tests/cfs-free/CMakeFiles/test_probe_anchor_compilers.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_probe_anchor_compilers"
+make -s -f tests/cfs-free/CMakeFiles/test_probe_anchor_reached.dir/build.make tests/cfs-free/CMakeFiles/test_probe_anchor_reached.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_probe_anchor_reached.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_probe_anchor_reached.dir/build.make tests/cfs-free/CMakeFiles/test_probe_anchor_reached.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=67 "Built target test_probe_anchor_reached"
+make -s -f tests/cfs-free/CMakeFiles/test_probe_basis.dir/build.make tests/cfs-free/CMakeFiles/test_probe_basis.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_probe_basis.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_probe_basis.dir/build.make tests/cfs-free/CMakeFiles/test_probe_basis.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_probe_basis"
+make -s -f tests/cfs-free/CMakeFiles/test_probe_elf_dwarf.dir/build.make tests/cfs-free/CMakeFiles/test_probe_elf_dwarf.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_probe_elf_dwarf.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_probe_elf_dwarf.dir/build.make tests/cfs-free/CMakeFiles/test_probe_elf_dwarf.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=68 "Built target test_probe_elf_dwarf"
+make -s -f tests/cfs-free/CMakeFiles/test_probe_golden.dir/build.make tests/cfs-free/CMakeFiles/test_probe_golden.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_probe_golden.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_probe_golden.dir/build.make tests/cfs-free/CMakeFiles/test_probe_golden.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=69 "Built target test_probe_golden"
+make -s -f tests/cfs-free/CMakeFiles/test_probe_observe.dir/build.make tests/cfs-free/CMakeFiles/test_probe_observe.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_probe_observe.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_probe_observe.dir/build.make tests/cfs-free/CMakeFiles/test_probe_observe.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_probe_observe"
+make -s -f tests/cfs-free/CMakeFiles/test_probe_profile.dir/build.make tests/cfs-free/CMakeFiles/test_probe_profile.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_probe_profile.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_probe_profile.dir/build.make tests/cfs-free/CMakeFiles/test_probe_profile.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=70 "Built target test_probe_profile"
+make -s -f tests/cfs-free/CMakeFiles/test_probe_record.dir/build.make tests/cfs-free/CMakeFiles/test_probe_record.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_probe_record.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_probe_record.dir/build.make tests/cfs-free/CMakeFiles/test_probe_record.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_probe_record"
+make -s -f tests/cfs-free/CMakeFiles/hold_prog.dir/build.make tests/cfs-free/CMakeFiles/hold_prog.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/hold_prog.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/hold_prog.dir/build.make tests/cfs-free/CMakeFiles/hold_prog.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target hold_prog"
+make -s -f tests/cfs-free/CMakeFiles/test_hold_ptrace.dir/build.make tests/cfs-free/CMakeFiles/test_hold_ptrace.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_hold_ptrace.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_hold_ptrace.dir/build.make tests/cfs-free/CMakeFiles/test_hold_ptrace.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=62 "Built target test_hold_ptrace"
+make -s -f tests/cfs-free/CMakeFiles/hold_seq_prog.dir/build.make tests/cfs-free/CMakeFiles/hold_seq_prog.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/hold_seq_prog.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/hold_seq_prog.dir/build.make tests/cfs-free/CMakeFiles/hold_seq_prog.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=1 "Built target hold_seq_prog"
+make -s -f tests/cfs-free/CMakeFiles/test_hold_sequence.dir/build.make tests/cfs-free/CMakeFiles/test_hold_sequence.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_hold_sequence.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_hold_sequence.dir/build.make tests/cfs-free/CMakeFiles/test_hold_sequence.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_hold_sequence"
+make -s -f tests/cfs-free/CMakeFiles/test_hold_plan.dir/build.make tests/cfs-free/CMakeFiles/test_hold_plan.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_hold_plan.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_hold_plan.dir/build.make tests/cfs-free/CMakeFiles/test_hold_plan.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=61 "Built target test_hold_plan"
+make -s -f tests/cfs-free/CMakeFiles/test_rt_plan_convert.dir/build.make tests/cfs-free/CMakeFiles/test_rt_plan_convert.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/cfs-free /home/user/work/merge-check/kz-llvm/tests/cfs-free/CMakeFiles/test_rt_plan_convert.dir/DependInfo.cmake "--color="
+make -s -f tests/cfs-free/CMakeFiles/test_rt_plan_convert.dir/build.make tests/cfs-free/CMakeFiles/test_rt_plan_convert.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_rt_plan_convert"
+make -s -f tests/phi/CMakeFiles/kz_phi_golden.dir/build.make tests/phi/CMakeFiles/kz_phi_golden.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/phi /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/phi /home/user/work/merge-check/kz-llvm/tests/phi/CMakeFiles/kz_phi_golden.dir/DependInfo.cmake "--color="
+make -s -f tests/phi/CMakeFiles/kz_phi_golden.dir/build.make tests/phi/CMakeFiles/kz_phi_golden.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=38 "Built target kz_phi_golden"
+make -s -f tests/phi/CMakeFiles/test_phi_cli.dir/build.make tests/phi/CMakeFiles/test_phi_cli.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/phi /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/phi /home/user/work/merge-check/kz-llvm/tests/phi/CMakeFiles/test_phi_cli.dir/DependInfo.cmake "--color="
+make -s -f tests/phi/CMakeFiles/test_phi_cli.dir/build.make tests/phi/CMakeFiles/test_phi_cli.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=65 "Built target test_phi_cli"
+make -s -f tests/predict/CMakeFiles/test_predict_model.dir/build.make tests/predict/CMakeFiles/test_predict_model.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/predict /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/predict /home/user/work/merge-check/kz-llvm/tests/predict/CMakeFiles/test_predict_model.dir/DependInfo.cmake "--color="
+make -s -f tests/predict/CMakeFiles/test_predict_model.dir/build.make tests/predict/CMakeFiles/test_predict_model.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=66 "Built target test_predict_model"
+make -s -f tests/property/CMakeFiles/test_property_eval_agreement.dir/build.make tests/property/CMakeFiles/test_property_eval_agreement.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/property /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/property /home/user/work/merge-check/kz-llvm/tests/property/CMakeFiles/test_property_eval_agreement.dir/DependInfo.cmake "--color="
+make -s -f tests/property/CMakeFiles/test_property_eval_agreement.dir/build.make tests/property/CMakeFiles/test_property_eval_agreement.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=71 "Built target test_property_eval_agreement"
+make -s -f tests/static/CMakeFiles/static_golden.dir/build.make tests/static/CMakeFiles/static_golden.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/static_golden.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/static_golden.dir/build.make tests/static/CMakeFiles/static_golden.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=46 "Built target static_golden"
+make -s -f tests/static/CMakeFiles/test_static_expr.dir/build.make tests/static/CMakeFiles/test_static_expr.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_expr.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_expr.dir/build.make tests/static/CMakeFiles/test_static_expr.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_static_expr"
+make -s -f tests/static/CMakeFiles/test_static_flow.dir/build.make tests/static/CMakeFiles/test_static_flow.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_flow.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_flow.dir/build.make tests/static/CMakeFiles/test_static_flow.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=86 "Built target test_static_flow"
+make -s -f tests/static/CMakeFiles/test_static_recipe.dir/build.make tests/static/CMakeFiles/test_static_recipe.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_recipe.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_recipe.dir/build.make tests/static/CMakeFiles/test_static_recipe.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=89 "Built target test_static_recipe"
+make -s -f tests/static/CMakeFiles/test_static_gitrev.dir/build.make tests/static/CMakeFiles/test_static_gitrev.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_gitrev.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_gitrev.dir/build.make tests/static/CMakeFiles/test_static_gitrev.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_static_gitrev"
+make -s -f tests/static/CMakeFiles/test_static_unroll.dir/build.make tests/static/CMakeFiles/test_static_unroll.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_unroll.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_unroll.dir/build.make tests/static/CMakeFiles/test_static_unroll.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_static_unroll"
+make -s -f tests/static/CMakeFiles/test_static_wrappers.dir/build.make tests/static/CMakeFiles/test_static_wrappers.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_wrappers.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_wrappers.dir/build.make tests/static/CMakeFiles/test_static_wrappers.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=90 "Built target test_static_wrappers"
+make -s -f tests/static/CMakeFiles/kz_static_main_obj.dir/build.make tests/static/CMakeFiles/kz_static_main_obj.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/kz_static_main_obj.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/kz_static_main_obj.dir/build.make tests/static/CMakeFiles/kz_static_main_obj.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target kz_static_main_obj"
+make -s -f tests/static/CMakeFiles/kz_static_whole_member.dir/build.make tests/static/CMakeFiles/kz_static_whole_member.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/kz_static_whole_member.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/kz_static_whole_member.dir/build.make tests/static/CMakeFiles/kz_static_whole_member.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=40 "Built target kz_static_whole_member"
+make -s -f tests/static/CMakeFiles/kz_static_lazy_used.dir/build.make tests/static/CMakeFiles/kz_static_lazy_used.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/kz_static_lazy_used.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/kz_static_lazy_used.dir/build.make tests/static/CMakeFiles/kz_static_lazy_used.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target kz_static_lazy_used"
+make -s -f tests/static/CMakeFiles/kz_static_lazy_unused.dir/build.make tests/static/CMakeFiles/kz_static_lazy_unused.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/kz_static_lazy_unused.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/kz_static_lazy_unused.dir/build.make tests/static/CMakeFiles/kz_static_lazy_unused.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=39 "Built target kz_static_lazy_unused"
+make -s -f tests/static/CMakeFiles/test_static_link.dir/build.make tests/static/CMakeFiles/test_static_link.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_link.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_link.dir/build.make tests/static/CMakeFiles/test_static_link.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=87 "Built target test_static_link"
+make -s -f tests/static/CMakeFiles/test_static_elf32.dir/build.make tests/static/CMakeFiles/test_static_elf32.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_elf32.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_elf32.dir/build.make tests/static/CMakeFiles/test_static_elf32.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=85 "Built target test_static_elf32"
+make -s -f tests/static/CMakeFiles/test_static_reasons.dir/build.make tests/static/CMakeFiles/test_static_reasons.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_reasons.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_reasons.dir/build.make tests/static/CMakeFiles/test_static_reasons.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num= "Built target test_static_reasons"
+make -s -f tests/static/CMakeFiles/test_static_plan.dir/build.make tests/static/CMakeFiles/test_static_plan.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_plan.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_plan.dir/build.make tests/static/CMakeFiles/test_static_plan.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=88 "Built target test_static_plan"
+make -s -f tests/static/CMakeFiles/test_static_cli.dir/build.make tests/static/CMakeFiles/test_static_cli.dir/depend
+cd /home/user/work/merge-check/kz-llvm && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/user/Shape-Perf/research/cfs_procrace/kairos /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static /home/user/work/merge-check/kz-llvm /home/user/work/merge-check/kz-llvm/tests/static /home/user/work/merge-check/kz-llvm/tests/static/CMakeFiles/test_static_cli.dir/DependInfo.cmake "--color="
+make -s -f tests/static/CMakeFiles/test_static_cli.dir/build.make tests/static/CMakeFiles/test_static_cli.dir/build
+/usr/bin/cmake -E cmake_echo_color "--switch=" --progress-dir=/home/user/work/merge-check/kz-llvm/CMakeFiles --progress-num=84 "Built target test_static_cli"
+/usr/bin/cmake -E cmake_progress_start /home/user/work/merge-check/kz-llvm/CMakeFiles 0

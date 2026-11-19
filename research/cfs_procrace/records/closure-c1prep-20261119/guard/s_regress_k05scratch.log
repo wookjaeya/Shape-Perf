@@ -1,0 +1,4 @@
+# space_guard.sh kind=regress need=20000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-runtime-20261119/scripts/regress_manifest.sh <scratch>/c1prep/rm_k05 <scratch>/c1prep/kzb5/kzgcc.so
+start 2026-11-19T09:04:48.475Z free=637816832 threshold=334572800
+sample 2026-11-19T09:04:48.480Z 637812736
+end 2026-11-19T09:04:50.488Z kind=regress verdict=completed rc=0 free=637456384 lowest=637456384 dip=360448 change=-360448

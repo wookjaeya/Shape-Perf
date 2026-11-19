@@ -3301,3 +3301,13 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - **비교의 갈래**(c1_pre_tx, `compare_c1_pre_tx_3.tsv`): 선언 갈래는 첫 파생 빌드의 것(정체성, 플러그인 옵션, 링크된 런타임, D2·D4, 계측·링크된 파일, D1 의 bplib)에 덧붙임 1·2 의 셋(D2 소스 트리 없음, `treetok`; D1 의 소스 경로 리터럴, `pathlen`)이다. 요약은 그 파일의 꼬리에 갈래별 수로 있다. facts 의 47 절 가운데 35 절이 맵 뒤 레코드가 차례까지 같다.
 - **MC**: `out/post_mc.txt` 가 `out/pre_mc.txt` 와 도구 일곱·정체성·정의·`CMakeCache.txt` 에서 같다(HEAD 와 여유 줄만 다름). **누적**: 원장에 이 단계의 출력 행 15(`OBS_c1p_*`, `OBS_c1p2_*`; 목록 `lists/`) — `ledger_check` 193 행 실패 0(`out/ledger_check_after_builds.txt`), `tools_check --deep` 57 행 실패 0(`out/tools_check_deep_after_builds.txt`). 이름 점검 `--tree`: B′·비교 출력 깨끗. 파생 작업 공간은 첫 파생 빌드 §5.4 와 같이 upstream 소스 사본만 걸린다(따로 고치지 않음).
 - **공간**: 가장 큰 dip 은 prepare 27,291,648 B 와 계측 빌드 19,394,560 B, 가장 낮은 감시 값 494,067,712 B(`guard/2_*.log`). 지금 여유 466,509,824 B.
+
+### 25.8 (1) 미리 정한 사용의 목록 [F]
+
+평가 절차 5.1 의 규칙으로 두 계획에서 만들었다(`scripts/uses_list.py`; 입력은 계획 `plan.kzs`·sidecar `plan.side` 와 그 계획을 낸 relations 글 `cz_final_order/<빌드>/relations.txt`; 행 번호·키·이름·기대 값은 입력이 아니다). 규칙: sidecar 의 경로 A 행 가운데 계획에 든 것(`state=planned` 의 층 또는 `control-state=planned` 의 대조) × 그 행의 relations `actors:` 줄의 행위자 뿌리 × 그 행의 `use-call` site 의 서로 다른 호출(같은 호출의 at-call·after-call 은 하나) × sidecar 의 그 행의 `context` 줄(없으면 `-` 하나).
+
+- c1_pre_tx: `uses/uses_c1_pre_tx.tsv` sha256 `0ca47839d43db83c9821cab74445dff58cdfa9fb69e71ccf47e5fd4abd214e14`, 사용 6, 행 5(A20 1, A21 2(문맥 1·2, 틀 site 293·292 와 305·304), A22 1, A26 1, A63 1).
+- c1_post_tx: `uses/uses_c1_post_tx.tsv` sha256 `955890c2c0876c0b70610acf93baf064431857ed74a2010be8957b2002f5fe20`, 사용 5, 행 5(각 1; A21 은 문맥 줄이 없음).
+- 행위자 뿌리: A20 `BP_AppMain (script-entry)`, A21 `CF_AppMain (script-entry)`, A22 `SCH_Lab_AppMain (script-entry)`, A26 `CFE_TIME_TaskMain (table-image-entry)`, A63 `none`(relations 행에 `actors:` 줄이 없음).
+- 점검 [M]: 동결한 설명 스크립트가 같은 계획의 정적 예행에서 센 `uses`(명세 10.7 4: 서로 다른 사용 호출 × 문맥)와 행마다 같다(c1_pre_tx A21 2, 나머지 1; c1_post_tx 모두 1; `obs1/xr4_dry_static_<빌드>_2/D1-R0/index.tsv`).
+- 이 목록이 분모 표(평가 절차 8 절)의 "정한 사용"이다. 경로 B 의 층 행(B13, B73, B81, B99, B113, B118, B119, B125)은 5.1 의 규칙(경로 A)에 들지 않는다. 그 행들의 기록은 설명 스크립트가 행위자마다 내지만 이 목록에는 없다.

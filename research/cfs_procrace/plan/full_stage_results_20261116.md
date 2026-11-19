@@ -2429,3 +2429,97 @@ scratch Release 빌드는 kz-static, static_golden, kz_lint, test_static_reasons
   - (7) 나머지 줄의 fixture(`source_tree`, `absence origins`, (4)·(5)).
   - (8) scratch 점검 빌드 → 선언 → 사본 → MC 빌드 → 다시 뽑기 → 끝 점검 → 결과 절.
 - §15.7 의 key-clearing 이름 문제, absence origins 의 이름 칸 문제, §12.10 5 항의 PI 결정(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함))은 그대로 남아 있다.
+
+## 18. C1 닫기의 kz-static 한 빌드: 소스 진행분 넷째 (2026-11-19, 선언 전에 멈춤)
+
+§17.5 의 다음 차례 (4)(저장된 이름 버퍼 줄과 수명 끝 줄)를 형식 덧붙임 → 소스 → scratch 점검의 차례로 넣었다. **선언, 도구 사본, MC 빌드, 다섯 빌드의 선언된 다시 뽑기는 하지 않았다**: 넣을 것이 아직 다 들어가지 않았으므로 §12.10 6 항대로 선언 전에 멈췄다. MC 의 kz-static 은 `bf2ec2ee…` 그대로이고(시작과 끝에 sha256 을 보았다, `scratch4/mc_tool_sha256_start.txt`·`_end.txt`), 소스가 그 바이너리보다 더 앞서 있다. 기록: `../records/closure-kzstatic-20261119/`(`scratch4/`, `scratch_guard4/`, `scripts/buffer_counts.py`, README). cFS 를 부팅하지 않았고 push 하지 않았다. 아래 수는 모두 기록 디렉터리의 출력 파일에서 왔고, scratch 도구의 수라서 [I] 다.
+
+### 18.0 lead 의 판단 (2026-11-19, §17 의 열린 것에 대해)
+lead 가 2026-11-19 에 정한 것을 그대로 적는다.
+- (a) 판정 규칙 8.13 의 17 번 조건 (6)은 쓰인 대로 적용한다: writer 집합이 필드 단위와 형 단위 **모두**에서 완전해야 한다. 도구를 필드 단위로만 읽게 바꾸지 않는다. 필드 단위만으로 읽는 것은 설계 행을 본 뒤의 규칙 읽기다. 이미 커밋된 평가 갈래 Re 가 그것을 덮는지는 설명 스크립트 단계와 평가 파일의 일이다. Re 의 커밋된 글이 17 번 조건 (6)을 덮지 않으면 PI 의 열린 것으로 적고, 지금 어떤 글도 넓히지 않는다.
+- (b) 성공 경로 줄에서 out 저장된 지역 변수의 추출 틈은 그대로 둔다: 이 빌드에서 `include/` 아래는 바꾸지 않는다(모든 바이너리가 다시 링크된다). 성공 경로 줄은 그 까닭으로 계속 missing 이고 열린 것이다.
+- (c) 저장된 이름 버퍼: 스칼라 배열의 FIELD_STATUS 상태가 건전하게 complete 가 될 수 있는지를 scratch 출력으로 깃발마다 정한다. 건전하게 뺄 수 없는 깃발이 하나라도 있으면 줄은 not complete 와 그 깃발을 말하고, 설계 행을 맞추려고 아무것도 풀지 않는다.
+- (d) 바뀌는 golden(order golden 셋, `resultflow_np`, `closure_np` 와 새로 생기는 것)은 선언된 빌드에서 커밋한다. 선언은 첫 ctest 실패를 **완전한 소스**의 scratch 점검 빌드에서 확인한 이름으로 적는다.
+- (e) C1 빌드의 둘째 주소 넘김 호출 자리와 열린 까닭의 `other` 종류는 빌드 단계의 측정에 들어가면 그때 가리고 세고, 아니면 열린 것으로 둔다.
+
+### 18.1 바뀐 것 [F]
+- 형식 덧붙임 여덟째(`1859bb6`, `kairos/docs/static_facts.md` 5x)와 그 고침 둘(`16036b1`, `05c4de5`), 모두 코드보다 먼저 커밋했다. 5 항을 자세히 정한다: 쓰는 사실과 자리(경로 A 이름 공간 블록의 `success path …` 줄들 뒤, `uses:` 앞), 키 필드 writer 의 종류 묶음(그 함수의 partition, 아니면 그 함수에 직접 호출로 닿는 키 매개변수 함수들의 partition), 이름 저장과 버퍼 필드(같은 자리의 decay 탈출 행), 버퍼 줄의 꼴, 원인을 깃발마다 정하는 법(18.2), address uses 줄(이름 포인터의 READS 행마다; 본문은 PARAM_FLOW 깊이 0 으로 따라가고, 본문 없는 함수는 SEMANTICS 의 `out-behaviour` 항목으로), 수명 끝의 네 꼴(`clear-table`, `clear-slot` 과 빈 레코드 조건, `release`, `release through parameter`)과 각 꼴이 id 를 어떻게 이름 대는지, 머리 줄. 고침 둘은 scratch 판을 본 뒤에 했다: 매개변수를 거친 release 의 호출자는 creator 함수 자신이거나 creator 가 한 단계로 부를 때만 생성 쪽(`rollback`)이다(여러 단계로 닿으면 생성자가 실패를 치우려고 부른 삭제일 수 있다; c1 에서 삭제 쪽 함수가 creator 셋에서 여러 단계로 닿았다).
+- 소스(`638e500`):
+  - `lib/llvm/relations.cpp`: `buffer_lifetime_lines`, `lifetime_lines`, `param_use`, `library_use`, `bl_header`. 새 줄은 행의 layers 칸과 basis 편차에 아무것도 더하지 않는다(`NoNotes`).
+  - `lib/llvm/rel_facts.hpp`·`rel_facts.cpp`: FIELD_TYPES 를 읽는다(버퍼의 extent, 키가 포인터 필드인지).
+  - `tests/static/fixtures/closure.c`, `tests/static/CMakeLists.txt`(설명): 이름 포인터의 공통 표와 두 종류 표, 다른 writer(이름 바꾸기), 포인터를 시험하고·읽기만 하는 함수에 넘기고·그것을 통해 쓰는 함수에 넘기고·전역에 베끼는 쓰임, 빈 레코드 조건이 보이는 clear-slot 과 보이지 않는 clear-slot, creator·삭제·널 포인터로 불리는 마무리 단계, 상수 release, 표 채움.
+- 바꾸지 않은 것: `include/`, 추출(다섯 빌드의 facts 는 셋째 실행의 scratch 판과 같은 sha256 이다, `scratch4/facts_same_as_scratch3.txt`), FIELD_STATUS, 규칙 개정 이름, 저장소의 golden. 새 golden 은 `scratch4/golden_scratch/closure_np.golden_4` 에만 있고 선언된 빌드에서 커밋한다.
+
+### 18.2 lead 의 판단 (c): 깃발마다 정한 것 [I]
+FIELD_STATUS 가 DISABLED 가 되는 원인은 `lib/llvm/lockset.cpp:589-597` 의 셋뿐이다: 그 필드의 적중(escape·cast·union·unknown), 형 단위에서 다른 필드의 적중과 형 없는 쓰기 자리가 함께 있는 것, 스칼라 배열 표시. `writer-function-not-once`·`several-instances`·`writer-in-loop` 는 `:636-643` 에서 `once` 판정에만 쓰이고 상태를 바꾸지 않는다.
+
+| 깃발 | 판단 | 근거 | 다섯 빌드의 버퍼 줄(c1_pre_tx/c1_post_tx/r2_core/c5_641/c5_642) |
+|---|---|---|---|
+| `array-element-stores-not-collected` | `--object-access` 아래에서 **풀린다** | `ast_fn.cpp` `note_array_decay`(:641-788): decay 된 배열의 원소 저장은 writer 행, 호출 인자는 out-pointer 호출, 나머지 쓰임은 주소 탈출 적중. 탐침(`scratch4/probe/probe_view.txt`): 대상이 아닌 스칼라 배열 필드의 원소 저장이 WRITERS 행 없이도 FIELD_STATUS 의 writer 로 세어진다(`Rec.name writers=1`) | discharged 16/16/17/0/0 |
+| 주소 탈출(`address-escape`) | **풀리지 않는다** | 탈출 행은 모두 이름 저장이지만, 그 주소(이름 포인터의 값)의 쓰임 20/20/21 가운데 14/14/15 가 풀리지 않는다: `strncpy`·`memcpy` 의 인자 1 에 "쓰지 않는다"는 항목이 없음 12/12/13, `OS_strnlen` 을 거쳐 `memchr` 1, 가변 인자 1. 풀린 것 6/6/6: 시험 4, `strcmp` 의 `out-behaviour doc-collated [declared pure …]` 1, 본문을 따라가 쓰기가 없음 1 | not discharged 16/16/17/0/0 |
+| 형 단위(다른 필드의 적중 + 형 없는 쓰기) | **풀리지 않는다** | 이 사실은 형 없는 쓰기가 그 필드에 닿지 않음을 보이지 않는다 | not discharged 4/4/4/0/0; 다른 필드의 적중이 없어 `untyped-in-program` 이 원인이 아닌 것 12/12/13/0/0 |
+| `writer-function-not-once`, `several-instances`, `writer-in-loop` | **원인이 아니다** | 위의 `once` 판정 | not a cause 16/16/16, 16/16/17, 3/3/3 |
+
+- 그러므로 **어느 빌드의 어느 버퍼도 `complete` 가 아니다**(16/16/17/0/0 가운데 0). 줄은 풀리지 않은 깃발을 이름으로 적는다. 아무것도 풀지 않았다.
+- FIELD_STATUS 자체는 바꾸지 않았다. 배열 표시를 `--object-access` 아래에서 빼는 것은 추출의 변경이고, FIELD_STATUS 를 읽는 다른 규칙(LOCK_IDS 의 정적 인스턴스, AWAIT_L1, 경로 C, 이미지 키, holder 줄, 필드 저장값 규칙의 (6))이 모두 움직인다. 그 크기: c1_pre_tx 에서 그 표시가 있는 행 185 가운데 그 필드의 적중이 없는 것(필드 단위로 움직일 것) 33, 그 가운데 형 단위의 원인도 없는 것 27(`scratch4/array_flag_only_c1_pre_tx.txt`). 버퍼 필드는 모두 주소 탈출이 남으므로 그 변경으로도 complete 가 되지 않는다. 할지는 lead 의 판단을 기다린다(18.8).
+- 덧붙임대로, 원인을 모두 풀어도 이 개정은 FIELD_STATUS 를 넘어 `complete` 라고 쓰지 않는다. 그래서 문자 배열 버퍼는 이 개정에서 `complete` 가 될 수 없다(배열 표시가 늘 남는다). 줄이 서는 꼴은 원인과 address use 마다의 discharged 다.
+
+### 18.3 scratch 점검 [I]
+scratch Release 빌드는 kz-static, static_golden, kz_lint, test_static_reasons 이고, 모두 감시 아래에서 돌렸다(`scratch_guard4/v01`–`v19`, 31 기록, 모두 `verdict=completed`). 다섯 빌드는 scratch 도구로 `run.sh extract_final` 한 번(`v03`, rc 0)으로 다시 뽑았다.
+
+| 점검 | 결과 | 출력 |
+|---|---|---|
+| 다시 뽑은 facts | 다섯 빌드 모두 셋째 실행의 scratch facts 와 같은 sha256 | `scratch4/facts_same_as_scratch3.txt` |
+| relations 글(다섯 빌드) | `rf2_final_order` 와 비교해 없어진 줄은 `facts` 줄 하나뿐. 더한 줄 244/243/149/297/297 가운데 이 단계의 줄: writer 묶음 43/43/28/96/96, address uses 1/1/1/0/0, 버퍼 16/16/17/0/0, 수명 끝 17/17/13/41/41, 머리 1. 나머지 166/165/89/159/159 는 셋째 실행까지의 줄(그때의 수와 같다) | `scratch4/relations_text_diff.txt` |
+| golden·fixture 컴파일·lint 69 | 실패 5: order golden 셋, `resultflow_np`, `closure_np`(저장소에 golden 없음). lint 8 통과. scratch golden 다섯은 scratch 자료 디렉터리에서 모두 `matches`; order 셋과 `resultflow_np` 는 앞 실행의 scratch golden 과 같은 바이트 | `scratch4/logs/ctest_golden_lint_4d.log`, `golden_scratch_check_4c.txt`, `scratch4/golden_scratch/same_as_earlier.txt` |
+| test_static_reasons(새 golden 을 놓은 scratch 자료 디렉터리) | 793 확인 통과 | `scratch4/logs/reasons_4c.log` |
+| 두 C1 빌드의 새 줄 | 빌드 경로를 가리면 같다(같은 수, 같은 글) | `scratch4/buffer/lines_c1_pre_tx.txt`, `lines_c1_post_tx.txt` |
+
+### 18.4 새 줄이 서는 곳과 서지 않는 곳 [I]
+수는 `scratch4/buffer/counts_all.txt`(차례 c1_pre_tx/c1_post_tx/r2_core/c5_641/c5_642/fixture)다. 설계 행에만 보이는 줄은 없다: 줄은 모든 이름 공간의 모든 writer 와 이름 저장에 대해 나온다.
+
+| 줄 | 서는 것 | 서지 않는 것 |
+|---|---|---|
+| 키 writer 의 묶음 | partition 하나 11/11/12/17/17/2, 여럿이 함께 씀 2/2/2/0/0/0 | 키 매개변수 함수가 닿지 않음 30/30/14/79/79/2 |
+| 버퍼 | complete 0/0/0/0/0/0 | not complete 16/16/17/0/0/2: FIELD_STATUS(풀리지 않은 원인) 11/11/12/0/0/1, 다른 writer 5/5/5/0/0/1; 정하지 못함 0 |
+| address uses | discharged 6/6/6/0/0/4(시험 4/4/4/0/0/2, 항목 있는 library 1/1/1/0/0/0, 본문 따라감 1/1/1/0/0/2) | not discharged 14/14/15/0/0/3(항목 없는 library 12/12/13/0/0/1, library 로 넘김 1/1/1/0/0/0, 가변·간접 1/1/1/0/0/0, 본문이 그것을 통해 씀 0/0/0/0/0/1, 베낌 0/0/0/0/0/1) |
+| clear-slot 의 빈 레코드 조건 | shown 0/0/0/0/0/1 | not shown 10/10/6/18/18/1 |
+| 그 밖의 수명 끝 | clear-table 5/5/6/0/0/1, release 1/1/0/23/23/1, 매개변수를 거친 release 1/1/1/0/0/1(호출자: 생성 쪽 1/1/1/0/0/2, 삭제 쪽 1/1/1/0/0/1, 널 포인터 1/1/1/0/0/1) | — |
+
+- c5 두 빌드(cFE 6.4 의 OSAL)에는 이름 포인터 키가 없으므로 이름 저장·버퍼·address uses 줄이 없다. 그 빌드의 수명 끝은 상수 release 23 과 clear-slot 18 이다. release 의 일부는 생성 함수 안의 것이다(예: `OS_TaskCreate` 안의 `OS_task_record_t.free := 1`, `lines_c5_641.txt`). 이 개정은 상수 release 가 실패한 생성의 되돌림인지 삭제인지 가르지 않는다(18.7).
+
+### 18.5 C1 에서 줄이 보인 것 [I]
+- **설계 행의 종류(partition `{3}`, 셈 세마포어)의 버퍼 줄**(`lines_c1_pre_tx.txt`): `OS_count_sem_internal_record_t.obj_name extent 20`, 이름 저장 하나(`osapi-countsem.c:100:9`), writer 셋 = 표 초기화의 채움(`:73:5`), 생성의 채움과 생성의 복사(`:100:9`). 다른 writer 는 없다. 원인: 배열 표시는 풀림, 주소 탈출 1 은 이름 저장이지만 address uses 20 가운데 14 가 풀리지 않아 풀리지 않음, 나머지는 원인이 아님. 줄은 `not complete (FIELD_STATUS disabled; causes not discharged: address-escape)` 다. 탐침 P3 의 읽기("writer 는 생성의 복사와 지우기뿐, FIELD_STATUS 는 주소 탈출로 DISABLED")를 도구 줄이 다시 낸다. 다른 점은 도구가 배열 표시까지 원인으로 따로 적는다는 것이다(탐침은 주소 탈출만 적었다; 배열 표시만으로도 두 규칙이 DISABLED 다, `lockset.cpp:594-597`).
+- **이름 공간 `OS_common_record_t.name_entry` 의 수명 끝**:
+  - `clear-table osapi-idmap.c:120:5 in OS_ObjectIdInit`: id 를 이름 대지 않고 `OS_common_table` 의 모든 레코드를 끝낸다.
+  - `clear-slot osapi-idmap.c:640:9 in OS_ObjectIdFindNextFree`: 빈 레코드 조건이 보이지 않는다. 그 저장의 guard `(eq local:return_code 0)` 는 활성 필드를 시험하지 않는다. 같은 함수가 같은 guard 로 `active_id := token->obj_id`(`:639:9`)를 쓰므로 그 레코드는 여기서 할당된다. 이것이 §12.11 (사)의 "자리를 비우며 하는 할당"을 도구 줄로 보인 것이다. 계획 규칙 10.4 에 따라 이 slot clear 는 계획에서 수명 끝 site 로 남는다.
+  - `release through parameter 1 of OS_ObjectIdTransactionFinish at osapi-idmap.c:1079:9`: `active_id := *final_id`. 호출자 셋은 `OS_ObjectIdFinalizeNew`(`:849:5`, `&final_id`, 생성 쪽: creator 함수 열둘이 바로 부름), `OS_ObjectIdFinalizeDelete`(`:887:5`, `&final_id`, 삭제 쪽), `OS_ObjectIdRelease`(`:1115:5`, `NULL`: 저장의 guard 가 널이 아니기를 요구) 다. 넘긴 지역 변수의 값은 묶이지 않는다(lead 의 판단 (b)의 틈과 같다). 그래서 이 줄은 어느 id 가 끝나는지 말하지 않는다.
+- 키 writer 의 묶음: `osapi-idmap.c:640:9` 의 지우기는 partition 열하나가 함께 쓰는 묶음, `OS_ModuleLoad` 의 이름 저장은 `{10} {11}` 둘이 함께 쓰는 묶음이다. 생성자 아홉의 이름 저장은 각각 partition 하나다.
+
+### 18.6 공간 [M]
+- 시작: 1,216,319,488 B(`free_start_attempt4.txt`, 03:49Z).
+- 감시 기록의 가장 낮은 값: 873,267,200 B(`scratch_guard4/v19`, ctest). 하한 314,572,800 B 를 넘지 않았다.
+- 크기: scratch 빌드 tree 207 MB, 다시 뽑은 다섯 빌드 70 MB, 보기·relations·fixture 49 MB.
+- scratch 를 모두 지운 뒤: 1,212,977,152 B(`free_end_attempt4.txt`, 04:15Z). 기록 디렉터리에 더한 것은 약 0.9 MB 다. 압축 대체는 쓰지 않았다.
+
+### 18.7 계획과 다르게 한 것
+- **덧붙임 고침 둘.** 생성 쪽과 삭제 쪽의 가름을 scratch 판과 fixture 를 보고 두 번 좁혔다(18.1). 둘 다 코드 커밋 전에 커밋했다.
+- **이름 저장은 포인터 키에서만.** 첫 판은 키가 배열 필드인 이름 공간(`OS_stream_internal_record_t.stream_name`, `OS_filesys_internal_record_t.virtual_mountpt`)에서도 같은 자리의 decay 를 이름 저장으로 셌다(버퍼 19/19/20). 5 항의 "이름 포인터 필드"대로 키가 FIELD_TYPES 의 포인터 필드이고 쓰기가 대입일 때만 센다. 그 판의 수는 `scratch4/buffer_trial_before_pointer_key/` 에 남겼다.
+- **layers 칸.** 첫 판은 새 줄이 이름 대는 함수를 행의 layers 에 더해 c1·r2 의 `namespace layers:` 줄 둘이 바뀌었다(덧붙임은 더하지 않는다고 적음). `NoNotes` 로 고쳤다. 그 판의 diff 파일은 scratch 에서 덮어써 남지 않았다. 수는 위 글이 전부다. 세기 스크립트의 첫 판(깃발 판정의 정규식 결함)의 출력도 기록 디렉터리에서 덮어썼다. "시도 출력은 새 이름으로" 를 지키지 못한 곳이다.
+- **fixture 가 보이지 못하는 꼴.** 문자 배열 버퍼는 배열 표시가 늘 남으므로 `complete` 와 `every cause discharged` 는 fixture 에도 다섯 빌드에도 없다. fixture 는 `--semantics` 없이 뽑으므로 검색의 비교 함수 인자도 풀리지 않는다.
+- **쓰임으로 읽지 않는 것.** 이름 포인터가 레코드 통째 복사로 다른 곳에 가는 길은 READS 행이 없어 address uses 에 없다. `release` 는 상수 빈 값을 쓰는 것을 모두 같은 꼴로 적고, 생성 함수 안의 되돌림(c5 의 `OS_TaskCreate`)과 삭제를 가르지 않는다. 생성 쪽 호출(`rollback`)은 성공한 생성의 마무리이기도 하다(계획 규칙 10.4 의 "status 인자가 성공 값이 아닐 때 되돌림"과 같은 site).
+- 열린 효과의 `other` 종류와 둘째 주소 넘김 호출 자리(lead 의 판단 (e))는 이 단계에서 보지 않았다.
+
+### 18.8 열린 것과 다음 차례
+- **lead 의 판단을 기다리는 것**: FIELD_STATUS 의 배열 표시를 `--object-access` 아래에서 뺄지(추출의 변경; c1_pre_tx 에서 33 행이 필드 단위로, 27 행이 형 단위로도 움직임 [I]). 빼더라도 버퍼 줄은 주소 탈출 때문에 complete 가 되지 않는다.
+- **PI 결정이 필요한 것**: 버퍼의 주소 탈출을 풀려면 `strncpy`·`memcpy` 의 원천 인자를 쓰지 않는다는 C 라이브러리 항목이 필요하다. 지금 그 항목은 없거나 `unverified` 다. §12.10 5 항의 C 라이브러리 항목 결정에 든다(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)). 결정 전: 미대조 그대로.
+- lead 의 판단 (a): 평가 갈래 Re 가 17 번 조건 (6)을 덮는지는 설명 스크립트 단계가 평가 파일에서 본다. 덮지 않으면 PI 의 열린 것이다.
+- lead 의 판단 (b): out 저장된 지역 변수의 추출 틈은 그대로다. 매개변수를 거친 release 줄도 그 틈 때문에 끝나는 id 를 말하지 않는다.
+- lead 의 판단 (e): 빌드 단계의 측정으로 미룬다.
+- 첫 ctest 실패(지금 소스의 scratch): `static_golden_order_np`, `static_golden_resultflow_np`, `static_golden_resultflow_order_np`, `static_golden_looplock_order_np`, `static_golden_closure_np`. 커밋할 golden 은 `scratch/golden_scratch/` 의 order 셋, `scratch3/golden_scratch/resultflow_np.golden`, `scratch4/golden_scratch/closure_np.golden_4` 다. 남은 내용을 넣으면 다시 정한다(lead 의 판단 (d)).
+- §17.5 의 다음 차례 가운데 남은 것:
+  - (5) 계획 규칙 개정 5 생성기: `framework_namespaces2_*` 를 읽는 쪽, `namespace-entry`·`namespace-layer` 줄, 생성 쪽 종류 값 site, 문맥 틀 site, 수명 끝 site(이 줄의 `clear-slot … not shown` 을 10.4 가 읽음), 라벨 둘. 선택 규칙과 층 라벨은 그대로.
+  - (6) 개정 이름 바꾸기(relations 14, order 8, plan 5).
+  - (7) `source_tree`·`absence origins`·(5)의 fixture.
+  - (8) 완전한 소스의 scratch 점검 빌드 → 선언 → 사본 → MC 빌드 → 다시 뽑기 → 끝 점검 → 결과 절.
+- §15.7 의 key-clearing 이름 문제(할당 때의 자리 비우기를 지우기로 셈)는 위 clear-slot 줄이 그 꼴을 보이므로, 계획 규칙 개정 5 의 수명 끝 site 와 함께 다룰 수 있다. 다루는 방법은 lead 의 판단을 기다린다. absence origins 의 이름 칸 문제와 §12.10 5 항의 PI 결정은 그대로 남아 있다.

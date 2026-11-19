@@ -43,3 +43,19 @@ Third run (2026-11-19, results section 17; the MC tool is still `bf2ec2ee…`):
 | `scratch3/golden_scratch/` | `closure_np.golden_3` (the new fixture cases) and `resultflow_np.golden` (one chain chunk more): to commit with the declared build |
 | `scratch3/logs/ctest_golden_lint_3.log` | goldens, fixture compiles and lint of the scratch build: 5 failures (the three order goldens, resultflow_np, closure_np) |
 | `scripts/alt_counts.py` | counts of the alternatives lines of a relations text (a check, not a tool of the method) |
+
+Fourth run (2026-11-19, results section 18; the MC tool is still `bf2ec2ee…`, `scratch4/mc_tool_sha256_start.txt`, `_end.txt`):
+
+| Path | Content |
+|---|---|
+| `free_start_attempt4.txt`, `free_end_attempt4.txt` | free space at the start and the end of the fourth run (the end after its scratch was removed) |
+| `scratch_guard4/` | the guard logs of the fourth run's scratch builds, views, re-extraction, relations runs and ctest (`v01`-`v19`) |
+| `scratch4/probe/` | a probe fixture of element stores, decays and writes through a pointer parameter, and its view (cited by the eighth addendum) |
+| `scratch4/facts_scratch_sha256.txt`, `facts_same_as_scratch3.txt` | the five builds re-extracted by this run's scratch tool: the same sha256 as the third run's (the new lines are relations only) |
+| `scratch4/buffer/` | the new lines of the scratch tool over the five builds and the fixture (`lines_<b>.txt`: namespace, line), their counts (`counts_<b>.txt`, `counts_all.txt`, by `scripts/buffer_counts.py`) |
+| `scratch4/buffer_trial_before_pointer_key/` | the counts and the text difference of the trial before the name store was limited to a pointer key (kept, not cited for the result) |
+| `scratch4/relations_text_diff.txt` | the scratch relations texts against `rf2_final_order`: lines gone (only the facts line) and lines added by kind |
+| `scratch4/array_flag_only_c1_pre_tx.txt` | the FIELD_STATUS rows of c1_pre_tx with the scalar-array flag and how many have no other cause |
+| `scratch4/golden_scratch/` | `closure_np.golden_4` (to commit with the declared build), the sha256 of the five scratch goldens and which equal earlier scratch goldens |
+| `scratch4/logs/` | cmake, make, extraction and ctest logs; `ctest_golden_lint_4d.log` and `reasons_4c.log` are the ones the results cite (earlier trials kept under their names) |
+| `scripts/buffer_counts.py` | counts of the stored-name buffer and lifetime-end lines of a relations text (a check, not a tool of the method) |

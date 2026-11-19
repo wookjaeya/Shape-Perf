@@ -122,3 +122,66 @@ end
 - 읽는 부분과 판정 부분의 파일 이름, 중간 글의 칸 이름은 코드를 쓰는 단계가 이 글을 고쳐 먼저 커밋한 뒤 확정할 수 있다(뜻은 바꾸지 않는다).
 - 적재된 모듈의 `buildid` 줄은 부팅 전까지 실제로 본 적이 없다 [미확인].
 - 읽기 갈래 `Rd`((c4)를 partition 의 생성자 집합과 전제로 받는 것)가 정확히 어느 줄들을 받는지는 PI 의 답을 들은 뒤가 아니라 **부팅 전에** 평가 절차의 채운 판에 적는다(받는 줄: 행의 `creator:` 줄들과 그 `incomplete:` 사유, 쌍 파일의 그 쌍의 값).
+
+## 10. 코드를 쓰며 정한 것과 실제 출력에 맞춘 고침 (2026-11-19; 코드보다 먼저 커밋함)
+
+이 절은 개정 4 의 코드를 쓰기 전에, 위 글을 두 C1 빌드의 실제 출력(kz-static `6f40dd60…` 의 `cz_final_order/<빌드>/relations.txt`·`pairs.tsv`, `cz_plans_v4_ns2/<빌드>/plan.side`·`plan.kzs`)과 런타임 단계의 시험 dump·연결 점검 글(`kz-rt-dump` `d83fdde9…`, `env/tools/chain_check.py`)에 맞춰 보고 정한 것이다. 3–8절의 뜻은 바꾸지 않는다. **고침**이라고 표시한 것만 위 글을 바꾼다. 9절의 첫 항목이 열어 둔 파일 이름과 칸 이름을 여기서 정한다.
+
+### 10.1 파일과 구동
+
+- 읽는 부분 `env/obs1/explain_read.py`, 판정 부분 `env/obs1/explain_judge.py`, 구동부 `env/obs1/explain.py`(둘을 차례로 부르고 그 밖의 계산을 하지 않는다), 평가 갈래 파일을 규칙으로 만드는 `env/obs1/explain_branches.py`, 요약 `env/obs1/explain_summary.py`, 기대 대조 `env/obs1/explain_expect.py`. 개정 3 의 `explain.py`(sha256 `acfd4271…`, 커밋 `d75aa53`)는 바이트 그대로 `env/obs1/explain_rev3.py` 로 남겨 회귀(7절)와 단위 점검 15 가 읽는다.
+- 읽는 부분과 판정 부분은 각각 표준 라이브러리만 가져오고 서로를 가져오지 않는다(한 파일의 sha256 이 그 부분의 모든 규칙을 덮게). 판정 부분은 중간 글(`normal.json`)과 어휘 파일만 연다. 시험은 `open` 을 바꿔 그 밖의 파일을 열면 실패하게 한다.
+- 출력 디렉터리(새 디렉터리만): `normal.json`(읽는 부분의 출력, 갈래와 무관), `inputs.txt`, `input_checks.txt`, 그리고 갈래마다 `<갈래 id>/records/*.json`, `<갈래 id>/index.tsv`, `<갈래 id>/uses.tsv`(집계 전의 사용 사건 표), `<갈래 id>/refused.txt`. rc: 0 모두 씀, 2 갈래 입력(후보 목록·인정 파일·갈래 파일)의 점검이 어긋남(아무 기록도 쓰지 않음), 3 결합이 거부됨(기록은 `build_mismatch`), 4 서식 검사에 물린 기록이 있음, 64 인자 오류.
+
+### 10.2 평가 갈래는 명시한 입력 파일이다 (고침: 3절 1 의 `--data-branch`·`--readings` 대신)
+
+갈래를 명령줄의 손 선택으로 두지 않고, 규칙으로 만든 파일 하나를 입력으로 받는다(`--branches`). 파일에는 행 번호·키·기대 판정이 없다.
+
+```
+kz-eval-branches 1
+rule judgement rules 8.13 item 5 (2026-11-18): data branches D1 and D2 (and D2[<kinds>] for each admission file given) x readings R0, each of Ra-Rf alone, all six
+candidates <후보 목록의 sha256 | none>
+branch <id> data=<D1|D2|D2[<종류>,...]> readings=<R0|Ra,...> admitted=<경로|none> admitted_sha256=<hex|none>
+...
+lines <n>
+end
+```
+
+- `explain_branches.py --out FILE [--candidates FILE] [--admitted FILE]...` 가 만든다: 자료 갈래 `D1` 하나와, 인정 파일마다 그 파일의 `branch` 줄이 이름 댄 자료 갈래(`D2` 또는 `D2[…]`) 하나씩. 각 자료 갈래에 읽기 여덟(`R0`, `Ra`…`Rf` 하나씩, 여섯 모두). id 는 `<자료>-<읽기>` 를 파일 이름에 쓸 수 있는 글로 바꾼 것(`D1-R0`, `D2-Ra`, `D2_k1_k2-all` 등). 후보 목록이 없으면 `D2` 갈래를 만들지 않는다(인정 파일은 후보 목록 없이 점검할 수 없다; 4절 표의 rc 2 를 피하려고 갈래를 낮추지 않는다).
+- 읽는 부분은 갈래 파일의 꼴, `candidates` 줄 = 넘겨받은 후보 목록의 sha256, 갈래마다 인정 파일의 sha256 = `admitted_sha256` 과 4.1 의 점검을 한다. 하나라도 어긋나면 rc 2 로 멈춘다.
+- 읽기 갈래가 든 기록은 `eval_branch.tag = "4.2 의 읽기 갈래(PI 결정 전)"` 를 단다(서식 검사 17).
+
+### 10.3 실제 출력에 맞춘 읽기 (고침이 아닌 정함)
+
+1. **relations 의 개정 14 줄.** `rules` 줄은 개정 12 그대로이고, 개정 14 는 `rules with object access: relations rules revision 14 …` 줄이 이름 댄다(`kairos/docs/static_facts.md` 5x 아홉째 덧붙임). 읽는 부분은 이 줄이 있고 그 줄에 `with RESULT_FLOW and RESULT_EFFECT` 가 있을 때만 행의 새 줄 다섯(성공 경로, 부재 기원, holder, 대안, 그리고 이름 공간 블록의 `writers [<묶음>] of`·`stored-name address uses`·`stored-name buffer`·`lifetime end`)을 기대한다. 없으면 그 줄들에 기대는 항목은 `missing(<줄 종류> not in this relations text)` 의 근거를 단다(사유의 글은 8.4·8.13 의 하위 사유 그대로).
+2. **행 몸의 줄과 이름 공간 블록.** 행 몸은 6 칸 들여 쓴 줄이다. 이름 공간 블록(`  namespace <키 필드> …` 머리 뒤의 6 칸 줄)은 행이 아니고, 행의 `namespace <키 필드> partition {<v>}` 가 그 블록을 이름 댄다. 블록 안의 8 칸 줄(성공 경로 줄의 되풀이, `lifecycle` 의 writer 줄)은 블록에 붙인다.
+3. **쌍 파일.** 머리는 `kz-order-pairs 1`, `facts`, `tool`, `relations`, `order`, `domain`, `columns` 이고, 쌍 줄 뒤 꼬리 줄 앞에 `edge<TAB>…` 줄이 올 수 있으며, 꼬리 줄은 `rows … pairs … <값마다의 수> no_pair <n>[ edges_not_in_tsv <n>]` 이다. 점검: 열 13; `edge` 줄을 뺀 줄의 행 키 수 = `rows`; `no_pair` 가 아닌 줄 수 = `pairs` = 값마다의 수의 합; `edge` 줄 수 = `edges_not_in_tsv`. 중간 글에는 계획된 행의 줄만 싣는다(점검은 파일 전체에서 한다).
+4. **쌍 줄 찾기.** (행 키, 다른 쪽 위치, 사용 뿌리, 다른 쪽 뿌리)로 찾는다. 다른 쪽 위치는 생성 사건의 site(`tu`, `line`, `col`)를 쌍 줄의 `other_pos` 의 꼬리와 줄·열로 맞춘다(쌍 파일은 묶음 루트 밖을 절대 경로로, manifest 는 묶음 안의 상대 경로로 쓴다). 뿌리는 root 묶기의 뿌리 함수와 종류를 `<함수> (<종류>)` 로 쓴 글이고, 프로세스의 첫 스레드는 종류 `process` 로 맞춘다(쌍 파일의 글은 `main (process)`). 맞는 줄이 없으면 `order_basis_unknown(no line of the pair in the pair file)`, 값이 다른 줄이 둘 이상이면 `order_basis_unknown(more than one line of the pair)`.
+5. **사건이 온 객체(기초 1).** dump 의 `ev` 줄의 `bind=` 는 `(모듈 << 16) | (site << 4) | n` 이다(`kairos/docs/event_semantics.md` 3절, `kairos/instrument/gcc/kzgcc.cpp:308`). 그래서 사건의 객체는 `module:<bind >> 16>` 이고, 기초 1 은 연결 점검 글의 `same_build_object` 줄 가운데 `main` 과 그 쌍의 두 사건의 모듈 객체가 모두 `confirmed` 일 때 선다. 연결 점검 글이 옛 꼴(`same_build` 한 줄뿐)이거나 그 객체의 줄이 없으면 `record_insufficient(same build not confirmed)`, 하나라도 `refused` 면 `build_mismatch`.
+6. **dump 1.5.** `buildid` 줄은 `module` 줄 뒤에 오고 경로가 잘린 줄은 끝에 ` path_cut=yes` 가 붙는다. `tok-create`·`tok-return`·`tok-start` 줄은 수만 센다. `format kzrt-dump 1.4` 이하는 `buildid` 줄이 없다고 적는다.
+7. **문맥 틀.** sidecar 의 `context row=<키> id=<n> frame=<at-call site>,<after-call site>|- chain="…"` 이다(`kairos/docs/plan_manifest.md` 10.8 의 고침). `id` 는 relations 의 `alternatives [context <n>: …]` 의 n 이다.
+8. **holder 가 지역 변수인 줄**(`holder: local …; local: definitions <n> (RESULT_FLOW)…; readers: not decided …`): (c3)(i)은 `not_established(the writer set of a local holder is not shown complete)` 다. 이 사실은 지역 변수의 정의를 다 싣지 않는다(5x 다섯째 덧붙임).
+9. **대안 줄의 필드 저장값 규칙과 읽기 `Re`.** 실제 줄은 규칙이 정하지 못했을 때 `[the stored-field rule at <호출>: not decided: (5) or (6) rests on a premise]` 와 `premises: (6) …` 를 적고, 그 전제 아래에서 규칙이 줄 호출 결과와 그 결과로 닫히는 효과를 적지 않는다. 그래서 판정 부분은 `Re` 아래에서도 그 문맥의 (iii)을 `held` 로 만들 수 없고, `not_established(the alternatives line gives no call result under the premise)` 로 둔다(값을 지어내지 않는다). `Re` 가 (i)에서 움직이는 것은 holder 줄의 FIELD_STATUS 가 `per-field=writer-set-complete` 이고 `type-level=DISABLED` 인 때뿐이다.
+10. **(다)의 두 집합.** (a) 이름 포인터 필드: 행의 `writers: <키 필드>: … premises: FIELD_STATUS per-field <상태>, type-level <상태>` 가 둘 다 `writer-set-complete` 이고, 이름 공간 블록의 `writers [<묶음>] of <키 필드>:` 줄 가운데 그 행의 partition 을 담는 묶음의 writer 가 모두 이름 공간 항목의 `create=` 함수 안의 저장이거나 상수(지우기)이며, partition 을 이름 대지 않는 묶음(`no key-parameter function reaches …`)에 상수가 아닌 writer 가 없을 때. 종류에 묶이지 않은 writer 는 그 종류의 writer 가 아니라고 보일 수 없다. (b) 버퍼: 항목의 `stored-name` 필드마다, 그 행의 partition 을 담는 묶음의 `stored-name buffer` 줄이 하나 이상 있고 모두 `complete` 일 때(읽기 `Rf` 에서는 `not complete (FIELD_STATUS disabled; every cause discharged)` 도 받는다). `stored-name address uses` 줄의 `library:` 항목은 후보 목록의 줄로 자료 갈래를 건다.
+11. **후보 목록이 없을 때.** 미대조 여부를 읽을 수 없으므로 후보 목록에 기대는 항목·요소는 자료 갈래 `D1` 에서 성립이 아니다(근거 `no candidate list given: the state of the library entries is not read`). 2026-11-16 입력의 회귀와 이 단계의 예행이 이 경우다.
+
+### 10.4 중간 글 `kz-explain-normal 1`
+
+JSON 하나. 최상위 칸: `format`, `reader{script, sha256}`, `inputs{이름: {path, sha256}}`, `input_checks[]`(점검, `ok`|`refused`, 까닭), `unparsed{줄 종류: [위치]}`, `plan{sidecar, sites, bindings}`, `relations{head, rows, namespace_blocks}`, `keys`, `pairs{head, tail, lines}`, `namespaces[]`, `candidates`, `branches[]`(인정 파일의 줄 포함), `facts_view`, `run`(dump, run.meta, 연결 점검, 시작 스크립트, 멈춤 평가, 인스턴스 목록, 부팅 예산; 없으면 `null`), `label_record`. 줄을 옮긴 값마다 `[파일 이름, 줄 번호]` 를, dump 사건마다 행위자와 aseq 를 단다. 계획된 행(층과 대조)의 relations 행과 쌍 줄만 싣는다.
+
+### 10.5 쌍 종류
+
+개정 3 의 `creator-app`(프로세스의 첫 스레드와 앱)은 개정 4 에서 `process-app` 으로 낸다(8.13-18). 같은 run 행위자면 `same_actor`, 앱(또는 그 자식)끼리 같은 앱이면 주-자식 `same-app-main-child`, 아니면 `same-app-other`; 다른 앱이면 `app-app`; 코어와 앱 `core-app`, 코어끼리 `core-core`; 나머지 `unknown`. 회귀에서 이 이름 바뀜은 선언한 필드 차이다.
+
+### 10.6 기대 대조 파일 `kz-expect 1`
+
+```
+kz-expect 1
+plan <sidecar 의 sha256>                  (계획마다 한 줄)
+expect<TAB><갈래 id><TAB><빌드><TAB><행 키><TAB><소비자 뿌리|*><TAB><필드><TAB><기대 값>
+...
+lines <n>
+end
+```
+
+`필드` 는 기록의 칸 경로(`tool_verdict.violation.value`, `use_cond.status`, `use_cond.branch_i.status`, `link.status`)이거나 `pair[<생성 site 위치>].missing_items`(쉼표로 이은 이름, 차례 무관)·`pair[<위치>].result`·`use[<n>].name_state` 다. `explain_expect.py` 는 기록을 바꾸지 않고 줄마다 `match`·`mismatch`·`no_record` 를 쓴다. 기대 파일은 주기를 준비하는 단계가 평가 절차 5절에서 만든다. 이 단계는 fixture 로만 시험한다.

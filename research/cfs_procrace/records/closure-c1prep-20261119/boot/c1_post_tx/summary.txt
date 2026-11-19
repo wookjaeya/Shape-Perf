@@ -1,0 +1,1473 @@
+# explain_summary.py revision 4, spec 11 items 7-9 (2026-11-19): tables per evaluation branch; decided = observed, not_observed_in_runs, refuted_link; unordered (static) = this revision found no edge; uses lists: uses_c1_post_tx.tsv
+
+table D1-R0
+  head: main (declared before the boot: D1/R0)
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1265, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D1-Ra
+  head: auxiliary (data D1, readings Ra) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1265, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D1-Rb
+  head: auxiliary (data D1, readings Rb) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1265, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D1-Rc
+  head: auxiliary (data D1, readings Rc) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1235, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D1-Rd
+  head: auxiliary (data D1, readings Rd) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 905, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D1-Re
+  head: auxiliary (data D1, readings Re) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1265, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D1-Rf
+  head: auxiliary (data D1, readings Rf) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1265, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D1-all
+  head: auxiliary (data D1, readings Ra,Rb,Rc,Rd,Re,Rf) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 875, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D2-R0
+  head: auxiliary (data D2, readings R0)
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1070, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D2-Ra
+  head: auxiliary (data D2, readings Ra) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1070, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D2-Rb
+  head: auxiliary (data D2, readings Rb) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1070, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D2-Rc
+  head: auxiliary (data D2, readings Rc) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1040, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D2-Rd
+  head: auxiliary (data D2, readings Rd) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 595, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D2-Re
+  head: auxiliary (data D2, readings Re) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1070, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D2-Rf
+  head: auxiliary (data D2, readings Rf) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 1070, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0
+
+table D2-all
+  head: auxiliary (data D2, readings Ra,Rb,Rc,Rd,Re,Rf) [4.2 의 읽기 갈래(PI 결정 전)]
+boots 5: boot1 boot2 boot3 boot4 boot5
+violation x pair_kind x order (records; a record with publishers of several kinds counts once per kind):
+  undetermined	-	unknown	10
+  undetermined	app-app	unknown	10
+  undetermined	core-app	unknown	90
+  undetermined	core-core	unknown	20
+  undetermined	process-app	unknown	130
+  undetermined	same_actor	unknown	5
+  undetermined	unknown	unknown	80
+per record over boots (row, use-site key, consumer root: values):
+  A20 bb0951052e63f1bc BP_AppMain: 5 boots: undetermined 5
+  A21 17975444d83f6589 CF_AppMain: 5 boots: undetermined 5
+  A22 f371687b47120887 SCH_Lab_AppMain: 5 boots: undetermined 5
+  A26 ad9fc1058923aad9 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  A63 b881269bea290f8b None: 5 boots: undetermined 5
+  B113 62696da28bd6b9b4 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B118 e74845731ffadce0 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B119 152f17981365b27d CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B125 cc073460235b0623 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B13 3c1a14a1e86af631 None: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_InputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CF_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 CI_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B73 ba2543549ee828a2 TO_LAB_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_InputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 BP_CLA_OutputTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_ES_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_EVS_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_SB_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Local1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_TaskMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CFE_TIME_Tone1HzTask: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CF_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 CI_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 SCH_Lab_AppMain: 5 boots: undetermined 5
+  B81 fb05e6e2f6b4cb48 TO_LAB_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b BP_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_ES_BackgroundTask: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CFE_TBL_TaskMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b CF_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b SCH_Lab_AppMain: 5 boots: undetermined 5
+  B99 299c8e07fe49d44b TO_LAB_AppMain: 5 boots: undetermined 5
+records with a (c3)(iii) branch decided by the stored-field rule (counted apart; not for statements outside the design rows): 0
+undetermined reasons by kind (reasons, over records): run evidence 345, static input 565, structure 85
+other_order_seen_in_boots per pair (row key, create site, pair kind):
+  17975444d83f6589 apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  17975444d83f6589 src/bp/fsw/src/bp_flow.c:132:18 app-app: use first; other order seen: no
+  bb0951052e63f1bc apps/sch_lab/fsw/src/sch_lab_app.c:168:16 app-app: create first; other order seen: no
+  bb0951052e63f1bc src/bp/fsw/src/bp_flow.c:132:18 same_actor: create first / use first; other order seen: yes
+  per use (defined 5): the unit of evaluation protocol 14.2 is one pre-defined use in one boot of one build; its verdict is the violation of the record (build, row, consumer actor) it is in
+    boot boot1: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot2: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot3: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot4: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    boot boot5: reached 4 / defined 5; decided 0 / reached 4; undetermined uses by kind (a use counts once in each kind its record's reasons have): run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0
+    use	c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 10
+    use	c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 15
+    use	c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 5, not reached 0	events 5
+    use	c1_post_tx	A63	b881269bea290f8b	none	context -	5 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 5	events 0
+    the uses of one record share its one verdict (evaluation protocol 14.2): no record holds two reached uses
+  pairs (actor pairs consumer x publisher of every record, over the boots; legend: static unordered = this revision found no edge, not that the other order is feasible):
+    pair_kind	app-app	15	between apps (both owners determined)
+    pair_kind	core-app	135	core and app
+    pair_kind	process-app	130	process and app
+    pair_kind	same-app-other	0	control (one app)
+    pair_kind	same-app-main-child	0	control (one app)
+    pair_kind	same_actor	5	control (one actor)
+    pair_kind	core-core	20	core and core
+    pair_kind	unknown	80	own line (see the split below)
+    between apps (the headline line: app-app, both owners determined): 15
+    controls (not between-app results): same-app-other 0, same-app-main-child 0, same_actor 5
+    unknown split by the actors' owner state: a owner not determined 0, b core-process with both owners determined 80, c other 0
+    failure signs (records with odf failure_sign) by pair-kind set: app-app 5, app-app,same_actor 5, core-core,unknown 5
+    failure signs by the consumer's affiliation (a core consumer's sign is no between-app signal): app 10, core 5, process 0, unknown 0

@@ -4211,3 +4211,14 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 3. 26.9 가 결과 27 에 남긴 것 가운데 이 단계가 낸 것: F3 `note` 가 600 글자인 줄은 부팅마다 0 / 752(`fix-judge-03`), 선언 고정의 대조(`fix-decl-09`, 위), 부팅마다 `run.meta` 의 `other=0` 과 `inst_files.sha256.other` 0 줄. 시험되지 않은 꼴 넷(`fix-judge-04`)과 읽기는 보고의 절이 적는다.
 4. D1-R0 의 boot 반증 점검 fail(128–129)과 기대 대조의 mismatch 64(모두 boot 종류)는 스크립트가 낸 그대로다. 줄마다의 까닭은 보고의 절이 평가 절차 14.13 의 7 대로 있는 그대로 적는다.
 5. 압축과 남긴 출력은 같은 디스크에만 있다(26.2 열린 점 3).
+
+### 27.2 `c1_post_tx` 의 부팅 (2026-11-19)
+
+**차례 (첫 부팅 전에 커밋함) [D].**
+- 27.1 의 차례와 같다. 빌드만 `c1_post_tx` 다(평가 절차 2절, 26.7 (라): `c1_pre_tx` 먼저, 다음 `c1_post_tx`). 부팅은 `boot/commands.txt` 의 줄을 그대로, 저장소 뿌리에서, 차례대로 돌린다. 부팅마다 열두 단계(verify, boot, control, convert, kzt-text, chain, stop, gate, explain, eval, expect, keep)이고, 단계마다 rc 를 본 뒤 다음으로 간다. 감시는 실행 스크립트가 거는 단계(boot, convert, explain, eval)에 걸린다. 단계는 `99f43ee` 의 `step.sh`, 뽑은 수는 같은 커밋의 `extract.sh` 로 낸다. 두 스크립트는 이미 `c1_post_tx` 를 받으므로 고치지 않는다. 실행 스크립트, 선언, 판정 부분, 기대는 바꾸지 않는다(평가 절차 12절).
+- 부팅 수(평가 절차 2절, 14.10; 선언 4 의 머리): 첫 부팅이 문(3절; `boot/c1_post_tx/boot1/gate.txt`)을 지나면 무엇을 보였든 정확히 네 번 더(N = 2–5) 하고 `summary` 를 돌린다. 지나지 못하면 그 사유를 `boot/c1_post_tx/addendum_1r.txt` 에 적어 커밋한 뒤 1r 을 한 번 한다. 1r 이 지나면 2–5 와 `summary`, 지나지 못하면 이 빌드의 부팅은 거기서 끝난다. 기록을 본 뒤에 수를 올리거나 내리지 않는다. 한 모든 부팅을 세고, 문을 지나지 못한 부팅은 사유와 함께 적는다. 부팅하지 않음(14.14 의 3)은 부팅으로 세지 않고, 까닭을 없앤 뒤 같은 N 으로 다시 하며 그 일을 여기 적는다.
+- 공간: 실행 스크립트의 규칙(14.14 의 4)으로 첫 부팅 앞의 필요는 314,572,800 + 100,000,000 + 6 × 60,444,672 = 777,240,832 B 다(부팅 하나의 값은 이미 한 부팅이 남긴 가장 큰 값, `c1_pre_tx` 부팅 3). 이 단계의 첫 측정은 801,075,200 B(20:14:43Z, `../records/closure-boots-20261119/c1_post_tx/free_start.txt`), 23,834,368 B 위다. 시작의 장부 점검은 225 행 실패 0(`c1_post_tx/ledger_check_start.txt`). 부팅 단계가 부팅마다 스스로 잰다(`space_at_boot.txt`). 못 미쳐 거절하면 남은 압축 줄이 없으므로 부팅하지 않고 PI 에게 묻는다(26.0 (카), 26.7 (나)).
+- 부팅마다 커밋하는 것: 실행 스크립트의 기록 디렉터리 `boot/c1_post_tx/boot<N>/` 전부, 장부, 이 단계의 기록 `../records/closure-boots-20261119/c1_post_tx/`(`steps.tsv`, 부팅마다 뽑은 수 `boot-<N>/`). 큰 출력은 `/home/user/work/redesign/obs1/c1cyc_post_{boot,convert,explain,eval}<N>/` 에 두고 `keep` 단계가 장부 행을 단다. `boot/declaration_pin.txt` 는 `c1_pre_tx` 1 이 쓴 그대로이고 이 빌드의 부팅 단계는 그것을 읽기만 한다.
+- 부팅마다 아래에 날짜 붙인 한 줄을 더한다.
+
+**부팅 [M].**

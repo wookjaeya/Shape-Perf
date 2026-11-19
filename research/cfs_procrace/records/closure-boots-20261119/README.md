@@ -1,6 +1,6 @@
 # closure-boots-20261119 — C1 주기의 부팅: 단계마다의 기록과 부팅마다 뽑은 수
 
-결과는 `plan/full_stage_results_20261116.md` 27절(`c1_pre_tx` 는 27.1). 근거: lead 의 판단 26.7 (라)·(마), 평가 절차 2·3절과 14.14, 부팅 선언 4(`../closure-c1prep-20261119/boot/declaration4.tsv`, `b268e2d2…`), 명령 `../closure-c1prep-20261119/boot/commands.txt`(`365ce243…`), 실행 스크립트 `../closure-c1prep-20261119/boot/run_cycle.sh`(`2508f144…`). 이 README 와 27.1 의 차례는 **첫 부팅보다 먼저** 커밋했고, 아래 두 스크립트는 그 뒤, 첫 부팅 전에 커밋했다.
+결과는 `plan/full_stage_results_20261116.md` 27절(`c1_pre_tx` 는 27.1, `c1_post_tx` 는 27.2; 27.2 의 차례도 그 첫 부팅보다 먼저 커밋했다). 근거: lead 의 판단 26.7 (라)·(마), 평가 절차 2·3절과 14.14, 부팅 선언 4(`../closure-c1prep-20261119/boot/declaration4.tsv`, `b268e2d2…`), 명령 `../closure-c1prep-20261119/boot/commands.txt`(`365ce243…`), 실행 스크립트 `../closure-c1prep-20261119/boot/run_cycle.sh`(`2508f144…`). 이 README 와 27.1 의 차례는 **첫 부팅보다 먼저** 커밋했고, 아래 두 스크립트는 그 뒤, 첫 부팅 전에 커밋했다.
 
 ## 무엇이 어디에 있는가
 

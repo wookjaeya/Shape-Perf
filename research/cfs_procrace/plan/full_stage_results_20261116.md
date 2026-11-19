@@ -2920,3 +2920,125 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - 탐침 P1 의 A21 c1_post_tx 문맥 꼴과, 계획된 행의 쌍 줄 1,125 와 텍스트 쌍 1,087 의 차이 38 을 행마다 맞추는 일은 하지 않았다 [미확인].
 - `test_probe_observe` 의 확인 수가 실행마다 달라지는 까닭은 보지 않았다.
 - §20.8 의 그 밖의 열린 것은 그대로 기다린다: 틀 없는 문맥의 시험, `framework_namespaces2_*.txt` 머리 글, §18.8 의 배열 표시와 key-clearing 이름 문제(lead), C 라이브러리 항목(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)), absence origins 의 이름 칸 문제.
+
+## 22. C1 닫기의 kz-static 한 빌드: 끝 점검의 남은 것과 빌드 전체 표 (2026-11-19)
+
+이 절은 선언된 kz-static 빌드(§21.0)의 다섯 빌드·쌍 파일·계획·끝 점검 단계에서 §21 이 하지 않은 것만 더한다. 다섯 빌드는 §21 에서 선언된 도구(kz-static `6f40dd60…`, `tool_sha256=36e02995…`)로 한 번 다시 뽑혔고(`cz_*`, `ba6a157`), relations·order·쌍 파일·계획·비교·끝 점검이 모두 거기서 끝났다. 끝낸 일은 다시 하지 않았다: 다시 뽑기, 새 출력 디렉터리, 도구 바꿈이 없다. 이 단계는 남긴 출력을 읽기만 하고, 기록 디렉터리 `../records/closure-kzstatic-exit-20261119/`(`README.md`)에만 쓴다. cFS 를 부팅하지 않고 push 하지 않는다. 빌드가 없으므로 선언도 없다. 모든 명령은 공간 감시 아래에서 돌렸다(`guard/`).
+
+### 22.0 lead 의 판단 (2026-11-19)
+§21.0 (가)에 적은 lead 의 판단을 그대로 다시 적는다. 이 단계는 어느 것도 바꾸지 않는다.
+- (a) 판정 규칙 8.13 의 17 번 조건 (6)은 쓰인 대로 적용한다. writer 집합은 필드 단위 규칙과 형 단위 규칙 **모두**에서 완전해야 한다. 도구를 필드 단위로만 읽게 바꾸지 않는다. 필드 단위만의 읽기는 설계 행을 본 뒤의 규칙 읽기다. 커밋된 평가 갈래 Re 가 그것을 덮는지는 설명 스크립트 단계와 평가 파일이 정한다. 덮지 않으면 PI 의 열린 것으로 적고, 지금 어떤 글도 넓히지 않는다.
+- (b) 성공 경로 줄에서 out 으로 저장되는 지역 변수의 추출 틈은 그대로 둔다. 이 빌드에서 `include/` 아래는 바뀌지 않는다. 성공 경로 줄은 그 까닭과 함께 missing 이라고 적는다. 열린 것이다.
+- (c) 저장된 이름 버퍼의 scalar-array FIELD_STATUS 상태는 깃발마다 정한다. 건전하게 뺄 수 없는 깃발이 있으면 그 줄은 not complete 와 그 깃발을 적는다. 설계 행이 나오게 하려고 아무것도 느슨하게 하지 않는다.
+- (d) 바뀌는 golden 은 선언된 빌드에서 커밋한다. 첫 ctest 의 실패는 완전한 소스의 scratch 점검 빌드에서 확인한 이름으로 적는다(§21.0 (마), §21.3).
+- (e) 둘째 주소 넘김 호출 자리와 열린 까닭의 `other` 종류는 맞으면 이 빌드의 측정에서 가리고 센다(§21.5 5). 아니면 열린 것으로 둔다.
+
+### 22.1 시작 점검 [M]
+- 여유 831,086,592 B(06:35Z, `free_start.txt`).
+- `ledger_check.sh`: 158 행, 실패 0(`out/ledger_check_start.txt`). `OBS_cz_*` 열 행의 파일이 모두 남긴 sha256 과 같다.
+- `tools_check.sh --deep`: 51 행, 실패 0(`out/tools_check_deep_start.txt`).
+- 다섯 빌드의 relations·order·쌍 파일의 도구 줄 15 개가 모두 `tool_sha256=36e0299521014b926b2f7d2bf6784b5b4ec97a929ff67799a34f72d610509eb5 tool_source=3b89477d…` 이다. 제자리 도구의 파일 sha256 은 `6f40dd60…` 이다(`out/tool_lines.txt`).
+
+### 22.2 컨테이너의 절마다 sha256 [M]
+§21 은 컨테이너를 절마다 견주었지만(`compare/extract_*_sections_*.txt`) 절마다의 sha256 은 남기지 않았다. 이 단계가 남겼다.
+- 대상: `cz_final_extract` 와 `cz_off_extract` 의 다섯 빌드, 각 `facts.kz` 와 `basis.kz`(컨테이너 20).
+- 방법: `section_sha.py`(`records/semantics-20261116/` 의 사본)가 kz-dump(`out/kz-dump.sha256`)의 글을 읽는다. 절마다 수, crc32, 그 절 글의 sha256 을 적는다.
+- 줄 수: 마지막 옵션 회차 265(facts 235, basis 30)와 옵션 없는 회차 225(facts 195, basis 30)다(`out/section_sha_final.txt`, `out/section_sha_off.txt`).
+- 감시 dip 은 53,248 B 다.
+
+### 22.3 남긴 쌍 측정과 `pairs:` 줄의 합, 쌍 파일 [M]
+선언된 도구의 출력(`cz_final_order/<b>/`: `cdr.txt`, `order.txt`, `pairs.tsv`)으로 다시 셌다. 쓴 것은 `pair_measure.py` 이고, 결과는 `out/pair_measure_2_<b>.txt` 다. 세 같음은 세어진 줄로만 확인하고, 빌드의 상수는 쓰지 않는다. 다섯 빌드 모두 `result PASS` 다.
+
+| | c1_pre_tx | c1_post_tx | r2_core | c5_641 | c5_642 |
+|---|---|---|---|---|---|
+| K 남긴 쌍 측정(`cdr.txt` 의 `pairs of the rows`) | 24,609 | 24,609 | 8,566 | 4,307 | 4,298 |
+| T `pairs:` 줄의 합 | 24,796 | 24,796 | 8,739 | 4,393 | 4,382 |
+| 쌍 파일의 쌍(no_pair 뺌) | 26,572 | 26,572 | 9,622 | 5,160 | 5,149 |
+| unknown(no root reaches) 줄 | 187 | 187 | 173 | 86 | 84 |
+| same_thread 줄: 글이 한 스레드 unknown 으로 셈 / 세지 않음 | 144 / 1,776 | 144 / 1,776 | 135 / 883 | 84 / 767 | 83 / 767 |
+
+1. **T − K = unknown(no root reaches) 줄.** 어느 뿌리도 닿지 않는 쌍을 글은 unknown 으로 센다. caller-dependent 측정은 `pair()` 를 계산한 쌍만 `pair_values_` 에 기록한다(`kairos/lib/llvm/order.cpp:1519`). 그래서 c1 에서 24,796 − 24,609 = 187 이다. §15.4 의 scratch 설명이 선언된 도구의 출력에서도 다섯 빌드 모두 선다.
+2. **쌍 파일 − T = 글이 세지 않는 same_thread 줄.** 글이 same_thread 줄을 세는 경우는 하나다. 경로 B·C 에서 그 두 위치의 줄이 하나뿐일 때 한 스레드 unknown 으로 센다(`pair_check.py` 점검 4 의 규칙). 쌍 파일은 영역이 넓다(order rules revision 8: 행이 이름 대는 모든 creator 와 writer, not-a-pair 생성자, 같은 스레드의 생성자). 그래서 c1 에서 26,572 − 24,796 = 1,776 이다.
+   - c1 의 1,776 은 writer 경로 B 1,256, 경로 C 507, `creator-not-a-pair(same actor only)` 12, `creator-not-a-pair(probe-create)` 1 이다.
+   - r2 의 883 은 경로 B 756, 경로 C 112, same actor only 12, `key constants differ` 3 이다.
+   - c5 의 767 은 경로 B 749, same actor only 18 이다.
+3. **K = 순서 값의 쌍 + 글이 세는 한 스레드 쌍.** c1 은 hard_before + fixed_early_proved + unordered 24,465 에 144 를 더해 24,609 다. 글의 unknown 331 은 187 + 144 다. unordered 는 셋 모두 21,664 로 같다.
+
+### 22.4 계획된 행의 쌍 줄 1,125 와 텍스트 쌍 1,087 의 차이 38: 행마다 [M]
+§21.8 에서 [미확인] 으로 둔 것이다. `pair_measure_2_<b>.txt` 의 행 표와 `planned_same_thread_<b>.txt` 로 행마다 맞췄다.
+- C1 두 빌드의 계획(`cz_plans_v4` 와 `cz_plans_v4_ns2`, 같은 13 행)에서 13 행 모두가 "쌍 파일 줄 − 텍스트 합 = 글이 세지 않는 same_thread 줄 + no_pair 줄" 을 만족한다.
+- 38 은 세 행에서 나온다. 셋 모두 same_thread 이고, 글이 세지 않는 줄이다.
+  - B73: writer 경로 B 33(두 위치에 줄이 여럿).
+  - B99: writer 경로 B 4(두 위치에 줄이 여럿).
+  - A20: `creator-not-a-pair(probe-create)` 1(`bp_flow.c:132:18` 의 같은 함수 생성).
+  - B125 의 same_thread 줄 1 은 글이 한 스레드 unknown 으로 세므로 차이에 들지 않는다.
+- 탐침 P5 의 1,087 은 고친 도구의 출력(`rf2_final_order`)과 그 계획(`rf2_plans_v4`)에서 센 것이다. 선언된 도구의 텍스트에서도 같은 13 행의 합은 1,087 이다.
+- `rf2_plans_v4` 의 sidecar 를 `cz` 출력에 대면 1,086/1,123 이 된다. A20 의 키가 소스 트리 토큰 때문에 움직였기 때문이다(§15.3, §21.5 1). 그래서 sidecar 의 A20 키가 `cz` 의 행에 맞지 않는다. 같은 행끼리 맞추면 차이는 없다.
+- 다른 빌드에서는 차이가 r2 15, c5 310/310 이다. 모두 같은 규칙으로 설명된다(행마다 PASS). 예를 들어 r2 의 대조 행 A2–A4 는 텍스트가 `pairs: none` 인데, 쌍 파일에는 같은 행위자 생성자의 same_thread 줄이 행마다 5 있다.
+- 첫 실행(`out/pair_measure_<b>.txt`)은 tier 계획이면서 대조이기도 한 행(A21)의 선택 칸을 `control` 로 적었다. 덮어쓰지 않고 남겼고, 칸을 고친 실행이 `_2` 다. 그 칸 말고는 같다.
+
+### 22.5 계획 규칙 개정 5 가 선언된 계획에 적은 것 [M]
+`plan_rev5_counts.py` 를 `cz_plans_v4_ns2` 다섯에 돌렸다(`out/plan_rev5_counts_v4_ns2.txt`). 차례는 c1_pre_tx/c1_post_tx/r2_core/c5_641/c5_642 다.
+- 계획된 경로 A 행은 5/5/4/2/2 다. 그 가운데 `namespace-entry` 줄이 있는 행은 4/4/4/0/0 이다(c1: A20·A21·A22·A26). 없는 행은 1/1/0/2/2 다(c1 의 A63, c5 의 A16·A17).
+- `namespace-layer` 줄은 1/1/1/2/2 다.
+- `kind-value` site 는 4/4/4/0/0 이다.
+- `object-rollback` site 는 4/4/6/0/0, `object-clear` site 는 2/2/2/0/0 이다.
+- `context-frame` site 는 4/0/0/0/0 이다. 문맥 줄 2 는 c1_pre_tx 의 A21 한 행에 있고, 틀은 2 를 찾았으며 틀 없는 문맥은 0 이다.
+- `lifetime-complete` 는 종류마다 yes 2/2/2/0/0 이다.
+- c5 두 빌드의 need 는 `object-delete not-planned plan_missing(no namespace data entry)` 2 뿐이다.
+- §19 의 scratch 수, §21.4 의 선언된 비교(같은 바이트)와 같다. 선택, 층, 층 라벨은 바뀌지 않았다.
+- 대조 예산의 이유 글은 "the boots of these rows are control runs of design rows" 다(`cz_plans_v4*/<b>/plan.side` 의 `control-budget`). "prior test" 라는 말은 다섯 계획 어디에도 없다.
+
+### 22.6 kz-static 한 빌드의 전체 표 [M]
+- 수는 c1_pre_tx/c1_post_tx/r2_core/c5_641/c5_642 의 차례다.
+- 출처는 둘이다. 하나는 `../records/closure-kzstatic-mc-20261119/exit/`(§21.5)이고, 다른 하나는 이 절의 `out/`(`design_rows_<c1>.txt`, `plan_rev5_counts_v4_ns2.txt`, `pair_measure_2_*.txt`)다.
+- 셋째 칸은 C1 의 계획된 행이 그 줄에서 보이는 것이다. 대조 선택 행은 A20·A21·A22·A26·A63 이다. 이 행들의 부팅은 설계 행의 대조 실행이고, A21 은 층 계획 행이기도 하다. 층 계획 행 B13·B73·B81·B99·B113·B118·B119·B125 는 경로 B 라서 경로 A 의 새 줄이 없다.
+- 두 C1 빌드에서 이 칸의 읽기는 같다. 위치 글은 다르다.
+
+| 내용 | 서는 곳 / 빠지는 곳(다섯 빌드) | C1 의 계획된 행 |
+|---|---|---|
+| 소스 트리 토큰의 키 글 | `source_tree` 항목 3/3/0/0/0. 키가 움직인 행 3/3/0/0/0. 두 C1 빌드의 키 글 367/367 같음. 공유 키 0 | A20 의 키가 움직임(A27·A30 은 계획되지 않음) |
+| 성공 경로 줄 | creator callee 14/14/12/15/15. held 0 이고 모두 missing(까닭별 수는 §21.5 3) | A20·A21 `OS_CountSemCreate`: missing(저장값이 성공 경로에 묶이지 않음; lead 의 판단 (b)). A22·A26 `OS_TimeBaseCreate`: missing(조건 사이의 함의를 정하지 못함). A63 `OS_mv`: missing(나르는 경로에 out-id 저장 없음) |
+| absence origins 줄 | 39/39/17/23/23. 기원이 둘인 줄 7/7/4/0/0. 값이 정해지지 않은 absence 에는 줄 없음 | A20·A21·A22·A26: −17 의 기원 둘(`[other]` `OS_ObjectIdFindByName:972:5`, `[search no-match]`). A63: 줄 없음(absence 값이 평가되지 않음) |
+| holder 줄 | 26/26/21/18/18. 필드 holder 8/8/2/0/0. 값을 시험하는 reader 18/18/5/0/0 | A20: 필드 `BP_Throttle_t.Sem`, writer 둘(자기 out 저장, 다른 정의 `bp_flow.c:132:18`). A21: 필드 `CF_Channel_t.sem_id`, writer 둘(채움 0 의 clearing, 자기 out 저장), FIELD_STATUS DISABLED 와 깃발 다섯, reader 하나는 지운 값을 먼저 시험함. A22·A26: 지역 변수, reader 를 정하지 못함. A63: 줄 없음 |
+| 문맥별 alternatives 줄과 저장 필드 규칙 | 65/64/26/66/66. 정한 호출 0/0/0/0/0. 주소 넘김 호출 자리 2/2/0/0/0(필드 1). 전제 (5)·(6)에 걸린 덩이 66(c1 두 빌드) | A20: 같은 함수의 생성과 retry 를 찾음. 열린 event-send 둘 때문에 세우지 않음. A21 c1_pre_tx 문맥 1: not established(열린 exit-app; `CFE_ES_RunLoop` 338:12 의 저장 필드 규칙이 전제 (6)에 걸림, `CF_AppData_t.run_status` per-field=writer-set-complete, type-level=DISABLED; lead 의 판단 (a)). 문맥 2: 효과가 호출자로 돌아가는 함수에서 끝남. A21 c1_post_tx: 문맥 하나에서 retry 를 찾음, 열린 return-result. A22: 열린 exit-app. A26: RESULT_EFFECT 행 없음. A63: absence 값이 평가되지 않음 |
+| 저장된 이름 버퍼 줄 | 16/16/17/0/0, complete 0. 깃발 address-escape 는 모든 버퍼에서 풀리지 않음. array-element 깃발은 모두 풀림(lead 의 판단 (c)) | 행의 이름 공간 `OS_common_record_t.name_entry` 블록에 버퍼·수명 끝 줄 19. 셈 세마포어(partition {3})와 시간 기준(partition {8})의 버퍼는 not complete(FIELD_STATUS disabled; address-escape 가 풀리지 않음) |
+| 수명 끝 줄 | clear-table 5/5/6/0/0, clear-slot 10/10/6/18/18(모두 not shown), release 1/1/0/23/23, 매개변수를 통한 release 1/1/1/0/0 | 같은 블록의 clear-table·clear-slot·release-through 줄 |
+| relations 머리의 도구 sha256 줄 | 다섯 빌드의 relations·order·쌍 파일 15 개 모두 `tool_sha256=36e02995…` | — |
+| 완전한 쌍 파일 | pair_check PASS 10/10(마지막 옵션과 기본 경로). 쌍 26,572/26,572/9,622/5,160/5,149 | 계획된 13 행 모두 줄이 있음: 1,125 줄(텍스트 1,087 과의 차이 38 은 22.4) |
+| 남긴 쌍 측정과 `pairs:` 줄의 합 | 22.3 의 세 같음이 다섯 빌드 모두 섬 | — |
+| 계획 규칙 개정 5 | `namespace-entry` 행 4/4/4/0/0, 빠진 행 1/1/0/2/2. 그 밖의 줄은 22.5 | A20·A21·A22·A26: entry 줄 있음. A63: 없음(적용되는 항목이 없음). A21(c1_pre_tx): 문맥 틀 2 |
+
+### 22.7 공간 [M]
+- 시작 831,086,592 B(06:35Z), 끝 830,013,440 B(06:45Z, `free_end.txt`)다.
+- 감시 기록은 19 개이고 모두 `verdict=completed` 다. 가장 큰 dip 은 절마다 sha256 의 53,248 B 이고, 하한을 넘지 않았다. 압축 대체는 쓰지 않았다.
+- 새로 남긴 것은 이 기록 디렉터리(262,789 B)뿐이다. scratch 는 만들지 않았다.
+
+### 22.8 계획과 다르게 한 것
+- **다시 뽑기와 실행을 다시 하지 않았다.** 이 단계의 일(선언된 도구로 다섯 빌드를 한 번 다시 뽑고, relations·order·쌍 파일·계획·비교를 돌림)은 §21 에서 이미 끝났다(`ba6a157`; 모든 비교 OK, BAD 0). 한 번만 뽑는다는 규칙대로 다시 하지 않았다. 남은 것만 했다: 절마다 sha256, 쌍 측정의 설명, 38 의 행별 대조, 계획된 행의 줄, 전체 표.
+- **"개정 4 계획" 과 "개정 5 계획".** 같은 계획이다. `cz_plans_v4*` 는 manifest 개정 4 의 꼴에 계획 규칙 개정 5(plan rules revision 5)를 담는다(§19, §21.4).
+- **감시 밖에서 돌린 작은 읽기 둘.** `planned_same_thread.py` 두 번과 도구 줄의 grep 은 감시 없이 돌렸다. 각 출력은 수 KB 의 읽기였다. 그 밖의 명령은 모두 감시 아래에서 돌렸다.
+- **세는 스크립트의 칸 하나를 고쳤다.** `pair_measure.py` 의 첫 실행은 A21 의 선택 칸을 잘못 적었다. 첫 출력은 남기고, 고친 실행은 새 이름으로 두었다(22.4).
+
+### 22.9 열린 것
+- **끝 조건**: 모두 섰다.
+  - 선언된 차이만 있다(§21.4: 260 보고가 선언된 보고와 같은 바이트, 쌍둥이 320/320).
+  - 두 C1 빌드의 키 글이 같다(367/367).
+  - 두 C1 계획의 계획된 행마다 쌍 파일이 완전하다(13/13).
+  - 탐침이 도구의 줄로 재현된다. 재현되지 않는 곳은 줄과 까닭을 적었다: P2 의 `OS_CountSemCreate` 는 lead 의 판단 (b), A21 문맥 1 의 not established 는 판단 (a)의 전제 (6)(§21.5 4).
+  - 새 줄마다 서는 곳과 빠지는 곳을 다섯 빌드 모두에서 셌다(22.6).
+  - 쌍 측정의 차이를 설명했다(22.3).
+  - 판단 (e)를 쟀다(§21.5 5).
+  - 장부와 등록부의 깊은 점검이 통과했다(22.1, 끝 점검 `out/*_end.txt`).
+- lead 의 판단 (a): 평가 갈래 Re 가 판정 규칙 8.13 의 17 번 조건 (6)을 덮는지는 설명 스크립트 단계가 본다. 덮지 않으면 PI 의 열린 것이다. C1 두 빌드의 덩이 66 이 그 전제에 걸린다.
+- lead 의 판단 (b): 성공 경로 줄의 추출 틈은 그대로다.
+- lead 의 판단 (c): 버퍼는 모두 not complete 다(address-escape).
+- 머리 줄의 `other` 세기(괄호 안의 `; ` 로 나눔, c1 에서 333 행)를 고칠지는 lead 의 판단을 기다린다.
+- 탐침 P1 의 A21 c1_post_tx 문맥 꼴(문맥 하나 대 탐침의 둘)은 두 빌드의 호출 꼴 차이를 따라가지 않았다 [미확인].
+- `test_probe_observe` 의 확인 수가 실행마다 달라지는 까닭은 보지 않았다 [미확인].
+- §20.8 의 그 밖의 열린 것은 그대로 기다린다.
+  - 틀 없는 문맥의 시험.
+  - `framework_namespaces2_*.txt` 의 머리 글.
+  - §18.8 의 배열 표시와 key-clearing 이름 문제(lead).
+  - C 라이브러리 항목(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)).
+  - absence origins 의 이름 칸 문제.

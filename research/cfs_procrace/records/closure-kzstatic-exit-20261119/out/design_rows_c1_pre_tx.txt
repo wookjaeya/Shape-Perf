@@ -1,0 +1,168 @@
+A20 (control): A20 lookup /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:126:13 in initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:121 -> OS_CountSemGetIdByName#1 namespace OS_common_record_t.name_entry
+  success path: 1 line(s)
+    callee-check (success path): OS_CountSemCreate: missing(the stored value is not tied to the success path): success value 0 [outcome class rule]; carried by 1 alternative(s): osal/src/os/shared/src/osapi-countsem.c:109:5 alt 1/2 = result of 
+  absence origins: 1 line(s)
+    absence origins: -17 [ARGCHECK(name, OS_ERR_NAME_NOT_FOUND)]: 2 origin(s): OS_ObjectIdFindByName at osal/src/os/shared/src/osapi-idmap.c:972:5 when (not param:name#1) [other]; OS_ObjectIdFindNextMatch at osal/src/os/shared/src/osapi-idmap.c
+  holder: 1 line(s)
+    holder: field BP_Throttle_t.Sem; writers 2: own out store /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:126:13; other definition /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:132:18 in initialize_throttling
+  alternatives: 1 line(s)
+    alternatives [context 1: initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:121@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:126:13]: found: creation in the same name space and partition b
+  namespace OS_common_record_t.name_entry: stored-name buffer / lifetime end lines 19
+    stored-name buffer [no key-parameter function reaches OS_ConsoleAPI_Init]: OS_console_internal_record_t.device_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-printf.c:101:9 in OS_ConsoleAPI_Init; writers 3 fro
+    stored-name buffer [no key-parameter function reaches OS_FileSysAddFixedMap]: OS_filesys_internal_record_t.device_name extent 32 [OS_FS_DEV_NAME_LEN]; name stores 1: osal/src/os/shared/src/osapi-filesys.c:280:9 in OS_FileSysAddFixedMap; wri
+    stored-name buffer [no key-parameter function reaches OS_SocketAccept]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-sockets.c:272:21 in OS_SocketAccept; writers 10 from WR
+    stored-name buffer [no key-parameter function reaches OS_SocketBind]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-sockets.c:188:17 in OS_SocketBind; writers 10 from WRITER
+    stored-name buffer [partition {11}]: OS_dir_internal_record_t.dir_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-dir.c:125:13 in OS_DirectoryOpen; writers 3 from WRITERS (the field is an extraction target): cl
+    stored-name buffer [partition {11}]: OS_filesys_internal_record_t.device_name extent 32 [OS_FS_DEV_NAME_LEN]; name stores 1: osal/src/os/shared/src/osapi-filesys.c:159:9 in OS_FileSys_Initialize; writers 5 from WRITERS (the field is an extr
+    stored-name buffer [partition {11}]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-file.c:142:13 in OS_OpenCreate; writers 10 from WRITERS (the field is an extraction target
+    stored-name buffer [partition {13}]: OS_condvar_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-condvar.c:96:9 in OS_CondVarCreate; writers 3 from WRITERS (the field is an extraction targe
+    stored-name buffer [partition {1}]: OS_task_internal_record_t.task_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-task.c:188:9 in OS_TaskCreate; writers 3 from WRITERS (the field is an extraction target): clea
+    stored-name buffer [partition {2}]: OS_queue_internal_record_t.queue_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-queue.c:104:9 in OS_QueueCreate; writers 3 from WRITERS (the field is an extraction target): 
+    stored-name buffer [partition {3}]: OS_count_sem_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-countsem.c:100:9 in OS_CountSemCreate; writers 3 from WRITERS (the field is an extraction t
+    stored-name buffer [partition {4}]: OS_bin_sem_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-binsem.c:108:9 in OS_BinSemCreate; writers 3 from WRITERS (the field is an extraction target)
+    stored-name buffer [partition {5}]: OS_mutex_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-mutex.c:105:9 in OS_MutSemCreate; writers 3 from WRITERS (the field is an extraction target): c
+    stored-name buffer [partition {8}]: OS_timebase_internal_record_t.timebase_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-timebase.c:128:9 in OS_TimeBaseCreate; writers 3 from WRITERS (the field is an extracti
+    stored-name buffer [partition {9}]: OS_timecb_internal_record_t.timer_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-time.c:141:9 in OS_DoTimerAdd@osal/src/os/shared/src/osapi-time.c:90; writers 3 from WRITERS
+    stored-name buffer [shared by partitions {10} {11}]: OS_module_internal_record_t.module_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-module.c:209:9 in OS_ModuleLoad; writers 3 from WRITERS (the field is an e
+    lifetime end [all partitions]: clear-table osal/src/os/shared/src/osapi-idmap.c:120:5 in OS_ObjectIdInit: names no id: every record of OS_common_table [fill 0] (OS_common_record_t.active_id, OS_common_record_t.name_entry)
+    lifetime end [shared by partitions {} {1} {10} {11} {13} {2} {3} {4} {5} {6} {8} {9}]: release through parameter 1 of OS_ObjectIdTransactionFinish at osal/src/os/shared/src/osapi-idmap.c:1079:9: OS_common_record_t.active_id := *final_id; ca
+    lifetime end [shared by partitions {} {1} {10} {11} {13} {2} {3} {4} {5} {8} {9}]: clear-slot osal/src/os/shared/src/osapi-idmap.c:640:9 in OS_ObjectIdFindNextFree: not shown (the store's guard (eq local:return_code 0) tests no active field
+A21 (planned+control): A21 lookup /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:993:19 in CF_CFDP_InitEngine -> OS_CountSemGetIdByName#1 namespace OS_common_record_t.name_entry partition {3} key unresolved
+  success path: 1 line(s)
+    callee-check (success path): OS_CountSemCreate: missing(the stored value is not tied to the success path): success value 0 [outcome class rule]; carried by 1 alternative(s): osal/src/os/shared/src/osapi-countsem.c:109:5 alt 1/2 = result of 
+  absence origins: 1 line(s)
+    absence origins: -17 [ARGCHECK(name, OS_ERR_NAME_NOT_FOUND)]: 2 origin(s): OS_ObjectIdFindByName at osal/src/os/shared/src/osapi-idmap.c:972:5 when (not param:name#1) [other]; OS_ObjectIdFindNextMatch at osal/src/os/shared/src/osapi-idmap.c
+  holder: 1 line(s)
+    holder: field CF_Channel_t.sem_id; writers 2: clearing /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:965:5 in CF_CFDP_InitEngine value=0 [fill]; own out store /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:9
+  alternatives: 2 line(s)
+    alternatives [context 1: CF_AppMain@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_app.c:330:14 <- CF_Init@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_app.c:252:18 <- CF_CFDP_InitEngine@/home/user/work/procrace/c1_build
+    alternatives [context 2: CF_CmdEnableEngine@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c:1119:13 <- CF_CFDP_InitEngine@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:993:19]: not established (the value's eff
+  namespace OS_common_record_t.name_entry: stored-name buffer / lifetime end lines 19
+    stored-name buffer [no key-parameter function reaches OS_ConsoleAPI_Init]: OS_console_internal_record_t.device_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-printf.c:101:9 in OS_ConsoleAPI_Init; writers 3 fro
+    stored-name buffer [no key-parameter function reaches OS_FileSysAddFixedMap]: OS_filesys_internal_record_t.device_name extent 32 [OS_FS_DEV_NAME_LEN]; name stores 1: osal/src/os/shared/src/osapi-filesys.c:280:9 in OS_FileSysAddFixedMap; wri
+    stored-name buffer [no key-parameter function reaches OS_SocketAccept]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-sockets.c:272:21 in OS_SocketAccept; writers 10 from WR
+    stored-name buffer [no key-parameter function reaches OS_SocketBind]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-sockets.c:188:17 in OS_SocketBind; writers 10 from WRITER
+    stored-name buffer [partition {11}]: OS_dir_internal_record_t.dir_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-dir.c:125:13 in OS_DirectoryOpen; writers 3 from WRITERS (the field is an extraction target): cl
+    stored-name buffer [partition {11}]: OS_filesys_internal_record_t.device_name extent 32 [OS_FS_DEV_NAME_LEN]; name stores 1: osal/src/os/shared/src/osapi-filesys.c:159:9 in OS_FileSys_Initialize; writers 5 from WRITERS (the field is an extr
+    stored-name buffer [partition {11}]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-file.c:142:13 in OS_OpenCreate; writers 10 from WRITERS (the field is an extraction target
+    stored-name buffer [partition {13}]: OS_condvar_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-condvar.c:96:9 in OS_CondVarCreate; writers 3 from WRITERS (the field is an extraction targe
+    stored-name buffer [partition {1}]: OS_task_internal_record_t.task_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-task.c:188:9 in OS_TaskCreate; writers 3 from WRITERS (the field is an extraction target): clea
+    stored-name buffer [partition {2}]: OS_queue_internal_record_t.queue_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-queue.c:104:9 in OS_QueueCreate; writers 3 from WRITERS (the field is an extraction target): 
+    stored-name buffer [partition {3}]: OS_count_sem_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-countsem.c:100:9 in OS_CountSemCreate; writers 3 from WRITERS (the field is an extraction t
+    stored-name buffer [partition {4}]: OS_bin_sem_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-binsem.c:108:9 in OS_BinSemCreate; writers 3 from WRITERS (the field is an extraction target)
+    stored-name buffer [partition {5}]: OS_mutex_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-mutex.c:105:9 in OS_MutSemCreate; writers 3 from WRITERS (the field is an extraction target): c
+    stored-name buffer [partition {8}]: OS_timebase_internal_record_t.timebase_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-timebase.c:128:9 in OS_TimeBaseCreate; writers 3 from WRITERS (the field is an extracti
+    stored-name buffer [partition {9}]: OS_timecb_internal_record_t.timer_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-time.c:141:9 in OS_DoTimerAdd@osal/src/os/shared/src/osapi-time.c:90; writers 3 from WRITERS
+    stored-name buffer [shared by partitions {10} {11}]: OS_module_internal_record_t.module_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-module.c:209:9 in OS_ModuleLoad; writers 3 from WRITERS (the field is an e
+    lifetime end [all partitions]: clear-table osal/src/os/shared/src/osapi-idmap.c:120:5 in OS_ObjectIdInit: names no id: every record of OS_common_table [fill 0] (OS_common_record_t.active_id, OS_common_record_t.name_entry)
+    lifetime end [shared by partitions {} {1} {10} {11} {13} {2} {3} {4} {5} {6} {8} {9}]: release through parameter 1 of OS_ObjectIdTransactionFinish at osal/src/os/shared/src/osapi-idmap.c:1079:9: OS_common_record_t.active_id := *final_id; ca
+    lifetime end [shared by partitions {} {1} {10} {11} {13} {2} {3} {4} {5} {8} {9}]: clear-slot osal/src/os/shared/src/osapi-idmap.c:640:9 in OS_ObjectIdFindNextFree: not shown (the store's guard (eq local:return_code 0) tests no active field
+A22 (control): A22 lookup apps/sch_lab/fsw/src/sch_lab_app.c:176:16 in SCH_LAB_AppInit -> OS_TimeBaseGetIdByName#1 namespace OS_common_record_t.name_entry partition {8} key known
+  success path: 1 line(s)
+    callee-check (success path): OS_TimeBaseCreate: missing(an implication between conditions is not decided): success value 0 [outcome class rule]; carried by 1 alternative(s): osal/src/os/shared/src/osapi-timebase.c:147:5 alt 1/2 = result of 
+  absence origins: 1 line(s)
+    absence origins: -17 [ARGCHECK(name, OS_ERR_NAME_NOT_FOUND)]: 2 origin(s): OS_ObjectIdFindByName at osal/src/os/shared/src/osapi-idmap.c:972:5 when (not param:name#1) [other]; OS_ObjectIdFindNextMatch at osal/src/os/shared/src/osapi-idmap.c
+  holder: 1 line(s)
+    holder: local TimeBaseId in SCH_LAB_AppInit; writers 1: own out store apps/sch_lab/fsw/src/sch_lab_app.c:176:16; local: definitions 0 (RESULT_FLOW); readers: not decided: the uses of a local are not READS rows
+  alternatives: 1 line(s)
+    alternatives [context 1: SCH_Lab_AppMain@apps/sch_lab/fsw/src/sch_lab_app.c:87:14 <- SCH_LAB_AppInit@apps/sch_lab/fsw/src/sch_lab_app.c:176:16]: not established (open: exit-app at apps/sch_lab/fsw/src/sch_lab_app.c:141:5: on a path through 
+  namespace OS_common_record_t.name_entry: stored-name buffer / lifetime end lines 19
+    stored-name buffer [no key-parameter function reaches OS_ConsoleAPI_Init]: OS_console_internal_record_t.device_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-printf.c:101:9 in OS_ConsoleAPI_Init; writers 3 fro
+    stored-name buffer [no key-parameter function reaches OS_FileSysAddFixedMap]: OS_filesys_internal_record_t.device_name extent 32 [OS_FS_DEV_NAME_LEN]; name stores 1: osal/src/os/shared/src/osapi-filesys.c:280:9 in OS_FileSysAddFixedMap; wri
+    stored-name buffer [no key-parameter function reaches OS_SocketAccept]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-sockets.c:272:21 in OS_SocketAccept; writers 10 from WR
+    stored-name buffer [no key-parameter function reaches OS_SocketBind]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-sockets.c:188:17 in OS_SocketBind; writers 10 from WRITER
+    stored-name buffer [partition {11}]: OS_dir_internal_record_t.dir_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-dir.c:125:13 in OS_DirectoryOpen; writers 3 from WRITERS (the field is an extraction target): cl
+    stored-name buffer [partition {11}]: OS_filesys_internal_record_t.device_name extent 32 [OS_FS_DEV_NAME_LEN]; name stores 1: osal/src/os/shared/src/osapi-filesys.c:159:9 in OS_FileSys_Initialize; writers 5 from WRITERS (the field is an extr
+    stored-name buffer [partition {11}]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-file.c:142:13 in OS_OpenCreate; writers 10 from WRITERS (the field is an extraction target
+    stored-name buffer [partition {13}]: OS_condvar_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-condvar.c:96:9 in OS_CondVarCreate; writers 3 from WRITERS (the field is an extraction targe
+    stored-name buffer [partition {1}]: OS_task_internal_record_t.task_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-task.c:188:9 in OS_TaskCreate; writers 3 from WRITERS (the field is an extraction target): clea
+    stored-name buffer [partition {2}]: OS_queue_internal_record_t.queue_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-queue.c:104:9 in OS_QueueCreate; writers 3 from WRITERS (the field is an extraction target): 
+    stored-name buffer [partition {3}]: OS_count_sem_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-countsem.c:100:9 in OS_CountSemCreate; writers 3 from WRITERS (the field is an extraction t
+    stored-name buffer [partition {4}]: OS_bin_sem_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-binsem.c:108:9 in OS_BinSemCreate; writers 3 from WRITERS (the field is an extraction target)
+    stored-name buffer [partition {5}]: OS_mutex_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-mutex.c:105:9 in OS_MutSemCreate; writers 3 from WRITERS (the field is an extraction target): c
+    stored-name buffer [partition {8}]: OS_timebase_internal_record_t.timebase_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-timebase.c:128:9 in OS_TimeBaseCreate; writers 3 from WRITERS (the field is an extracti
+    stored-name buffer [partition {9}]: OS_timecb_internal_record_t.timer_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-time.c:141:9 in OS_DoTimerAdd@osal/src/os/shared/src/osapi-time.c:90; writers 3 from WRITERS
+    stored-name buffer [shared by partitions {10} {11}]: OS_module_internal_record_t.module_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-module.c:209:9 in OS_ModuleLoad; writers 3 from WRITERS (the field is an e
+    lifetime end [all partitions]: clear-table osal/src/os/shared/src/osapi-idmap.c:120:5 in OS_ObjectIdInit: names no id: every record of OS_common_table [fill 0] (OS_common_record_t.active_id, OS_common_record_t.name_entry)
+    lifetime end [shared by partitions {} {1} {10} {11} {13} {2} {3} {4} {5} {6} {8} {9}]: release through parameter 1 of OS_ObjectIdTransactionFinish at osal/src/os/shared/src/osapi-idmap.c:1079:9: OS_common_record_t.active_id := *final_id; ca
+    lifetime end [shared by partitions {} {1} {10} {11} {13} {2} {3} {4} {5} {8} {9}]: clear-slot osal/src/os/shared/src/osapi-idmap.c:640:9 in OS_ObjectIdFindNextFree: not shown (the store's guard (eq local:return_code 0) tests no active field
+A26 (control): A26 lookup cfe/modules/time/fsw/src/cfe_time_task.c:286:16 in CFE_TIME_TaskInit -> OS_TimeBaseGetIdByName#1 namespace OS_common_record_t.name_entry partition {8} key known
+  success path: 1 line(s)
+    callee-check (success path): OS_TimeBaseCreate: missing(an implication between conditions is not decided): success value 0 [outcome class rule]; carried by 1 alternative(s): osal/src/os/shared/src/osapi-timebase.c:147:5 alt 1/2 = result of 
+  absence origins: 1 line(s)
+    absence origins: -17 [ARGCHECK(name, OS_ERR_NAME_NOT_FOUND)]: 2 origin(s): OS_ObjectIdFindByName at osal/src/os/shared/src/osapi-idmap.c:972:5 when (not param:name#1) [other]; OS_ObjectIdFindNextMatch at osal/src/os/shared/src/osapi-idmap.c
+  holder: 1 line(s)
+    holder: local TimeBaseId in CFE_TIME_TaskInit; writers 1: own out store cfe/modules/time/fsw/src/cfe_time_task.c:286:16; local: definitions 0 (RESULT_FLOW); readers: not decided: the uses of a local are not READS rows
+  alternatives: 1 line(s)
+    alternatives [context 1: CFE_TIME_TaskMain@cfe/modules/time/fsw/src/cfe_time_task.c:71:14 <- CFE_TIME_TaskInit@cfe/modules/time/fsw/src/cfe_time_task.c:286:16]: not established (no RESULT_EFFECT row of the value 0 at cfe/modules/time/fsw/sr
+  namespace OS_common_record_t.name_entry: stored-name buffer / lifetime end lines 19
+    stored-name buffer [no key-parameter function reaches OS_ConsoleAPI_Init]: OS_console_internal_record_t.device_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-printf.c:101:9 in OS_ConsoleAPI_Init; writers 3 fro
+    stored-name buffer [no key-parameter function reaches OS_FileSysAddFixedMap]: OS_filesys_internal_record_t.device_name extent 32 [OS_FS_DEV_NAME_LEN]; name stores 1: osal/src/os/shared/src/osapi-filesys.c:280:9 in OS_FileSysAddFixedMap; wri
+    stored-name buffer [no key-parameter function reaches OS_SocketAccept]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-sockets.c:272:21 in OS_SocketAccept; writers 10 from WR
+    stored-name buffer [no key-parameter function reaches OS_SocketBind]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-sockets.c:188:17 in OS_SocketBind; writers 10 from WRITER
+    stored-name buffer [partition {11}]: OS_dir_internal_record_t.dir_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-dir.c:125:13 in OS_DirectoryOpen; writers 3 from WRITERS (the field is an extraction target): cl
+    stored-name buffer [partition {11}]: OS_filesys_internal_record_t.device_name extent 32 [OS_FS_DEV_NAME_LEN]; name stores 1: osal/src/os/shared/src/osapi-filesys.c:159:9 in OS_FileSys_Initialize; writers 5 from WRITERS (the field is an extr
+    stored-name buffer [partition {11}]: OS_stream_internal_record_t.stream_name extent 64 [OS_MAX_PATH_LEN]; name stores 1: osal/src/os/shared/src/osapi-file.c:142:13 in OS_OpenCreate; writers 10 from WRITERS (the field is an extraction target
+    stored-name buffer [partition {13}]: OS_condvar_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-condvar.c:96:9 in OS_CondVarCreate; writers 3 from WRITERS (the field is an extraction targe
+    stored-name buffer [partition {1}]: OS_task_internal_record_t.task_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-task.c:188:9 in OS_TaskCreate; writers 3 from WRITERS (the field is an extraction target): clea
+    stored-name buffer [partition {2}]: OS_queue_internal_record_t.queue_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-queue.c:104:9 in OS_QueueCreate; writers 3 from WRITERS (the field is an extraction target): 
+    stored-name buffer [partition {3}]: OS_count_sem_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-countsem.c:100:9 in OS_CountSemCreate; writers 3 from WRITERS (the field is an extraction t
+    stored-name buffer [partition {4}]: OS_bin_sem_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-binsem.c:108:9 in OS_BinSemCreate; writers 3 from WRITERS (the field is an extraction target)
+    stored-name buffer [partition {5}]: OS_mutex_internal_record_t.obj_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-mutex.c:105:9 in OS_MutSemCreate; writers 3 from WRITERS (the field is an extraction target): c
+    stored-name buffer [partition {8}]: OS_timebase_internal_record_t.timebase_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-timebase.c:128:9 in OS_TimeBaseCreate; writers 3 from WRITERS (the field is an extracti
+    stored-name buffer [partition {9}]: OS_timecb_internal_record_t.timer_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-time.c:141:9 in OS_DoTimerAdd@osal/src/os/shared/src/osapi-time.c:90; writers 3 from WRITERS
+    stored-name buffer [shared by partitions {10} {11}]: OS_module_internal_record_t.module_name extent 20 [OS_MAX_API_NAME]; name stores 1: osal/src/os/shared/src/osapi-module.c:209:9 in OS_ModuleLoad; writers 3 from WRITERS (the field is an e
+    lifetime end [all partitions]: clear-table osal/src/os/shared/src/osapi-idmap.c:120:5 in OS_ObjectIdInit: names no id: every record of OS_common_table [fill 0] (OS_common_record_t.active_id, OS_common_record_t.name_entry)
+    lifetime end [shared by partitions {} {1} {10} {11} {13} {2} {3} {4} {5} {6} {8} {9}]: release through parameter 1 of OS_ObjectIdTransactionFinish at osal/src/os/shared/src/osapi-idmap.c:1079:9: OS_common_record_t.active_id := *final_id; ca
+    lifetime end [shared by partitions {} {1} {10} {11} {13} {2} {3} {4} {5} {8} {9}]: clear-slot osal/src/os/shared/src/osapi-idmap.c:640:9 in OS_ObjectIdFindNextFree: not shown (the store's guard (eq local:return_code 0) tests no active field
+A63 (control): A63 lookup /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp_s.c:352:13 in CF_CFDP_S_SubstateSendMetadata -> OS_FileOpenCheck#0 namespace OS_stream_internal_record_t.stream_name partition {} key unresolved
+  success path: 1 line(s)
+    callee-check (success path): OS_mv: missing(no out-id store on a carrying path): success value 0 [outcome class rule]; carried by 2 alternative(s): osal/src/os/shared/src/osapi-file.c:471:5 alt 0/2 = result of OS_rename at osal/src/os/share
+  absence origins: 0 line(s)
+  holder: 0 line(s)
+  alternatives: 1 line(s)
+    alternatives [context -]: not established (the lookup's absence value is not evaluated)
+  namespace OS_stream_internal_record_t.stream_name: stored-name buffer / lifetime end lines 3
+    lifetime end [all partitions]: clear-table osal/src/os/shared/src/osapi-file.c:97:5 in OS_FileAPI_Init: names no id: every record of OS_stream_table [fill 0] (OS_stream_internal_record_t.stream_name)
+    lifetime end [partition {}]: clear-slot osal/src/os/shared/src/osapi-file.c:375:17 in OS_rename: not shown (the store's guard (and (and (eq local:return_code 0) (ne (call-result OS_ObjectIdIteratorGetNext (seq (addr local:iter))) 0)) (and (
+    lifetime end [no key-parameter function reaches OS_CreateSocketName]: clear-slot osal/src/os/shared/src/osapi-sockets.c:97:9 in OS_CreateSocketName: not shown (the store's guard (ne (call-result OS_SocketAddrToString_Impl (seq field:OS_stre
+B13 (planned): B13 CFE_ES_BackgroundTaskState_t.TaskID -> CFE_ES_DeleteChildTask#0 sites=1 callee-check=yes
+  success path: 0 line(s)
+  absence origins: 0 line(s)
+  holder: 0 line(s)
+  alternatives: 0 line(s)
+B73 (planned): B73 CFE_SB_Global_t.AppId -> CFE_EVS_SendEventWithAppID#2 sites=50 callee-check=yes
+  success path: 0 line(s)
+  absence origins: 0 line(s)
+  holder: 0 line(s)
+  alternatives: 0 line(s)
+B81 (planned): B81 CFE_SB_MemParams_t.PoolHdl -> CFE_ES_PutPoolBuf#0 sites=3 callee-check=yes
+  success path: 0 line(s)
+  absence origins: 0 line(s)
+  holder: 0 line(s)
+  alternatives: 0 line(s)
+B99 (planned): B99 CFE_TBL_Global_t.TableTaskAppId -> CFE_EVS_SendEventWithAppID#2 sites=36 callee-check=yes
+  success path: 0 line(s)
+  absence origins: 0 line(s)
+  holder: 0 line(s)
+  alternatives: 0 line(s)
+B113 (planned): B113 CFE_TBL_RegistryRec_t.LastFileLoaded -> CFE_SB_MessageStringSet#1 sites=1 callee-check=yes
+  success path: 0 line(s)
+  absence origins: 0 line(s)
+  holder: 0 line(s)
+  alternatives: 0 line(s)
+B118 (planned): B118 CFE_TBL_RegistryRec_t.Name -> CFE_SB_MessageStringSet#1 sites=2 callee-check=yes
+  success path: 0 line(s)
+  absence origins: 0 line(s)
+  holder: 0 line(s)
+  alternatives: 0 line(s)
+B119 (planned): B119 CFE_TBL_RegistryRec_t.OwnerAppId -> CFE_ES_GetAppName#1 sites=1 callee-check=yes
+  success path: 0 line(s)
+  absence origins: 0 line(s)
+  holder: 0 line(s)
+  alternatives: 0 line(s)
+B125 (planned): B125 CFE_TBL_TblRegPacket_Payload_t.OwnerAppName -> CFE_ES_GetAppName#0 sites=1 callee-check=yes
+  success path: 0 line(s)
+  absence origins: 0 line(s)
+  holder: 0 line(s)
+  alternatives: 0 line(s)

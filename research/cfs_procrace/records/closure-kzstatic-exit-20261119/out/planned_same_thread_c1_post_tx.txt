@@ -1,0 +1,4 @@
+A20 bb0951052e63f1bc: creator-not-a-pair(probe-create) path A not counted (single) 1
+B73 ba2543549ee828a2: writer path B not counted (group) 33
+B99 299c8e07fe49d44b: writer path B not counted (group) 4
+B125 cc073460235b0623: writer path B counted (single) 1

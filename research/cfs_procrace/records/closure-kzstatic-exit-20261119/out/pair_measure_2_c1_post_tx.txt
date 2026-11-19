@@ -1,0 +1,71 @@
+build /home/user/work/redesign/obs1/cz_final_order/c1_post_tx
+K kept pair measure (cdr.txt): 24609 (unordered 21664)
+T sum of the pairs: lines: 24796; fixed_early_proved 1276, hard_before 1525, unknown 331, unordered 21664
+F pair-file lines: 26634 (pairs 26572, no_pair 62); fixed_early_proved 1276, hard_before 1525, no_pair 62, same_thread 1920, unknown 187, unordered 21664
+  unknown lines: no root reaches 187, other 0
+  same_thread lines: counted by the text as one-thread unknown 144, not counted 1776
+  same_thread lines not counted, by other kind and path:
+    creator-not-a-pair(probe-create) path A: 1
+    creator-not-a-pair(same actor only) path A: 12
+    writer path B: 1256
+    writer path C: 507
+  same_thread lines counted, by other kind and path:
+    writer path B: 140
+    writer path C: 4
+ok   (1) T - K = 24796 - 24609 = 187 = unknown(no root reaches) lines 187
+ok       text unknown 331 = no-root 187 + other unknown 0 + one-thread same_thread 144
+ok   (2) F(pairs) - T = 26572 - 24796 = 1776 = same_thread lines not counted by the text 1776
+ok   (3) K 24609 = hard_before + conditional + fixed_early + unordered 24465 + counted one-thread 144 + other unknown 0
+ok       unordered: measure 21664, text 21664, file 21664
+plan /home/user/work/redesign/obs1/cz_plans_v4/c1_post_tx/plan.side: planned rows 13
+  row id | selection | text sum | file lines | file no_pair | same_thread not counted | file - text
+  A20 | control | 1 | 2 | 0 | 1 | 1
+  A21 | control | 2 | 2 | 0 | 0 | 0
+  A22 | control | 1 | 1 | 0 | 0 | 0
+  A26 | control | 1 | 1 | 0 | 0 | 0
+  A63 | control | 1 | 1 | 0 | 0 | 0
+  B13 | planned | 3 | 3 | 0 | 0 | 0
+  B73 | planned | 745 | 778 | 0 | 33 | 33
+  B81 | planned | 42 | 42 | 0 | 0 | 0
+  B99 | planned | 222 | 226 | 0 | 4 | 4
+  B113 | planned | 24 | 24 | 0 | 0 | 0
+  B118 | planned | 24 | 24 | 0 | 0 | 0
+  B119 | planned | 19 | 19 | 0 | 0 | 0
+  B125 | planned | 2 | 2 | 0 | 0 | 0
+  sums: text 1087, file lines 1125, difference 38
+ok     rows whose difference file - text = same_thread not counted + no_pair: 13 of 13
+plan /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/plan.side: planned rows 13
+  row id | selection | text sum | file lines | file no_pair | same_thread not counted | file - text
+  A20 | control | 1 | 2 | 0 | 1 | 1
+  A21 | control | 2 | 2 | 0 | 0 | 0
+  A22 | control | 1 | 1 | 0 | 0 | 0
+  A26 | control | 1 | 1 | 0 | 0 | 0
+  A63 | control | 1 | 1 | 0 | 0 | 0
+  B13 | planned | 3 | 3 | 0 | 0 | 0
+  B73 | planned | 745 | 778 | 0 | 33 | 33
+  B81 | planned | 42 | 42 | 0 | 0 | 0
+  B99 | planned | 222 | 226 | 0 | 4 | 4
+  B113 | planned | 24 | 24 | 0 | 0 | 0
+  B118 | planned | 24 | 24 | 0 | 0 | 0
+  B119 | planned | 19 | 19 | 0 | 0 | 0
+  B125 | planned | 2 | 2 | 0 | 0 | 0
+  sums: text 1087, file lines 1125, difference 38
+ok     rows whose difference file - text = same_thread not counted + no_pair: 13 of 13
+plan /home/user/work/redesign/obs1/rf2_plans_v4/c1_post_tx/plan.side: planned rows 13
+  row id | selection | text sum | file lines | file no_pair | same_thread not counted | file - text
+  A20 | control | 0 | 0 | 0 | 0 | 0
+  A21 | control | 2 | 2 | 0 | 0 | 0
+  A22 | control | 1 | 1 | 0 | 0 | 0
+  A26 | control | 1 | 1 | 0 | 0 | 0
+  A63 | control | 1 | 1 | 0 | 0 | 0
+  B13 | planned | 3 | 3 | 0 | 0 | 0
+  B73 | planned | 745 | 778 | 0 | 33 | 33
+  B81 | planned | 42 | 42 | 0 | 0 | 0
+  B99 | planned | 222 | 226 | 0 | 4 | 4
+  B113 | planned | 24 | 24 | 0 | 0 | 0
+  B118 | planned | 24 | 24 | 0 | 0 | 0
+  B119 | planned | 19 | 19 | 0 | 0 | 0
+  B125 | planned | 2 | 2 | 0 | 0 | 0
+  sums: text 1086, file lines 1123, difference 37
+ok     rows whose difference file - text = same_thread not counted + no_pair: 13 of 13
+result PASS

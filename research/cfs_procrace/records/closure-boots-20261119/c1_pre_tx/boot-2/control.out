@@ -1,0 +1,31 @@
+dump text sha256 a5ed73aa2b186bc82feac4acb2be0e5e357ed4bfdc164a3d4efc288bc2cc34d6 lines 1183
+record kinds (first word, count):
+       16 actor
+       17 buf
+        7 buildid
+        1 caps
+       22 check
+        1 end
+     1103 ev
+        1 format
+        6 module
+        2 resource
+        3 run
+        4 runx
+  run abi=1 mode=stopped run_id=1 instance=1 phase=0xb adapter="posix" adapter_caps=0x3f clock=1 runtime="kzrt 0.5.0"
+  caps max_actors=64 actor_buf_bytes=4194304 boot_buf_bytes=65536 max_points=32 max_vals=8 str_max=64 holdable=task,lock-held,osal-internal
+  runx window_mode=record mode_source=early flags=build-info
+  runx pool_bytes=4194304 chunk_bytes=4096 chunks_used=34 pool_dropped=0 actor_quota=0 boot_bytes_used=0 boot_bytes_dropped=0 max_modules=32 max_notes=32
+  runx process=22096 initial=tid:22096 evidence=constructor,tid-is-pid
+  runx end=in-process end_flags=- end_value=0 store=memory
+  buildid object=main path="./core-tx" build_id=619614002e6d4556fa731365d88ee7f0d49c00cf note=present source=start actor=- t=67565386075855
+  buildid object=module:5 path="./core-tx" build_id=619614002e6d4556fa731365d88ee7f0d49c00cf note=present source=registration actor=- t=67565386082581
+  buildid object=module:4 path="./cf/ci_lab.so" build_id=4074a88bb9a747f7729153fbb3444df21e668f39 note=present source=registration actor=1 t=67566891235000
+  buildid object=module:7 path="./cf/to_lab.so" build_id=1c6beabaaf271c405f3c9258340ecada8bf5b77d note=present source=registration actor=1 t=67566891408190
+  buildid object=module:6 path="./cf/sch_lab.so" build_id=310dfddb52b7c0d5ca4db109fb866f14d6a7900d note=present source=registration actor=1 t=67566891549232
+  buildid object=module:3 path="./cf/cf.so" build_id=c55b464be7b96ec2d0001b1a5ea296740c13e5c0 note=present source=registration actor=1 t=67566891713085
+  buildid object=module:1 path="./cf/bp.so" build_id=01db56cfd8f7a50b03665e022ca4c835f8f9fd8b note=present source=registration actor=1 t=67566891869798
+loss fields not 0 (kind=value, count): 
+loss records by kind (lines, sum of count=; no-build-id and object-table lose no event, event_semantics 13.5): 
+pool overflow fields not 0: 0
+kz-rt-dump check summary: check ok (0 failures)

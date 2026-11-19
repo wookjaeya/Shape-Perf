@@ -1,0 +1,27 @@
+# explain_judge.py revision 4, spec 11 fixes and spec 11.5 item 1 (2026-11-19); reader explain_read.py revision 4, spec 11 item 2 (2026-11-19) ef20a760e7c5611acee768e17c22b7568ae8ab45819afdeca21757b7ad123c69
+admitted:admitted_D2.tsv	d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4	/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/admitted_D2.tsv
+bindings	5ed4ddb8b7344db4a445c5273d096d65a5a70bfbb81f670cdccb17eafab448eb	/home/user/work/redesign/obs1/c1p2_pre_derived/binds_instr.kzs
+bprime_basis	65c6b02eadec0209918b616ea2b5104fb98417542bc033fd1eb36c8400e3817d	/home/user/work/redesign/obs1/c1p2_pre_bprime/c1_pre_tx/NP/basis.kz
+branches	4d06783852faf48db766cfcb6f79265f2e1703679f3bd86871714176cc943234	/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/branches_16.txt
+candidates	6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73	/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/candidates.tsv
+chain	19617d75c7476ef4988806789f7f3e6268ed89fb1a3262924376837742d3f334	/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/c1_pre_tx/boot2/chain.txt
+dump_text	a5ed73aa2b186bc82feac4acb2be0e5e357ed4bfdc164a3d4efc288bc2cc34d6	/home/user/work/redesign/obs1/c1cyc_pre_boot2/tx/tx.dump.txt
+facts_view	cf493527ec3356fbf6cfc9a80f17a7482a0cda60275bf7baacec96f5e4900fea	/home/user/work/redesign/obs1/xr4_dry_inputs/c1_pre_tx/facts_view.txt
+instance_list	19f809a452350e41d10705e85e0e9636898d2386c15cc8d10dde8fb5beaab146	/home/user/work/redesign/obs1/c1cyc_pre_boot2/tx/inst_files.sha256
+keys	1aa7463260b16d4170eb78c707f74d897bda29df685f2c9c68fde720e61375c4	/home/user/work/redesign/obs1/cz_final_order/c1_pre_tx/keys.txt
+manifest	69a278b019281fd3015226b2ac188be0702613eb2a950fc12627c2603b53c9a0	/home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs
+named_calls	4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b	/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/named_calls.tsv
+namespaces[0]	348ce515d9f37c221bd32e6c7414f87f36522999c548f3a284c0ca2247d02161	/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.1.txt
+namespaces[1]	32c83db59b319a0652788e8626f9336cc8e80819773a6caa30034f46ee778c1b	/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.2.txt
+namespaces[2]	49028355f7abaac19ac5734b9b3331288180e4492068906e5ef05e9bb08e80f9	/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-4.1.1.txt
+namespaces[3]	8245eebbf77ad6c21a8c957f07b7ef49b64aba85f7454c0c6cce003a006fb806	/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-7.0.1.txt
+namespaces[4]	e587cee040e0a70561d07d6b0d15719bd2dbfeb97b0792f4cadc18600ed975b1	/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-f34759d.txt
+normal	82b7bf195415550cd8a04535f2cb2e878af947ea6bfda59f6786fb8d98f2d17e	/home/user/work/redesign/obs1/c1cyc_pre_explain2/normal.json
+pairs	c91113d5c5d0ce4c62807938b9b3a42e859069857b5d3d5e7c2f82cd9e0b29dd	/home/user/work/redesign/obs1/cz_final_order/c1_pre_tx/pairs.tsv
+relations	a10fcf92a051bd3c84a7057032f1746eb565a02336e17c9a08a89f3c0df41b31	/home/user/work/redesign/obs1/cz_final_order/c1_pre_tx/relations.txt
+run_meta	df9b1414f54e827f92dd266184caed9b236a9442c8d63cc0ed5bebb295bc09ce	/home/user/work/redesign/obs1/c1cyc_pre_boot2/tx/run.meta
+sidecar	a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4	/home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side
+startup_script	8ddb9359fd2e897b57b1c9c9f0b92f4d8efe36a8b5b290aafef62805657ba0ef	/home/user/work/redesign/obs1/c1cyc_pre_boot2/tx/inst/tx/cf/cfe_es_startup.scr
+stop_eval	35d37fb7021e1a269502ac4f95ca9d8eac08a286bc0046ad5e324abc49b713e7	/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/c1_pre_tx/boot2/stop_eval.tsv
+vocabulary	4b964d34812232886fbe906e00328be5d07a8978353cf1905a850a692f237678	/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/reason_vocabulary.txt
+combination	chain confirmed; same_build unconfirmed(object not in the build record)

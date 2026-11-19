@@ -2808,3 +2808,9 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 #### 21.0 (자) 함께 커밋하는 것
 - 스크립트: `run.sh`, `compare.sh`, `twin_sha.py`, `twin_map.tsv`, `selftest_twin_sha.txt`, `tool_copy/copy.sh`. Python 은 `python3 -I` 로 돌린다. `diffkinds.py`·`sections_cmp.py`·`plan_one*.sh`·셈 스크립트는 앞 기록 디렉터리의 것을 그 자리에서 읽는다.
 - 목록: `declared_reports.sha256`, `golden_expected.sha256`, `ctest_first_expected_fail.txt`, `data_inputs.sha256`, `prebuild/`(dry run, relink 목록과 sha256, `pre_mc.txt`, `cmakecache.sha256`, 빌드 전 ctest·점검·단위 점검).
+
+#### 21.0 (차) 덧붙임 (2026-11-19, golden 갱신 뒤 전체 ctest 의 확인 수가 선언과 달라 멈춘 뒤, 다음 점검 전에 커밋함) [D]
+전체 ctest 는 271 가운데 실패 0, 건너뜀 1 이었다(`ctest_full.log`). 그러나 `test_static_reasons` 의 확인 수가 804 였다. (마)에 적은 [I] 771 과 다르다. 선언 밖이므로 멈추고 까닭을 밝힌다.
+- `test_static_reasons` 는 자료 디렉터리의 `.golden` 파일을 모두 읽는다. relations golden 의 행마다 `incomplete:` 줄의 까닭이 표에 있는지 확인한다(`kairos/tests/static/test_static_reasons.cpp:105-138`). 그래서 확인 수는 자료 디렉터리의 golden 에 따라 달라진다.
+- 선언의 771 은 scratch 점검 빌드의 **첫** ctest 의 수다. 그때 자료 디렉터리에는 HEAD 의 golden 만 있었고 새 `closure_np.golden` 은 없었다. 같은 점검 빌드가 갱신한 golden 일곱을 둔 scratch 자료 디렉터리에서 돌린 수는 804 다(`../records/closure-kzstatic-20261119/scratch6/checkbuild/logs/cb_golden_scratchdata.log`). 이 빌드의 첫 ctest 도 771 이었다(`ctest_first.log`). 그러므로 선언이 golden 갱신 뒤의 수로 잘못 옮겨 적은 것이다. 도구의 차이가 아니다.
+- **덧붙임**: golden 갱신 뒤 `test_static_reasons` 의 확인 수는 804 다. 첫 ctest 에서는 771 이다. 그 밖의 (마)는 그대로다.

@@ -3311,3 +3311,9 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - 행위자 뿌리: A20 `BP_AppMain (script-entry)`, A21 `CF_AppMain (script-entry)`, A22 `SCH_Lab_AppMain (script-entry)`, A26 `CFE_TIME_TaskMain (table-image-entry)`, A63 `none`(relations 행에 `actors:` 줄이 없음).
 - 점검 [M]: 동결한 설명 스크립트가 같은 계획의 정적 예행에서 센 `uses`(명세 10.7 4: 서로 다른 사용 호출 × 문맥)와 행마다 같다(c1_pre_tx A21 2, 나머지 1; c1_post_tx 모두 1; `obs1/xr4_dry_static_<빌드>_2/D1-R0/index.tsv`).
 - 이 목록이 분모 표(평가 절차 8 절)의 "정한 사용"이다. 경로 B 의 층 행(B13, B73, B81, B99, B113, B118, B119, B125)은 5.1 의 규칙(경로 A)에 들지 않는다. 그 행들의 기록은 설명 스크립트가 행위자마다 내지만 이 목록에는 없다.
+
+### 25.9 (2) 판독지의 정적 부분: 채우지 않음, 읽는 사람 없음 [F]
+
+읽는 사람은 정해지지 않았다(PI 결정, §12.10 5 항; 평가 절차 9 절). 그래서 정적 부분은 미리 정한 사용 11 개(25.8) 모두 네 칸(호출자가 그 객체를 필요로 하는가, 객체 없이 잇는 경로, 객체를 만드는 task 와 그 종류, 순서를 강제하는 것)이 "not filled: no reader" 다(`sheets/sheets_static.tsv` sha256 `e70c31f2cf4e285df00ff28489ab3952b4d3611e5e9ae7ec52e12ee251458a1f`). 부팅은 진행하고, 정밀도와 계획 안의 재현율은 **정의되지 않음**으로 보고한다(평가 절차 8 절).
+
+읽는 사람에게 줄 것과 주지 않을 것의 목록(`sheets/reader_files.tsv` sha256 `80313f0419640ff1de221a6606da02219a7b98e7e6cbf13f9d5d9680f9b692bd`; 아무것도 주지 않았다): 준다 — 판이 고정된 소스 트리 다섯(묶음 `1df262a64a09…`, CF pre `281a9418…`, CF post `833fdbb2…`, BP `b051eb0d…`, bplib `d4c6db9f…`, git 판), 미리 정한 사용의 목록 둘(sha256), 부팅별 부분에 그 사건들의 dump 글; 원 이슈와 수정 논의의 글은 이 환경에 사본이 없다 [미확인]. 주지 않는다 — 사례 카드 셋(`cases/C1.md`, `cases/C1.yaml`, `plan/ovm_evidence_20261111/g_cases_c1c2.md`, sha256), 이 절차의 채운 기대와 그 파일(25.11), 후보 목록의 종류별 기대, 설명 기록과 요약, 손 읽기 결과와 판정 규칙 5.1·8.8.

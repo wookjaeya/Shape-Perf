@@ -1,0 +1,16 @@
+kz-sheets-static 1
+rule evaluation protocol 9 (2026-11-18): one sheet per pre-defined use; the static part before the boots, filled by the reader from the file list; no reader is named (PI decision pending, results 12.10 item 5), so every static field is not filled
+columns build	row_label	row_key	consumer_root	use_call	context_id	needs_the_object	path_without_the_object	creating_task_and_kind	forced_order
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	OS_CountSemGetIdByName@src/bp/fsw/src/bp_flow.c:126:13	-	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	OS_CountSemGetIdByName@src/cf/fsw/src/cf_cfdp.c:993:19	1	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	OS_CountSemGetIdByName@src/cf/fsw/src/cf_cfdp.c:993:19	2	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_pre_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	OS_TimeBaseGetIdByName@apps/sch_lab/fsw/src/sch_lab_app.c:176:16	-	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_pre_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	OS_TimeBaseGetIdByName@cfe/modules/time/fsw/src/cfe_time_task.c:286:16	-	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_pre_tx	A63	b881269bea290f8b	none	OS_FileOpenCheck@src/cf/fsw/src/cf_cfdp_s.c:352:13	-	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	OS_CountSemGetIdByName@src/bp/fsw/src/bp_flow.c:126:13	-	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	OS_CountSemGetIdByName@src/cf/fsw/src/cf_cfdp.c:1003:23	-	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_post_tx	A22	f371687b47120887	SCH_Lab_AppMain (script-entry)	OS_TimeBaseGetIdByName@apps/sch_lab/fsw/src/sch_lab_app.c:176:16	-	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_post_tx	A26	ad9fc1058923aad9	CFE_TIME_TaskMain (table-image-entry)	OS_TimeBaseGetIdByName@cfe/modules/time/fsw/src/cfe_time_task.c:286:16	-	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+c1_post_tx	A63	b881269bea290f8b	none	OS_FileOpenCheck@src/cf/fsw/src/cf_cfdp_s.c:352:13	-	not filled: no reader	not filled: no reader	not filled: no reader	not filled: no reader
+lines 11
+end

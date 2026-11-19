@@ -1,0 +1,19 @@
+kz-reader-files 1
+rule evaluation protocol 9 (2026-11-18): what a reader is given and what is withheld; no reader is named, so nothing has been given
+columns state	what	identity
+given	source tree bundle_1df262a (/home/user/work/procrace/c1_build/bundle_1df262a)	git 1df262a64a09f128357482d8f2e06b0fdfe84d37
+given	source tree cf pre (/home/user/work/procrace/c1_build/pre/src/cf)	git 281a94188cd7d885a5aed01ee041f3ece2b0486f
+given	source tree cf post (/home/user/work/procrace/c1_build/post/src/cf)	git 833fdbb27a26f15f2429e79392e7eb73d61abdea
+given	source tree bp (/home/user/work/procrace/c1_build/pre/src/bp)	git b051eb0d12bfe76c0230215c2ff851cfaa553ce4
+given	source tree bplib (/home/user/work/procrace/c1_build/pre/src/bplib)	git d4c6db9f0d197f78967455fbc83bf1c5e5c31c9c
+given	pre-defined use list c1_pre_tx (records/closure-c1prep-20261119/uses/uses_c1_pre_tx.tsv)	sha256 0ca47839d43db83c9821cab74445dff58cdfa9fb69e71ccf47e5fd4abd214e14
+given	pre-defined use list c1_post_tx (records/closure-c1prep-20261119/uses/uses_c1_post_tx.tsv)	sha256 955890c2c0876c0b70610acf93baf064431857ed74a2010be8957b2002f5fe20
+given	the per-boot part: the kz-rt-dump text lines of the use and creation events of each sheet's use (after each boot)	named per boot then
+given	the original issue and the fix discussion text	no copy in this work environment [unverified]
+withheld	case card cases/C1.md	sha256 1495bc53e11bf5840262ce959ee4d9580b2246a326e23ac6e3529f6784b10fb3
+withheld	case card cases/C1.yaml	sha256 9c1e2f1d340b3ef64a521af306c903048ce32f71a1abbfe026206072df2d8bc1
+withheld	case card plan/ovm_evidence_20261111/g_cases_c1c2.md	sha256 216eca3ab3cb4ada2adaf0f4427129aebb57c08777714afc2bca794316091f6d
+withheld	the filled expectations of the evaluation protocol and their files (results 25.10), the candidate list's expected kinds	named in the boot declaration
+withheld	explanation records and summaries	made after the boots
+withheld	the hand readings of the case (results documents) and judgement rules 5.1 and 8.8 (plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md)	sha256 71c5dfeea2097c045f48c77cdc6fb22e706f1d26a69b69d15b98d55a32939920
+end

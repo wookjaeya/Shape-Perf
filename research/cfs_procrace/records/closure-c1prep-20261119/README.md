@@ -37,3 +37,4 @@ declaration. No cFS boot. Nothing is pushed.
 | `boot/run_cycle.sh`, `boot/commands.txt` | (5) the boots of the cycle: the exact commands, written and NOT RUN (results 25.12); the gate and the boot-number rule in the script |
 | `boot/declaration.tsv` | (5) the boot declaration's list: plans, sidecars, binding files, B' basis, derived builds, ELF sha256 and build-ids, frozen scripts, cycle files, tools |
 | `boot/no_expect_input_check.txt` | the expectation file and the predictions are an input of the expect step only |
+| `out/ledger_check_end.txt`, `out/tools_check_deep_end.txt`, `out/free_end.txt` | the end checks (ledger 193 rows, registry 57 rows deep, 0 failing) and free space at the end |

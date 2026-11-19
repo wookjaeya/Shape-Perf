@@ -940,7 +940,8 @@ def apply_branch(items, br):
 def holder_branch(st, br):
     """(c3)(i) from the row's holder lines (8.13 item 15; spec 10.3 items 8 and 9)."""
     if not st["holders"]:
-        return {"status": "not_established", "why": "no holder line (relations rules revision 14 lines not in this relations text)",
+        return {"status": "not_established", "why": ("the row has no holder line" if st.get("rev14") else
+                                                      "no holder line (relations rules revision 14 lines not in this relations text)"),
                 "sources": []}
     res = []
     for n, t in st["holders"]:
@@ -997,7 +998,7 @@ def alternatives_of(st):
         rest = re.search(r"; rests on: (.*?); premises: (.*?); decided calls: (.*)$", body)
         verdict = ("none_found" if body.startswith("none found (exploration complete)") else
                    "found" if body.startswith("found: ") else "not_established")
-        out[cid] = {"verdict": verdict, "text": body[:600], "n": n, "rests_on": rest.group(1) if rest else None,
+        out[cid] = {"verdict": verdict, "text": body[:600], "full": body, "n": n, "rests_on": rest.group(1) if rest else None,
                     "premises": rest.group(2) if rest else None, "decided": rest.group(3) if rest else None}
     return out
 
@@ -1019,7 +1020,7 @@ def branch_iii(st, alts, cid, br):
         return out
     if a["verdict"] == "not_established":
         why = a["text"][:300]
-        if br.reads("Re") and "rests on a premise" in a["text"] and (a["premises"] or "none") != "none":
+        if br.reads("Re") and "rests on a premise" in a["full"] and (a["premises"] or "none") != "none":
             why = "the alternatives line gives no call result under the premise (reading Re): " + (a["premises"] or "")[:200]
         out.update(status="not_established", why=why)
         return out
@@ -2213,6 +2214,7 @@ def main(argv):
                 continue
             st = row_static(rows[rid], N["rel_name"])
             st["row_key"] = k
+            st["rev14"] = bool((N["relations"]["head"].get("object_access") or {}).get("rev14_lines"))
             ctx["static"][k] = st
             if run is not None and not mism:
                 us = {int(n) for n in sc["maps"].get(k, []) if "use-call" in sites[int(n)].rules}

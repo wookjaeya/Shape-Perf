@@ -1,0 +1,4 @@
+# space_guard.sh kind=reclaim need=5000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/reclaim-20261118/reclaim.sh /home/user/work/redesign/obs1 reclaim/identity_summary_before.txt
+start 2026-11-19T13:46:32.175Z free=377651200 threshold=319572800
+sample 2026-11-19T13:46:32.179Z 377647104
+end 2026-11-19T13:46:34.186Z kind=reclaim verdict=completed rc=0 free=408440832 lowest=377647104 dip=4096 change=30789632

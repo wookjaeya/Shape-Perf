@@ -1,0 +1,2 @@
+# archive.sh rf2_final_extract records/review-fixes-2-mc-20261119/rf2_final_extract.sha256 2026-11-19T13:46:48Z
+FAIL: the files on disk are not the files the list names

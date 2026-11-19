@@ -19,3 +19,17 @@ ledger_rewrite.py <ledger> <proposed> reclaim <row> <name> <twin row> <twin> <fi
 ../../env/tools/ledger_check.sh <proposed> > ledger/check_R_proposed_before_removal.txt   rc 0 (193 rows, 0 failing; the three rows read
     the twin directories while the candidates are still there); the proposed ledger copied over records/LEDGER.tsv (cmp; sha256 cb7b4364...)
 the rewritten ledger is committed before the removal
+committed as 698bdd9
+space_guard.sh --need 5000000 --kind reclaim -- bash ../reclaim-20261118/reclaim.sh /home/user/work/redesign/obs1
+    reclaim/identity_summary_before.txt > reclaim/reclaim.txt                     rc 0 (3 eligible, 3 removed, 0 failing; free 377647104 ->
+    408440832, change 30793728; guard/g06_reclaim.log)
+../../env/tools/ledger_check.sh > ledger/check_R_after_removal.txt                rc 0 (193 rows, 0 failing)
+## 3. tier 1 and 2: one directory at a time (run_seq.sh FROM TO; SPACE_TMP=<scratch>)
+SPACE_TMP=<scratch> bash run_seq.sh 4 4                                          rc 1: archive.sh stopped at step 1 ("the files on disk
+    are not the files the list names"): the list of OBS_rf2_final_extract writes <path>, not ./<path>, and the step compared the two
+    forms as text; nothing was archived or removed (the directory is whole, no archive directory made).  The trial's outputs are
+    kept under new names: archive/roundtrip_rf2_final_extract.trial1_fail.txt, guard/a_4_rf2_final_extract.trial1_fail.log
+archive.sh fixed (both comparisons read the list in the form ./<path>; MEMBERS.sha256 stays the list as it is); selftest.sh gains
+    case 5 (a list without ./)
+space_guard.sh --need 5000000 --kind selftest -- bash selftest.sh <scratch> > selftest_2.txt               rc 0, 5 of 5 (guard/g07_selftest_2.log)
+the fix is committed before the next archive

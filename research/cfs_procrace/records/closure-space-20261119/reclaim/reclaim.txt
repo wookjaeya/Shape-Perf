@@ -1,0 +1,6 @@
+start 2026-11-19T13:46:32Z free 377647104
+REMOVED rf2_pre_final_order (OBS_rf2_pre_final_order): 35 files 15953440 bytes, same as ll_final_order (OBS_ll_final_order) by diff -rq just before; free 377643008 -> 393666560
+REMOVED rf2_pre_relcheck (OBS_rf2_pre_relcheck): 15 files 7630029 bytes, same as revfix_relcheck (OBS_revfix_relcheck) by diff -rq just before; free 393666560 -> 401338368
+REMOVED rf2_pre_order (OBS_rf2_pre_order): 15 files 7058482 bytes, same as revfix_order (OBS_revfix_order) by diff -rq just before; free 401338368 -> 408440832
+end 2026-11-19T13:46:32Z free 408440832 (change 30793728)
+reclaim: 3 eligible, 3 removed, 0 failing

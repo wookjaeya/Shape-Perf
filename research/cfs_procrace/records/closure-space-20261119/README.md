@@ -10,7 +10,7 @@
 | `listing.py`, `listing.sh`, `readers_extra.txt`, `listing.tsv` | 목록: `/home/user/work/redesign/obs1` 아래 디렉터리 모두(134)와 `/home/user/work` 의 디렉터리(34; 소스 트리·도구 사슬·`kairos-build`·`preserve`·`llvm-project` 는 크기 없이 '제외'로만). 디렉터리마다 크기(파일 크기의 합, 그리고 df 가 세는 블록), 파일 수, 링크, 장부 행, 장부 목록이 디스크의 파일과 같은지, 누가 아직 읽는지, 바꿀 수 있는지와 그 까닭 |
 | `need.py`, `need.txt` | 필요량: 항목마다 남긴 파일(감시 기록, 디렉터리 크기)에서 읽음 |
 | `chosen.tsv` | 이 단계가 건드릴 수 있는 디렉터리와 그 차례(R → 1 → 2), 줄마다 기대 여유 |
-| `archive.sh`, `selftest.sh`, `selftest.txt` | 압축: `f9ce046` 의 스크립트(`../closure-c1prep-20261119/reclaim/archive.sh`)와 같은 다섯 단계, 더한 것은 `chosen.tsv` 의 tier 1·2 줄만 받음과 정규 파일·디렉터리 밖의 항목 거부. 자체 시험 넷 모두 통과 |
+| `archive.sh`, `selftest.sh`, `selftest.txt`, `selftest_2.txt` | 압축: `f9ce046` 의 스크립트(`../closure-c1prep-20261119/reclaim/archive.sh`)와 같은 다섯 단계, 더한 것은 `chosen.tsv` 의 tier 1·2 줄만 받음과 정규 파일·디렉터리 밖의 항목 거부. 자체 시험 넷 모두 통과(`selftest.txt`). 첫 압축 시도가 1 단계에서 멈춘 뒤(목록이 `./` 없이 경로를 적음; 아무것도 지우지 않음) 두 대조가 목록을 `./<경로>` 꼴로 읽게 고치고 시험 하나를 더함: 다섯 모두 통과(`selftest_2.txt`) |
 | `ledger_rewrite.py` | 장부 한 행 고치기(아래 규약) |
 | `run_seq.sh` | `chosen.tsv` 의 줄을 하나씩: 감시 아래 압축 → 제안 장부 → 제안 장부의 `ledger_check.sh` → 장부 교체 → `progress.tsv` 한 줄. 줄마다 먼저 여유가 목표에 닿았는지 보고 닿았으면 멈춤 |
 | `reclaim/` | `rf2_pre_*` 셋: `pairs.tsv`, `../reclaim-20261118/identity_listing.py` 의 출력(`identity_summary_before.txt`, `listing_before_<디렉터리>.txt`), 그리고 뒤의 지우기 기록 |

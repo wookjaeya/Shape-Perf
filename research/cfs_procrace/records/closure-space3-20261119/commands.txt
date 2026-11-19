@@ -1,0 +1,15 @@
+# commands of the third space step (results 26.9; review findings fix-judge-02, fix-decl-01, fix-decl-03; protocol 14.14
+# item 4); times UTC, 2026-11-19; <scratch> is a scratch directory of this step outside the repository; <research> is
+# research/cfs_procrace.  No cFS boot, no build, no extraction.  Run from this directory.
+## 1. before any archive
+{ date -u; df -B1 /; } > free_start.txt                                         19:24:39Z (available 1035780096)
+space_guard.sh --need 5000000 --kind need --log guard/g01_need.log -- python3 -I need3.py --research <research>
+    --free <df now> --out need.txt                                               rc 0 (per_boot 54484992, need_free 1068392704,
+    need_post1 741482752, free_now 1035739136, short_now 32653568)
+chosen.tsv: lines 9-12 of ../closure-space2-20261119/chosen.tsv, copied with one header line
+space_guard.sh --need 5000000 --kind selftest --log guard/g02_selftest.log -- bash selftest.sh <scratch>/st > selftest.txt
+                                                                                  rc 0, 5 of 5 (the scratch path in the log's
+    first line is written <scratch> after the run)
+../../env/tools/ledger_check.sh > ledger/check_start.txt                          rc 0 (205 rows, 0 failing; ledger sha256 6763efd1...)
+git grep -n xr5_ in records/closure-c1prep-20261119/boot, env/obs1 and the three freeze files                      0 lines
+the need, the chosen list, the scripts and results 26.9 (the plan) are committed before step 2

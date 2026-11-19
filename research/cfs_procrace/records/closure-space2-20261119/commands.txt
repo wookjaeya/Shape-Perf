@@ -1,0 +1,18 @@
+# commands of the second space step (results 26.8; lead ruling 26.7 (나)); times UTC, 2026-11-19; <scratch> is a scratch
+# directory of this step outside the repository; <research> is research/cfs_procrace.  No cFS boot, no build, no
+# extraction.  Run from this directory.
+## 1. before any archive
+{ date -u; df -B1 /; } > free_start.txt                                         18:08:36Z (available 758841344)
+space_guard.sh --need 5000000 --kind listing --log guard/g01_listing.log -- python3 -I listing.py --research <research>
+    --obs /home/user/work/redesign/obs1 --since-commit c7b9d90 --since-time 2026-11-19T13:57:00Z --out listing.tsv
+                                                                                  rc 0: 12 directories, 12 archivable (both ways of
+    finding them give the same twelve obs1/xr5_*)
+space_guard.sh --need 5000000 --kind need --log guard/g02_need.log -- python3 -I need.py --research <research>
+    --listing listing.tsv --free <df now> --out need.txt --chosen chosen.tsv     rc 0 (free_now 758681600 at 18:10:54Z; need_free
+    1036296448, short 277614848; expected [I] need met after seq 8)
+space_guard.sh --need 5000000 --kind selftest --log guard/g03_selftest.log -- bash selftest.sh <scratch> > selftest.txt
+                                                                                  rc 0, 5 of 5 (the scratch path in the log's
+    first line is written <scratch> after the run, as in the earlier step's log)
+../../env/tools/ledger_check.sh > ledger/check_start.txt                          rc 0 (205 rows, 0 failing; ledger sha256 5a93fa7b...)
+ledger_rewrite.py on a scratch copy for line 1 (diff read, the copy removed)      rc 0 (one row and the header line)
+the listing, the need, the chosen list, the scripts, the convention and results 26.8 (the plan) are committed before step 2

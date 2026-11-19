@@ -1,0 +1,12 @@
+# kz-space2-need 1 (records/closure-space2-20261119/need.py); [I] except the inputs, which are [M] in kept files
+floor 314572800
+per_boot 51810304 (records/closure-space-20261119/need.txt, as declaration3.tsv restates it)
+boots_total 621723648 (12 boots)
+margin 100000000
+need_free 1036296448 (records/closure-c1prep-20261119/boot/declaration3.tsv header: free before boot 1)
+free_now 758681600
+short_now 277614848
+archive_ratio_used 0.072835 (the largest of the 28 archives of results 26.2: order_rev1_extract, 3426624 / 47046656)
+stop rule: before each line, if df -B1 / >= need_free, stop (the line and those after it are not touched)
+chosen 12 directories, blocks 385576960; expected free after all 1116175213 (expected gain 357493613)
+expected: need met after seq 8

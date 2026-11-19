@@ -1,0 +1,4 @@
+# space_guard.sh kind=listing need=5000000 floor=314572800 interval=2 cmd=python3 -I listing.py --research /home/user/Shape-Perf/research/cfs_procrace --obs /home/user/work/redesign/obs1 --since-commit c7b9d90 --since-time 2026-11-19T13:57:00Z --out listing.tsv
+start 2026-11-19T18:09:37.119Z free=758771712 threshold=319572800
+sample 2026-11-19T18:09:37.123Z 758767616
+end 2026-11-19T18:09:39.130Z kind=listing verdict=completed rc=0 free=758755328 lowest=758755328 dip=16384 change=-16384

@@ -1,0 +1,14 @@
+# kz-space2-chosen 1: the directories this step may archive, in this order (need.py ORDER); run_seq.sh stops before the first line at which the measured free space has reached need_free (need.txt); the lines after the stop stay in this list for a later step that finds the space short at its start (protocol 14.9), by the same method
+seq	tier	dir	ledger_row	blocks	expected_gain	expected_free_after	why
+1	A	redesign/obs1/xr5_synth_c1_pre_tx_script_trial1	OBS_xr5_synth_c1_pre_tx_script_trial1	53350400	49464645	808146245	the first trial of the synthetic generator, superseded by xr5_synth_c1_pre_tx_script
+2	A	redesign/obs1/xr5_eval_dry	OBS_xr5_eval_dry	6909952	6406668	814552913	explain_eval.py of the unfrozen source snapshot dc879c6 on the six dry runs; superseded by the re-evaluations of results 26.5 (heads and tails committed)
+3	A	redesign/obs1/xr5_synth_c1_pre_tx_reverse	OBS_xr5_synth_c1_pre_tx_reverse	48758784	45207457	859760370	synthetic use events (test input, never evidence); compared in results 26.4 and 26.5
+4	A	redesign/obs1/xr5_synth_c1_pre_tx_script	OBS_xr5_synth_c1_pre_tx_script	48807936	45253029	905013399	synthetic use events (test input, never evidence); compared in results 26.4 and 26.5
+5	A	redesign/obs1/xr5_synth_c1_post_tx_reverse	OBS_xr5_synth_c1_post_tx_reverse	48775168	45222648	950236047	synthetic use events (test input, never evidence); compared in results 26.4 and 26.5
+6	A	redesign/obs1/xr5_synth_c1_post_tx_script	OBS_xr5_synth_c1_post_tx_script	48771072	45218850	995454897	synthetic use events (test input, never evidence); compared in results 26.4 and 26.5
+7	A	redesign/obs1/xr5_dry_rt_rt_objects	OBS_xr5_dry_rt_rt_objects	25444352	23591123	1019046020	dry run on a runtime step test dump (judge rc 3 build_mismatch by contract); compared in results 26.5
+8	A	redesign/obs1/xr5_dry_rt_rt_format15	OBS_xr5_dry_rt_rt_format15	24371200	22596133	1041642153	dry run on a runtime step test dump (judge rc 3 build_mismatch by contract); compared in results 26.5
+9	A	redesign/obs1/xr5_dry_static_c1_pre_tx	OBS_xr5_dry_static_c1_pre_tx	27983872	25945678	1067587831	static dry run with the 16 branches, no run; compared in results 26.5
+10	A	redesign/obs1/xr5_dry_static_c1_post_tx	OBS_xr5_dry_static_c1_post_tx	27979776	25941880	1093529711	static dry run with the 16 branches, no run; compared in results 26.5
+11	A	redesign/obs1/xr5_regress_rev4fix	OBS_xr5_regress_rev4fix	23973888	22227759	1115757470	the regression on the 2026-11-16 inputs (8 D1 branches); compared in results 26.5
+12	A	redesign/obs1/xr5_candidates_regen	OBS_xr5_candidates_regen	450560	417743	1116175213	candidates.py re-run: 64 files byte-identical to records/closure-c1prep-20261119/candidates

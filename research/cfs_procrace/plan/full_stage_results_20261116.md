@@ -2309,3 +2309,58 @@ kz-static 한 빌드에 아직 넣지 않은 것은 다음과 같다. 차례는 
    - 끝 점검(키 글 같음, 쌍 파일 완전, 탐침을 도구 줄이 재현, 새 줄마다 다섯 빌드에서 성립하는 곳과 빠지는 곳)을 하고 결과 절을 쓴다.
 - §12.11 (사)의 key-clearing 이름 문제(할당 때의 자리 비우기를 지우기로 셈)는 위 4·5(수명 끝 꼴의 `clear-slot`, 범위 규칙 개정 2 의 `layer-op clear-slot`)와 함께 다뤄야 한다. 다루는 방법은 lead 의 판단을 기다린다.
 - §12.10 5 항의 PI 결정은 그대로 기다린다(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)).
+
+## 16. C1 닫기의 kz-static 한 빌드: 소스 진행분 둘째 (2026-11-19, 선언 전에 멈춤)
+
+§15.7 의 다음 차례 1·2(생성자의 성공 경로 줄, holder 줄)를 형식 덧붙임 → 소스 → scratch 점검의 차례로 넣었다. **선언, 도구 사본, MC 빌드, 다섯 빌드의 선언된 다시 뽑기는 하지 않았다**: 넣을 것이 아직 다 들어가지 않았으므로 §12.10 6 항대로 선언 전에 멈췄다. MC 의 kz-static 은 `bf2ec2ee…` 그대로이고(이 실행 끝에 sha256 을 다시 보았다), 소스가 그 바이너리보다 더 앞서 있다. 기록: `../records/closure-kzstatic-20261119/`(`scratch2/`, `scratch_guard2/`, `scripts/holder_counts.py`, README). cFS 를 부팅하지 않았고 push 하지 않았다. 아래 수는 모두 기록 디렉터리의 출력 파일에서 왔고, scratch 도구의 수라서 [I] 다.
+
+### 16.1 바뀐 것 [F]
+- 형식 덧붙임 다섯째(`6023304`, `kairos/docs/static_facts.md` 5x): 성공 경로 줄을 자세히 정한다. 성공 값은 outcome class rule 의 성공 상수다. 운반·제외 대안과 `its own branch` 의 조건을 정한다. 조건 나무는 원자 위의 식으로 읽고, **함의는 반례 배정이 없을 때만 선다**(반례가 있어도 "서지 않음"이 아니라 "보이지 않음"이다). callee 의 나무에 매개변수와 지역 변수를 묶는 법, 이름 저장, out-id 저장, out-store 행의 글로 본 저장 값, 까닭의 차례를 둔다. 이름 공간 블록에는 그 이름 공간의 모든 생성자 callee 의 줄을 둔다(설계 행에만 보이는 줄이 없게).
+- 소스(`a60f77b`; `lib/llvm/relations.cpp`, `lib/llvm/outcome.hpp`, `tests/static/fixtures/closure.c`, `tests/static/CMakeLists.txt`, `tests/static/static_golden.cpp`): relations rules revision 14 의 1 항 줄을 넣었다(행마다 생성자 callee 의 줄, 이름 공간 블록의 줄, 머리의 `summary success path:`). 새 fixture `closure.c` 와 golden 경우 `closure_np`(`--result-flow --object-access`)를 더했다. fixture 에는 생성자 API 다섯이 있다: 성립 둘(상수 반환, 상태를 되돌려 주는 마무리 단계), 누락 셋(두 번째 기원, 지역 변수를 거친 id, 다른 갈래의 이름 저장).
+- 형식 덧붙임 여섯째(`757ee59`): holder 줄을 자세히 정한다. 자리, 필드·지역·그 밖의 holder, WRITERS 행 모두와 종류, FIELD_STATUS 를 막은 깃발과 ATYPE 위치, reader 와 값의 시험을 둔다. 경로 B 행에는 조회의 `id holder:` 줄이 없으므로 이 줄도 없다.
+- 소스(`48048d3`; `relations.cpp`, `rel_facts.hpp`·`rel_facts.cpp` 가 ATYPE 을 읽음, `closure.c`): relations rules revision 14 의 3 항 줄을 넣었다. fixture 에 필드 holder(지우는 writer 와 reader 둘), 전역 배열 holder, 지역 holder 를 더했다.
+- 바꾸지 않은 것: 규칙 개정 이름(§15.2 와 같은 까닭). 저장소의 golden 도 바꾸지 않았다: 새 golden `closure_np` 는 `scratch2/golden_scratch/closure_np.golden_2` 에만 있고 선언된 빌드에서 커밋한다. 그래서 HEAD 를 빌드하면 order golden 셋과 `closure_np` 가 실패한다 [I].
+
+### 16.2 scratch 점검 [I]
+scratch Release 빌드는 kz-static, static_golden, kz_lint, test_static_reasons 이고, 모두 감시 아래에서 돌렸다(`scratch_guard2/t01`–`t20`). 다섯 빌드의 relations 는 남긴 마지막 옵션 회차 사실(`rf2_final_extract`)에서 돌렸다.
+
+| 점검 | 결과 | 출력 |
+|---|---|---|
+| golden·fixture 컴파일·lint(새 golden 을 잠시 놓고) | 68 가운데 실패 3 = order golden 셋(§15.3 과 같음); `closure_np` 통과; lint 8 통과 | `scratch2/logs/ctest_golden_lint_2.log` |
+| test_static_reasons(새 golden 을 놓고) | 통과 | `scratch2/logs/ctest_reasons.log` |
+| fixture 의 성공 경로 줄 | callee 5: held 2(`ent_create`, `ent_create_fin`), missing 3(a second origin 1, not tied 1, not decided 1) | `scratch2/success_path/fixture_closure_relations.txt`, `golden_scratch/closure_np.golden_2` |
+| 다섯 빌드의 `summary success path` | callee 14/14/12/15/15, held 0/0/0/0/0. 누락 까닭: no out-id store 3/3/2/5/5, not tied 4/4/3/4/4, not decided 7/7/7/5/5, returns not followed 0/0/0/1/1 | `scratch2/success_path/summary.txt`, `lines_<b>.txt` |
+| 다섯 빌드의 holder 줄 | 줄 26/26/21/18/18 (field 8/8/2/0/0, local 17/17/18/18/18, 그 밖 1/1/1/0/0); 필드 holder 의 reader: 시험 뒤 18/18/5/0/0, 시험 없음 26/26/4/0/0, 정하지 않음 0 | `scratch2/holder/counts_<b>.txt`, `lines_<b>.txt` |
+| relations 글의 다른 줄 | 다섯 빌드 모두 앞 도구의 `rf2_final_order` 와 비교해 더한 줄(도구 줄, `absence origins`, 성공 경로의 줄들)만 다름(holder 줄을 넣기 전의 판으로 셈) | 이 실행의 diff 출력은 scratch 에만 있었고 남기지 않았다 |
+
+### 16.3 성공 경로 줄이 보인 것 [I]
+- **C1 의 OSAL 생성자(`OS_BinSemCreate`, `OS_CondVarCreate`, `OS_CountSemCreate`, `OS_MutSemCreate`)는 이름 저장과 out-id 저장이 운반 조건으로 함의된다.** 그러나 저장되는 값이 묶이지 않는다. out-id 는 `OS_ObjectIdFinalizeNew` 의 지역 변수 `final_id` 다(`osapi-idmap.c:860`). 이 사실이 보이는 정의는 `token->obj_id`(`:841`, READS)뿐이다. 다른 정의 `OS_OBJECT_ID_UNDEFINED` 대입(`:845`)과 그 주소가 넘어가는 `OS_ObjectIdTransactionFinish`(`:849`, ARGFLOW)는 사실에 정의로 실리지 않는다. 그래서 줄은 `missing(the stored value is not tied to the success path)` 이고, 판정 규칙의 기초 4 는 누락으로 센다(§12.10 4 항의 "성공 경로 줄이 설 때만").
+- 이 줄이 서려면 추출이 out-store 된 지역 변수의 도달 정의를 사실로 내야 한다(RETURNS 가 반환된 지역 변수에 하는 것과 같은 규칙). 지금 형식(`include/` 를 바꾸지 않음)에는 그 자리가 없다. 이것을 열린 것으로 둔다(16.6).
+- 나머지 C1 생성자는 이름 저장이 callee 가 부르는 함수에만 있다(CFE_ES·CFE_SB 쪽). 이 개정은 그 사이 호출의 guard 를 읽지 않으므로 정하지 않는다. `OS_initfs`·`OS_mkfs`·`OS_mv` 에는 out-store 행이 없다.
+- 탐침 P2 의 읽기(§15.1: 원형은 다섯 callee 가운데 하나에서만 세운다)는 저장 값의 묶임을 보지 않았다. 도구의 줄은 그것까지 보므로 C1 에서 하나도 세우지 않는다. **탐침과 도구 줄의 차이는 이 규칙 차이 하나다**(이름·out-id 저장의 성립은 같다: `OS_CountSemCreate` 의 두 저장).
+
+### 16.4 holder 줄이 보인 것 [I]
+- A21(`CF_Channel_t.sem_id`)의 holder 줄은 탐침 P4 의 내용을 도구 줄로 다시 낸다.
+  - writer 둘: 엔진을 지우는 memset(`cf_cfdp.c:965`, 값 0)과 조회 자신의 out 저장.
+  - FIELD_STATUS 는 두 규칙 모두 DISABLED 다. 막은 것은 깃발 다섯, 주소 탈출 둘(`cf_cfdp.c:1353`), cast 하나(`cf_cmd.c:734`)다.
+  - 뒤의 reader `cf_cfdp_sbintf.c:93:49` 는 `OS_ObjectIdDefined` 의 시험 뒤에 쓴다. 91:35 의 읽기는 그 시험 자체다.
+- A20(`BP_Throttle_t.Sem`)의 holder 줄: 다른 정의 하나(`bp_flow.c:132:18`, `OS_CountSemCreate` 를 거친 out-pointer)가 있다. reader 셋은 모두 시험 없이 쓴다. 탐침 P4 의 "다른 정의" 와 같다.
+
+### 16.5 공간 [M]
+- 시작 1,226,493,952 B(`free_start_attempt2.txt`, 02:46Z).
+- 이 실행의 가장 낮은 값은 931,139,584 B 다(`scratch_guard2/`). scratch 빌드 tree 는 202 MB, 사실 보기 하나(c1_pre_tx)와 relations 출력은 77 MB 였다.
+- scratch 를 모두 지운 뒤 1,222,668,288 B(`free_end_attempt2.txt`, 03:14Z). 압축 대체는 쓰지 않았다.
+
+### 16.6 계획과 다르게 한 것, 열린 것
+- **out-store 행의 값.** 이 사실은 out-store 행의 저장 값을 상수일 때만 나무로 싣고, 나머지는 쓴 글로만 싣는다(`lib/llvm/argflow.cpp:165-174`). 그래서 저장 값의 묶임은 글로 정한다(덧붙임 다섯째). 지역 변수로 저장된 id 는 어느 빌드에서도 묶이지 않는다. 추출 규칙을 더할지(형식과 `include/` 의 변경)는 lead 의 판단을 기다린다.
+- **함의를 두 값으로만 낸다.** 반례 배정이 있어도 원자 사이의 관계를 사실이 주지 않으므로 "함의되지 않음"이라 쓰지 않는다. 이것은 형식 1 항의 까닭 글 여섯 가운데 `no name store`·`no out-id store` 를 "저장이 아예 없음"에만 쓰게 한다.
+- **성공 값의 출처.** 성공 값은 `callee-check (result flow, success)` 가 보인 값이 아니라 outcome class rule 의 성공 상수다. 성공 상수를 바로 돌려주는 callee 는 RESULT_EFFECT 가 반환에 닿는 값을 보이지 않는데(fixture 에서 확인), 형식 1 항의 `[outcome class rule]` 도 이것을 가리킨다.
+- holder 줄은 경로 A 행에만 있다(경로 B 행에는 조회가 없다).
+- §15.7 의 다음 차례 가운데 남은 것은 이렇다.
+  - (3) 문맥별 대안 줄과 필드 저장값 규칙
+  - (4) 저장된 이름 버퍼 줄과 수명 끝 줄
+  - (5) 계획 규칙 개정 5
+  - (6) 개정 이름 바꾸기
+  - (7) 나머지 줄의 fixture: `source_tree`, `absence origins`, 위 (3)–(5)
+  - (8) scratch 점검 빌드 → 선언 → 사본 → MC 빌드 → 다시 뽑기 → 끝 점검 → 결과 절
+- §15.7 의 key-clearing 이름 문제와 absence origins 의 이름 칸 문제, §12.10 5 항의 PI 결정(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함))은 그대로 남아 있다.

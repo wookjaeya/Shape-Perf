@@ -18,3 +18,15 @@ No cFS boot, no push.  Scratch paths in kept logs are written `<scratch>`.
 | `scripts/keys_compare.py` | the use-site key listings of two tools per build, and the key texts of the two C1 builds against each other |
 | `scratch/` | outputs of the scratch Release build of the source snapshots ([I], not of a declared tool): `golden_scratch/` the three order goldens with the pair section, `fixture_pairs/` and `pairs_trial1/`, `pairs_trial2/`, `pairs_check3/`, `pairs_check4/` the pair checks in the order they were run (`pairs_check4` is the one the results cite; `pairs_sha256_size.txt` the pair files' sha256 and sizes), `keys/` the source-tree items and keys, `facts_cmp/` the facts compared section by section with the rf2 final round, `plans_v4/` the sidecar differences, `absence/` the absence origins counts, `logs/` cmake, make, ctest and run logs |
 | `scratch_guard/` | the guard logs of the scratch build, ctest and runs (`s01`-`s20`) |
+
+Second run (2026-11-19, results section 16; the MC tool is still `bf2ec2ee…`):
+
+| Path | Content |
+|---|---|
+| `free_start_attempt2.txt`, `free_end_attempt2.txt` | free space at the start and the end of the second run (the end after its scratch was removed) |
+| `scratch_guard2/` | the guard logs of the second run's scratch build, view, relations runs and ctest (`t01`-`t20`) |
+| `scratch2/success_path/` | the success path lines of the scratch tool over the five builds' kept final facts (`lines_<b>.txt`: the summary line, then the namespace-block line of every creator callee), `summary.txt`, and the fixture's relations text |
+| `scratch2/holder/` | the holder lines over the five builds (`lines_<b>.txt`) and their counts (`counts_<b>.txt`, by `scripts/holder_counts.py`) |
+| `scratch2/golden_scratch/` | the golden of the new fixture case `closure_np`: `closure_np.golden` (with the success path line only) and `closure_np.golden_2` (with the holder cases too; the one to commit with the declared build) |
+| `scratch2/logs/` | ctest logs of the scratch build: the goldens, fixture compiles and lint (`ctest_golden_lint_2.log`: 3 failures, the order goldens), the reasons test |
+| `scripts/holder_counts.py` | counts of the holder lines of a relations text (a check, not a tool of the method) |

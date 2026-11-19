@@ -1,0 +1,4 @@
+# space_guard.sh kind=ledger-check need=2000000 floor=314572800 interval=2 cmd=bash env/ledger_check.sh
+start 2026-11-19T17:52:09.775Z free=762671104 threshold=316572800
+sample 2026-11-19T17:52:09.780Z 762667008
+end 2026-11-19T17:52:11.787Z kind=ledger-check verdict=completed rc=127 free=762662912 lowest=762662912 dip=8192 change=-8192

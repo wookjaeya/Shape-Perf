@@ -3721,3 +3721,164 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 4. 명세 11 의 5 의 [I] 가 A63 에서 틀렸다(`D1` 의 `use_cond` `not_derived`). 평가 절차 14.6 의 표는 이 단계의 출력에서 어긋나지 않았다(s1–s4·F5·F6 `static`, F2 (b)·F7 `format`, F3·F4·F8 (b)·F9·F10 `boot`). 그러나 다시 동결한 판으로 다시 확인해야 한다(14.6 머리).
 5. 글 커밋 셋(`b071f02`, `adfdb51`, `3535b43`)의 결과 소절은 아직 없다(그 단계의 열린 점). 그 단계의 수는 남긴 파일이 없어 이 절에 옮기지 않았다.
 6. 합성 생성기의 한계 [I]. 사용의 키 글은 그 행의 첫 생성자 글이다. 수명 끝·효과·정지 사건은 내지 않는다. 생성자 뿌리가 쌍 파일에 없으면 생성이 없다. 그래서 합성 예행은 코드 길만 보이고, 부팅 결과의 예측이 아니다.
+
+### 26.4 다시 하는 동결, 규칙에서 다시 쓴 기대, 새 부팅 선언 (2026-11-19; §26.0 (가)·(나)·(다)·(라)·(바)·(사)·(아)·(타), 부팅 없음)
+
+**무엇 [M].** 기록: `../records/closure-preboot-20261119/`(README 가 파일을 적음). cFS 를 부팅하지 않았고 push 하지 않았다. 출력을 쓰는 실행은 모두 감시 아래 돌렸다(감시 기록 35, 모두 `verdict=completed`, `below_floor_at_end` 없음). 커밋의 차례는 다음과 같다.
+1. `aaadfba` 다시 하는 동결(새 동결 파일).
+2. `3acbea8` 평가 절차 14.12(다시 쓰는 기대와 새 부팅 선언보다 먼저): F1 의 가름 둘, 기대를 다시 쓰는 법, 합성 기록과 맞댈 때의 셋째 종류.
+3. `38142cb` 규칙에서 다시 쓴 기대와 예측(어느 실행과도 맞대기 전).
+4. `46ea311` 고친 판정 부분의 합성 기록과의 맞댐, 어긋난 줄마다의 가름.
+5. `549dc94` 새 부팅 선언 `boot/declaration2.tsv`(옛 선언 `860c2cd` 를 대신함), 실행 스크립트·시험·명령의 고침.
+6. 이 커밋: verify 한 번의 출력, 끝 점검, 이 절.
+
+**(1) 다시 하는 동결 [M].** 새 동결 파일은 `../records/closure-preboot-20261119/freeze.tsv`(`70bbf7f5…`)다. 앞의 `../records/closure-explain-rev4-20261119/freeze.tsv`(`733feef7…`)는 덮어쓰지 않았다. 원본 커밋은 `dc879c6` 이고 그 뒤로 이 파일들은 바뀌지 않았다(`git status` 깨끗함).
+
+| 부분 | 파일 | sha256 | 앞 동결과 |
+|---|---|---|---|
+| 읽는 부분 | `env/obs1/explain_read.py` | `ef20a760…` | 바뀜(명세 11 의 2: `--named-calls`) |
+| 판정 부분 | `env/obs1/explain_judge.py` | `1d0b4ae0…` | 바뀜(11 의 1, 3, 4, 5, 6) |
+| 구동부 | `env/obs1/explain.py` | `af9d4395…` | 같음 |
+| 갈래 생성 | `env/obs1/explain_branches.py` | `a722e4af…` | 같음 |
+| 요약 | `env/obs1/explain_summary.py` | `5e19b419…` | 바뀜(7–9, 11) |
+| 기대 대조 | `env/obs1/explain_expect.py` | `a9a9fc3f…` | 바뀜(12: `class` 칸) |
+| 반증·평가 | `env/obs1/explain_eval.py` | `f6b72fc4…` | 새로(13) |
+| fixture | `env/obs1/tests/test_explain4.py`, `tests/test_explain_eval.py` | `804326bf…`, `5e153435…` | 바뀜, 새로 |
+| 개정 3 | `env/obs1/explain_rev3.py` | `acfd4271…` | 같음(회귀의 견줌 기준) |
+
+- 동결 전 점검: 동결한 바이트 위에서 fixture 를 다시 돌렸다. `test_explain4.py` 193/193(`out/fixtures.txt`), `test_explain_eval.py` 92/92(`out/eval_fixtures.txt`). 앞뒤의 sha256 이 같다(`out/freeze_sha_before.txt`, `…_after.txt`).
+- 회귀(2026-11-16 입력), 16 갈래 정적 예행, 시험 dump, 합성 사용 사건은 26.3 이 같은 판으로 돌렸다. 그 기록의 `script.judge_sha256` 은 `1d0b4ae0…`, `reader_sha256` 은 `ef20a760…` 다. 그래서 다시 돌리지 않았다.
+
+**(2) 규칙에서 다시 쓴 기대 [I][M].** 기대를 쓰는 법은 평가 절차 14.12 의 2 로 먼저 커밋했다. 새 파일은 옛 파일 옆에 두었다(`expect_c1.tsv` `d5501bf6…` 와 `predictions.tsv` `44011827…` 는 그대로).
+- `scripts/expect_write2.py`(`6947e9cb…`). 입력은 다섯이다.
+  - 25.11 의 커밋된 바탕 `scratch/branches16/static_elements_16.tsv`(8.14 앞의 규칙이 정적 입력에 낸 요소 값).
+  - 두 빌드의 relations 글(행 블록의 `layers:`·`flip:`·`absence:`·`creator:`·`holder:`·대안 줄·성공 경로 줄).
+  - 후보 목록과 갈래 파일이 이름 댄 인정 파일.
+  - 손으로 쓴 예측 `expect/predictions2.tsv`(`4ed9a362…`, 68 줄, 줄마다 근거).
+  - 미리 정한 사용의 목록.
+  - 행 번호·키·값은 상수가 아니다. 고친 판정 부분의 출력은 읽지 않는다.
+- 건 규칙.
+  - 판정 규칙 8.14 의 6 (다)와 명세 11 의 5: 요소의 출처 줄이 이름 댄, 행의 `layers:` 목록의 함수를 후보 목록에서 찾는다. 그 갈래가 인정하지 않으면 present·`held` 를 내린다.
+  - 8.14 의 6 (가): 문맥 줄이 없는 행의 문맥은 대안 줄의 하나뿐인 id 다.
+  - 8.14 의 2 의 결합으로 `use_cond` 를 다시 센다. `derived` 가 나오면 스크립트가 멈춘다(나오지 않았다).
+  - 예측 쪽: 8.14 의 5(`memchr` 항목 없음: 조건 (나)의 의미는 `D2` 에서도 빠짐), 6 (가), 6 (나)(찾은 사용은 `undecided(the row's creator sites are not complete)`, 사용과 행의 연결 `unlinked`; 명세 11 의 4 의 차례).
+- 출력 `expect/expect_c1_2.tsv`(`444f7615…`): 2,208 줄(16 갈래 × 두 빌드의 경로 A 행 다섯 × 칸). `class` 는 `static` 1,280, `boot` 928, `format` 0 이다. `static` 은 여섯 칸 × 160 = 960 에 14.12 의 1 이 더한 `use_cond.caller_dependence.text` 160 과 `link.status` 160 이다. 빈 기록 디렉터리에 돌린 형식 점검은 rc 0, `no_record 2208` 이다(`expect/form_check2_no_records.txt`). 요소 값은 `expect/elements_by_rule_2.tsv`(160 줄)에 갈래마다의 `depends_on` 과 함께 있다.
+- **바뀐 것**(`expect/changes_2.tsv`; 같음 1,676, 바뀜 468, 더함 64):
+
+| 칸 | 줄 | 바뀜 | 규칙 |
+|---|---|---|---|
+| `use_cond.writers.status` (c4) | 20 | `D1-Rd`·`D1-all` 의 행 다섯 × 두 빌드: present → missing | 8.14 의 6 (다): `creator:` 줄이 `OS_CountSemCreate`·`OS_TimeBaseCreate`·`OS_mv` 를 이름 대고, 그 `agreement` 항목이 후보 목록에 있어 `D1` 이 인정하지 않음 |
+| `use_cond.callee_check.status` (c1) | 16 | A63, `D1` 여덟 갈래 × 두 빌드: present → missing | 같은 규칙: A63 의 `flip:` 줄이 `OS_FileOpenCheck` 를 이름 댐 |
+| `use_cond.status` | 16 | A63, `D1` 여덟 갈래: `partial` → `not_derived` | 남는 요소가 없음(8.14 의 2) |
+| `use_cond.caller_dependence.text` | 48 | 두 빌드의 A20: (iii) `not_established` → `not_held`(32); 고친 빌드의 A21: 같음(16) | 8.14 의 6 (가): 대안 줄의 문맥 1 이 `found: …` |
+| `use[0].context` | 112 | `-` → `1` | 8.14 의 6 (가): 문맥 줄이 없는 행(결함 빌드 A20·A22·A26, 고친 빌드 A20·A21·A22·A26) |
+| `link.status` | 64 | A22·A26: `established` → `unlinked` | 8.14 의 6 (나): 세대가 없음(성공 경로 줄 `missing`) |
+| `use[0].name_state` | 64 | A22·A26: `undecided(a slot clear not shown to be no lifetime end)` → `undecided(the row's creator sites are not complete)` | 8.14 의 6 (나), 명세 11 의 4 |
+| `use[0].link_result` | 64 | A22·A26: `linked` → `unlinked` | 8.13 의 14번(열린 세대에만) |
+| 쌍의 `missing_items` | 64 | `D2` 여덟 갈래의 A20·A21 생성 자리 둘: `na_semantics` 가 더해짐 | 8.14 의 5 |
+| 더함 | 64 | A20 의 `use[1].context`, `use[1].link_result` | 둘째 조회도 같은 규칙으로 적음 |
+
+- 이 바뀜으로 요소 값은 빌드마다 26 칸이 25.11 의 바탕과 다르다. 26.3 이 고친 판정 부분의 정적 예행에서 본 26 칸과 같은 자리다. 기대를 커밋한 **뒤에** 규칙으로 낸 값과 고친 판정 부분의 정적 표를 칸마다 견줬다(`compare/elements_vs_fixed_static.txt`): 960 칸, 다른 칸 0. 기대는 바꾸지 않았다.
+- 명세 11 의 5 의 [I] 'use_cond 는 바뀌지 않으리라'는 A63 에서 맞지 않는다(26.3 열린 점 4 와 같다). `violation` 은 160 줄 모두 `undetermined` 다.
+- **행마다의 기대 (D1-R0, 두 빌드)** [I]:
+  - A21 (CF 의 조회): 결과 absent. 문맥은 결함 빌드에서 틀로 1, 고친 빌드에서 1(대안 줄). 이름 상태 `undecided(the row's creator sites are not complete)`, 연결 `unlinked`. (iii)은 결함 빌드 `not_established`, 고친 빌드 `not_held`(`found: retry`). 쌍의 빠진 항목: BP 자리 {기초 4, (다), (마), (나) 의미}, SCH_LAB 자리 + 기초 6. 결과 `differs_from_use_key,unlinked` / `differs_from_use_key`.
+  - A20 (탐침 행): 사용 둘 모두 absent, 문맥 1. (i)·(iii) 모두 `not_held`. 쌍은 A21 과 같은 꼴에 기초 6.
+  - A22·A26 (시간 기준 행): found, 문맥 1, 이름 상태 `undecided(the row's creator sites are not complete)`, 사용·행의 연결 `unlinked`.
+  - A63 (파일 이름 행): 사건 없음, `target_not_reached`, `D1` 에서 `not_derived`.
+  - `D2` 의 쌍 항목은 `D1` 과 같다(`memchr` 항목 없음).
+
+**(3) 고친 판정 부분과의 맞댐 [M]** (평가 절차 14.12 의 3). 동결한 `explain_expect.py` 에 `expect_c1_2.tsv` 를 주고 26.3 의 합성 출력 넷(`/home/user/work/redesign/obs1/xr5_synth_<빌드>_<script|reverse>/explain`)과 정적 예행 둘(`…/xr5_dry_static_<빌드>`)에 돌렸다(`compare/*.txt`). 출력마다 한 빌드만 담으므로 다른 빌드의 1,104 줄은 `no_record` 다.
+- 합성 넷: `static` 줄은 빌드마다 640/640 모두 같다. `boot` 줄은 같음 256–272, 어긋남 192–208 이다.
+- 정적 예행 둘: `static` 줄 640/640 같음. `boot` 줄은 사용 사건이 없어 448 이 어긋난다. 정적 예행은 26.0 (라)의 맞댐이 아니라 가르지 않았다.
+- **합성 넷의 어긋난 줄 784 의 가름**(`scripts/classify_compare.py`, `compare/classify_synth_*.tsv`; 줄마다 기록의 칸을 근거로 적음): **판정 부분의 결함 0, 기대의 잘못 0, 합성 입력 784**. 그래서 판정 부분도 기대도 고치지 않았다. 출력마다의 내역은 다음과 같다.
+  - T1 64: A20 의 `use[1]` 이 기록에 없다. 생성기는 사용 호출 site 쌍마다 호출 하나를 쓴다(루프의 둘째 바퀴가 없음).
+  - T2 16: 기대 absent 가 found 다.
+    - script 차례의 A20: 생성기가 사용의 키 글을 행의 첫 생성자 줄의 글(`SCH_LAB`)로 준다. 그 글의 생성이 앞서 끝났다.
+    - reverse 차례의 A21: BP 가 CF 보다 먼저 돈다.
+    - 둘 다 이름 상태는 `undecided`, 인스턴스 연결은 `unlinked` 다(`unmet` 아님; 8.14 의 6 (나)대로).
+  - T3 16(결함 빌드 reverse 만): A21 의 문맥이 2 다. 생성기가 reverse 에서 사용을 마지막 문맥 틀 안에 둔다.
+  - T4 64: 찾은 사용에는 쌍이 없다(쌍은 부재 사용에만 맺음, 8.2).
+  - T5 32: 빠진 항목의 차이가 모두 기록의 항목 근거로 설명된다.
+    - (마)가 `held` 다: 기록에 수명 끝 사건이 0 이다. 생성기는 쓰지 않는다.
+    - reverse 에서 기초 6 이 `held` 다: 생성이 사용 뒤다.
+    - 기초 5·(나) 한도가 빠진다: 생성 하나의 키 글이 기록되지 않았다. 생성기의 생성자 키 글 규칙 때문이다.
+  - T6 16: 결과에 `differs_from_use_key` 가 없다. 그 자리의 생성 키 글이 사용의 글과 같거나 기록되지 않았다(`order.publish_events`).
+- 합성 세계가 시험하지 못한 기대 줄도 있다 [I]. (마)의 `missing`, A20 의 둘째 사용, BP 의 둘째 생성의 키 글(`BP1_tsem`), 시작 스크립트 차례에서의 A20 의 absent 다. 부팅 기록에서 처음 맞댄다.
+- 동결한 `explain_eval.py` 도 새 파일의 `class` 칸을 읽는다. 결함 빌드 script 합성에서 F1 은 `boot` 지남 272·어긋남 192, `static` 지남 640 이다(`out/eval_synth_*_tail.txt`; 출력 약 1 MB 는 scratch 에 쓰고 머리·꼬리·sha256 만 남김).
+
+**(4) 후보 목록, 갈래 파일, 미리 정한 사용, 판독지 [M].** 모두 그대로다. 옛 선언의 줄로 다시 재어 sha256 이 같다(`declaration/remeasure_860c2cd_2.tsv`). 26.0 의 규칙 가운데 이것들을 바꾸는 것은 없다.
+- (다): 항목이 없는 호출은 후보 목록에 넣지 않는다. `memchr` 는 처음부터 후보 목록에 없었다(`closure-c1prep-20261119/out/candidates_named_check.txt`). '항목 없음'은 새 입력 `named_calls.tsv` 가 나른다. 바꾸지 않은 `candidates.py` 를 다시 돌린 64 파일이 바이트까지 같았다(26.3).
+- (나): 문맥의 고침은 기록의 문맥 id 를 바꾼다. 사용 목록의 단위는 바꾸지 않는다. 목록의 `-` 는 평가 절차 5.1 의 '문맥 줄이 없는 행의 사용 하나'다. 요약은 그것을 기록의 어느 문맥과도 맞춘다(명세 11.4 의 3).
+- (라)·(사): 판정 부분의 출력만 바꾼다.
+- 판독지: 'not filled: no reader' 그대로다. `reader_files.tsv` 가 가리는 판정 규칙의 sha256(`71c5dfee…`)은 8.14 앞의 파일이다. 판독자를 정할 때 다시 커밋한다(평가 절차 14.5).
+
+**(5) 새 부팅 선언 [D].** `boot/declaration2.tsv`(`9758074a…`, 행 130)가 `860c2cd` 의 `boot/declaration.tsv`(그대로 둠)를 대신한다.
+- 옛 선언의 행 110 을 다시 쟀다(`declaration/remeasure_860c2cd_2.tsv`). 103 이 같다. 설치된 ELF 42 줄의 sha256 과 GNU build-id, plan-id 둘, 계획, sidecar, 결합 파일, B′ 기초, 주기의 파일, 도구가 그 안에 있다. 7 이 커밋된 고침으로 바뀌었다: `run_cycle.sh`, 읽는 부분, 판정 부분, 요약, 기대 대조, fixture, `space_guard.sh`(`declaration/changes_vs_860c2cd.tsv`). 처음 잰 것(`remeasure_860c2cd.tsv`)은 `run_cycle.sh` 를 고치기 전이고, 그것도 남겼다.
+- 더한 행은 20 이다.
+  - 동결: 반증·평가 스크립트와 그 fixture, 새 동결 파일.
+  - 설명 단계의 입력: `reason_vocabulary.txt`, 두 sidecar 의 `input namespace-data` 줄이 이름 댄 이름 공간 자료 다섯.
+  - 계획 입력: `framework_api_roles.txt`.
+  - 주기의 파일: `named_calls.tsv` 와 그 스크립트, `expect_c1_2.tsv`·`predictions2.tsv`·`elements_by_rule_2.tsv`·`expect_write2.py`·바탕 `static_elements_16.tsv`, `commands.txt`, `test_run_cycle.sh`, `no_expect_input_check2.txt`.
+- 선언의 머리에 적은 것.
+  - 문(평가 절차 3절).
+  - 부팅 수의 규칙과 다시 한 부팅의 읽기(26.0 (타), 14.10: 1r 이 문을 지나면 네 번 더).
+  - 더 한 부팅에서 읽는 둘(사용마다의 부팅별 분포, `other_order_seen_in_boots`).
+  - 주 결과 `D1/R0` 와 보조 갈래(나머지 15 와 부분 인정 496).
+  - 기대하는 결과와 그 구조적 까닭: (c2)·(c4)는 정적으로 정해지지 않는다. (c3)(i)은 어느 갈래에서도 `held` 가 아니고, (iii)은 모든 문맥에서 `not_held` 이거나 `not_established` 다. 쌍에서는 기초 4(성공 경로 줄 0/14)와 (다)가 모든 갈래에서 빠진다. 그래서 어느 설계 행도 `observed` 에 닿을 수 없다. 이 기대는 양성도 음성도 아니다.
+  - 지금 잰 공간과 필요량(아래).
+  - 명령 `boot/commands.txt`.
+- 실행 스크립트(제자리에서 고침; 앞판은 git 에 있음). `run_cycle.sh` 는 `declaration2.tsv` 를 재고, `eval`·`expect` 단계는 `expect_c1_2.tsv` 를 읽는다. 기록의 이름표도 이 절을 가리킨다. `bash -n` 깨끗하다. `boot/test_run_cycle.sh` 는 꾸민 선언의 이름만 고쳤고 7/7 이다(`out/run_cycle_tests.txt`). `boot/commands.txt` 는 머리만 고쳤다. 명령은 그대로이고 빌드마다 첫 명령이자 부팅마다 부팅 앞의 명령이 `verify` 다. 쓰기만 했고 돌리지 않았다.
+- 기대 파일이 입력이 아님의 점검을 다시 했다(`boot/no_expect_input_check2.txt`, 명세 11 의 15). 기대 파일과 예측을 이름 대는 단계는 `eval`(F1 에만: `explain_eval.py:328`)과 `expect` 둘이다. 설명 단계의 인자와 두 계획의 `args.txt` 에는 없다.
+- **verify 한 번** [M]: `run_cycle.sh verify <빌드> 0` 을 두 빌드에 돌렸다. 둘 다 rc 0, `rows 130 ok 130 differs 0 missing 0` 이다(`boot/c1_pre_tx/boot0/verify.txt`, `boot/c1_post_tx/boot0/verify.txt`; 감시 기록 `guard/verify-*.log`). N = 0 은 부팅 번호가 아니다. 부팅 단계는 0 을 받지 않는다. 부팅들은 제 N 으로 verify 를 다시 돈다.
+
+**공간 [M].**
+- 시작 819,277,824 B(15:10:36Z, `out/free_start.txt`), 끝 811,319,296 B(15:33:13Z, `out/free_end.txt`)다. 바닥 위로 496,746,496 B 다.
+- 감시 기록의 가장 낮은 값은 707,485,696 B(`guard/evalfx.log`)다. fixture 의 scratch 107,872,256 B 는 끝에 지웠다.
+- 새로 남긴 것은 기록 디렉터리의 글뿐이다(비교 출력 여섯 약 1.5 MB 포함). obs1 에 새 출력은 없다.
+- **필요량과 견줌**(선언의 머리; 26.2 `need.txt` [I]): 부팅 하나 51,810,304 B × 12 = 621,723,648 B 에 여유 100,000,000 B 를 더하면, 첫 부팅 전에 1,036,296,448 B 가 비어 있어야 한다. 15:27:40Z 에 잰 값은 811,941,888 B 로 224,354,560 B 모자란다. 26.0 (카)에 따라 그 필요량이 채워지거나 PI 가 정하기 전에는 부팅하지 않는다. 설명 출력을 정적 측정으로 잡으면(26.2 `need.txt` 의 `beside` 줄 648,282,368 B 에서 코드 단계의 몫 177,725,440 B 를 뺌) 부팅 12 번과 여유에 바닥 위 470,556,928 B, 곧 785,129,728 B 가 필요하고 지금 값은 그 위다. 그러나 선언한 필요량은 큰 쪽이다(26.2).
+
+**끝 점검 [M].** `ledger_check` 205 행 실패 0(`out/ledger_check_end.txt`), `tools_check` 59 행 실패 0(`out/tools_check_end.txt`). 이 단계는 등록부의 도구와 obs1 의 남긴 출력을 바꾸지 않았다. 커밋마다 이름 점검(`--cached`, 새 디렉터리 `--tree`)과 금지어 grep 을 했다.
+
+**계획과 다르게 한 것.**
+1. 절 번호: 지시는 26.3 이었다. 26.3 은 코드 단계가 썼다. 그래서 26.4 로 적었다.
+2. 평가 절차 14.12 를 더했다(지시 밖의 글 커밋). 두 가지다.
+   - 14.6 의 F1 줄을 14.6 머리의 가름 규칙으로 고쳤다. 그 결과 `link.status` 와 `use_cond.caller_dependence.text` 가 이 주기에 정적이다. 명세 11 의 12 의 '출처로 가름'으로는 `boot` 다(320 줄).
+   - 합성 기록과 맞댈 때 '합성 입력' 종류를 두었다. 26.0 (라)의 두 종류 밖이므로 맞대기 전에 커밋했다.
+3. 요소의 8.14 앞 값은 25.11 의 커밋된 바탕에서 읽었다. 그 바탕은 동결 앞 판정 부분의 정적 실행 출력이다(25.11 이 그렇게 만듦). 8.14 가 바꾼 것만 규칙으로 걸었다. 앞 판의 8.13 구현이 틀렸다면 그 틀림은 이 기대에도 남는다 [I].
+4. 기대를 쓰는 스크립트는 새 이름(`expect_write2.py`)으로 두었다. 명세 11.3 은 `expect_write.py` 를 '다시 적는다'고 했다. 옛 스크립트와 파일은 그대로다.
+5. 예측에 A20 의 `use[1].context`·`use[1].link_result` 를 더했다(64 줄).
+6. 동결 파일은 새 디렉터리에 두었다(지시의 둘째 안).
+7. 고친 판정 부분의 정적 표와의 견줌(0 칸 다름)은 기대를 커밋한 뒤에 했다. 기대는 바꾸지 않았다.
+8. 가름 스크립트의 앞 시도 둘을 시도 이름으로 남겼다.
+   - `*.trial1_*`: None 의 정렬로 둘이 멈췄다. 둘은 고친 스크립트로 다시 했다.
+   - `*.trial2_t6_basis5.*`: 결과 시험이 키 글을 기초 5 의 근거에서 읽었다. 그런데 `held` 인 항목은 키 글을 싣지 않는다.
+9. `run_cycle.sh`, `test_run_cycle.sh`, `commands.txt` 는 제자리에서 고쳤다(26.3 의 관행). `declaration.tsv`, `expect_c1.tsv`, `predictions.tsv`, `no_expect_input_check.txt` 는 그대로 두었다.
+10. verify 를 N = 0 으로 돌렸다. 부팅의 `boot1/verify.txt` 와 섞이지 않게 하려는 것이다. `boot/<빌드>/boot0/about.txt` 에 그 뜻을 적었다.
+11. 선언에 `framework_api_roles.txt` 를 더했다(계획 입력; 지시의 목록 밖).
+12. 반증·평가 스크립트의 합성 출력 둘은 scratch 에 쓰고 지웠다. 머리·수·sha256 만 남겼다.
+
+**열린 점.**
+1. **공간**: 첫 부팅 전에 224,354,560 B 가 모자란다. 압축할 것과 양을 먼저 커밋하고 26.2 의 방법으로 내거나(예: 26.3 의 `obs1/xr5_*`; 26.3 열린 점 1), PI 에게 묻는다(26.0 (카)). 부팅 하나의 필요량 [I] 은 2026-11-16 부팅에서 왔다. 첫 부팅의 감시 기록으로 고친다(26.2 열린 점 2).
+2. 합성 세계가 시험하지 못한 줄((마), A20 의 둘째 사용, BP 둘째 생성의 키 글, 시작 스크립트 차례의 A20)은 첫 부팅 기록에서 처음 맞댄다 [I].
+3. 찾은 사용의 인스턴스 연결 사유 `link_unlinked(no create of the id in the record)` 는 세대가 없다는 뜻이다. 생성 사건이 기록되어도 그 성공 경로 줄이 `held` 가 아니면 같은 글이 나온다. 명세 11 의 4 가 이 글을 그대로 두었으므로 결함이 아니고, 상태(`unlinked`)도 맞다. 글을 고치면 판정 부분이 바뀐다. 다음 개정의 일로 남긴다.
+4. 25.13 의 열린 점 가운데 아직 열린 것.
+   - 4: `same_build` 의 build-id 읽기는 cFS 가 적재한 모듈에서 처음이다 [미확인](F10).
+   - 5: 묶이지 않은 site 242, c1_post_tx 297.
+   - 6: lead 판단 (a)–(c)의 셋은 그대로 열려 있다. 읽는 사람이 없고, 원 이슈의 글은 이 환경에 없다 [미확인].
+   - 7: A22·A26 의 생성이 기록되는가 [I]. 이제 F4 에만 달리고, 시간 기준 행의 `expect_discriminate` 는 어느 쪽이든 미달이다.
+   - 8: kzllvm 의 집합 피연산자 꼴, B′ 의 `treetok`.
+   - 9: `osapi-idmap.c:640`(26.0 (파)).
+   - 10: `semantics-04`.
+   - 1(문맥 `-`)은 26.3 의 코드와 이 동결로 닫혔다. 2(다시 한 부팅의 읽기)는 26.0 (타)와 14.10 으로 닫혔다. 3(공간)은 26.2 로 계획했으나 위 1 로 다시 열렸다.
+5. 26.3 의 열린 점 가운데 아직 열린 것.
+   - 3: `eval.txt` 의 크기(약 1 MB × 부팅 12)와 자리. 지금 실행 스크립트는 기록 디렉터리에 쓴다.
+   - 5: 글 커밋 셋(`b071f02`, `adfdb51`, `3535b43`)의 결과 소절이 없다.
+   - 6: 합성 생성기의 한계.
+6. PI 에게 남은 것(26.0 (더)).
+   - `R0` 결합과 (ii)의 자리(판정 규칙 8.14 의 2).
+   - 읽는 사람. 정해지면 판독지·파일 목록·이 선언을 다시 커밋한다.
+   - 기초 2 가 프로세스의 시작 스레드가 만든 것에서 설 수 없는 문제.
+   - `Re` 가 (iii)을 움직이게 하는 도구 빌드.
+   - PI 결정 기록이 PI 확인으로 남긴 것.
+   - PI 결정 기록(`ac5b70a`)이 인용한 판정 규칙의 줄 번호는 지금 파일에서 2 뒤에 있다.
+7. 다음 단계의 차례: 공간의 계획과 압축(또는 PI 의 결정). 그다음 `boot/commands.txt` 를 c1_pre_tx, 이어서 c1_post_tx 에 돌린다(root). 첫 명령은 `verify` 다.

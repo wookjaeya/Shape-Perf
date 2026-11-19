@@ -1,0 +1,1 @@
+verify run before the first boot (results 26.4): N = 0 is no boot number (the boot step refuses it, boot/run_cycle.sh allowed); the boots run verify again with their own N

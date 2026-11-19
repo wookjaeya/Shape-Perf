@@ -1,0 +1,8 @@
+# space_guard.sh kind=review27 need=20000000 floor=314572800 interval=2 cmd=python3 -I records/closure-review-boots-20261119/scripts/review27.py --records records/closure-c1prep-20261119 --obs1 /home/user/work/redesign/obs1 --builds c1_pre_tx=pre,c1_post_tx=post --boots 5 --tools env/tools --out records/closure-review-boots-20261119/out/review27
+start 2026-11-19T21:57:38.783Z free=456302592 threshold=334572800
+sample 2026-11-19T21:57:38.788Z 456298496
+sample 2026-11-19T21:57:40.794Z 456298496
+sample 2026-11-19T21:57:42.800Z 456298496
+sample 2026-11-19T21:57:44.807Z 456298496
+sample 2026-11-19T21:57:46.812Z 456298496
+end 2026-11-19T21:57:48.819Z kind=review27 verdict=completed rc=0 free=456163328 lowest=456163328 dip=139264 change=-139264

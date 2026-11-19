@@ -1,0 +1,29 @@
+# compare_dev.sh: file, then for dev1, dev2 and the committed run: sha256 (first 16) and lines; then dev1 and dev2 against the committed file
+# dev = /home/user/work/redesign/obs1/c1cyc_report27_dev ; committed = records/closure-report-20261119/out
+inputs.sha256	dev1 90ebc183d12b55ae 7700	dev2 - -	committed - -	dev1: absent in one	dev2: absent in one
+inputs.txt	dev1 - -	dev2 edac8d706d6e6840 23	committed edac8d706d6e6840 23	dev1: absent in one	dev2: same
+run.txt	dev1 005f6a78646f53dc 13	dev2 6787b560dcb1e335 13	committed 6787b560dcb1e335 13	dev1: differs (diff lines 4)	dev2: same
+t01_boots.tsv	dev1 a5d0419dcf68d3b1 12	dev2 a5d0419dcf68d3b1 12	committed a5d0419dcf68d3b1 12	dev1: same	dev2: same
+t02_uses.tsv	dev1 c782b48209548307 1059	dev2 c782b48209548307 1059	committed c782b48209548307 1059	dev1: same	dev2: same
+t03_elements.tsv	dev1 46b714dc7847c1ac 1762	dev2 46b714dc7847c1ac 1762	committed 46b714dc7847c1ac 1762	dev1: same	dev2: same
+t04_pairs.tsv	dev1 e4ffcb5b9bb87a05 218	dev2 e4ffcb5b9bb87a05 218	committed e4ffcb5b9bb87a05 218	dev1: same	dev2: same
+t05_checks.tsv	dev1 b853ce4379ad5fb3 3632	dev2 b853ce4379ad5fb3 3632	committed b853ce4379ad5fb3 3632	dev1: same	dev2: same
+t05b_units.tsv	dev1 36eae5f7c10b9e44 109	dev2 36eae5f7c10b9e44 109	committed 36eae5f7c10b9e44 109	dev1: same	dev2: same
+t06_discriminate.tsv	dev1 0c5fec61ff5caa76 162	dev2 0c5fec61ff5caa76 162	committed 0c5fec61ff5caa76 162	dev1: same	dev2: same
+t07_expect.tsv	dev1 9a93cf9ef37444ae 180	dev2 9a93cf9ef37444ae 180	committed 9a93cf9ef37444ae 180	dev1: same	dev2: same
+t08_pairkinds.tsv	dev1 c075ec0371ff0764 202	dev2 c075ec0371ff0764 202	committed c075ec0371ff0764 202	dev1: same	dev2: same
+t09_aux.tsv	dev1 05a4e496a849745f 640	dev2 7598a41845faca03 636	committed 7598a41845faca03 636	dev1: differs (diff lines 848)	dev2: same
+t10_compare11.tsv	dev1 41fc2a685227dceb 38	dev2 41fc2a685227dceb 38	committed 41fc2a685227dceb 38	dev1: same	dev2: same
+t11_rows_c3.tsv	dev1 01587b1b6872edbe 90	dev2 01587b1b6872edbe 90	committed 01587b1b6872edbe 90	dev1: same	dev2: same
+# dev1/run.txt against the committed run.txt: the first 6 lines diff prints (each cut at 200 characters)
+#   11c11
+#   < t09_aux.tsv lines 640
+#   ---
+#   > t09_aux.tsv lines 636
+# dev1/t09_aux.tsv against the committed t09_aux.tsv: the first 6 lines diff prints (each cut at 200 characters)
+#   13c13
+#   < D1-Rb	c1_pre_tx	field	A21 undetermined_reasons	["link_unlinked(absence outcome: the use reached no object instance)", "link_unlinked(name binding: a delete or retire of the name between the use and 
+#   ---
+#   > D1-Rb	c1_pre_tx	field	A21 undetermined_reasons	only main: ["caller_dependence_unknown((i) not_held, (iii) not_established)"]	only auxiliary: ["caller_dependence_unknown((i) not_established, (iii) no
+#   18c18
+#   < D1-Rb	c1_post_tx	field	A21 undetermined_reasons	["multi_state_unlinked(the consumer's uses name 2 keys)", "link_unlinked(absence outcome: the use reached no object instance)", "link_unlinked(name bi

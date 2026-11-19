@@ -5,3 +5,21 @@
 ../../env/tools/ledger_check.sh > out/ledger_check_start.txt                     rc 0 (245 rows, 0 failing)
 findings.tsv, README.md, commands.txt (this text, before any script)            committed as (next commit)
 scripts/review27.py, scripts/compare_dev.sh (after the README text)            bash -n rc 0; python ast parse ok; committed as (next commit)
+df -B1 /                                                                        21:57Z (available 456306688)
+(research dir) space_guard.sh --need 20000000 --kind review27 --log guard/review27.log -- python3 -I scripts/review27.py
+    --records records/closure-c1prep-20261119 --obs1 /home/user/work/redesign/obs1 --builds c1_pre_tx=pre,c1_post_tx=post
+    --boots 5 --tools env/tools --out out/review27 > out/review27.stdout 2> out/review27.stderr
+                                                                                rc 0: kept files checked 7,564, differing 0;
+                                                                                r1 82, r2 21, r3 102, r4 642, r5 22, r6 802 lines;
+                                                                                guard completed, lowest 456163328, dip 139264
+mkdir obs1/c1cyc_report27_dev{,/guard}; cp -rp <dev-scratch>/dev1 <dev-scratch>/dev2 obs1/c1cyc_report27_dev/;
+    cp -p <dev-scratch>/dev{1,2}.guard.log obs1/c1cyc_report27_dev/guard/dev{1,2}.log            rc 0
+sha256sum of the sources, checked on the copies (sha256sum -c)                  rc 0 (30 files, 3,374,906 B)
+(cd obs1/c1cyc_report27_dev && find . -type f | sort | xargs sha256sum) > lists/c1cyc_report27_dev.sha256   rc 0 (30 lines)
+ledger row OBS_c1cyc_report27_dev appended to records/LEDGER.tsv; ledger_check.sh > out/ledger_check_dev.txt   rc 0 (246 rows, 0 failing)
+(research dir) space_guard.sh --need 10000000 --kind compare-dev --log guard/compare_dev.log -- bash scripts/compare_dev.sh
+    /home/user/work/redesign/obs1/c1cyc_report27_dev records/closure-report-20261119/out > out/dev/compare_dev.txt
+                                                                                rc 0: dev2 equals the committed out/ in all 14 files;
+                                                                                dev1 differs in t09_aux.tsv (640 against 636 lines,
+                                                                                diff 848 lines) and run.txt, and has inputs.sha256
+                                                                                (7,700 lines) in place of inputs.txt; guard completed

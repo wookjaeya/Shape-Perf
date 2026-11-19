@@ -1,0 +1,7 @@
+review27 builds c1_pre_tx=pre,c1_post_tx=post boots 5 branches 16 kept files checked 7564 differing 0
+r1_buildid.tsv lines 82
+r2_found_uses.tsv lines 21
+r3_eval_lines.tsv lines 102
+r4_order_ground.tsv lines 642
+r5_plan_paths.tsv lines 22
+r6_expect_branch.tsv lines 802

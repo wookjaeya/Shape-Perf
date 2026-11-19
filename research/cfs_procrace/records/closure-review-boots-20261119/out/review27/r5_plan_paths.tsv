@@ -1,0 +1,22 @@
+# review27.py (review of results 27, 2026-11-19): sidecar: rows and planned rows per path, planned path A rows with or without a namespace-entry line
+# columns build sidecar(sha256) path rows tier_planned control_planned both either; then the path A rows planned by either: row key label namespace-entry line
+c1_pre_tx	a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4	A	63	1	5	1	5
+c1_pre_tx	a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4	B	170	8	0	0	8
+c1_pre_tx	a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4	C	134	0	0	0	0
+c1_pre_tx	a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4	all	367	9	5	1	13
+# c1_pre_tx: row lines 367, parsed 367
+c1_pre_tx	path A planned	A20	bb0951052e63f1bc	tier-state cut	control-state planned	namespace-entry yes
+c1_pre_tx	path A planned	A21	17975444d83f6589	tier-state planned	control-state planned	namespace-entry yes
+c1_pre_tx	path A planned	A22	f371687b47120887	tier-state cut	control-state planned	namespace-entry yes
+c1_pre_tx	path A planned	A26	ad9fc1058923aad9	tier-state cut	control-state planned	namespace-entry yes
+c1_pre_tx	path A planned	A63	b881269bea290f8b	tier-state cut	control-state planned	namespace-entry no
+c1_post_tx	4ef73c918ac41cdc5e41be1dcc12b996557b0f954208ea80d06d1250dcfbd0e9	A	63	0	5	0	5
+c1_post_tx	4ef73c918ac41cdc5e41be1dcc12b996557b0f954208ea80d06d1250dcfbd0e9	B	170	8	0	0	8
+c1_post_tx	4ef73c918ac41cdc5e41be1dcc12b996557b0f954208ea80d06d1250dcfbd0e9	C	134	0	0	0	0
+c1_post_tx	4ef73c918ac41cdc5e41be1dcc12b996557b0f954208ea80d06d1250dcfbd0e9	all	367	8	5	0	13
+# c1_post_tx: row lines 367, parsed 367
+c1_post_tx	path A planned	A20	bb0951052e63f1bc	tier-state cut	control-state planned	namespace-entry yes
+c1_post_tx	path A planned	A21	17975444d83f6589	tier-state cut	control-state planned	namespace-entry yes
+c1_post_tx	path A planned	A22	f371687b47120887	tier-state cut	control-state planned	namespace-entry yes
+c1_post_tx	path A planned	A26	ad9fc1058923aad9	tier-state cut	control-state planned	namespace-entry yes
+c1_post_tx	path A planned	A63	b881269bea290f8b	tier-state cut	control-state planned	namespace-entry no

@@ -1,0 +1,82 @@
+# review27.py (review of results 27, 2026-11-19): dump buildid lines, the chain.txt verdict, the record path of the chain_check.py 344-346 match, the match without a leading './', and the readelf build-id of that file in the build tree
+# columns build boot object dump_path dump_build_id note chain_same_build_object record_path(chain_check.py:344-346) record_paths(leading './' removed) tree_build_id(readelf -n) equal
+c1_pre_tx	1	main	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	1	module:5	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	1	module:4	./cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	yes
+c1_pre_tx	1	module:7	./cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	yes
+c1_pre_tx	1	module:6	./cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	yes
+c1_pre_tx	1	module:3	./cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	yes
+c1_pre_tx	1	module:1	./cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	yes
+# count c1_pre_tx boot 1: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7
+c1_pre_tx	2	main	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	2	module:5	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	2	module:4	./cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	yes
+c1_pre_tx	2	module:7	./cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	yes
+c1_pre_tx	2	module:6	./cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	yes
+c1_pre_tx	2	module:3	./cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	yes
+c1_pre_tx	2	module:1	./cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	yes
+# count c1_pre_tx boot 2: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7
+c1_pre_tx	3	main	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	3	module:5	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	3	module:4	./cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	yes
+c1_pre_tx	3	module:7	./cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	yes
+c1_pre_tx	3	module:6	./cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	yes
+c1_pre_tx	3	module:3	./cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	yes
+c1_pre_tx	3	module:1	./cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	yes
+# count c1_pre_tx boot 3: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7
+c1_pre_tx	4	main	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	4	module:5	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	4	module:4	./cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	yes
+c1_pre_tx	4	module:7	./cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	yes
+c1_pre_tx	4	module:6	./cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	yes
+c1_pre_tx	4	module:3	./cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	yes
+c1_pre_tx	4	module:1	./cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	yes
+# count c1_pre_tx boot 4: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7
+c1_pre_tx	5	main	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	5	module:5	./core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	619614002e6d4556fa731365d88ee7f0d49c00cf	yes
+c1_pre_tx	5	module:4	./cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	4074a88bb9a747f7729153fbb3444df21e668f39	yes
+c1_pre_tx	5	module:7	./cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	1c6beabaaf271c405f3c9258340ecada8bf5b77d	yes
+c1_pre_tx	5	module:6	./cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	310dfddb52b7c0d5ca4db109fb866f14d6a7900d	yes
+c1_pre_tx	5	module:3	./cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	c55b464be7b96ec2d0001b1a5ea296740c13e5c0	yes
+c1_pre_tx	5	module:1	./cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	yes
+# count c1_pre_tx boot 5: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7
+c1_post_tx	1	main	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	1	module:5	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	1	module:4	./cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	yes
+c1_post_tx	1	module:7	./cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	yes
+c1_post_tx	1	module:6	./cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	yes
+c1_post_tx	1	module:3	./cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	yes
+c1_post_tx	1	module:1	./cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	yes
+# count c1_post_tx boot 1: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7
+c1_post_tx	2	main	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	2	module:5	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	2	module:4	./cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	yes
+c1_post_tx	2	module:7	./cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	yes
+c1_post_tx	2	module:6	./cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	yes
+c1_post_tx	2	module:3	./cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	yes
+c1_post_tx	2	module:1	./cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	yes
+# count c1_post_tx boot 2: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7
+c1_post_tx	3	main	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	3	module:5	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	3	module:4	./cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	yes
+c1_post_tx	3	module:7	./cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	yes
+c1_post_tx	3	module:6	./cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	yes
+c1_post_tx	3	module:3	./cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	yes
+c1_post_tx	3	module:1	./cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	yes
+# count c1_post_tx boot 3: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7
+c1_post_tx	4	main	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	4	module:5	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	4	module:4	./cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	yes
+c1_post_tx	4	module:7	./cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	yes
+c1_post_tx	4	module:6	./cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	yes
+c1_post_tx	4	module:3	./cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	yes
+c1_post_tx	4	module:1	./cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	yes
+# count c1_post_tx boot 4: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7
+c1_post_tx	5	main	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	confirmed	--main exe/tx/core-tx	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	5	module:5	./core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/core-tx	acee9edd432e2e987903efefe7fc0c19bdee41ac	yes
+c1_post_tx	5	module:4	./cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/ci_lab.so	8dc25470e6749a4d0fd4ce53061b9601e21fe540	yes
+c1_post_tx	5	module:7	./cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/to_lab.so	a79dc81815ccd1875206b916ddfd390f8afddbda	yes
+c1_post_tx	5	module:6	./cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/sch_lab.so	14e71ebd93acc0d75f74c233ae07449f43685b18	yes
+c1_post_tx	5	module:3	./cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/cf.so	3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	yes
+c1_post_tx	5	module:1	./cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	present	unconfirmed(object not in the build record)	None(0 matches)	exe/tx/cf/bp.so	f359e98bd5420438130647946f80fd562e03edf7	yes
+# count c1_post_tx boot 5: objects 7, present 7, chain_confirmed 1, rule_match 1, strip_match_one 7, tree_equal 7

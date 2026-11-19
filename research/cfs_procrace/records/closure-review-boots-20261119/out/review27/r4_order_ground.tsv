@@ -1,0 +1,642 @@
+# review27.py (review of results 27, 2026-11-19): records per order_ground value, fixed_early or hard_before records, order.pairs entries
+# columns build boot branch what value records
+c1_pre_tx	1	D1-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-R0	order.pairs entries	sum	0
+c1_pre_tx	1	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Ra	order.pairs entries	sum	0
+c1_pre_tx	1	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Rb	order.pairs entries	sum	0
+c1_pre_tx	1	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Rc	order.pairs entries	sum	0
+c1_pre_tx	1	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Rd	order.pairs entries	sum	0
+c1_pre_tx	1	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Re	order.pairs entries	sum	0
+c1_pre_tx	1	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-Rf	order.pairs entries	sum	0
+c1_pre_tx	1	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-all	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D1-all	order.pairs entries	sum	0
+c1_pre_tx	1	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-R0	order.pairs entries	sum	0
+c1_pre_tx	1	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Ra	order.pairs entries	sum	0
+c1_pre_tx	1	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Rb	order.pairs entries	sum	0
+c1_pre_tx	1	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Rc	order.pairs entries	sum	0
+c1_pre_tx	1	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Rd	order.pairs entries	sum	0
+c1_pre_tx	1	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Re	order.pairs entries	sum	0
+c1_pre_tx	1	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-Rf	order.pairs entries	sum	0
+c1_pre_tx	1	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-all	names fixed_early or hard_before	no	46
+c1_pre_tx	1	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	1	D2-all	order.pairs entries	sum	0
+c1_pre_tx	1	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-R0	order.pairs entries	sum	0
+c1_pre_tx	2	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Ra	order.pairs entries	sum	0
+c1_pre_tx	2	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Rb	order.pairs entries	sum	0
+c1_pre_tx	2	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Rc	order.pairs entries	sum	0
+c1_pre_tx	2	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Rd	order.pairs entries	sum	0
+c1_pre_tx	2	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Re	order.pairs entries	sum	0
+c1_pre_tx	2	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-Rf	order.pairs entries	sum	0
+c1_pre_tx	2	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-all	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D1-all	order.pairs entries	sum	0
+c1_pre_tx	2	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-R0	order.pairs entries	sum	0
+c1_pre_tx	2	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Ra	order.pairs entries	sum	0
+c1_pre_tx	2	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Rb	order.pairs entries	sum	0
+c1_pre_tx	2	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Rc	order.pairs entries	sum	0
+c1_pre_tx	2	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Rd	order.pairs entries	sum	0
+c1_pre_tx	2	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Re	order.pairs entries	sum	0
+c1_pre_tx	2	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-Rf	order.pairs entries	sum	0
+c1_pre_tx	2	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-all	names fixed_early or hard_before	no	46
+c1_pre_tx	2	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	2	D2-all	order.pairs entries	sum	0
+c1_pre_tx	2	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-R0	order.pairs entries	sum	0
+c1_pre_tx	3	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Ra	order.pairs entries	sum	0
+c1_pre_tx	3	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Rb	order.pairs entries	sum	0
+c1_pre_tx	3	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Rc	order.pairs entries	sum	0
+c1_pre_tx	3	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Rd	order.pairs entries	sum	0
+c1_pre_tx	3	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Re	order.pairs entries	sum	0
+c1_pre_tx	3	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-Rf	order.pairs entries	sum	0
+c1_pre_tx	3	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-all	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D1-all	order.pairs entries	sum	0
+c1_pre_tx	3	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-R0	order.pairs entries	sum	0
+c1_pre_tx	3	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Ra	order.pairs entries	sum	0
+c1_pre_tx	3	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Rb	order.pairs entries	sum	0
+c1_pre_tx	3	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Rc	order.pairs entries	sum	0
+c1_pre_tx	3	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Rd	order.pairs entries	sum	0
+c1_pre_tx	3	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Re	order.pairs entries	sum	0
+c1_pre_tx	3	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-Rf	order.pairs entries	sum	0
+c1_pre_tx	3	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-all	names fixed_early or hard_before	no	46
+c1_pre_tx	3	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	3	D2-all	order.pairs entries	sum	0
+c1_pre_tx	3	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-R0	order.pairs entries	sum	0
+c1_pre_tx	4	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Ra	order.pairs entries	sum	0
+c1_pre_tx	4	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Rb	order.pairs entries	sum	0
+c1_pre_tx	4	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Rc	order.pairs entries	sum	0
+c1_pre_tx	4	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Rd	order.pairs entries	sum	0
+c1_pre_tx	4	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Re	order.pairs entries	sum	0
+c1_pre_tx	4	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-Rf	order.pairs entries	sum	0
+c1_pre_tx	4	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-all	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D1-all	order.pairs entries	sum	0
+c1_pre_tx	4	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-R0	order.pairs entries	sum	0
+c1_pre_tx	4	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Ra	order.pairs entries	sum	0
+c1_pre_tx	4	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Rb	order.pairs entries	sum	0
+c1_pre_tx	4	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Rc	order.pairs entries	sum	0
+c1_pre_tx	4	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Rd	order.pairs entries	sum	0
+c1_pre_tx	4	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Re	order.pairs entries	sum	0
+c1_pre_tx	4	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-Rf	order.pairs entries	sum	0
+c1_pre_tx	4	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-all	names fixed_early or hard_before	no	46
+c1_pre_tx	4	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	4	D2-all	order.pairs entries	sum	0
+c1_pre_tx	4	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-R0	order.pairs entries	sum	0
+c1_pre_tx	5	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Ra	order.pairs entries	sum	0
+c1_pre_tx	5	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Rb	order.pairs entries	sum	0
+c1_pre_tx	5	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Rc	order.pairs entries	sum	0
+c1_pre_tx	5	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Rd	order.pairs entries	sum	0
+c1_pre_tx	5	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Re	order.pairs entries	sum	0
+c1_pre_tx	5	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-Rf	order.pairs entries	sum	0
+c1_pre_tx	5	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-all	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D1-all	order.pairs entries	sum	0
+c1_pre_tx	5	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-R0	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-R0	order.pairs entries	sum	0
+c1_pre_tx	5	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Ra	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Ra	order.pairs entries	sum	0
+c1_pre_tx	5	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Rb	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Rb	order.pairs entries	sum	0
+c1_pre_tx	5	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Rc	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Rc	order.pairs entries	sum	0
+c1_pre_tx	5	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Rd	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Rd	order.pairs entries	sum	0
+c1_pre_tx	5	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Re	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Re	order.pairs entries	sum	0
+c1_pre_tx	5	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Rf	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-Rf	order.pairs entries	sum	0
+c1_pre_tx	5	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-all	names fixed_early or hard_before	no	46
+c1_pre_tx	5	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_pre_tx	5	D2-all	order.pairs entries	sum	0
+c1_pre_tx	5	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-R0	names fixed_early or hard_before	no	46
+c1_post_tx	1	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-R0	order.pairs entries	sum	0
+c1_post_tx	1	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	1	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Ra	order.pairs entries	sum	0
+c1_post_tx	1	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	1	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Rb	order.pairs entries	sum	0
+c1_post_tx	1	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	1	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Rc	order.pairs entries	sum	0
+c1_post_tx	1	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	1	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Rd	order.pairs entries	sum	0
+c1_post_tx	1	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Re	names fixed_early or hard_before	no	46
+c1_post_tx	1	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Re	order.pairs entries	sum	0
+c1_post_tx	1	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	1	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-Rf	order.pairs entries	sum	0
+c1_post_tx	1	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-all	names fixed_early or hard_before	no	46
+c1_post_tx	1	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D1-all	order.pairs entries	sum	0
+c1_post_tx	1	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-R0	names fixed_early or hard_before	no	46
+c1_post_tx	1	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-R0	order.pairs entries	sum	0
+c1_post_tx	1	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	1	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Ra	order.pairs entries	sum	0
+c1_post_tx	1	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	1	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Rb	order.pairs entries	sum	0
+c1_post_tx	1	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	1	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Rc	order.pairs entries	sum	0
+c1_post_tx	1	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	1	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Rd	order.pairs entries	sum	0
+c1_post_tx	1	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Re	names fixed_early or hard_before	no	46
+c1_post_tx	1	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Re	order.pairs entries	sum	0
+c1_post_tx	1	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	1	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-Rf	order.pairs entries	sum	0
+c1_post_tx	1	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-all	names fixed_early or hard_before	no	46
+c1_post_tx	1	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	1	D2-all	order.pairs entries	sum	0
+c1_post_tx	1	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-R0	names fixed_early or hard_before	no	46
+c1_post_tx	2	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-R0	order.pairs entries	sum	0
+c1_post_tx	2	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	2	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Ra	order.pairs entries	sum	0
+c1_post_tx	2	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	2	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Rb	order.pairs entries	sum	0
+c1_post_tx	2	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	2	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Rc	order.pairs entries	sum	0
+c1_post_tx	2	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	2	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Rd	order.pairs entries	sum	0
+c1_post_tx	2	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Re	names fixed_early or hard_before	no	46
+c1_post_tx	2	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Re	order.pairs entries	sum	0
+c1_post_tx	2	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	2	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-Rf	order.pairs entries	sum	0
+c1_post_tx	2	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-all	names fixed_early or hard_before	no	46
+c1_post_tx	2	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D1-all	order.pairs entries	sum	0
+c1_post_tx	2	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-R0	names fixed_early or hard_before	no	46
+c1_post_tx	2	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-R0	order.pairs entries	sum	0
+c1_post_tx	2	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	2	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Ra	order.pairs entries	sum	0
+c1_post_tx	2	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	2	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Rb	order.pairs entries	sum	0
+c1_post_tx	2	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	2	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Rc	order.pairs entries	sum	0
+c1_post_tx	2	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	2	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Rd	order.pairs entries	sum	0
+c1_post_tx	2	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Re	names fixed_early or hard_before	no	46
+c1_post_tx	2	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Re	order.pairs entries	sum	0
+c1_post_tx	2	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	2	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-Rf	order.pairs entries	sum	0
+c1_post_tx	2	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-all	names fixed_early or hard_before	no	46
+c1_post_tx	2	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	2	D2-all	order.pairs entries	sum	0
+c1_post_tx	2	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-R0	names fixed_early or hard_before	no	46
+c1_post_tx	3	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-R0	order.pairs entries	sum	0
+c1_post_tx	3	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	3	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Ra	order.pairs entries	sum	0
+c1_post_tx	3	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	3	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Rb	order.pairs entries	sum	0
+c1_post_tx	3	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	3	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Rc	order.pairs entries	sum	0
+c1_post_tx	3	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	3	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Rd	order.pairs entries	sum	0
+c1_post_tx	3	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Re	names fixed_early or hard_before	no	46
+c1_post_tx	3	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Re	order.pairs entries	sum	0
+c1_post_tx	3	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	3	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-Rf	order.pairs entries	sum	0
+c1_post_tx	3	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-all	names fixed_early or hard_before	no	46
+c1_post_tx	3	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D1-all	order.pairs entries	sum	0
+c1_post_tx	3	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-R0	names fixed_early or hard_before	no	46
+c1_post_tx	3	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-R0	order.pairs entries	sum	0
+c1_post_tx	3	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	3	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Ra	order.pairs entries	sum	0
+c1_post_tx	3	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	3	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Rb	order.pairs entries	sum	0
+c1_post_tx	3	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	3	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Rc	order.pairs entries	sum	0
+c1_post_tx	3	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	3	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Rd	order.pairs entries	sum	0
+c1_post_tx	3	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Re	names fixed_early or hard_before	no	46
+c1_post_tx	3	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Re	order.pairs entries	sum	0
+c1_post_tx	3	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	3	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-Rf	order.pairs entries	sum	0
+c1_post_tx	3	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-all	names fixed_early or hard_before	no	46
+c1_post_tx	3	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	3	D2-all	order.pairs entries	sum	0
+c1_post_tx	3	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-R0	names fixed_early or hard_before	no	46
+c1_post_tx	4	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-R0	order.pairs entries	sum	0
+c1_post_tx	4	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	4	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Ra	order.pairs entries	sum	0
+c1_post_tx	4	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	4	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Rb	order.pairs entries	sum	0
+c1_post_tx	4	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	4	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Rc	order.pairs entries	sum	0
+c1_post_tx	4	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	4	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Rd	order.pairs entries	sum	0
+c1_post_tx	4	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Re	names fixed_early or hard_before	no	46
+c1_post_tx	4	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Re	order.pairs entries	sum	0
+c1_post_tx	4	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	4	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-Rf	order.pairs entries	sum	0
+c1_post_tx	4	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-all	names fixed_early or hard_before	no	46
+c1_post_tx	4	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D1-all	order.pairs entries	sum	0
+c1_post_tx	4	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-R0	names fixed_early or hard_before	no	46
+c1_post_tx	4	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-R0	order.pairs entries	sum	0
+c1_post_tx	4	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	4	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Ra	order.pairs entries	sum	0
+c1_post_tx	4	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	4	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Rb	order.pairs entries	sum	0
+c1_post_tx	4	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	4	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Rc	order.pairs entries	sum	0
+c1_post_tx	4	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	4	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Rd	order.pairs entries	sum	0
+c1_post_tx	4	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Re	names fixed_early or hard_before	no	46
+c1_post_tx	4	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Re	order.pairs entries	sum	0
+c1_post_tx	4	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	4	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-Rf	order.pairs entries	sum	0
+c1_post_tx	4	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-all	names fixed_early or hard_before	no	46
+c1_post_tx	4	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	4	D2-all	order.pairs entries	sum	0
+c1_post_tx	4	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-R0	names fixed_early or hard_before	no	46
+c1_post_tx	5	D1-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-R0	order.pairs entries	sum	0
+c1_post_tx	5	D1-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	5	D1-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Ra	order.pairs entries	sum	0
+c1_post_tx	5	D1-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	5	D1-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Rb	order.pairs entries	sum	0
+c1_post_tx	5	D1-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	5	D1-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Rc	order.pairs entries	sum	0
+c1_post_tx	5	D1-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	5	D1-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Rd	order.pairs entries	sum	0
+c1_post_tx	5	D1-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Re	names fixed_early or hard_before	no	46
+c1_post_tx	5	D1-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Re	order.pairs entries	sum	0
+c1_post_tx	5	D1-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	5	D1-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-Rf	order.pairs entries	sum	0
+c1_post_tx	5	D1-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-all	names fixed_early or hard_before	no	46
+c1_post_tx	5	D1-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D1-all	order.pairs entries	sum	0
+c1_post_tx	5	D1-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-R0	names fixed_early or hard_before	no	46
+c1_post_tx	5	D2-R0	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-R0	order.pairs entries	sum	0
+c1_post_tx	5	D2-R0	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Ra	names fixed_early or hard_before	no	46
+c1_post_tx	5	D2-Ra	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Ra	order.pairs entries	sum	0
+c1_post_tx	5	D2-Ra	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Rb	names fixed_early or hard_before	no	46
+c1_post_tx	5	D2-Rb	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Rb	order.pairs entries	sum	0
+c1_post_tx	5	D2-Rb	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Rc	names fixed_early or hard_before	no	46
+c1_post_tx	5	D2-Rc	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Rc	order.pairs entries	sum	0
+c1_post_tx	5	D2-Rc	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Rd	names fixed_early or hard_before	no	46
+c1_post_tx	5	D2-Rd	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Rd	order.pairs entries	sum	0
+c1_post_tx	5	D2-Rd	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Re	names fixed_early or hard_before	no	46
+c1_post_tx	5	D2-Re	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Re	order.pairs entries	sum	0
+c1_post_tx	5	D2-Re	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Rf	names fixed_early or hard_before	no	46
+c1_post_tx	5	D2-Rf	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-Rf	order.pairs entries	sum	0
+c1_post_tx	5	D2-Rf	order_ground (record)	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-all	names fixed_early or hard_before	no	46
+c1_post_tx	5	D2-all	order.order_ground	["order_basis_unknown(no linked pair)"]	46
+c1_post_tx	5	D2-all	order.pairs entries	sum	0
+c1_post_tx	5	D2-all	order_ground (record)	["order_basis_unknown(no linked pair)"]	46

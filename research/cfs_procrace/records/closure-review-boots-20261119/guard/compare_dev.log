@@ -1,0 +1,4 @@
+# space_guard.sh kind=compare-dev need=10000000 floor=314572800 interval=2 cmd=bash records/closure-review-boots-20261119/scripts/compare_dev.sh /home/user/work/redesign/obs1/c1cyc_report27_dev records/closure-report-20261119/out
+start 2026-11-19T21:58:45.723Z free=452468736 threshold=324572800
+sample 2026-11-19T21:58:45.729Z 452464640
+end 2026-11-19T21:58:47.736Z kind=compare-dev verdict=completed rc=0 free=452460544 lowest=452460544 dip=8192 change=-8192

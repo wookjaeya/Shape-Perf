@@ -1,0 +1,102 @@
+# review27.py (review of results 27, 2026-11-19): eval.txt: D1-R0 F4 units per path and result, D1-R0 F3 pass notes, F8a notes, slot-clear and weak lines
+# columns build boot what value lines (eval.txt; D1-R0 lines unless named)
+c1_pre_tx	1	F4 path A not_evaluable	-	3
+c1_pre_tx	1	F4 path A pass	-	2
+c1_pre_tx	1	F4 path B fail	no recorded create whose out value is the found id None	79
+c1_pre_tx	1	F4 path B not_evaluable	-	27
+c1_pre_tx	1	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	1	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	1	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	1	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_pre_tx	1	whole file	lines containing 'slot clear'	0
+c1_pre_tx	1	whole file	lines containing 'weak'	0
+c1_pre_tx	2	F4 path A not_evaluable	-	3
+c1_pre_tx	2	F4 path A pass	-	2
+c1_pre_tx	2	F4 path B fail	no recorded create whose out value is the found id None	78
+c1_pre_tx	2	F4 path B not_evaluable	-	27
+c1_pre_tx	2	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	2	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	2	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	2	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_pre_tx	2	whole file	lines containing 'slot clear'	0
+c1_pre_tx	2	whole file	lines containing 'weak'	0
+c1_pre_tx	3	F4 path A not_evaluable	-	3
+c1_pre_tx	3	F4 path A pass	-	2
+c1_pre_tx	3	F4 path B fail	no recorded create whose out value is the found id None	79
+c1_pre_tx	3	F4 path B not_evaluable	-	27
+c1_pre_tx	3	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	3	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	3	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	3	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_pre_tx	3	whole file	lines containing 'slot clear'	0
+c1_pre_tx	3	whole file	lines containing 'weak'	0
+c1_pre_tx	4	F4 path A not_evaluable	-	3
+c1_pre_tx	4	F4 path A pass	-	2
+c1_pre_tx	4	F4 path B fail	no recorded create whose out value is the found id None	79
+c1_pre_tx	4	F4 path B not_evaluable	-	27
+c1_pre_tx	4	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	4	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	4	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	4	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_pre_tx	4	whole file	lines containing 'slot clear'	0
+c1_pre_tx	4	whole file	lines containing 'weak'	0
+c1_pre_tx	5	F4 path A not_evaluable	-	3
+c1_pre_tx	5	F4 path A pass	-	2
+c1_pre_tx	5	F4 path B fail	no recorded create whose out value is the found id None	79
+c1_pre_tx	5	F4 path B not_evaluable	-	27
+c1_pre_tx	5	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	5	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	5	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_pre_tx	5	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_pre_tx	5	whole file	lines containing 'slot clear'	0
+c1_pre_tx	5	whole file	lines containing 'weak'	0
+c1_post_tx	1	F4 path A not_evaluable	-	2
+c1_post_tx	1	F4 path A pass	-	4
+c1_post_tx	1	F4 path B fail	no recorded create whose out value is the found id None	79
+c1_post_tx	1	F4 path B not_evaluable	-	28
+c1_post_tx	1	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	1	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_post_tx	1	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	1	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_post_tx	1	whole file	lines containing 'slot clear'	0
+c1_post_tx	1	whole file	lines containing 'weak'	0
+c1_post_tx	2	F4 path A not_evaluable	-	2
+c1_post_tx	2	F4 path A pass	-	4
+c1_post_tx	2	F4 path B fail	no recorded create whose out value is the found id None	79
+c1_post_tx	2	F4 path B not_evaluable	-	28
+c1_post_tx	2	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	2	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_post_tx	2	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	2	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_post_tx	2	whole file	lines containing 'slot clear'	0
+c1_post_tx	2	whole file	lines containing 'weak'	0
+c1_post_tx	3	F4 path A not_evaluable	-	2
+c1_post_tx	3	F4 path A pass	-	4
+c1_post_tx	3	F4 path B fail	no recorded create whose out value is the found id None	79
+c1_post_tx	3	F4 path B not_evaluable	-	28
+c1_post_tx	3	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	3	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_post_tx	3	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	3	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_post_tx	3	whole file	lines containing 'slot clear'	0
+c1_post_tx	3	whole file	lines containing 'weak'	0
+c1_post_tx	4	F4 path A not_evaluable	-	2
+c1_post_tx	4	F4 path A pass	-	4
+c1_post_tx	4	F4 path B fail	no recorded create whose out value is the found id None	79
+c1_post_tx	4	F4 path B not_evaluable	-	28
+c1_post_tx	4	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	4	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_post_tx	4	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	4	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_post_tx	4	whole file	lines containing 'slot clear'	0
+c1_post_tx	4	whole file	lines containing 'weak'	0
+c1_post_tx	5	F4 path A not_evaluable	-	2
+c1_post_tx	5	F4 path A pass	-	4
+c1_post_tx	5	F4 path B fail	no recorded create whose out value is the found id None	79
+c1_post_tx	5	F4 path B not_evaluable	-	28
+c1_post_tx	5	F3 pass row A20 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	5	F3 pass row A20 use 1	no earlier finished successful create of the same kind and text	1
+c1_post_tx	5	F3 pass row A21 use 0	no earlier finished successful create of the same kind and text	1
+c1_post_tx	5	F8a branch * pass	<n> creator or writer locations, each with a pair-file line; the text output (order.txt) and the value side are not inputs of this script and are not compared	5
+c1_post_tx	5	whole file	lines containing 'slot clear'	0
+c1_post_tx	5	whole file	lines containing 'weak'	0

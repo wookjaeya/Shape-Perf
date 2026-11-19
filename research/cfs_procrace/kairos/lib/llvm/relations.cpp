@@ -38,6 +38,10 @@ const char* relations_result_flow_revision() { return "relations rules revision 
 // the same handle and that handle is a static instance with a verified semantics item (LOCK_HANDLES static-instance);
 // a common handle of another status is named in the row's text.  Without the section the rows are revision 10's.
 const char* relations_lock_handle_revision() { return "relations rules revision 11 (2026-11-16)"; }
+// Revision 14 adds to revision 13 only what facts with OBJECT_ACCESS carry (static_facts.md 5x and its addenda): the key
+// texts by source tree, and with RESULT_FLOW and RESULT_EFFECT the lines of items 1-5.  It is named on a line of its own
+// (5x ninth addendum); without OBJECT_ACCESS the text is revision 13's (or 12's) with the tool line.
+const char* relations_object_access_revision() { return "relations rules revision 14 (2026-11-19)"; }
 
 namespace {
 
@@ -671,6 +675,17 @@ class Rel : public RelFacts {
   }
 
   // ---------------------------------------------------------------- header
+  // the line that names relations rules revision 14 (static_facts.md 5x ninth addendum), on facts with OBJECT_ACCESS
+  std::string object_access_rules_line() const {
+    size_t trees = 0;
+    for (const auto& [k, v] : basis_map_)
+      if (k.rfind("source_tree[", 0) == 0) ++trees;
+    return std::string("rules with object access: ") + relations_object_access_revision() +
+           ", over OBJECT_ACCESS (extract --object-access, docs/static_facts.md 5x): key texts by source tree " + std::to_string(trees) +
+           " (BASIS source_tree items); " +
+           (result_flow_ ? "with RESULT_FLOW and RESULT_EFFECT: the success path, absence origins, holder, alternatives, stored-name buffer and lifetime-end lines"
+                         : "without RESULT_FLOW and RESULT_EFFECT: no line of items 1-5");
+  }
   void header(std::ostream& os) const {
     os << "kz-relations 1\n";
     os << "facts " << kz::to_hex(c_.artifact_hash()) << "\n";
@@ -710,6 +725,7 @@ class Rel : public RelFacts {
       for (const auto& [k, n] : n_lab_) os << " " << k << " " << n;
       os << "\n";
     }
+    if (has_objacc_) os << object_access_rules_line() << "\n";
     os << "run order: no record given (this revision reads no run record; the column says so in every row)\n";
     os << "functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): ";
     for (size_t i = 0; i < sizeof kReturnsTwice / sizeof kReturnsTwice[0]; ++i) os << (i == 0 ? "" : ", ") << kReturnsTwice[i];
@@ -6016,6 +6032,13 @@ std::string relation_keys_text(const RelReport& rep) {
   std::string t = "kz-relation-keys 1\n";
   t += "facts " + rep.facts + "\n";
   t += std::string("rules ") + relations_rules_revision() + "\n";
+  // the line of relations rules revision 14 (facts with OBJECT_ACCESS: the key texts by source tree), as the header has it
+  // (static_facts.md 5x ninth addendum)
+  {
+    std::istringstream in(rep.header);
+    for (std::string l; std::getline(in, l);)
+      if (l.rfind("rules with object access: ", 0) == 0) t += l + "\n";
+  }
   t += "key: the first 16 hex digits of the sha256 of the key text (docs/static_facts.md §5l): path|subject|caller|callee#parameter|n-th call; path C adds |read <function> <n-th read>|<context>\n";
   t += "rows " + std::to_string(rows) + ", distinct keys " + std::to_string(by_key.size()) + ", rows that share a key " + std::to_string(shared) +
        ", keys shared by different key texts " + std::to_string(distinct_texts_sharing) + "\n";

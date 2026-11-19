@@ -46,6 +46,9 @@ const char* order_result_flow_revision() { return "order rules revision 6 (2026-
 // the output is revision 3's (or 2's) to the byte.
 // Revision 7 (2026-11-18): the awaited fields and the writers of a LOOP_DEFS predicate follow revision 5.
 const char* order_loop_lock_revision() { return "order rules revision 7 (2026-11-18)"; }
+// Revision 8 (static_facts.md 5x): the complete pair file (--pairs).  The text and edges.tsv are those of revisions 5-7 with
+// the tool line, so the name is written in the pair file's `order` line only (5x ninth addendum).
+const char* order_pairs_revision() { return "order rules revision 8 (2026-11-19): the complete pair file"; }
 
 namespace {
 
@@ -1691,7 +1694,7 @@ class Ord : public RelFacts {
     os << "facts " << kz::to_hex(c_.artifact_hash()) << "\n";
     os << (tool_line_.empty() ? std::string("tool -") : tool_line_) << "\n";
     os << "relations " << rules_of(rel_.header, nullptr) << "\n";
-    os << "order " << rules_of(text, order_rules_revision()) << "\n";
+    os << "order " << order_pairs_revision() << "; " << rules_of(text, order_rules_revision()) << "\n";
     os << "domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B "
           "and C); a pair in one thread has the value same_thread\n";
     os << "columns row_key\tpath\tuse_pos\tuse_function\tuse_root\tother_kind\tother_pos\tother_function\tother_root\tvalue\tedges\tpremises\trow_line\n";

@@ -30,6 +30,8 @@
  *                is turned into another constant, and a store that the source puts after the exit is on a path from the
  *                status store to the call; a command thread calls the initialisation function too (a second context);
  *                a waiter looks a name up again until it is found (a retry);
+ *   absence      a lookup of the same table through a wrapper that returns the no-match constant itself for a null out
+ *                pointer, used by the command thread: its absence origins line has the no-match origin and another one;
  *   stored names a common table of name pointers into kind tables (see the comment before names_main);
  *   threads      the main thread starts a looker (the lookups), a maker (the creations), a user, the two runners, the
  *                command thread, the waiter, a thread that makes, renames, reads, resets and deletes stored names, and a
@@ -216,6 +218,14 @@ int ent_get(int *out, const char *name) {
   return CL_ERR_NOT_FOUND;
 }
 
+/* a lookup of the same table through a wrapper that returns the no-match constant itself for a null out pointer and
+ * otherwise the search's result: the absence value has two origins in the chain, the search's no-match return and the
+ * wrapper's (relations rules revision 14, the absence origins line) */
+int ent_look(int *out, const char *name) {
+  if (out == 0) return CL_ERR_NOT_FOUND;
+  return ent_get(out, name);
+}
+
 static int run_init(void) { return ent_get(&rid[0], "gamma"); }
 
 static int run_init_c(void) {
@@ -256,6 +266,7 @@ fix:
 static void *cmd_main(void *arg) {
   (void)arg;
   if (run_init() != CL_OK) seen = seen + 5;
+  if (ent_look(&rid[3], "zeta") != CL_OK) seen = seen + 6;
   return 0;
 }
 

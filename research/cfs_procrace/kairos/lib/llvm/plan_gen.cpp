@@ -17,9 +17,13 @@
 namespace kzs {
 
 const char* plan_rules_revision() { return "plan rules revision 2 (2026-11-16)"; }
+// The rules of --manifest 4: plan rules revision 5 (docs/plan_manifest.md 10, renamed by 10.9), which is revision 4 with the
+// lines and sites of 10.1-10.5 written with the name-space files of coverage rule revision 2.
 const char* plan_rules_v4_revision() {
-  return "plan rules revision 4 (2026-11-18): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; "
-         "both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart";
+  return "plan rules revision 5 (2026-11-19): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; "
+         "both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; "
+         "with the name-space files of coverage rule revision 2: the namespace-entry and namespace-layer lines, the kind-value, rollback, clear and "
+         "context-frame sites, the lifetime-end sites and the key text bound from the stored-name extent";
 }
 const char* plan_control_revision() { return "control selection rule revision 1 (2026-11-16)"; }
 const char* plan_requests_revision() { return "value requests rule revision 1 (2026-11-16)"; }

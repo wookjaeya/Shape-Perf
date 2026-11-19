@@ -70,7 +70,9 @@
 #                    the stored-name buffer and lifetime-end lines (5x eighth addendum): a common table of name pointers
 #                    into two kind tables (a rename as another writer; uses that test, read, write through and copy the
 #                    pointer), a free-slot clear with and without the free-record condition, a finishing step called by
-#                    the creates, by a delete and with a null pointer, a constant release and the table's fill;
+#                    the creates, by a delete and with a null pointer, a constant release and the table's fill; a lookup
+#                    through a wrapper that returns the no-match constant itself for a null pointer (the absence origins
+#                    line with the no-match origin and another one);
 #                    planv4.c for plan rules revision 3 (kz-static plan --manifest 4, docs/plan_manifest.md 7-8), read by
 #                    test_static_plan only with data/planv4_fixture/ (a hand-written semantics data file that names the
 #                    event-type argument of its event send, a hand-written namespace data file with its lookup, create and

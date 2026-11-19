@@ -1764,6 +1764,74 @@ startup_script {
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rf) + " --keys", &out), 2);
   }
 
+  // ---- the key texts by source tree (relations rules revision 14, static_facts.md 5x and its ninth addendum) --------------
+  // The key-parameter function of a lookup is a static function of a header outside the root, in two checkouts of one tree
+  // (a directory with a `.git` entry).  With --object-access the facts carry BASIS source_tree items and the key text names
+  // the file by the tree's token, so the two checkouts give one key; without the option the key text keeps the absolute path
+  // and the keys differ.  The line that names revision 14 is in the relations header and the key listing only with the option.
+  {
+    const fs::path X = work / "treekeys";
+    fs::create_directories(X);
+    for (const char* c : {"c1", "c2"}) {
+      fs::create_directories(X / c / "app" / ".git");
+      write(X / c / "app" / "src" / "kt.h", "int k_find(int kind, const char *name);\nstatic int t_find(const char *name) { return k_find(3, name); }\n");
+    }
+    write(X / "root" / "m.c",
+          "#include <pthread.h>\n#include <string.h>\n#include \"kt.h\"\n"
+          "typedef struct { int used; char name[16]; } KSlot;\nstatic KSlot kslots[8][4];\n"
+          "int k_find(int kind, const char *name) {\n  int i;\n  for (i = 0; i < 4; i++) {\n"
+          "    if (kslots[kind][i].used == 1 && strcmp(kslots[kind][i].name, name) == 0) return i;\n  }\n  return -17;\n}\n"
+          "int k_create(int kind, const char *name) {\n  int i;\n  for (i = 0; i < 4; i++) {\n"
+          "    if (kslots[kind][i].used == 1 && strcmp(kslots[kind][i].name, name) == 0) return -5;\n  }\n"
+          "  for (i = 0; i < 4; i++) {\n    if (kslots[kind][i].used == 0) {\n      strncpy(kslots[kind][i].name, name, 15);\n      kslots[kind][i].used = 1;\n      return i;\n"
+          "    }\n  }\n  return -17;\n}\n"
+          "int t_create(const char *name) { return k_create(3, name); }\n"
+          "void *user_main(void *arg) {\n  (void)arg;\n  return (void *)(long)t_find(\"a\");\n}\n"
+          "void *maker_main(void *arg) {\n  (void)arg;\n  (void)t_create(\"a\");\n  return 0;\n}\n"
+          "int main(void) {\n  pthread_t a, b;\n  pthread_create(&a, 0, user_main, 0);\n  pthread_create(&b, 0, maker_main, 0);\n  return 0;\n}\n");
+    std::map<std::string, std::string> rel, keyl, basis;
+    for (const char* c : {"c1", "c2"})
+      for (const char* o : {"on", "off"}) {
+        const std::string n = std::string(c) + "_" + o;
+        const std::string f = (X / (n + ".kz")).string();
+        KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "root" / "m.c").string()) + " --root " + q((X / "root").string()) +
+                            (std::string(o) == "on" ? " --object-access" : "") + " -o " + q(f) + " -- -std=c99 -I" + q((X / c / "app" / "src").string()),
+                        &out),
+                    0);
+        KZ_CHECK_EQ(run(q(tool) + " relations " + q(f) + " --keys " + q((X / (n + ".keys")).string()), &rel[n]), 0);
+        keyl[n] = read(X / (n + ".keys"));
+        KZ_CHECK_EQ(run(q(tool) + " show " + q(f) + " --section basis", &basis[n]), 0);
+      }
+    for (const char* c : {"c1", "c2"}) {
+      const std::string on = std::string(c) + "_on", off = std::string(c) + "_off";
+      // BASIS: the tree of the header, with its token (the option only)
+      KZ_CHECK(has(basis[on], "source_tree[0] = " + (X / c / "app").string() + " <app>"));
+      KZ_CHECK(!has(basis[on], "source_tree[1]"));
+      KZ_CHECK(!has(basis[off], "source_tree["));
+      // the key text: the tree's token with the option, the recorded path without it
+      KZ_CHECK(has(keyl[on], " A|KSlot.name|user_main|t_find@<app>/src/kt.h#0|1\n"));
+      KZ_CHECK(has(keyl[off], " A|KSlot.name|user_main|t_find@" + (X / c / "app" / "src").string() + "/kt.h#0|1\n"));
+      // the line that names revision 14, in the header and the key listing, with the option only
+      const std::string l14 = "rules with object access: relations rules revision 14 (2026-11-19), over OBJECT_ACCESS (extract --object-access, docs/static_facts.md 5x): "
+                              "key texts by source tree 1 (BASIS source_tree items); without RESULT_FLOW and RESULT_EFFECT: no line of items 1-5\n";
+      KZ_CHECK(has(rel[on], "rules relations rules revision 12 (2026-11-18)\n"));
+      KZ_CHECK(has(rel[on], l14));
+      KZ_CHECK(has(keyl[on], "rules relations rules revision 12 (2026-11-18)\n" + l14));
+      KZ_CHECK(!has(rel[off], "rules with object access") && !has(keyl[off], "rules with object access"));
+    }
+    // one key for the two checkouts with the option, two without it
+    auto row_lines = [](const std::string& k) {
+      std::string r;
+      std::istringstream ks(k);
+      for (std::string line; std::getline(ks, line);)
+        if (line.size() > 1 && line[0] == 'A' && line[1] >= '1' && line[1] <= '9') r += line + "\n";
+      return r;
+    };
+    KZ_CHECK(!row_lines(keyl["c1_on"]).empty());
+    KZ_CHECK_EQ(row_lines(keyl["c1_on"]), row_lines(keyl["c2_on"]));
+    KZ_CHECK(row_lines(keyl["c1_off"]) != row_lines(keyl["c2_off"]));
+  }
+
   // ---- 8c (RV3A 6.3 O2, O12): command-line targets no unit declares, the target recorded once, the reading options
   {
     const fs::path X = work / "8c";

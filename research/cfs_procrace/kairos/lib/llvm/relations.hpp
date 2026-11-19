@@ -50,6 +50,7 @@ namespace kzs {
 
 const char* relations_rules_revision();
 const char* relations_lock_handle_revision();  // relations rules revision 11: what facts with LOCK_HANDLES add
+const char* relations_object_access_revision();  // relations rules revision 14: what facts with OBJECT_ACCESS add
 const char* relations_result_flow_revision();  // relations rules revision 10: what facts with RESULT_FLOW and RESULT_EFFECT add
 
 struct RelationsOptions {

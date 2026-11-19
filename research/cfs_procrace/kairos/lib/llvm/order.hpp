@@ -41,6 +41,7 @@ namespace kzs {
 
 const char* order_rules_revision();
 const char* order_loop_lock_revision();  // order rules revision 4: what facts with LOOP_DEFS and LOCK_HANDLES add
+const char* order_pairs_revision();  // order rules revision 8: the complete pair file
 const char* order_result_flow_revision();  // order rules revision 3: what facts with RESULT_FLOW and RESULT_EFFECT add
 
 struct OrderOptions {

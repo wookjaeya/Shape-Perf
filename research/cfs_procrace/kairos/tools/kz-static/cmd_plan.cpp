@@ -4,7 +4,7 @@
 //   kz-static plan <facts> [--basis B] --framework F --select observation-set --order method-priority
 //                  --budget tier:D07|tier:directed|all|rows:<n> --budget-reason TEXT [--budget-disclosure TEXT]
 //                  -o MANIFEST --sidecar SIDECAR --modules-out TABLE --exes-out LIST
-//                  [--manifest 3|4]  (4: plan rules revision 3, kzs-sites 4; with it --control-budget all|rows:<n>
+//                  [--manifest 3|4]  (4: plan rules revisions 3 to 5, kzs-sites 4; with it --control-budget all|rows:<n>
 //                  --control-budget-reason TEXT --requests-out REQUESTS [--namespaces F]..., docs/plan_manifest.md 7-8)
 //
 // The command opens the files named on its command line and no other: the facts, the basis the facts were read under

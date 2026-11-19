@@ -406,4 +406,7 @@ and the relations lines of relations rules revision 14 that sections 10.1-10.4 r
   data)`).  An `object-delete` need of a row whose matching entries have no applying `delete` statement takes the same
   sub-reason under revision 5 (revision 3 writes `no namespace data entry` there).
 - **10.5.**  The sidecar line is `bound string-namespace-extent source=namespace-entry extent reason=… sites=<n>`, written
-  when a key text was bounded so; the value's `ref` names the field and its extent.
+  when a key text was bounded so; the value's `ref` names the field and its extent.  When the entry has more than one
+  stored name with a constant extent (two creates keep the name in two fields, as the file systems of the OSAL files of
+  coverage rule revision 2 do), the bound is the **largest** of them, so that no name that fits one of the stored names
+  is cut (2026-11-19, after the scratch plans of the five builds; before the code is committed).

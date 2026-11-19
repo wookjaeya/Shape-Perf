@@ -35,6 +35,18 @@
 #               prototype statement of that name) and the attributes the declaration carries (pure, const, noreturn,
 #               nonnull positions, warn-unused-result, nothrow); the lines of the local copy of C library source text
 #               the P0 table cites (p0-source) are pinned by its sha256
+#   namespaces2 (coverage rule revision 2, section 8 of the rule; files framework_namespaces2_<label>.txt) generation N:
+#               the kind of an operation is the argument bound to the parameter of the layer function whose declared type
+#               is the component's object-kind type (anchors objid-kinds, objid-kind-type, objid-layer of the component
+#               list), resolved to a constant of the kind range through the file's own definitions, else kind-unresolved;
+#               per kind lookup, create, the failed-create rollback (the create-finalize call that shares an argument with
+#               the create call), delete (the delete-finalize call, its kind from the get call that shares an argument
+#               with it), stored-name, other-store, not-covered; once per component the layer-fn lines and the layer-op
+#               lines (the fill of the table in the layer's initialisation, the store into the name field in its free-slot
+#               search, the create-finalize and delete-finalize functions with their status and out parameters);
+#               generation T: the entries of revision 1 under the revision-2 head.  The revision-1 files are generated and
+#               checked as before, byte for byte; a component of generation N without the revision-2 anchors gets no
+#               revision-2 file.
 # The scan reads files and prints; it opens nothing else and writes only under the output directory of `generate`.
 import glob
 import hashlib
@@ -1033,6 +1045,341 @@ def p0_lines(comp, sc, names):
     return L
 
 
+# ---------------------------------------------------------------- revision 2: name-space entries of the object-id layer
+# (kairos/docs/semantics_coverage.md section 8).  The functions below do not change any revision-1 output: the files
+# framework_namespaces_<label>.txt are still made by ns_lines above, byte for byte; revision 2 writes
+# framework_namespaces2_<label>.txt.  Anchors of revision 2 (component list): objid-kinds (the line range of the kind
+# constants), objid-kind-type (the declared type of the table-selecting parameter), objid-layer (role:function pairs).
+RULE_REVISION_2 = 'semantics coverage rule revision 2 (2026-11-18)'
+FORMAT_2 = 'semantics-data 2'
+LAYER_ROLES = ('lookup', 'create', 'get', 'create-finalize', 'delete-finalize', 'init', 'slot-search')
+KIND_ROLES = ('lookup', 'create', 'get')
+
+
+def calls_in(s, bo, end, fn):
+    """(line, args, call offset) of every call of `fn` in the body text code[bo:end] (arguments across lines)."""
+    code = s.code_np
+    out = []
+    for m in re.finditer(r'\b%s\s*\(' % re.escape(fn), code[bo:end]):
+        pos = bo + m.start()
+        args = call_args(code[pos:end], m.end() - m.start() - 1)
+        if args is None:
+            continue
+        out.append((s.line_of(pos), [' '.join(a.split()) for a in args], pos))
+    return out
+
+
+def unparen(a):
+    a = strip_cast(a.strip())
+    while a.startswith('(') and a.endswith(')'):
+        inner = a[1:-1]
+        depth, ok = 0, True
+        for ch in inner:
+            depth += ch == '('
+            depth -= ch == ')'
+            if depth < 0:
+                ok = False
+                break
+        if not ok:
+            break
+        a = strip_cast(inner.strip())
+    return a
+
+
+def resolve_kind(files, rels, r, arg, kconsts, depth=0):
+    """The kind constant an argument text stands for: a constant of the kind range, or a name the same file (then the
+    listed headers) defines as such through #define or an enumerator; None when it cannot be resolved."""
+    a = unparen(arg)
+    if not re.fullmatch(r'[A-Za-z_]\w*', a):
+        return None
+    if a in kconsts:
+        return a
+    if depth > 5:
+        return None
+    for rel in [r] + [x for x in rels if x != r]:
+        try:
+            src = files.get(rel)
+        except OSError:
+            continue
+        for l in src.lines:
+            m = re.match(r'^\s*#\s*define\s+%s\s+(.+?)\s*$' % re.escape(a), l) or re.match(r'^\s*%s\s*=\s*([^,;]+?)\s*,?\s*$' % re.escape(a), l)
+            if m:
+                return resolve_kind(files, rels, rel, m.group(1), kconsts, depth + 1)
+    return None
+
+
+def struct_field2(files, rels, ty, field):
+    """find_struct_field, also through a typedef of a tagged struct declared apart (typedef struct TAG NAME;)."""
+    hit = find_struct_field(files, rels, ty, field)
+    if hit is not None:
+        return hit
+    for r in rels:
+        try:
+            src = files.get(r)
+        except OSError:
+            continue
+        m = re.search(r'\btypedef\s+struct\s+(\w+)\s+%s\s*;' % re.escape(ty), src.code)
+        if m:
+            return find_struct_field(files, rels, m.group(1), field)
+    return None
+
+
+def fill_names(p0cpp):
+    """The fill functions of the P0 table (data entries of the memset writer kind), read from its text."""
+    text = open(p0cpp).read()
+    return [m.group(1) for m in re.finditer(r'\bdata\("([A-Za-z_]\w*)",[^;]*KZ_WRITER_KIND_MEMSET', text)]
+
+
+def namespaces2(comp, p0cmp, fills):
+    """Revision-2 name-space data of a component with the object-id anchors; None when the revision-2 anchors are absent."""
+    if not all(comp.get(k) for k in ('objid-kinds', 'objid-kind-type', 'objid-layer')):
+        return None
+    root = comp['root']
+    files = Files(root)
+    headers = files_of(root, comp.get('headers', ''))
+    sources = files_of(root, comp.get('sources', ''))
+    defs = definitions(files, sources)
+    allh = headers + [h for h in headers_all(comp, files) if h not in headers]
+    lookup0, create0, delete0, init_macro, kmacro, nfield = comp['objid'].split(',')
+    widths = typedef_widths(files, headers)
+    kinds = group_in(files, comp['objid-kinds'], widths)  # (name, value, rel, line)
+    kconsts = {n for n, _, _, _ in kinds}
+    ktype = comp['objid-kind-type']
+    success = comp.get('success', '')
+    public = set()
+    for r in headers:
+        for text, start, end_ch, end in files.get(r).statements():
+            if end_ch == ';':
+                p = parse_proto(text)
+                if p:
+                    public.add(p['name'])
+    # the layer functions: definition line, index of the parameter of the kind type
+    layer = []  # (role, fn, rel, line, kind-param or None, def tuple)
+    for item in comp['objid-layer'].split(','):
+        role, _, fn = item.partition(':')
+        if role not in LAYER_ROLES:
+            raise SystemExit('objid-layer: unknown role %s' % role)
+        dl = defs.get(fn, [])
+        if len(dl) != 1:
+            raise SystemExit('objid-layer: %s has %d definitions in the sources' % (fn, len(dl)))
+        r, line, bo, end, p = dl[0]
+        idx = [i for i, pr in enumerate(p['params']) if ktype in param_type_words(pr)]
+        if role in KIND_ROLES and len(idx) != 1:
+            raise SystemExit('objid-layer: %s (%s) has no single parameter of type %s; an anchor value is needed' % (fn, role, ktype))
+        layer.append((role, fn, r, line, idx[0] if len(idx) == 1 else None, dl[0]))
+    fn_role = {}
+    for role, fn, r, line, kp, d in layer:
+        fn_role.setdefault(role, []).append((fn, kp))
+    layer_fns = {fn for _, fn, _, _, _, _ in layer}
+
+    def one(role):
+        x = [e for e in layer if e[0] == role]
+        return x[0] if len(x) == 1 else None
+
+    def param_cmp_success(d):
+        r, line, bo, end, p = d
+        s = files.get(r)
+        body = s.code_np[bo:end]
+        for i, pr in enumerate(p['params']):
+            n = param_name(pr)
+            if n and success and re.search(r'\b%s\s*[!=]=\s*%s\b|\b%s\s*[!=]=\s*%s\b' % (re.escape(n), re.escape(success), re.escape(success), re.escape(n)), body):
+                return i
+        return None
+
+    def param_out_store(d):
+        r, line, bo, end, p = d
+        s = files.get(r)
+        body = s.code_np[bo:end]
+        for i, pr in enumerate(p['params']):
+            n = param_name(pr)
+            if n and '*' in pr and re.search(r'(?<![\w)\]])\*\s*%s\s*=[^=]' % re.escape(n), body):
+                return i
+        return None
+
+    cfin, dfin, linit, slot = one('create-finalize'), one('delete-finalize'), one('init'), one('slot-search')
+    cfin_status = param_cmp_success(cfin[5]) if cfin else None
+    cfin_out = param_out_store(cfin[5]) if cfin else None
+    dfin_status = param_cmp_success(dfin[5]) if dfin else None
+    # the layer's own operations
+    layer_ops = []
+    if linit:
+        r, line, bo, end, p = linit[5]
+        s = files.get(r)
+        for f in fills:
+            for ln, args, pos in calls_in(s, bo, end, f):
+                if not args:
+                    continue
+                a0 = unparen(args[0]).lstrip('&').strip()
+                a0 = re.sub(r'\[.*$', '', a0).strip()
+                ty = find_decl_type(files, sources + allh, a0) if re.fullmatch(r'[A-Za-z_]\w*', a0) else None
+                if ty and struct_field2(files, allh, ty, nfield):
+                    layer_ops.append(('clear-table', 'layer-op clear-table %s def=%s:%d at=%s:%d form=fill' % (linit[1], r, line, r, ln), r, ln))
+    if slot:
+        r, line, bo, end, p = slot[5]
+        s = files.get(r)
+        for ln, l in body_lines(s, bo, end):
+            if re.search(r'(->|\.)\s*%s\s*=[^=]' % re.escape(nfield), s.code_np.split('\n')[ln - 1]):
+                layer_ops.append(('clear-slot', 'layer-op clear-slot %s def=%s:%d at=%s:%d form=assign field=%s' % (slot[1], r, line, r, ln, nfield), r, ln))
+    if cfin:
+        layer_ops.append(('rollback', 'layer-op rollback %s def=%s:%d status-param=%s out-param=%s' % (cfin[1], cfin[2], cfin[3], '-' if cfin_status is None else cfin_status,
+                                                                                                  '-' if cfin_out is None else cfin_out), cfin[2], cfin[3]))
+    if dfin:
+        layer_ops.append(('delete-finalize', 'layer-op delete-finalize %s def=%s:%d status-param=%s' % (dfin[1], dfin[2], dfin[3], '-' if dfin_status is None else dfin_status),
+                          dfin[2], dfin[3]))
+    # every call of a layer function that takes a kind, in every definition of the sources
+    ent = {k: {'lookup': [], 'create': [], 'rollback': [], 'delete': [], 'stored-name': [], 'other-store': []} for k in kconsts}
+    unresolved = []  # (function, rel, line, argument text)
+    writers = []  # every name-storing writer: (function, rel, line, form, covered-by or None)
+    stray_init = []
+    for name, dl in sorted(defs.items()):
+        for d in dl:
+            r, line, bo, end, p = d
+            s = files.get(r)
+            pnames = {param_name(x) for x in p['params']}
+            kcalls = []  # (role, line, args, kind or None, kind-param)
+            for role in KIND_ROLES:
+                for fn, kp in fn_role.get(role, []):
+                    for ln, args, pos in calls_in(s, bo, end, fn):
+                        k = None
+                        if kp < len(args) and unparen(args[kp]) not in pnames:
+                            k = resolve_kind(files, sources + allh, r, args[kp], kconsts)
+                        kcalls.append((role, ln, args, k, kp, pos))
+                        if k is None:
+                            unresolved.append((name, r, ln, args[kp] if kp < len(args) else ''))
+            kinds_here = sorted({c[3] for c in kcalls if c[3]})
+            for role, ln, args, k, kp, pos in kcalls:
+                if k and role in ('lookup', 'create'):
+                    ent[k][role].append((name, r, line, ln, name in public))
+            # rollback: the create-finalize call of the same function that shares a non-kind argument with the create call
+            if cfin:
+                fcalls = calls_in(s, bo, end, cfin[1])
+                for role, ln, args, k, kp, pos in kcalls:
+                    if role != 'create' or not k:
+                        continue
+                    share = {unparen(a) for i, a in enumerate(args) if i != kp and unparen(a) not in ('NULL', '0')}
+                    for fln, fargs, fpos in fcalls:
+                        if fpos > pos and share & {unparen(a) for a in fargs}:
+                            ent[k]['rollback'].append((name, r, line, fln, cfin_status, cfin_out))
+                            break
+            # delete: the delete-finalize call, its kind from the get call that shares a non-kind argument with it
+            if dfin:
+                for fln, fargs, fpos in calls_in(s, bo, end, dfin[1]):
+                    fset = {unparen(a) for a in fargs if unparen(a) not in ('NULL', '0')}
+                    ks = sorted({k for role, ln, args, k, kp, pos in kcalls if role == 'get' and k and fset & {unparen(a) for i, a in enumerate(args) if i != kp}})
+                    if len(ks) == 1:
+                        ent[ks[0]]['delete'].append((name, r, line, fln, name in public))
+                    elif name not in layer_fns:
+                        unresolved.append((name, r, fln, '(no get call of one kind shares an argument with this delete-finalize call)'))
+            # the stored name: the name-initialising macro in a create of the kind
+            creates_here = sorted({k for role, ln, args, k, kp, pos in kcalls if role == 'create' and k})
+            for ln, l in body_lines(s, bo, end):
+                m = re.search(r'\b%s\s*\(\s*\w+\s*,\s*(\w+)\s*,\s*(\w+)\s*,' % re.escape(init_macro), l)
+                if m:
+                    ext = record_field(files, sources + allh, s, bo, end, m.group(1), m.group(2))
+                    if len(creates_here) == 1:
+                        ent[creates_here[0]]['stored-name'].append((name, r, ln, ext))
+                        writers.append((name, r, ln, 'init-macro', 'stored-name %s' % creates_here[0]))
+                    else:
+                        stray_init.append((name, r, ln))
+                        writers.append((name, r, ln, 'init-macro', None))
+                if re.search(r'(->|\.)\s*%s\s*=[^=]' % re.escape(nfield), s.code_np.split('\n')[ln - 1]):
+                    if slot and name == slot[1]:
+                        writers.append((name, r, ln, 'store', 'layer-op clear-slot'))
+                    elif len(kinds_here) == 1:
+                        ent[kinds_here[0]]['other-store'].append((name, r, ln))
+                        writers.append((name, r, ln, 'store', 'other-store %s' % kinds_here[0]))
+                    else:
+                        writers.append((name, r, ln, 'store', None))
+    rv1 = namespaces(comp, files, headers, sources, defs, set(n for n, _, _, _ in group_in(files, comp['status'], widths)) if comp.get('status') else set(),
+                     p0cmp, lambda rel: rel)
+    n1 = rv1[0] if rv1 else {'comparisons': [], 'chain': []}
+    return {'layer': layer, 'layer_ops': layer_ops, 'kinds': kinds, 'ent': ent, 'unresolved': sorted(set(unresolved), key=lambda x: (x[1], x[2], x[0])),
+            'writers': writers, 'stray_init': stray_init, 'comparisons': n1['comparisons'], 'chain': n1['chain'], 'public': public, 'anchors': comp['objid'],
+            'nfield': nfield}
+
+
+def head2(label, comp):
+    return ['# %s -- name-space data of %s, layer %s, generated by research env/tools/semantics_scan.py (%s); do not edit:'
+            % ('framework_namespaces2_%s.txt' % label, label, comp['layer'], RULE_REVISION_2),
+            '# the file is what the scan of the version-pinned files below gives; `semantics_scan.py check` regenerates it and',
+            '# compares.  Every file:line is relative to the component root and pinned by the sha256 of its `file` line.',
+            '# No tool reads this file yet: the present plan generator (plan rules revisions 3 and 4, kz-static `read_namespaces`)',
+            '# refuses its statements layer-fn, layer-op, rollback, not-covered and kind-unresolved, and so the file as a whole;',
+            '# the reader comes with the kz-static build that implements plan rules revision 5.  The revision-1 file of this',
+            '# component (framework_namespaces_%s.txt) is unchanged and stays what kept plans name.' % label,
+            FORMAT_2, 'layer %s' % comp['layer'], 'component %s version="%s"' % (label, comp['version']), 'rule %s' % RULE_REVISION_2]
+
+
+def ns2_lines(comp, sc, ns2):
+    """Revision-2 lines: generation N from namespaces2, generation T as revision 1 (section 8 leaves it unchanged)."""
+    label = comp['label']
+    L = head2(label, comp)
+    if ns2 is None:
+        # generation T: the entries of revision 1 under the revision-2 head
+        old = ns_lines(comp, sc)
+        start = next(i for i, l in enumerate(old) if l.startswith('rule ')) + 1
+        L.append('# generation T (table paths): unchanged by revision 2 (coverage rule section 8); the entries are those of revision 1.')
+        L += old[start:]
+        return L
+    pins, body = set(), []
+    body.append('generation object-id anchors=%s kinds=%s kind-type=%s' % (ns2['anchors'], comp['objid-kinds'], comp['objid-kind-type']))
+    pins.add(comp['objid-kinds'].rpartition(':')[0])
+    for role, fn, r, line, kp, d in ns2['layer']:
+        body.append('layer-fn %s %s def=%s:%d kind-param=%s' % (role, fn, r, line, '-' if kp is None else kp))
+        pins.add(r)
+    for what, text, r, ln in ns2['layer_ops']:
+        body.append(text)
+        pins.add(r)
+    for fn, r, line, cmp, ln in ns2['comparisons']:
+        body.append('compare %s def=%s:%d call=%s at=%s:%d' % (fn, r, line, cmp, r, ln))
+        pins.add(r)
+    for fn, r, line, c, ln in ns2['chain']:
+        body.append('chain-status %s def=%s:%d %s at=%s:%d' % (fn, r, line, c, r, ln))
+        pins.add(r)
+    n = 0
+    for k, v, kr, kl in ns2['kinds']:
+        e = ns2['ent'][k]
+        n += 1
+        body.append('kind %s value=%d at=%s:%d' % (k, v, kr, kl))
+        for role in ('lookup', 'create'):
+            for fn, r, line, ln, pub in e[role]:
+                body.append('  %s %s def=%s:%d at=%s:%d public=%s' % (role, fn, r, line, r, ln, 'yes' if pub else 'no'))
+                pins.add(r)
+        for fn, r, line, ln, si, oi in e['rollback']:
+            body.append('  rollback %s def=%s:%d at=%s:%d status-arg=%s out-arg=%s' % (fn, r, line, r, ln, '-' if si is None else si, '-' if oi is None else oi))
+        for fn, r, line, ln, pub in e['delete']:
+            body.append('  delete %s def=%s:%d at=%s:%d public=%s' % (fn, r, line, r, ln, 'yes' if pub else 'no'))
+            pins.add(r)
+        for fn, r, ln, ext in e['stored-name']:
+            if ext:
+                body.append('  stored-name %s at=%s:%d extent=%s element=%s decl=%s:%d' % (fn, r, ln, ext[0], ext[3].replace(' ', '-'), ext[1], ext[2]))
+                pins.add(ext[1])
+            else:
+                body.append('  stored-name %s at=%s:%d extent=- (the record field declaration is not found)' % (fn, r, ln))
+            pins.add(r)
+        for r, ln in sorted({(r, ln) for fn, r, ln in e['other-store']}):
+            body.append('  other-store at=%s:%d' % (r, ln))
+            pins.add(r)
+        pl = [x for x in e['lookup'] if x[4]]
+        pc = [x for x in e['create'] if x[4]]
+        if not pl or not pc:
+            if not e['lookup'] and not e['create'] and not e['delete']:
+                body.append('  not-covered no lookup, create or delete of the layer is called with this kind in the scanned sources')
+            else:
+                missing = ' and '.join(w for w, x in (('lookup', pl), ('create', pc)) if not x)
+                np_ = sorted({x[0] for x in e['lookup'] + e['create'] if not x[4]})
+                body.append('  not-covered no public %s%s' % (missing, ('; the layer is called with this kind by %s, not declared in the public headers' % ','.join(np_)) if np_ else ''))
+    for fn, r, ln, arg in ns2['unresolved']:
+        body.append('kind-unresolved %s at=%s:%d' % (fn, r, ln))
+        pins.add(r)
+    files = Files(comp['root'])
+    for rel in sorted(pins):
+        L.append('file %s sha256=%s' % (rel, files.get(rel).sha256))
+    L += body
+    L.append('end namespaces=%d kind-unresolved=%d' % (n, len(ns2['unresolved'])))
+    return L
+
+
 def generate_all(trees, p0cpp):
     comps = read_trees(trees)
     names = p0_names(p0cpp)
@@ -1040,6 +1387,7 @@ def generate_all(trees, p0cpp):
     # only the byte-string comparisons of the compare table name a key comparison
     text = open(p0cpp).read()
     p0cmp = [n for n in p0cmp if re.search(r'\{"%s", "byte-string comparison"' % re.escape(n), text)]
+    fills = fill_names(p0cpp)
     out = {}
     for c in comps:
         if c['layer'] == 'p0':
@@ -1050,6 +1398,10 @@ def generate_all(trees, p0cpp):
         out['framework_semantics_%s.txt' % c['label']] = fw_lines(c, sc)
         if sc['namespaces']:
             out['framework_namespaces_%s.txt' % c['label']] = ns_lines(c, sc)
+            # revision 2 (coverage rule section 8): a component of generation N needs the revision-2 anchors
+            ns2 = namespaces2(c, p0cmp, fills) if c.get('objid') else None
+            if ns2 is not None or not c.get('objid'):
+                out['framework_namespaces2_%s.txt' % c['label']] = ns2_lines(c, sc, ns2)
     return comps, out
 
 
@@ -1077,7 +1429,7 @@ def main(argv):
     if len(argv) == 5 and argv[1] == 'check':
         comps, out = generate_all(argv[2], argv[3])
         bad = 0
-        present = sorted(n for n in os.listdir(argv[4]) if re.match(r'^(framework_semantics|framework_namespaces|p0_declarations)_.*\.txt$', n))
+        present = sorted(n for n in os.listdir(argv[4]) if re.match(r'^(framework_semantics|framework_namespaces2?|p0_declarations)_.*\.txt$', n))
         for name in sorted(set(out) | set(present)):
             p = os.path.join(argv[4], name)
             if name not in out:

@@ -549,3 +549,56 @@ same_build<TAB><confirmed|refused|unconfirmed(<까닭>)><TAB><m> objects: confir
 - 객체 줄: dump 의 `buildid` 줄의 값과, 빌드 트리의 같은 파일에서 `readelf -n` 으로 읽은 값이 같으면 `confirmed`, 다르면 `refused`. 까닭의 글: `no build-id in dump`(1.4 까지의 dump, 또는 그 객체의 줄이 없음), `no build-id note`(`note=absent|unreadable`), `no build-id in the build tree`, `object not in the build record`.
 - 요약 줄: 모든 객체가 `confirmed` 일 때만 `confirmed`; 하나라도 `refused` 면 `refused`; 아니면 `unconfirmed(<첫 까닭>)`. 객체가 없으면 `unconfirmed(no build-id in dump)`.
 - 사슬의 판정(`chain` 줄)은 지금처럼 `same_build` 를 넣지 않고 따로 낸다. **부팅의 문에도 넣지 않는다**: 같은 빌드는 쌍마다 기초 1 로 평가한다(판정 규칙 8.13 의 6번). 설명 스크립트는 쌍의 두 사건의 site 가 든 객체의 `same_build_object` 줄을 읽는다.
+
+### 13.5 dump 1.5 의 바이트 배치, 종류 번호, 적재 객체를 찾는 방법 (2026-11-19; 런타임 단계가 그것을 쓰고 읽는 코드보다 먼저 커밋함) [D]
+
+13.1–13.4 의 글 줄은 그대로다. 이 항은 그 줄을 내는 레코드의 바이트 배치와 번호, 그리고 모듈 등록에서 적재 객체를 찾는 방법을 정한다. 형식은 `kzrt-dump` **1.5**(부번호 하나: 새 레코드 종류와 새 LOSS 종류만, 있던 레코드의 배치는 그대로), 런타임은 `kzrt 0.5.0` 이다. hook ABI·control ABI·adapter ABI 는 1 그대로다(호출을 더할 뿐이다). 플러그인이 넣는 모듈 등록 `kz_rt_module(module, manifest_sha256)` 은 바뀌지 않는다.
+
+**(가) 스트림 레코드 BUILDID** `0x0009`(sub 0). MODULE 레코드들 바로 뒤에 놓는다: `RUN, RUNX, MODULE*, BUILDID*, RESOURCE*, ACTOR*, LOSS*, POINT*, PLAN?, BUF*, END`. 1.4 reader 는 모르는 종류로 건너뛴다.
+
+```
+ 8 u32 object   0 = 주 실행 파일, 그 밖 = 모듈 번호
+12 u32 source   1 = start, 2 = registration
+16 u32 note     0 = present, 1 = absent, 2 = unreadable
+20 u32 actor    기록한 스레드의 run actor (0 = 없음, 글 줄의 actor=-)
+24 u64 t        adapter 시계 (0 = 모름)
+32 u16 id_len   build-id 바이트 수 (0 .. KZ_RT_BUILDID_MAX = 64; note 가 present 가 아니면 0)
+34 u16 path_len 경로 바이트 수 (0 .. KZ_RT_OBJPATH_MAX = 1023)
+36 u32 flags    1 = 경로가 1023 바이트에서 잘림
+40 id 바이트, 그다음 path 바이트 (NUL 없음), 4 바이트로 채움;   크기 = 40 + id_len + path_len 을 4 의 배수로
+```
+
+글 줄은 13.1 그대로이고, 경로가 잘린 줄에만 줄 끝에 ` path_cut=yes` 를 더한다(연결 점검은 그런 객체를 `object not in the build record` 로 둔다). `path` 의 글은 다른 따옴표 글(`what="…"`)과 같이 찍을 수 없는 바이트를 `\xNN` 으로 쓴다.
+
+**(나) 예약하는 버퍼 레코드 셋**(actor 의 BUF 안, EVENT 와 같은 자리; 이 주기에는 쓰는 쪽이 없다). sub 는 EVENT 와 같은 사건 표지(`KZ_RT_EF_*`)다.
+
+```
+TOK_CREATE 0x0104:  8 u32 actor, 12 u32 aseq, 16 u32 site, 20 u32 rsv, 24 u64 token, 32 u64 t;                      크기 40
+TOK_RETURN 0x0105:  8 u32 actor, 12 u32 aseq, 16 u32 site, 20 u32 rsv, 24 u64 token, 32 s64 status, 40 u64 handle,
+                    48 u64 t;                                                                                     크기 56
+TOK_START  0x0106:  8 u32 actor, 12 u32 aseq, 16 u32 site (0 = 없음), 20 u32 rsv, 24 u64 token, 32 u64 t;           크기 40
+```
+
+글 줄은 13.2 그대로다(`tok-return`·`tok-start` 의 글에는 site 가 없다). 세 종류는 actor 의 aseq 를 하나씩 쓰는 레코드로 센다(`kz-rt-dump` 의 aseq 빈틈 점검이 EVENT·CTL·AEXIT 와 함께 읽는다). 크기가 위보다 작으면 형식 오류다.
+
+**(다) LOSS 종류 둘.** `15` = `no-build-id`: key = 모듈 번호(주 실행 파일은 0), count = build-id 를 적지 못한 (모듈, 객체) 수 — note 가 `absent`·`unreadable` 인 BUILDID 레코드마다 하나, 그리고 객체를 읽는 쪽(아래 (라))이 끝내 주어지지 않아 찾지 못한 등록마다 하나(그때는 BUILDID 레코드가 없다). `16` = `object-table`: key 0, count = 객체 표(`KZ_RT_MAX_OBJECTS`, 기본 `KZ_RT_MAX_MODULES + 1`)가 차서 적지 못한 (모듈, 주소) 수. 둘 다 사건의 손실이 아니다: 변환은 그것을 손실 구간으로 만들지 않는다((바)).
+
+**(라) 적재 객체를 찾는 방법** (플러그인·ABI 를 바꾸지 않는다). 런타임 핵심은 라이브러리를 부르지 않으므로 객체를 읽는 일은 adapter 쪽 함수가 한다.
+- 더하는 호출 `kz_rt_objects(reader, ctx)`(`kz_rt.h`): 읽는 함수 `int reader(ctx, addr, kz_rt_object *out)` 를 한 번 준다. `addr == NULL` 은 주 실행 파일이다. 런타임은 그 자리에서 주 실행 파일을 읽어 `source=start` 로 적고, 그때까지 받아 둔 등록을 읽어 `source=registration` 으로 적는다. 그 뒤의 `kz_rt_module` 호출은 그때마다 읽는다.
+- 등록의 주소: `kz_rt_module` 의 두 번째 인자(manifest sha256 의 32 바이트). GCC plugin 은 그것을 등록하는 번역 단위 안의 문자열 상수로 만든다(`instrument/gcc/kzgcc.cpp` `build_module_ctor`). 그래서 그 주소가 든 적재 객체가 그 단위가 링크된 객체다. 같은 (모듈, 주소)는 한 번만 받아 두고, 읽은 뒤에는 (모듈, 객체의 적재 기준 주소)마다 한 줄이다(한 모듈의 단위가 여러 객체에 있으면 객체마다 한 줄).
+- POSIX 의 읽는 함수 `kz_rt_posix_objects()`(`kz_rt_posix.h`): 적재기의 프로그램 머리 훑기(`dl_iterate_phdr`)로, `PT_LOAD` 구간 `[dlpi_addr + p_vaddr, + p_memsz)` 에 주소가 드는 객체를 찾는다(`addr == NULL` 이면 첫 객체 = 주 실행 파일). 그 객체의 `PT_NOTE` 구간을 메모리에서 읽어 이름 `GNU`, 종류 3(`NT_GNU_BUILD_ID`)의 note 를 찾는다: 있으면 `present`, 없으면 `absent`, note 구간이 그 객체의 구간을 넘거나 크기가 맞지 않거나 64 바이트보다 길면 `unreadable`. 주소가 든 객체가 없으면 `unreadable` 이고 경로는 빈 글이다. 경로: 주 실행 파일은 `getauxval(AT_EXECFN)`(exec 에 준 경로), 그 밖은 `dlpi_name`(적재기가 준 경로; `dlopen` 에 준 글).
+- POSIX 시작 객체(`kz_rt_posix_auto.c`)의 생성자가 `kz_rt_attach`·`kz_rt_init` 뒤에 `kz_rt_posix_objects()` 를 부른다. 실행 파일의 단위 생성자는 그보다 먼저 돌므로 그 등록은 받아 두었다가 이때 읽힌다. `dlopen` 으로 올리는 모듈의 생성자는 그 뒤에 돌아 그때 읽힌다(생성자 안에서 `dl_iterate_phdr` 를 부른다; 그 객체는 생성자가 돌 때 이미 적재기의 목록에 있다 [I: 런타임 시험이 test 모듈로 보인다]).
+- 기록은 store 의 표에 값으로 둔다(포인터를 dump 하지 않는다). 그래서 store 에서 되살린 dump(`kz-rt-dump --recover`)도 같은 BUILDID 레코드를 낸다.
+
+**(마) `kz-rt-dump`**: 형식 줄은 `format kzrt-dump 1.5 …`. 1.0–1.4 dump 는 앞판과 같은 글이다. `buildid` 줄은 스트림 차례대로(MODULE 줄 뒤) 찍고, `tok-*` 줄은 BUF 안의 차례대로 찍는다. 새 `check` 줄은 없다.
+
+**(바) `kz convert --kzrt`**: BUILDID 레코드마다 중립 층 NBUILD 레코드 하나(`link=build-id`, `index` = 모듈 번호 또는 0, `path`, `build_id` = 소문자 16진(없으면 빈 글), 표지 `observed-known` 은 note 가 present 일 때만, `verdict=unconfirmed`, `reason` = `not compared by the conversion` 또는 `no build-id note (absent)`·`(unreadable)`). 변환은 빌드 트리를 읽지 않으므로 아무것도 비교하지 않고 `run` 레코드도 쓰지 않는다: 같은 빌드의 판정은 `env/tools/chain_check.py`(13.4)가 한다. LOSS `no-build-id`·`object-table` 은 중립 손실로 옮기지 않는다(사건이 빠진 것이 아니다). 1.0–1.4 dump 에서는 NBUILD 가 없다(그 절은 비어 있으면 쓰지 않으므로 container 는 앞판과 같은 바이트다, 도구 정체성 칸 밖). `kz convert` 의 출력에 줄 하나를 더한다: `build-id records: <n>` 또는 `build-id records: none (kzrt-dump <major>.<minor>)`.
+
+**(사) 연결 점검의 객체 대응** (13.4 의 줄): `object=main` 은 `--main` 의 파일이다. `object=module:<n>` 은 빌드 기록의 실행 파일·모듈 줄 가운데 경로가 dump 의 `path` 와 뒤끝이 맞는 것(한쪽이 다른 쪽의 `/` 뒤 끝) **정확히 하나**이고, 없거나 둘 이상이면 `unconfirmed(object not in the build record)` 다. dump 에 MODULE 줄은 있는데 그 모듈의 `buildid` 줄이 없으면 그 모듈의 객체 줄 하나를 `unconfirmed(no build-id in dump)` 로 낸다. 주 실행 파일의 줄이 없을 때도 같다.
+
+### 13.6 플러그인이 `kzs-sites 4` 를 읽는 법 (kzgcc 0.4, kzllvm 0.2; 2026-11-19; 코드보다 먼저 커밋함) [D]
+
+두 플러그인은 런타임의 같은 파서(`runtime/tools/manifest`)로 읽는다. 판 1–3 manifest 에서는 앞판(kzgcc 0.3, kzllvm 0.1)과 같은 site 를 같은 자리에 묶는다: 목적 파일은 같은 바이트이고 binding 파일은 머리의 판 글(`# kzgcc 0.4 …`)만 다르다. 아래는 판 4 manifest 에서만 일어난다.
+- **호출 site 고르기**(`callee=` 가 있는 site 에 `col=`·`nth=` 가 있을 때): 그 함수의 `callee` 호출 가운데 `line=` 의 줄에 있는 것이 하나면 그것을 묶는다. 둘 이상이면 컴파일러가 그 호출에 준 열(GCC 는 GIMPLE 문의 위치, LLVM 은 debug 위치)이 `col=` 과 같은 것이 정확히 하나일 때 그것을 묶고, 아니면 `unsupported` 로 둔다(까닭: 그 줄의 호출 수와 컴파일러의 열들). 묶은 호출마다 컴파일러의 열과 그 함수 안의 차례(줄·열 순)를 `# bind … notes=` 에 `gcc-col=`·`gcc-nth=`(LLVM 은 `llvm-col=`·`llvm-nth=`)로 적는다. `col=`·`nth=` 와 다르면 그 차이를 세어 머리 줄 `# v4 calls: …` 에 적는다. kz-static 의 열은 clang 의 확장 위치이고 GCC 의 열은 GIMPLE 문의 위치이므로, 둘이 같다고 가정하지 않는다 [I: 묶음 점검이 잰다].
+- **site 종류**: kzgcc 는 판 2–3 의 자리(`at-call`, `after-call`, `line-start`, `store`)와 판 1 의 꼴을 그대로 묶는다. 계획 규칙 개정 5 의 새 site(생성 쪽 종류 값, 문맥 틀, 수명 끝)는 모두 이 꼴이다(`docs/plan_manifest.md` 10 절). `place=load` 는 묶지 않는다(`unsupported`, 까닭 `place=load is not bound by kzgcc 0.4 (no load site kind)`). `spawn` 문이 있는 at-call 은 값과 함께 보통의 at-call 로 묶고 호출을 래퍼로 바꾸지 않는다(binding 의 notes 에 `spawn wrapper not applied`). `identity … decoder=spawn-token` 은 읽는 쪽이 없다: 그 site 의 다른 binding 은 그대로이고 그 읽기만 센다. kzllvm 0.2 는 판 1 의 꼴(진입·반환, 호출 전·후, 포인터 매개변수를 통한 store)만 묶고, 판 4 manifest 의 다른 꼴(`place=` 가 있는 site, identity 읽기가 있는 site)은 `unsupported`(까닭 `<꼴> is not bound by kzllvm 0.2`)로 둔다.
+- **센 것**: binding 파일 머리에 판 4 manifest 일 때만 줄을 더한다: `# plan <id>`(manifest 의 plan 문), `# unsupported-kind <꼴> sites=<n> reason="<까닭>"`(이 단위에서 그 까닭으로 묶지 않은 site 수, 꼴마다 한 줄), `# not-applied <무엇> sites=<n>`(spawn 래퍼, spawn-token 읽기), `# v4 calls: sites=<n> line-unique=<a> by-col=<b> unsupported=<c> col-differs=<d> nth-differs=<e>`.

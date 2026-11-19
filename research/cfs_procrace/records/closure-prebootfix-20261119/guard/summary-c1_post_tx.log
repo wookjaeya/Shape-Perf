@@ -1,0 +1,4 @@
+# space_guard.sh kind=summary-c1_post_tx need=20000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/env/obs1/explain_summary.py --out /home/user/Shape-Perf/research/cfs_procrace/records/closure-prebootfix-20261119/out/summary_synth_c1_post_tx.txt --uses /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/uses/uses_c1_post_tx.tsv boot1=/home/user/work/redesign/obs1/xr5_synth_c1_post_tx_script/explain boot2=/home/user/work/redesign/obs1/xr5_synth_c1_post_tx_reverse/explain
+start 2026-11-19T17:46:48.142Z free=764747776 threshold=334572800
+sample 2026-11-19T17:46:48.147Z 764743680
+end 2026-11-19T17:46:50.154Z kind=summary-c1_post_tx verdict=completed rc=0 free=764628992 lowest=764628992 dip=118784 change=-118784

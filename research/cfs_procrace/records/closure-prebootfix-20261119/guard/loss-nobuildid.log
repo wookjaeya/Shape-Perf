@@ -1,0 +1,31 @@
+# space_guard.sh kind=loss-nobuildid need=60000000 floor=314572800 interval=2 cmd=bash -c synth_explain () 
+{ 
+    local b=$1 rd=$2 out=$3 lab=$4 s P Z D;
+    case "$b" in 
+        c1_pre_tx)
+            s=pre
+        ;;
+        c1_post_tx)
+            s=post
+        ;;
+        *)
+            return 64
+        ;;
+    esac;
+    P=$O/cz_plans_v4_ns2/$b;
+    Z=$O/cz_final_order/$b;
+    D=$O/xr4_dry_inputs/$b;
+    mapfile -t NS < <(NSARGS "$P/plan.side");
+    python3 -I "$EX/explain.py" --sidecar "$P/plan.side" --manifest "$P/plan.kzs" --bindings "$O/c1p2_${s}_derived/binds_instr.kzs" --relations "$Z/relations.txt" --keys "$Z/keys.txt" --pairs "$Z/pairs.tsv" "${NS[@]}" --facts-view "$D/facts_view.txt" --bprime-basis "$O/c1p2_${s}_bprime/$b/NP/basis.kz" --build-label "$b" --branches "$PREP/candidates/branches_16.txt" --candidates "$PREP/candidates/candidates.tsv" --named-calls "$PREP/candidates/named_calls.tsv" --dump-text "$rd/tx.dump.txt" --run-meta "$rd/run.meta" --chain "$rd/chain.txt" --startup-script "$rd/startup.scr" --label-record "$lab" --vocabulary "$VOC" --out "$out"
+}
+NSARGS () 
+{ 
+    for f in $(grep '^input namespace-data ' "$1" | sed 's/.* path=//');
+    do
+        printf -- '--namespaces\n%s\n' "$f";
+    done
+}; O='/home/user/work/redesign/obs1'; EX='/home/user/Shape-Perf/research/cfs_procrace/env/obs1'; VOC='/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/reason_vocabulary.txt'; PREP='/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119'; synth_explain 'c1_pre_tx' '<scratch>/xr6_loss_nobuildid/record' '<scratch>/xr6_loss_nobuildid/explain' 'SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)'
+start 2026-11-19T17:46:06.507Z free=766070784 threshold=374572800
+sample 2026-11-19T17:46:06.512Z 766066688
+sample 2026-11-19T17:46:08.518Z 730873856
+end 2026-11-19T17:46:10.524Z kind=loss-nobuildid verdict=completed rc=0 free=717209600 lowest=717209600 dip=48861184 change=-48861184

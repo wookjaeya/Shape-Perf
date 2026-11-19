@@ -1,0 +1,7 @@
+dc879c6 2026-11-19T14:43:10+00:00
+a88066dd59dd0111ce848d9881633f9ee2222d8b922a8a0039db1510567df2ce  scripts/named_calls.py
+named calls: 4, no entry 1: memchr length-call 0 0 -; memset copy-call,fill-call 4 2 P0; strcmp compare-call 3 1 P0; strncpy copy-call 4 2 P0
+rc=0
+4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b  /home/user/Shape-Perf/research/cfs_procrace/records/closure-prebootfix-20261119/out/named_calls_rerun_after_commit.tsv
+4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b  /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/candidates/named_calls.tsv
+byte-identical

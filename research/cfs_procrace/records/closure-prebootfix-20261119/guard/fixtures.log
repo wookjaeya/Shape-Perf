@@ -1,0 +1,17 @@
+# space_guard.sh kind=fixtures need=150000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/env/obs1/tests/test_explain4.py /home/user/Shape-Perf/research/cfs_procrace/env/obs1 /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/reason_vocabulary.txt <scratch>/fx
+start 2026-11-19T17:44:04.597Z free=768421888 threshold=464572800
+sample 2026-11-19T17:44:04.602Z 768417792
+sample 2026-11-19T17:44:06.608Z 758730752
+sample 2026-11-19T17:44:08.614Z 748740608
+sample 2026-11-19T17:44:10.620Z 738660352
+sample 2026-11-19T17:44:12.626Z 728842240
+sample 2026-11-19T17:44:14.632Z 719507456
+sample 2026-11-19T17:44:16.638Z 710152192
+sample 2026-11-19T17:44:18.644Z 701542400
+sample 2026-11-19T17:44:20.650Z 691064832
+sample 2026-11-19T17:44:22.656Z 682364928
+sample 2026-11-19T17:44:24.662Z 671141888
+sample 2026-11-19T17:44:26.669Z 659841024
+sample 2026-11-19T17:44:28.675Z 653180928
+sample 2026-11-19T17:44:30.681Z 653008896
+end 2026-11-19T17:44:32.687Z kind=fixtures verdict=completed rc=0 free=653004800 lowest=653004800 dip=115417088 change=-115417088

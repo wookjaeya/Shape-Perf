@@ -164,7 +164,7 @@ case "$step" in
     { echo "# du -sb (apparent bytes) and du -sB1 (block bytes) of the kept outputs of results 26.3 (obs1/xr5_*), $(date -u +%FT%TZ)"
       echo "## du -sb"; (cd "$O" && du -sb xr5_*); echo "## du -sb, total of the twelve"; (cd "$O" && du -sbc xr5_* | tail -1)
       echo "## du -sb, total of the five synthetic outputs (xr5_synth_*)"; (cd "$O" && du -sbc xr5_synth_* | tail -1)
-      echo "## du -sB1"; (cd "$O" && du -sB1 xr5_*); echo "## du -sB1, total"; (cd "$O" && du -sB1c xr5_* | tail -1); } > "$T"
+      echo "## du -sB1"; (cd "$O" && du -sB1 xr5_*); echo "## du -sB1, total"; (cd "$O" && du -sB1 -c xr5_* | tail -1); } > "$T"
     cat "$T" ;;
   *) echo "usage: runs.sh fixtures|evalfx|runcycle|unit|regress|static B|rtread N|synth B O|loss B O TAG LINE|eval DIR B NAME|summary B|namedcalls|expectregen|classify2 B O|sizes" >&2; exit 64 ;;
 esac

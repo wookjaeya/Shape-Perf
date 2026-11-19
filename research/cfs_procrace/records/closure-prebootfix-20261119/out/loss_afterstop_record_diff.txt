@@ -1,0 +1,3 @@
+the kept synthetic record of /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script with one line added before its format line: loss after-stop actor=- key=0 count=1
+1157a1158
+> loss after-stop actor=- key=0 count=1

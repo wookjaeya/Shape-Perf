@@ -1,0 +1,12 @@
+PASS the stand-in ELF has a GNU build-id (/usr/bin/true)
+PASS clean declaration: verify rc 0, the boot step verifies again and runs (verify rc 0, boot rc 0, rows 7 ok 7 differs 0 missing 0)
+PASS a changed declared value: differs, rc 1; the boot step stops before the boot command (verify rc 1, boot rc 1, rows 7 ok 6 differs 1 missing 0)
+PASS a missing file: missing, rc 1; no boot (verify rc 1, boot rc 1, rows 7 ok 6 differs 0 missing 1)
+PASS the declaration changed after a clean verify: no boot (verify rc 0, boot rc 1)
+PASS no verify.txt: no boot (boot rc 1)
+PASS a second verify keeps the first output under a new name (rc 0 0)
+PASS a declared file changed after a clean verify: the boot step verifies again and does not boot (verify rc 0, boot rc 1, rows 7 ok 6 differs 1 missing 0)
+PASS a declaration with an uncommitted change: no boot (verify rc 0, boot rc 1)
+PASS a file added under a counted directory: differs (verify rc 1, 5	count	elf	1	2	differs)
+PASS control and gate name every loss record by kind and count (control rc 0, gate rc 0, losses: fields none; records after-stop lines=1 count=4;no-build-id lines=2 count=3;)
+run_cycle tests: 11 of 11 pass

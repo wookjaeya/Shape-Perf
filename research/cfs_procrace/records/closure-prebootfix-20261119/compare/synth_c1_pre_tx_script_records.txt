@@ -1,0 +1,112 @@
+== branch D1-R0: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Ra: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Rb: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Rc: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Rd: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Re: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Rf: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-all: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-R0: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Ra: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Rb: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Rc: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Rd: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Re: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Rf: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-all: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events (test input, never evidence; results 26.3), explained again (results 26.5)")
+script identity paths (counted apart): inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46

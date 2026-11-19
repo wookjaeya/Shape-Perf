@@ -1,0 +1,56 @@
+== branch D1-R0: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  none
+script identity paths (counted apart): inputs.normal.path [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45
+== branch D1-Ra: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  none
+script identity paths (counted apart): inputs.normal.path [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45
+== branch D1-Rb: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  none
+script identity paths (counted apart): inputs.normal.path [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45
+== branch D1-Rc: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  none
+script identity paths (counted apart): inputs.normal.path [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45
+== branch D1-Rd: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  none
+script identity paths (counted apart): inputs.normal.path [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45
+== branch D1-Re: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  none
+script identity paths (counted apart): inputs.normal.path [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45
+== branch D1-Rf: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  none
+script identity paths (counted apart): inputs.normal.path [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45
+== branch D1-all: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  none
+differing field paths by class (path class, kind: records; one example: old -> new):
+  none
+script identity paths (counted apart): inputs.normal.path [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45

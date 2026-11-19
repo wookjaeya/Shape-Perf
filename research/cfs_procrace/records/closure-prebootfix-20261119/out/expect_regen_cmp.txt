@@ -1,0 +1,10 @@
+expectations: 2208 lines over 16 branches, 10 rows; class static 1280, boot 928, format 0
+rc=0
+4ed9a362bd096d28a69ca1b7ee79ce74f9ba9ad22fcab1e08a2135684fd982a8  /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/predictions2.tsv
+d8a83e6aa1d8aae891072853dda8acdc5a160c108cff31308257bcedb5ba9b88  /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/predictions3.tsv
+444f7615f7830f464e1f713244c558e263ffbee1c76d5b3a615fa2aa6d04f0ef  <scratch>/expect_regen/expect_c1_2.tsv
+444f7615f7830f464e1f713244c558e263ffbee1c76d5b3a615fa2aa6d04f0ef  /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/expect_c1_2.tsv
+7ebc980343b67edc71e2d1428dce830df60774e7d7e20c609ddbe5455e1a9c70  <scratch>/expect_regen/elements_by_rule_2.tsv
+7ebc980343b67edc71e2d1428dce830df60774e7d7e20c609ddbe5455e1a9c70  /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/elements_by_rule_2.tsv
+expect_c1_2.tsv byte-identical
+elements_by_rule_2.tsv byte-identical

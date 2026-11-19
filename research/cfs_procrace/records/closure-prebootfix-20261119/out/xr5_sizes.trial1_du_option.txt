@@ -1,0 +1,32 @@
+# du -sb (apparent bytes) and du -sB1 (block bytes) of the kept outputs of results 26.3 (obs1/xr5_*), 2026-11-19T17:47:10Z
+## du -sb
+294738	xr5_candidates_regen
+22646154	xr5_dry_rt_rt_format15
+23237575	xr5_dry_rt_rt_objects
+26121453	xr5_dry_static_c1_post_tx
+26132943	xr5_dry_static_c1_pre_tx
+6891710	xr5_eval_dry
+23165224	xr5_regress_rev4fix
+46914237	xr5_synth_c1_post_tx_reverse
+46923019	xr5_synth_c1_post_tx_script
+46905031	xr5_synth_c1_pre_tx_reverse
+46921120	xr5_synth_c1_pre_tx_script
+51332619	xr5_synth_c1_pre_tx_script_trial1
+## du -sb, total of the twelve
+367485823	total
+## du -sb, total of the five synthetic outputs (xr5_synth_*)
+238996026	total
+## du -sB1
+450560	xr5_candidates_regen
+24371200	xr5_dry_rt_rt_format15
+25444352	xr5_dry_rt_rt_objects
+27979776	xr5_dry_static_c1_post_tx
+27983872	xr5_dry_static_c1_pre_tx
+6909952	xr5_eval_dry
+23973888	xr5_regress_rev4fix
+48775168	xr5_synth_c1_post_tx_reverse
+48771072	xr5_synth_c1_post_tx_script
+48758784	xr5_synth_c1_pre_tx_reverse
+48807936	xr5_synth_c1_pre_tx_script
+53350400	xr5_synth_c1_pre_tx_script_trial1
+## du -sB1, total

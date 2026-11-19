@@ -1,0 +1,2 @@
+summary form ok (0 failures)
+rc=0

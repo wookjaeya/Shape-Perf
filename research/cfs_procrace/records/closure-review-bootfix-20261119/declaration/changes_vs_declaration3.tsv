@@ -1,0 +1,12 @@
+# declaration4.py: boot/declaration4.tsv against boot/declaration3.tsv of 13cf028 (rows of the old one not listed here are the same)
+old_line	kind	name	path	old	new	change	why
+152	cycle	run_cycle.sh	records/closure-c1prep-20261119/boot/run_cycle.sh	aa3d535ca21c9d0156af4b71b4ff97abcdd262155c0e1dcbd8ad4f373f69b8c2	2508f144e2a9eef964466d3f40eb2c64bf29c9f55e5ff5fcab6f9ec7c592d083	changed	adfc67d (spec 11.6 item 1: declaration4.tsv, count of non-directory entries, need rows, eval under the work directory, keep, write once, not booted, space need, pin, verify again)
+186	cycle	commands.txt	records/closure-c1prep-20261119/boot/commands.txt	56ad9f0af1b8a132b5992aa2e0b48f1e3ac025ad2e0dd154457a3aaef21ae538	365ce243fde1d47374000fe9ebf9e9631cc6c2f20f2c56271fdd1c24f166d414	changed	adfc67d (spec 11.6 item 3: twelve steps, declaration4.tsv, the space need and the rules of protocol 14.14)
+187	cycle	test_run_cycle.sh	records/closure-c1prep-20261119/boot/test_run_cycle.sh	7076095e96445330bcca82e3d11f24688095bb19a0be89cf201bbee220c00fcb	f76b63f96639afa38a60fab5fb2ca7cf3b170235c1520e26539a34e070b12014	changed	adfc67d and 66397fc (spec 11.6 item 2: 26 checks)
+-	need	floor	need:floor	-	314572800	added	protocol 14.14 item 4: read from records/closure-space3-20261119/need.txt
+-	need	margin	need:margin	-	100000000	added	protocol 14.14 item 4: read from records/closure-space3-20261119/need.txt
+-	need	per boot	need:per_boot	-	54484992	added	protocol 14.14 item 4: read from records/closure-space3-20261119/need.txt
+-	tool	ledger_check.sh	research/cfs_procrace/env/tools/ledger_check.sh	-	2002ca0201028f587eeb3c1d8ad1b8d2d295bf483edd36dacc452055cfc9ed86	added	protocol 14.14 item 1: called by the keep step on the proposed ledger
+-	cycle	need.txt	records/closure-space3-20261119/need.txt	-	3a86b9ddb51902b6fc46995e538c9ad526b5a68e03c6bd3ec9dd38c61396bf04	added	protocol 14.14 item 4: the per-boot need from kept measurements, the source of the need rows
+-	cycle	no_expect_input_check4.txt	records/closure-c1prep-20261119/boot/no_expect_input_check4.txt	-	a70b2e043f12e975b6caf4f7717a81e445dcae6061367ff99c878319f6638108	added	spec 11 item 15 again for the run script of results 26.9
+rows 165 (old 159, added 6; changed 3)

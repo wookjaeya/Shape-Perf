@@ -1,0 +1,15 @@
+check (results 26.9; spec 11 item 15): the expectation files (expect_c1.tsv, expect_c1_2.tsv) and the hand predictions (predictions.tsv, predictions2.tsv, predictions3.tsv) are no input of any step but the two named exceptions
+run_cycle.sh sha256 2508f144e2a9eef964466d3f40eb2c64bf29c9f55e5ff5fcab6f9ec7c592d083
+lines of run_cycle.sh that name an expectation file or the predictions:
+  6:# 860c2cd, kept unchanged), and the eval and expect steps read expect/expect_c1_2.tsv (the expectations rewritten from
+  7:# the rules; expect_c1.tsv is kept unchanged and read by no step).  Revised again before any boot (results 26.5; evaluation
+  321:      --sheets-boot none --expect "$D/expect/expect_c1_2.tsv" --out "$EV/eval.txt" > "$L/eval_run.txt" 2>&1; rc=$?
+  336:    python3 -I "$EX/explain_expect.py" --expect "$D/expect/expect_c1_2.tsv" --records "$XO" --out "$L/expect_compare.txt"; rc=$?
+steps whose command names one (by case label):
+  eval)
+  expect)
+the explain step's explain.py arguments naming an expect or prediction file: 0
+plan generation (args.txt of the two plans) naming one: /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/args.txt:0 /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/args.txt:0 
+explain_eval.py lines that open the expectation file (the F1 branch):
+  335:        ex = read("expect", o.expect).splitlines()
+the eval fixtures' open and write watches: 4 lines naming them in test_explain_eval.py (116/116 pass on the frozen bytes: records/closure-prebootfix-20261119/out/freeze_eval_fixtures.txt)

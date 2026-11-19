@@ -1,0 +1,4 @@
+# space_guard.sh kind=declaration4 need=5000000 floor=314572800 interval=2 cmd=python3 -I scripts/declaration4.py ../closure-c1prep-20261119/boot/declaration3.tsv scripts/declaration4_header.txt ../closure-c1prep-20261119/boot/declaration4.tsv declaration/remeasure_declaration3.tsv declaration/changes_vs_declaration3.tsv
+start 2026-11-19T19:45:09.593Z free=1112989696 threshold=319572800
+sample 2026-11-19T19:45:09.598Z 1112985600
+end 2026-11-19T19:45:11.606Z kind=declaration4 verdict=completed rc=0 free=1112903680 lowest=1112903680 dip=86016 change=-86016

@@ -2216,3 +2216,96 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 - **지금의 계획 생성기는 새 파일을 읽지 못한다**(`lib/llvm/plan_gen.cpp` `read_namespaces` 가 `layer-fn`·`layer-op`·`kind-unresolved` 와 들여 쓴 `rollback`·`not-covered` 를 물림). 읽는 쪽은 계획 규칙 개정 5 의 kz-static 빌드(§15)가 들인다.
 - 세대 T 의 표에서 어느 항목 줄도 이름 대지 않는 이름 경로 쓰기(osal-4.1.1 의 `"\0"` 복사로 쓴 지우기 다섯, cfe 의 시작 객체 이름 복사와 끝 표지 저장 둘)는 기록만 했다(`out/report/writers.txt`). 개정 2 는 세대 T 를 바꾸지 않는다.
 - 층의 get-by-name 함수를 거치는 이름 조회(파일 시스템 종류, 구성 요소마다 2 호출)는 `lookup` 줄이 아니고 따로 보고했다(`out/report/get_by_name.txt`).
+
+## 15. C1 닫기의 kz-static 한 빌드: 소스 진행분과 scratch 점검 (2026-11-19, 선언 전에 멈춤)
+
+§12.10 4 항의 "kz-static 한 빌드에 넣는 것" 가운데 넷을 소스로 커밋하고 scratch 빌드에서 점검했다. **선언, 도구 사본, MC 빌드, 다섯 빌드의 선언된 다시 뽑기는 하지 않았다**: 넣을 것이 다 들어가지 않았으므로 §12.10 6 항대로 선언 전에 멈췄다. MC 의 kz-static 은 `bf2ec2ee…`(§12.11) 그대로이고, 소스가 그 바이너리보다 앞서 있다. 기록: `../records/closure-kzstatic-20261119/`(`README.md`). cFS 를 부팅하지 않았고 push 하지 않았다. 아래의 수는 모두 기록 디렉터리의 출력 파일에서 왔다. scratch 도구의 수는 선언된 도구의 측정이 아니므로 [I] 다.
+
+### 15.1 고친 도구의 사실에서 다시 돌린 탐침 [M]
+- `../records/closure-texts-20261118/scripts` 의 스크립트를 입력 디렉터리 이름만 바꿔(`rf2_final_order`, `rf2_plans_v4`, `rf2_final_extract`) `probes/scripts/` 에 복사했다. 고친 도구 `bf2ec2ee…` 로 마지막 옵션 회차 사실의 보기 둘을 감시 아래에서 만들었고(`probes/views.sha256`, 도구 sha256 앞뒤 같음), 29 명령이 모두 rc 0 이다(`probes/out/commands_rc.txt`). 첫 시도는 저장소 뿌리를 한 단계 잘못 잡아 15 번째 명령에서 멈췄다. 그 출력은 `probes/out_trial1_wrong_root/` 에 남겼다.
+- 앞 도구의 출력과 비교했다(`probes/normcmp_3.txt`). 줄 번호, 행 번호, 디렉터리 이름을 가린 뒤 C1 의 출력 26 이 같다: P1 대안, P3 버퍼 writer, P4 holder, P6 키, P7 항목, 열린 사유 모집단(1/1/0/0/0 호출 자리). P2 의 한 줄은 `view line(s)` 꼴의 번호만 다르다.
+- 바뀐 것은 P5(`probes/out/p5_pairs.txt`)의 c5 두 빌드뿐이다. c5_641 의 쌍은 4,406 → 4,393, 적힌 쌍은 631 → 618, 계획된 행은 23 → 10 이다. c5_642 는 4,395 → 4,382, 620 → 607, 22 → 9 다. §12.11 (라)의 대조 집합 15 → 2 를 따르는 움직임이다. C1 의 쌍 24,796/1,988 과 계획된 행 13 은 그대로다.
+- 그러므로 C1 설계 행에 대한 §12.10 4 항의 [예비] 읽기(필드 저장값 규칙의 적용 자리가 하나라는 것, (c3)(i)의 writer 둘과 reader 의 가름, 성공 경로 줄을 원형이 다섯 callee 가운데 하나에서만 세운다는 것)는 고친 도구에서도 같다.
+
+### 15.2 바뀐 것 [F]
+글을 먼저, 그것을 쓰는 코드를 뒤에 커밋했다.
+- 형식 덧붙임 `static_facts.md` 5x (`b4cfda0`, `2f51dbe`, `49d8467`, `f381cd9`):
+  - order 글의 도구 줄 자리, 쌍 파일의 `creator-not-a-pair(same actor only)`, 한 스레드의 쌍은 늘 `same_thread`, 꼬리 수.
+  - 쌍 파일은 글 뒤에 계산한다. `edges.tsv` 에 없는 간선은 `edge` 줄로 적는다.
+  - `source_tree[i]` 항목을 찾는 규칙과 키 글에 쓰는 법.
+  - `absence origins:` 줄의 자세한 꼴.
+- 소스 (`c0e17ae`, `5024826`, `4ce894a`; `lib/llvm/order.cpp`·`order.hpp`·`relations.cpp`·`relations.hpp`·`rel_facts.*`·`serialize.cpp`, `tools/kz-static/cmd_show.cpp`·`main.cpp`, `tests/static/static_golden.cpp`):
+  1. relations·order 머리의 도구 줄(`tool kz-static tool_sha256=… tool_source=…`). 명령이 쓰고, 안에서 읽는 쪽은 쓰지 않는다. golden 시험은 이 줄을 뺀다.
+  2. order rules revision 8 의 완전한 쌍 파일(`kz-static order … --pairs FILE`). 영역은 relations 행이 이름 대는 모든 생성자·writer 다(not-a-pair 셋 포함, 같은 스레드는 `same_thread`). 행마다 짝이 없으면 `no_pair`, `edges.tsv` 에 없는 간선은 `edge` 줄이고, 줄 수 한도가 없다. golden 시험이 쌍 파일을 읽고, `--pairs` 가 글을 바꾸지 않는지 본다.
+  3. `--object-access` 아래의 BASIS `source_tree[i]` 와 relations 키 글의 소스 트리 토큰.
+  4. relations rules revision 14 의 `absence origins:` 줄. RESULT_FLOW·RESULT_EFFECT·OBJECT_ACCESS 가 함께 있는 사실에서만 쓴다.
+- 바꾸지 않은 것:
+  - 규칙 개정 이름(`relations rules revision 12`, `order rules revision 5`)은 개정 14·8 이 다 들어간 뒤에 바꾼다.
+  - 저장소의 golden 은 갱신하지 않았다. 선언된 빌드에서 갱신한다(§12.8 의 앞례). 그래서 지금 HEAD 를 빌드하면 order golden 셋이 실패한다 [I: scratch ctest].
+
+### 15.3 scratch 빌드와 점검 [I]
+scratch Release 빌드는 kz-static, static_golden, kz_lint 이고 모두 감시 아래에서 돌렸다(`scratch_guard/`, `scratch/logs/`). 같은 tree 에서 고친 뒤 다시 빌드하기를 다섯 번 했다(make1–5).
+
+| 점검 | 결과 | 출력 |
+|---|---|---|
+| golden 32(core 제외) | 실패 3 = 쌍 절이 더해진 order golden 셋(`order_np`, `resultflow_order_np`, `looplock_order_np`), 나머지 29 같음; scratch golden 셋은 다시 돌려 `matches` | `scratch/logs/ctest_golden4.log`, `scratch/golden_scratch/` |
+| lint 시험 8 | 모두 통과 | `scratch/logs/ctest_lint.log` |
+| 쌍 점검(`scripts/pair_check.py`) fixture 셋 | 모두 PASS | `scratch/fixture_pairs/` |
+| 쌍 점검 다섯 빌드(scratch 도구, rf2 마지막 회차 사실) | 모두 PASS: 글에 적힌 쌍 1,988/1,988/1,607/618/607 이 모두 같은 값의 줄을 가짐; 행마다 글의 `pairs:` 수 = 파일의 생성자·writer 줄; 간선 id 가 `edges.tsv` 나 `edge` 줄에서 모두 풀림; 계획된 행 13/13/7/10/9 가 모두 줄을 가짐(그 줄 1,125/1,125/47/1,841/1,835) | `scratch/pairs_check4/check_<b>.txt` |
+| 같은 실행의 order 글과 `edges.tsv` | 도구 줄 말고 `rf2_final_order` 와 같은 바이트(다섯 빌드) | 같은 실행, 위 표의 줄 |
+| 다섯 빌드 다시 뽑기(scratch 도구, `run.sh extract_final`) | rc 0; facts 차이는 머리의 정체성 칸, BASIS(c1 두 빌드: 항목 셋 더함, 그 뒤 항목의 번호가 밀림), STRINGS 크기뿐 | `scratch/facts_cmp/facts_<b>.txt` |
+| `source_tree` 항목 | 3/3/0/0/0 (`<bp>`, `<bplib>`, `<cf>`) | `scratch/keys/basis_source_tree_<b>.txt` |
+| 키가 움직인 행 | 3/3/0/0/0(A20, A27, A30); 공유 키 0; **두 C1 빌드의 키 글이 367 개 가운데 367 개 같음**(앞 도구는 364) | `scratch/keys/keys_compare.txt` |
+| relations 글 | facts 줄과 도구 줄 말고 같음(다섯 빌드) | `scratch/keys/relations_text_diff.txt` |
+| 개정 4 계획 | sidecar 차이는 정체성·입력 줄과, c1 에서 움직인 키 셋의 `row`·`map`·`site refs`·`need` 줄뿐(키를 바꿔 놓으면 `map` 줄 하나의 차례만 남음); r2·c5 는 정체성 줄만 | `scratch/plans_v4/sidecar_diff_kinds.txt` |
+| `absence origins:` 줄 | 값이 정해진 `absence:` 줄 39/39/17/23/23 마다 하나, 모두 `[search no-match]` 기원을 가짐; 정해지지 않은 24/24/8/43/43 은 줄 없음; 기원 둘인 줄 7/7/4/0/0 | `scratch/absence/absence_counts.txt` |
+
+### 15.4 쌍 파일이 보인 것 [I]
+- 쌍 파일의 줄 수는 26,634/26,634/9,643/5,218/5,207 이다. 값 분포(c1_pre_tx)는 unordered 21,664, hard_before 1,525, fixed_early_proved 1,276, same_thread 1,920, unknown 187, no_pair 62 이다(`scratch/pairs_check4/check_c1_pre_tx.txt`).
+- **남긴 쌍 수 24,609 와 `pairs:` 줄의 합 24,796 의 차이 187 은 이렇게 설명된다.**
+  - 그 187 은 한쪽이 어느 뿌리에도 닿지 않는 쌍(`unknown(no root reaches …)`)이고, 쌍 파일의 unknown 187 과 같은 수다.
+  - 글의 `pairs:` 줄은 이 쌍을 `unknown` 으로 센다. caller-dependent 측정(`order.cpp` 의 `pair_values_`)은 두 쪽에 뿌리가 있어 `pair()` 를 계산한 쌍만 기록한다. 그래서 24,796 − 187 = 24,609 다.
+  - 글의 unknown 331 은 이 187 과 경로 B·C 의 한 스레드 쌍 144 를 더한 것이다. 쌍 파일은 그 144 를 `same_thread` 로 적는다.
+- 설계 행에 대한 비판(쌍 파일의 영역)은 이제 이렇게 답한다. 탐침 행의 같은 함수 생성(`bp_flow.c:132:18`)은 `creator-not-a-pair(probe-create) … same_thread` 줄로 파일에 있다. 다른 응용의 생성은 `creator … unordered` 줄이다. 시작 때 프로세스 행위자가 만든 것은 `other_root` 가 `main (process)` 인 줄로 따로 읽힌다.
+
+### 15.5 공간 [M]
+- 시작 1,247,948,800 B(`free_start.txt`, 02:12Z).
+- 이 실행의 가장 낮은 값은 940,474,368 B 이고 하한을 넘지 않았다(`scratch_guard/`). scratch 빌드 tree 는 약 122 MB, 다시 뽑은 다섯 빌드는 약 71 MB 였다. make 의 dip 은 처음 114,311,168 B 이고, 다시 빌드할 때는 수 MB 였다.
+- scratch 를 모두 지운 뒤 1,228,222,464 B(`free_after_scratch_removed.txt`). 기록 디렉터리는 약 1.0 MB 다.
+- 압축 대체는 쓰지 않았다.
+
+### 15.6 계획과 다르게 한 것
+- **받은 결과 글이 끊겨 있었다.** 글 단계의 결과 글은 (6) 항의 중간에서 끊겼고, 이름 공간 자료 단계의 글은 없었다. §13 의 (6)·(7) 항과 §14 는 그 단계들의 커밋과 기록에서 적었다(각 절의 머리에 밝힘).
+- **비판 파일 경로가 없었다.** 지정된 비판 JSON 둘은 경로에 없었다. 둘째 비판은 같은 내용의 텍스트 사본(scratch)에서 읽었다. 첫 비판은 읽지 못했으나, 그 처리 상태는 둘째 비판의 첫 항목이 적고 있다.
+- **형식에 정해지지 않은 것이 드러났다.** 코드를 쓰며 다섯 가지를 덧붙임으로 정하고 코드보다 먼저 커밋했다: 같은 행위자만의 not-a-pair 종류, 한 스레드의 값, `edges.tsv` 에 없는 간선, 쌍을 글 뒤에 계산하는 것, `source_tree` 를 찾는 규칙. 먼저 계산 순서를 고치지 않은 판은 `--pairs` 가 글의 `HB-seq steps` 수를 바꿨다(fixture 81 → 82). scratch 점검이 이것을 잡아 고쳤다.
+- **scratch 점검에서 잡은 결함 둘.**
+  - 첫 판은 `same actor only` 접두를 길이 34 로 비교해 그 생성자를 놓쳤다(`scratch/pairs_trial1`, `pairs_trial2`). 접두 비교로 고쳤다.
+  - 점검 스크립트가 처음에는 `control-state=planned` 행을 세지 않았다(9 of 9 → 13 of 13, `scratch/pairs_check3`). 모든 시도 출력은 새 이름으로 남겼다.
+- **fixture 가 없는 줄 둘.** `source_tree` 항목과 `absence origins:` 줄은 fixture 가 그 줄을 내지 않는다. 지금 fixture 는 모두 묶음 루트 안에 있고, 결과 흐름 fixture 는 `--object-access` 를 쓰지 않는다. 선언 전에 fixture 를 더해야 한다(15.7).
+
+### 15.7 열린 것과 다음 차례
+kz-static 한 빌드에 아직 넣지 않은 것은 다음과 같다. 차례는 형식이 이미 커밋된 5x 의 순서다.
+1. 생성자의 성공 경로 줄(5x 1 항).
+   - out-id 저장은 callee 의 PARAM_FLOW out-store 행에서 읽는다.
+   - 저장되는 값의 정의를 성공 경로에 묶는다.
+   - 조건 나무의 함의를 판정하고, 두 방향의 fixture 를 둔다.
+   - 다섯 빌드의 모든 creator callee 에서 성립과 누락을 까닭별로 낸다.
+2. holder 줄(3 항). 모든 writer 를 값 종류와 함께 적고, 뒤의 reader 가 지운 값을 가르는지 본다.
+3. 문맥별 대안 줄과 필드 저장값 규칙(4 항).
+   - 경로 조건으로 보고, 줄 차례와 경로 차례가 다른 fixture 를 둔다.
+   - 빌드마다 열린 효과를 사유 종류별로, 규칙이 정한 호출 자리 수를 낸다.
+   - 설계 행 밖의 진술에는 쓰지 않는다.
+4. 저장된 이름 버퍼 줄과 수명 끝 줄(5 항).
+   - FIELD_STATUS 의 스칼라 배열 상태가 원소 저장과 decay 를 모으면 완전해질 수 있는지를 scratch 출력으로 정한다. 안 되면 깃발마다 까닭을 적는다.
+   - 이름 포인터 필드의 writer 를 종류별로 나눈다.
+5. 계획 규칙 개정 5. `framework_namespaces2_*` 의 새 문장을 읽는 쪽, `namespace-entry`·`namespace-layer` 줄, 생성 쪽 종류 값 site, 문맥 틀 site, 수명 끝 site, 라벨 둘을 넣는다. 선택 규칙은 그대로이고 층 라벨도 그대로다.
+6. 규칙 개정 이름을 바꾼다(relations 14, order 8, plan 5).
+7. 위 모든 줄과 `source_tree`·`absence origins` 의 fixture 를 성립 꼴과 누락 꼴로 만든다.
+8. 그 뒤의 차례:
+   - scratch 점검 빌드에서 [I] 와 첫 ctest 실패를 이름으로 얻는다.
+   - 선언(허용 차이는 출력 종류별, relink 는 dry run 에서, 공간 포함)을 커밋한다.
+   - 사본을 만들고 MC 를 빌드한다.
+   - 누적 점검과 다섯 빌드 다시 뽑기를 한 번 한다(relations, 쌍 파일을 낸 order, 새 자료 파일 위의 개정 4·5 계획).
+   - 끝 점검(키 글 같음, 쌍 파일 완전, 탐침을 도구 줄이 재현, 새 줄마다 다섯 빌드에서 성립하는 곳과 빠지는 곳)을 하고 결과 절을 쓴다.
+- §12.11 (사)의 key-clearing 이름 문제(할당 때의 자리 비우기를 지우기로 셈)는 위 4·5(수명 끝 꼴의 `clear-slot`, 범위 규칙 개정 2 의 `layer-op clear-slot`)와 함께 다뤄야 한다. 다루는 방법은 lead 의 판단을 기다린다.
+- §12.10 5 항의 PI 결정은 그대로 기다린다(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)).

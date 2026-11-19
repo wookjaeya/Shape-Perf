@@ -12,3 +12,10 @@ space_guard.sh --need 5000000 --kind selftest -- bash selftest.sh <scratch> > se
 space_guard.sh --need 5000000 --kind identity -- python3 -I ../reclaim-20261118/identity_listing.py /home/user/work/redesign/obs1
     reclaim/pairs.tsv reclaim before                                              rc 0, 3 pairs identical-no-extra (guard/g05_identity.log)
 the listing, the need, the chosen list, the scripts, the convention and results 26.2 (the plan) are committed before step 2
+## 2. R: the three rf2_pre directories by the 2026-11-18 convention
+../../env/tools/ledger_check.sh > ledger/check_start.txt                          rc 0 (193 rows, 0 failing; ledger sha256 910aa385...)
+ledger_rewrite.py <ledger> <proposed> reclaim <row> <name> <twin row> <twin> <files> <bytes>   three times, rc 0 (ledger/rewrite.txt;
+    the header line of this step added once)
+../../env/tools/ledger_check.sh <proposed> > ledger/check_R_proposed_before_removal.txt   rc 0 (193 rows, 0 failing; the three rows read
+    the twin directories while the candidates are still there); the proposed ledger copied over records/LEDGER.tsv (cmp; sha256 cb7b4364...)
+the rewritten ledger is committed before the removal

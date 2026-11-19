@@ -898,6 +898,7 @@ end
 - `use_root` 와 `other_root` 가 같은 스레드면 값은 늘 `same_thread` 다. 글 출력은 그대로라서, 경로 B·C 의 글에 `unknown: one thread: …` 로 적힌 쌍은 쌍 파일에서 `same_thread` 다(읽는 쪽의 "같은 값" 점검은 이 짝을 같은 것으로 본다). 경로 A 의 글은 같은 스레드의 생성자를 쌍으로 세지 않으므로 그 줄은 쌍 파일에만 있다.
 - 뿌리에 닿지 않는 쪽이 있는 쌍은 `use_root` 또는 `other_root` 가 `-` 이고 값이 `unknown(no root reaches <함수>)` 다(글 출력의 `unknown: no root reaches …` 와 같은 쌍).
 - 꼬리 줄의 `pairs` 는 `no_pair` 가 아닌 줄의 수이고, 값마다의 수의 합이다. `unknown` 은 까닭과 상관없이 센다.
+- 쌍 파일의 쌍은 글 출력을 다 쓴 뒤에 계산한다. 닫힘을 따라가며 HB-seq 단계 간선이 새로 생길 수 있는데(쌍 파일에만 있는 쌍, 인쇄 한도 밖의 쌍), 그것이 글의 `HB-seq steps the closures followed` 수나 `edges.tsv` 를 바꾸지 않게 하려는 것이다. 그래서 `edges` 칸의 id 가운데 `edges.tsv` 에 없는 것이 있다: 그런 간선은 쌍 줄 뒤, 꼬리 줄 앞에 `edge<TAB><edges.tsv 의 열한 칸>` 줄로 한 번씩 적고, 꼬리 줄 끝에 ` edges_not_in_tsv <n>` 을 더한다. 읽는 쪽은 `edges` 칸의 모든 id 가 `edges.tsv` 나 이 `edge` 줄에 있는지 본다.
 
 ## 6. core-cpu1 결과 [M]
 

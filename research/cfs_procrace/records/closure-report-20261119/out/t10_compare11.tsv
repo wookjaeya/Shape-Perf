@@ -1,0 +1,38 @@
+# report27.py, results 27.3 table (10) evaluation protocol 11: (a) failure state, (b) with another actor creating the same text, (c)
+# branch D1-R0; columns build boot record (a) (b) other_actor_same_text(actor:aseq) (c) link.status pair results use_cond violation
+c1_pre_tx	1	c1_pre_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	1	c1_pre_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_pre_tx	1	c1_pre_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	2	c1_pre_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	2	c1_pre_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_pre_tx	2	c1_pre_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	3	c1_pre_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	3	c1_pre_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_pre_tx	3	c1_pre_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	4	c1_pre_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	4	c1_pre_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_pre_tx	4	c1_pre_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	5	c1_pre_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	5	c1_pre_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_pre_tx	5	c1_pre_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_pre_tx	all boots	total	a	15
+c1_pre_tx	all boots	total	b	5
+c1_pre_tx	all boots	total	c violation	undetermined	15
+c1_post_tx	1	c1_post_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_post_tx	1	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	1	c1_post_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18,14:29	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	2	c1_post_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_post_tx	2	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	2	c1_post_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18,14:29	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	3	c1_post_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_post_tx	3	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	3	c1_post_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18,14:29	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	4	c1_post_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_post_tx	4	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	4	c1_post_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18,14:29	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	5	c1_post_tx.B73.ba2543549ee828a2.actor-2.json	yes	no	-	unlinked	-	not_derived	undetermined
+c1_post_tx	5	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	yes	no	-	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	5	c1_post_tx.A21.17975444d83f6589.actor-13.json	yes	yes	14:18,14:29	unlinked	differs_from_use_key,unlinked	partial	undetermined
+c1_post_tx	all boots	total	a	15
+c1_post_tx	all boots	total	b	5
+c1_post_tx	all boots	total	c violation	undetermined	15

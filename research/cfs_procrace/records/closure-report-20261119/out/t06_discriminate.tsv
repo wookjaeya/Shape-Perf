@@ -1,0 +1,162 @@
+# report27.py, results 27.3 table (6) expect_discriminate lines of eval_tail.txt per boot
+# columns build branch row result class boots note (eval_tail.txt lines 'expect_discriminate')
+c1_pre_tx	D1-R0	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D1-R0	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D1-R0	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-R0	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-R0	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D1-Ra	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D1-Ra	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D1-Ra	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Ra	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Ra	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D1-Rb	A21	not_counted	static	5	rule (3): nothing to require from the static lines and the record; plan_state tier+control: not counted
+c1_pre_tx	D1-Rb	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D1-Rb	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Rb	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Rb	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D1-Rc	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D1-Rc	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D1-Rc	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Rc	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Rc	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D1-Rd	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D1-Rd	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D1-Rd	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Rd	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Rd	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D1-Re	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D1-Re	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D1-Re	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Re	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Re	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D1-Rf	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D1-Rf	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D1-Rf	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Rf	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-Rf	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D1-all	A21	not_counted	static	5	rule (3): nothing to require from the static lines and the record; plan_state tier+control: not counted
+c1_pre_tx	D1-all	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D1-all	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-all	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D1-all	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D2-R0	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D2-R0	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D2-R0	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-R0	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-R0	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D2-Ra	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D2-Ra	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D2-Ra	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Ra	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Ra	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D2-Rb	A21	not_counted	static	5	rule (3): nothing to require from the static lines and the record; plan_state tier+control: not counted
+c1_pre_tx	D2-Rb	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D2-Rb	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Rb	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Rb	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D2-Rc	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D2-Rc	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D2-Rc	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Rc	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Rc	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D2-Rd	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D2-Rd	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D2-Rd	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Rd	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Rd	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D2-Re	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D2-Re	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D2-Re	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Re	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Re	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D2-Rf	A21	not_counted	static	5	rules (1)-(2): required: (2) (i) not_held on relations.txt:732; given: (2) (i) not_held on relations.txt:732; plan_state tier+control: not counted
+c1_pre_tx	D2-Rf	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D2-Rf	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Rf	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-Rf	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_pre_tx	D2-all	A21	not_counted	static	5	rule (3): nothing to require from the static lines and the record; plan_state tier+control: not counted
+c1_pre_tx	D2-all	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_pre_tx	D2-all	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-all	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_pre_tx	D2-all	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D1-R0	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D1-R0	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D1-R0	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-R0	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-R0	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D1-Ra	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D1-Ra	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D1-Ra	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Ra	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Ra	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D1-Rb	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D1-Rb	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778; given: (1) context 1 (iii) not_held on relations.txt:778
+c1_post_tx	D1-Rb	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Rb	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Rb	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D1-Rc	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D1-Rc	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D1-Rc	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Rc	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Rc	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D1-Rd	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D1-Rd	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D1-Rd	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Rd	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Rd	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D1-Re	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D1-Re	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D1-Re	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Re	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Re	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D1-Rf	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D1-Rf	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D1-Rf	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Rf	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-Rf	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D1-all	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D1-all	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778; given: (1) context 1 (iii) not_held on relations.txt:778
+c1_post_tx	D1-all	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-all	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D1-all	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D2-R0	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D2-R0	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D2-R0	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-R0	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-R0	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D2-Ra	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D2-Ra	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D2-Ra	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Ra	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Ra	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D2-Rb	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D2-Rb	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778; given: (1) context 1 (iii) not_held on relations.txt:778
+c1_post_tx	D2-Rb	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Rb	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Rb	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D2-Rc	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D2-Rc	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D2-Rc	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Rc	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Rc	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D2-Rd	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D2-Rd	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D2-Rd	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Rd	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Rd	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D2-Re	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D2-Re	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D2-Re	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Re	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Re	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D2-Rf	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D2-Rf	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+c1_post_tx	D2-Rf	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Rf	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-Rf	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record
+c1_post_tx	D2-all	A20	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+c1_post_tx	D2-all	A21	met	static	5	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778; given: (1) context 1 (iii) not_held on relations.txt:778
+c1_post_tx	D2-all	A22	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-all	A26	unmet	static	5	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+c1_post_tx	D2-all	A63	unmet	static	5	rule (3): nothing to require from the static lines and the record

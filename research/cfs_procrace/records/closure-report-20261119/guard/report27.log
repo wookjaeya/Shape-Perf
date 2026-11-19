@@ -1,0 +1,9 @@
+# space_guard.sh kind=report27 need=20000000 floor=314572800 interval=2 cmd=python3 -I records/closure-report-20261119/scripts/report27.py --records records/closure-c1prep-20261119 --obs1 /home/user/work/redesign/obs1 --out records/closure-report-20261119/out --builds c1_pre_tx=pre,c1_post_tx=post --boots 5
+start 2026-11-19T20:40:18.574Z free=485507072 threshold=334572800
+sample 2026-11-19T20:40:18.578Z 485502976
+sample 2026-11-19T20:40:20.586Z 485502976
+sample 2026-11-19T20:40:22.592Z 485502976
+sample 2026-11-19T20:40:24.598Z 485502976
+sample 2026-11-19T20:40:26.605Z 485502976
+sample 2026-11-19T20:40:28.611Z 485007360
+end 2026-11-19T20:40:30.617Z kind=report27 verdict=completed rc=0 free=484511744 lowest=484511744 dip=995328 change=-995328

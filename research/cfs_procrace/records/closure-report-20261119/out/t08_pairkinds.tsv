@@ -1,0 +1,202 @@
+# report27.py, results 27.3 table (8) D1-R0: pair kinds, failure signs, consumer affiliation, order lines per pair, per boot
+# branch D1-R0; columns build boot kind value count
+c1_pre_tx	1	pair_kind (consumer x publisher)	app-app	3
+c1_pre_tx	1	pair_kind (consumer x publisher)	core-app	29
+c1_pre_tx	1	pair_kind (consumer x publisher)	core-core	4
+c1_pre_tx	1	pair_kind (consumer x publisher)	process-app	26
+c1_pre_tx	1	pair_kind (consumer x publisher)	same_actor	1
+c1_pre_tx	1	pair_kind (consumer x publisher)	unknown	16
+c1_pre_tx	1	failure_sign records by pair_kind set	app-app	1
+c1_pre_tx	1	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_pre_tx	1	failure_sign records by pair_kind set	core-core,unknown	1
+c1_pre_tx	1	failure_sign records by consumer class	app	2
+c1_pre_tx	1	failure_sign records by consumer class	core	1
+c1_pre_tx	1	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	1	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1565.292 ms after the use's after-call t 1565.292 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	1	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.336 ms after the use's after-call t 1565.292 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	1	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	1	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	1	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.336 ms after the use's after-call t 1565.336 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	1	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	1	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1565.292 ms after the use's after-call t 1556.504 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	1	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1565.336 ms after the use's after-call t 1556.504 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	2	pair_kind (consumer x publisher)	app-app	3
+c1_pre_tx	2	pair_kind (consumer x publisher)	core-app	29
+c1_pre_tx	2	pair_kind (consumer x publisher)	core-core	4
+c1_pre_tx	2	pair_kind (consumer x publisher)	process-app	26
+c1_pre_tx	2	pair_kind (consumer x publisher)	same_actor	1
+c1_pre_tx	2	pair_kind (consumer x publisher)	unknown	16
+c1_pre_tx	2	failure_sign records by pair_kind set	app-app	1
+c1_pre_tx	2	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_pre_tx	2	failure_sign records by pair_kind set	core-core,unknown	1
+c1_pre_tx	2	failure_sign records by consumer class	app	2
+c1_pre_tx	2	failure_sign records by consumer class	core	1
+c1_pre_tx	2	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	2	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1566.045 ms after the use's after-call t 1566.044 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	2	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1566.074 ms after the use's after-call t 1566.044 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	2	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	2	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	2	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1566.074 ms after the use's after-call t 1566.074 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	2	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	2	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1566.045 ms after the use's after-call t 1556.112 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	2	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1566.074 ms after the use's after-call t 1556.112 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	3	pair_kind (consumer x publisher)	app-app	3
+c1_pre_tx	3	pair_kind (consumer x publisher)	core-app	29
+c1_pre_tx	3	pair_kind (consumer x publisher)	core-core	4
+c1_pre_tx	3	pair_kind (consumer x publisher)	process-app	26
+c1_pre_tx	3	pair_kind (consumer x publisher)	same_actor	1
+c1_pre_tx	3	pair_kind (consumer x publisher)	unknown	16
+c1_pre_tx	3	failure_sign records by pair_kind set	app-app	1
+c1_pre_tx	3	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_pre_tx	3	failure_sign records by pair_kind set	core-core,unknown	1
+c1_pre_tx	3	failure_sign records by consumer class	app	2
+c1_pre_tx	3	failure_sign records by consumer class	core	1
+c1_pre_tx	3	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	3	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1564.469 ms after the use's after-call t 1564.469 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	3	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1564.503 ms after the use's after-call t 1564.469 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	3	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	3	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	3	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1564.503 ms after the use's after-call t 1564.503 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	3	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	3	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1564.469 ms after the use's after-call t 1557.32 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	3	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1564.503 ms after the use's after-call t 1557.32 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	4	pair_kind (consumer x publisher)	app-app	3
+c1_pre_tx	4	pair_kind (consumer x publisher)	core-app	29
+c1_pre_tx	4	pair_kind (consumer x publisher)	core-core	4
+c1_pre_tx	4	pair_kind (consumer x publisher)	process-app	26
+c1_pre_tx	4	pair_kind (consumer x publisher)	same_actor	1
+c1_pre_tx	4	pair_kind (consumer x publisher)	unknown	16
+c1_pre_tx	4	failure_sign records by pair_kind set	app-app	1
+c1_pre_tx	4	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_pre_tx	4	failure_sign records by pair_kind set	core-core,unknown	1
+c1_pre_tx	4	failure_sign records by consumer class	app	2
+c1_pre_tx	4	failure_sign records by consumer class	core	1
+c1_pre_tx	4	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	4	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1570.279 ms after the use's after-call t 1570.278 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	4	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1570.347 ms after the use's after-call t 1570.278 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	4	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	4	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	4	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1570.347 ms after the use's after-call t 1570.341 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	4	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	4	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1570.279 ms after the use's after-call t 1557.699 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	4	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1570.347 ms after the use's after-call t 1557.699 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	5	pair_kind (consumer x publisher)	app-app	3
+c1_pre_tx	5	pair_kind (consumer x publisher)	core-app	29
+c1_pre_tx	5	pair_kind (consumer x publisher)	core-core	4
+c1_pre_tx	5	pair_kind (consumer x publisher)	process-app	26
+c1_pre_tx	5	pair_kind (consumer x publisher)	same_actor	1
+c1_pre_tx	5	pair_kind (consumer x publisher)	unknown	16
+c1_pre_tx	5	failure_sign records by pair_kind set	app-app	1
+c1_pre_tx	5	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_pre_tx	5	failure_sign records by pair_kind set	core-core,unknown	1
+c1_pre_tx	5	failure_sign records by consumer class	app	2
+c1_pre_tx	5	failure_sign records by consumer class	core	1
+c1_pre_tx	5	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	5	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1566.837 ms after the use's after-call t 1566.837 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	5	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1566.873 ms after the use's after-call t 1566.837 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	5	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	5	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	5	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1566.873 ms after the use's after-call t 1566.873 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	5	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	5	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1566.837 ms after the use's after-call t 1555.954 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_pre_tx	5	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1566.873 ms after the use's after-call t 1555.954 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	1	pair_kind (consumer x publisher)	app-app	3
+c1_post_tx	1	pair_kind (consumer x publisher)	core-app	27
+c1_post_tx	1	pair_kind (consumer x publisher)	core-core	4
+c1_post_tx	1	pair_kind (consumer x publisher)	process-app	26
+c1_post_tx	1	pair_kind (consumer x publisher)	same_actor	1
+c1_post_tx	1	pair_kind (consumer x publisher)	unknown	16
+c1_post_tx	1	failure_sign records by pair_kind set	app-app	1
+c1_post_tx	1	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_post_tx	1	failure_sign records by pair_kind set	core-core,unknown	1
+c1_post_tx	1	failure_sign records by consumer class	app	2
+c1_post_tx	1	failure_sign records by consumer class	core	1
+c1_post_tx	1	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	1	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1565.268 ms after the use's after-call t 1565.268 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	1	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.303 ms after the use's after-call t 1565.268 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	1	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	1	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	1	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.303 ms after the use's after-call t 1565.303 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	1	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	1	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1565.268 ms after the use's after-call t 1556.78 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	1	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1565.303 ms after the use's after-call t 1556.78 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	2	pair_kind (consumer x publisher)	app-app	3
+c1_post_tx	2	pair_kind (consumer x publisher)	core-app	27
+c1_post_tx	2	pair_kind (consumer x publisher)	core-core	4
+c1_post_tx	2	pair_kind (consumer x publisher)	process-app	26
+c1_post_tx	2	pair_kind (consumer x publisher)	same_actor	1
+c1_post_tx	2	pair_kind (consumer x publisher)	unknown	16
+c1_post_tx	2	failure_sign records by pair_kind set	app-app	1
+c1_post_tx	2	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_post_tx	2	failure_sign records by pair_kind set	core-core,unknown	1
+c1_post_tx	2	failure_sign records by consumer class	app	2
+c1_post_tx	2	failure_sign records by consumer class	core	1
+c1_post_tx	2	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	2	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1566.574 ms after the use's after-call t 1566.574 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	2	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1566.614 ms after the use's after-call t 1566.574 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	2	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	2	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	2	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1566.614 ms after the use's after-call t 1566.614 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	2	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	2	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1566.574 ms after the use's after-call t 1557.098 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	2	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1566.614 ms after the use's after-call t 1557.098 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	3	pair_kind (consumer x publisher)	app-app	3
+c1_post_tx	3	pair_kind (consumer x publisher)	core-app	27
+c1_post_tx	3	pair_kind (consumer x publisher)	core-core	4
+c1_post_tx	3	pair_kind (consumer x publisher)	process-app	26
+c1_post_tx	3	pair_kind (consumer x publisher)	same_actor	1
+c1_post_tx	3	pair_kind (consumer x publisher)	unknown	16
+c1_post_tx	3	failure_sign records by pair_kind set	app-app	1
+c1_post_tx	3	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_post_tx	3	failure_sign records by pair_kind set	core-core,unknown	1
+c1_post_tx	3	failure_sign records by consumer class	app	2
+c1_post_tx	3	failure_sign records by consumer class	core	1
+c1_post_tx	3	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	3	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1565.094 ms after the use's after-call t 1565.093 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	3	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.13 ms after the use's after-call t 1565.093 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	3	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	3	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	3	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.13 ms after the use's after-call t 1565.13 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	3	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	3	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1565.094 ms after the use's after-call t 1556.045 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	3	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1565.13 ms after the use's after-call t 1556.045 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	4	pair_kind (consumer x publisher)	app-app	3
+c1_post_tx	4	pair_kind (consumer x publisher)	core-app	27
+c1_post_tx	4	pair_kind (consumer x publisher)	core-core	4
+c1_post_tx	4	pair_kind (consumer x publisher)	process-app	26
+c1_post_tx	4	pair_kind (consumer x publisher)	same_actor	1
+c1_post_tx	4	pair_kind (consumer x publisher)	unknown	16
+c1_post_tx	4	failure_sign records by pair_kind set	app-app	1
+c1_post_tx	4	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_post_tx	4	failure_sign records by pair_kind set	core-core,unknown	1
+c1_post_tx	4	failure_sign records by consumer class	app	2
+c1_post_tx	4	failure_sign records by consumer class	core	1
+c1_post_tx	4	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	4	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1565.615 ms after the use's after-call t 1565.615 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	4	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.652 ms after the use's after-call t 1565.615 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	4	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	4	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	4	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.652 ms after the use's after-call t 1565.652 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	4	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	4	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1565.615 ms after the use's after-call t 1556.89 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	4	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1565.652 ms after the use's after-call t 1556.89 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	5	pair_kind (consumer x publisher)	app-app	3
+c1_post_tx	5	pair_kind (consumer x publisher)	core-app	27
+c1_post_tx	5	pair_kind (consumer x publisher)	core-core	4
+c1_post_tx	5	pair_kind (consumer x publisher)	process-app	26
+c1_post_tx	5	pair_kind (consumer x publisher)	same_actor	1
+c1_post_tx	5	pair_kind (consumer x publisher)	unknown	16
+c1_post_tx	5	failure_sign records by pair_kind set	app-app	1
+c1_post_tx	5	failure_sign records by pair_kind set	app-app,same_actor	1
+c1_post_tx	5	failure_sign records by pair_kind set	core-core,unknown	1
+c1_post_tx	5	failure_sign records by consumer class	app	2
+c1_post_tx	5	failure_sign records by consumer class	core	1
+c1_post_tx	5	pair order line	A20	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	5	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 held() grounds ["create at-call t 1565.784 ms after the use's after-call t 1565.784 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	5	pair order line	A20	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.821 ms after the use's after-call t 1565.784 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	5	pair order line	A20	use 1 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	5	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 same_actor: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	5	pair order line	A20	use 1 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 same_actor: basis6 held() grounds ["create at-call t 1565.821 ms after the use's after-call t 1565.82 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	5	pair order line	A21	use 0 create apps/sch_lab/fsw/src/sch_lab_app.c:168:16 aseq 3 app-app: basis6 missing(link_unlinked(name binding: the create is not after the use)) grounds ["the create ended before the use"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	5	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 18 app-app: basis6 held() grounds ["create at-call t 1565.784 ms after the use's after-call t 1557.207 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null
+c1_post_tx	5	pair order line	A21	use 0 create src/bp/fsw/src/bp_flow.c:132:18 aseq 29 app-app: basis6 held() grounds ["create at-call t 1565.821 ms after the use's after-call t 1557.207 ms"]; order_ground ["order_basis_unknown(no linked pair)"]; other_order_seen_in_boots null

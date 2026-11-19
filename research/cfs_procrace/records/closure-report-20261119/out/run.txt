@@ -1,0 +1,13 @@
+report27 builds c1_pre_tx=pre,c1_post_tx=post boots 5 branches 16 kept files checked 7700 differing 0
+t01_boots.tsv lines 12
+t02_uses.tsv lines 1059
+t03_elements.tsv lines 1762
+t04_pairs.tsv lines 218
+t05_checks.tsv lines 3632
+t05b_units.tsv lines 109
+t06_discriminate.tsv lines 162
+t07_expect.tsv lines 180
+t08_pairkinds.tsv lines 202
+t09_aux.tsv lines 636
+t10_compare11.tsv lines 38
+t11_rows_c3.tsv lines 90

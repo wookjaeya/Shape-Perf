@@ -1,0 +1,218 @@
+# report27.py, results 27.3 table (4) D1-R0: name-binding items of every pair of the path A records per boot
+# columns build row key consumer_root use create_pos create_key_text pair_kind item state(reason) boots result
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis2_ties	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis6_create_after_use	missing(link_unlinked(name binding: the create is not after the use))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_bound	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ra_same_kind	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis2_ties	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis3_absence_constant	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis5_key_texts	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis6_create_after_use	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ga_namespace_entry	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	na_bound	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ra_same_kind	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ma_no_lifetime_end	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis2_ties	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis6_create_after_use	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	na_bound	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ra_same_kind	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis2_ties	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis6_create_after_use	missing(link_unlinked(name binding: the create is not after the use))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_bound	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ra_same_kind	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis2_ties	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis6_create_after_use	missing(link_unlinked(name binding: the create is not after the use))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	na_bound	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ra_same_kind	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ma_no_lifetime_end	held()	5	differs_from_use_key 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis2_ties	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis3_absence_constant	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis5_key_texts	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis6_create_after_use	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ga_namespace_entry	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	na_bound	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ra_same_kind	held()	5	unlinked 5
+c1_pre_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ma_no_lifetime_end	held()	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis2_ties	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis6_create_after_use	missing(link_unlinked(name binding: the create is not after the use))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_bound	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ra_same_kind	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis2_ties	held()	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis3_absence_constant	held()	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis5_key_texts	held()	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis6_create_after_use	held()	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	ga_namespace_entry	held()	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	na_bound	held()	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	ra_same_kind	held()	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	unlinked 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis2_ties	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis6_create_after_use	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	na_bound	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	ra_same_kind	held()	5	differs_from_use_key 5
+c1_pre_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis2_ties	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis6_create_after_use	missing(link_unlinked(name binding: the create is not after the use))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_bound	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ra_same_kind	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis2_ties	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis3_absence_constant	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis5_key_texts	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis6_create_after_use	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ga_namespace_entry	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	na_bound	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ra_same_kind	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ma_no_lifetime_end	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis2_ties	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis6_create_after_use	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	na_bound	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ra_same_kind	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis2_ties	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis6_create_after_use	missing(link_unlinked(name binding: the create is not after the use))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_bound	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ra_same_kind	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis2_ties	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	basis6_create_after_use	missing(link_unlinked(name binding: the create is not after the use))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	na_bound	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ra_same_kind	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	same_actor	ma_no_lifetime_end	held()	5	differs_from_use_key 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis2_ties	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis3_absence_constant	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis5_key_texts	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	basis6_create_after_use	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ga_namespace_entry	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	na_bound	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ra_same_kind	held()	5	unlinked 5
+c1_post_tx	A20	bb0951052e63f1bc	BP_AppMain (script-entry)	1	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	same_actor	ma_no_lifetime_end	held()	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis2_ties	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	basis6_create_after_use	missing(link_unlinked(name binding: the create is not after the use))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	na_bound	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ra_same_kind	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	apps/sch_lab/fsw/src/sch_lab_app.c:168:16	SCH_LAB	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis2_ties	held()	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis3_absence_constant	held()	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis5_key_texts	held()	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	basis6_create_after_use	held()	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	ga_namespace_entry	held()	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	na_bound	held()	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	ra_same_kind	held()	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP0_tsem	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	unlinked 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis1_same_build	missing(record_insufficient(same build not confirmed))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis2_ties	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis3_absence_constant	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis4_creator_success	missing(record_insufficient(no success constant of the creator: the stored value is not tied to the success path))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis5_key_texts	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	basis6_create_after_use	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	ga_namespace_entry	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	na_semantics	missing(link_unlinked(name binding: no entry: memchr))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	na_bound	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	da_no_name_mapping	missing(link_unlinked(name binding: no entry: strncpy, memchr, memcpy))	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	ra_same_kind	held()	5	differs_from_use_key 5
+c1_post_tx	A21	17975444d83f6589	CF_AppMain (script-entry)	0	src/bp/fsw/src/bp_flow.c:132:18	BP1_tsem	app-app	ma_no_lifetime_end	missing(link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded))	5	differs_from_use_key 5

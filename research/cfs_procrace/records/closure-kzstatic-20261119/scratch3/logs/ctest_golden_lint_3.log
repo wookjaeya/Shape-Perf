@@ -1,0 +1,156 @@
+Test project <scratch>/kzc3_build
+      Start 105: lint_selftest
+ 1/68 Test #105: lint_selftest ..........................   Passed    0.04 sec
+      Start 106: lint_case-ids
+ 2/68 Test #106: lint_case-ids ..........................   Passed    1.78 sec
+      Start 107: lint_case-ids-data
+ 3/68 Test #107: lint_case-ids-data .....................   Passed    0.15 sec
+      Start 108: lint_semantics-names
+ 4/68 Test #108: lint_semantics-names ...................   Passed    0.09 sec
+      Start 109: lint_retired-term
+ 5/68 Test #109: lint_retired-term ......................   Passed    0.08 sec
+      Start 110: lint_banned-files
+ 6/68 Test #110: lint_banned-files ......................   Passed    0.04 sec
+      Start 111: lint_no-llvm
+ 7/68 Test #111: lint_no-llvm ...........................   Passed    0.05 sec
+      Start 112: lint_no-generated
+ 8/68 Test #112: lint_no-generated ......................   Passed    0.07 sec
+      Start 199: static_fixture_compile_writers
+ 9/68 Test #199: static_fixture_compile_writers .........   Passed    0.02 sec
+      Start 200: static_fixture_compile_outptr
+10/68 Test #200: static_fixture_compile_outptr ..........   Passed    0.02 sec
+      Start 201: static_fixture_compile_derives
+11/68 Test #201: static_fixture_compile_derives .........   Passed    0.03 sec
+      Start 202: static_fixture_compile_loops
+12/68 Test #202: static_fixture_compile_loops ...........   Passed    0.03 sec
+      Start 203: static_fixture_compile_spawn
+13/68 Test #203: static_fixture_compile_spawn ...........   Passed    0.02 sec
+      Start 204: static_fixture_compile_atype
+14/68 Test #204: static_fixture_compile_atype ...........   Passed    0.02 sec
+      Start 205: static_fixture_compile_wrappers
+15/68 Test #205: static_fixture_compile_wrappers ........   Passed    0.03 sec
+      Start 206: static_fixture_compile_flowfacts
+16/68 Test #206: static_fixture_compile_flowfacts .......   Passed    0.02 sec
+      Start 207: static_fixture_compile_argflow
+17/68 Test #207: static_fixture_compile_argflow .........   Passed    0.02 sec
+      Start 208: static_fixture_compile_lockset
+18/68 Test #208: static_fixture_compile_lockset .........   Passed    0.03 sec
+      Start 209: static_fixture_compile_relations
+19/68 Test #209: static_fixture_compile_relations .......   Passed    0.04 sec
+      Start 210: static_fixture_compile_relpaths
+20/68 Test #210: static_fixture_compile_relpaths ........   Passed    0.05 sec
+      Start 211: static_fixture_compile_relsound
+21/68 Test #211: static_fixture_compile_relsound ........   Passed    0.07 sec
+      Start 212: static_fixture_compile_deepcond
+22/68 Test #212: static_fixture_compile_deepcond ........   Passed    0.03 sec
+      Start 213: static_fixture_compile_imgbudget
+23/68 Test #213: static_fixture_compile_imgbudget .......   Passed    0.02 sec
+      Start 214: static_fixture_compile_relincomplete
+24/68 Test #214: static_fixture_compile_relincomplete ...   Passed    0.02 sec
+      Start 215: static_fixture_compile_relcallback
+25/68 Test #215: static_fixture_compile_relcallback .....   Passed    0.03 sec
+      Start 216: static_fixture_compile_plangen
+26/68 Test #216: static_fixture_compile_plangen .........   Passed    0.02 sec
+      Start 217: static_fixture_compile_order
+27/68 Test #217: static_fixture_compile_order ...........   Passed    0.04 sec
+      Start 218: static_fixture_compile_anonrec
+28/68 Test #218: static_fixture_compile_anonrec .........   Passed    0.02 sec
+      Start 219: static_fixture_compile_objaccess
+29/68 Test #219: static_fixture_compile_objaccess .......   Passed    0.02 sec
+      Start 220: static_fixture_compile_plankey
+30/68 Test #220: static_fixture_compile_plankey .........   Passed    0.03 sec
+      Start 221: static_fixture_compile_semantics
+31/68 Test #221: static_fixture_compile_semantics .......   Passed    0.02 sec
+      Start 222: static_fixture_compile_resultflow
+32/68 Test #222: static_fixture_compile_resultflow ......   Passed    0.04 sec
+      Start 223: static_fixture_compile_looplock
+33/68 Test #223: static_fixture_compile_looplock ........   Passed    0.03 sec
+      Start 224: static_fixture_compile_planv4
+34/68 Test #224: static_fixture_compile_planv4 ..........   Passed    0.04 sec
+      Start 225: static_fixture_compile_closure
+35/68 Test #225: static_fixture_compile_closure .........   Passed    0.03 sec
+      Start 226: static_golden_writers
+36/68 Test #226: static_golden_writers ..................   Passed    0.04 sec
+      Start 227: static_golden_outptr
+37/68 Test #227: static_golden_outptr ...................   Passed    0.04 sec
+      Start 228: static_golden_derives
+38/68 Test #228: static_golden_derives ..................   Passed    0.04 sec
+      Start 229: static_golden_loops
+39/68 Test #229: static_golden_loops ....................   Passed    0.05 sec
+      Start 230: static_golden_spawn
+40/68 Test #230: static_golden_spawn ....................   Passed    0.03 sec
+      Start 231: static_golden_atype
+41/68 Test #231: static_golden_atype ....................   Passed    0.04 sec
+      Start 232: static_golden_wrappers
+42/68 Test #232: static_golden_wrappers .................   Passed    0.07 sec
+      Start 233: static_golden_flowfacts
+43/68 Test #233: static_golden_flowfacts ................   Passed    0.06 sec
+      Start 234: static_golden_argflow
+44/68 Test #234: static_golden_argflow ..................   Passed    0.05 sec
+      Start 235: static_golden_lockset
+45/68 Test #235: static_golden_lockset ..................   Passed    0.05 sec
+      Start 236: static_golden_relations
+46/68 Test #236: static_golden_relations ................   Passed    0.08 sec
+      Start 237: static_golden_clobber
+47/68 Test #237: static_golden_clobber ..................   Passed    0.03 sec
+      Start 238: static_golden_flowfacts_np
+48/68 Test #238: static_golden_flowfacts_np .............   Passed    0.06 sec
+      Start 239: static_golden_argflow_np
+49/68 Test #239: static_golden_argflow_np ...............   Passed    0.06 sec
+      Start 240: static_golden_lockset_np
+50/68 Test #240: static_golden_lockset_np ...............   Passed    0.06 sec
+      Start 241: static_golden_relations_np
+51/68 Test #241: static_golden_relations_np .............   Passed    0.11 sec
+      Start 242: static_golden_lockpaths_np
+52/68 Test #242: static_golden_lockpaths_np .............   Passed    0.12 sec
+      Start 243: static_golden_relpaths_np
+53/68 Test #243: static_golden_relpaths_np ..............   Passed    0.13 sec
+      Start 244: static_golden_relsound_np
+54/68 Test #244: static_golden_relsound_np ..............   Passed    0.33 sec
+      Start 245: static_golden_imgbudget_np
+55/68 Test #245: static_golden_imgbudget_np .............   Passed    0.06 sec
+      Start 246: static_golden_relincomplete_np
+56/68 Test #246: static_golden_relincomplete_np .........   Passed    0.10 sec
+      Start 247: static_golden_relincomplete_cut_np
+57/68 Test #247: static_golden_relincomplete_cut_np .....   Passed    0.12 sec
+      Start 248: static_golden_relcallback_np
+58/68 Test #248: static_golden_relcallback_np ...........   Passed    0.12 sec
+      Start 249: static_golden_order_np
+59/68 Test #249: static_golden_order_np .................***Failed    0.18 sec
+      Start 250: static_golden_anonrec_np
+60/68 Test #250: static_golden_anonrec_np ...............   Passed    0.08 sec
+      Start 251: static_golden_objaccess
+61/68 Test #251: static_golden_objaccess ................   Passed    0.06 sec
+      Start 252: static_golden_objaccess_off
+62/68 Test #252: static_golden_objaccess_off ............   Passed    0.05 sec
+      Start 253: static_golden_semantics_np
+63/68 Test #253: static_golden_semantics_np .............   Passed    0.15 sec
+      Start 254: static_golden_resultflow_np
+64/68 Test #254: static_golden_resultflow_np ............***Failed    0.13 sec
+      Start 255: static_golden_resultflow_order_np
+65/68 Test #255: static_golden_resultflow_order_np ......***Failed    0.16 sec
+      Start 256: static_golden_looplock_np
+66/68 Test #256: static_golden_looplock_np ..............   Passed    0.19 sec
+      Start 257: static_golden_looplock_order_np
+67/68 Test #257: static_golden_looplock_order_np ........***Failed    0.18 sec
+      Start 258: static_golden_closure_np
+68/68 Test #258: static_golden_closure_np ...............***Failed    0.16 sec
+
+93% tests passed, 5 tests failed out of 68
+
+Label Time Summary:
+golden    =   3.20 sec*proc (33 tests)
+lint      =   2.30 sec*proc (8 tests)
+static    =   3.99 sec*proc (60 tests)
+
+Total Test time (real) =   6.32 sec
+
+The following tests FAILED:
+	249 - static_golden_order_np (Failed)
+	254 - static_golden_resultflow_np (Failed)
+	255 - static_golden_resultflow_order_np (Failed)
+	257 - static_golden_looplock_order_np (Failed)
+	258 - static_golden_closure_np (Failed)
+Errors while running CTest
+Output from these tests are in: <scratch>/kzc3_build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.

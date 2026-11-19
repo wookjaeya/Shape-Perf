@@ -1,0 +1,5 @@
+c1_pre_tx: lines of rf2_final_order/c1_pre_tx/relations.txt not in the scratch text: 1 (      1 facts  ); lines added: 166
+c1_post_tx: lines of rf2_final_order/c1_post_tx/relations.txt not in the scratch text: 1 (      1 facts  ); lines added: 165
+r2_core: lines of rf2_final_order/r2_core/relations.txt not in the scratch text: 1 (      1 facts  ); lines added: 89
+c5_641: lines of rf2_final_order/c5_641/relations.txt not in the scratch text: 1 (      1 facts  ); lines added: 159
+c5_642: lines of rf2_final_order/c5_642/relations.txt not in the scratch text: 1 (      1 facts  ); lines added: 159

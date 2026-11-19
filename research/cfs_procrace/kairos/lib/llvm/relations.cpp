@@ -13,6 +13,7 @@
 #include <cstring>
 #include <functional>
 #include <map>
+#include <regex>
 #include <set>
 #include <sstream>
 #include <tuple>
@@ -786,6 +787,8 @@ class Rel : public RelFacts {
       for (const char* w : kSpWhy)
         if (why.count(w) != 0) ws.push_back(std::string(w) + " " + std::to_string(why.at(w)));
       os << " (" << (ws.empty() ? std::string("none") : join(ws, "; ")) << ")\n";
+      // relations rules revision 14 (5x item 4, seventh addendum): the stored-field rule over the program
+      os << sf_header() << "\n";
     }
     // relations rules revision 6: the rows per incompleteness reason (the reason, then its sub-reasons)
     os << "summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m):";
@@ -3668,6 +3671,7 @@ class Rel : public RelFacts {
       if (result_flow_ && has_objacc_)
         for (const std::string& h : holder_lines(u.ci, u.callee, u.param)) L.line("holder") << h;
       std::vector<std::string> paired, excluded, probes;
+      std::vector<std::string> probe_same;  // relations rules revision 14: the probe-creates that are no pair (the alternatives line)
       std::vector<const Use*> named;  // the creators the row pairs, and its probe-creates (relations rules revision 7)
       bool creator_member_unres = false;
       bool any_inter = false, any_match = false, any_unres = false, creator_unres = false, creator_cut = false;
@@ -3745,6 +3749,7 @@ class Rel : public RelFacts {
           ++n_probe;
           excluded.push_back("probe-create (same function, the same key argument, the creator's key read under the lookup's result; " + polarity + "): " + line);
           probes.push_back(call_pos(w.ci) + " -> " + fname(w.callee) + " (" + polarity + ")");
+          probe_same.push_back(call_pos(w.ci) + " -> " + fname(w.callee));
           continue;
         }
         if (probe)
@@ -3832,6 +3837,8 @@ class Rel : public RelFacts {
         for (int64_t v : nm)
           if (rf_fail(v, calls_[u.ci].callee_fn)) absence.insert(v);
         a_result_flow(L, u.ci, absence, nm_via, !probes.empty(), &nm_chain, &nm_rows);
+        // relations rules revision 14 (static_facts.md 5x item 4, seventh addendum)
+        if (has_objacc_) alternatives_lines(L, u.ci, absence, probe_same);
         L.done();
       }
       std::string dep;
@@ -4154,6 +4161,428 @@ class Rel : public RelFacts {
     }
     return "absence origins: " + std::to_string(v) + " [" + (name.empty() ? std::string("-") : name) + "]: " + std::to_string(out.size()) + " origin(s): " +
            (out.empty() ? std::string("none in the return constants of the chain") : join(out, "; "));
+  }
+  // ---------------------------------------------------------------- relations rules revision 14: the alternatives line
+  // (static_facts.md 5x item 4 and its seventh addendum) and the stored-field rule (judgement rules 8.13 item 17).  The
+  // rule reads the chunks the extraction writes into the chain of an exit row whose stored location's address a call takes
+  // on the paths; it names no function, field or role.  The lines name no file or function into the row's layers.
+  struct SfChunk {
+    std::string store_pos, callee, call_pos, target, effect_pos;
+    bool is_const = false;
+    int64_t c = 0;
+    uint32_t arg = 0, calls = 0, stores = 0;
+    std::vector<std::tuple<std::string, bool, std::string>> branches;  // position, reads the result of the call, toward
+  };
+  static std::vector<SfChunk> sf_chunks(const std::string& chain) {
+    static const std::regex re(
+        " \\[path from the store at (\\S+): value (constant (-?[0-9]+)|not a constant); to (\\S+) at (\\S+) argument ([0-9]+): other calls ([0-9]+)(?: \\(first \\S+\\))?, "
+        "stores of (\\S+) ([0-9]+)(?: \\(first \\S+\\))?; to the effect at (\\S+): branches ([^\\]]*)\\]");
+    std::vector<SfChunk> out;
+    for (std::sregex_iterator it(chain.begin(), chain.end(), re), end; it != end; ++it) {
+      const std::smatch& m = *it;
+      SfChunk ch;
+      ch.store_pos = m[1];
+      ch.is_const = m[3].matched;
+      if (ch.is_const) ch.c = std::stoll(m[3]);
+      ch.callee = m[4];
+      ch.call_pos = m[5];
+      ch.arg = static_cast<uint32_t>(std::stoul(m[6]));
+      ch.calls = static_cast<uint32_t>(std::stoul(m[7]));
+      ch.target = m[8];
+      ch.stores = static_cast<uint32_t>(std::stoul(m[9]));
+      ch.effect_pos = m[10];
+      const std::string bs = m[11];
+      if (bs != "none") {
+        size_t at = 0;
+        while (at <= bs.size()) {
+          const size_t e = bs.find(", ", at);
+          const std::string part = bs.substr(at, e == std::string::npos ? std::string::npos : e - at);
+          const size_t sp = part.find(' '), tw = part.rfind(" toward ");
+          if (sp != std::string::npos && tw != std::string::npos)
+            ch.branches.emplace_back(part.substr(0, sp), part.compare(sp + 1, 24, "reads the result of the ") == 0, part.substr(tw + 8));
+          if (e == std::string::npos) break;
+          at = e + 2;
+        }
+      }
+      out.push_back(ch);
+    }
+    return out;
+  }
+  struct SfResult {
+    bool decided = false;
+    int64_t r = 0;
+    int branch = -1;  // the branch on the call's result under r: 1 true, 0 false, -1 not decided
+    std::string why;  // not decided: why
+    std::vector<std::string> premises;
+    std::string text;  // decided: "<call> result <r> by the stored-field rule (store <S> := <c>)"
+    std::string callee;
+    uint32_t fn = kN;
+  };
+  // the nodes of a tree that condition (3) of the rule decides: (deref param k) = c, and param k compared with 0
+  void sf_force(uint32_t root, uint32_t k, int64_t c, Subst* s) const {
+    if (root == kN || root >= exprs_.size()) return;
+    const kz_fact_expr& e = exprs_[root];
+    auto is_param = [&](uint32_t n) {
+      return n != kN && n < exprs_.size() && exprs_[n].op == KZ_EXPR_OP_LOAD && exprs_[n].flags == KZ_EXPR_REF_PARAM && static_cast<uint32_t>(exprs_[n].value) == k;
+    };
+    auto is_zero = [&](uint32_t n) { return n != kN && n < exprs_.size() && exprs_[n].op == KZ_EXPR_OP_CONST && exprs_[n].a == kN && exprs_[n].b == kN && exprs_[n].value == 0; };
+    if (e.op == KZ_EXPR_OP_DEREF && is_param(e.a)) {
+      s->forced[root] = c;
+      return;
+    }
+    if ((e.op == KZ_EXPR_OP_EQ || e.op == KZ_EXPR_OP_NE) && ((is_param(e.a) && is_zero(e.b)) || (is_param(e.b) && is_zero(e.a)))) {
+      s->forced[root] = e.op == KZ_EXPR_OP_NE ? 1 : 0;
+      return;
+    }
+    if (e.a != kN && e.a < root) sf_force(e.a, k, c, s);
+    if (e.b != kN && e.b < root) sf_force(e.b, k, c, s);
+  }
+  static uint32_t sf_line(const std::string& line_col) {
+    const size_t c = line_col.find(':');
+    return static_cast<uint32_t>(std::strtoul(line_col.substr(0, c).c_str(), nullptr, 10));
+  }
+  // the rule at the exit row ri for one of its chunks
+  SfResult sf_rule(uint32_t ri, const SfChunk& ch) const {
+    SfResult res;
+    const kz_fact_reffect& e = reffect_[ri];
+    res.callee = ch.callee;
+    auto fail = [&](const std::string& w) {
+      res.why = w;
+      return res;
+    };
+    // (0) the store: a complete STORE row of the same call and value at that position, of a constant
+    bool store_ok = false;
+    auto sit = reffect_of_site_.find(e.site);
+    if (sit != reffect_of_site_.end())
+      for (uint32_t i : sit->second) {
+        const kz_fact_reffect& s = reffect_[i];
+        if (s.effect != KZ_REFF_EFFECT_STORE || s.outcome_value != e.outcome_value || s.reach != e.reach) continue;
+        if (s.effect_line != sf_line(ch.store_pos)) continue;
+        if (str(s.detail).compare(0, ch.target.size() + 4, ch.target + " := ") != 0) continue;
+        if (s.status == KZ_REFF_STATUS_COMPLETE) store_ok = true;
+      }
+    if (!store_ok) return fail("the store is on a path this value does not decide");
+    if (!ch.is_const) return fail("the stored value is not a constant");
+    if (ch.target.compare(0, 6, "field:") != 0) return fail("the stored location is not a field");
+    const std::string X = ch.target.substr(6);
+    // the call: in the function of the row, by its line and column (the chunk's positions are those of that function's file)
+    uint32_t kci = kN;
+    auto cof = calls_of_.find(e.fn);
+    if (cof != calls_of_.end())
+      for (uint32_t i : cof->second)
+        if (str(calls_[i].callee) == ch.callee && std::to_string(calls_[i].line) + ":" + std::to_string(calls_[i].col) == ch.call_pos) kci = i;
+    if (kci == kN) return fail("the call is not a call row of these facts");
+    const uint32_t F = calls_[kci].callee_fn;
+    res.fn = F;
+    // (1)
+    if (!defined(F)) return fail("(1) the callee has no body in these facts");
+    auto rit = retconsts_of_.find(F);
+    if (rit == retconsts_of_.end() || rit->second.empty()) return fail("(1) the callee has no RET_CONSTS row");
+    for (uint32_t i : rit->second)
+      if (!(retconsts_[i].flags & KZ_RET_FLAG_ONLY_CONSTANTS) || retconsts_[i].cond_root == kN) return fail("(1) a RET_CONSTS row of the callee is not only-constants with a condition");
+    // (2)
+    auto ait = argflow_at_.find({calls_[kci].site, ch.arg});
+    if (ait == argflow_at_.end()) return fail("(2) the argument has no ARGFLOW row");
+    const kz_fact_argflow& af = argflow_[ait->second];
+    if (af.src != KZ_ARGSRC_ADDRESS || af.base != KZ_ARGBASE_GLOBAL || str(af.type) + "." + str(af.field) != X)
+      return fail("(2) the argument is not shown to be the address of the field of a global object (" + enum_text("KZ_ARGSRC", af.src) + ", " + enum_text("KZ_ARGBASE", af.base) + ")");
+    // (3)
+    std::set<int64_t> possible;
+    for (uint32_t i : rit->second) {
+      Subst s;
+      sf_force(retconsts_[i].cond_root, ch.arg, ch.c, &s);
+      const Val w = eval(retconsts_[i].cond_root, s, nullptr);
+      if (!w.known || w.v != 0) possible.insert(retconsts_[i].value);
+    }
+    if (possible.size() != 1) return fail("(3) the return conditions leave " + std::to_string(possible.size()) + " constants possible");
+    res.r = *possible.begin();
+    // (4)
+    auto pit = pflow_of_.find({F, ch.arg});
+    if (pit != pflow_of_.end())
+      for (uint32_t i : pit->second) {
+        const kz_fact_pflow& p = pflow_[i];
+        if (p.kind == KZ_PFLOW_KIND_CALL_ARG && p.depth == 0) return fail("(4) the callee passes the parameter on to another call");
+        if (p.kind != KZ_PFLOW_KIND_OUT_STORE) continue;
+        if (p.guard_root == kN) return fail("(4) the callee stores through the parameter on every path");
+        Subst s;
+        sf_force(p.guard_root, ch.arg, ch.c, &s);
+        const Val g = eval(p.guard_root, s, nullptr);
+        if (!g.known || g.v != 0) return fail("(4) a store through the parameter is not excluded under the stored value");
+      }
+    // (5)
+    if (ch.calls != 0 || ch.stores != 0) return fail("(5) a call or a store of the location is on a path from the store to the call");
+    // (6)
+    auto fit = fstatus_of_.find(X);
+    if (fit == fstatus_of_.end()) res.premises.push_back("(6) the writer set of " + X + " is complete (no FIELD_STATUS row)");
+    else {
+      const kz_fact_fstatus& fs = fstatus_[fit->second];
+      if (fs.status_field != KZ_LOC_STATUS_COMPLETE || fs.status_type != KZ_LOC_STATUS_COMPLETE)
+        res.premises.push_back("(6) the writer set of " + X + " is complete under both rules (FIELD_STATUS per-field=" + enum_text("KZ_LOC_STATUS", fs.status_field) +
+                               " type-level=" + enum_text("KZ_LOC_STATUS", fs.status_type) + ")");
+    }
+    const std::set<uint32_t> here = actor_set(calls_[kci].caller_fn);
+    if (here.size() != 1) res.premises.push_back("(6) the function of the call runs in one actor (it runs in " + std::to_string(here.size()) + ")");
+    else {
+      auto wit = writers_of_.find(X);
+      uint32_t other = 0;
+      if (wit != writers_of_.end())
+        for (uint32_t i : wit->second) {
+          const std::set<uint32_t> a = actor_set(writers_[i].fn);
+          if (a.empty() || !std::includes(here.begin(), here.end(), a.begin(), a.end())) ++other;
+        }
+      if (other != 0) res.premises.push_back("(6) no writer of " + X + " runs in another actor (" + std::to_string(other) + " writer row(s) whose actors these facts do not show to be the call's)");
+    }
+    if (!res.premises.empty()) return fail("(5) or (6) rests on a premise");
+    res.decided = true;
+    // the branch on the call's result
+    auto fl = rflow_of_site_.find(calls_[kci].site);
+    std::vector<uint32_t> br;
+    if (fl != rflow_of_site_.end())
+      for (uint32_t i : fl->second)
+        if (rflow_[i].use_kind == KZ_RFLOW_USE_BRANCH) br.push_back(i);
+    if (br.size() == 1) {
+      Subst s;
+      uint32_t n = 0;
+      visit(rflow_[br[0]].cond_root, [&](const kz_fact_expr& x) {
+        if (x.op == KZ_EXPR_OP_CALL_RESULT && str(x.name) == ch.callee) ++n;
+      });
+      if (n == 1) {
+        s.calls[ch.callee] = res.r;
+        const Val b = eval(rflow_[br[0]].cond_root, s, nullptr);
+        if (b.known) res.branch = b.v != 0 ? 1 : 0;
+      }
+    }
+    const std::string file = e.fn < funcs_.size() ? str(funcs_[e.fn].file) : std::string();
+    res.text = ch.callee + " at " + call_pos(kci) + " result " + std::to_string(res.r) + " by the stored-field rule (store " + file + ":" + ch.store_pos + " := " + std::to_string(ch.c) + ")";
+    return res;
+  }
+  // an open RESULT_EFFECT row that the rule closes: every part of its reason is a decided address pass or the undecided
+  // branch whose every branch on the path reads the decided call's result toward the effect
+  bool sf_closes(uint32_t ri, std::vector<SfResult>* used) const {
+    const kz_fact_reffect& e = reffect_[ri];
+    const std::string reason = str(e.reason);
+    const std::vector<SfChunk> chs = sf_chunks(str(e.chain));
+    if (chs.empty()) return false;
+    std::vector<SfResult> rs;
+    for (const SfChunk& ch : chs) rs.push_back(sf_rule(ri, ch));
+    for (const SfResult& r : rs)
+      if (!r.decided) return false;
+    size_t at = 0;
+    while (at <= reason.size()) {
+      const size_t x = reason.find("; ", at);
+      const std::string part = reason.substr(at, x == std::string::npos ? std::string::npos : x - at);
+      if (part == "on a path through a branch this value does not decide") {
+        for (size_t i = 0; i < chs.size(); ++i)
+          for (const auto& [p, reads, tow] : chs[i].branches) {
+            if (!reads || !rs[i].decided || rs[i].branch < 0) return false;
+            if (!(tow == "both" || (tow == "true" && rs[i].branch == 1) || (tow == "false" && rs[i].branch == 0))) return false;
+          }
+      } else if (part.find(" takes the address of ") != std::string::npos) {
+        bool ok = false;
+        for (size_t i = 0; i < chs.size(); ++i)
+          if (part.compare(0, chs[i].callee.size() + 4 + chs[i].call_pos.size(), chs[i].callee + " at " + chs[i].call_pos) == 0 && rs[i].decided) ok = true;
+        if (!ok) return false;
+      } else {
+        return false;
+      }
+      if (x == std::string::npos) break;
+      at = x + 2;
+    }
+    for (const SfResult& r : rs) used->push_back(r);
+    return true;
+  }
+  // the reason class of a part of an open row's reason (the header count)
+  static const char* sf_class(const std::string& part) {
+    auto starts = [&](const char* p) { return part.compare(0, std::strlen(p), p) == 0; };
+    if (starts("on a path through a branch this value does not decide")) return "branch not decided by the value";
+    if (part.find(" takes the address of ") != std::string::npos) return "address passed on the paths";
+    if (starts("the outcome is ")) return "outcome not enumerated";
+    if (starts("the values the callee returns are not known")) return "callee values not known";
+    return "other";
+  }
+  std::string sf_header() const {
+    NoNotes nn(const_cast<Rel*>(this));
+    std::map<std::string, uint32_t> by;
+    uint32_t n = 0, d = 0;
+    std::set<std::string> sites, dsites;
+    std::map<std::string, uint32_t> why;
+    for (uint32_t ri = 0; ri < reffect_.size(); ++ri) {
+      const kz_fact_reffect& e = reffect_[ri];
+      if (e.status != KZ_REFF_STATUS_OPEN) continue;
+      const std::string reason = str(e.reason);
+      std::set<std::string> cls;
+      size_t at = 0;
+      while (at <= reason.size()) {
+        const size_t x = reason.find("; ", at);
+        cls.insert(sf_class(reason.substr(at, x == std::string::npos ? std::string::npos : x - at)));
+        if (x == std::string::npos) break;
+        at = x + 2;
+      }
+      for (const std::string& c : cls) ++by[c];
+      for (const SfChunk& ch : sf_chunks(str(e.chain))) {
+        ++n;
+        sites.insert(ch.callee + " at " + ch.call_pos);
+        const SfResult r = sf_rule(ri, ch);
+        if (r.decided) {
+          ++d;
+          dsites.insert(ch.callee + " at " + ch.call_pos);
+        } else {
+          ++why[r.why];
+        }
+      }
+    }
+    std::vector<std::string> bs, ws;
+    for (const auto& [k, v] : by) bs.push_back(k + " " + std::to_string(v));
+    for (const auto& [k, v] : why) ws.push_back(k + " " + std::to_string(v));
+    return "rules with decided call results: relations rules revision 14 (the stored-field rule, judgement rules 8.13 item 17): open effects by reason: " +
+           (bs.empty() ? std::string("none") : join(bs, "; ")) + "; address-passing calls on stored-location paths " + std::to_string(n) + " (call sites " +
+           std::to_string(sites.size()) + "): decided " + std::to_string(d) + "; not decided: " + (ws.empty() ? std::string("none") : join(ws, "; ")) +
+           "; call sites decided by the stored-field rule " + std::to_string(dsites.size()) + " (rows " + std::to_string(n_alt_decided_rows_) + ")";
+  }
+  uint32_t n_alt_decided_rows_ = 0;
+  struct AltCtx {
+    std::vector<uint32_t> sites;  // from the use up
+    std::vector<std::string> found, decided;
+    std::set<std::string> rests, premises;
+    bool complete = false;
+    std::string why;  // not complete: why
+  };
+  static constexpr size_t kAltContexts = 256;
+  void alt_rests(uint32_t fn, std::set<std::string>* out) const {
+    if (fn == kN || fn >= funcs_.size()) return;
+    const std::string n = str(funcs_[fn].name);
+    if (p0_unverified_.count(n) != 0) out->insert("P0-unverified(" + n + ")");
+    auto it = sem_unverified_.find(fn);
+    if (it != sem_unverified_.end())
+      for (const std::string& s : it->second) out->insert("sem-unverified(" + s + ")");
+  }
+  void alt_walk(uint32_t site, int64_t v, uint32_t depth, AltCtx acc, const std::vector<std::string>& probe, std::vector<AltCtx>* out, bool* cut) const {
+    if (out->size() >= kAltContexts) {
+      *cut = true;
+      return;
+    }
+    acc.sites.push_back(site);
+    auto cit = call_by_site_.find(site);
+    auto finish = [&](AltCtx& a, bool complete, const std::string& why) {
+      a.complete = complete;
+      a.why = why;
+      out->push_back(a);
+    };
+    if (cit == call_by_site_.end()) return finish(acc, false, "the call is not a call row of these facts");
+    for (size_t i = 0; i + 1 < acc.sites.size(); ++i)
+      if (acc.sites[i] == site) return finish(acc, false, "the walk comes back to the call at " + call_pos(cit->second));
+    if (depth > 40) return finish(acc, false, "the walk stops at 40 frames");
+    const uint32_t ci = cit->second;
+    bool comp = false;
+    const std::vector<uint32_t> rows = reff_rows(site, v, &comp);
+    if (rows.empty()) return finish(acc, false, "no RESULT_EFFECT row of the value " + std::to_string(v) + " at " + call_pos(ci));
+    if (comp) return finish(acc, false, "the value " + std::to_string(v) + " is not among the values enumerated at " + call_pos(ci));
+    if (depth == 0)
+      for (const std::string& p : probe) acc.found.push_back("creation in the same name space and partition by the same function (" + p + "; the row's not-a-pair line)");
+    std::vector<std::string> open;
+    std::set<std::pair<uint32_t, int64_t>> rets;
+    bool ends = false;
+    for (uint32_t i : rows) {
+      const kz_fact_reffect& e = reffect_[i];
+      if (e.effect == KZ_REFF_EFFECT_RETRY) {
+        acc.found.push_back("retry (the call at " + call_pos(ci) + " runs again; " + enum_text("KZ_REFF_STATUS", e.status) + ")");
+        continue;
+      }
+      bool complete = e.status == KZ_REFF_STATUS_COMPLETE;
+      if (!complete) {
+        std::vector<SfResult> used;
+        if (sf_closes(i, &used)) {
+          complete = true;
+          for (const SfResult& r : used) {
+            acc.decided.push_back(r.text);
+            alt_rests(r.fn, &acc.rests);
+          }
+        } else {
+          std::string nd;
+          for (const SfChunk& ch : sf_chunks(str(e.chain))) {
+            const SfResult r = sf_rule(i, ch);
+            for (const std::string& p : r.premises) acc.premises.insert(p);
+            if (!r.decided) nd += " [the stored-field rule at " + ch.callee + " " + ch.call_pos + ": not decided: " + r.why + "]";
+            else if (r.branch < 0) nd += " [the stored-field rule at " + ch.callee + " " + ch.call_pos + ": result " + std::to_string(r.r) + ", the branch on it not decided]";
+            else nd += " [the stored-field rule at " + ch.callee + " " + ch.call_pos + ": result " + std::to_string(r.r) + "; the open parts of the row are not all closed by it]";
+          }
+          open.push_back(enum_text("KZ_REFF_EFFECT", e.effect) + " at " + reff_pos(e) + ": " + str(e.reason) + nd);
+        }
+      }
+      if (!complete) continue;
+      if (e.effect == KZ_REFF_EFFECT_EXIT_APP || e.effect == KZ_REFF_EFFECT_TERMINAL) {
+        ends = true;
+        if (e.effect_site != kN) {
+          auto x = call_by_site_.find(e.effect_site);
+          if (x != call_by_site_.end()) alt_rests(calls_[x->second].callee_fn, &acc.rests);
+        }
+      }
+      if (e.effect == KZ_REFF_EFFECT_RETURN_RESULT) rets.insert({e.fn, v});
+      if (e.effect == KZ_REFF_EFFECT_RETURN_CONST) rets.insert({e.fn, e.effect_value});
+    }
+    if (!open.empty()) {
+      std::string t;
+      for (size_t i = 0; i < open.size() && i < 3; ++i) t += (i == 0 ? "" : "; ") + open[i];
+      if (open.size() > 3) t += "; and " + std::to_string(open.size() - 3) + " more";
+      return finish(acc, false, "open: " + t);
+    }
+    if (!rets.empty()) {
+      for (const auto& [g, c] : rets) {
+        const bool direct = g < callers_.size() && !callers_[g].empty();
+        if (indirect_callers_.count(g) != 0) {
+          AltCtx a = acc;
+          finish(a, false, fname(g) + " returns the value " + std::to_string(c) + " and is also called through a function pointer; those callers are not followed");
+        }
+        if (!direct) {
+          AltCtx a = acc;
+          if (root_kind_.count(g) != 0) finish(a, true, "");
+          else if (indirect_callers_.count(g) == 0) finish(a, false, fname(g) + " returns the value " + std::to_string(c) + " and no call of these facts calls it");
+          continue;
+        }
+        for (uint32_t x : callers_[g]) alt_walk(calls_[x].site, c, depth + 1, acc, probe, out, cut);
+      }
+      return;
+    }
+    if (ends) return finish(acc, true, "");
+    const uint32_t f = calls_[ci].caller_fn;
+    return finish(acc, false, "the value's effects end in " + fname(f) + " and it returns to its caller: direct callers " +
+                                   std::to_string(f < callers_.size() ? callers_[f].size() : 0) + ", called through a function pointer: " + (indirect_callers_.count(f) != 0 ? "yes" : "no"));
+  }
+  void alternatives_lines(RowLines& L, uint32_t ci, const std::set<int64_t>& absence, const std::vector<std::string>& probe) {
+    NoNotes nn(this);
+    if (absence.empty()) {
+      L.line("alternatives") << "alternatives [context -]: not established (the lookup's absence value is not evaluated)";
+      return;
+    }
+    bool row_decided = false;
+    for (int64_t v : absence) {
+      std::vector<AltCtx> ctx;
+      bool cut = false;
+      alt_walk(calls_[ci].site, v, 0, AltCtx{}, probe, &ctx, &cut);
+      std::vector<std::pair<std::vector<uint32_t>, size_t>> order;
+      for (size_t i = 0; i < ctx.size(); ++i) order.push_back({std::vector<uint32_t>(ctx[i].sites.rbegin(), ctx[i].sites.rend()), i});
+      std::sort(order.begin(), order.end());
+      size_t k = 0;
+      for (const auto& [key, i] : order) {
+        const AltCtx& a = ctx[i];
+        std::string c;
+        for (auto it = a.sites.rbegin(); it != a.sites.rend(); ++it) {
+          auto x = call_by_site_.find(*it);
+          c += (c.empty() ? "" : " <- ") + (x == call_by_site_.end() ? std::string("site ") + std::to_string(*it) : fname(calls_[x->second].caller_fn) + "@" + call_pos(x->second));
+        }
+        std::string res;
+        if (!a.found.empty()) res = "found: " + join(a.found, "; ") + (a.complete ? std::string() : " [not established (" + a.why + ")]");
+        else if (a.complete) res = "none found (exploration complete)";
+        else res = "not established (" + a.why + ")";
+        if (!a.decided.empty()) row_decided = true;
+        L.line("alternatives") << "alternatives [context " << ++k << (absence.size() > 1 ? " value " + std::to_string(v) : std::string()) << ": " << c << "]: " << res
+                               << "; rests on: " << (a.rests.empty() ? std::string("none") : join(std::vector<std::string>(a.rests.begin(), a.rests.end()), " "))
+                               << "; premises: " << (a.premises.empty() ? std::string("none") : join(std::vector<std::string>(a.premises.begin(), a.premises.end()), "; "))
+                               << "; decided calls: " << (a.decided.empty() ? std::string("none") : join(a.decided, "; "));
+      }
+      if (cut) L.line("alternatives") << "alternatives: the walk stopped at " << kAltContexts << " contexts (a walk bound; the contexts after it are not written)";
+    }
+    if (row_decided) ++n_alt_decided_rows_;
   }
   // a path A row: the absence line and the handling label (the absence values of the lookup, else its failure values)
   void a_result_flow(RowLines& L, uint32_t ci, const std::set<int64_t>& absence, const std::string& via, bool probe, const std::vector<uint32_t>* chain = nullptr,

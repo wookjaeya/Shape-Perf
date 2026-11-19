@@ -63,7 +63,10 @@
 #                    with --result-flow and --object-access): five create APIs of one name table whose success path line
 #                    holds (a constant return after the name store and the out-id store; a finishing step that gives its
 #                    status back and stores the id) or is missing (the id through a local, an early success return, a name
-#                    store on another branch);
+#                    store on another branch); the alternatives line and the stored-field rule (5x seventh addendum): a
+#                    status stored on a lookup's failure, a second store that the line order puts between it and a loop on
+#                    a call taking its address but no path does, a store that the line order puts after the exit but a path
+#                    reaches before the call, a failure turned into another constant, a second caller context, a retry;
 #                    planv4.c for plan rules revision 3 (kz-static plan --manifest 4, docs/plan_manifest.md 7-8), read by
 #                    test_static_plan only with data/planv4_fixture/ (a hand-written semantics data file that names the
 #                    event-type argument of its event send, a hand-written namespace data file with its lookup, create and

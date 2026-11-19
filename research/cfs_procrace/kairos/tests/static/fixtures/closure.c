@@ -22,9 +22,19 @@
  *   holders      the looker clears a table of channels and looks a name up into a channel's field (a field holder with a
  *                clearing writer), into an element of a global array (no record field) and into a local; a user thread
  *                reads the channel field once after a test of its value and once without one;
- *   threads      the main thread starts a looker (the lookups), a maker (the creations) and a user.
+ *   alternatives (relations rules revision 14, the alternatives line and the stored-field rule, 5x seventh addendum)
+ *                a runner looks a name up through an initialisation function that returns the lookup's result; on the
+ *                failure it stores a status, jumps over a second store to a loop on a call that takes the status's address
+ *                and returns 0 for that status, and exits with the status: by line the second store is between the store
+ *                and the call, by path it is not; a second runner stores a status on the failure of a lookup whose failure
+ *                is turned into another constant, and a store that the source puts after the exit is on a path from the
+ *                status store to the call; a command thread calls the initialisation function too (a second context);
+ *                a waiter looks a name up again until it is found (a retry);
+ *   threads      the main thread starts a looker (the lookups), a maker (the creations), a user, the two runners, the
+ *                command thread and the waiter.
  * The values are the fixture's; they are no experiment results. */
 #include <pthread.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define NSLOTS 4
@@ -179,10 +189,90 @@ static void *maker_main(void *arg) {
   return 0;
 }
 
+typedef struct {
+  unsigned int run;
+  unsigned int mode;
+} RunState;
+
+static RunState runs;
+static int rid[4];
+
+int run_loop(unsigned int *state) {
+  if (state != 0 && *state != 1) return 0;
+  return 1;
+}
+
+/* the same table's lookup without the null check: its no-match value is the search's */
+int ent_get(int *out, const char *name) {
+  int i;
+  for (i = 0; i < NSLOTS; i++) {
+    if (ents[i].used == 1 && strcmp(ents[i].name, name) == 0) {
+      *out = ents[i].id;
+      return CL_OK;
+    }
+  }
+  return CL_ERR_NOT_FOUND;
+}
+
+static int run_init(void) { return ent_get(&rid[0], "gamma"); }
+
+static int run_init_c(void) {
+  if (ent_get(&rid[1], "delta") != CL_OK) return CL_ERR_FULL;
+  return CL_OK;
+}
+
+static void *runner_main(void *arg) {
+  int st;
+  (void)arg;
+  st = run_init();
+  if (st != CL_OK) {
+    runs.run = 3;
+    goto loop;
+  }
+  runs.run = 1;
+loop:
+  while (run_loop(&runs.run)) {
+    seen = seen + 1;
+  }
+  exit((int)runs.run);
+}
+
+static void *runner2_main(void *arg) {
+  (void)arg;
+  if (run_init_c() != CL_OK) runs.mode = 3;
+  if (seen > 7) goto fix;
+again:
+  while (run_loop(&runs.mode)) {
+    seen = seen + 2;
+  }
+  exit((int)runs.mode);
+fix:
+  runs.mode = 1;
+  goto again;
+}
+
+static void *cmd_main(void *arg) {
+  (void)arg;
+  if (run_init() != CL_OK) seen = seen + 5;
+  return 0;
+}
+
+static void *waiter_main(void *arg) {
+  (void)arg;
+  while (ent_get(&rid[2], "eps") != CL_OK) {
+    seen = seen + 3;
+  }
+  return 0;
+}
+
 int main(void) {
-  pthread_t a, b, c;
+  pthread_t a, b, c, d, e, f, g;
   (void)pthread_create(&a, 0, looker_main, 0);
   (void)pthread_create(&b, 0, maker_main, 0);
   (void)pthread_create(&c, 0, user_main, 0);
+  (void)pthread_create(&d, 0, runner_main, 0);
+  (void)pthread_create(&e, 0, runner2_main, 0);
+  (void)pthread_create(&f, 0, cmd_main, 0);
+  (void)pthread_create(&g, 0, waiter_main, 0);
   return 0;
 }

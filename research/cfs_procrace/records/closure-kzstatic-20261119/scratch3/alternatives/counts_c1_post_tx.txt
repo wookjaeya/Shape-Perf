@@ -1,0 +1,14 @@
+rows with alternatives lines 63; lines 64; contexts per row: {1: 62, 2: 1}
+  found (creation in the same name space and partition by the same function, retry) with a context not established: 1
+  found (retry) with a context not established: 5
+  none found (exploration complete): 3
+  not established: absence value not evaluated: 24
+  not established: an open effect: 16
+  not established: effects end in a function that returns to its caller: 8
+  not established: other (no RESULT_EFFECT row of the value -17 at /h): 2
+  not established: other (no RESULT_EFFECT row of the value -17 at cf): 3
+  not established: other (no RESULT_EFFECT row of the value 0 at cfe/): 2
+lines with premises: none
+lines with decided calls: 0
+rests on (lines naming the kind): none
+header: rules with decided call results: relations rules revision 14 (the stored-field rule, judgement rules 8.13 item 17): open effects by reason: address passed on the paths 72; branch not decided by the value 6817; other 2398; outcome not enumerated 3857; address-passing calls on stored-location paths 72 (call sites 2): decided 0; not decided: (5) or (6) rests on a premise 66; the store is on a path this value does not decide 2; the stored location is not a field 4; call sites decided by the stored-field rule 0 (rows 0)

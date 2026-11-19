@@ -5934,6 +5934,129 @@ class FnWalker {
     *via = g->getNameAsString() + " at " + rf_pos_text(t->getBeginLoc()) + " returns its parameter " + std::to_string(k) + " unchanged";
     return true;
   }
+  // relations rules revision 14 (static_facts.md 5x, seventh addendum): the CFG elements on a path from element a to
+  // element b -- reached from a (after it) without passing b, and from which b can be reached -- and the ends of the blocks
+  // such a path passes, each with the successors from which b is reached (without passing `avoid` again, when it is set)
+  struct RfSpan {
+    std::vector<const Stmt*> elems;
+    std::vector<std::pair<const CFGBlock*, std::vector<bool>>> ends;
+  };
+  std::set<unsigned> rf_reaching(const CfgIndex& ix, unsigned target, unsigned skip) const {
+    std::set<unsigned> r{target};
+    std::vector<unsigned> wl{target};
+    while (!wl.empty()) {
+      const unsigned x = wl.back();
+      wl.pop_back();
+      const CFGBlock* blk = x < ix.blocks.size() ? ix.blocks[x] : nullptr;
+      if (blk == nullptr) continue;
+      for (const CFGBlock::AdjacentBlock& p : blk->preds()) {
+        const CFGBlock* pb = p.getReachableBlock();
+        if (pb == nullptr || pb->getBlockID() == skip) continue;
+        if (r.insert(pb->getBlockID()).second) wl.push_back(pb->getBlockID());
+      }
+    }
+    return r;
+  }
+  RfSpan rf_span(const CfgIndex& ix, const Stmt* a, const Stmt* b, const Stmt* avoid) const {
+    RfSpan sp;
+    auto ia = ix.at.find(a), ib = ix.at.find(b);
+    if (ia == ix.at.end() || ib == ix.at.end()) return sp;
+    const unsigned bb = ib->second.first, bi = ib->second.second;
+    const std::set<unsigned> rb = rf_reaching(ix, bb, ~0u);
+    std::set<unsigned> rb_avoid;
+    if (avoid != nullptr) {
+      auto iv = ix.at.find(avoid);
+      if (iv != ix.at.end() && !(iv->second.first == bb && iv->second.second < bi)) rb_avoid = rf_reaching(ix, bb, iv->second.first);
+    }
+    auto succ_in = [&](const CFGBlock* blk, const std::set<unsigned>& in) {
+      for (const CFGBlock::AdjacentBlock& x : blk->succs())
+        if (x.getReachableBlock() != nullptr && in.count(x.getReachableBlock()->getBlockID()) != 0) return true;
+      return false;
+    };
+    std::set<std::pair<unsigned, unsigned>> started, seen;
+    std::set<unsigned> ended;
+    std::vector<std::pair<unsigned, unsigned>> work{{ia->second.first, ia->second.second + 1}};
+    while (!work.empty()) {
+      const auto [x, from] = work.back();
+      work.pop_back();
+      if (!started.insert({x, from}).second) continue;
+      const CFGBlock* blk = x < ix.blocks.size() ? ix.blocks[x] : nullptr;
+      if (blk == nullptr) continue;
+      const bool tail = succ_in(blk, rb);
+      bool stop = false;
+      for (unsigned k = from; k < blk->size(); ++k) {
+        if (x == bb && k == bi) {
+          stop = true;
+          break;
+        }
+        const std::optional<CFGStmt> cs = (*blk)[k].getAs<CFGStmt>();
+        if (!cs) continue;
+        if (((x == bb && k < bi) || tail) && seen.insert({x, k}).second) sp.elems.push_back(cs->getStmt());
+      }
+      if (stop) continue;
+      if (tail && ended.insert(x).second) {
+        std::vector<bool> tw;
+        for (const CFGBlock::AdjacentBlock& y : blk->succs()) {
+          const CFGBlock* sb = y.getReachableBlock();
+          tw.push_back(sb != nullptr && (avoid != nullptr ? rb_avoid : rb).count(sb->getBlockID()) != 0);
+        }
+        sp.ends.push_back({blk, tw});
+      }
+      for (const CFGBlock::AdjacentBlock& y : blk->succs())
+        if (y.getReachableBlock() != nullptr) work.push_back({y.getReachableBlock()->getBlockID(), 0});
+    }
+    return sp;
+  }
+  static bool rf_contains(const Stmt* root, const Stmt* t) {
+    if (root == nullptr) return false;
+    if (root == t) return true;
+    for (const Stmt* c : root->children())
+      if (rf_contains(c, t)) return true;
+    return false;
+  }
+  // the seventh addendum's chunk of an exit row's chain: the path from the store `st` of `t` to the address-passing call
+  // `k` (argument `arg`) and from the store to the effect call `e`
+  std::string rf_path_chunk(const CfgIndex& ix, const Stmt* st, const std::string& t, bool is_const, int64_t cv, const CallExpr* k, unsigned arg, const CallExpr* e) {
+    std::string out = " [path from the store at " + rf_pos_text(st->getBeginLoc()) + ": value " + (is_const ? "constant " + std::to_string(cv) : std::string("not a constant")) +
+                      "; to " + callee_text(k) + " at " + rf_pos_text(k->getBeginLoc()) + " argument " + std::to_string(arg) + ": ";
+    const RfSpan sk = rf_span(ix, st, k, nullptr);
+    const Stmt* first_call = nullptr;
+    const Stmt* first_store = nullptr;
+    unsigned n_calls = 0, n_stores = 0;
+    auto earlier = [&](const Stmt* x, const Stmt* y) { return y == nullptr || sm_.isBeforeInTranslationUnit(sm_.getExpansionLoc(x->getBeginLoc()), sm_.getExpansionLoc(y->getBeginLoc())); };
+    for (const Stmt* x : sk.elems) {
+      if (const auto* ce = dyn_cast<CallExpr>(x); ce != nullptr && ce != k) {
+        ++n_calls;
+        if (earlier(x, first_call)) first_call = x;
+      }
+      bool ad = false;
+      const Expr* lhs = nullptr;
+      if (const auto* bo = dyn_cast<BinaryOperator>(x); bo != nullptr && bo->isAssignmentOp()) lhs = bo->getLHS();
+      if (const auto* uo = dyn_cast<UnaryOperator>(x); uo != nullptr && uo->isIncrementDecrementOp()) lhs = uo->getSubExpr();
+      if (lhs != nullptr && rf_loc_of(lhs, &ad) == t) {
+        ++n_stores;
+        if (earlier(x, first_store)) first_store = x;
+      }
+    }
+    out += "other calls " + std::to_string(n_calls) + (first_call != nullptr ? " (first " + rf_pos_text(first_call->getBeginLoc()) + ")" : std::string()) + ", stores of " + t + " " +
+           std::to_string(n_stores) + (first_store != nullptr ? " (first " + rf_pos_text(first_store->getBeginLoc()) + ")" : std::string()) + "; to the effect at " +
+           rf_pos_text(e->getBeginLoc()) + ": branches ";
+    const RfSpan se = rf_span(ix, st, e, k);
+    std::vector<std::string> br;
+    for (const auto& [blk, tw] : se.ends) {
+      const Stmt* cond = blk->getTerminatorCondition();
+      if (cond == nullptr || tw.size() < 2) continue;
+      std::string tow;
+      if (blk->getTerminatorStmt() != nullptr && isa<SwitchStmt>(blk->getTerminatorStmt())) tow = "switch";
+      else tow = tw[0] && tw[1] ? "both" : tw[0] ? "true" : tw[1] ? "false" : "none";
+      br.push_back(rf_pos_text(cond->getBeginLoc()) + " " + (rf_contains(cond, k) ? "reads the result of the call at " + rf_pos_text(k->getBeginLoc()) : std::string("other")) + " toward " + tow);
+    }
+    std::sort(br.begin(), br.end());
+    br.erase(std::unique(br.begin(), br.end()), br.end());
+    std::string bs;
+    for (const std::string& x : br) bs += (bs.empty() ? "" : ", ") + x;
+    return out + (bs.empty() ? std::string("none") : bs) + "]";
+  }
   RfWalk rf_explore(const CfgIndex& ix, const RfCtx& c) {
     RfWalk w;
     auto sat = ix.at.find(c.S);
@@ -6436,15 +6559,21 @@ class FnWalker {
                 x.store_target = t;
                 x.store_value = vt;
                 if (is_const) x.effect_value = cv;
+                std::string chunks;
+                std::set<std::pair<const CallExpr*, unsigned>> chunked;
                 for (const RfItem& between : w.items) {
                   if (between.kind != 1 || between.st == later.st) continue;
                   const auto* between_call = cast<CallExpr>(between.st);
                   for (unsigned a = 0; a < between_call->getNumArgs(); ++a) {
                     bool ad = false;
-                    if (rf_loc_of(between_call->getArg(a), &ad) == t && ad) x.address_passes.push_back({ext_call_keys_.at(between_call), a});
+                    if (rf_loc_of(between_call->getArg(a), &ad) == t && ad) {
+                      x.address_passes.push_back({ext_call_keys_.at(between_call), a});
+                      // relations rules revision 14 (5x, seventh addendum): the path from the store to that call and to the effect
+                      if (chunked.insert({between_call, a}).second) chunks += rf_path_chunk(*ix, bo, t, is_const, cv, between_call, a, later_call);
+                    }
                   }
                 }
-                x.chain += " (the store at " + rf_pos_text(bo->getBeginLoc()) + " of " + t + " := " + vt + " is its argument)";
+                x.chain += " (the store at " + rf_pos_text(bo->getBeginLoc()) + " of " + t + " := " + vt + " is its argument)" + chunks;
                 m_.reffects.push_back(x);
               }
             }

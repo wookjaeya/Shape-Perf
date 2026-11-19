@@ -1,0 +1,66 @@
+A1       alternatives [context 1: CFE_ES_DeleteCDS@cfe/fsw/cfe-core/src/es/cfe_es_cds.c:826:22]: not established (open: none at cfe/fsw/cfe-core/src/es/cfe_es_cds.c:867: on a path through a branch this value does not decide; returns Status, neither a constant nor this result; store at cfe/fsw/cfe-core/src/es/cfe_es_cds.c:843: on a path through a branch this value does not decide); rests on: none; premises: none; decided calls: none
+A2       alternatives [context 1: CFE_ES_StopAppCmd@cfe/fsw/cfe-core/src/es/cfe_es_task.c:939:18]: not established (the value's effects end in CFE_ES_StopAppCmd and it returns to its caller: direct callers 1, called through a function pointer: no); rests on: none; premises: none; decided calls: none
+A3       alternatives [context 1: CFE_ES_RestartAppCmd@cfe/fsw/cfe-core/src/es/cfe_es_task.c:996:24]: not established (the value's effects end in CFE_ES_RestartAppCmd and it returns to its caller: direct callers 1, called through a function pointer: no); rests on: none; premises: none; decided calls: none
+A4       alternatives [context 1: CFE_ES_ReloadAppCmd@cfe/fsw/cfe-core/src/es/cfe_es_task.c:1047:26]: not established (the value's effects end in CFE_ES_ReloadAppCmd and it returns to its caller: direct callers 1, called through a function pointer: no); rests on: none; premises: none; decided calls: none
+A5       alternatives [context 1: CFE_ES_QueryOneCmd@cfe/fsw/cfe-core/src/es/cfe_es_task.c:1100:24]: not established (the value's effects end in CFE_ES_QueryOneCmd and it returns to its caller: direct callers 1, called through a function pointer: no); rests on: none; premises: none; decided calls: none
+A6       alternatives [context 1: CFE_EVS_SetFilterMaskCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:850:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:900: returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A7       alternatives [context 1: CFE_EVS_EnableAppEventTypesCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1170:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1218: on a path through a branch this value does not decide; returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A8       alternatives [context 1: CFE_EVS_DisableAppEventTypesCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1240:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1288: on a path through a branch this value does not decide; returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A9       alternatives [context 1: CFE_EVS_EnableAppEventsCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1309:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1343: returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A10       alternatives [context 1: CFE_EVS_DisableAppEventsCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1364:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1398: returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A11       alternatives [context 1: CFE_EVS_ResetAppEventCounterCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1420:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1454: returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A12       alternatives [context 1: CFE_EVS_ResetFilterCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1478:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1525: returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A13       alternatives [context 1: CFE_EVS_ResetAllFiltersCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1548:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1585: returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A14       alternatives [context 1: CFE_EVS_AddEventFilterCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1608:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1676: returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A15       alternatives [context 1: CFE_EVS_DeleteEventFilterCmd@cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1699:13]: not established (open: none at cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:1750: returns (boolean)Status, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A16       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A17       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A18       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A19       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A20       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A21       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A22       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A23       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A24       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A25       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A26       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A27       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A28       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A29       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A30       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A31       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A32       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A33       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A34       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A35       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A36       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A37       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A38       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A39       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A40       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A41       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A42       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A43       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A44       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A45       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A46       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A47       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A48       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A49       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A50       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A51       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A52       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A53       alternatives [context 1: CFE_TBL_Register@cfe/fsw/cfe-core/src/tbl/cfe_tbl_api.c:226:19]: not established (open: none at cfe/fsw/cfe-core/src/tbl/cfe_tbl_api.c:564: on a path through a branch this value does not decide; returns Status, neither a constant nor this result; none at cfe/fsw/cfe-core/src/tbl/cfe_tbl_api.c:564: on a path through a branch this value does not decide; returns Status, neither a constant nor this result (assigned a value that is not a constant on this path); return-const at cfe/fsw/cfe-core/src/tbl/cfe_tbl_api.c:564: on a path through a branch this value does not decide; and 5 more); rests on: none; premises: none; decided calls: none
+A54       alternatives [context 1: CFE_TBL_LoadCmd@cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:519:22]: not established (open: none at cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:683: returns ReturnCode, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A55       alternatives [context 1: CFE_TBL_DumpCmd@cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:717:16]: not established (open: none at cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:841: returns ReturnCode, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A56       alternatives [context 1: CFE_TBL_ValidateCmd@cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1003:16]: not established (open: none at cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1133: returns ReturnCode, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A57       alternatives [context 1: CFE_TBL_ActivateCmd@cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1159:16]: not established (open: none at cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1225: returns ReturnCode, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A58       alternatives [context 1: CFE_TBL_TlmRegCmd@cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1444:16]: not established (open: none at cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1467: returns ReturnCode, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A59       alternatives [context 1: CFE_TBL_DeleteCDSCmd@cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1496:16]: not established (open: none at cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1565: on a path through a branch this value does not decide; returns ReturnCode, neither a constant nor this result; return-const at cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1565: on a path through a branch this value does not decide; event-send at cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1516:17: on a path through a branch this value does not decide; and 8 more); rests on: none; premises: none; decided calls: none
+A60       alternatives [context 1: CFE_TBL_AbortLoadCmd@cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1590:16]: not established (open: none at cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1623: returns ReturnCode, neither a constant nor this result); rests on: none; premises: none; decided calls: none
+A61       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A62       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A63       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A64       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A65       alternatives [context -]: not established (the lookup's absence value is not evaluated)
+A66       alternatives [context -]: not established (the lookup's absence value is not evaluated)

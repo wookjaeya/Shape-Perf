@@ -1,0 +1,12 @@
+== guard_boot.log
+start 2026-11-19T20:18:29.325Z free=738705408 threshold=374572800
+end 2026-11-19T20:18:41.371Z kind=boot verdict=completed rc=0 free=735924224 lowest=735924224 dip=2781184 change=-2781184
+== guard_convert.log
+start 2026-11-19T20:18:41.454Z free=735907840 threshold=334572800
+end 2026-11-19T20:18:43.464Z kind=convert verdict=completed rc=0 free=735641600 lowest=735641600 dip=266240 change=-266240
+== guard_eval.log
+start 2026-11-19T20:18:49.722Z free=680022016 threshold=334572800
+end 2026-11-19T20:18:51.732Z kind=eval verdict=completed rc=0 free=678768640 lowest=678768640 dip=1253376 change=-1253376
+== guard_explain.log
+start 2026-11-19T20:18:45.664Z free=735051776 threshold=374572800
+end 2026-11-19T20:18:49.682Z kind=explain verdict=completed rc=0 free=680030208 lowest=680030208 dip=55021568 change=-55021568

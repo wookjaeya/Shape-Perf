@@ -1,0 +1,6 @@
+what	path	files	apparent_bytes	blocks_bytes	keep_list_lines	keep_list_sha256	ledger_row
+boot	/home/user/work/redesign/obs1/c1cyc_post_boot2	52	3663937	2777088	52	776d15f237db3da29cf58b232ed61e899110c350bb378b7601de18198ac9a3a4	OBS_c1cyc_post_boot2
+convert	/home/user/work/redesign/obs1/c1cyc_post_convert2	4	749481	765952	4	120dc647de0e4a1c14e24fa7f58d58c33f092027f8bacb78f2aabf891b504c8c	OBS_c1cyc_post_convert2
+explain	/home/user/work/redesign/obs1/c1cyc_post_explain2	788	52998027	55013376	788	b0967bd64ede49de942ba474f4f9e3e3d400831e926697fd9b812793acec3719	OBS_c1cyc_post_explain2
+eval	/home/user/work/redesign/obs1/c1cyc_post_eval2	1	1243060	1249280	1	bdff5971495791b6ac3756423527500280f1d8ac32d56ce0cdacbbcc764c0d2f	OBS_c1cyc_post_eval2
+record	records/closure-c1prep-20261119/boot/c1_post_tx/boot2	27	584229	671744	-	-	-

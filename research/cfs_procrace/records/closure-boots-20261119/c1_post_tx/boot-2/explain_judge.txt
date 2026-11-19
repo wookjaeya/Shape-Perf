@@ -1,0 +1,18 @@
+# explain_judge.py revision 4, spec 11 fixes and spec 11.5 item 1 (2026-11-19) sha256 644acc11fb29237099d783225f45ae138a11eb86c363f2365e03759713aa71f0
+compat	chain confirmed; same_build unconfirmed(object not in the build record)
+branch D1-R0 records 46 refused 0 uses 176
+branch D1-Ra records 46 refused 0 uses 176
+branch D1-Rb records 46 refused 0 uses 176
+branch D1-Rc records 46 refused 0 uses 176
+branch D1-Rd records 46 refused 0 uses 176
+branch D1-Re records 46 refused 0 uses 176
+branch D1-Rf records 46 refused 0 uses 176
+branch D1-all records 46 refused 0 uses 176
+branch D2-R0 records 46 refused 0 uses 176
+branch D2-Ra records 46 refused 0 uses 176
+branch D2-Rb records 46 refused 0 uses 176
+branch D2-Rc records 46 refused 0 uses 176
+branch D2-Rd records 46 refused 0 uses 176
+branch D2-Re records 46 refused 0 uses 176
+branch D2-Rf records 46 refused 0 uses 176
+branch D2-all records 46 refused 0 uses 176

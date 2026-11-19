@@ -3200,3 +3200,43 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 4. 후보 목록·인정 파일·기대 파일(`kz-expect 1`)·미리 정한 사용 목록은 주기 준비 단계의 것이다. 판독지와 읽는 사람은 PI 결정 그대로다.
 5. 적재된 cFS 모듈의 `buildid` 줄은 부팅 전이라 본 적이 없다 [미확인]. 줄을 읽는 쪽의 고침만 부팅 뒤에 생기면 판정 부분의 sha256 이 같고 diff 를 남긴다(명세 2 절).
 6. lead 의 판단 (b), (c)의 열린 점(성공 경로 줄의 지역 변수 빈틈, 완전하지 않은 버퍼)은 그대로이고, 이 판정 부분에서는 기초 4 와 (다)의 `missing` 으로 나온다.
+
+## 25. C1 자동 주기 하나의 준비: 계획, 파생 빌드 둘, 결합, 부팅 전에 커밋하는 것 (2026-11-19, 부팅 없음)
+
+§12.10 4 항 (7)의 단계다. kz-static 단계의 추출(`cz_final_extract`)에서 낸 두 C1 계획(`cz_plans_v4_ns2/c1_pre_tx`, `c1_post_tx`)을 그대로 쓰고(새 추출 없음), 재생성 점검, 런타임 트리, kzgcc 0.4 의 파생 빌드 둘, 결합 보고, 파생 사실과 기준-파생 비교를 한 뒤, 부팅 선언 전에 다음을 차례대로 커밋 하나씩으로 낸다: (1) 미리 정한 사용의 목록, (2) 판독지의 정적 부분, (3) 규칙으로 만든 미대조 항목의 후보 목록과 평가 갈래 파일, (4) 모든 평가 갈래의 기대, (5) 부팅 선언. 기록: `../records/closure-c1prep-20261119/`(README). 출력: `/home/user/work/redesign/obs1/c1p_*`(새 디렉터리). cFS 를 부팅하지 않는다. push 하지 않는다. 이 부팅들은 설계 행의 **대조 실행**이고 사전 시험이 아니다(§12.10 3 항).
+
+### 25.0 lead 의 판단 (2026-11-19, §17 의 열린 점에 대해; 이 단계는 어느 것도 바꾸지 않음)
+
+- (a) 판정 규칙 8.13 17 항 조건 (6)은 글대로 적용한다: writer 집합은 필드 단위 규칙과 형 단위 규칙 **둘 다**에서 완전해야 한다. 도구를 필드 단위로만 읽게 바꾸지 않는다. 필드 단위만의 읽기는 설계 행을 본 뒤의 규칙 읽기다. 커밋된 평가 갈래 `Re` 가 그것을 덮는지는 설명 스크립트 단계와 평가 파일의 몫이다(§24.4 (라): 글은 덮지만 입력 줄이 전제 아래의 호출 결과를 주지 않아 움직이지 않음). 덮지 않으면 PI 의 열린 점으로 적고, 지금 어느 글도 넓히지 않는다.
+- (b) 성공 경로 줄에서 out 으로 저장되는 지역 변수의 추출 빈틈은 그대로 둔다(`include/` 를 바꾸면 모든 바이너리가 다시 링크됨). 성공 경로 줄은 그 까닭과 함께 missing 이다. 열린 점이다.
+- (c) 저장된 이름 버퍼: scalar-array FIELD_STATUS 가 건전하게 complete 가 될 수 있는지는 깃발마다 scratch 출력에서 정한다. 하나라도 건전하게 뺄 수 없으면 줄은 not complete 와 그 깃발을 적고, 설계 행이 나오게 하려고 아무것도 느슨하게 하지 않는다(§18.2: address-escape 는 어느 버퍼에서도 풀리지 않음).
+- (d) 바뀌는 golden 은 선언된 빌드에서 커밋하고, 선언은 완전한 소스의 scratch 점검 빌드에서 확인한 첫 ctest 실패를 이름으로 적는다(§21 에서 끝남; 이 단계는 Kairos 도구를 짓지 않으므로 해당 없음).
+- (e) C1 빌드의 둘째 주소 넘김 호출 자리와 `other` 열린 까닭 부류는 빌드 단계의 측정에서 맞으면 세고, 아니면 열린 점이다(§21.5 5, §22 가 다룸; 이 단계는 건드리지 않음).
+
+### 25.1 시작 점검과 공간 [M]
+
+- 시작: 여유 541,810,688 B(08:41:11Z, `out/free_start.txt`), 바닥 314,572,800 B. `ledger_check` 178 행 실패 0(`out/ledger_check_start.txt`), `tools_check --deep` 56 행 실패 0(`out/tools_check_deep_start.txt`). MC 의 도구 일곱은 kz-static `6f40dd60…`, kz `94cba72b…`, kz-dump `32a96ae7…`, kz-rt-dump `d83fdde9…`, kz-phi `df79fb82…`, kz_lint `3d4d5a8f…`, kz-instr-clang `4041f6b4…`(`out/pre_mc.txt`); kzgcc 0.4 `985fc102…`.
+- 필요량(`out/space_need.txt`, 어느 일보다 먼저 적고 `c131a87` 로 커밋): 두 빌드에 남는 것 약 156 MB, 마지막 파생 단계에서 감시가 바닥 + 100,000,000 을 요구하므로 230 MB 가 여유 227 MB 를 넘는다. 바닥 위에서 맞지 않는다.
+- 그래서 §12.10 2 항이 허용한 압축 대체를 옵션 없는 추출 회차 넷에만 썼다(`reclaim/archive.sh`, 자기 시험 2/2 `reclaim/selftest.txt`): `objacc_off_extract`, `sem_off_extract`, `rf_off_extract`, `ll_off_extract`(각 50 파일, 47,149,056 B 블록)를 `/home/user/work/preserve/archives-20261119/<이름>/<이름>.tar.xz`(3,396,416 / 3,394,656 / 3,383,000 / 3,404,512 B)로 바꿨다. 디렉터리를 지우기 전에 각 압축을 흘려 50 구성원 모두의 sha256 이 그 행의 목록과 줄마다 같음을 확인했다(`reclaim/roundtrip_<이름>.txt`). 원장의 네 행은 `parts` 방식으로 압축 디렉터리를 가리키고(목록 칸은 구성원 목록 그대로, 압축 디렉터리에 `PARTS.sha256` 과 `MEMBERS.sha256`), 원장 머리에 그 약속을 적었다(`reclaim/ledger_rewrite.txt`). 바꾼 뒤 `ledger_check` 178 행 실패 0(`reclaim/ledger_check_after_archive.txt`), 여유 713,269,248 B. 커밋 `f9ce046`. 중간 옵션 회차 셋은 건드리지 않았다. 그 회차들을 경로로 읽던 앞 단계의 비교 스크립트는 그대로는 다시 돌지 않는다(남긴 출력은 그대로다).
+
+### 25.2 계획과 예산, 재생성 점검 [M]
+
+- 계획은 kz-static 단계의 것을 그대로 쓴다: `cz_plans_v4_ns2/c1_pre_tx`(plan id `943b8cc0d0e200e4`, manifest `69a278b0…`, sidecar `a18a0370…`, 요청 `b79604d5…`)와 `cz_plans_v4_ns2/c1_post_tx`(plan id `b99c203f12de1e24`, manifest `ef35173e…`, sidecar `4ef73c91…`, 요청 `1b909f07…`). 둘 다 `cz_final_extract` 의 사실(c1_pre_tx `7403a377…`, c1_post_tx `77532840…`)에서 kz-static `6f40dd60…`(`tool_sha256=36e02995…`)이 냈다.
+- 예산(`out/plan_budgets.txt`, sidecar 15–22 줄): 층 예산 `tier:D07`(까닭: 기록 풀이 고정이고 생성된 계획의 사건 양을 아직 재지 않음; 밝힘: 이 빌드들에서 우선 층에 어느 행이 드는지 알고 정한 값), c1_pre_tx 계획된 9·잘린 358, c1_post_tx 8·359, `unresolved="whether the rows cut fit the record pool (no event volume measured)"`, `sensitivity="not measured"`. 대조 예산 `all`(까닭의 글은 "control runs of design rows", §12.10 3 항의 말), 행 5(a 1, b 4), 계획된 5, 잘린 0, `complete=yes`, 같은 `unresolved`·`sensitivity`. 대조 행은 두 계획 모두 A20·A21·A22·A26·A63 이고, c1_pre_tx 의 A21 은 층 1 이기도 하다(c1_post_tx 의 A21 은 층 2, label H). 값 요청: c1_pre_tx 행 4·요청 36·계획 30, c1_post_tx 4·30·24.
+- 재생성 점검(`env/tools/plan_regen.sh` 를 MC 의 kz-static 그대로, 각 계획의 `args.txt` 로; 출력 `obs1/c1p_regen/<빌드>`, 감시 `guard/regen_<pre|post>.log`): 두 계획 모두 manifest·sidecar·요청 파일이 같은 바이트, module 표와 실행 파일 목록이 첫 줄의 sidecar 경로 밖에서 같음, `PASS`(`derived/<pre|post>/regen.txt`). 계획을 낸 도구가 MC 에 그대로 있으므로 사본을 풀지 않았다.
+
+### 25.3 파생 빌드 둘의 선언 (빌드 전에 적고 커밋함) [D]
+
+아래 밖의 차이는 결함이다. 결함이면 그 점검에서 멈추고, 까닭을 밝힌 덧붙임을 커밋한 뒤에만 그 비교를 새 이름으로 다시 돌린다. 모든 일은 감시(`env/tools/space_guard.sh`, 바닥 314,572,800 B) 아래에서 돌리고 감시 기록은 `guard/` 에 둔다. 출력은 새 디렉터리에만 쓰고 덮어쓰지 않는다. 단계는 `scripts/run.sh` 의 것이다.
+
+- **Kairos 도구**: 짓지 않는다. MC 의 도구 일곱과 정체성·정의·`CMakeCache.txt` 는 앞뒤가 같아야 한다(`out/pre_mc.txt` 와 끝의 `post_mc.txt`, `build_record.sh`). 정체성이 바뀌는 도구: 없음. 다시 링크되는 MC 바이너리: 없음. 플러그인은 kzgcc 0.4 `985fc102…`(`/home/user/work/instr/kzgcc-0.4/plugin-build/kzgcc.so`, 판 글 `kzgcc 0.4`) 그대로.
+- **런타임 트리**(빌드마다 하나, `obs1/c1p_<pre|post>_rt/rt`): `build_runtime.sh` 로 `kairos/runtime`(HEAD, 마지막 변경 `139330e`, `kzrt 0.5.0`, dump 1.5)을 대상 gcc 로 따로 짓는다. backend 는 `kzgcc 0.4 (gcc-plugin)`, manifest 는 그 빌드의 계획. 라이브러리·객체·kz-rt-dump 의 sha256 은 `runtime.record` 에 기록으로 남는다(등록부의 도구가 아니다).
+- **단계**(빌드마다, c1_pre_tx 먼저): runtime → prepare(`derive_c1.sh prepare <pre|post> 1df262a obs1/c1p_<pre|post>_derived`) → ref(같은 자리의 기준 빌드, 해시 뒤 지움) → instr(kzgcc 0.4 와 그 런타임 트리) → check → rx → buildids → bprime(`one_build.sh <빌드> obs1/c1p_<pre|post>_bprime --path-map`, kz-static `6f40dd60`, B 와 같은 추출 옵션 모두: `--object-access`, `--semantics` 자료 여덟, `--result-flow`, `--loop-defs`, `--lock-handles`) → bindings → compare.
+- **기준과 파생 사이에 허용하는 차이**(레코드·칸 수준; 조건 그대로는 `derived/declared_diff.tsv`, 37 줄): 첫 파생 빌드의 목록(`records/obs1-20261116-derived/declared_diff_after.tsv`; 관측 경로 결과 §5.0·§5.3 의 원래 목록과 덧붙임)을 그대로 쓴다. B 는 계획을 낸 사실 `cz_final_extract/<빌드>/<빌드>/NP` 이다. 갈래: 정체성(머리·절 줄·`extract.units_from`·글 출력의 해시 줄·`args.txt` 의 맵 줄), 플러그인 옵션(BASIS `instrumentation.*`·`front_end.arguments_removed`·`units.distinct_flag_sets`, DEVIATIONS 하나, TUS `flags`·`command_sha256`, `compile_commands.json`·플러그인 파일·모듈 `link.txt` 의 FILE_HASHES, facts 가 옮긴 편차, `relations.txt` 의 편차 수 줄), 링크된 런타임(BASIS `link.*`·`binary.*`·`closure.*`·`module[*]` 의 값, `basis.txt` 의 같은 줄, 컴파일 명령 없는 런타임 객체의 경고 줄), D2 의 module 판 표, D4 의 빌드 환경 표와 그 단위에서 읽은 레코드, 계측·링크된 파일의 FILE_HASHES, D1 경로 글의 `bplib.so`. 그 밖은 모두 같아야 한다(facts 의 다른 절은 맵 뒤 레코드가 차례까지 같음).
+- **객체 비교**: 다른 객체는 계측 단위(결합 파일이 있는 단위)와 D4 의 `cfe_build_env_table.c.o` 둘(tx, rx)뿐이어야 한다(`check.record` 의 `UNEXPECTED` 0, 바뀌지 않은 계측 단위 0).
+- **설치 파일**: 기준과 다른 것은 계획의 실행 파일 목록의 tx 일곱과 같은 이름의 rx 일곱(bplib.so 는 site 가 없어 D1 경로 글로만 다름), 그리고 경로 글로 다른 `cfe_assert.so` 둘(tx, rx; 첫 파생 빌드 §5.2 와 같은 까닭)뿐이어야 한다(`install_inventory.tsv`).
+- **결합 보고**(`env/tools/plan_bindings.py`, `--file-hashes` 로 B′ basis 의 FILE_HASHES 와 단위의 소스 sha256 을 묶음): 계획의 모든 site 에 결합 줄이 있어야 하고(`not-seen` 0), bound·inlined·duplicated 가 아닌 site 는 플러그인의 까닭과 함께 나열한다. 단위마다 manifest sha256 = 계획의 것, module id = 계획의 표와 플러그인 규칙. 런타임 단계의 묶음 점검이 이미 본 것 [I]: c1_post_tx 의 `s0297.wait-exit`(`cf_cfdp.c:1008` 의 `break`)는 `no statement on line 1008 of the function` 으로 묶이지 않는다(§23.4 5). site 의 상태를 그 밖에 미리 기대하지 않는다.
+- **build-id 를 적을 객체**(값은 빌드 뒤, 어느 부팅보다 먼저 `derived/<pre|post>/exe_buildids.tsv` 에 적는다: 설치된 모든 ELF 의 sha256 과 `readelf -n` 의 GNU build-id): 부팅 기록의 `buildid` 줄이 이름 댈 객체는 주 실행 파일 `exe/tx/core-tx` 와 site 가 있는 단위의 모듈 등록이 적재된 객체다. 계획의 module 표로는 bp(1) `exe/tx/cf/bp.so`, cf(3) `cf.so`, ci_lab(4) `ci_lab.so`, core-tx(5, 실행 파일 자신), sch_lab(6) `sch_lab.so`, to_lab(7) `to_lab.so` 다 [I]. bplib(2)는 site 가 없어 등록이 없으리라 본다 [I]. rx 의 파일은 `KZ_RT_MODE=off` 로 돌아 기록을 쓰지 않지만 값은 함께 적는다.
+- **시험**: 결합 보고(위), `hookcheck` rc 0(계획의 목록, tx), module id = 계획의 표, rx 의 (함수, hook, id) 목록 = 계획의 그룹, 바인딩 수와 site 의 상태는 측정으로 적는다.
+- **누적 바이트 동일성**: 끝에 `ledger_check.sh` 전체와 `tools_check.sh --deep`. 새 출력은 장부 행으로 더한다(`OBS_c1p_*`). 바깥 이름 점검을 새 출력 디렉터리에 돌린다(파생 작업 공간의 upstream 소스 사본에 걸리는 것은 첫 파생 빌드 §5.4 와 같이 따로 적는다).
+- **공간**: `out/space_need.txt` 의 빌드마다의 값 [I]. 지금 여유 713,269,248 B. 감시 `--need`: runtime·prepare·ref·instr·check 100,000,000, bprime 60,000,000(`ONE_BUILD_NEED`), compare 10,000,000. `derive_c1.sh` 가 같은 자리 기준 빌드 트리를 해시 뒤 지우는 것 밖에는 아무것도 지우지 않는다.

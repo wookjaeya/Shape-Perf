@@ -1,0 +1,30 @@
+# scratch kz-static (source at HEAD e4b5684) extract --no-profile --targets-rule R-T1,R-T2 --result-flow --object-access of probe.c; show --section writers atype fstatus paramflow (untyped-write rows left out)
+facts-view 1
+[writers] 4
+  Com.name_entry assign at probe.c:15:3 in use value=symbolic [recs[i].name] key=com[i] {} n/a
+  Rec2.other inc-dec at probe.c:14:3 in use value=top [recs2[i].other[2]++] key=recs2[i] {partial-write} n/a
+  Rec2.other out-pointer at probe.c:16:3 in use via wr@probe.c:8 probe.c:8 value=top [element store: p[0] = 'x'] key=*wr argument 0 {} n/a
+  Rec2.other out-pointer at probe.c:17:3 in use via wr2@probe.c:9 probe.c:9 value=const 121 ['y'] key=*wr2 argument 0 {} n/a
+[atype] 0
+[paramflow] 13
+  cp@probe.c:11#0 d0 out-store at probe.c:11:73 {} [element store: d[i] = s[i]] guard=(lt local:i 7)
+  use#0 d0 subscript at probe.c:13:3 {} [recs[i]] expr=(index global:recs param:i#0)
+  use#0 d0 subscript at probe.c:14:3 {} [recs2[i]] expr=(index global:recs2 param:i#0)
+  use#0 d0 subscript at probe.c:15:3 {} [com[i]] expr=(index global:com param:i#0)
+  use#0 d0 subscript at probe.c:15:23 {} [recs[i]] expr=(index global:recs param:i#0)
+  use#0 d0 subscript at probe.c:16:6 {} [recs2[i]] expr=(index global:recs2 param:i#0)
+  use#0 d0 subscript at probe.c:17:7 {} [recs2[i]] expr=(index global:recs2 param:i#0)
+  use#0 d0 subscript at probe.c:18:13 {} [com[i]] expr=(index global:com param:i#0)
+  use2#0 d0 call-argument -> cp@probe.c:11#0 at site 6 probe.c:20:28 {} [d]
+  use2#0 d1 out-store in cp@probe.c:11 at probe.c:11:73 via site 6 probe.c:20:28 {} [element store: d[i] = s[i]] guard=(lt local:i 7)
+      chain use2#0 -> cp#0
+  use2#1 d0 subscript at probe.c:20:34 {} [com[i]] expr=(index global:com param:i#1)
+  wr2@probe.c:9#0 d0 out-store at probe.c:9:28 {} ['y'] expr=121
+  wr@probe.c:8#0 d0 out-store at probe.c:8:27 {} [element store: p[0] = 'x']
+[fstatus] 6
+  Com.active per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 3 {untyped-in-program}
+  Com.name_entry per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 3 {untyped-in-program} by use
+  Rec.n per-field=writer-set-complete type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 1; untyped sites 3 {sibling-exposed,untyped-in-program}
+  Rec.name per-field=DISABLED type-level=DISABLED writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 1, cast 0, union 0, unknown 0, other fields 0; untyped sites 3 {untyped-in-program,array-element-stores-not-collected} by use
+  Rec2.k per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 3 {untyped-in-program}
+  Rec2.other per-field=DISABLED type-level=DISABLED writers=3 (direct 1, data 0, out-pointer 2, init 1) instances=3 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 3 {untyped-in-program,several-instances,array-element-stores-not-collected} by use

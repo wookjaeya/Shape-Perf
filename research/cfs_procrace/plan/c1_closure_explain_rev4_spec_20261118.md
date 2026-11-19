@@ -358,3 +358,31 @@ end
 | `env/obs1/tests/test_explain4.py` 와 새 시험 파일 | 1–16 | 다시 적는다 |
 
 바뀌지 않는 것: `env/obs1/explain_branches.py`, 후보 목록, 인정 파일, 갈래 파일, 미리 정한 사용의 목록, 판독지, 계획, 파생 빌드, 판정 부분이 읽는 어휘 파일(26.0 (너)).
+
+### 11.4 코드를 쓰며 정한 것 (2026-11-19; 코드 커밋보다 먼저 커밋함)
+
+11.1–11.3 을 커밋한 뒤 코드를 짜고 합성 fixture 와 2026-11-16 입력, 두 C1 계획에서 scratch 로 돌리며 정한 것이다. 11.1–11.3 의 뜻은 바꾸지 않는다. 판정 규칙의 글도 바꾸지 않는다. 결과는 결과 문서 26.3 에 적는다(26.1·26.2 는 앞 단계가 썼다).
+
+1. **이름 붙은 호출 파일(2).** 만드는 스크립트는 따로 둔다(`records/closure-c1prep-20261119/scripts/named_calls.py`). `candidates.py` 는 바꾸지 않는다. 입력은 `candidates.py` 와 같다(두 계획 디렉터리, 각 계획을 만든 facts). `records` 는 facts 의 `P0_TABLE` 기록 가운데 `name=` 이 그 함수인 것과 `SEMANTICS` 기록 가운데 `api=` 가 그 함수인 것(모든 칸)의 수다. `layers` 는 `P0_TABLE` 이면 `P0`, `SEMANTICS` 이면 그 `layer=` 다. `namespace-layer` 줄은 계획된 행의 `namespace-entry` 줄과 `data=` 가 같은 줄만 본다. 읽는 부분의 넷째 점검도 같은 줄들을 본다. 그 줄을 다시 만들어 후보 목록과 인정 파일 64 개가 바이트까지 같음을 보인다.
+2. **판정 부분.**
+   - 버퍼 주소 쓰임(3, 5): `library: <f> parameter <k>: no entry says the parameter is not written` 인 쓰임이 '항목 없음'이다. `library: <f> parameter <k>: <칸> unverified` 인 쓰임이 미대조이고, 후보 목록에서 (`P0`, f, 칸)의 줄을 찾는다. 그 줄이 없으면 그 함수의 모든 칸의 줄을 찾는다. 사유는 '항목 없음'이 먼저다(`link_unlinked(name binding: no entry: <호출>, …)`). 그다음 다른 까닭이고, 그것도 없을 때만 미대조의 미인정이다(`link_unlinked(name binding: rests on an unverified entry: <f>:<칸>, …)`).
+   - 요소의 `depends_on`(5): 요소의 출처 줄은 그 요소의 `sources` 가 가리키는 relations 줄이다. 함수 이름은 단어 단위로 맞춘다. 후보 목록에 없는 목록 항목은 더하지 않는다. present 가 아니게 된 (c1)·(c2)의 사유는 `absent_result_unevaluated(rests on an unverified entry: <f>:<칸>)`, (c4)는 `writer_set_incomplete(…)` 다. `held` 가 아니게 된 (c3)(i)는 `not_established` 이고, 그 `why` 는 `rests on an unverified entry: <f>:<칸>; ` 로 시작한다.
+   - 기록에 칸 넷을 더한다. `data_branch.admitted_kinds`(검사 16 (c)를 기록만으로 할 수 있게), `data_branch.named_calls_sha256`, `events.lifetime_ends[].t_ms`(반증 스크립트가 사건의 `t_ms` 와 같은 단위로 견주려고), 그리고 `branch_iii` 의 모든 항목(문맥을 모름, 대안 줄 없음 포함)의 `depends_on` 이다. 이름 붙은 호출의 근거는 `{"file": [파일 이름, 줄 번호], "text": …}` 다.
+   - 검사 16 (c)는 기록의 `admitted_kinds` 와 견준다. 판정 부분 안에서 돌 때는 그 갈래 인정 파일의 줄과도 견준다. (d)는 사유, `why`, 글로 된 근거에 `no entry: ` 가 든 것을 본다.
+3. **요약(7–9, 11).** 새 인자는 `--uses FILE` 이다(반드시 줌, 여럿 가능). 형식 점검만 하는 `--check-summary FILE` 도 둔다(어긋나면 rc 3). 표는 `table <갈래>` 줄로 열고 다음 줄이 `  head: …` 다. 사용 행은 `    use\t…`, 쌍 종류 줄은 `    pair_kind\t<값>\t<수>\t<무리>` 로 쓴다. 미리 정한 사용은 기록과 빌드, 행 키, 소비 뿌리('뿌리 (종류)'), 사용 site(at-call 이나 after-call), 문맥으로 맞춘다. 목록의 문맥 `-` 는 그 기록의 모든 문맥과 맞는다.
+4. **기대 대조(12).** 꼬리에 `# by class:` 줄을 더한다.
+5. **반증·평가 스크립트(13).**
+   - 인자: `--build`, `--boot`(이름표)를 더한다. 문 결과가 없으면 `--gate none`, 판독지 부팅별 부분이 없으면 `--sheets-boot none` 이다.
+   - 판독지 부팅별 부분의 꼴(이 스크립트가 읽는 꼴; 판독자를 정할 때 커밋하는 꼴이 다르면 그 전에 이 스크립트를 고쳐 다시 동결한다): `kz-sheet-boot 1`, 칸 `build`, `row_key`, `consumer_root`, `context_id`, `reading`(`T`·`F`·`U`), `label`(`positive`·`negative`·`unreadable`).
+   - 줄마다의 가름(평가 절차 14.6 의 가름 규칙을 줄마다 건다): F1 은 기대 줄의 `class` 다. F2 (a), s1, s3, s4 는 그 행의 성공 경로 줄이 하나라도 `held` 이면 `boot`, 아니면 `static` 이다(세대, `bound`, `refuted` 가 생길 수 없다). F2 (b)와 F7 은 `format` 이다. F5, F6, F8 (a), s2 는 `static` 이다. F3, F4, F8 (b), F9, F10 은 `boot` 다. `expect_discriminate` 는 (3)의 요구가 있고 그 행의 성공 경로 줄이 `held` 일 때만 `boot` 이고, 아니면 `static` 이다.
+   - 단위가 없는 기록(부재 사용이 없는 기록의 F3, 찾은 사용이 없는 기록의 F4, 사용 사건이 없는 기록의 F9)은 `pass` 로 적고 그 까닭을 `note` 에 적는다. 그 부팅에서 그 점검의 문장이 참이기 때문이다. 문을 지나지 않은 부팅(또는 문 결과가 없는 예행)의 F10 은 `not_evaluable` 이다.
+   - F5 와 `expect_discriminate` (2)의 '다른 정의'는 holder 줄의 writer 가운데 own out store 가 아닌 것이다. 읽기 `Rb` 의 갈래에서는 clearing writer 를 뺀다(판정 규칙 8.13 의 5번이 적은 `Rb` 의 뜻).
+   - F6 에는 실패하는 입력이 없다. 정한 문맥이 있으면 `not_evaluable`(11 의 13 의 한계), 없으면 '점검할 것 없음'의 `pass` 다. 그래서 F6 의 fixture 는 두 결과를 보이고 실패는 보이지 않는다.
+   - 미리 정한 행의 기록이 그 갈래에 없으면 `records` 줄(`format`, `fail`)을 쓴다.
+6. **실행 스크립트(14–15).**
+   - 시험 이음새 둘: `RUN_CYCLE_OBS`(작업 디렉터리를 바꿈)와 `RUN_CYCLE_BOOT_CMD`(부팅 명령을 바꿈)다. 시험에만 쓰고, 쓰면 그 출력에 적힌다.
+   - `verify` 의 경로 풀이: 절대 경로, `research/…`(저장소 뿌리에서), `records/…`(연구 뿌리에서), 그 밖은 작업 디렉터리다. `plan-id` 줄은 같은 빌드의 `plan.side` 줄이 가리키는 파일의 `plan-id` 줄과 견준다. 앞의 `verify.txt` 는 새 이름으로 남긴다.
+   - `eval` 단계는 `boot<N>/sheet_boot.tsv` 가 있을 때만 판독지 부팅별 부분을 준다.
+   - 시험은 `boot/test_run_cycle.sh` 다.
+7. **공간 감시(26.0 (차)).** `below_floor_at_end` 의 rc 는 77 이다(명령의 rc 는 끝 줄의 `rc=` 에 남는다). 끝 값을 읽지 못하면 0 으로 센다. 등록부 `records/TOOLS.tsv` 에는 줄 둘을 둔다. 하나는 지금 판(`in-place`)이고, 다른 하나는 앞 판 `730bcc06…` 이다. 앞 판은 `gone` 이고, 그 글은 git 에 있다고 적는다.
+8. **fixture.** 경로 B 행의 합성 세계에서 경로 A 행의 문맥 줄을 뺀다. 검사 14 에 더한 줄(문맥이 있으면 그 대안 줄이 있음)이 그 세계를 물리는데, 경로 B 행에는 대안 줄이 없기 때문이다.

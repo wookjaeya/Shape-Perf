@@ -4160,3 +4160,18 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 2. 압축은 같은 디스크에만 있다(26.2 열린 점 3).
 3. 결과 27 이 할 것: 부팅마다 `space_at_boot.txt` 와 감시 기록의 dip, 부팅하지 않은 단계가 있으면 그 까닭; F3 `note` 의 600 글자 줄 수(`fix-judge-03`); 시험되지 않은 꼴 넷(`fix-judge-04`); 모든 `verify*.txt` 의 선언 sha256 과 고정 파일(`fix-decl-09`); 부팅마다 `run.meta` 의 `other=` 와 `inst_files.sha256.other`(정규 파일이 아닌 항목; 이제 verify 도 셈); 고정 파일, 목록, 꼬리, 장부를 함께 커밋.
 4. 다음 단계의 차례(26.7 (라)): 부팅 선언 4 와 `boot/commands.txt` 대로 `c1_pre_tx` 먼저 부팅한다(root; 첫 명령은 `verify`, 부팅마다 열두 단계, 끝에 `summary`). 그다음 `c1_post_tx`.
+
+## 27. C1 주기: 부팅과 그 평가 (2026-11-19)
+
+근거: lead 의 판단 26.7 (라)·(마), 평가 절차 2·3절과 14.14, 부팅 선언 4(`../records/closure-c1prep-20261119/boot/declaration4.tsv`, `b268e2d2…`), 명령 `boot/commands.txt`(`365ce243…`), 실행 스크립트 `boot/run_cycle.sh`(`2508f144…`). 읽기와 보고의 틀(26.7 (마), 평가 절차 10절과 14절)은 두 빌드의 부팅이 끝난 뒤의 절이 한다. 빌드마다의 소절(27.1 부터)은 스크립트가 낸 수만 적는다.
+
+### 27.1 `c1_pre_tx` 의 부팅 (2026-11-19)
+
+**차례 (첫 부팅 전에 커밋함) [D].**
+- 부팅은 `boot/commands.txt` 의 줄을 그대로, 저장소 뿌리에서, 차례대로 돌린다. 부팅마다 열두 단계(verify, boot, control, convert, kzt-text, chain, stop, gate, explain, eval, expect, keep)이고, 단계마다 rc 를 본 뒤 다음으로 간다. 감시는 실행 스크립트가 거는 단계(boot, convert, explain, eval)에 걸린다. 실행 스크립트, 선언, 판정 부분, 기대는 바꾸지 않는다.
+- 부팅 수(평가 절차 2절, 14.10; 선언 4 의 머리): 첫 부팅이 문(3절; `boot/c1_pre_tx/boot1/gate.txt`)을 지나면 무엇을 보였든 정확히 네 번 더(N = 2–5) 하고 `summary` 를 돌린다. 지나지 못하면 그 사유를 `boot/c1_pre_tx/addendum_1r.txt` 에 적어 커밋한 뒤 1r 을 한 번 한다. 1r 이 지나면 2–5 와 `summary`, 지나지 못하면 이 빌드의 부팅은 거기서 끝난다. 기록을 본 뒤에 수를 올리거나 내리지 않는다. 한 모든 부팅을 세고, 문을 지나지 못한 부팅은 사유와 함께 적는다. 부팅하지 않음(14.14 의 3)은 부팅으로 세지 않고, 까닭을 없앤 뒤 같은 N 으로 다시 하며 그 일을 여기 적는다.
+- 공간: 첫 부팅 앞의 필요는 1,068,392,704 B 다(선언 4). 이 단계의 첫 측정은 1,110,761,472 B(19:53:02Z, `../records/closure-boots-20261119/free_start.txt`), 42,368,768 B 위다. 부팅 단계가 부팅마다 스스로 잰다(`space_at_boot.txt`). 못 미쳐 거절하면 남은 압축 줄이 없으므로 부팅하지 않고 PI 에게 묻는다(26.0 (카), 26.7 (나)).
+- 부팅마다 커밋하는 것: 실행 스크립트의 기록 디렉터리 `boot/c1_pre_tx/boot<N>/` 전부(작은 출력, 제어 점검, 연결 사슬, 문, 평가의 머리와 갈래마다의 꼬리, 기대 대조, `keep` 의 sha256 목록, 감시 기록), 장부, 첫 부팅 뒤의 `boot/declaration_pin.txt`, 그리고 이 단계의 기록 `../records/closure-boots-20261119/c1_pre_tx/`(단계마다의 시각·rc·여유 `steps.tsv`, 부팅마다 뽑은 수 `boot-<N>/`; README 가 파일을 적음). 큰 출력(작업 디렉터리와 덤프, 변환, 설명 기록, `eval.txt`)은 `/home/user/work/redesign/obs1/c1cyc_pre_{boot,convert,explain,eval}<N>/` 에 두고 `keep` 단계가 장부 행을 단다.
+- 부팅마다 아래에 날짜 붙인 한 줄을 더한다.
+
+**부팅 [M].**

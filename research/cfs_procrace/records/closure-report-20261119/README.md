@@ -4,6 +4,6 @@
 
 - `scripts/report27.py`: 두 빌드 열 부팅의 커밋된 기록(`../closure-c1prep-20261119/boot/<빌드>/`)과 장부 행이 있는 남긴 출력(`/home/user/work/redesign/obs1/c1cyc_<s>_{explain,eval}<N>/`)을 읽기만 하고, `out/` 에 표 글을 쓴다. 남긴 출력은 읽기 전에 `keep` 목록의 sha256 과 맞댄다. 판정·기대·점검을 다시 셈하지 않는다. 행 이름이나 사례의 값을 입력으로 받지 않는다.
 - `out/`: 27.3 의 표 (1)–(11). 파일마다 머리에 무엇을 어디서 셌는지를 적는다.
-- `guard/`: 감시 기록. `free_*.txt`: 시작과 끝의 여유.
+- `guard/`: 감시 기록. `report27.stdout`: 실행의 표준 출력. `free_*.txt`: 시작과 끝의 여유. `ledger_check_end.txt`, `tools_check_deep_end.txt`: 끝 점검.
 
 기록, 판정 부분, 기대, 선언, 규칙은 바꾸지 않는다(평가 절차 12절). 스크립트를 고치면 앞판 출력을 지우지 않고 새 이름으로 다시 낸다.

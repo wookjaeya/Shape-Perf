@@ -4268,3 +4268,132 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - **출력 표.** (1) 빌드·부팅마다 문, 손실, 연결 사슬, `same_build` 와 객체마다의 `same_build_object`. (2) 갈래마다(주 갈래 `D1-R0` 먼저) 미리 정한 사용의 부팅별 닿음, 사용 사건의 결과 열, 문맥, 이름 상태, 연결 결과, 기록의 `violation`, 미확정 사유의 종류. (3) 행마다 사용 조건의 요소((c1) `callee_check`, (c2) `reach`, (c3)(i) `branch_i`, (c3)(iii) 문맥마다, (c4) `writers`)와 `use_cond`, `violation`, `link.status` 의 상태와 근거 줄. (4) 쌍마다 이름 결합 항목 열둘의 `held`·`missing(<하위 사유>)`, 쌍의 결과와 `pair_kind`. (5) 갈래·가름·점검·결과마다 반증 점검과 `expect_safe` 의 수, `D1-R0` 의 fail·`not_evaluable` 단위의 점검·행·`note` 마다 부팅별 수. (6) `expect_discriminate` 의 줄. (7) 기대 대조의 가름·결과마다의 수와 `mismatch` 줄의 항목 차이. (8) 부팅마다 `pair_kind` 의 수, 실패 징후의 `pair_kind` 집합과 소비자 소속, 쌍마다 `order_ground` 와 `other_order_seen_in_boots`. (9) 보조 갈래마다 기록의 `eval_branch`·`data_branch` 가 적은 바꾼 조건과 `D1-R0` 와 다른 칸. (10) 평가 절차 11절의 세 읽기: (a) 실패 상태(`odf = failure_sign`)만, (b) 실패 상태이고 같은 키 글을 생성한 다른 행위자가 기록에 있음(`publish_events` 의 키 글), (c) 커밋된 규칙이 닿는 수준(쌍의 결과, `use_cond`, `violation`). (11) 세 C1 행(결함 빌드의 행, 고친 빌드의 같은 키의 행, 탐침 행)의 (c3)를 정적 줄(holder·대안 줄과 그 relations 글)과 부팅 기록(사용 사건, 그 결과와 문맥)의 칸으로 나눠.
 - **보고(27.4).** 26.7 (마)의 틀이다: 주 결과 `D1/R0` 먼저; 부팅별 분포로 내고 합치지 않음; 반증 점검과 `expect_safe` 는 '부팅으로 틀릴 수 있음'과 '정적·형식'을 따로; 기대와 어긋난 줄은 14.13 의 7 대로 있는 그대로; 정밀도와 계획 안의 재현율은 정의되지 않음(읽는 사람 없음); 쌍 종류마다; 보조 갈래의 표마다 바꾼 조건; `unordered` 는 '이 개정이 간선을 찾지 못함'. 탐지나 주장의 말을 쓰지 않는다. 수는 모두 위 출력이나 커밋된 기록의 줄에서 인용한다.
 - **크기.** 결과 문서는 이 절 앞에서 969,646 B 다. 1 MB(10^6 B)를 넘지 않도록 27.4 의 본문은 요약 표와 문장만 두고, 줄마다의 값은 출력 파일을 인용한다.
+
+### 27.4 보고: 부팅과 그 평가 (2026-11-19) [M]
+
+근거: 27.3 의 차례. 수는 `../records/closure-report-20261119/out/`(아래 `out/`; `report27.py` `19a9995`, 감시 아래 한 번, rc 0, 남긴 파일 7,700 개를 `keep` 목록과 맞대어 차이 0; `out/run.txt`, `out/inputs.txt`)와 27.1·27.2 가 인용한 커밋된 기록에서 온다. 이 부팅들은 이미 읽은 설계 행에 대한 대조 실행이고, 두 빌드는 한 사례의 두 판이다(평가 절차 1절). 아래는 아는 행에 대한 확인이고 규칙의 탐지가 아니다.
+
+**(가) 부팅과 문** (`out/t01_boots.tsv`). `c1_pre_tx` 다섯, `c1_post_tx` 다섯, 모두 문을 지났다. 지나지 못한 부팅, 1r, 부팅하지 않음은 없다. 열 부팅 모두 손실 없음(`losses: fields none; records none`), `chain confirmed`(16 links), `same_build unconfirmed(object not in the build record)`: 객체 7 가운데 `main` 1 만 confirmed, 모듈 객체 여섯(`module:1,3,4,5,6,7`)은 `unconfirmed(object not in the build record)` 이고 줄마다 `tree=not read` 다. `same_build` 은 문에 들지 않는다(3절).
+
+**(나) 주 결과 `D1/R0`: 미리 정한 사용마다 부팅별 분포** (`out/t02_uses.tsv`; `boot/<빌드>/summary.txt` 의 `per use`). 다섯 부팅 모두 같은 값이라 한 칸에 적고, 분포는 '5 부팅 가운데'로 적는다(pre = `c1_pre_tx`, post = `c1_post_tx`).
+
+| 빌드 | 행 | 소비자 뿌리 | 문맥 | 부팅마다 사용 사건(결과) | 이름 상태 / 연결 결과 | 5 부팅의 `violation` |
+|---|---|---|---|---|---|---|
+| pre | A20 | `BP_AppMain` | – | 2: absent, absent (`OS_ERR_NAME_NOT_FOUND`) | `undecided(the row's creator sites are not complete)` / `unlinked` | undetermined 5 |
+| pre | A21 | `CF_AppMain` | 1 | 1: absent | 같음 | undetermined 5 |
+| pre | A21 | `CF_AppMain` | 2 | 0 | – | not reached 5 |
+| pre | A22 | `SCH_Lab_AppMain` | – | 1: found (`OS_SUCCESS`) | 같음 | undetermined 5 |
+| pre | A26 | `CFE_TIME_TaskMain` | – | 1: found | 같음 | undetermined 5 |
+| pre | A63 | none | – | 0 | – | not reached 5 |
+| post | A20 | `BP_AppMain` | – | 2: absent, absent | 같음 | undetermined 5 |
+| post | A21 | `CF_AppMain` | – | 3: absent, found, found | 같음 | undetermined 5 |
+| post | A22, A26 | 위와 같음 | – | 1: found | 같음 | undetermined 5 |
+| post | A63 | none | – | 0 | – | not reached 5 |
+
+부팅마다 닿은 사용 / 정한 사용은 `c1_pre_tx` 4 / 6, `c1_post_tx` 4 / 5, 판정된 사용 / 닿은 사용은 두 빌드 모든 부팅에서 0 / 4 다. 미확정 사용의 종류(사용은 그 기록의 사유가 가진 종류마다 한 번): 실행 증거 2, 정적 입력 4, 자원 0, 구조 4, 모순 0, 그 밖 0. `observed`·`not_observed_in_runs`·`refuted_link` 는 어느 부팅, 어느 사용에도 없다. 결함 빌드 A21 의 두 문맥은 한 기록(판정 하나)을 나누지만 문맥 2 가 닿지 않아 두 사용이 닿은 기록은 없다(14.2). 사건 수는 분자가 아니다: 5 부팅 합 A20 10, `c1_pre_tx` A21 5, `c1_post_tx` A21 15, A22·A26 각 5. 계획된 행 / 추출된 행은 `c1_pre_tx` 층 9 + 대조 5 / 367, `c1_post_tx` 층 8 + 대조 5 / 367 이다(`../records/closure-c1prep-20261119/out/plan_budgets.txt`; 25.13).
+
+**(다) 사용 조건의 요소와 이름 결합 항목** (`D1/R0`; 다섯 부팅 모두 같음; `out/t03_elements.tsv`, `out/t04_pairs.tsv`).
+
+| 행 | (c1) | (c2) | (c3)(i) | (c3)(iii) | (c4) | `use_cond` | `link` |
+|---|---|---|---|---|---|---|---|
+| A20 (두 빌드) | present | missing | not_held | 1: not_held | missing | partial | unlinked |
+| A21 (pre) | present | missing | not_held | 1: not_established | missing | partial | unlinked |
+| A21 (post) | present | missing | not_held | 1: not_held | missing | partial | unlinked |
+| A22, A26 (두 빌드) | present | missing | not_established | 1: not_established | missing | partial | unlinked |
+| A63 (두 빌드) | missing | missing | not_established | –: not_established | missing | not_derived | unlinked |
+
+모든 기록의 `violation` 은 `undetermined`(`order_basis_unknown`)다. 부재 사용(A20, A21)의 쌍마다 이름 결합 항목 열둘: `held` 는 기초 2·3·5, (가) `ga_namespace_entry`, (나) 한도 `na_bound`, (라) `ra_same_kind`; `missing` 은 기초 1 `record_insufficient(same build not confirmed)`, 기초 4 `record_insufficient(no success constant of the creator: …)`, (나) 의미 `no entry: memchr`, (다) `no entry: strncpy, memchr, memcpy`, (마) `a delete or retire of the name between the use and the create is not excluded`. 기초 6 은 생성이 사용 뒤인 쌍에서 `held`, `SCH_LAB` 의 생성처럼 사용 앞에 끝난 쌍에서 `missing(the create is not after the use)` 다. 쌍의 결과는 같은 글의 쌍이 `unlinked`, 다른 글이 `differs_from_use_key` 다. 찾은 사용(A22, A26, `c1_post_tx` A21 의 둘째·셋째)은 이름 상태 `undecided`, 연결 `unlinked`(`no create of the id in the record`)다. 기대 대조: 정적 줄은 부팅마다 640 match, 0 mismatch; 부팅 줄은 400 match, 64 mismatch(두 빌드, 모든 부팅; `out/t07_expect.tsv`).
+
+**(라) 기대와 어긋난 줄 (14.13 의 7; 있는 그대로)** (`out/t07_expect.tsv` 의 `mismatch` 줄, `out/t05b_units.tsv` 의 F1). 부팅마다 64 줄 = 16 갈래 × 4 줄이고 열 부팅 모두 같은 줄이다: A20 과 A21 의 `pair[src/bp/fsw/src/bp_flow.c:132:18].missing_items` 와 `pair[apps/sch_lab/fsw/src/sch_lab_app.c:168:16].missing_items`. 64 줄 모두 기록의 목록 = 기대의 목록 + `basis1_same_build` 이고 다른 차이는 없다. 기대(`expect/expect_c1_2.tsv`, 근거 `predictions3.tsv`)는 기초 1 을 빠진 항목에 넣지 않았다. 기록은 연결 점검의 모듈 객체 줄(위 (가))을 받아 기초 1 을 `missing` 으로 적는다(명세 10.3 의 5). 3절이 '이 항목은 실제로 빠질 수 있다 [미확인]'이라 적은 경우다. 기대 파일은 다시 쓰지 않는다. 연결 점검 글은 `exe` 줄에 `exe/tx/cf/cf.so` 꼴의 이름을, `same_build_object` 줄에 `./cf/cf.so` 꼴의 경로를 적는다. 이 다름이 `object not in the build record` 의 까닭인지는 확인하지 않았다 [미확인].
+
+**(마) 세 C1 행: 요소 수준, 정적과 부팅을 다른 칸에** (`out/t11_rows_c3.tsv`; 평가 절차 14.13 의 6). 세 행을 가르는 칸은 부팅 전에 정해진 정적 결과다 [정적]. 부팅 칸은 수준 1 의 부팅 부분이다.
+
+| 행 | 정적 줄 (부팅 전, `cz_final_order/<빌드>/relations.txt`) | 부팅 기록 (다섯 부팅 모두) |
+|---|---|---|
+| 결함 빌드 A21 (CF; 대안 미입증) | (i) `not_held`: 732 holder, 다른 정의 `cf_cfdp.c:965` 의 지우는 채움(value=0). (iii) 문맥 1 `not_established`: 778 (열린 `exit-app` `cf_app.c:366`, 값이 가르지 않는 분기). 문맥 2 도 `not_established`(779; PI 결정 ③) | 문맥 1 사건 하나 absent, 키 `BP0_tsem`(부팅 1 aseq 31, 1556.503 ms). BP 의 같은 글 생성(`bp_flow.c:132`, aseq 18, 1565.292 ms)은 사용 뒤(기초 6 `held`). 문맥 2 는 닿지 않음. 기록의 (iii) `1: not_established` |
+| 고친 빌드 A21 (CF; 재시도) | (i) `not_held`: 732. (iii) 문맥 1 `not_held`: 778 `found: retry (the call at …cf_cfdp.c:1003:23 runs again; open)` | 사건 셋: absent → found → found(부팅 1: 1556.779, 1656.964, 1657.095 ms; 키 `BP0_tsem`, `BP0_tsem`, `BP1_tsem`). 찾은 id 의 생성은 기록에 있다(F4 pass: BP `initialize_throttling` 의 `OS_CountSemCreate`). 이름 상태 `undecided`, 연결 `unlinked`. facts 가 재시도 뒤 실패 사건을 놓치는 한계(`semantics-04`)는 그대로다 |
+| 탐침 A20 (BP; 같은 함수의 자기 생성; 두 빌드) | (i) `not_held`: 673 다른 정의 `bp_flow.c:132:18`(out 저장). (iii) 문맥 1 `not_held`: 718 `found: creation in the same name space and partition by the same function` | 사건 둘 absent(키 `BP0_tsem`, `BP1_tsem`). 같은 행위자의 생성이 뒤따름(쌍 `same_actor`, 기초 6 `held`) |
+
+F5 는 두 빌드 모든 부팅에서 정적 지남 5 / 5 다. `expect_discriminate` 의 (1)·(2)가 충족인 행은 두 빌드의 A20 과 고친 빌드의 A21 이고, 결함 빌드의 A21 은 `tier+control` 이라 세지 않았다. 세 행의 구분은 사용 사건이 없는 기록에서도 이미 나왔다(26.3 의 정적 예행). 부팅이 더한 것은 사용 사건의 존재, 결과 열, 문맥 배정(F9: 결함 빌드 A21 의 문맥 1, pass 1 / 1)뿐이다. 수준 1 을 이렇게 나눠 적는 것으로 주장해도 되는지는 PI 결정 기록 §5 의 9 그대로 남는다.
+
+**(바) 쌍 종류와 실패 징후** (`D1/R0`; `out/t08_pairkinds.tsv`; 다섯 부팅 모두 같음; 쌍 = 기록마다 소비자 × 생성자). 범례: 정적 `unordered` 는 '이 개정이 간선을 찾지 못함'이고 반대 순서가 실현 가능하다는 뜻이 아니다.
+
+| `pair_kind` | `c1_pre_tx` 부팅마다 | `c1_post_tx` 부팅마다 | 자리 |
+|---|---|---|---|
+| `app-app` | 3 | 3 | 앱 사이 표제 수(두 소유 앱 정해짐) |
+| `core-app` | 29 | 27 | 제 줄 |
+| `process-app` | 26 | 26 | 제 줄(앱 사이에 더하지 않음) |
+| `core-core` | 4 | 4 | 제 줄 |
+| `unknown` | 16 | 16 | 제 줄: (a) 소유 미상 0, (b) 두 소유가 정해진 코어–프로세스 16, (c) 그 밖 0 |
+| `same-app-other`, `same-app-main-child` | 0, 0 | 0, 0 | 대조 |
+| `same_actor` | 1 | 1 | 대조(A20 × BP 자신) |
+
+실패 징후(`odf = failure_sign`) 기록은 부팅마다 셋이다: `pair_kind` 집합 `app-app` 1(A21 CF), `app-app,same_actor` 1(A20 BP), `core-core,unknown` 1(B73, 소비자 `CFE_EVS_TaskMain`). 소비자 소속은 앱 2, 코어 1, 프로세스 0, 미상 0 이다. 코어 소비자의 징후는 앱 사이 신호로 세지 않는다. `app-app` 꼬리표만으로 같은 자원의 위반을 입증하지 않는다.
+
+**(사) `other_order_seen_in_boots`** (`summary.txt`, 두 빌드 같음; 쌍마다의 순서 줄은 `out/t08_pairkinds.tsv`). A21 × `SCH_LAB` 생성: create first, 다른 순서 없음. A21 × BP 생성(`bp_flow.c:132:18`): use first, 없음. A20 × `SCH_LAB`: create first, 없음. A20 × BP(`same_actor`): 'create first / use first, 다른 순서 보임: yes'. 이 yes 는 한 부팅 안의 BP 의 두 사용(키 `BP0_tsem`·`BP1_tsem`)이 같은 생성 자리의 두 생성과 다른 순서였던 것이다(use 0 은 aseq 18·29 두 생성 앞, use 1 은 aseq 18 생성 뒤이고 aseq 29 생성 앞; 기초 6 의 줄). 부팅 사이에 순서가 바뀐 것이 아니고, 대조 쌍이다. 앱 사이 쌍의 순서는 다섯 부팅 모두 같았다. 시작 스크립트가 순서를 정하므로 다른 순서에 대해서는 아무것도 보이지 않는다(2절).
+
+**(아) 반증 점검과 `expect_safe`: 부팅으로 틀릴 수 있음과 정적·형식을 따로** (`D1/R0`; `out/t05_checks.tsv`, `out/t05b_units.tsv`; 단위의 수, pass / fail / not_evaluable).
+
+| 점검 (부팅으로 틀릴 수 있음) | `c1_pre_tx` | `c1_post_tx` | 단위와 `note` |
+|---|---|---|---|
+| F1 사건 줄 | 25 / 4 / 0 | 25 / 4 / 0 | fail 4 = 위 (라)의 줄 |
+| F3 | 3 / 0 / 44 | 3 / 0 / 44 | pass: A20 의 둘, A21 의 첫 사용(약한 지남, 14.13 의 5). `note` 600 글자 줄 0 / 752(27.1·27.2) |
+| F4 | 2 / 79 / 30 (부팅 2: 2 / 78 / 30) | 4 / 79 / 30 | fail 은 모두 경로 B: B73 75(`c1_pre_tx` 부팅 2 는 74), B99 4, `note` 'no recorded create whose out value is the found id None'. pass: A22·A26(id 0x80001, `soft_timebase_Init` 의 생성), `c1_post_tx` A21 의 둘 |
+| F8 (b) | 0 / 0 / 46 | 0 / 0 / 46 | 연결된 쌍이 없음 |
+| F9 | 1 / 0 / 0 | – | 결함 빌드 A21 문맥 1 |
+| F10 | 0 / 46 / 0 | 0 / 46 / 0 | 모든 기록: 'objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7' |
+| 합 (`eval_tail.txt`) | pass 31 / 160 (fail 129; 부팅 2: 31 / 159, fail 128), not evaluable 120 | pass 32 / 161 (fail 129), not evaluable 120 | |
+
+정적·형식(부팅마다, 두 빌드 같음; 지남의 수에 더하지 않음): 정적 137 / 137(F1 정적 줄 40, F2 (a) 46, F5 5, F6 46), 형식 51 / 51(F2 (b) 46, F7 5), F8 (a) 5 / 5(갈래 `*`). `expect_safe` 는 부팅으로 틀릴 수 있는 것 0 / 0, 정적 20 / 20(s1–s4 각 5)이다. 실패한 점검이 말하는 것(6절): F10 은 'build-id 를 읽는 방식이 적재된 모듈에서 서지 않는다', F1 의 넷은 그 항목(기초 1)이 기대와 다르다는 것이다. F4 의 fail 은 경로 B 의 찾은 사용에서 `note` 가 이름 댄 id 가 `None` 인 단위다. 그 까닭은 이 단계에서 보지 않았다 [미확인]. 6절대로 어느 점검도 행에 맞춰 규칙을 고쳐 없애지 않는다.
+
+**(자) `expect_discriminate` (정적)** (`out/t06_discriminate.tsv`; 16 갈래, 다섯 부팅 모두 같음). `c1_pre_tx` 충족 1 / 센 4(A20 충족; A22·A26 은 규칙 (3)의 열린 세대 위 인스턴스 연결이 없어 미달, A63 은 요구할 근거가 없어 미달; A21 은 `tier+control` 이라 세지 않음). `c1_post_tx` 충족 2 / 센 5(A20, A21 충족; A22, A26, A63 미달). 모든 줄의 가름은 `static` 이고 14.13 의 2 의 [I] 와 같다. `expect_safe` 와 합치지 않는다.
+
+**(차) 정밀도와 계획 안의 재현율.** 두 빌드 모든 부팅, 모든 갈래에서 `undefined(no reader)` 다(`eval_tail.txt`). 판독지의 정적 부분은 'not filled: no reader' 이고 첫 부팅 뒤에 판독자를 정하면 '부팅 뒤 회고 판독'으로만 쓴다(14.5). 도구 양성(`observed`)도 0 이다(N = 0). 계획 안의 재현율 옆 칸은 모두 0 이다(판독이 없어 k 가 없음).
+
+**(카) 보조 갈래** (`out/t09_aux.tsv`: 같은 부팅, 같은 이름의 기록을 `D1-R0` 과 맞댄 칸). 표마다 바꾼 조건을 적는다. 읽기 갈래가 든 줄은 기록의 표지대로 '4.2 의 읽기 갈래(PI 결정 전)'다. 열여섯 갈래 모두에서 모든 기록의 `violation`, `link`, 쌍의 항목과 결과, 사용의 결과·문맥·이름 상태·연결 결과, 사용마다의 분포, 부팅으로 틀릴 수 있는 반증 점검의 수는 주 결과와 같다.
+
+| 갈래 | 바꾼 조건 | 경로 A 행에서 `D1-R0` 와 다른 칸 (두 빌드, 다섯 부팅) | 경로 B 에서 다른 칸 | 정적 / 형식 / `expect_safe` 정적 |
+|---|---|---|---|---|
+| `D1-Ra`, `D1-Re`, `D1-Rf` | 읽기 하나 | 없음 | 없음 | 137 / 46 / 20 |
+| `D1-Rb` | 읽기 `Rb` | A21 (i) not_held → not_established | 없음 | 137 / 46 / 20 |
+| `D1-Rc` | 읽기 `Rc` | A20·A21·A22·A26 (c2) missing → present | 없음 | 137 / 46 / 20 |
+| `D1-Rd` | 읽기 `Rd` | 없음 | B13·B125·B73·B99 (c4) present; B73·B99 `use_cond` not_derived → partial | 137 / 46 / 20 |
+| `D1-all` | 여섯 읽기 | `Rb`·`Rc` 의 합 | `Rd` 와 같음 | 137 / 46 / 20 |
+| `D2-R0` | 자료 `D2`: 후보 목록 전부 인정(종류 여섯, 인정 파일 `d610a779…`) | A63 (c1) missing → present, `use_cond` not_derived → partial | B113·B118·B73·B81·B99 (c1) present, `use_cond` partial | 91 / 5 / 15 |
+| `D2-Ra`, `D2-Re`, `D2-Rf` | `D2` 와 읽기 하나 | `D2-R0` 와 같음 | 같음 | 91 / 0 / 15 |
+| `D2-Rb`, `D2-Rc` | `D2` 와 `Rb`, `Rc` | `D2-R0` 에 `Rb`, `Rc` 의 칸을 더함 | 같음 | 91 / 0 / 15 |
+| `D2-Rd` | `D2` 와 `Rd` | `D2-R0` 에 A20·A21·A22·A26·A63 (c4) present | `D2-R0` 에 B13·B73·B81·B99·B113·B118·B119·B125 (c4) present | 91 / 0 / 15 |
+| `D2-all` | `D2` 와 여섯 읽기 | 위의 합 | 위의 합 | 91 / 0 / 15 |
+
+16 갈래는 2 × (1 + 6 + 1)이고 모든 조합이 아니다. 하나씩의 갈래와 여섯 모두의 갈래를 견주어 각 읽기가 필요하다고 결론 내지 않는다(14.1). 부분 인정 62 의 496 갈래(25.10)는 이 단계에서 돌리지 않았다(열린 점 3).
+
+**(타) 같은 기록에서의 세 읽기 (평가 절차 11절)** (`D1/R0`; `out/t10_compare11.tsv`; 다섯 부팅 모두 같음). (a) 실패 상태만: 부팅마다 기록 셋(A20 BP, A21 CF, B73 `CFE_EVS_TaskMain`). (b) 실패 상태이고 같은 키 글을 생성한 다른 행위자가 기록에 있음: 부팅마다 하나, A21(BP, actor 14 의 `BP0_tsem` 생성 aseq 18; 고친 빌드는 `BP1_tsem` 의 aseq 29 도). A20 의 같은 글 생성은 같은 행위자 것이라 (b)에 들지 않고, B73 에는 생성 사건이 없다. (c) 커밋된 규칙이 닿는 수준: 셋 모두 `link unlinked`, `violation undetermined`; A20·A21 의 쌍은 같은 글이 `unlinked`, 다른 글이 `differs_from_use_key`; `use_cond` 는 A20·A21 `partial`, B73 `not_derived`. (c)의 `observed` 는 11절이 미리 적은 대로 비어 있다. (a)·(b)가 표시한 기록 가운데 (c)의 요소가 가르는 것은 (c3)이다: (b)에 든 결함 빌드 A21 은 (iii) `not_established`, 고친 빌드 A21 은 (iii) `not_held`(재시도); (b)에 들지 않은 A20 은 (i)·(iii) `not_held`. 이 가름은 (마)대로 정적이다.
+
+**(파) 이 부팅들이 보일 수 없는 것.**
+1. 다른 순서. 시작 스크립트가 순서를 정하고 다섯 부팅 모두 앱 사이 쌍의 순서가 같았다(2절, (사)). 반대 순서가 실현되는지, 그때 무엇이 나오는지는 보이지 않는다.
+2. 판정된 사용. 세대는 성공 경로 줄이 `held` 인 생성에서만 생기고 그 줄은 빌드마다 0 / 14 다. 그래서 어느 부팅 기록도 `bound`, `refuted`, 인스턴스 연결, `observed` 에 닿을 수 없다(14.12 의 1). 부팅을 더 해도 이것은 바뀌지 않는다.
+3. 세 행의 구분의 부팅 근거. 구분은 정적 줄에서 왔다. 부팅은 사용 사건과 그 문맥만 더했다((마)).
+4. 같은 빌드. 이 주기의 연결 점검으로는 모듈 객체의 기초 1 이 서지 않았다((가), (라)).
+5. 결함 빌드 A21 의 문맥 2, A63 의 사용. 닿지 않았다.
+6. 개입. 축은 `unconfirmed(intervention_out_of_scope)` 다.
+7. 시험되지 않은 꼴 넷(`fix-judge-04`; 26.9). 이 주기의 대조 행은 어느 꼴에도 닿지 않았고 fixture 도 없다.
+8. 독립 평가, 정량 성능, 일반화, 인과. 설계 행이고 판독자가 없다(1절, 14.5; PI 결정 ③·④).
+9. 손실 기록의 규칙. 손실이 없어 판정 부분의 `NONEVENT_LOSS`·`loss_any` 와 선언 4 의 머리가 정한 규칙(`fix-judge-08`)이 쓰인 부팅은 없다.
+
+**(하) 열린 점과 PI 가 정할 것.**
+1. 기초 1 과 F10: 모든 부팅, 모든 기록에서 모듈 객체가 `unconfirmed(object not in the build record)` 다. 이 부팅들의 연결 점검과 판정 부분은 바꾸지 않는다(12절). 다음 주기 전에 고칠지는 lead 가 정한다.
+2. F4 의 경로 B fail(id `None`)의 까닭은 보지 않았다 [미확인].
+3. 부분 인정 62 자료 갈래 × 읽기 8 = 496 갈래(14.1, 25.10)는 아직 평가하지 않았다. 부팅 하나의 16 갈래 설명 기록이 약 55 MB 이므로 남은 공간(아래)으로는 열 부팅 모두를 한 번에 할 수 없다 [I]. 차례와 공간은 lead 가 정한다.
+4. 기대와 어긋난 64 줄은 위대로 두고 기대 파일을 다시 쓰지 않는다(14.13 의 7).
+5. 결과 문서는 27.3 앞 969,646 B, 27.4 앞 973,737 B 였고 이 절로 1 MB(10^6 B)에 가깝다. 다음 절의 자리(이어지는 문서)는 lead 가 정한다.
+6. 압축과 남긴 출력은 같은 디스크에만 있다(26.2 열린 점 3).
+7. PI 결정 기록 §5 의 1–9 는 그대로 남는다. 특히 9(수준 1 을 '부팅 전에 정해진 정적 구분'과 '사용마다의 부팅 근거'를 따로 적어 주장해도 되는지; 위 (마)), 2(판독자: 이제 정하면 회고 판독으로만), 1 의 lead 의 고침(§2 의 A9 를 포함)이다. PI 의 뒤 답은 주 결과 옆에 함께 낼 보조 갈래만 고른다(26.7 (바)).
+
+**공간 [M].** 시작 489,963,520 B(20:36:00Z, `../records/closure-report-20261119/free_start.txt`). 셈 스크립트의 감시 기록은 `verdict=completed`, 가장 낮은 값 484,511,744 B, dip 995,328 B(`guard/report27.log`). 끝 483,872,768 B(20:47:47Z, `free_end.txt`), 바닥보다 169,299,968 B 위.
+
+**끝 점검 [M].** `ledger_check` 245 행 실패 0(`../records/closure-report-20261119/ledger_check_end.txt`), `tools_check --deep` 59 행 실패 0(`tools_check_deep_end.txt`). 이 단계는 장부 행을 더하지 않았다(출력은 모두 저장소에 있고 1 MB 보다 작다). 커밋마다 금지어 grep 과 이름 점검을 했다.
+
+**계획과 다르게 한 것.**
+1. 27.1 의 부팅마다의 줄은 이미 완결이라 고치지 않았다. 보고는 27.3(차례)과 27.4 로 더했다.
+2. 결과 문서의 크기 때문에 줄마다의 값은 `out/` 의 파일에 두고 본문은 그 요약만 적었다(27.3 의 '크기').
+3. 셈 스크립트의 개발 실행 둘은 scratch 에 남겼고 커밋하지 않았다. 둘째 개발 실행과 커밋한 실행의 출력은 바이트가 같다.

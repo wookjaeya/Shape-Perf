@@ -1,0 +1,14 @@
+field holders with no writer but the own out store 1
+holder field 2
+holder lines 21
+holder local 18
+holder other 1
+per-field DISABLED 1
+per-field writer-set-complete 1
+readers: not decided 0
+readers: tests the cleared value 5
+readers: uses the value without such a test 4
+test reads 5
+writers: clearing 5
+writers: other definition 0
+writers: own out store 2

@@ -19,7 +19,10 @@
  *                                gives its status back unchanged and stores the id through the out pointer; the first
  *                                definition cannot carry the success value to the return (its own branch on it), and
  *                                the out-id store is in the finishing step under a condition on its own parameter;
- *   threads      the main thread starts a looker (the lookups) and a maker (the creations).
+ *   holders      the looker clears a table of channels and looks a name up into a channel's field (a field holder with a
+ *                clearing writer), into an element of a global array (no record field) and into a local; a user thread
+ *                reads the channel field once after a test of its value and once without one;
+ *   threads      the main thread starts a looker (the lookups), a maker (the creations) and a user.
  * The values are the fixture's; they are no experiment results. */
 #include <pthread.h>
 #include <string.h>
@@ -38,7 +41,13 @@ typedef struct {
   char name[NAMELEN];
 } Ent;
 
+typedef struct {
+  int sem;
+  int count;
+} Chan;
+
 static Ent ents[NSLOTS];
+static Chan chans[2];
 static int ids[8];
 static int seen;
 
@@ -141,10 +150,22 @@ int ent_create_fin(int *out, const char *name, int slot) {
   return rc;
 }
 
+static int chan_use(int id) { return id + 1; }
+
 static void *looker_main(void *arg) {
+  int mine;
   (void)arg;
-  if (ent_find(&ids[0], "alpha") != CL_OK) seen = seen + 1;
+  memset(chans, 0, sizeof(chans));
+  if (ent_find(&chans[0].sem, "alpha") != CL_OK) seen = seen + 1;
   if (ent_find(&ids[1], "beta") != CL_OK) seen = seen + 2;
+  if (ent_find(&mine, "alpha") == CL_OK) seen = seen + mine;
+  return 0;
+}
+
+static void *user_main(void *arg) {
+  (void)arg;
+  if (chans[0].sem != 0) seen = chan_use(chans[0].sem);
+  seen = seen + chan_use(chans[1].sem);
   return 0;
 }
 
@@ -159,8 +180,9 @@ static void *maker_main(void *arg) {
 }
 
 int main(void) {
-  pthread_t a, b;
+  pthread_t a, b, c;
   (void)pthread_create(&a, 0, looker_main, 0);
   (void)pthread_create(&b, 0, maker_main, 0);
+  (void)pthread_create(&c, 0, user_main, 0);
   return 0;
 }

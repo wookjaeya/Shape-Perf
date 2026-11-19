@@ -3664,6 +3664,9 @@ class Rel : public RelFacts {
       if (!u.key.alias.empty()) L.line("aliases") << "aliases: the key is read through the pointer field " << u.key.alias;
       L.line("actors") << "actors: " << actors_text(u.actors) << "; result=" << result_use(u.ci);
       for (const std::string& h : id_holders(u.ci, u.callee, u.param)) L.line("id holder") << "id holder: the lookup's " << h;
+      // relations rules revision 14 (static_facts.md 5x item 3)
+      if (result_flow_ && has_objacc_)
+        for (const std::string& h : holder_lines(u.ci, u.callee, u.param)) L.line("holder") << h;
       std::vector<std::string> paired, excluded, probes;
       std::vector<const Use*> named;  // the creators the row pairs, and its probe-creates (relations rules revision 7)
       bool creator_member_unres = false;
@@ -4680,6 +4683,147 @@ class Rel : public RelFacts {
     if (fail.empty()) return done("");
     if (n_ok > 0) return done(kSpWhy[1]);
     return done(kSpWhy[fail.front()]);
+  }
+
+  // ---------------------------------------------------------------- relations rules revision 14: the holder line
+  // (static_facts.md 5x item 3 and its sixth addendum): for each out-pointer argument of a lookup, the object that holds the
+  // id it stores, every writer of that object with its value kind, the rule statuses with what blocks them, and its readers
+  // with whether a test of the value comes before the use that depends on it.
+  std::string fstatus_flags(uint16_t f) const {
+    static const std::pair<uint16_t, const char*> names[] = {{KZ_FSTATUS_FLAG_SIBLING_EXPOSED, "sibling-exposed"},
+                                                             {KZ_FSTATUS_FLAG_UNTYPED_IN_PROGRAM, "untyped-in-program"},
+                                                             {KZ_FSTATUS_FLAG_WRITER_IN_LOOP, "writer-in-loop"},
+                                                             {KZ_FSTATUS_FLAG_WRITER_NOT_ONCE, "writer-function-not-once"},
+                                                             {KZ_FSTATUS_FLAG_SEVERAL_INSTANCES, "several-instances"},
+                                                             {KZ_FSTATUS_FLAG_ARRAY_ELEMENTS, "array-element-stores-not-collected"}};
+    std::vector<std::string> out;
+    for (const auto& [b, n] : names)
+      if (f & b) out.push_back(n);
+    return join(out, ", ");
+  }
+  std::vector<std::string> holder_lines(uint32_t ci, uint32_t F, uint32_t key) {
+    std::vector<std::string> out;
+    if (!defined(F)) return out;
+    NoNotes nn(this);
+    const kz_fact_call& c = calls_[ci];
+    const std::string cfile = str(c.file);
+    for (uint32_t j = 0; j < c.nargs; ++j) {
+      if (j == key) continue;
+      auto it = pflow_of_.find({F, j});
+      if (it == pflow_of_.end()) continue;
+      bool outstore = false;
+      for (uint32_t i : it->second)
+        if (pflow_[i].kind == KZ_PFLOW_KIND_OUT_STORE) outstore = true;
+      if (!outstore) continue;
+      auto af = argflow_at_.find({c.site, j});
+      if (af == argflow_at_.end()) {
+        out.push_back("holder: argument " + std::to_string(j) + ": no ARGFLOW row of the argument");
+        continue;
+      }
+      const kz_fact_argflow& a = argflow_[af->second];
+      const std::string tf = str(a.type).empty() || str(a.field).empty() ? std::string() : str(a.type) + "." + str(a.field);
+      std::vector<std::string> parts;
+      if (tf.empty() || tf.compare(0, 9, "<global>.") == 0) {
+        // a local or a global object: its stores are not WRITERS rows of a field
+        if (a.base == KZ_ARGBASE_LOCAL) {
+          const std::string l = str(a.root);
+          std::vector<std::string> defs;
+          for (const kz_fact_rflow& r : rflow_)
+            if (r.fn == c.caller_fn && str(r.local).compare(0, l.size() + 1, l + "@") == 0) defs.push_back(str(r.local));
+          std::sort(defs.begin(), defs.end());
+          defs.erase(std::unique(defs.begin(), defs.end()), defs.end());
+          parts.push_back("holder: local " + l + " in " + fname(c.caller_fn));
+          parts.push_back("writers 1: own out store " + call_pos(ci));
+          parts.push_back("local: definitions " + std::to_string(defs.size()) + " (RESULT_FLOW)" + (defs.empty() ? std::string() : ": " + join(defs, ", ")));
+          parts.push_back("readers: not decided: the uses of a local are not READS rows");
+        } else {
+          parts.push_back("holder: [" + str(a.text) + "] " + enum_text("KZ_ARGSRC", a.src) + " base " + enum_text("KZ_ARGBASE", a.base) + (tf.empty() ? std::string() : " " + tf));
+          parts.push_back("writers: not decided: the holder is no record field (WRITERS names the stores of fields)");
+        }
+        out.push_back(join(parts, "; "));
+        continue;
+      }
+      parts.push_back("holder: field " + tf);
+      // the writers, every WRITERS row of the field
+      std::vector<std::string> ws;
+      std::set<int64_t> cleared;
+      auto wit = writers_of_.find(tf);
+      size_t nw = 0;
+      if (wit != writers_of_.end())
+        for (uint32_t i : wit->second) {
+          const kz_fact_writer& w = writers_[i];
+          ++nw;
+          const std::string at = pos(str(w.file), w.line, w.col);
+          if (w.kind == KZ_WRITER_KIND_OUTPTR && str(w.file) == cfile && w.line == c.line && w.col == c.col && w.fn == c.caller_fn) {
+            ws.push_back("own out store " + at);
+          } else if (w.value_kind == KZ_ARG_KIND_CONST) {
+            cleared.insert(w.value);
+            ws.push_back("clearing " + at + " in " + fname(w.fn) + " value=" + std::to_string(w.value) + " [" + (w.kind == KZ_WRITER_KIND_MEMSET ? "fill" : "assign") + "]");
+          } else {
+            ws.push_back("other definition " + at + " in " + fname(w.fn) + " value=" + enum_text("KZ_ARG_KIND", w.value_kind) +
+                         (w.kind == KZ_WRITER_KIND_OUTPTR && w.via_fn != kN ? " [out-pointer, stored in " + fname(w.via_fn) + "]" : std::string(" [") + enum_text("KZ_WRITER_KIND", w.kind) + "]"));
+          }
+        }
+      parts.push_back("writers " + std::to_string(nw) + (ws.empty() ? std::string() : ": " + join(ws, "; ")));
+      // the rule statuses and what blocks them
+      auto fs = fstatus_of_.find(tf);
+      if (fs == fstatus_of_.end()) {
+        parts.push_back("FIELD_STATUS: no row of " + tf);
+      } else {
+        const kz_fact_fstatus& f = fstatus_[fs->second];
+        std::string t = "FIELD_STATUS per-field=" + enum_text("KZ_LOC_STATUS", f.status_field) + " type-level=" + enum_text("KZ_LOC_STATUS", f.status_type);
+        std::vector<std::string> why;
+        auto at = atypes_of_.find(tf);
+        if (at != atypes_of_.end())
+          for (uint32_t i : at->second) {
+            const kz_fact_atype& x = atypes_[i];
+            if (x.kind == KZ_ATYPE_KIND_UNTYPED_WRITE) continue;  // a site of the whole program, counted below
+            why.push_back(enum_text("KZ_ATYPE_KIND", x.kind) + " " + pos(str(x.file), x.line, x.col));
+          }
+        const std::string fl = fstatus_flags(f.flags);
+        if (!fl.empty()) why.insert(why.begin(), "flags " + fl);
+        if (f.sibling_hits != 0) why.push_back("hits on other fields of the type " + std::to_string(f.sibling_hits));
+        if (f.untyped != 0) why.push_back("untyped write sites in the program " + std::to_string(f.untyped));
+        if (!why.empty()) t += ": " + join(why, "; ");
+        parts.push_back(t);
+      }
+      // the readers: every READS row of the field whose value does not feed a branch condition (those that do, also as the
+      // argument of a call whose result is the condition, are the tests)
+      std::vector<std::string> rd;
+      size_t tests = 0;
+      auto rit = reads_of_field_.find(tf);
+      if (rit != reads_of_field_.end())
+        for (uint32_t i : rit->second) {
+          const kz_fact_read& r = reads_[i];
+          if (r.use & KZ_READ_USE_BRANCH) {
+            ++tests;
+            continue;
+          }
+          const std::string at = pos(str(r.file), r.line, r.col);
+          std::string v;
+          if (r.guard_root != kN && has_field(r.guard_root, tf)) {
+            v = "tests the cleared value before the dependent use at " + at;
+          } else {
+            // a local that holds the field's value in the same function, tested by the guard
+            std::string held;
+            for (uint32_t k : rit->second) {
+              const kz_fact_read& q = reads_[k];
+              if (q.fn != r.fn || !(q.use & KZ_READ_USE_STORE) || q.ctx_root == kN || q.ctx_root >= exprs_.size()) continue;
+              const kz_fact_expr& d = exprs_[q.ctx_root];
+              if (d.op == KZ_EXPR_OP_LOAD && d.flags == KZ_EXPR_REF_LOCAL && r.guard_root != kN && sp_reads_local(r.guard_root, str(d.name)))
+                held = str(d.name) + " (stored at " + pos(str(q.file), q.line, q.col) + ")";
+            }
+            v = held.empty() ? "uses the value without such a test" : "not decided: the guard tests the local " + held + ", which may be redefined";
+          }
+          rd.push_back(fname(r.fn) + " at " + at + ": " + v);
+        }
+      std::string cl;
+      for (int64_t x : cleared) cl += (cl.empty() ? "" : ", ") + std::to_string(x);
+      parts.push_back("readers " + std::to_string(rd.size()) + (rd.empty() ? std::string() : ": " + join(rd, "; ")) + " (branch-condition reads, the tests themselves: " + std::to_string(tests) +
+                      "; the cleared value" + (cl.empty() ? std::string(": none written") : (cleared.size() > 1 ? "s " : " ") + cl) + ")");
+      out.push_back(join(parts, "; "));
+    }
+    return out;
   }
 
   // what the caller does with a lookup's result: a retry loop around it, and where the failure leads

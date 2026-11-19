@@ -183,6 +183,7 @@ struct RelFacts {
   std::vector<kz_fact_lockid> lockids_;
   std::vector<kz_fact_lockset> lockset_;
   std::vector<kz_fact_fstatus> fstatus_;
+  std::vector<kz_fact_atype> atypes_;  // ATYPE (the address-type hits; read by relations rules revision 14, the holder line)
   std::vector<kz_fact_await> awaits_;
   std::vector<kz_fact_lockpath> lockpaths_;
   std::vector<kz_fact_sem> sem_;  // SEMANTICS (extract --semantics, static_facts.md 5t); empty without the section
@@ -222,6 +223,7 @@ struct RelFacts {
   std::map<std::pair<uint32_t, uint32_t>, std::vector<uint32_t>> pflow_of_;
   std::map<uint32_t, uint32_t> lockset_call_, lockset_read_, ptrread_of_, loop_by_index_;
   std::map<std::string, uint32_t> fstatus_of_;
+  std::map<std::string, std::vector<uint32_t>> atypes_of_;  // "Type.field" -> its ATYPE rows
   std::map<std::string, std::vector<uint32_t>> writers_of_, inits_of_, fwrites_of_, gimages_of_;
   std::map<std::string, uint8_t> p0_kind_;
   std::set<std::string> compare_names_;

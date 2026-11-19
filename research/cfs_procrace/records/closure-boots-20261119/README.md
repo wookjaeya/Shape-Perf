@@ -6,7 +6,7 @@
 
 - **실행 스크립트가 쓰는 기록**은 선언된 자리 `../closure-c1prep-20261119/boot/<빌드>/boot<N>/` 에 있다(`verify.txt`, `verify_at_boot.txt`, `space_at_boot.txt`, `boot.txt`, `control_check.txt`, `convert.log`, `convert.sha256`, `chain.txt`, `stop_eval.tsv`, `gate.txt`, `verify_at_explain.txt`, `explain.txt`, `eval_run.txt`, `eval_tail.txt`, `expect_compare.txt`, `keep.txt`, `ledger_check_keep.txt`, `c1cyc_<s>_<무엇><N>.sha256`, 감시 기록 `guard_*.log`). 실행 스크립트는 바꿀 수 없으므로(부팅 단계가 커밋된 그대로를 요구함) 그 자리를 옮기지 않는다. 그 디렉터리를 부팅마다 그대로 커밋한다. 첫 부팅이 쓰는 `boot/declaration_pin.txt` 도 함께 커밋한다.
 - **큰 출력**(부팅의 작업 디렉터리와 덤프, 변환, 16 갈래의 설명 기록, 평가 출력 전문 `eval.txt`)은 `/home/user/work/redesign/obs1/c1cyc_<s>_{boot,convert,explain,eval}<N>/` 에 있고, `keep` 단계가 sha256 목록과 장부 행(`OBS_c1cyc_<s>_<무엇><N>`)을 단다.
-- **이 디렉터리**는 이 단계가 쓴 것이다: 단계마다의 시각·rc·여유(`<빌드>/steps.tsv`, 단계의 출력 `<빌드>/boot-<N>/<단계>.out`), 부팅마다 뽑은 수(`<빌드>/boot-<N>/`; 아래), 시작과 끝의 여유와 장부 점검.
+- **이 디렉터리**는 이 단계가 쓴 것이다: 단계마다의 시각·rc·여유(`<빌드>/steps.tsv`, 단계의 출력 `<빌드>/boot-<N>/<단계>.out`), 부팅마다 뽑은 수(`<빌드>/boot-<N>/`; 아래), 시작과 끝의 여유와 장부 점검. 빌드의 부팅이 끝난 뒤(2026-11-19 에 더함): `<빌드>/summary/summary.out`(`summary` 단계의 출력), `<빌드>/pin_check.txt`(모든 `verify*.txt` 의 선언 sha256 과 고정 파일, 첫 부팅 뒤 선언·실행 스크립트의 커밋 수; 26.9 `fix-decl-09`), `<빌드>/ledger_check_end.txt`, `<빌드>/tools_check_deep_end.txt`, `<빌드>/free_end.txt`.
 
 ## 스크립트 (첫 부팅 전에 커밋함)
 

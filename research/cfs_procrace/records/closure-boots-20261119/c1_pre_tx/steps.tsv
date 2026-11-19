@@ -59,3 +59,4 @@ start	end	build	N	step	rc	free_before	free_after	output
 2026-11-19T20:05:37.552Z	2026-11-19T20:05:39.601Z	c1_pre_tx	5	eval	0	805388288	804073472	c1_pre_tx/boot-5/eval.out
 2026-11-19T20:05:39.614Z	2026-11-19T20:05:40.333Z	c1_pre_tx	5	expect	0	804073472	803811328	c1_pre_tx/boot-5/expect.out
 2026-11-19T20:05:40.345Z	2026-11-19T20:05:44.787Z	c1_pre_tx	5	keep	0	803811328	803651584	c1_pre_tx/boot-5/keep.out
+2026-11-19T20:06:46.308Z	2026-11-19T20:06:51.289Z	c1_pre_tx	-	summary	0	802836480	802664448	c1_pre_tx/summary/summary.out

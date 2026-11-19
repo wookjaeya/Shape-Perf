@@ -1,0 +1,15 @@
+relations tool line	ok	relations tool_sha256 36e0299521014b92, sidecar generator 36e0299521014b92
+relations revision 14 lines	ok	rules with object access line with the revision 14 lines
+sidecar form	ok	first line 'kz-plan-sidecar 2', manifest-revision '4 (kzs-sites 4)'
+pairs form	ok	form, columns, tail counts and edge lines agree
+pairs facts	ok	pair file facts = sidecar input facts
+pairs tool	ok	tool_sha256 equal in pair file, relations and sidecar
+namespace data framework_namespaces2_cfe-6.4.1.txt	ok	first line 'semantics-data 2'; sha256 = the sidecar's input namespace-data line
+namespace data framework_namespaces2_cfe-6.4.2.txt	ok	first line 'semantics-data 2'; sha256 = the sidecar's input namespace-data line
+namespace data framework_namespaces2_osal-4.1.1.txt	ok	first line 'semantics-data 2'; sha256 = the sidecar's input namespace-data line
+namespace data framework_namespaces2_osal-7.0.1.txt	ok	first line 'semantics-data 2'; sha256 = the sidecar's input namespace-data line
+namespace data framework_namespaces2_osal-f34759d.txt	ok	first line 'semantics-data 2'; sha256 = the sidecar's input namespace-data line
+named calls	ok	4 calls, 1 with no entry; plan lines = the candidate list's; every call the plan's namespace-entry and namespace-layer lines name is in it
+dump format	ok	format line {'dump_flags': '0x1', 'records': '1276', 'unknown': '0', 'partial': '0', 'pads': '0', 'end': 'yes'}
+dump build-id lines	ok	7 buildid lines (format 1.5)
+chain same_build_object lines	ok	7 same_build_object lines

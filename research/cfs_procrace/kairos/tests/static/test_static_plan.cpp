@@ -38,6 +38,14 @@
 //     namespace data), the effect call with the argument the semantics data names; the value requests are written and
 //     named with their sha256; refusals (no control budget, a revision-3 option with --manifest 3, a namespace data
 //     line that is no statement); the text of the revision-3 plan against data/planv4_np.plan.golden.
+//   - plan rules revision 5 (docs/plan_manifest.md section 10) on planv5.c (facts of --object-access and --result-flow) with
+//     the two hand-written namespace data files of coverage rule revision 2 in data/planv5_fixture/: determinism; files of
+//     both revisions refused, a revision-2 statement in a revision-1 file refused; no revision-5 line without namespace
+//     data; the namespace-layer and namespace-entry lines (kind, value, operations, comparison, stored name with its extent
+//     from FIELD_TYPES, copy and length calls, success path), the lifetime lines with their sites (rollback with reentry,
+//     the slot clear the relations show under the free-record condition as no lifetime end, fill, delete) and
+//     lifetime-complete, the context lines with their frames, the kind value, rollback, frame and slot-clear sites in the
+//     manifest, the key text bounded by the extent; the text against data/planv5_np.plan.golden.
 #include <sys/wait.h>
 
 #include <cstdio>
@@ -130,6 +138,9 @@ std::set<std::string> site_keys(const std::string& sidecar) {
 std::string mask(std::string t, const std::string& work) {
   t = std::regex_replace(t, std::regex("[0-9a-f]{64}"), "<sha256>");
   t = std::regex_replace(t, std::regex("path=\\S+"), "path=<path>");
+  // the plan id is the first 16 hex digits of a sha256 over the facts' artifact hash (masked above) and the rule texts;
+  // the facts carry the identity of the tool that extracted them, so it changes with every build of the tool
+  t = std::regex_replace(t, std::regex("(\\nplan |\\nplan-id )[0-9a-f]{16}"), "$1<plan-id>");
   size_t at;
   while ((at = t.find(work)) != std::string::npos) t.replace(at, work.size(), "<work>/");
   return t;
@@ -546,6 +557,142 @@ int main(int argc, char** argv) {
         if (want != got) {
           write(work / "planv4_np.plan.actual", got);
           kztest::fail(__FILE__, __LINE__, "the plan differs from " + golden.string() + " (actual in " + (work / "planv4_np.plan.actual").string() + ")");
+        }
+        ++kztest::state().checks;
+      }
+    }
+  }
+
+  // ---- plan rules revision 5 (namespace data of coverage rule revision 2) on planv5.c
+  {
+    const fs::path vd = data / "planv5_fixture";
+    const std::string ext5 = q(tool) + " extract --no-profile --source " + q((fixtures / "planv5.c").string()) + " --root " + q(fixtures.string()) +
+                             " --targets-rule R-T1,R-T2 --object-access --result-flow -o " + q((work / "planv5.kz").string()) + " -- -std=c99 -pedantic";
+    KZ_CHECK_EQ(run(ext5, &log), 0);
+    const fs::path vfw = data / "planv4_framework.txt";
+    const fs::path ns_a = vd / "framework_namespaces2_fixture-v5.txt";
+    const fs::path ns_t = vd / "framework_namespaces2_fixture-v5t.txt";
+    auto v5cmd = [&](const fs::path& out, const std::string& ns) {
+      return q(tool) + " plan " + q((work / "planv5.kz").string()) + " --framework " + q(vfw.string()) +
+             " --select observation-set --order method-priority --budget all --budget-reason 'the test budget' --manifest 4 --control-budget all"
+             " --control-budget-reason 'the test control budget'" + ns + " --requests-out " + q((out / "plan.req").string()) + " -o " +
+             q((out / "plan.kzs").string()) + " --sidecar " + q((out / "plan.side").string()) + " --modules-out " + q((out / "plan.mod").string()) +
+             " --exes-out " + q((out / "plan.exe").string());
+    };
+    const std::string ns2 = " --namespaces " + q(ns_a.string()) + " --namespaces " + q(ns_t.string());
+    // two generations, the same bytes
+    Plan p5, q5, r4;
+    fs::create_directories(work / "v5a");
+    fs::create_directories(work / "v5b");
+    fs::create_directories(work / "v5r1");
+    KZ_CHECK(generate(v5cmd(work / "v5a", ns2), work / "v5a", &p5));
+    KZ_CHECK(generate(v5cmd(work / "v5b", ns2), work / "v5b", &q5));
+    KZ_CHECK(p5.manifest == q5.manifest && p5.sidecar == q5.sidecar);
+    // the revision-1 file of planv4 with a revision-2 file: refused (a plan names the files of one revision)
+    {
+      const fs::path rf = work / "v5mix";
+      fs::create_directories(rf);
+      KZ_CHECK(run(v5cmd(rf, " --namespaces " + q((data / "planv4_fixture" / "framework_namespaces_fixture-plan.txt").string()) + ns2), &log) == 2);
+      KZ_CHECK(has(log, "a plan names the namespace data of one revision"));
+      KZ_CHECK(!fs::exists(rf / "plan.side"));
+      // a revision-1 file with a statement of revision 2: refused as before
+      write(rf / "r1_layer.txt", "semantics-data 1\nlayer-fn lookup obj_find def=planv5.c:58 kind-param=0\n");
+      KZ_CHECK(run(v5cmd(rf, " --namespaces " + q((rf / "r1_layer.txt").string())), &log) == 2);
+      KZ_CHECK(has(log, "is no statement of the namespace data"));
+    }
+    // without namespace data the plan has none of the revision-5 lines
+    KZ_CHECK(generate(v5cmd(work / "v5r1", ""), work / "v5r1", &r4));
+    KZ_CHECK(!has(r4.sidecar, "\nnamespace-entry ") && !has(r4.sidecar, "\ncontext row=") && !has(r4.sidecar, "\nnamespace-layer "));
+    const std::string& sc5 = p5.sidecar;
+    // 10.1: the namespace-layer line of each file whose component applies; the namespace-entry lines
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nnamespace-layer data=\S+framework_namespaces2_fixture-v5\.txt sha256=[0-9a-f]{64} clear-table=obj_init@planv5\.c:109:applies clear-slot=obj_free@planv5\.c:77:applies,obj_reset@planv5\.c:83:applies rollback=obj_finish:applies status-param=0 out-param=2 delete-finalize=obj_finish_delete:applies fill-call=memset@planv5\.c:109\n)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nnamespace-layer data=\S+fixture-v5t\.txt sha256=[0-9a-f]{64} clear-table=- clear-slot=- rollback=- status-param=- out-param=- delete-finalize=- fill-call=-\n)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nnamespace-entry row=[0-9a-f]{16} data=\S+fixture-v5\.txt sha256=[0-9a-f]{64} line=24 kind=K_SEM value=1 kind-at=planv5\.c:24 lookup=sem_get:applies create=sem_create:applies compare=obj_find:applies compare-call=strcmp@planv5\.c:61 stored-name=Sem\.name decl=planv5\.c:39 extent=NAMELEN extent-value=12 extent-source=FIELD_TYPES copy-call=strncpy@planv5\.c:125 length-call=memchr@planv5\.c:\d+ success-path=sem_create:held\n)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nnamespace-entry row=[0-9a-f]{16} data=\S+fixture-v5\.txt [^\n]* kind=K_QUE value=2 [^\n]* length-call=memchr@planv5\.c:\d+ success-path=que_create:held\n)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nnamespace-entry row=[0-9a-f]{16} data=\S+fixture-v5t\.txt [^\n]* kind=cfgs\[\]\.key value=- kind-at=- lookup=cfg_find:applies create=cfg_add:applies compare=cfg_find:applies compare-call=strncmp@planv5\.c:162 stored-name=Cfg\.key decl=planv5\.c:47 extent=NAMELEN extent-value=12 extent-source=FIELD_TYPES copy-call=strncpy@planv5\.c:175 )")));
+    // 10.4: the lifetime ends of each kind with their sites; the slot clear the relations show under the free-record
+    // condition is no lifetime end; the queue kind has no delete
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nlifetime K_SEM rollback sem_create planv5\.c:119 data \S+ line \d+: applies; create-finalize obj_finish at planv5\.c:127:10, status arg0, out arg2; reentry=none sites=\d+,\d+\n)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nlifetime K_SEM clear-slot obj_free planv5\.c:69 data \S+ line \d+: applies; store at planv5\.c:77; relations: [^\n]* not shown [^\n]* sites=\d+\n)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nlifetime K_SEM clear-slot obj_reset planv5\.c:82 data \S+ line \d+: not-a-lifetime-end\(lifetime end [^\n]*free-record condition shown[^\n]*\)\n)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nlifetime K_SEM clear-table obj_init planv5\.c:109 data \S+ line \d+: applies; fill memset@planv5\.c:109 sites=\d+\n)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nlifetime K_SEM delete sem_delete planv5\.c:132 data \S+ line \d+: applies sites=\d+,\d+\n)")));
+    KZ_CHECK(has(sc5, "\nlifetime-complete kind=K_SEM yes\n"));
+    KZ_CHECK(has(sc5, "\nlifetime-complete kind=K_QUE no(no delete statement)\n"));
+    KZ_CHECK(has(sc5, "\nlifetime-complete kind=cfgs[].key no(no delete statement; no rollback statement; no layer-op statement)\n"));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nneed row [0-9a-f]{16} object-delete not-planned reason=plan_missing\(no lifetime-end entry in the namespace data\) )")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nneed row [0-9a-f]{16} kind-value not-planned reason=plan_missing\(no rule of this revision\) note="an entry of the table-copy generation has no kind value")")));
+    // 10.3: the two caller contexts of the initialisation function, each with its own frame
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\ncontext row=[0-9a-f]{16} id=1 frame=\d+,\d+ chain="app_main@planv5\.c:\d+@planv5\.c:\d+:\d+ <- app_init@)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\ncontext row=[0-9a-f]{16} id=2 frame=\d+,\d+ chain="cmd_main@planv5\.c:\d+@planv5\.c:\d+:\d+ <- app_init@)")));
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nneed row [0-9a-f]{16} context-frame 2 planned reason=- note="" sites=\d+,\d+\n)")));
+    // 10.5: the key texts bounded by the extent of the stored name
+    KZ_CHECK(std::regex_search(sc5, std::regex(R"(\nbound string-namespace-extent source=namespace-entry extent reason="[^"]*" sites=\d+\n)")));
+    // the manifest parses; the kind value, the rollback status and out value, the frame sites and the bounded key text
+    kzrt::Manifest m5;
+    std::string e5;
+    KZ_CHECK(kzrt::parse_manifest(p5.manifest, "planv5.kzs", &m5, &e5));
+    if (!e5.empty()) std::fprintf(stderr, "%s\n", e5.c_str());
+    auto site5 = [&](const std::string& func, const std::string& place, const std::string& callee) {
+      for (const kzrt::Site& st : m5.sites)
+        if (st.func == func && st.place == place && st.callee == callee) return &st;
+      return static_cast<const kzrt::Site*>(nullptr);
+    };
+    const kzrt::Site* kv = site5("sem_get", "at-call", "obj_find");
+    KZ_CHECK(kv != nullptr && has(kv->label, "kind-value") && has(kv->label, "key-text"));
+    // (the kind argument of the lookup's layer call is also the key of the row whose namespace is the kind field: that
+    // row's use-call names it first)
+    if (kv != nullptr) {
+      bool kind0 = false, key12 = false;
+      for (const kzrt::Value& v : kv->values) {
+        if (v.from == "arg0") kind0 = true;
+        if (v.role == "key_text" && v.bound == 12) key12 = true;
+      }
+      KZ_CHECK(kind0 && key12);
+    }
+    const kzrt::Site* kc = site5("sem_create", "at-call", "obj_alloc");
+    KZ_CHECK(kc != nullptr && has(kc->label, "kind-value"));
+    if (kc != nullptr) {
+      bool kind = false;
+      for (const kzrt::Value& v : kc->values) kind = kind || (v.role == "kind" && v.from == "arg0");
+      KZ_CHECK(kind);
+    }
+    const kzrt::Site* rb = site5("sem_create", "at-call", "obj_finish");
+    KZ_CHECK(rb != nullptr && has(rb->label, "object-rollback") && rb->value(0) != nullptr && rb->value(0)->role == "status" && rb->value(0)->from == "arg0");
+    const kzrt::Site* ra = site5("sem_create", "after-call", "obj_finish");
+    bool out2 = false;
+    if (ra != nullptr)
+      for (const kzrt::Value& v : ra->values) out2 = out2 || v.from == "out2";
+    KZ_CHECK(ra != nullptr && has(ra->label, "object-rollback") && out2);
+    KZ_CHECK(site5("app_main", "at-call", "app_init") != nullptr && has(site5("app_main", "at-call", "app_init")->label, "context-frame"));
+    KZ_CHECK(site5("cmd_main", "after-call", "app_init") != nullptr && has(site5("cmd_main", "after-call", "app_init")->label, "context-frame"));
+    bool slot_store = false;
+    for (const kzrt::Site& st : m5.sites)
+      if (st.func == "obj_free" && st.place == "store" && has(st.label, "object-clear")) slot_store = true;
+    KZ_CHECK(slot_store);
+    for (const kzrt::Site& st : m5.sites) KZ_CHECK(!(st.func == "obj_reset" && has(st.label, "object-clear")));
+    // the reasons of the need lines are in the plan's table
+    {
+      std::set<std::string> reasons;
+      for (const kzs::RelReason& rr : kzs::plan_reasons()) reasons.insert(kzs::reason_text(rr));
+      for (const kzrt::Need& n : m5.needs)
+        if (n.state != "planned") KZ_CHECK(reasons.count(n.reason) != 0);
+    }
+    // the text of the revision-5 plan
+    {
+      std::string got = mask(p5.manifest + "\n# sidecar\n" + p5.sidecar + "\n# requests\n" + read(work / "v5a" / "plan.req"), (work / "").string());
+      const std::string dd = (data / "").string();
+      for (size_t at = got.find(dd); at != std::string::npos; at = got.find(dd)) got.replace(at, dd.size(), "<data>/");
+      const fs::path golden = data / "planv5_np.plan.golden";
+      const char* upd = std::getenv("KZ_GOLDEN_UPDATE");
+      if (upd != nullptr && std::strcmp(upd, "1") == 0) {
+        write(golden, got);
+        std::printf("updated %s\n", golden.string().c_str());
+      } else {
+        const std::string want = fs::exists(golden) ? read(golden) : std::string();
+        if (want != got) {
+          write(work / "planv5_np.plan.actual", got);
+          kztest::fail(__FILE__, __LINE__, "the plan differs from " + golden.string() + " (actual in " + (work / "planv5_np.plan.actual").string() + ")");
         }
         ++kztest::state().checks;
       }

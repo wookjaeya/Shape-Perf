@@ -1,0 +1,30 @@
+== c1_pre_tx
+sidecar equal apart from the generator line
+manifest equal apart from the sidecar sha256
+requests equal
+module table equal after its first line
+executables equal after the first line
+== c1_post_tx
+sidecar equal apart from the generator line
+manifest equal apart from the sidecar sha256
+requests equal
+module table equal after its first line
+executables equal after the first line
+== r2_core
+sidecar equal apart from the generator line
+manifest equal apart from the sidecar sha256
+requests equal
+module table equal after its first line
+executables equal after the first line
+== c5_641
+sidecar equal apart from the generator line
+manifest equal apart from the sidecar sha256
+requests equal
+module table equal after its first line
+executables equal after the first line
+== c5_642
+sidecar equal apart from the generator line
+manifest equal apart from the sidecar sha256
+requests equal
+module table equal after its first line
+executables equal after the first line

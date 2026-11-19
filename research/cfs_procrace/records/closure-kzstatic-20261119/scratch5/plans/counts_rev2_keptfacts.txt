@@ -1,0 +1,58 @@
+== <scratch>/w5/g2_rev2_rf2facts/c1_pre_tx
+planned path A rows 5: with a namespace-entry line 4 (A20 A21 A22 A26); without 1 (A63)
+namespace-entry lines 4; namespace-layer lines 1
+  entry A20: kind=OS_OBJECT_TYPE_OS_COUNTSEM value=3 stored-name=OS_count_sem_internal_record_t.obj_name extent-value=20 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271 copy-call=memset@osal/src/os/shared/src/osapi-countsem.c:100,strncpy@osal/src/os/shared/src/osapi-countsem.c:100 length-call=memchr@osal/src/os/shared/src/osapi-countsem.c:91,memchr@osal/src/os/shared/src/osapi-idmap.c:973 success-path=OS_CountSemCreate:missing
+  entry A21: kind=OS_OBJECT_TYPE_OS_COUNTSEM value=3 stored-name=OS_count_sem_internal_record_t.obj_name extent-value=20 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271 copy-call=memset@osal/src/os/shared/src/osapi-countsem.c:100,strncpy@osal/src/os/shared/src/osapi-countsem.c:100 length-call=memchr@osal/src/os/shared/src/osapi-countsem.c:91,memchr@osal/src/os/shared/src/osapi-idmap.c:973 success-path=OS_CountSemCreate:missing
+  entry A22: kind=OS_OBJECT_TYPE_OS_TIMEBASE value=8 stored-name=OS_timebase_internal_record_t.timebase_name extent-value=20 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271 copy-call=memset@osal/src/os/shared/src/osapi-timebase.c:128,strncpy@osal/src/os/shared/src/osapi-timebase.c:128 length-call=memchr@osal/src/os/shared/src/osapi-idmap.c:973,memchr@osal/src/os/shared/src/osapi-timebase.c:109,memchr@osal/src/os/shared/src/osapi-timebase.c:256 success-path=OS_TimeBaseCreate:missing
+  entry A26: kind=OS_OBJECT_TYPE_OS_TIMEBASE value=8 stored-name=OS_timebase_internal_record_t.timebase_name extent-value=20 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271 copy-call=memset@osal/src/os/shared/src/osapi-timebase.c:128,strncpy@osal/src/os/shared/src/osapi-timebase.c:128 length-call=memchr@osal/src/os/shared/src/osapi-idmap.c:973,memchr@osal/src/os/shared/src/osapi-timebase.c:109,memchr@osal/src/os/shared/src/osapi-timebase.c:256 success-path=OS_TimeBaseCreate:missing
+sites by rule (object-delete includes revision 3's): context-frame 4; kind-value 4; object-clear 2; object-delete 4; object-rollback 4
+context lines 2 in rows 1 (A21); frames found 2, none 0
+lifetime lines by operation and state: clear-slot applies 2; clear-table applies 2; delete applies 2; rollback applies 2
+  lifetime-complete kind=OS_OBJECT_TYPE_OS_COUNTSEM yes
+  lifetime-complete kind=OS_OBJECT_TYPE_OS_TIMEBASE yes
+needs of the rules: context-frame planned - 2; kind-value planned - 4; object-clear planned - 4; object-delete not-planned plan_missing(no namespace data entry) 1; object-delete planned - 4; object-rollback planned - 4
+key texts bounded by an extent: 1
+== <scratch>/w5/g2_rev2_rf2facts/c1_post_tx
+planned path A rows 5: with a namespace-entry line 4 (A20 A21 A22 A26); without 1 (A63)
+namespace-entry lines 4; namespace-layer lines 1
+  entry A20: kind=OS_OBJECT_TYPE_OS_COUNTSEM value=3 stored-name=OS_count_sem_internal_record_t.obj_name extent-value=20 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271 copy-call=memset@osal/src/os/shared/src/osapi-countsem.c:100,strncpy@osal/src/os/shared/src/osapi-countsem.c:100 length-call=memchr@osal/src/os/shared/src/osapi-countsem.c:91,memchr@osal/src/os/shared/src/osapi-idmap.c:973 success-path=OS_CountSemCreate:missing
+  entry A21: kind=OS_OBJECT_TYPE_OS_COUNTSEM value=3 stored-name=OS_count_sem_internal_record_t.obj_name extent-value=20 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271 copy-call=memset@osal/src/os/shared/src/osapi-countsem.c:100,strncpy@osal/src/os/shared/src/osapi-countsem.c:100 length-call=memchr@osal/src/os/shared/src/osapi-countsem.c:91,memchr@osal/src/os/shared/src/osapi-idmap.c:973 success-path=OS_CountSemCreate:missing
+  entry A22: kind=OS_OBJECT_TYPE_OS_TIMEBASE value=8 stored-name=OS_timebase_internal_record_t.timebase_name extent-value=20 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271 copy-call=memset@osal/src/os/shared/src/osapi-timebase.c:128,strncpy@osal/src/os/shared/src/osapi-timebase.c:128 length-call=memchr@osal/src/os/shared/src/osapi-idmap.c:973,memchr@osal/src/os/shared/src/osapi-timebase.c:109,memchr@osal/src/os/shared/src/osapi-timebase.c:256 success-path=OS_TimeBaseCreate:missing
+  entry A26: kind=OS_OBJECT_TYPE_OS_TIMEBASE value=8 stored-name=OS_timebase_internal_record_t.timebase_name extent-value=20 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:271 copy-call=memset@osal/src/os/shared/src/osapi-timebase.c:128,strncpy@osal/src/os/shared/src/osapi-timebase.c:128 length-call=memchr@osal/src/os/shared/src/osapi-idmap.c:973,memchr@osal/src/os/shared/src/osapi-timebase.c:109,memchr@osal/src/os/shared/src/osapi-timebase.c:256 success-path=OS_TimeBaseCreate:missing
+sites by rule (object-delete includes revision 3's): kind-value 4; object-clear 2; object-delete 4; object-rollback 4
+context lines 0 in rows 0 (); frames found 0, none 0
+lifetime lines by operation and state: clear-slot applies 2; clear-table applies 2; delete applies 2; rollback applies 2
+  lifetime-complete kind=OS_OBJECT_TYPE_OS_COUNTSEM yes
+  lifetime-complete kind=OS_OBJECT_TYPE_OS_TIMEBASE yes
+needs of the rules: kind-value planned - 4; object-clear planned - 4; object-delete not-planned plan_missing(no namespace data entry) 1; object-delete planned - 4; object-rollback planned - 4
+key texts bounded by an extent: 1
+== <scratch>/w5/g2_rev2_rf2facts/r2_core
+planned path A rows 4: with a namespace-entry line 4 (A2 A3 A4 A5); without 0 ()
+namespace-entry lines 4; namespace-layer lines 1
+  entry A2: kind=OS_OBJECT_TYPE_OS_FILESYS value=11 stored-name=OS_filesys_internal_record_t.virtual_mountpt,OS_filesys_internal_record_t.device_name extent-value=64,32 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:277 copy-call=memset@osal/src/os/shared/src/osapi-filesys.c:163,memset@osal/src/os/shared/src/osapi-filesys.c:267,strncpy@osal/src/os/shared/src/osapi-filesys.c:163,strncpy@osal/src/os/shared/src/osapi-filesys.c:267 length-call=memchr@osal/src/os/shared/src/osapi-filesys.c:148,memchr@osal/src/os/shared/src/osapi-filesys.c:259 success-path=-
+  entry A3: kind=OS_OBJECT_TYPE_OS_FILESYS value=11 stored-name=OS_filesys_internal_record_t.virtual_mountpt,OS_filesys_internal_record_t.device_name extent-value=64,32 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:277 copy-call=memset@osal/src/os/shared/src/osapi-filesys.c:163,memset@osal/src/os/shared/src/osapi-filesys.c:267,strncpy@osal/src/os/shared/src/osapi-filesys.c:163,strncpy@osal/src/os/shared/src/osapi-filesys.c:267 length-call=memchr@osal/src/os/shared/src/osapi-filesys.c:148,memchr@osal/src/os/shared/src/osapi-filesys.c:259 success-path=-
+  entry A4: kind=OS_OBJECT_TYPE_OS_FILESYS value=11 stored-name=OS_filesys_internal_record_t.virtual_mountpt,OS_filesys_internal_record_t.device_name extent-value=64,32 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:277 copy-call=memset@osal/src/os/shared/src/osapi-filesys.c:163,memset@osal/src/os/shared/src/osapi-filesys.c:267,strncpy@osal/src/os/shared/src/osapi-filesys.c:163,strncpy@osal/src/os/shared/src/osapi-filesys.c:267 length-call=memchr@osal/src/os/shared/src/osapi-filesys.c:148,memchr@osal/src/os/shared/src/osapi-filesys.c:259 success-path=-
+  entry A5: kind=OS_OBJECT_TYPE_OS_TIMEBASE value=8 stored-name=OS_timebase_internal_record_t.timebase_name extent-value=20 compare-call=strcmp@osal/src/os/shared/src/osapi-idmap.c:277 copy-call=memset@osal/src/os/shared/src/osapi-timebase.c:128,strncpy@osal/src/os/shared/src/osapi-timebase.c:128 length-call=memchr@osal/src/os/shared/src/osapi-idmap.c:986,memchr@osal/src/os/shared/src/osapi-timebase.c:109,memchr@osal/src/os/shared/src/osapi-timebase.c:256 success-path=OS_TimeBaseCreate:missing
+sites by rule (object-delete includes revision 3's): kind-value 4; object-clear 2; object-delete 4; object-rollback 6
+context lines 0 in rows 0 (); frames found 0, none 0
+lifetime lines by operation and state: clear-slot applies 2; clear-table applies 2; delete applies 2; rollback applies 3
+  lifetime-complete kind=OS_OBJECT_TYPE_OS_FILESYS yes
+  lifetime-complete kind=OS_OBJECT_TYPE_OS_TIMEBASE yes
+needs of the rules: kind-value planned - 4; object-clear planned - 4; object-delete planned - 4; object-rollback planned - 4
+key texts bounded by an extent: 0
+== <scratch>/w5/g2_rev2_rf2facts/c5_641
+planned path A rows 2: with a namespace-entry line 0 (); without 2 (A16 A17)
+namespace-entry lines 0; namespace-layer lines 2
+sites by rule (object-delete includes revision 3's): 
+context lines 0 in rows 0 (); frames found 0, none 0
+lifetime lines by operation and state: 
+needs of the rules: object-delete not-planned plan_missing(no namespace data entry) 2
+key texts bounded by an extent: 0
+== <scratch>/w5/g2_rev2_rf2facts/c5_642
+planned path A rows 2: with a namespace-entry line 0 (); without 2 (A16 A17)
+namespace-entry lines 0; namespace-layer lines 2
+sites by rule (object-delete includes revision 3's): 
+context lines 0 in rows 0 (); frames found 0, none 0
+lifetime lines by operation and state: 
+needs of the rules: object-delete not-planned plan_missing(no namespace data entry) 2
+key texts bounded by an extent: 0

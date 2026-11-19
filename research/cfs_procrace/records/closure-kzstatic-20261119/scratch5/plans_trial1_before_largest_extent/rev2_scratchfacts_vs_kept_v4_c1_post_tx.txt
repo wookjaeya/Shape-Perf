@@ -1,0 +1,24 @@
+rows kept 367 new 367: equal 364; same line but the use-site key moved 3 A20 A27 A30; different 0 ; only kept 0; only new 0
+selection tier-planned kept 8 new 8 equal=yes: B13 B73 B81 B99 B113 B118 B119 B125
+selection control-planned kept 5 new 5 equal=yes: A20 A21 A22 A26 A63
+selection tiers equal=yes
+sites kept 291 new 302: removed 0; added 11
+sites added by rule (a site may carry several): kind-value 3; object-clear 2; object-delete 2; object-rollback 4
+common sites 291: rules changed 1; values changed 1
+  rules key-text -> key-text+kind-value: osal/src/os/shared/src/osapi-countsem.c|OS_CountSemGetIdByName|point|at-call|OS_ObjectIdFindByName|212|col=19|nth=1
+  values: osal/src/os/shared/src/osapi-countsem.c|OS_CountSemGetIdByName|point|at-call|OS_ObjectIdFindByName|212|col=19|nth=1
+    kept: role=key_text from=arg1 type=ptr string=validated bound=64 ref="non-null test (ne param:sem_name#1 0) in the guard (and (not (not (ne param:sem_id#0 0))) (not (not (ne param:sem_name#1 0)))) of parameter 1 of OS_CountSemGetIdByName before osal/src/os/shared/src/osapi-countsem.c:212:19; bound KZ_RT_STR_MAX 64 (runtime/include/kz_rt.h:82; the runtime copies up to the NUL or the bound and flags a cut); premise: the string is NUL-terminated within the bound or the cut is flagged" | role=arg0 from=arg0 type=u64 | role=arg2 from=arg2 type=u64
+    new:  role=key_text from=arg1 type=ptr string=validated bound=20 ref="non-null test (ne param:sem_name#1 0) in the guard (and (not (not (ne param:sem_id#0 0))) (not (not (ne param:sem_name#1 0)))) of parameter 1 of OS_CountSemGetIdByName before osal/src/os/shared/src/osapi-countsem.c:212:19; bound KZ_RT_STR_MAX 64 (runtime/include/kz_rt.h:82; the runtime copies up to the NUL or the bound and flags a cut); premise: the string is NUL-terminated within the bound or the cut is flagged; bound 20: the extent of OS_count_sem_internal_record_t.obj_name (namespace-entry extent, OS_OBJECT_TYPE_OS_COUNTSEM, plan rules revision 5 10.5)" | role=kind from=arg0 type=u64 | role=arg2 from=arg2 type=u64
+needs kept 51 new 63: equal 43; changed 2; only new 18; only kept 6
+needs only new by what: event-send 1; event-send-other-outcome 1; kind-value 4; lock-result 1; object-clear 4; object-delete 1; object-rollback 4; use-result 1; wait-result 1
+  changed need row f371687b47120887 object-delete: state, reason, note, sites: not-planned plan_missing(no namespace data entry) -> planned -
+  changed need row ad9fc1058923aad9 object-delete: state, reason, note, sites: not-planned plan_missing(no namespace data entry) -> planned -
+  only kept need row bdcc6978b9a41c8c use-result
+  only kept need row bdcc6978b9a41c8c event-send
+  only kept need row bdcc6978b9a41c8c event-send-other-outcome
+  only kept need row bdcc6978b9a41c8c wait-result
+  only kept need row bdcc6978b9a41c8c lock-result
+  only kept need row bdcc6978b9a41c8c object-delete
+sidecar line kinds (kept -> new): bound 4->5; lifetime 1->8; lifetime-complete 0->2; namespace-entry 0->4; namespace-layer 0->1; need 406->418; site 291->302
+other sidecar lines equal=yes (28 lines)
+requests kept 30 new 30 equal after mapping the site ids=no

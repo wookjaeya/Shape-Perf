@@ -1,0 +1,18 @@
+rows kept 367 new 367: equal 364; same line but the use-site key moved 3 A20 A27 A30; different 0 ; only kept 0; only new 0
+selection tier-planned kept 9 new 9 equal=yes: A21 B13 B73 B81 B99 B113 B118 B119 B125
+selection control-planned kept 5 new 5 equal=yes: A20 A21 A22 A26 A63
+selection tiers equal=yes
+sites kept 291 new 291: removed 0; added 0
+sites added by rule (a site may carry several): 
+common sites 291: rules changed 0; values changed 0
+needs kept 52 new 52: equal 46; changed 0; only new 6; only kept 6
+needs only new by what: event-send 1; event-send-other-outcome 1; lock-result 1; object-delete 1; use-result 1; wait-result 1
+  only kept need row 35f07539e7606e2e use-result
+  only kept need row 35f07539e7606e2e event-send
+  only kept need row 35f07539e7606e2e event-send-other-outcome
+  only kept need row 35f07539e7606e2e wait-result
+  only kept need row 35f07539e7606e2e lock-result
+  only kept need row 35f07539e7606e2e object-delete
+sidecar line kinds (kept -> new): 
+other sidecar lines equal=yes (28 lines)
+requests kept 36 new 36 equal after mapping the site ids=no

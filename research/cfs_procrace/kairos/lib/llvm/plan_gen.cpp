@@ -44,6 +44,9 @@ const std::vector<RelReason>& plan_reasons() {
       {"plan_missing", "no namespace data entry", "a planned path A row whose lookup and creators match no applying entry of the namespace data given: the deletes and retires of its object kind are not planned"},
       {"plan_missing", "no rule of this revision", "a need of a path the rules of this revision do not plan (the lock calls of path A and B rows, a branch taken, an effect without a call)"},
       {"record_insufficient", "the exit is no statement", "a condition exit of a wait loop: the point after the loop is not in the facts, the exit taken is recorded by its condition reads only"},
+      // plan rules revision 5 (docs/plan_manifest.md section 10.6)
+      {"plan_missing", "no call site tells the context apart", "a context of a planned row whose chain of calls has no call site that lies on no other chain of the row: no frame site"},
+      {"plan_missing", "no lifetime-end entry in the namespace data", "a kind of a planned row with no delete or rollback statement in the namespace data, or a component with no layer-op statement: that lifetime end is not planned"},
   };
   return table;
 }
@@ -55,7 +58,7 @@ constexpr uint32_t kSlots = 4;      // values per event bound by the plugin (kzg
 constexpr uint32_t kStrMax = 64;    // KZ_RT_STR_MAX (runtime/include/kz_rt.h:82)
 
 std::string reason(size_t i) { return reason_text(plan_reasons()[i]); }
-enum R { kBudget, kNotPlanned, kKeyText, kTwoCalls, kSlotsFull, kNoPos, kNoChannel, kNoCreation, kPathNotUnique, kControlCut, kWaitPred, kNoNamespace, kNoRule, kExitNoStmt };
+enum R { kBudget, kNotPlanned, kKeyText, kTwoCalls, kSlotsFull, kNoPos, kNoChannel, kNoCreation, kPathNotUnique, kControlCut, kWaitPred, kNoNamespace, kNoRule, kExitNoStmt, kNoFrame, kNoLifetime };
 
 std::string quoted(const std::string& s) {
   std::string t;
@@ -294,16 +297,36 @@ class Gen : public RelFacts {
     std::string what, fn, def_file, at_file;
     uint32_t def_line = 0, at_line = 0;
     int line = 0;
+    // plan rules revision 5: a `rollback` sub-statement's status and out arguments; a `layer-op`'s parameters, form and
+    // field; a `layer-fn`'s kind parameter (-1: none)
+    int status = -1, out = -1, kind_param = -1;
+    std::string form, field;
+  };
+  // plan rules revision 5: a stored-name (object-id generation) or extent (table-copy generation) sub-statement
+  struct NsStored {
+    std::string fn, at_file, extent, decl_file;
+    uint32_t at_line = 0, decl_line = 0;
   };
   struct NsEntry {
     std::string name;
     std::vector<NsOp> ops;
     int line = 0;
+    // plan rules revision 5 (files of coverage rule revision 2)
+    bool table = false;
+    std::string value = "-", kind_at = "-";
+    std::vector<NsStored> stored;
+    NsOp compare;  // the table's compare sub-statement (fn empty: none)
   };
   struct NsFile {
     std::string path;
     std::map<std::string, std::string> sha;
     std::vector<NsEntry> entries;
+    // plan rules revision 5: the coverage rule revision of the file, the sha256 of its text, its layer functions and
+    // operations and its top-level comparison statement
+    int rev = 1;
+    std::string text_sha;
+    std::vector<NsOp> layer_fns, layer_ops;
+    NsOp compare;
   };
   struct SpawnBind {
     uint32_t start = 0, arg = 0, out = KZ_NONE32;
@@ -439,11 +462,30 @@ class Gen : public RelFacts {
   // the statements below and comments; nothing else (the file names no other file).  Of an entry (a `kind` of the
   // object-id generation or a `table` of the table-copy generation) the generator keeps the functions that look up or
   // create (lookup, create, copy, create-check) and those that delete or retire (delete, clear) with their positions.
+  // Plan rules revision 5 (docs/plan_manifest.md 10.8): a file of coverage rule revision 2 (`semantics-data 2`,
+  // semantics/framework_namespaces2_*.txt) may also hold layer-fn, layer-op and kind-unresolved statements and rollback and
+  // not-covered sub-statements; of it the reader also keeps the kind value and position, the stored-name and extent
+  // sub-statements, the comparison statements, the layer functions and operations and the rollbacks.  A plan names the
+  // files of one revision only.
   kz::Status read_namespaces() {
     static const std::regex re_file(R"(^file (\S+) sha256=([0-9a-f]{64})$)");
     static const std::regex re_op(R"(^  (lookup|create|copy|create-check|delete|clear) (\S+) def=(\S+):(\d+)(?: at=(\S+):(\d+))?(?: public=\S+)?$)");
     static const std::set<std::string> other = {"semantics-data", "layer", "component", "rule", "generation", "compare", "chain-status", "end"};
     static const std::set<std::string> other_sub = {"stored-name", "extent", "other-store", "compare"};
+    // coverage rule revision 2
+    static const std::regex re_rev(R"(^semantics-data (\d+)$)");
+    static const std::regex re_kind(R"(^kind (\S+) value=(-?\d+) at=(\S+):(\d+)(?: .*)?$)");
+    static const std::regex re_lfn(R"(^layer-fn (\S+) (\S+) def=(\S+):(\d+) kind-param=(\d+|-)$)");
+    static const std::regex re_lop(
+        R"(^layer-op (clear-table|clear-slot|rollback|delete-finalize) (\S+) def=(\S+):(\d+)(?: at=(\S+):(\d+))?(?: form=(\S+))?(?: field=(\S+))?(?: status-param=(\d+))?(?: out-param=(\d+))?$)");
+    static const std::regex re_rb(R"(^  rollback (\S+) def=(\S+):(\d+) at=(\S+):(\d+) status-arg=(\d+) out-arg=(\d+)$)");
+    static const std::regex re_sn(R"(^  stored-name (\S+) at=(\S+):(\d+) extent=(\S+) element=\S+ decl=(\S+):(\d+)$)");
+    static const std::regex re_ext(R"(^  extent (\S+) element=\S+ decl=(\S+):(\d+)$)");
+    static const std::regex re_cmp(R"(^(  )?compare (\S+) def=(\S+):(\d+) call=\S+ at=(\S+):(\d+)(?: bound=\S+)?(?: public=\S+)?$)");
+    static const std::set<std::string> other_rev2 = {"kind-unresolved"};
+    static const std::set<std::string> other_sub_rev2 = {"not-covered"};
+    auto num = [](const std::ssub_match& m) { return static_cast<uint32_t>(std::strtoul(m.str().c_str(), nullptr, 10)); };
+    int revs = 0;  // bit 1: a revision-1 file, bit 2: a revision-2 file
     for (size_t fi = 0; fi < o_.namespace_data.size(); ++fi) {
       const auto& [path, text] = o_.namespace_data[fi];
       std::istringstream in(text);
@@ -451,6 +493,7 @@ class Gen : public RelFacts {
       int n = 0;
       NsFile f;
       f.path = path;
+      f.text_sha = kz::to_hex(kz::sha256(text));
       NsEntry* cur = nullptr;
       while (std::getline(in, l)) {
         ++n;
@@ -460,6 +503,8 @@ class Gen : public RelFacts {
           f.sha[m[1].str()] = m[2].str();
           continue;
         }
+        if (std::regex_match(l, m, re_rev)) f.rev = std::atoi(m[1].str().c_str()) == 2 ? 2 : 1;
+        const bool rev2 = f.rev == 2;
         const std::string w = l.substr(0, l.find(' '));
         if (w == "kind" || w == "table") {
           f.entries.push_back(NsEntry{});
@@ -467,6 +512,11 @@ class Gen : public RelFacts {
           cur->name = l.substr(w.size() + 1);
           cur->name = cur->name.substr(0, cur->name.find(' '));
           cur->line = n;
+          cur->table = w == "table";
+          if (rev2 && std::regex_match(l, m, re_kind)) {
+            cur->value = m[2].str();
+            cur->kind_at = m[3].str() + ":" + m[4].str();
+          }
           continue;
         }
         if (std::regex_match(l, m, re_op)) {
@@ -475,19 +525,84 @@ class Gen : public RelFacts {
           op.what = m[1].str();
           op.fn = m[2].str();
           op.def_file = m[3].str();
-          op.def_line = static_cast<uint32_t>(std::strtoul(m[4].str().c_str(), nullptr, 10));
+          op.def_line = num(m[4]);
           op.at_file = m[5].str();
-          op.at_line = m[6].matched ? static_cast<uint32_t>(std::strtoul(m[6].str().c_str(), nullptr, 10)) : 0;
+          op.at_line = m[6].matched ? num(m[6]) : 0;
           op.line = n;
           cur->ops.push_back(op);
           continue;
         }
+        if (rev2) {
+          if (std::regex_match(l, m, re_lfn) || std::regex_match(l, m, re_lop)) {
+            NsOp op;
+            const bool lfn = w == "layer-fn";
+            op.what = m[1].str();
+            op.fn = m[2].str();
+            op.def_file = m[3].str();
+            op.def_line = num(m[4]);
+            op.line = n;
+            if (lfn) {
+              op.kind_param = m[5].str() == "-" ? -1 : static_cast<int>(num(m[5]));
+              f.layer_fns.push_back(op);
+            } else {
+              op.at_file = m[5].str();
+              op.at_line = m[6].matched ? num(m[6]) : 0;
+              op.form = m[7].str();
+              op.field = m[8].str();
+              op.status = m[9].matched ? static_cast<int>(num(m[9])) : -1;
+              op.out = m[10].matched ? static_cast<int>(num(m[10])) : -1;
+              f.layer_ops.push_back(op);
+            }
+            continue;
+          }
+          if (std::regex_match(l, m, re_rb)) {
+            if (cur == nullptr) return kz::Status::error(kz::Err::Invalid, "namespace data " + path + " line " + std::to_string(n) + ": a rollback before its kind");
+            NsOp op;
+            op.what = "rollback";
+            op.fn = m[1].str();
+            op.def_file = m[2].str();
+            op.def_line = num(m[3]);
+            op.at_file = m[4].str();
+            op.at_line = num(m[5]);
+            op.status = static_cast<int>(num(m[6]));
+            op.out = static_cast<int>(num(m[7]));
+            op.line = n;
+            cur->ops.push_back(op);
+            continue;
+          }
+          if (cur != nullptr && std::regex_match(l, m, re_sn)) {
+            cur->stored.push_back(NsStored{m[1].str(), m[2].str(), m[4].str(), m[5].str(), num(m[3]), num(m[6])});
+            continue;
+          }
+          if (cur != nullptr && std::regex_match(l, m, re_ext)) {
+            cur->stored.push_back(NsStored{"", "", m[1].str(), m[2].str(), 0, num(m[3])});
+            continue;
+          }
+          if (std::regex_match(l, m, re_cmp)) {
+            NsOp op;
+            op.what = "compare";
+            op.fn = m[2].str();
+            op.def_file = m[3].str();
+            op.def_line = num(m[4]);
+            op.at_file = m[5].str();
+            op.at_line = num(m[6]);
+            op.line = n;
+            if (m[1].matched && cur != nullptr) cur->compare = op;
+            else if (!m[1].matched) f.compare = op;
+            continue;
+          }
+        }
         const std::string sub = l.size() > 2 && l[0] == ' ' && l[1] == ' ' ? l.substr(2, l.find(' ', 2) - 2) : std::string();
         if (other.count(w) != 0 || (!sub.empty() && other_sub.count(sub) != 0)) continue;
+        if (rev2 && (other_rev2.count(w) != 0 || (!sub.empty() && other_sub_rev2.count(sub) != 0))) continue;
         return kz::Status::error(kz::Err::Invalid, "namespace data " + path + " line " + std::to_string(n) + " is no statement of the namespace data; the generator reads no other file");
       }
+      revs |= f.rev == 2 ? 2 : 1;
       ns_.push_back(f);
     }
+    if (revs == 3)
+      return kz::Status::error(kz::Err::Invalid, "--namespaces: the files are of coverage rule revisions 1 and 2; a plan names the namespace data of one revision (docs/plan_manifest.md 10.8)");
+    v5_ = revs == 2;
     return kz::Status::success();
   }
 
@@ -963,7 +1078,59 @@ class Gen : public RelFacts {
     v.bound = bound;
     v.ref = "non-null test " + test + " of parameter " + std::to_string(kparam) + " of " + plain(kfn) + " before " + call_pos(best) + "; bound " + bref +
             "; premise: the string is NUL-terminated within the bound or the cut is flagged";
-    at_call(best, "key-text", rowref, {v});
+    if (Site* kt = at_call(best, "key-text", rowref, {v})) keytext_site_[ci] = kt->key();
+  }
+
+  // ---------------------------------------------------------------- plan rules revision 5: context frames (10.3)
+  // A row with more than one caller chain (its `alternatives [context …]` lines; a chain written for two absence values is
+  // one context): for each chain, the at-call and the after-call of the lowest call site of the chain that lies on no
+  // other chain of the row.
+  void context_frames(size_t i, const RelRow& r, const std::string& rowref, const std::vector<std::string>& lines) {
+    static const std::regex re_ctx(R"(^alternatives \[context \d+(?: value -?\d+)?: (.*?)\]: )");
+    std::vector<std::string> chains;
+    for (const std::string& l : lines) {
+      std::smatch m;
+      if (!std::regex_search(l, m, re_ctx)) continue;
+      if (std::find(chains.begin(), chains.end(), m[1].str()) == chains.end()) chains.push_back(m[1].str());
+    }
+    if (chains.size() < 2) return;
+    std::vector<std::vector<std::tuple<std::string, uint32_t, uint32_t>>> ps;
+    // an element of a chain is "<function>@<call position>" (a static function's name carries "@<file>:<line>" itself)
+    for (const std::string& c : chains) {
+      std::vector<std::tuple<std::string, uint32_t, uint32_t>> v;
+      size_t a = 0;
+      while (a <= c.size()) {
+        size_t b = c.find(" <- ", a);
+        const std::string e = c.substr(a, b == std::string::npos ? std::string::npos : b - a);
+        const std::vector<std::tuple<std::string, uint32_t, uint32_t>> q = positions(e.substr(e.rfind('@') == std::string::npos ? 0 : e.rfind('@') + 1));
+        if (!q.empty()) v.push_back(q.back());
+        if (b == std::string::npos) break;
+        a = b + 4;
+      }
+      ps.push_back(v);
+    }
+    for (size_t j = 0; j < chains.size(); ++j) {
+      Context cx;
+      cx.row = r.key;
+      cx.id = static_cast<uint32_t>(j + 1);
+      cx.chain = chains[j];
+      for (auto it = ps[j].rbegin(); it != ps[j].rend() && cx.at.empty(); ++it) {
+        bool other = false;
+        for (size_t k = 0; k < ps.size() && !other; ++k)
+          if (k != j && std::find(ps[k].begin(), ps[k].end(), *it) != ps[k].end()) other = true;
+        if (other) continue;
+        const uint32_t ci = call_of(*it);
+        if (ci == kN) continue;
+        const std::string ref = rowref + " context " + std::to_string(cx.id) + " frame " + call_pos(ci);
+        Site* a = at_call(ci, "context-frame", ref);
+        Site* b = after_call(ci, "context-frame", ref);
+        if (a != nullptr && b != nullptr) cx.at = a->key(), cx.after = b->key();
+      }
+      if (cx.at.empty()) need(rowref, "context-frame " + std::to_string(cx.id), "not-planned", reason(kNoFrame), "chain " + cx.chain);
+      else need(rowref, "context-frame " + std::to_string(cx.id), "planned", "-", "", {cx.at, cx.after});
+      contexts_.push_back(cx);
+    }
+    (void)i;
   }
 
   void plan_row(size_t i) {
@@ -1028,6 +1195,15 @@ class Gen : public RelFacts {
       }
       if (!v4_)
         need(rowref, "event-send", "not-planned", reason(kNotPlanned), "the effects of a result (an event or a message sent on it) are not in the facts of this revision");
+      if (v5_) {
+        // plan rules revision 5: the success path items of the namespace-entry line (10.1) and the context frames (10.3)
+        static const std::regex re_sp(R"(^callee-check \(success path\): (\S+): (held|missing))");
+        for (const std::string& l : lines) {
+          std::smatch m;
+          if (std::regex_search(l, m, re_sp)) row_success_[i].push_back(m[1].str() + ":" + m[2].str());
+        }
+        context_frames(i, r, rowref, lines);
+      }
     } else if (r.path == 'B') {
       for (uint32_t ci : r.site_calls) {
         Val v;
@@ -1413,6 +1589,7 @@ class Gen : public RelFacts {
         keys = rc->second;
         entry_found = true;
       }
+      RowNs rn;  // plan rules revision 5
       for (const NsFile& f : ns_)
         for (const NsEntry& e : f.entries) {
           bool match = false;
@@ -1423,31 +1600,384 @@ class Gen : public RelFacts {
             }
           if (!match) continue;
           entry_found = true;
+          rn.found = true;
+          std::vector<std::string> del_missing;
+          bool del_stmt = false;
           for (const NsOp& op : e.ops) {
             if (op.what != "delete" && op.what != "clear") continue;
+            if (op.what == "delete") del_stmt = true;
             uint32_t fn = kN;
             const std::string dref = "namespace data " + f.path + " line " + std::to_string(op.line) + ": " + e.name + " " + op.what + " " + op.fn;
             std::string state = "applies";
+            std::set<std::string> opkeys;
             if (!op_applies(f, op, &fn)) {
               state = "does not apply (no file of that sha256 or no definition on that line)";
             } else if (op.what == "delete") {
-              if (Site* st = entry_site(fn, "object-delete", dref, true)) keys.insert(st->key());
+              if (Site* st = entry_site(fn, "object-delete", dref, true)) opkeys.insert(st->key());
               for (uint32_t ci : calls_of_.count(fn) != 0 ? calls_of_.at(fn) : std::vector<uint32_t>{})
                 if (calls_[ci].line == op.at_line)
-                  if (Site* st = after_call(ci, "object-delete", dref + " retire call " + call_pos(ci))) keys.insert(st->key());
+                  if (Site* st = after_call(ci, "object-delete", dref + " retire call " + call_pos(ci))) opkeys.insert(st->key());
             } else {
-              if (Site* st = store_site(fn, op.at_line, "object-retire", dref + " at " + op.at_file + ":" + std::to_string(op.at_line))) keys.insert(st->key());
+              if (Site* st = store_site(fn, op.at_line, "object-retire", dref + " at " + op.at_file + ":" + std::to_string(op.at_line))) opkeys.insert(st->key());
             }
-            lifetimes_.insert(e.name + " " + op.what + " " + op.fn + " " + op.def_file + ":" + std::to_string(op.def_line) + " data " + f.path + " line " +
-                              std::to_string(op.line) + ": " + state);
+            if (op.what == "delete" && opkeys.empty()) del_missing.push_back("delete " + op.fn + (state == "applies" ? " has no site" : " does not apply"));
+            keys.insert(opkeys.begin(), opkeys.end());
+            const std::string lline = e.name + " " + op.what + " " + op.fn + " " + op.def_file + ":" + std::to_string(op.def_line) + " data " + f.path + " line " +
+                                      std::to_string(op.line) + ": " + state;
+            lifetimes_.insert(lline);
+            lifetime_sites_[lline].insert(opkeys.begin(), opkeys.end());
           }
+          if (!del_stmt) del_missing.push_back("no delete statement");
+          if (v5_) ns_entry(i, r, rowref, f, e, del_missing, &rn);
         }
       if (!entry_found) need(rowref, "object-delete", "not-planned", reason(kNoNamespace), "the row's lookup and creators: " + [&] {
         std::string t;
         for (const std::string& n : names) t += (t.empty() ? "" : " ") + n;
         return t;
       }());
+      else if (v5_ && rn.found) need_sites(rowref, "object-delete", keys, kNoLifetime, "the matching entries have no delete statement that applies to the build");
       else need_sites(rowref, "object-delete", keys, kNoNamespace, "an entry matches but none of its deletes and retires applies to the build");
+      if (v5_ && rn.found) {
+        if (rn.kind_entry) need_sites(rowref, "kind-value", rn.kind, kNoPos, "no layer call with a kind parameter on the lookup's or a create's line in the facts");
+        else need(rowref, "kind-value", "not-planned", reason(kNoRule), "an entry of the table-copy generation has no kind value");
+        need_sites(rowref, "object-rollback", rn.rollback, kNoLifetime, rn.rollback_stmt ? "the rollback statements do not apply or have no create-finalize call" : "no rollback statement for the kind");
+        need_sites(rowref, "object-clear", rn.clear, kNoLifetime, rn.clear_stmt ? "the component's clears do not apply or are no lifetime end" : "no layer-op clear statement in the component's data");
+      }
+    }
+    if (v5_) plan_ns_layers();
+  }
+
+  // ---------------------------------------------------------------- plan rules revision 5 (docs/plan_manifest.md 10.1-10.5, 10.8)
+  struct RowNs {
+    bool found = false, kind_entry = false, rollback_stmt = false, clear_stmt = false;
+    std::set<std::string> kind, rollback, clear;
+  };
+  static bool tail_is(const std::string& p, const std::string& tail) {
+    return p == tail || (p.size() > tail.size() && p.compare(p.size() - tail.size(), tail.size(), tail) == 0 && p[p.size() - tail.size() - 1] == '/');
+  }
+  static std::string joined(const std::vector<std::string>& v, const char* sep = ",") {
+    std::string t;
+    for (const std::string& x : v) t += (t.empty() ? "" : sep) + x;
+    return t.empty() ? "-" : t;
+  }
+  static std::string joined(const std::set<std::string>& v, const char* sep = ",") { return joined(std::vector<std::string>(v.begin(), v.end()), sep); }
+  std::string call_text(uint32_t ci) const { return str(calls_[ci].callee) + "@" + str(calls_[ci].file) + ":" + std::to_string(calls_[ci].line); }
+  std::vector<uint32_t> calls_on(uint32_t fn, uint32_t line) const {
+    std::vector<uint32_t> v;
+    for (uint32_t ci : calls_of_.count(fn) != 0 ? calls_of_.at(fn) : std::vector<uint32_t>{})
+      if (calls_[ci].line == line) v.push_back(ci);
+    return v;
+  }
+  bool data_fn_call(uint32_t ci) const {
+    if (defined(calls_[ci].callee_fn)) return false;
+    auto it = p0_kind_.find(str(calls_[ci].callee));
+    return it != p0_kind_.end() && it->second == KZ_P0_KIND_DATA_FN;
+  }
+  // the value of the site recorded from `from`: its role is set to the rule's role (the site may hold it as a plain
+  // argument already)
+  void name_val(Site* s, const std::string& from, const std::string& role) {
+    if (s == nullptr) return;
+    for (Val& v : s->vals)
+      if (v.from == from) {
+        if (starts(v.role, "arg")) v.role = role;
+        return;
+      }
+    Val v;
+    v.role = role;
+    v.from = from;
+    add_val(s, v);
+  }
+  // does fn reach itself through the defined callees of CALLS
+  bool reenters(uint32_t fn) const {
+    std::set<uint32_t> seen;
+    std::vector<uint32_t> work = {fn};
+    while (!work.empty()) {
+      const uint32_t f = work.back();
+      work.pop_back();
+      for (uint32_t ci : calls_of_.count(f) != 0 ? calls_of_.at(f) : std::vector<uint32_t>{}) {
+        const uint32_t g = calls_[ci].callee_fn;
+        if (!defined(g)) continue;
+        if (g == fn) return true;
+        if (seen.insert(g).second) work.push_back(g);
+      }
+    }
+    return false;
+  }
+  // the bounded NUL searches (section 3: memchr with the byte 0 and a constant length, strnlen with a constant length)
+  // the key parameter of fn reaches through PARAM_FLOW at any depth
+  void length_calls(uint32_t fn, std::set<std::string>* out) const {
+    if (!defined(fn)) return;
+    for (uint32_t k = 0; k < funcs_[fn].nparams; ++k) {
+      if (!reaches_compare(fn, k)) continue;
+      auto it = pflow_of_.find({fn, k});
+      if (it == pflow_of_.end()) return;
+      for (uint32_t ri : it->second) {
+        const kz_fact_pflow& p = pflow_[ri];
+        if (p.kind != KZ_PFLOW_KIND_CALL_ARG) continue;
+        auto cit = call_by_site_.find(p.depth == 0 ? p.site : p.sink_site);
+        if (cit == call_by_site_.end()) continue;
+        const uint32_t c = cit->second;
+        const uint32_t at = p.depth == 0 ? p.next_param : p.n;
+        const std::string cal = str(calls_[c].callee);
+        const kz_fact_arg* len = nullptr;
+        if (cal == "memchr" && at == 0) {
+          const kz_fact_arg* ch = arg(c, 1);
+          if (ch != nullptr && ch->kind == KZ_ARG_KIND_CONST && ch->value == 0) len = arg(c, 2);
+        } else if (cal == "strnlen" && at == 0) {
+          len = arg(c, 1);
+        }
+        if (len != nullptr && len->kind == KZ_ARG_KIND_CONST && len->value > 0) out->insert(call_text(c));
+      }
+      return;  // the first key parameter, as the creator rule of plan_row
+    }
+  }
+  // the relations' clear-slot lifetime-end line at a position of the data (file by its tail, line), empty when none
+  std::string relations_clear_slot(const std::string& file, uint32_t line) const {
+    static const std::regex re(R"(lifetime end \[[^\]]*\]: clear-slot (\S+):(\d+):\d+ in )");
+    for (const RelGroup& g : rep_.groups) {
+      std::istringstream in(g.text);
+      std::string l;
+      while (std::getline(in, l)) {
+        std::smatch m;
+        if (!std::regex_search(l, m, re)) continue;
+        if (tail_is(m[1].str(), file) && static_cast<uint32_t>(std::strtoul(m[2].str().c_str(), nullptr, 10)) == line) return l.substr(l.find_first_not_of(' '));
+      }
+    }
+    return "";
+  }
+
+  // one namespace-entry line, the kind-value, rollback and clear sites, the lifetime lines and the extent bound of a row
+  void ns_entry(size_t i, const RelRow& r, const std::string& rowref, const NsFile& f, const NsEntry& e, const std::vector<std::string>& del_missing, RowNs* rn) {
+    auto st = [](bool a) { return std::string(a ? "applies" : "not-applicable"); };
+    const std::string dref = "namespace data " + f.path + " line " + std::to_string(e.line) + ": " + e.name;
+    std::vector<std::string> lk, cr;
+    std::vector<std::pair<const NsOp*, uint32_t>> side_fns;  // the lookup and create operations that apply, with their function
+    for (const NsOp& op : e.ops) {
+      const bool is_lookup = op.what == "lookup";
+      const bool is_create = op.what == "create" || (e.table && (op.what == "copy" || op.what == "create-check"));
+      if (!is_lookup && !is_create) continue;
+      uint32_t fn = kN;
+      const bool a = op_applies(f, op, &fn);
+      (is_lookup ? lk : cr).push_back(op.fn + ":" + st(a));
+      if (a) side_fns.push_back({&op, fn});
+    }
+    // the comparison function and its comparison calls
+    const NsOp& cmp = e.table ? e.compare : f.compare;
+    std::string cmp_t = "-";
+    std::set<std::string> cmp_calls;
+    if (!cmp.fn.empty()) {
+      uint32_t fn = kN;
+      const bool a = op_applies(f, cmp, &fn);
+      cmp_t = cmp.fn + ":" + st(a);
+      if (a)
+        for (uint32_t ci : calls_of_.count(fn) != 0 ? calls_of_.at(fn) : std::vector<uint32_t>{})
+          if (!defined(calls_[ci].callee_fn) && compare_names_.count(str(calls_[ci].callee)) != 0) cmp_calls.insert(call_text(ci));
+    }
+    // the stored names: the FIELD_TYPES row declared at decl=, its extent; the data-function calls on the store's line
+    std::vector<std::string> fld, decl, ext, extv;
+    std::set<std::string> copy_calls;
+    uint32_t min_extent = 0;  // the bound of 10.5: the largest constant extent of the stored names
+    std::string min_field;
+    for (const NsStored& x : e.stored) {
+      std::string fl = "-", ev = "-";
+      for (const kz_fact_ftype& t : ftypes_)
+        if (t.line == x.decl_line && tail_is(file_path(t.fh), x.decl_file)) {
+          fl = str(t.type) + "." + str(t.field);
+          if (t.extent_kind == KZ_FTYPE_EXTENT_CONSTANT && t.extent > 0) {
+            ev = std::to_string(t.extent);
+            // more than one stored name (two creates keep the name in two fields): the largest extent, so that no name
+            // that fits one of the stored names is cut (docs/plan_manifest.md 10.8)
+            if (t.extent > min_extent) min_extent = t.extent, min_field = fl;
+          }
+          break;
+        }
+      const std::string d = x.decl_file + ":" + std::to_string(x.decl_line);
+      if (std::find(decl.begin(), decl.end(), d) == decl.end() || std::find(fld.begin(), fld.end(), fl) == fld.end()) {
+        fld.push_back(fl);
+        decl.push_back(d);
+        ext.push_back(x.extent);
+        extv.push_back(ev);
+      }
+      // the line of the store: the stored-name statement's at= in its function (object-id generation), the copy
+      // statement's at= (table-copy generation)
+      std::vector<std::pair<uint32_t, uint32_t>> where;
+      if (!x.fn.empty()) {
+        for (const auto& [op, fn] : side_fns)
+          if (op->fn == x.fn) where.push_back({fn, x.at_line});
+      } else {
+        for (const auto& [op, fn] : side_fns)
+          if (op->what == "copy" && op->at_line != 0) where.push_back({fn, op->at_line});
+      }
+      for (const auto& [fn, line] : where)
+        for (uint32_t ci : calls_on(fn, line))
+          if (data_fn_call(ci)) copy_calls.insert(call_text(ci));
+    }
+    std::set<std::string> len_calls;
+    for (const auto& [op, fn] : side_fns) length_calls(fn, &len_calls);
+    std::ostringstream o;
+    o << "namespace-entry row=" << r.key << " data=" << f.path << " sha256=" << f.text_sha << " line=" << e.line << " kind=" << e.name << " value=" << e.value
+      << " kind-at=" << e.kind_at << " lookup=" << joined(lk) << " create=" << joined(cr) << " compare=" << cmp_t << " compare-call=" << joined(cmp_calls)
+      << " stored-name=" << joined(fld) << " decl=" << joined(decl) << " extent=" << joined(ext) << " extent-value=" << joined(extv) << " extent-source=FIELD_TYPES"
+      << " copy-call=" << joined(copy_calls) << " length-call=" << joined(len_calls) << " success-path=" << joined(row_success_[i]);
+    ns_entry_lines_.push_back(o.str());
+
+    // 10.5: the key texts of the row's use and creators bounded by the extent of the stored name
+    if (min_extent != 0) {
+      std::vector<uint32_t> cs;
+      if (r.call != kN) cs.push_back(r.call);
+      for (uint32_t ci : row_creators_[i]) cs.push_back(ci);
+      for (uint32_t ci : cs) {
+        auto kt = keytext_site_.find(ci);
+        if (kt == keytext_site_.end()) continue;
+        auto sit = sites_.find(kt->second);
+        if (sit == sites_.end()) continue;
+        for (Val& v : sit->second.vals)
+          if (v.role == "key_text" && v.string_mode == "validated" && v.bound > min_extent) {
+            v.bound = min_extent;
+            v.ref += "; bound " + std::to_string(min_extent) + ": the extent of " + min_field + " (namespace-entry extent, " + e.name + ", plan rules revision 5 10.5)";
+            extent_sites_.insert(kt->second);
+          }
+      }
+    }
+
+    // 10.2: the kind value at the layer call of the lookup and of each create
+    if (!e.table) {
+      rn->kind_entry = true;
+      for (const auto& [op, fn] : side_fns)
+        for (uint32_t ci : calls_on(fn, op->at_line))
+          for (const NsOp& lf : f.layer_fns)
+            if (lf.kind_param >= 0 && lf.fn == str(calls_[ci].callee)) {
+              Site* s = at_call(ci, "kind-value", rowref + " " + e.name + " " + op->what + " " + op->fn + " layer call " + call_pos(ci));
+              name_val(s, "arg" + std::to_string(lf.kind_param), "kind");
+              if (s != nullptr) rn->kind.insert(s->key());
+            }
+    }
+
+    // 10.4: the failed-create rollbacks of the kind
+    std::vector<std::string> missing = del_missing;
+    bool rb_stmt = false;
+    std::set<std::string> finals;
+    for (const NsOp& lf : f.layer_fns)
+      if (lf.what == "create-finalize") finals.insert(lf.fn);
+    for (const NsOp& lo : f.layer_ops)
+      if (lo.what == "rollback") finals.insert(lo.fn);
+    for (const NsOp& op : e.ops) {
+      if (op.what != "rollback") continue;
+      rb_stmt = rn->rollback_stmt = true;
+      uint32_t fn = kN;
+      std::string lline = e.name + " rollback " + op.fn + " " + op.def_file + ":" + std::to_string(op.def_line) + " data " + f.path + " line " + std::to_string(op.line) + ": ";
+      std::set<std::string> ks;
+      if (!op_applies(f, op, &fn)) {
+        lline += "does not apply (no file of that sha256 or no definition on that line)";
+        missing.push_back("rollback " + op.fn + " does not apply");
+      } else {
+        std::string calls;
+        for (uint32_t ci : calls_on(fn, op.at_line)) {
+          if (finals.count(str(calls_[ci].callee)) == 0) continue;
+          const std::string ref = dref + " rollback in " + op.fn + " at " + call_pos(ci);
+          Site* a = at_call(ci, "object-rollback", ref);
+          name_val(a, "arg" + std::to_string(op.status), "status");
+          Site* b = after_call(ci, "object-rollback", ref, {static_cast<uint32_t>(op.out)});
+          if (a != nullptr) ks.insert(a->key());
+          if (b != nullptr) ks.insert(b->key());
+          calls += (calls.empty() ? "" : ", ") + str(calls_[ci].callee) + " at " + call_pos(ci);
+        }
+        if (calls.empty()) {
+          lline += "applies; no create-finalize call on the line " + op.at_file + ":" + std::to_string(op.at_line);
+          missing.push_back("rollback " + op.fn + " has no site");
+        } else {
+          lline += "applies; create-finalize " + calls + ", status arg" + std::to_string(op.status) + ", out arg" + std::to_string(op.out) +
+                   "; reentry=" + (reenters(fn) ? "possible" : "none");
+        }
+      }
+      rn->rollback.insert(ks.begin(), ks.end());
+      lifetimes_.insert(lline);
+      lifetime_sites_[lline].insert(ks.begin(), ks.end());
+    }
+    if (!rb_stmt) missing.push_back("no rollback statement");
+
+    // 10.4: the component's table initialisation and slot clear (the layer operations belong to the object-id generation;
+    // a table entry has none)
+    bool clear_stmt = false;
+    for (const NsOp& lo : e.table ? std::vector<NsOp>{} : f.layer_ops) {
+      if (lo.what != "clear-table" && lo.what != "clear-slot") continue;
+      clear_stmt = rn->clear_stmt = true;
+      uint32_t fn = kN;
+      std::string lline = e.name + " " + lo.what + " " + lo.fn + " " + lo.def_file + ":" + std::to_string(lo.def_line) + " data " + f.path + " line " + std::to_string(lo.line) + ": ";
+      std::set<std::string> ks;
+      const std::string ref = "namespace data " + f.path + " line " + std::to_string(lo.line) + ": layer-op " + lo.what + " " + lo.fn;
+      if (!op_applies(f, lo, &fn)) {
+        lline += "does not apply (no file of that sha256 or no definition on that line)";
+        missing.push_back(lo.what + " " + lo.fn + " does not apply");
+      } else if (lo.what == "clear-table") {
+        std::string fills;
+        for (uint32_t ci : calls_on(fn, lo.at_line))
+          if (data_fn_call(ci))
+            if (Site* a = at_call(ci, "object-clear", ref + " fill " + call_pos(ci))) {
+              ks.insert(a->key());
+              fills += (fills.empty() ? "" : ", ") + call_text(ci);
+            }
+        if (fills.empty()) {
+          lline += "applies; no fill call on the line " + lo.at_file + ":" + std::to_string(lo.at_line);
+          missing.push_back("clear-table " + lo.fn + " has no site");
+        } else {
+          lline += "applies; fill " + fills;
+        }
+      } else {
+        const std::string rl = relations_clear_slot(lo.at_file, lo.at_line);
+        if (rl.find(": free-record condition shown") != std::string::npos) {
+          lline += "not-a-lifetime-end(" + rl + ")";
+        } else if (Site* a = store_site(fn, lo.at_line, "object-clear", ref + " store at " + lo.at_file + ":" + std::to_string(lo.at_line))) {
+          ks.insert(a->key());
+          lline += "applies; store at " + lo.at_file + ":" + std::to_string(lo.at_line) + "; " + (rl.empty() ? std::string("no relations lifetime-end line at that position") : "relations: " + rl);
+        } else {
+          lline += "applies; no store site";
+          missing.push_back("clear-slot " + lo.fn + " has no site");
+        }
+      }
+      rn->clear.insert(ks.begin(), ks.end());
+      lifetimes_.insert(lline);
+      lifetime_sites_[lline].insert(ks.begin(), ks.end());
+    }
+    if (!clear_stmt && (e.table || f.layer_ops.empty())) missing.push_back("no layer-op statement");
+    else if (!clear_stmt) missing.push_back("no layer-op clear statement");
+    lifetime_complete_[e.name] = missing.empty() ? std::string("yes") : "no(" + joined(missing, "; ") + ")";
+  }
+
+  // 10.1: one namespace-layer line per namespace data file whose component applies to the build
+  void plan_ns_layers() {
+    for (const NsFile& f : ns_) {
+      bool applies = false;
+      uint32_t fn = kN;
+      for (const NsEntry& e : f.entries)
+        for (const NsOp& op : e.ops) applies = applies || op_applies(f, op, &fn);
+      for (const NsOp& op : f.layer_fns) applies = applies || op_applies(f, op, &fn);
+      for (const NsOp& op : f.layer_ops) applies = applies || op_applies(f, op, &fn);
+      if (!applies) continue;
+      std::vector<std::string> ct, cs, rb, df;
+      std::set<std::string> fills;
+      std::string sp = "-", op_ = "-";
+      for (const NsOp& lo : f.layer_ops) {
+        uint32_t g = kN;
+        const bool a = op_applies(f, lo, &g);
+        const std::string at = lo.at_file + ":" + std::to_string(lo.at_line);
+        if (lo.what == "clear-table") {
+          ct.push_back(lo.fn + "@" + at + ":" + (a ? "applies" : "not-applicable"));
+          if (a)
+            for (uint32_t ci : calls_on(g, lo.at_line))
+              if (data_fn_call(ci)) fills.insert(call_text(ci));
+        } else if (lo.what == "clear-slot") {
+          cs.push_back(lo.fn + "@" + at + ":" + (a ? "applies" : "not-applicable"));
+        } else if (lo.what == "rollback") {
+          rb.push_back(lo.fn + ":" + (a ? "applies" : "not-applicable"));
+          sp = lo.status >= 0 ? std::to_string(lo.status) : "-";
+          op_ = lo.out >= 0 ? std::to_string(lo.out) : "-";
+        } else if (lo.what == "delete-finalize") {
+          df.push_back(lo.fn + ":" + (a ? "applies" : "not-applicable"));
+        }
+      }
+      ns_layer_lines_.push_back("namespace-layer data=" + f.path + " sha256=" + f.text_sha + " clear-table=" + joined(ct) + " clear-slot=" + joined(cs) + " rollback=" +
+                                joined(rb) + " status-param=" + sp + " out-param=" + op_ + " delete-finalize=" + joined(df) + " fill-call=" + joined(fills));
     }
   }
 
@@ -1873,6 +2403,8 @@ class Gen : public RelFacts {
           if (f.path == path) return f.entries.size();
         return static_cast<size_t>(0);
       }() << "\n";
+      // plan rules revision 5 (10.1): the layer of each namespace data file whose component applies
+      for (const std::string& l : ns_layer_lines_) sc << l << "\n";
     }
     sc << "bound string KZ_RT_STR_MAX=" << kStrMax << " source=runtime/include/kz_rt.h:82 reason=" << quoted("the runtime's copy bound; a key text is bounded by the program's own constant length check where the facts show one")
        << " truncation=" << quoted("the runtime flags a cut string per value") << "\n";
@@ -1880,6 +2412,10 @@ class Gen : public RelFacts {
       sc << "bound string-extent source=ARG_TYPES reason="
          << quoted("a key argument that is a character array read at a point that dominates the call is copied at the call within min(its extent, KZ_RT_STR_MAX)")
          << "\n";
+    if (v5_ && !extent_sites_.empty())
+      sc << "bound string-namespace-extent source=namespace-entry extent reason="
+         << quoted("a key text of a planned row with a namespace-entry line is copied within the extent of the name space's stored name where that is smaller (plan rules revision 5 10.5)")
+         << " sites=" << extent_sites_.size() << "\n";
     sc << "bound slots=" << kSlots << " source=instrument/gcc/kzgcc.cpp build_obs reason=" << quoted("values per event bound by kzgcc 0.3") << "\n";
     sc << "bound sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason=" << quoted("the binding id scheme") << " sites=" << sites_.size() << "\n";
     sc << "param tu-root " << (out_root_.empty() ? "-" : out_root_) << " (units outside the bundle root are named relative to it)\n";
@@ -1933,7 +2469,34 @@ class Gen : public RelFacts {
     for (const Need& n : gaps_) sc << "gap " << n.subject << " " << quoted(n.what) << " reason=" << n.why << " rule=" << n.note << "\n";
     for (const std::string& c : creations_) sc << "creation " << c << "\n";
     for (const std::string& s : stops_) sc << "stop-event " << s << "\n";
-    for (const std::string& l : lifetimes_) sc << "lifetime " << l << "\n";
+    for (const std::string& l : lifetimes_) {
+      sc << "lifetime " << l;
+      // plan rules revision 5 (10.4): the sites of each lifetime end
+      const auto ls = lifetime_sites_.find(l);
+      if (v5_ && ls != lifetime_sites_.end() && !ls->second.empty()) {
+        std::set<uint32_t> ids;
+        for (const std::string& k2 : ls->second) {
+          const auto it = sites_.find(k2);
+          if (it != sites_.end()) ids.insert(it->second.id);
+        }
+        std::string t;
+        for (uint32_t id2 : ids) t += (t.empty() ? "" : ",") + std::to_string(id2);
+        sc << " sites=" << t;
+      }
+      sc << "\n";
+    }
+    if (v5_) {
+      for (const auto& [k2, v] : lifetime_complete_) sc << "lifetime-complete kind=" << k2 << " " << v << "\n";
+      for (const std::string& l : ns_entry_lines_) sc << l << "\n";
+      for (const Context& c : contexts_) {
+        sc << "context row=" << c.row << " id=" << c.id << " frame=";
+        const auto a = sites_.find(c.at);
+        const auto b = sites_.find(c.after);
+        if (a != sites_.end() && b != sites_.end()) sc << a->second.id << "," << b->second.id;
+        else sc << "-";
+        sc << " chain=" << quoted(c.chain) << "\n";
+      }
+    }
     for (const auto& [k, b] : spawns_) {
       const auto it = sites_.find(k);
       if (it != sites_.end()) sc << "spawn " << it->second.id << " wrapper=" << kSpawnWrapper << " " << b.ref << "\n";
@@ -2049,6 +2612,7 @@ class Gen : public RelFacts {
   // TBEGIN with the creation token; docs/plan_manifest.md section 8)
   static constexpr const char* kSpawnWrapper = "kz_rt_posix_create";
   bool v4_ = false;
+  bool v5_ = false;  // plan rules revision 5: every namespace data file is of coverage rule revision 2
   uint32_t control_rows_ = 0;
   std::vector<NsFile> ns_;
   std::vector<kz_fact_objacc> objacc_;
@@ -2063,6 +2627,18 @@ class Gen : public RelFacts {
   size_t request_rows_ = 0;
   std::set<std::string> lifetimes_;
   std::map<std::string, SpawnBind> spawns_;  // site key -> its spawn binding
+  // plan rules revision 5
+  struct Context {
+    std::string row, chain, at, after;  // at, after: the frame's site keys (empty: no frame)
+    uint32_t id = 0;
+  };
+  std::vector<Context> contexts_;
+  std::map<uint32_t, std::string> keytext_site_;                      // a use or creator call -> the site key of its key-text site
+  std::map<size_t, std::vector<std::string>> row_success_;            // row -> "<creator callee>:<held|missing>"
+  std::map<std::string, std::set<std::string>> lifetime_sites_;       // lifetime line -> its site keys
+  std::map<std::string, std::string> lifetime_complete_;              // kind -> yes | no(...)
+  std::vector<std::string> ns_entry_lines_, ns_layer_lines_;
+  std::set<std::string> extent_sites_;                                // key-text sites bounded by a namespace-entry extent
 
   struct FwEntry {
     std::string role, function, def_file, def_sha, decl, version;

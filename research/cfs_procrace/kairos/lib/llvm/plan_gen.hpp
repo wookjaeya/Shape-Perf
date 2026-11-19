@@ -40,6 +40,17 @@
 // namespace data names for the row's lookup and creators); the effect calls of RESULT_EFFECT with the argument the
 // SEMANTICS rows give a role.  Without --manifest 4 the output is that of revision 2.
 //
+// Plan rules revision 5 (docs/plan_manifest.md section 10, its precisions 10.8): with namespace data of coverage rule
+// revision 2 (semantics/framework_namespaces2_*.txt; the files of one revision per plan) the same selection, order,
+// budgets, tier label and control selection, and: a namespace-layer line per file whose component applies; for every
+// planned path A row whose use or creator callee is a lookup or create of an entry that applies, a namespace-entry line
+// (kind, value, operations, comparison and its calls, the stored name with its extent from FIELD_TYPES, the copy and
+// length calls, the success path items of the row), the kind value at the layer call of the lookup and the creates
+// (kind-value), the failed-create rollback (object-rollback), the table fill and the slot clear that the relations do not
+// show under a free-record condition (object-clear), the lifetime lines with their sites and lifetime-complete per kind,
+// the key text bounded by the stored name's extent; for every planned row with more than one caller chain, the frame of
+// each context (context-frame).  With revision-1 files the output is that of revision 4.
+//
 // Output: a site manifest "kzs-sites 3" (the plugin kzgcc 0.3 and the runtime 1.4 read it: source, module, site, value
 // statements; no identity, control or bind statements) whose comment header carries the sha256 of the sidecar; the
 // sidecar (the plan header with every input file and its sha256, the generator identity, the rules and priority

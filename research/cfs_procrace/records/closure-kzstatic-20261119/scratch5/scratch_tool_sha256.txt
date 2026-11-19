@@ -1,0 +1,1 @@
+54e91a6af31061159cfc465ef0bd20f01080eb92d4104ee2f8988af56aebae73  <scratch>/kzc5_build/tools/kz-static/kz-static

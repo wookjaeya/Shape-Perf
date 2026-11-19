@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-run need=50000000 floor=314572800 interval=2 cmd=bash <scratch>/w5/plans.sh g2_rev2_rf2facts /home/user/work/redesign/obs1/rf2_final_extract 2
+start 2026-11-19T04:48:27.373Z free=814182400 threshold=364572800
+sample 2026-11-19T04:48:27.377Z 814178304
+sample 2026-11-19T04:48:29.384Z 813412352
+end 2026-11-19T04:48:31.391Z kind=scratch-run verdict=completed rc=0 free=812814336 lowest=812814336 dip=1368064 change=-1368064

@@ -1,0 +1,8 @@
+[  0%] Built target kzrt-manifest
+[ 40%] Built target kz-core
+[ 45%] Built target kz-testsupport
+[ 90%] Built target kz-llvm
+[100%] Built target kz-static
+[100%] Building CXX object tests/static/CMakeFiles/test_static_plan.dir/test_static_plan.cpp.o
+[100%] Linking CXX executable test_static_plan
+[100%] Built target test_static_plan

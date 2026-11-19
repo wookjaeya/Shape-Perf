@@ -75,13 +75,20 @@
 #                    test_static_plan only with data/planv4_fixture/ (a hand-written semantics data file that names the
 #                    event-type argument of its event send, a hand-written namespace data file with its lookup, create and
 #                    delete functions): a probe-create row, rows with creators excluded by key constants, a retry wait on a
-#                    call result, a path C read subscripted by a call result under a mutex, a delete through a retire call
+#                    call result, a path C read subscripted by a call result under a mutex, a delete through a retire call;
+#                    planv5.c for plan rules revision 5 (docs/plan_manifest.md section 10), read by test_static_plan only with
+#                    data/planv5_fixture/ (two hand-written namespace data files of coverage rule revision 2: an object
+#                    layer with its layer functions and operations, two kinds, a table): a lookup and an allocation with a
+#                    kind parameter, a finishing step that rolls a failed create back, a delete, a fill, a slot clear with
+#                    and without the free-record condition, a kind without a delete, a table searched by strncmp, an
+#                    initialisation function with two caller contexts
 #   data/reason_vocabulary.txt  the reason vocabulary of the judgement rules (JUDGEMENT_RULES_REV1.md 3.5);
 #                    test_static_reasons compares every reason `kz-static relations` can write with it, and every
 #                    `incomplete:` line of the relations goldens with the reasons the tool can write
 #   data/*.golden    the text view of the facts of each fixture and of the core executable; plangen_np.plan.golden
 #                    the plan of plangen.c (manifest, sidecar, module table, executables; sha256 values and paths masked);
-#                    planv4_np.plan.golden the revision-3 plan of planv4.c (manifest, sidecar, value requests; masked)
+#                    planv4_np.plan.golden the revision-3 plan of planv4.c (manifest, sidecar, value requests; masked);
+#                    planv5_np.plan.golden the revision-5 plan of planv5.c (the same parts; masked)
 #   data/plangen_framework.txt  the framework-layer data of plangen.c (its run loop and app exit); plankey_framework.txt
 #                    that of plankey.c; planv4_framework.txt that of planv4.c
 #   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table
@@ -107,7 +114,7 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
 # clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
-set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete relcallback plangen order anonrec objaccess plankey semantics resultflow looplock planv4 closure)
+set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete relcallback plangen order anonrec objaccess plankey semantics resultflow looplock planv4 closure planv5)
 set(kz_golden_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations clobber flowfacts_np argflow_np lockset_np
     relations_np lockpaths_np relpaths_np relsound_np imgbudget_np relincomplete_np relincomplete_cut_np relcallback_np order_np anonrec_np objaccess objaccess_off semantics_np
     resultflow_np resultflow_order_np looplock_np looplock_order_np closure_np)
@@ -181,7 +188,8 @@ kz_add_unit_test(test_static_reasons SOURCES test_static_reasons.cpp LIBS kz-llv
 # `kz-static plan` on plangen.c (plan rules revision 2, docs/plan_manifest.md): determinism, the runtime's host parser on the
 # manifest (kzrt-manifest; a test links it, no tool does), the observation rules, the priority port, the refusals, a second
 # caller, the golden text; on plankey.c the key argument of a character array (facts with and without --object-access); on
-# planv4.c plan rules revision 3 (--manifest 4: kzs-sites 4, the control selection, value requests, wait and object rules)
+# planv4.c plan rules revision 3 (--manifest 4: kzs-sites 4, the control selection, value requests, wait and object rules); on
+# planv5.c plan rules revision 5 (namespace data of coverage rule revision 2)
 kz_add_unit_test(test_static_plan SOURCES test_static_plan.cpp LIBS kz-llvm kzrt-manifest kz-testsupport LABEL static
   ARGS $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/work_plan)
 add_dependencies(test_static_plan kz-static)

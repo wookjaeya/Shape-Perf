@@ -1,0 +1,12 @@
+rows kept 172 new 172: equal 172; same line but the use-site key moved 0 ; different 0 ; only kept 0; only new 0
+selection tier-planned kept 8 new 8 equal=yes: B6 B9 B20 B21 B35 B41 B51 B58
+selection control-planned kept 2 new 2 equal=yes: A16 A17
+selection tiers equal=yes
+sites kept 165 new 165: removed 0; added 0
+sites added by rule (a site may carry several): 
+common sites 165: rules changed 0; values changed 0
+needs kept 35 new 35: equal 35; changed 0; only new 0; only kept 0
+needs only new by what: 
+sidecar line kinds (kept -> new): namespace-layer 0->2
+other sidecar lines equal=yes (26 lines)
+requests kept 18 new 18 equal after mapping the site ids=yes

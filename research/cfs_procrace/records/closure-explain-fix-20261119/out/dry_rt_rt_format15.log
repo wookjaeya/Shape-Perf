@@ -1,0 +1,33 @@
+kz-rt-dump rc=0
+manifest	unconfirmed	plan=69a278b019281fd3 build_record=69a278b019281fd3 run.meta=missing dump=missing
+exe manifest	unconfirmed	record=69a278b019281fd3 tree=missing run.meta=no-such-file
+exe test_rt_objects	unconfirmed	record=609bdbb81680cf46 tree=609bdbb81680cf46 run.meta=no-such-file
+exe librt_objects_mod_id.so	unconfirmed	record=ab79abe53569582a tree=ab79abe53569582a run.meta=no-such-file
+exe librt_objects_mod_noid.so	unconfirmed	record=266e85d4bef12ac2 tree=266e85d4bef12ac2 run.meta=no-such-file
+facts_build	unconfirmed	no basis of the facts given (main test_rt_objects run=missing)
+same_build_object	refused	main path=test_rt_objects tree=e840b203a07d9b1b3dc313500115b642681cac32 dump=deadbeef0102030405060708090a0b0c0d0e0f10
+same_build_object	unconfirmed(object not in the build record)	module:4 path=cf/a "q".so tree=not read dump=abcdef0123456789
+same_build_object	unconfirmed(no build-id note)	module:5 path=cf/b.so tree=not read dump=none
+same_build	refused	3 objects: confirmed 0, refused 1, unconfirmed 2
+chain	unconfirmed	6 links
+chain_check rc=3
+normal /home/user/work/redesign/obs1/xr5_dry_rt_rt_format15/normal.json inputs 16 checks refused 0 unparsed 0 mismatch 2 branches 16
+reader rc=0
+branch D1-R0 records 46 refused 0 uses 0
+branch D1-Ra records 46 refused 0 uses 0
+branch D1-Rb records 46 refused 0 uses 0
+branch D1-Rc records 46 refused 0 uses 0
+branch D1-Rd records 46 refused 0 uses 0
+branch D1-Re records 46 refused 0 uses 0
+branch D1-Rf records 46 refused 0 uses 0
+branch D1-all records 46 refused 0 uses 0
+branch D2-R0 records 46 refused 0 uses 0
+branch D2-Ra records 46 refused 0 uses 0
+branch D2-Rb records 46 refused 0 uses 0
+branch D2-Rc records 46 refused 0 uses 0
+branch D2-Rd records 46 refused 0 uses 0
+branch D2-Re records 46 refused 0 uses 0
+branch D2-Rf records 46 refused 0 uses 0
+branch D2-all records 46 refused 0 uses 0
+compat refused: run.meta names another manifest; the dump's RUN or module records carry another manifest sha256
+judge rc=3

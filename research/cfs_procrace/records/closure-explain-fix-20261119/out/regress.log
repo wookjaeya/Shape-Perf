@@ -1,0 +1,10 @@
+normal /home/user/work/redesign/obs1/xr5_regress_rev4fix/normal.json inputs 15 checks refused 5 unparsed 0 mismatch 0 branches 8
+branch D1-R0 records 45 refused 0 uses 177
+branch D1-Ra records 45 refused 0 uses 177
+branch D1-Rb records 45 refused 0 uses 177
+branch D1-Rc records 45 refused 0 uses 177
+branch D1-Rd records 45 refused 0 uses 177
+branch D1-Re records 45 refused 0 uses 177
+branch D1-Rf records 45 refused 0 uses 177
+branch D1-all records 45 refused 0 uses 177
+compat chain confirmed; same_build unconfirmed(no build-id in dump)

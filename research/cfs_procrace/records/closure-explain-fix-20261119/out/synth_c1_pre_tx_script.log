@@ -1,0 +1,20 @@
+synthetic record: order script, actors 16 (CFE_ES_TaskMain (table-image-entry), CFE_EVS_TaskMain (table-image-entry), CFE_SB_TaskMain (table-image-entry), CFE_TBL_TaskMain (table-image-entry), CFE_TIME_TaskMain (table-image-entry), CI_Lab_AppMain (script-entry), TO_LAB_AppMain (script-entry), SCH_Lab_AppMain (script-entry), CF_AppMain (script-entry), BP_AppMain (script-entry), BP_CLA_InputTask (spawn-entry), BP_CLA_OutputTask (spawn-entry), CFE_ES_BackgroundTask (spawn-entry), CFE_TIME_Local1HzTask (spawn-entry), CFE_TIME_Tone1HzTask (spawn-entry)), events 1132, uses 521, creates 6
+normal /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/normal.json inputs 21 checks refused 0 unparsed 0 mismatch 0 branches 16
+branch D1-R0 records 46 refused 0 uses 523
+branch D1-Ra records 46 refused 0 uses 523
+branch D1-Rb records 46 refused 0 uses 523
+branch D1-Rc records 46 refused 0 uses 523
+branch D1-Rd records 46 refused 0 uses 523
+branch D1-Re records 46 refused 0 uses 523
+branch D1-Rf records 46 refused 0 uses 523
+branch D1-all records 46 refused 0 uses 523
+branch D2-R0 records 46 refused 0 uses 523
+branch D2-Ra records 46 refused 0 uses 523
+branch D2-Rb records 46 refused 0 uses 523
+branch D2-Rc records 46 refused 0 uses 523
+branch D2-Rd records 46 refused 0 uses 523
+branch D2-Re records 46 refused 0 uses 523
+branch D2-Rf records 46 refused 0 uses 523
+branch D2-all records 46 refused 0 uses 523
+compat chain confirmed; same_build confirmed
+explain rc=0

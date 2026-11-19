@@ -3610,3 +3610,114 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 2. 부팅 하나의 필요량 [I] 은 2026-11-16 부팅(계획된 행 12)에서 왔다. 지금 계획은 계획된 행이 52 다. 첫 부팅의 감시 기록으로 다시 재어 남은 부팅의 필요량을 고친다.
 3. 압축은 같은 디스크에만 있다(verified_copy 는 이 디스크 위의 왕복). remote 는 여전히 none 이다.
 4. `/home/user/work` 의 obs1 밖 디렉터리(`redesign/step2a` 2.66 GB, `redesign/extract_baseline` 326 MB 등)는 이 규칙 밖이다. 장부 목록이 파일을 다 이름 대지 않는다. 그것을 쓰려면 목록을 먼저 만드는 글과 lead 의 판단이 필요하다.
+
+### 26.3 설명 스크립트 명세 11절의 코드, fixture, 회귀, 예행 (2026-11-19; §26.0 (나)–(자)·(차), 부팅 없음)
+
+**무엇 [M].** 기록: `../records/closure-explain-fix-20261119/`(README 가 파일을 적음). cFS 를 부팅하지 않았고 push 하지 않았다. 아무것도 동결하지 않았다(커밋한 코드는 소스 스냅샷이다). 차례는 다음과 같다.
+- 명세 11.4 를 코드보다 먼저 커밋했다(`cee2ae9`). 코드를 쓰며 정한 것들이다: 이름 붙은 호출 파일을 만드는 스크립트, 주소 쓰임의 두 꼴, 기록에 더한 칸 넷, 반증 스크립트의 줄마다의 가름 규칙, 실행 스크립트의 시험 이음새, 감시의 rc 77.
+- 그다음 코드와 fixture 를 함께 커밋했다(`dc879c6`).
+- 그 뒤 아래의 실행을 모두 감시 아래 새 디렉터리에 돌렸다. 앞판의 부분 diff(재시작 전 `explain_judge.py` 의 75 줄)는 그대로 살렸다: 판의 이름, `text_of`, 갈래에 넘기는 호출 파일, `entry_state` 의 (b)–(d). 나머지는 새로 썼다.
+- 판정 부분(`env/obs1/explain_judge.py`) — 명세 11 의 1, 3, 4, 5, 6:
+  - 문맥 줄이 없는 행의 문맥은 그 행의 대안 줄이 이름 댄 문맥 id 가 정확히 하나일 때 그 id 다(`-` 도 줄이 적으면 그대로). 하나가 아니면 `unknown` 이다.
+  - 항목이 없는 호출은 모든 갈래에서 `link_unlinked(name binding: no entry: <호출>)` 이고, 근거에 호출 파일의 줄을 단다.
+  - 버퍼 주소 쓰임: `no entry …` 쓰임이 있으면 (다)는 모든 갈래와 `Rf` 에서 `missing` 이다. `<칸> unverified` 쓰임은 후보 줄에 기댄다(`depends_on`).
+  - 찾은 사용에 열린 세대가 없으면 `undecided(no create of the found id in the record)` 또는 `undecided(the row's creator sites are not complete)` 이고 `unmet` 은 아니다.
+  - (c1), (c2), (c4), (c3)(i), 모든 (c3)(iii), (다)에 `depends_on` 을 갈래마다 적는다.
+  - 서식 검사 14 에 둘(문맥의 대안 줄, 찾은 사용의 `unmet`), 16 에 (a)–(d)를 더했다.
+- 읽는 부분(`explain_read.py`) — 명세 11 의 2: `--named-calls` 를 더했다. `--candidates` 와 함께여야 하고, 어긋나면 rc 2 로 멈추고 기록을 쓰지 않는다.
+- 이름 붙은 호출 파일 `../records/closure-c1prep-20261119/candidates/named_calls.tsv` 는 새 스크립트 `scripts/named_calls.py` 가 만들었다(`out/named_calls_run.txt`). 호출 넷이다:
+  - `memchr` `length-call`: 기록 0(항목 없음).
+  - `memset` `copy-call,fill-call`: 4, 미대조 2.
+  - `strcmp` `compare-call`: 3, 미대조 1.
+  - `strncpy` `copy-call`: 4, 미대조 2.
+  - 바꾸지 않은 `candidates.py` 를 같은 입력에 다시 돌렸다(`obs1/xr5_candidates_regen`). 64 파일이 64 개 모두 커밋된 후보 목록·인정 파일과 바이트까지 같다(`out/candidates_regen_compare.txt`).
+- 그 밖의 코드:
+  - 요약(`explain_summary.py`; 7–9): 갈래마다 머리 줄 하나(`main (declared before the boot: D1/R0)` 은 `D1-R0` 에만), 사용 단위의 표, 쌍 종류 여덟 줄과 `unknown` 의 셋 나눔, 실패 징후의 두 나눔, `--check-summary` 를 넣었다.
+  - 기대 대조(`explain_expect.py`; 12): 여덟째 칸 `class` 를 받는다. 기대 파일과 `expect_write.py` 는 이 단계에서 바꾸지 않았다.
+  - 새 반증·평가 스크립트 `env/obs1/explain_eval.py`(13).
+  - `boot/run_cycle.sh`: `verify` 단계, `eval` 단계, 깨끗한 `verify.txt` 가 있어야 도는 `boot`, 설명 단계의 호출 파일, 요약의 사용 목록을 더했다. `boot/commands.txt` 는 `verify` 를 빌드마다의 첫 명령이자 부팅마다 부팅 앞에 둔다. 시험은 `boot/test_run_cycle.sh` 다(14–15).
+  - `env/tools/space_guard.sh`(26.0 (차)): 끝 값이 바닥 아래면 판정 `below_floor_at_end` 와 rc 77 을 낸다. 등록부 `records/TOOLS.tsv` 에 두 줄을 두었다(지금 판 `f67ac6ec…` in-place, 앞 판 `730bcc06…` gone(git 에 있음); `tools_check` 59 행 실패 0).
+
+**시험 [M].**
+- `env/obs1/tests/test_explain4.py`: **193 점검 모두 통과**(`out/fixtures.txt`). 앞의 127 에 66 을 더했다. 모두 합성 이름이고 설계 행의 꼴이 아니다.
+  - 문맥 줄이 없는 한 문맥 행: 대안 줄이 found / none found(D2 에서 `held`, `derived`; D1 에서 `not_established`) / not established 인 셋, at-call 과 틀 사건이 없는 사용, 문맥 둘을 이름 댄 행(`unknown`), 대안 줄이 없는 행, `[context -]` 의 행.
+  - 이름 붙은 호출 파일: 머리·꼬리·plan sha256·빠진 호출·파일 없음, 모두 rc 2.
+  - 기록이 없는 호출: `D1`, `D2`, 부분 인정, `D2-all` 에서 모두 `no entry: …`. 기록이 있고 미대조가 아닌 호출은 `held`. 어느 파일에도 없는 항목은 '읽지 못함'.
+  - 주소 쓰임: 항목 없음(`D2`, `D2-Rf` 에서 (다) `missing`), 미대조(`D2` 에서 `held` 와 `depends_on`; `D1` 과 그 종류를 뺀 부분 인정에서 `missing`).
+  - 세대 없는 찾은 사용: 성공 경로 `missing`, 생성자 불완전, 생성 사건 없음 셋 모두 `undecided`, `unmet` 이 아님.
+  - (c4)·(c1)(c2)·(c3)(i)의 `depends_on` 이 갈래마다 다른 상태로 감, 이름 대지 않는 행의 '없음'.
+  - 서식 검사 14 의 둘과 16 (a)–(d)를 깬 기록 일곱(모두 그 검사에 물림).
+  - 요약: 머리·사용 행·쌍 종류 줄, 그리고 깬 요약 넷(rc 3). 기대의 `class` 와 깬 파일 둘(rc 2).
+- `env/obs1/tests/test_explain_eval.py`: **92 점검 모두 통과**(`out/eval_fixtures.txt`).
+  - F1–F10, s1–s4 가 각각 한 번 이상 `fail` 한다. F6 만은 `not_evaluable` 이다(11.4 의 5: 실패하는 입력이 없음).
+  - `expect_discriminate` 의 충족·미달·`not_counted`.
+  - 정밀도: `undefined(no reader)`, `(no tool positive)`, `(T + F = 0)`, `U` 가 있어 확정하지 않은 값, 조건부 1/2.
+  - 재현율: 1/1, 0/1, `undefined(k = 0)`, 옆 칸.
+  - 줄마다의 가름(성공 경로 줄이 `held` 이면 F2 (a)·s1·s3·s4 와 (3)의 `expect_discriminate` 가 `boot`).
+  - 열기·쓰기 감시와 그 음성 대조 둘: 기대 파일을 F1 밖에서 여는 사본, 출력 옆에 쓰는 사본을 잡는다.
+- `boot/test_run_cycle.sh`: **7/7**(`out/run_cycle_tests.txt`). 경우는 다음과 같다:
+  - 깨끗한 선언: `rows 6 ok 6 differs 0 missing 0`, 부팅 명령의 모의가 돎.
+  - 바꾼 값: `differs`, rc 1, 부팅 명령을 부르지 않음.
+  - 없는 파일: `missing`, rc 1.
+  - verify 뒤에 바뀐 선언, `verify.txt` 없음: 둘 다 부팅 안 함.
+  - 두 번째 verify: 앞 출력을 새 이름으로 남김.
+- 단위 점검: `env/tools/tests/run_unit.sh` **20/20**(`out/unit_tools.txt`). 점검 1 의 감시는 rc 77 경우를 더했다. 점검 19 는 193, 새 점검 20 은 92 다. `env/redesign/step2a_tests_unit.sh` 7/7(`out/unit_step2a.txt`).
+- 원장 `ledger_check` 205 행 실패 0(`out/ledger_check.txt`; 새 행 `OBS_xr5_*` 12). 커밋마다 이름 점검(`--cached`, 새 디렉터리 `--tree`)과 금지어 grep 을 했다.
+
+**회귀: 2026-11-16 입력 [M]** (`obs1/xr5_regress_rev4fix`, `out/regress.log`). 24.3 과 같은 스크립트, 같은 입력, D1 여덟 갈래다. 갈래마다 45 기록이고 물림 0 이다. 동결한 판의 출력 `obs1/xr4_regress_rev4_2` 와 견줬다(`scripts/compare_records.py`, `out/compare_regress.txt`). **축 상태와 판정 값은 여덟 갈래 모두 45/45 같다.** 다른 필드 경로의 부류는 13 이고, 여덟 갈래에서 부류와 수가 똑같다. 그 차이는 모두 아래 고침에서 나온다.
+1. `data_branch.admitted_kinds`, `data_branch.named_calls_sha256` 더함(45, 45): 11.4 의 2. 이 입력에는 호출 파일이 없어 `none` 이다.
+2. `order.use_events[].context` `-` → `null`(177; `uses.tsv` 의 `context` 칸 177 줄도 같음): 명세 11 의 1. 이 relations 글(개정 14 줄이 없음)에는 대안 줄이 없다. 그래서 이름 댄 문맥 id 의 집합이 비어 `unknown` 이다. 예전의 `-` 가 `rules-01` 의 결함이다.
+3. `use_cond.branch_iii[]` 의 `context` `-` → `null`(22), `why` `no alternatives line of context -` → `context unknown`(22), `uses` 더함(22): 2 와 같은 까닭이다. 22 는 사용 사건이 든 기록이다.
+4. `use_cond.missing[]` 과 `tool_verdict.violation.undetermined_reasons[]` 의 `caller_dependence_unknown((i) not_established, (iii) not_established)` → `caller_dependence_unknown(context unknown)`(22): 하위 사유가 '문맥을 모름'을 먼저 고르는 줄(바뀌지 않음)이 3 을 따른 것이다.
+5. `depends_on` 더함: `callee_check`, `reach`, `writers`, `branch_i`, 모든 `branch_iii` 항목(각 45). 명세 11 의 5 다. 후보 목록이 없는 실행이라 모두 빈 목록이다.
+- 수명 끝의 `t_ms` 는 이 기록들에 수명 끝이 없어 차이가 없다. 스크립트 정체성 칸(`script.*`, `inputs.normal`)은 따로 셌다.
+
+**예행 [M].**
+- **(가) 두 C1 빌드의 정적 출력, 실행 없음, 16 갈래**(`obs1/xr5_dry_static_<빌드>`). 입력은 후보 목록, `branches_16.txt`, 호출 파일, 24.4 와 같은 정적 입력이다. 두 빌드 모두 rc 0, 갈래마다 46 기록, 물림 0, 입력 점검 refused 0 이다.
+  - 경로 A 행의 요소 값(`scripts/elements.py`, `out/static_elements_16_fixed.tsv`; 첫 실행 `…trial1_root_none.tsv` 는 소비 뿌리 없음을 `none` 으로 적어 견줌이 틀렸다)을 동결한 판의 `../records/closure-c1prep-20261119/scratch/branches16/static_elements_16.tsv`(160 줄)와 견줬다. 다른 칸은 빌드마다 26, 모두 `D1` 갈래다.
+  - (c4) `present` → `missing`: `D1-Rd`·`D1-all` 의 A20, A21, A22, A26 과 A63(빌드마다 10). `Rd` 는 (c4)를 전제로 세운다. 그런데 생성자 줄이 이름 댄 생성 API(`OS_CountSemCreate`·`OS_TimeBaseCreate`·A63 의 생성자)의 `agreement` 항목이 그 행의 `layers:` 목록과 후보 목록에 있다. `D1` 은 그 항목을 인정하지 않는다(명세 11 의 5; 그 절의 [I] 가 든 예와 같다).
+  - A63 의 (c1) `present` → `missing`, `use_cond` `partial` → `not_derived`(`D1` 여덟 갈래, 빌드마다 16 칸): A63 의 flip 줄이 사용 callee `OS_FileOpenCheck` 를 이름 대고, 그 `agreement` 항목이 목록에 있다. 남는 요소가 없어 `not_derived` 다. 명세 11 의 5 의 [I] "`use_cond.status` 는 바뀌지 않으리라"는 A63 에서 맞지 않았다. **`violation` 은 160 줄 모두 `undetermined` 그대로다.** `D2` 갈래에는 다른 칸이 없다.
+- **(나) 런타임 단계의 시험 dump**(`obs1/xr5_dry_rt_rt_objects`, `…_rt_format15`; `out/dry_rt_*.log`): 24.4 (나)와 같다. 읽는 부분 rc 0 이고, 판정 부분 rc 3 이다(그 dump 는 계획의 manifest 를 싣지 않아 모든 기록이 `build_mismatch`; 계약대로). 16 갈래 × 46 기록, 물림 0.
+- **(다) 실제 두 계획 위의 합성 사용 사건**(시험 입력이며 증거가 아님; `scripts/synth_record.py`, `obs1/xr5_synth_<빌드>_<script|reverse>`, `out/synth_*.log`).
+  - 생성기의 규칙은 그 머리글에 있다. 행위자는 쌍 파일이 이름 댄 뿌리마다 하나이고, 코어 뿌리를 먼저, 그다음 시작 스크립트의 앱을 그 차례나 그 반대로 둔다. 생성·사용 호출은 계획의 site 와 결합 파일의 묶인 site 에서만 낸다. 키 글은 relations 의 생성자 줄에서 온다. 결과는 같은 partition·같은 글의 생성이 먼저 끝났는지로 정한다. 행 번호·키·기대는 인자가 아니다.
+  - 넷 모두 rc 0, 갈래마다 46 기록, 물림 0, 사용 523 이다(사건 1,132/1,130, 사용 호출 521, 생성 6).
+  - 경로 A 행(`scripts/path_a_uses.py`, `out/synth_path_a_rows.txt`; `D1-R0`·`D2-R0`):
+    - 문맥 줄이 없는 행의 사용은 문맥 `1` 을 받는다(A20, A22, A26, c1_post_tx 의 A21). c1_pre_tx 의 A21 은 틀로 정해진다(script 차례 1, reverse 차례 2).
+    - c1_post_tx A21 의 (iii)은 `not_held`(found: retry)다. 평가 절차 14.11 이 예측한 수준 1 과 같은 꼴이다.
+    - 찾은 사용은 모두 `undecided(the row's creator sites are not complete)` 이고 인스턴스 연결은 `unlinked` 다. `unmet` 은 하나도 없다.
+    - 모든 쌍의 (나)는 `no entry: memchr`, (다)는 `no entry: strncpy, memchr, memcpy` 다.
+    - 경로 A 의 모든 기록이 `violation undetermined` 다.
+  - 첫 실행(`obs1/xr5_synth_c1_pre_tx_script_trial1`)은 쌍 파일의 뿌리 글 `-` 와 중괄호 집합에도 행위자를 만들었다(52 기록). 생성기를 고쳐 다시 돌렸고, 첫 출력은 남겼다.
+- **(라) 반증·평가 스크립트를 여섯 예행 출력에 돌림**(`obs1/xr5_eval_dry`, 꼬리 `out/eval_dry_tails.txt`). 문 결과는 없고, 기대 파일은 시험 입력 `out/test_expect_c1_with_class.tsv` 다(커밋된 `expect_c1.tsv` 에 12 의 규칙으로 `class` 를 단 것: static 960, boot 1,184; 이 주기의 기대 파일이 아님).
+  - 여섯 모두 `form ok` 다.
+  - F1 의 `static` 어긋남은 빌드마다 26 이다. (가)의 26 칸과 같다. 곧 동결 전 판의 정적 값을 비춘 기대 줄이 고친 판과 갈리는 자리다. `boot` 의 F1 어긋남(정적 416; 합성 320–352)은 실행 없는 기록이나 합성 기록을 부팅 예측과 견준 것이라 아무것도 증명하지 않는다.
+  - s1–s4 는 280 줄 모두 `static` 이고 `pass` 다.
+  - `expect_discriminate` 는 모두 `static` 이다:
+    - 정적 예행: c1_pre_tx 충족 16 / 센 64(A20; A21 은 `tier+control` 이라 `not_counted` 16), c1_post_tx 32/80(A20, A21).
+    - 합성 c1_pre_tx script: 0/64. 그 합성 세계에서 A20 의 사용이 찾음이라 (3)을 요구하고, 세대가 없어 미달이다.
+  - F8 (b)·F10 은 `not_evaluable` 이다(연결된 쌍 없음, 문 결과 없음). 정밀도·재현율은 `undefined(no reader)` 다.
+  - 첫 합성 평가는 출력 이름이 겹쳐 부팅 이름표가 `explain` 이었다. `…trial1_label_explain` 으로 남겼다.
+
+**공간 [M].**
+- 시작 1,213,014,016 B(14:21Z, `out/free_start.txt`), 끝 822,243,328 B(14:57:18Z, `out/free_end.txt`)다.
+- 감시 기록은 38 이고 끝 줄은 42 다. 모두 `verdict=completed` 이고 `below_floor_at_end` 는 없다. 가장 낮은 값은 823,791,616 B 이고, 바닥 314,572,800 B 위로 509,219,216 B 다.
+- 남긴 출력은 `obs1/xr5_*` 열둘, 약 367 MB(겉 크기)다. 그 가운데 합성 다섯이 239 MB 다. fixture 와 시험 출력은 scratch 에 두었다가 지웠다.
+- 26.2 가 잡은 '코드와 동결 단계의 실행' 177,725,440 B 보다 훨씬 많이 썼다. 16 갈래와 합성 예행 다섯 번 때문이다. 그래서 부팅 12 번의 목표 여유(1,214,021,888 B)에 약 392 MB 모자란다(열린 점 1).
+
+**계획과 다르게 한 것.**
+1. 절 번호: 지시는 26.2 였으나 26.1·26.2 는 앞 단계가 썼다. 그래서 26.3 으로 적었다.
+2. 명세 11.4 를 코드보다 먼저 따로 커밋했다(머리의 규칙). 그 안의 정함 가운데 기록에 더한 칸 넷(`admitted_kinds`, `named_calls_sha256`, 수명 끝의 `t_ms`, 모든 (iii) 항목의 `depends_on`)은 11.1–11.3 이 적지 않은 것이다.
+3. 첫 fixture 시험 하나(scratch, 약 46 MB)는 감시 없이 돌렸다. 그 뒤의 개발 시험(`guard/dev*.log`)과 모든 실행은 감시 아래였다.
+4. 경로 B 의 fixture 세계에서 경로 A 행의 문맥 줄을 뺐다(11.4 의 8). 검사 14 에 더한 줄이 그 세계를 물렸기 때문이다.
+5. F6 은 실패하는 fixture 가 없다(11.4 의 5). 지시는 '모든 점검을 한 번은 실패'였다.
+6. `expect_write.py` 와 기대 파일의 다시 씀(12)은 하지 않았다. 다음 단계의 일이다(26.0 (나)·(다)·(라)).
+7. 평가 출력이 부팅마다 약 1 MB 였다. 그래서 예행의 평가 출력은 기록 디렉터리에 두지 않고 `obs1/xr5_eval_dry` 로 옮겼다. 기록에는 꼬리와 sha256 목록만 둔다. 명세 11 의 15 는 부팅의 `eval.txt` 를 '작은 글'로 기록 디렉터리에 둔다(열린 점 3).
+8. 첫 합성 생성기와 첫 요소 비교, 첫 합성 평가의 출력은 고친 뒤에도 새 이름으로 남겼다.
+
+**열린 점.**
+1. **공간.** 여유 822 MB 로는 부팅 12 번의 목표에 약 392 MB 모자란다. 이 단계의 `obs1/xr5_*`(JSON 기록이 대부분)를 26.2 의 방법(목록 대조, xz tar, 파일마다의 왕복, 장부 행을 `parts` 로)으로 바꾸면 되찾을 수 있으리라 본다 [I]. 고를 것과 양을 먼저 커밋해야 한다(26.0 (카)). 부팅 전에 lead 가 정한다.
+2. 남은 차례(평가 절차 14.0): 규칙에서 다시 쓰는 기대와 예측(12, 기대 쓰는 스크립트의 `class` 칸 포함), 다시 하는 동결(판정 부분 sha256 은 이 단계의 커밋 판 기준), 새 부팅 선언(새 줄: 어휘 파일, 이름 공간 자료 다섯, `named_calls.tsv` 와 그 스크립트, `explain_eval.py`, 새 동결 파일).
+3. `eval.txt` 의 크기와 자리(약 1 MB × 부팅 12): 명세 11 의 15 를 고칠지 lead 가 정한다.
+4. 명세 11 의 5 의 [I] 가 A63 에서 틀렸다(`D1` 의 `use_cond` `not_derived`). 평가 절차 14.6 의 표는 이 단계의 출력에서 어긋나지 않았다(s1–s4·F5·F6 `static`, F2 (b)·F7 `format`, F3·F4·F8 (b)·F9·F10 `boot`). 그러나 다시 동결한 판으로 다시 확인해야 한다(14.6 머리).
+5. 글 커밋 셋(`b071f02`, `adfdb51`, `3535b43`)의 결과 소절은 아직 없다(그 단계의 열린 점). 그 단계의 수는 남긴 파일이 없어 이 절에 옮기지 않았다.
+6. 합성 생성기의 한계 [I]. 사용의 키 글은 그 행의 첫 생성자 글이다. 수명 끝·효과·정지 사건은 내지 않는다. 생성자 뿌리가 쌍 파일에 없으면 생성이 없다. 그래서 합성 예행은 코드 길만 보이고, 부팅 결과의 예측이 아니다.

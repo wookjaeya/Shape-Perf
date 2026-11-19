@@ -1,0 +1,4 @@
+# space_guard.sh kind=path-a-uses need=5000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-explain-fix-20261119/scripts/path_a_uses.py /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_reverse/explain /home/user/work/redesign/obs1/xr5_synth_c1_post_tx_script/explain /home/user/work/redesign/obs1/xr5_synth_c1_post_tx_reverse/explain
+start 2026-11-19T14:53:14.686Z free=823812096 threshold=319572800
+sample 2026-11-19T14:53:14.691Z 823808000
+end 2026-11-19T14:53:16.698Z kind=path-a-uses verdict=completed rc=0 free=823791616 lowest=823791616 dip=20480 change=-20480

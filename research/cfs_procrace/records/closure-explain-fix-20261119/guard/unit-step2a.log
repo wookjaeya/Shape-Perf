@@ -1,0 +1,9 @@
+# space_guard.sh kind=unit-step2a need=50000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/env/redesign/step2a_tests_unit.sh
+start 2026-11-19T14:47:43.397Z free=1210228736 threshold=364572800
+sample 2026-11-19T14:47:43.402Z 1210224640
+sample 2026-11-19T14:47:45.408Z 1208254464
+sample 2026-11-19T14:47:47.415Z 1207607296
+sample 2026-11-19T14:47:49.423Z 1207046144
+sample 2026-11-19T14:47:51.428Z 1205686272
+sample 2026-11-19T14:47:53.434Z 1203384320
+end 2026-11-19T14:47:55.440Z kind=unit-step2a verdict=completed rc=0 free=1210220544 lowest=1203384320 dip=6844416 change=-8192

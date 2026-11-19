@@ -40,7 +40,8 @@
 #     instance list run.meta does not name, a run container with another parent basis, another dump -> refused (1)
 #  14 stop-event evaluation (env/obs1/stop_eval.py): apps of a stub startup script reach run loop or exit -> rc 0; an
 #     app whose actor never reaches a stop site, an app without a root site in the plan -> rc 3; no RUN line -> rc 2
-#  15 explanation records (env/obs1/explain.py, fixtures env/obs1/tests/test_explain.py): each need state of the
+#  15 explanation records of revision 3 (env/obs1/explain_rev3.py, the revision-3 explain.py kept byte for byte; fixtures
+#     env/obs1/tests/test_explain.py): each need state of the
 #     judgement rules 3.5, each status of the link, use_cond, order and effect axes, a repeated creation-argument value
 #     (both ties undetermined), a refused combination (rc 3), and a broken record for each format rule of 3.6 (rc 4)
 #  16 offline probe revision 2 (plan/ovm_rev1_20261116/probe/s1_rev2.py) on a stub relations text: one path A row whose
@@ -55,6 +56,10 @@
 #     text without buildid lines but with a module line -> unconfirmed(no build-id in dump) for main and the module;
 #     note=absent -> unconfirmed(no build-id note); a module path no build record line ends with -> unconfirmed(object not
 #     in the build record); the chain verdict is the same in every case
+#  19 explanation records of revision 4 (env/obs1/explain.py driving explain_read.py and explain_judge.py; fixtures
+#     env/obs1/tests/test_explain4.py): each of the twelve name-binding items missing alone, the pair and record results,
+#     name states and instance links, pair kinds, the pair file, contexts and (c3), each reading, the data branches and
+#     the admission-file checks (rc 2), the judge opening only its inputs, a broken record for each format check 9-17
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../../.." && pwd)"
@@ -375,7 +380,7 @@ res "stop-event evaluation (stub plan, script and dump)" $ok "control rc $c ($sm
 
 # 15 explanation records
 X=$W/ex
-python3 -I "$R/env/obs1/tests/test_explain.py" "$R/env/obs1/explain.py" "$R/kairos/tests/static/data/reason_vocabulary.txt" "$X" > "$W/ex.log" 2>&1; c=$?
+python3 -I "$R/env/obs1/tests/test_explain.py" "$R/env/obs1/explain_rev3.py" "$R/kairos/tests/static/data/reason_vocabulary.txt" "$X" > "$W/ex.log" 2>&1; c=$?
 sm=$(tail -1 "$W/ex.log")
 ok=0; [ $c -eq 0 ] || { ok=1; grep '^FAIL' "$W/ex.log" | head -5; }
 res "explanation records (synthetic fixtures)" $ok "$sm"
@@ -442,6 +447,13 @@ ok=0
 [ "$r1" = "2 confirmed unconfirmed" ] && [ "$r2" = "2 refused unconfirmed" ] && [ "$r3" = "2 unconfirmed(no build-id in dump) unconfirmed" ] || ok=1
 [ "$r4" = "2 unconfirmed(no build-id note) unconfirmed" ] && [ "$r5" = "2 unconfirmed(object not in the build record) unconfirmed" ] || ok=1
 res "same-build lines (stub tree, system executables)" $ok "equal ids: $r1; other module id: $r2; no buildid line: $r3; note absent: $r4; path not in the record: $r5"
+
+# 19 explanation records of revision 4
+X=$W/ex4
+python3 -I "$R/env/obs1/tests/test_explain4.py" "$R/env/obs1" "$R/kairos/tests/static/data/reason_vocabulary.txt" "$X" > "$W/ex4.log" 2>&1; c=$?
+sm=$(tail -1 "$W/ex4.log")
+ok=0; [ $c -eq 0 ] || { ok=1; grep '^FAIL' "$W/ex4.log" | head -5; }
+res "explanation records revision 4 (synthetic fixtures)" $ok "$sm"
 
 echo "unit checks: $((NC - NF)) of $NC pass"
 exit $((NF > 0))

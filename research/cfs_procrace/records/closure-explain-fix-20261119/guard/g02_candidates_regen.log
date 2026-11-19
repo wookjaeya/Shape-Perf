@@ -1,0 +1,5 @@
+# space_guard.sh kind=candidates-regen need=20000000 floor=314572800 interval=2 cmd=python3 -I records/closure-c1prep-20261119/scripts/candidates.py --out /home/user/work/redesign/obs1/xr5_candidates_regen --kairos kairos --kzdump /home/user/work/merge-check/kz-llvm/tools/kz-dump/kz-dump /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx:/home/user/work/redesign/obs1/cz_final_order/c1_pre_tx/relations.txt:/home/user/work/redesign/obs1/cz_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx:/home/user/work/redesign/obs1/cz_final_order/c1_post_tx/relations.txt:/home/user/work/redesign/obs1/cz_final_extract/c1_post_tx/c1_post_tx/NP/facts.kz
+start 2026-11-19T14:22:02.674Z free=1212968960 threshold=334572800
+sample 2026-11-19T14:22:02.678Z 1212964864
+sample 2026-11-19T14:22:04.684Z 1212960768
+end 2026-11-19T14:22:06.691Z kind=candidates-regen verdict=completed rc=0 free=1212510208 lowest=1212510208 dip=458752 change=-458752

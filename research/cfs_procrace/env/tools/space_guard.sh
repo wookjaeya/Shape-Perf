@@ -9,7 +9,11 @@
 # after 5 s, and the guard exits 76.  Otherwise the guard exits with the command's status.
 # The last lines of FILE: "start", "end" with the lowest sample, the dip (free at start minus the lowest sample),
 # the change (end minus start), the kind (--kind, default "unnamed"; the dip of each tool kind is kept apart) and
-# the verdict (completed, refused-at-start, stopped-at-floor).
+# the verdict (completed, refused-at-start, stopped-at-floor, below_floor_at_end).
+# below_floor_at_end (2026-11-19, results 26.0 (j)): the free value read after the command ended is below the floor
+# although no sample during the run was; the guard then exits 77 (the command's own status stays on the end line as
+# rc=); an end value that cannot be read counts as 0.  A report cites the lowest value of the end line, not the
+# verdict alone.
 # Floor default 314572800 B (300 MiB, as records/local-20261109/bundle_local.sh:20): a work safety value.
 # The free value comes from `df -B1 /`; SPACE_GUARD_FREE_CMD replaces that command (unit tests only; the log says so).
 set -uo pipefail
@@ -73,6 +77,11 @@ if [ $STOP -eq 1 ]; then
   echo "end $(now) kind=$KIND verdict=stopped-at-floor rc=$RC free=$F1 lowest=$LOW dip=$((F0 - LOW)) change=$((F1 - F0))" >> "$LOG"
   echo "space_guard.sh: stopped: free fell below the floor $FLOOR" >&2
   exit 76
+fi
+if [ "$F1" -lt "$FLOOR" ]; then
+  echo "end $(now) kind=$KIND verdict=below_floor_at_end rc=$RC free=$F1 lowest=$LOW dip=$((F0 - LOW)) change=$((F1 - F0))" >> "$LOG"
+  echo "space_guard.sh: the free value at the end $F1 is below the floor $FLOOR" >&2
+  exit 77
 fi
 echo "end $(now) kind=$KIND verdict=completed rc=$RC free=$F1 lowest=$LOW dip=$((F0 - LOW)) change=$((F1 - F0))" >> "$LOG"
 exit "$RC"

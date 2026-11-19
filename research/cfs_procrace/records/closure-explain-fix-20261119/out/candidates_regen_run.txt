@@ -1,0 +1,1 @@
+candidates: 44 lines, 6 kinds (lines 44 kinds 6: byte-string-comparison 1; data-function 4; dynamic-loading 1; framework:agreement 35; sleep 1; termination 2); admission files 63 (D2 and 62 partial)

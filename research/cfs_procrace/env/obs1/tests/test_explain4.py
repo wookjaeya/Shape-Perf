@@ -24,6 +24,7 @@ F = "f" * 64
 KEY = "00000000000000a1"
 T = "a" * 64
 RESULTS = []
+FX = {}     # records kept for the format-check breaks of spec 11 items 1, 4 and 6
 
 
 def ok(name, cond, detail=""):
@@ -143,6 +144,10 @@ def world():
                   ("P0", "strncpy", "source", "p0", "-", "2", "copy-call", "data function"),
                   ("P0", "memchr", "source", "p0", "-", "3", "length-call", "data function"),
                   ("P0", "xexit", "source", "p0", "-", "4", "P0-unverified", "termination")]
+    # the named-calls file (spec 11 item 2): function -> (named_by, records, unverified, layers); None writes no file
+    W["named"] = {"strcmp": ("compare-call", "3", "1", "P0"), "strncpy": ("copy-call", "4", "2", "P0"),
+                  "memchr": ("length-call", "3", "1", "P0")}
+    W["named_over"] = {}        # head / tail / plan / drop overrides of the named-calls file
     W["admitted"] = []          # list of (branch data, kinds or None for all, overrides)
     W["readings"] = None        # None: the 8 of each data branch
     W["give_ns"] = True
@@ -225,6 +230,15 @@ def write_world(W, d):
     cl += ["lines %d kinds %d: %s" % (len(W["cands"]), len(kinds), "; ".join("%s %d" % x for x in sorted(kinds.items()))), "end"]
     with open(p("cand.txt"), "w") as f:
         f.write("\n".join(cl) + "\n")
+    if W["named"] is not None:
+        no = W["named_over"]
+        rows = ["%s\t%s\t%s\t%s\t%s" % ((fn,) + tuple(v)) for fn, v in sorted(W["named"].items()) if fn != no.get("drop")]
+        nl = [no.get("head", "kz-named-calls 1"), "rule judgement rules 8.14 item 5 (synthetic)",
+              "plan %s %s" % (no.get("plan") or sha(p("plan.side")), p("plan.side")), "facts %s /x/facts.kz" % F,
+              "columns function\tnamed_by\trecords\tunverified\tlayers"] + rows
+        nl += [no.get("tail") or "lines %d no_entry %d" % (len(rows), sum(1 for r in rows if r.split("\t")[2] == "0")), "end"]
+        with open(p("named.tsv"), "w") as f:
+            f.write("\n".join(nl) + "\n")
     adm = []
     for i, (data, ks, ov) in enumerate(W["admitted"]):
         lines = [c for c in W["cands"] if ks is None or c[7] in ks]
@@ -285,6 +299,8 @@ def write_world(W, d):
         args += ["--namespaces", p("ns2.txt")]
     if W["give_cands"]:
         args += ["--candidates", p("cand.txt")]
+    if W["give_cands"] and W["named"] is not None:
+        args += ["--named-calls", p("named.tsv")]
     if W["run"]:
         args += ["--dump-text", p("dump.txt"), "--run-meta", p("run.meta"), "--chain", p("chain.txt"), "--startup-script", p("startup.scr")]
     return args
@@ -525,8 +541,9 @@ def main():
         b6before(W)
         W["events"][8] = ("2", 11, 1100, [0, 0x10001], None, "")
         W["rel"]["flip"] = W["rel"]["flip"]
-    case("found-linked", found, [("a found use is instance-linked on an open generation", lambda r, rc, o: r["order"]["use_events"][0]["instance_link"]["status"] == "linked"),
-                                 ("record established by instance", lambda r, rc, o: r["link"]["status"] == "established" and r["link"]["basis"] == "instance")])
+    FX["found"], _ = case("found-linked", found, [("a found use is instance-linked on an open generation", lambda r, rc, o: r["order"]["use_events"][0]["instance_link"]["status"] == "linked"),
+                                 ("record established by instance", lambda r, rc, o: r["link"]["status"] == "established" and r["link"]["basis"] == "instance"),
+                                 ("name state met on the open generation", lambda r, rc, o: r["order"]["use_events"][0]["name_state"] == "met")])
 
     def found_deleted(W):
         found(W)
@@ -639,7 +656,7 @@ def main():
                     "cc": "callee-check: Lib_Check returns -1 [ERR] when (eq param:x#0 0)", "w": "assign at app/maker.c:30:5 in maker_init value=1",
                     "feas": "feasibility: possible: the facts give an order", "flip": "flip: none"}
         W["rel_extra"] = []
-        with_keys = W
+        W["contexts"] = []      # (2026-11-19) the path A row's context lines are not of a path B row
         W["entry_on"] = False
     r, out = case("pathB", pathb, [("a path B row makes a record with no name-binding pair", lambda r, rc, o: rc == 0 and r["path"] == "B"
                                     and r["link"]["name_binding"]["pairs"] == [] and r["use_cond"]["branch_i"]["status"] == "not_established")])
@@ -657,6 +674,164 @@ def main():
          [("a slot clear shown to be no lifetime end plans no site: (ma) held", lambda r, rc, o: pair0(r)["missing_items"] == [])])
     case("note-absent", lambda W: W.__setitem__("chain", [W["chain"][0], W["chain"][1], "same_build_object\tunconfirmed(no build-id note)\tmodule:1 path=core tree=11 dump=none"]),
          [("an object without a build-id note: basis 1 missing", lambda r, rc, o: pair0(r)["missing_items"] == ["basis1_same_build"])])
+
+    # 12. spec 11 (2026-11-19): shapes that are not the design rows (synthetic names only)
+    # 12.1 item 1: the context of a row without context lines
+    ctx_one = "alternatives [context 1: ConsumerMain@app/cons.c:90:5 <- cons_init@app/cons.c:50:9]: "
+    tail_ = "; rests on: none; premises: none; decided calls: none"
+
+    def noctx(body, extra=None):
+        def m(W):
+            W["contexts"] = []
+            W["rel"]["alt1"] = ctx_one + body if body else None
+            W["rel"]["alt2"] = extra
+        return m
+    use0 = lambda r: r["order"]["use_events"][0]
+    case("ctx1-found", noctx("found: retry: app/cons.c:52:9" + tail_),
+         [("no context line, one alternatives context: the use's context is that id", lambda r, rc, o: use0(r)["context"] == "1"),
+          ("(iii) not_held from the found line", lambda r, rc, o: [x["status"] for x in r["use_cond"]["branch_iii"]] == ["not_held"]),
+          ("uses.tsv carries the context", lambda r, rc, o: open(os.path.join(o, "D2-R0", "uses.tsv")).read().splitlines()[1].split("\t")[16] == "1")])
+    case("ctx1-none", noctx("none found (exploration complete); rests on: P0-unverified(xexit); premises: none; decided calls: none"),
+         [("context 1", lambda r, rc, o: use0(r)["context"] == "1"),
+          ("(iii) held (D2: the entry it rests on admitted)", lambda r, rc, o: [x["status"] for x in r["use_cond"]["branch_iii"]] == ["held"]),
+          ("use_cond derived", lambda r, rc, o: r["use_cond"]["status"] == "derived")])
+    case("ctx1-none-D1", noctx("none found (exploration complete); rests on: P0-unverified(xexit); premises: none; decided calls: none"),
+         [("D1: (iii) not established on the unverified entry", lambda r, rc, o: use0(r)["context"] == "1" and r["use_cond"]["branch_iii"][0]["status"] == "not_established"
+           and r["use_cond"]["branch_iii"][0]["depends_on"] != [])], branch="D1-R0")
+    case("ctx1-notest", noctx("not established (open: exit at app/cons.c:95:5: on a path through a branch this value does not decide)" + tail_),
+         [("context 1, (iii) not established from the line", lambda r, rc, o: use0(r)["context"] == "1" and r["use_cond"]["branch_iii"][0]["status"] == "not_established"
+           and r["use_cond"]["branch_iii"][0]["context"] == "1")])
+
+    def ctx1_noat(W):
+        noctx("found: retry: app/cons.c:52:9" + tail_)(W)
+        del W["events"][9]
+        del W["events"][6]
+        del W["events"][5]
+    case("ctx1-noat", ctx1_noat, [("no frame event and no at-call: the context is still the one id", lambda r, rc, o: use0(r)["context"] == "1"
+                                    and "at_call" not in use0(r))])
+    alt_two = "alternatives [context 2: cons_cmd@app/cons.c:120:5 <- cons_init@app/cons.c:50:9]: found: retry: app/cons.c:122:9" + tail_
+    case("ctx2-nolines", noctx("found: retry: app/cons.c:52:9" + tail_, alt_two),
+         [("no context line, two alternatives contexts: unknown", lambda r, rc, o: use0(r)["context"] is None),
+          ("(iii) not established (context unknown)", lambda r, rc, o: any(x["why"] == "context unknown" and x["context"] is None for x in r["use_cond"]["branch_iii"])),
+          ("caller_dependence_unknown(context unknown)", lambda r, rc, o: "caller_dependence_unknown(context unknown)" in r["use_cond"]["missing"])])
+    case("ctx-none-lines", noctx(None),
+         [("no context line and no alternatives line: unknown, no id made up", lambda r, rc, o: use0(r)["context"] is None
+           and all(x["context"] is None for x in r["use_cond"]["branch_iii"]))])
+
+    def ctx_dash(W):
+        W["contexts"] = []
+        W["rel"]["alt1"] = "alternatives [context -]: none found (exploration complete); rests on: P0-unverified(xexit); premises: none; decided calls: none"
+        W["rel"]["alt2"] = None
+    case("ctx-dash", ctx_dash, [("an alternatives line of context '-': the use's context is '-'", lambda r, rc, o: use0(r)["context"] == "-"
+                                 and r["use_cond"]["branch_iii"][0]["context"] == "-" and r["use_cond"]["branch_iii"][0]["status"] == "held")])
+    # 12.2 item 2: the named-calls file goes with the candidate list; a wrong one stops the run (rc 2, no record)
+    for tag, mod in (("named-head", lambda W: W["named_over"].__setitem__("head", "kz-named-calls 2")),
+                     ("named-tail", lambda W: W["named_over"].__setitem__("tail", "lines 9 no_entry 0")),
+                     ("named-plan", lambda W: W["named_over"].__setitem__("plan", "0" * 64)),
+                     ("named-drop", lambda W: W["named_over"].__setitem__("drop", "memchr")),
+                     ("named-absent", lambda W: W.__setitem__("named", None))):
+        W = full()
+        mod(W)
+        rc, out, log = run(W, tag)
+        ok("%s: the run stops with rc 2 and writes no record" % tag, rc == 2 and not os.path.isdir(os.path.join(out, "D1-R0")), log[-200:])
+    # 12.3 item 3: a named call with no entry, a call with records that are not unverified, an entry not read, address uses
+    PART = "D2_byte-string_comparison_data_function-R0"
+
+    def noentry(W):
+        W["cands"] = [c for c in W["cands"] if c[1] != "memchr"]
+        W["named"]["memchr"] = ("length-call", "0", "0", "-")
+        W["admitted"] = [("D2", None, {}), ("D2[byte-string comparison,data function]", ["byte-string comparison", "data function"], {})]
+    NOE = "link_unlinked(name binding: no entry: memchr)"
+    for br_ in ("D1-R0", "D2-R0", PART, "D2-all"):
+        FX["noentry-" + br_], _ = case("noentry-" + br_, noentry, [("(na) semantics missing, sub-reason no entry", lambda r, rc, o: item(r, "na_semantics") == ("missing", NOE)),
+                                        ("the ground names the named-calls line", lambda r, rc, o: any(isinstance(g, dict) and g["file"][0] == "named.tsv"
+                                                                                                       for g in pair0(r)["items"]["na_semantics"]["grounds"]))],
+             branch=br_)
+
+    def notunver(W):
+        W["cands"] = [c for c in W["cands"] if c[1] != "memchr"]
+        W["named"]["memchr"] = ("length-call", "2", "0", "P0")
+    case("named-not-unverified", notunver, [("a call with records none of them unverified: (na) held, the pair bound", lambda r, rc, o: pair0(r)["missing_items"] == []
+                                              and pair0(r)["result"] == "bound")])
+    case("entry-not-read", lambda W: W["rel"].__setitem__("alt1", W["rel"]["alt1"].replace("P0-unverified(xexit)", "P0-unverified(yexit)")),
+         [("a rests-on entry in neither file: (iii) not established, its state not read", lambda r, rc, o: r["use_cond"]["branch_iii"][0]["status"] == "not_established"
+           and "the state of the entry of yexit is not read" in r["use_cond"]["branch_iii"][0]["why"])])
+    addr_ne = ("stored-name address uses (the reads of NS_rec_t.name_ptr, every partition): 2: Lib_Info at lib/ns.c:90:5: library: zcopy parameter 1: "
+               "no entry says the parameter is not written (arg 0 unverified [arg 0 is written]); Lib_Cmp at lib/ns.c:12:5: test")
+    for br_ in ("D2-R0", "D2-Rf"):
+        case("addr-noentry-" + br_, lambda W: W["ns"].__setitem__("addr", addr_ne),
+             [("an address use with no entry: (da) missing in every branch, sub-reason no entry", lambda r, rc, o: pair0(r)["missing_items"] == ["da_no_name_mapping"]
+               and item(r, "da_no_name_mapping")[1] == "link_unlinked(name binding: no entry: zcopy)")], branch=br_)
+    addr_uv = ("stored-name address uses (the reads of NS_rec_t.name_ptr, every partition): 1: Lib_Info at lib/ns.c:90:5: library: strncpy parameter 0: "
+               "out-behaviour unverified [arg 0 is written]")
+    SOB = ("P0", "strncpy", "out-behaviour", "p0", "-", "5", "copy-call", "data function")
+
+    def addr_unver(W):
+        W["ns"]["addr"] = addr_uv
+        W["cands"].append(SOB)
+        W["admitted"] = [("D2", None, {}), ("D2[byte-string comparison]", ["byte-string comparison"], {})]
+    case("addr-unver-D2", addr_unver, [("an unverified address use: (da) held in D2, depends_on its candidate line", lambda r, rc, o: item(r, "da_no_name_mapping")[0] == "held"
+                                         and pair0(r)["items"]["da_no_name_mapping"]["depends_on"] == ["\t".join(SOB)])])
+    case("addr-unver-D1", addr_unver, [("D1: (da) missing, rests on an unverified entry", lambda r, rc, o: item(r, "da_no_name_mapping")[0] == "missing"
+                                         and "rests on an unverified entry: strncpy:out-behaviour" in item(r, "da_no_name_mapping")[1]
+                                         and pair0(r)["items"]["da_no_name_mapping"]["depends_on"] == ["\t".join(SOB)])], branch="D1-R0")
+    case("addr-unver-part", addr_unver, [("a partial admission without the kind: (da) missing", lambda r, rc, o: item(r, "da_no_name_mapping")[0] == "missing")],
+         branch="D2_byte-string_comparison-R0")
+    # 12.4 item 4: a found use with no generation is undecided, never unmet; its instance link is unlinked
+    def found_spm(W):
+        found(W)
+        W["rel"]["success"] = W["rel"]["success"].replace(": held:", ": missing(an implication between conditions is not decided):")
+    case("found-nogen", found_spm, [("success path missing: no generation; name state undecided (no create of the found id)",
+                                     lambda r, rc, o: use0(r)["name_state"] == "undecided(no create of the found id in the record)"),
+                                    ("instance link unlinked, no create of the id", lambda r, rc, o: use0(r)["instance_link"] == {
+                                        "status": "unlinked", "reason": "link_unlinked(no create of the id in the record)"}),
+                                    ("record link unlinked", lambda r, rc, o: r["link"]["status"] == "unlinked")])
+    case("found-nogen-inc", lambda W: (found_spm(W), W["rel"].__setitem__("inc", "incomplete: actor_not_extracted(spawn call with no resolved entry)")),
+         [("creator sites not complete: undecided with that sub-reason", lambda r, rc, o: use0(r)["name_state"] == "undecided(the row's creator sites are not complete)")])
+
+    def found_nocreate(W):
+        found(W)
+        W["events"] = W["events"][:10]
+    case("found-nocreate", found_nocreate, [("no create event at all, complete creators: undecided, not unmet", lambda r, rc, o: use0(r)["outcome"] == "found"
+                                              and use0(r)["name_state"] == "undecided(no create of the found id in the record)")])
+    # 12.5 item 5: the list entries (c1), (c2), (c4), (c3)(i) rest on, per data branch
+    LC = ("framework", "Lib_Create", "agreement", "fw", "-", "7", "sem-unverified", "framework:agreement")
+    PART3 = "D2_byte-string_comparison_data_function_termination-R0"
+
+    def dep_c4(W):
+        W["rel"]["layers"] = "layers: B P0 R sem-unverified(Lib_Create:agreement)"
+        W["cands"].append(LC)
+        W["admitted"] = [("D2", None, {}), ("D2[byte-string comparison,data function,termination]", ["byte-string comparison", "data function", "termination"], {})]
+    FX["dep_c4_D2"], _ = case("dep-c4-D2", dep_c4, [("(c4) present in D2 with depends_on the candidate line", lambda r, rc, o: r["use_cond"]["writers"]["status"] == "present"
+                                 and r["use_cond"]["writers"]["depends_on"] == ["\t".join(LC)]),
+                                ("(c1) depends_on none", lambda r, rc, o: r["use_cond"]["callee_check"]["depends_on"] == [])])
+    FX["dep_c4_D1"], _ = case("dep-c4-D1", dep_c4, [("(c4) not present in D1, rests on an unverified entry", lambda r, rc, o: r["use_cond"]["writers"]["status"] == "missing"
+                                 and "writer_set_incomplete(rests on an unverified entry: Lib_Create:agreement)" in r["use_cond"]["missing"]
+                                 and r["use_cond"]["writers"]["depends_on"] == ["\t".join(LC)])], branch="D1-R0")
+    case("dep-c4-part", dep_c4, [("(c4) not present in a partial admission without the kind", lambda r, rc, o: r["use_cond"]["writers"]["status"] == "missing"
+                                   and r["use_cond"]["status"] == "partial")], branch=PART3)
+    LS = ("P0", "Lib_Search", "role", "p0", "-", "8", "P0-unverified", "termination")
+
+    def dep_c1(W):
+        W["rel"]["layers"] = "layers: B P0 R P0-unverified(Lib_Search)"
+        W["cands"].append(LS)
+    case("dep-c1-D1", dep_c1, [("(c1) and (c2) rest on the flip line's listed entry: missing in D1", lambda r, rc, o: r["use_cond"]["callee_check"]["status"] == "missing"
+                                 and r["use_cond"]["reach"]["status"] == "missing" and "absent_result_unevaluated(rests on an unverified entry: Lib_Search:role)" in r["use_cond"]["missing"])],
+         branch="D1-R0")
+    case("dep-c1-D2", dep_c1, [("(c1) present in D2 with its depends_on", lambda r, rc, o: r["use_cond"]["callee_check"]["status"] == "present"
+                                 and r["use_cond"]["callee_check"]["depends_on"] == ["\t".join(LS)])])
+    CR = ("framework", "cons_run", "agreement", "fw", "-", "9", "sem-unverified", "framework:agreement")
+
+    def dep_ci(W):
+        W["rel"]["layers"] = "layers: B P0 R sem-unverified(cons_run:agreement)"
+        W["cands"].append(CR)
+    case("dep-ci-D1", dep_ci, [("(c3)(i) not established in D1 on the holder line's listed entry", lambda r, rc, o: r["use_cond"]["branch_i"]["status"] == "not_established"
+                                 and r["use_cond"]["branch_i"]["why"].startswith("rests on an unverified entry: cons_run:agreement"))], branch="D1-R0")
+    case("dep-ci-D2", dep_ci, [("(c3)(i) held in D2 with its depends_on", lambda r, rc, o: r["use_cond"]["branch_i"]["status"] == "held"
+                                 and r["use_cond"]["branch_i"]["depends_on"] == ["\t".join(CR)])])
+    case("dep-none", lambda W: None, [("no listed entry named: every element and (da) depends_on none", lambda r, rc, o: all(
+        r["use_cond"][k]["depends_on"] == [] for k in ("callee_check", "reach", "writers", "branch_i")) and pair0(r)["items"]["da_no_name_mapping"]["depends_on"] == [])])
+
     # 10. format checks: break each of 9-17 in a good record; --check refuses every one
     good = rec(os.path.join(WORK, "001_base", "out"), "D2-R0")
     gpath = os.path.join(WORK, "good.json")
@@ -686,25 +861,102 @@ def main():
             json.dump(bad, f)
         rcb = subprocess.call([PY, "-I", os.path.join(OBS, "explain.py"), "--check", bp, "--vocabulary", VOC], stdout=subprocess.DEVNULL)
         ok("format check %s: refused" % name, rcb == 4)
+    # 10b. spec 11 items 1, 4 and 6: the added format checks 14 and 16 (a)-(d), each broken in a record that passes
+    def uc_of(r):
+        return r["use_cond"]
+    breaks2 = [
+        ("14 a use with a context of no alternatives line", good, lambda r: r["order"]["use_events"][0].__setitem__("context", "7"), "spec 11 item 1"),
+        ("14 a found use whose name state is unmet", FX.get("found"), lambda r: r["order"]["use_events"][0].__setitem__("name_state", "unmet"), "spec 11 item 4"),
+        ("16 (a) (c1) without depends_on", good, lambda r: uc_of(r)["callee_check"].pop("depends_on"), "(16) (a)"),
+        ("16 (a) a pair's (da) without depends_on", good, lambda r: r["link"]["name_binding"]["pairs"][0]["items"]["da_no_name_mapping"].pop("depends_on"), "(16) (a)"),
+        ("16 (b) D1: (c4) present on a list entry", FX.get("dep_c4_D1"), lambda r: uc_of(r)["writers"].__setitem__("status", "present"), "(16) (b)"),
+        ("16 (c) D2[...]: (c4) present on a line of a kind not admitted", FX.get("dep_c4_D2"),
+         lambda r: (r["eval_branch"].__setitem__("data", "D2[byte-string comparison]"), r["data_branch"].__setitem__("admitted_kinds", ["byte-string comparison"])), "(16) (c)"),
+        ("16 (d) (na) held with the sub-reason no entry", FX.get("noentry-D2-R0"),
+         lambda r: r["link"]["name_binding"]["pairs"][0]["items"]["na_semantics"].__setitem__("status", "held"), "(16) (d)"),
+    ]
+    for name, base_rec, br_, want in breaks2:
+        if base_rec is None:
+            ok("format check %s: refused" % name, False, "no base record")
+            continue
+        g2 = os.path.join(WORK, "good2.json")
+        with open(g2, "w") as f:
+            json.dump(base_rec, f)
+        r0 = subprocess.run([PY, "-I", os.path.join(OBS, "explain.py"), "--check", g2, "--vocabulary", VOC], stdout=subprocess.PIPE, universal_newlines=True)
+        bad = copy.deepcopy(base_rec)
+        br_(bad)
+        bp = os.path.join(WORK, "bad2.json")
+        with open(bp, "w") as f:
+            json.dump(bad, f)
+        r1 = subprocess.run([PY, "-I", os.path.join(OBS, "explain.py"), "--check", bp, "--vocabulary", VOC], stdout=subprocess.PIPE, universal_newlines=True)
+        ok("format check %s: the record passes, the broken one is refused by it" % name, r0.returncode == 0 and r1.returncode == 4 and want in r1.stdout,
+           (r0.stdout[-200:], r1.stdout[-300:]))
     # 11. summary and expectation comparison (they change no record)
     before = sha(os.path.join(WORK, "001_base", "out", "D2-R0", "index.tsv"))
     sm = os.path.join(WORK, "summary.txt")
-    rcs = subprocess.call([PY, "-I", os.path.join(OBS, "explain_summary.py"), "--out", sm, "boot1=%s" % os.path.join(WORK, "001_base", "out"),
-                           "boot2=%s" % os.path.join(WORK, "contradiction") if False else "boot2=%s" % os.path.join(WORK, "001_base", "out")],
-                          stdout=subprocess.DEVNULL)
+    ul = os.path.join(WORK, "uses_fx.tsv")     # a synthetic list of pre-defined uses: the fixture row's use in its two contexts
+    with open(ul, "w") as f:
+        f.write("kz-uses 1\nrule synthetic\ncolumns build\trow_label\trow_key\tpath\tconsumer_root\tuse_tu\tuse_line\tuse_col\tcallee\tat_site\t"
+                "after_site\tcontext_id\tframe_sites\tplan_state\n")
+        for cid, fr in (("1", "40,41"), ("2", "42,43")):
+            f.write("\t".join(["fx", "A1", KEY, "A", "ConsumerMain (script-entry)", "app/cons.c", "50", "9", "Lib_FindByName", "10", "11", cid, fr, "tier+control"]) + "\n")
+        f.write("lines 2 rows 1\nend\n")
+    rcs = subprocess.call([PY, "-I", os.path.join(OBS, "explain_summary.py"), "--out", sm, "--uses", ul, "boot1=%s" % os.path.join(WORK, "001_base", "out"),
+                           "boot2=%s" % os.path.join(WORK, "001_base", "out")], stdout=subprocess.DEVNULL)
     txt = open(sm).read() if os.path.exists(sm) else ""
-    ok("summary rc 0, per-branch tables, no detection count", rcs == 0 and "branch D2-R0" in txt and "violation x pair_kind x order" in txt and "detect" not in txt.lower())
+    ok("summary rc 0, per-branch tables, no detection count", rcs == 0 and "table D2-R0" in txt and "violation x pair_kind x order" in txt and "detect" not in txt.lower())
+    tl = txt.splitlines()
+    heads = {}
+    for i, ln in enumerate(tl):
+        if ln.startswith("table "):
+            heads[ln.split()[1]] = tl[i + 1]
+    ok("summary (spec 11 item 7): main head on D1-R0 only, auxiliary heads with data and readings, the reading tag copied",
+       heads.get("D1-R0", "").startswith("  head: main (declared before the boot: D1/R0)") and heads.get("D2-R0") == "  head: auxiliary (data D2, readings R0)"
+       and heads.get("D2-Ra") == "  head: auxiliary (data D2, readings Ra) [4.2 의 읽기 갈래(PI 결정 전)]"
+       and sum(1 for h in heads.values() if "main" in h) == 1, list(heads.items())[:3])
+    ok("summary (spec 11 item 8): one row per pre-defined use, the unreached context included; per-boot reached / defined",
+       sum(1 for ln in tl if ln.startswith("    use\t")) == 2 * len(heads) and "    boot boot1: reached 1 / defined 2; decided 1 / reached 1" in txt
+       and any(ln.startswith("    use\tfx\tA1\t%s\tConsumerMain (script-entry)\tcontext 2\t2 boots: observed 0, not observed 0, refuted 0, undetermined 0, not reached 2" % KEY)
+               for ln in tl), [ln for ln in tl if ln.startswith("    boot ")][:2])
+    ok("summary (spec 11 item 9): the eight pair-kind lines, the between-app line",
+       all(sum(1 for ln in tl if ln.startswith("    pair_kind\t%s\t" % k)) == len(heads) for k in ("app-app", "core-app", "process-app", "same-app-other",
+                                                                                          "same-app-main-child", "same_actor", "core-core", "unknown"))
+       and "    between apps (the headline line: app-app, both owners determined): 2" in txt)
+    for name, f_ in (("two head lines in a table", lambda L: L.insert(L.index("table D2-R0") + 2, "  head: auxiliary (data D2, readings R0)")),
+                     ("a main head on another branch", lambda L: L.__setitem__(L.index("table D2-R0") + 1, "  head: main (declared before the boot: D1/R0)")),
+                     ("a use row missing", lambda L: L.remove(next(x for x in L if x.startswith("    use\t")))),
+                     ("a pair-kind line missing", lambda L: L.remove(next(x for x in L if x.startswith("    pair_kind\tcore-core\t"))))):
+        L = list(tl)
+        f_(L)
+        bp = os.path.join(WORK, "summary_bad.txt")
+        with open(bp, "w") as f:
+            f.write("\n".join(L) + "\n")
+        rcb = subprocess.call([PY, "-I", os.path.join(OBS, "explain_summary.py"), "--check-summary", bp], stdout=subprocess.DEVNULL)
+        rcg = subprocess.call([PY, "-I", os.path.join(OBS, "explain_summary.py"), "--check-summary", sm], stdout=subprocess.DEVNULL)
+        ok("summary form check: %s refused (rc 3), the written summary passes" % name, rcb == 3 and rcg == 0)
     ex = os.path.join(WORK, "expect.txt")
     with open(ex, "w") as f:
         f.write("kz-expect 1\nplan x\n" + "\n".join("\t".join(x) for x in [
-            ("expect", "D1-R0", "fx", KEY, "ConsumerMain", "pair[app/maker.c:30:5].missing_items", "na_semantics"),
-            ("expect", "D2-R0", "fx", KEY, "*", "tool_verdict.violation.value", "observed"),
-            ("expect", "D1-R0", "fx", KEY, "*", "use_cond.status", "derived")]) + "\nlines 3\nend\n")
+            ("expect", "D1-R0", "fx", KEY, "ConsumerMain", "pair[app/maker.c:30:5].missing_items", "na_semantics", "boot"),
+            ("expect", "D2-R0", "fx", KEY, "*", "tool_verdict.violation.value", "observed", "boot"),
+            ("expect", "D1-R0", "fx", KEY, "*", "use_cond.status", "derived", "static")]) + "\nlines 3\nend\n")
     eo = os.path.join(WORK, "expect_out.txt")
     rce = subprocess.call([PY, "-I", os.path.join(OBS, "explain_expect.py"), "--expect", ex, "--records", os.path.join(WORK, "001_base", "out"), "--out", eo],
                           stdout=subprocess.DEVNULL)
     et = open(eo).read() if os.path.exists(eo) else ""
     ok("expectation comparison: 2 match, 1 mismatch", rce == 0 and et.count("\tmatch\t") == 2 and et.count("\tmismatch\t") == 1, et[-300:])
+    ok("expectation comparison (spec 11 item 12): the class on every line and the counts per class",
+       "# by class: boot: match 1, mismatch 0, no_record 1; static: match 0, mismatch 1, no_record 0; format: match 0, mismatch 0, no_record 0" in et
+       or "# by class: boot: match 2, mismatch 0, no_record 0; static: match 0, mismatch 1, no_record 0; format: match 0, mismatch 0, no_record 0" in et, et[-400:])
+    for name, bad_line in (("no class column", "expect\tD2-R0\tfx\t%s\t*\tuse_cond.status\tpartial" % KEY),
+                           ("a class outside the three", "expect\tD2-R0\tfx\t%s\t*\tuse_cond.status\tpartial\tmaybe" % KEY)):
+        exb = os.path.join(WORK, "expect_bad.txt")
+        with open(exb, "w") as f:
+            f.write("kz-expect 1\nplan x\n%s\nlines 1\nend\n" % bad_line)
+        eob = os.path.join(WORK, "expect_bad_out_%d.txt" % len(RESULTS))
+        rcb = subprocess.call([PY, "-I", os.path.join(OBS, "explain_expect.py"), "--expect", exb, "--records", os.path.join(WORK, "001_base", "out"), "--out", eob],
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        ok("expectation file with %s: refused (rc 2)" % name, rcb == 2)
     ok("summary and comparison changed no record", sha(os.path.join(WORK, "001_base", "out", "D2-R0", "index.tsv")) == before)
     n_pass = sum(1 for _, c in RESULTS if c)
     print("fixtures: %d checks, %d passed, %d failed" % (len(RESULTS), n_pass, len(RESULTS) - n_pass))

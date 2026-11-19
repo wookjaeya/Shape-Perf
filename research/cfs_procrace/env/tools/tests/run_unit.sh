@@ -5,7 +5,8 @@
 # Everything runs on stand-ins in a temporary directory under ${TMPDIR:-/tmp}, removed at the end; nothing is built
 # or booted and nothing outside that directory is written.  Read only otherwise: the scripts themselves and
 # env/redesign/step2a_tests.sh (its inputs table).  These check the scripts; they are not detection experiments.
-#   1 space guard: control completes (rc 0); refused at start (rc 75); stopped at the floor (rc 76, writer killed)
+#   1 space guard: control completes (rc 0); refused at start (rc 75); stopped at the floor (rc 76, writer killed); the
+#     value after the command below the floor with no sample below it (below_floor_at_end, rc 77)
 #   2 build record: a stub tree gives the record (rc 0, the lines of pre_mc.txt); a missing tool -> rc 1
 #   3 ledger: control rc 0; a missing file, a changed byte, a broken bundle part -> rc 1 each
 #   4 tool registry: control rc 0; a changed tool byte, a missing copy -> rc 1 each
@@ -59,7 +60,12 @@
 #  19 explanation records of revision 4 (env/obs1/explain.py driving explain_read.py and explain_judge.py; fixtures
 #     env/obs1/tests/test_explain4.py): each of the twelve name-binding items missing alone, the pair and record results,
 #     name states and instance links, pair kinds, the pair file, contexts and (c3), each reading, the data branches and
-#     the admission-file checks (rc 2), the judge opening only its inputs, a broken record for each format check 9-17
+#     the admission-file checks (rc 2), the judge opening only its inputs, a broken record for each format check 9-17;
+#     since 2026-11-19 also spec 11 items 1-12 (contexts of rows without context lines, the named-calls file, no entry,
+#     found uses, depends_on, format checks 14 and 16 (a)-(d), the summary's heads, uses and pair kinds, the class column)
+#  20 the falsifier and evaluation script (env/obs1/explain_eval.py; fixtures env/obs1/tests/test_explain_eval.py): each of
+#     F1-F10 and s1-s4 failing once (F6 not evaluable), expect_discriminate met / unmet / not counted, precision and in-plan
+#     recall undefined and with values, the classes, the expectation file opened only in F1, writes only to the output
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../../.." && pwd)"
@@ -82,10 +88,16 @@ SPACE_GUARD_FREE_CMD="cat $X/free" "$TL/space_guard.sh" --need 500 --floor 500 -
 echo 900 > "$X/free"
 SPACE_GUARD_FREE_CMD="cat $X/free" "$TL/space_guard.sh" --need 100 --floor 500 --interval 0.2 --kind stub --log "$X/s.log" -- \
   bash -c 'for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do echo $(( $(cat '"$X"'/free) - 100 )) > '"$X"'/free; echo $i >> '"$X"'/steps; sleep 0.3; done'; f2=$?
+# the stand-in writer lowers "free" below the floor and ends before the guard's next sample (interval 3 s): the value
+# read after the command is below the floor, so the verdict is below_floor_at_end and the guard's rc 77 (2026-11-19)
+echo 900 > "$X/free"
+SPACE_GUARD_FREE_CMD="cat $X/free" "$TL/space_guard.sh" --need 100 --floor 500 --interval 3 --kind stub --log "$X/e.log" -- \
+  bash -c 'sleep 0.5; echo 400 > '"$X"'/free'; f3=$?
 ok=0; [ $c -eq 0 ] && [ -s "$X/out" ] && grep -q 'verdict=completed' "$X/c.log" || ok=1
 [ $f1 -eq 75 ] && [ ! -e "$X/never" ] && grep -q 'verdict=refused-at-start' "$X/r.log" || ok=1
 [ $f2 -eq 76 ] && grep -q 'verdict=stopped-at-floor' "$X/s.log" && [ "$(wc -l < "$X/steps")" -lt 20 ] || ok=1
-res "space guard (stub writer)" $ok "control rc $c; refused rc $f1; floor rc $f2 after $(wc -l < "$X/steps") of 20 writer steps; dip $(sed -n 's/.*dip=\([0-9-]*\).*/\1/p' "$X/s.log")"
+[ $f3 -eq 77 ] && grep -q 'verdict=below_floor_at_end rc=0 free=400 lowest=400' "$X/e.log" && ! grep -q 'verdict=completed' "$X/e.log" || ok=1
+res "space guard (stub writer)" $ok "control rc $c; refused rc $f1; floor rc $f2 after $(wc -l < "$X/steps") of 20 writer steps; dip $(sed -n 's/.*dip=\([0-9-]*\).*/\1/p' "$X/s.log"); end below the floor rc $f3"
 
 # 2 build record
 X=$W/b; T=$X/tree; mkdir -p "$T/tools/kz-static/CMakeFiles/kz-static.dir" "$T/tools/kz/CMakeFiles/kz.dir" "$T/tools/kz-dump/CMakeFiles/kz-dump.dir" \
@@ -494,6 +506,13 @@ python3 -I "$R/env/obs1/tests/test_explain4.py" "$R/env/obs1" "$R/kairos/tests/s
 sm=$(tail -1 "$W/ex4.log")
 ok=0; [ $c -eq 0 ] || { ok=1; grep '^FAIL' "$W/ex4.log" | head -5; }
 res "explanation records revision 4 (synthetic fixtures)" $ok "$sm"
+
+# 20 the falsifier and evaluation script (env/obs1/explain_eval.py; fixtures env/obs1/tests/test_explain_eval.py, 2026-11-19)
+X=$W/ev
+python3 -I "$R/env/obs1/tests/test_explain_eval.py" "$R/env/obs1" "$X" > "$W/ev.log" 2>&1; c=$?
+sm=$(tail -1 "$W/ev.log")
+ok=0; [ $c -eq 0 ] || { ok=1; grep '^FAIL' "$W/ev.log" | head -5; }
+res "falsifier and evaluation script (synthetic fixtures)" $ok "$sm"
 
 echo "unit checks: $((NC - NF)) of $NC pass"
 exit $((NF > 0))

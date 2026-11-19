@@ -1,0 +1,4 @@
+# space_guard.sh kind=runcycle-test-dev need=10000000 floor=314572800 interval=2 cmd=bash test_run_cycle.sh <scratch>/rct_try2
+start 2026-11-19T14:38:18.230Z free=1207443456 threshold=324572800
+sample 2026-11-19T14:38:18.235Z 1207439360
+end 2026-11-19T14:38:20.243Z kind=runcycle-test-dev verdict=completed rc=0 free=1206738944 lowest=1206738944 dip=704512 change=-704512

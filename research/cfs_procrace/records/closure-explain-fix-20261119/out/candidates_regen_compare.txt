@@ -1,0 +1,3 @@
+# candidates.py (unchanged, sha256 5add280500150deb4d4fb43e4482337013e11a754c1ad0e308b03b4f5e685e7e) re-run into /home/user/work/redesign/obs1/xr5_candidates_regen; compared file by file with records/closure-c1prep-20261119/candidates (cmp)
+files regenerated 64, byte-identical 64
+committed files not regenerated: admitted.sha256 branches_16.txt branches_all.txt named_calls.tsv 

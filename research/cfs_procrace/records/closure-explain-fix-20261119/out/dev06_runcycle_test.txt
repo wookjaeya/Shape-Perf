@@ -1,0 +1,18 @@
+FAIL the stand-in ELF has a GNU build-id (/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/true)
+cp: cannot stat '/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/true': No such file or directory
+/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/test_run_cycle.sh: line 33: <scratch>/rct_try1/clean/obs/elf/prog: No such file or directory
+FAIL clean declaration: verify rc 0, the boot step runs (verify rc 1, boot rc 1, rows 6 ok 5 differs 0 missing 1)
+cp: cannot stat '/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/true': No such file or directory
+/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/test_run_cycle.sh: line 33: <scratch>/rct_try1/differs/obs/elf/prog: No such file or directory
+FAIL a changed declared value: differs, rc 1; the boot step stops before the boot command (verify rc 1, boot rc 1, rows 6 ok 5 differs 0 missing 1)
+cp: cannot stat '/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/true': No such file or directory
+/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/test_run_cycle.sh: line 33: <scratch>/rct_try1/missing/obs/elf/prog: No such file or directory
+FAIL a missing file: missing, rc 1; no boot (verify rc 1, boot rc 1, rows 6 ok 4 differs 0 missing 2)
+cp: cannot stat '/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/true': No such file or directory
+/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/test_run_cycle.sh: line 33: <scratch>/rct_try1/changed/obs/elf/prog: No such file or directory
+FAIL the declaration changed after a clean verify: no boot (verify rc 1, boot rc 1)
+cp: cannot stat '/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/true': No such file or directory
+/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/test_run_cycle.sh: line 33: <scratch>/rct_try1/noverify/obs/elf/prog: No such file or directory
+PASS no verify.txt: no boot (boot rc 1)
+FAIL a second verify keeps the first output under a new name (rc 1)
+run_cycle tests: 1 of 7 pass

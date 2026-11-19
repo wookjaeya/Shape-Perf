@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """explain_judge.py -- the judgement part of the explanation script, revision 4 (plan/c1_closure_explain_rev4_spec_20261118.md
-sections 3, 5 and 10; judgement rules plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md 3.2-3.6, 8.2-8.5, 8.12, 8.13).
+sections 3, 5, 10 and 11; judgement rules plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md 3.2-3.6, 8.2-8.5, 8.12, 8.13, 8.14).
+Changed after the PI decision of 2026-11-19 (spec 11 items 1, 3, 4, 5 and 6): the context of a row without context lines,
+a named library call with no entry, the name state of a found use, the entries the elements rest on, format check 16.
 
     python3 -I explain_judge.py --normal normal.json --vocabulary reason_vocabulary.txt --out DIR
     python3 -I explain_judge.py --check RECORD.json --vocabulary reason_vocabulary.txt
@@ -19,7 +21,7 @@ import os
 import re
 import sys
 
-JUDGE_REV = "explain_judge.py revision 4 (2026-11-19)"
+JUDGE_REV = "explain_judge.py revision 4, spec 11 fixes (2026-11-19)"
 READING_TAG = "4.2 의 읽기 갈래(PI 결정 전)"
 ITEMS = ["basis1_same_build", "basis2_ties", "basis3_absence_constant", "basis4_creator_success", "basis5_key_texts",
          "basis6_create_after_use", "ga_namespace_entry", "na_semantics", "na_bound", "da_no_name_mapping",
@@ -405,6 +407,7 @@ def row_static(row, rel_name):
                 return n, t
         return None, None
     st = {"path": path, "head": row["head"], "head_line": row["line"], "rel": rel_name}
+    st["text_of"] = {n: t for n, t, _ in body}
     st["ref"] = lambda n: "%s:%d" % (rel_name, n)
     m = re.search(r"-> (\S+)#(\d+)", row["head"])
     st["callee"] = m.group(1) if m else None
@@ -483,6 +486,58 @@ def layers_unverified(text):
     return out
 
 
+def names_function(text, fn):
+    """Whether a line's text names the function fn as a whole word (spec 11 item 5: matched by the text's function name)."""
+    return re.search(r"(?<![\w@])%s(?![\w])" % re.escape(fn), text or "") is not None
+
+
+def element_depends(st, br, line_numbers):
+    """Spec 11 item 5 (judgement rules 8.13 item 2, 8.14 item 6 (c)): the list entries an element rests on.  Every
+    (layer, function, column) of the row's layers line that the element's source lines name by text is looked up in
+    the candidate list; the lines found are depends_on (an empty list is 'none').  Returns (depends_on, unadmitted)."""
+    listed = layers_unverified((st.get("layers") or (None, None))[1] or "")
+    dep, bad = [], []
+    for n in sorted(set(line_numbers)):
+        t = st["text_of"].get(n, "")
+        for layer, fn, col in listed:
+            if names_function(t, fn):
+                ok, d, b = br.listed_state(layer, fn, col)
+                dep.extend(d)
+                bad.extend(b)
+    return sorted(set(dep)), sorted(set(bad))
+
+
+def source_lines(sources):
+    out = []
+    for s in sources or []:
+        m = re.search(r":(\d+)$", s.get("ref", "")) if s.get("kind") == "static-row" else None
+        if m:
+            out.append(int(m.group(1)))
+    return out
+
+
+ADDR_NOENTRY = re.compile(r"library: (\S+) parameter (\d+): no entry says the parameter is not written")
+ADDR_UNVER = re.compile(r"library: (\S+) parameter (\d+): (\S+) unverified\b")
+
+
+def address_uses(blk):
+    """The stored-name address uses line of a namespace block (judgement rules 8.13 item 11 (b), 8.14 item 5): its line,
+    the uses whose parameter has no entry, and the uses whose entry is unverified [(text, function, column)]."""
+    for n, t in block_lines(blk, "ns-address-uses"):
+        body = re.sub(r"^stored-name address uses \(.*?\): \d+: ", "", t)
+        noent, unver = [], []
+        for u in body.split("; "):
+            m = ADDR_NOENTRY.search(u)
+            if m:
+                noent.append((u.strip()[:200], m.group(1)))
+                continue
+            m = ADDR_UNVER.search(u)
+            if m:
+                unver.append((u.strip()[:200], m.group(1), m.group(3)))
+        return n, noent, unver
+    return None, [], []
+
+
 def group_has(group, partition):
     """Whether a writers/buffer/lifetime group text names the row's partition."""
     if group == "all partitions":
@@ -496,10 +551,11 @@ def group_has(group, partition):
 
 # ------------------------------------------------------------------------------------------------ the data branch
 class Branch:
-    def __init__(self, b, cand):
+    def __init__(self, b, cand, named=None):
         self.id, self.data, self.readings = b["id"], b["data"], set(b["readings"]) - {"R0"}
         self.admitted = b.get("admitted")
         self.cand = cand
+        self.named = named
         self.kinds = set(self.admitted["kinds"]) if self.admitted else set()
 
     def reads(self, r):
@@ -511,14 +567,35 @@ class Branch:
             return False, [], "no candidate list given: the state of the library entries is not read"
         hits = [d for d in self.cand["lines"] if d["function"] == function and (layer is None or d["layer"] == layer)
                 and (column is None or d["column"] == column) and (named_by is None or named_by in d["named_by"].split(","))]
-        if not hits:
-            if named_by is None:
-                return False, [], "the entry %s is not in the candidate list" % function
-            return True, [], "the entry %s is not in the candidate list (not unverified)" % function
+        if not hits:   # spec 11 item 3 (b)-(d): a call with no record is 'no entry' in every data branch
+            nc = (self.named or {}).get(function)
+            if nc is not None and nc["records"] == 0:
+                return False, [], "no entry: %s" % function
+            if nc is not None:
+                return True, [], "the entry %s is not in the candidate list; %d records in the facts (not unverified)" % (
+                    function, nc["records"])
+            return False, [], "the state of the entry of %s is not read" % function
         dep = [d["line"] for d in hits]
         if all(d["kind"] in self.kinds for d in hits):
             return True, dep, "admitted in %s (%s)" % (self.data, ", ".join(sorted({d["kind"] for d in hits})))
         return False, dep, "an unverified entry not admitted in %s: %s" % (self.data, function)
+
+    def named_ground(self, function):
+        nc = (self.named or {}).get(function)
+        if nc is None:
+            return None
+        return {"file": list(nc["src"]), "text": "named call %s: records %d, unverified %d, layers %s"
+                % (function, nc["records"], nc["unverified"], nc["layers"])}
+
+    def listed_state(self, layer, function, column):
+        """Spec 11 item 5: (admitted, depends_on lines, unadmitted 'f:c' names) of a row's listed entry in the candidate
+        list; an entry the candidate list does not hold adds nothing (its depends_on is empty: 'none')."""
+        if self.cand is None:
+            return True, [], []
+        hits = [d for d in self.cand["lines"] if d["function"] == function and d["layer"] == layer
+                and (column is None or d["column"] == column)]
+        bad = ["%s:%s" % (d["function"], d["column"]) for d in hits if d["kind"] not in self.kinds]
+        return not bad, [d["line"] for d in hits], bad
 
     def tag(self):
         return {"id": self.id, "data": self.data, "readings": sorted(self.readings) or ["R0"],
@@ -769,11 +846,19 @@ def item_na_semantics(nsf, br):
             calls.setdefault(x.split("@")[0], set()).add(fld)
     dep, bad, gr = [], [], [{"file": e["src"], "text": "compare-call=%s copy-call=%s length-call=%s" % (
         e.get("compare-call"), e.get("copy-call"), e.get("length-call"))}]
+    noent = []
     for fn, flds in sorted(calls.items()):
         for fld in sorted(flds):
             ok, d, why = br.entry_state(None, fn, None, fld)
             dep.extend(d)
             (gr if ok else bad).append(why)
+            if why.startswith("no entry: ") and fn not in noent:   # spec 11 item 3 (b): not held in any data branch
+                noent.append(fn)
+                ng = br.named_ground(fn)
+                if ng:
+                    bad.append(ng)
+    if noent:
+        return it("missing", NB % ("no entry: " + ", ".join(noent)), gr + bad, sorted(set(dep)))
     if bad:
         return it("missing", R_ITEM["na_semantics"], gr + bad, sorted(set(dep)))
     return it("held", grounds=gr, depends_on=sorted(set(dep)))
@@ -849,9 +934,31 @@ def item_da(st, nsf, br):
             else:
                 mt = re.search(r"; (not complete \(.*\))$", t)
                 bad.append("(b) %s:%d %s" % (st["rel"], n, mt.group(1) if mt else "not complete"))
+    # (b) the library entries of the address uses (judgement rules 8.13 item 11 (b), 8.14 item 5; spec 11 items 3 and 5):
+    # a use whose parameter has no entry makes (da) missing in every data branch and under Rf; a use whose entry is
+    # unverified rests on that candidate line (depends_on), held only where it is admitted
+    an, noent, unver = address_uses(blk)
+    dep, unadm = [], []
+    for txt, fn, col in unver:
+        ok, d, b = br.listed_state("P0", fn, col)
+        if not d:
+            ok, d, b = br.listed_state("P0", fn, None)
+        dep.extend(d)
+        unadm.extend(b)
+    dep = sorted(set(dep))
+    if noent:
+        calls = []
+        for _, fn in noent:
+            if fn not in calls:
+                calls.append(fn)
+        return it("missing", NB % ("no entry: " + ", ".join(calls)), gr + bad + [
+            "(b) %s:%d: %d address use(s) with no entry: %s" % (st["rel"], an, len(noent), " | ".join(t for t, _ in noent)[:1500])], dep)
     if bad:
-        return it("missing", R_ITEM["da_no_name_mapping"], gr + bad)
-    return it("held", grounds=gr)
+        return it("missing", R_ITEM["da_no_name_mapping"], gr + bad, dep)
+    if unadm:
+        return it("missing", NB % ("rests on an unverified entry: " + ", ".join(sorted(set(unadm)))), gr + [
+            "(b) %s:%d: an address use rests on an unverified entry not admitted in %s" % (st["rel"], an, br.data)], dep)
+    return it("held", grounds=gr, depends_on=dep)
 
 
 def item_ra(st, nsf, u, c, sc):
@@ -1006,10 +1113,11 @@ def alternatives_of(st):
 def branch_iii(st, alts, cid, br):
     """(c3)(iii) of one context (8.13 items 15-17)."""
     if cid is None:
-        return {"status": "not_established", "why": "context unknown", "context": None, "sources": []}
+        return {"status": "not_established", "why": "context unknown", "context": None, "sources": [], "depends_on": []}
     a = alts.get(cid)
     if a is None:
-        return {"status": "not_established", "why": "no alternatives line of context %s" % cid, "context": cid, "sources": []}
+        return {"status": "not_established", "why": "no alternatives line of context %s" % cid, "context": cid, "sources": [],
+                "depends_on": []}
     src = [{"kind": "static-row", "ref": st["ref"](a["n"])}]
     out = {"context": cid, "sources": src, "depends_on": []}
     if a["decided"] and a["decided"] != "none":
@@ -1039,10 +1147,13 @@ def branch_iii(st, alts, cid, br):
     return out
 
 
-def use_context(run, ctx_lines, u_inst):
-    """Judgement rules 8.13 item 16: the context frame that brackets the use, or unknown."""
+def use_context(run, ctx_lines, u_inst, alt_ids=()):
+    """Judgement rules 8.13 item 16: the context frame that brackets the use, or unknown.  A row without context lines
+    (8.14 item 6 (a); spec 11 item 1): the one context id its alternatives lines name, whatever the event's frame and
+    whether its at-call is recorded; none or several -> unknown (None).  No id is made up."""
     if not ctx_lines:
-        return "-" if u_inst is not None else None
+        ids = sorted(set(alt_ids))
+        return ids[0] if len(ids) == 1 else None
     if u_inst is None or u_inst.at is None:
         return None
     hits = []
@@ -1143,7 +1254,8 @@ def explain_row(ctx, rowkey, consumer, br):
     rec["premises"] = list(ctx["premises"])
     rec["eval_branch"] = br.tag()
     rec["data_branch"] = {"data": br.data, "admitted_sha256": (br.admitted and N["branches_by_id"][br.id]["admitted_sha256"]) or "none",
-                          "candidates_sha256": ctx["sha"]("candidates") or "none"}
+                          "candidates_sha256": ctx["sha"]("candidates") or "none", "admitted_kinds": sorted(br.kinds),
+                          "named_calls_sha256": ctx["sha"]("named_calls") or "none"}
     loss_any = ctx["loss_any"]
     apps = ctx["apps"]
     if run is not None and not mismatch and not isinstance(consumer, tuple):
@@ -1213,7 +1325,7 @@ def explain_row(ctx, rowkey, consumer, br):
             fv = run.val(i.at, "field_value") if i.at is not None else None
             u["field_value"] = hx(fv)
             u["_fv"] = fv
-        u["context"] = use_context(run, ctx_lines, i)
+        u["context"] = use_context(run, ctx_lines, i, alts.keys())
         u["_i"] = i
         u["_ev"] = i.at or i.after
         use_events.append(u)
@@ -1290,7 +1402,7 @@ def explain_row(ctx, rowkey, consumer, br):
             if e.site not in lsites:
                 continue
             s = sites[e.site]
-            x = {"actor": e.actor, "aseq": e.aseq, "t": e.t, "site": e.site, "rules": s.rules, "src": e.src}
+            x = {"actor": e.actor, "aseq": e.aseq, "t": e.t, "t_ms": run.ms(e.t), "site": e.site, "rules": s.rules, "src": e.src}
             if "object-delete" in s.rules and s.place == "entry":
                 x.update(form="delete", names="id", id=run.val(e, "param0") if s.role_index("param0") is not None else
                          (signed(e.v[0], s.values.get(0, {}).get("type")) if e.v else None))
@@ -1365,6 +1477,9 @@ def explain_row(ctx, rowkey, consumer, br):
             maybe = [x for x in ends if x["names"] == "slot" and open_[0]["start"] < x["t"] < ui.at.t and x.get("create_of") is not open_[0]["create"]["_i"]]
             u["name_state"] = "met" if not maybe else "undecided(a slot clear not shown to be no lifetime end)"
             u["_gen"] = open_[0] if not maybe else None
+        elif u["outcome"] == "found":   # spec 11 item 4 (8.14 item 6 (b)): a found use is never unmet
+            u["name_state"] = ("undecided(the row's creator sites are not complete)" if not creators_complete else
+                               "undecided(no create of the found id in the record)")
         elif not creators_complete:
             u["name_state"] = "undecided(the row's creator sites are not complete)"
         else:
@@ -1600,13 +1715,29 @@ def explain_row(ctx, rowkey, consumer, br):
             um.append("writer_set_incomplete(the completeness of the row's writer set is a premise only)")
         if not decided:
             um.append("fixed_proof_open(%s)" % (fz[len("feasibility: "):].split(":")[0] if fz else "no feasibility line"))
+    # the list entries (c1), (c2) and (c4) rest on, per data branch (spec 11 item 5; judgement rules 8.13 item 2, 8.14 item 6 (c))
+    for k, base in (("callee_check", "absent_result_unevaluated"), ("reach", "absent_result_unevaluated"),
+                    ("writers", "writer_set_incomplete")):
+        e = uc[k]
+        dep, unadm = element_depends(st, br, source_lines(e.get("sources")))
+        e["depends_on"] = dep
+        if unadm and e["status"] == "present":
+            e["status"] = "missing"
+            e["why"] = "rests on an unverified entry: " + ", ".join(unadm)
+            um.append("%s(rests on an unverified entry: %s)" % (base, ", ".join(unadm)))
     bi = holder_branch(st, br) if st["path"] == "A" else {"status": "not_established", "why": "path %s: no holder line" % st["path"], "sources": []}
+    dep, unadm = element_depends(st, br, source_lines(bi.get("sources")))
+    bi["depends_on"] = dep
+    if unadm and bi["status"] == "held":
+        bi["status"] = "not_established"
+        bi["why"] = "rests on an unverified entry: %s; %s" % (", ".join(unadm), bi["why"])
     uc["branch_i"] = bi
     cids = sorted({u["context"] for u in use_events if u["context"] is not None}) if use_events else sorted(alts) or [None]
     unk = [u for u in use_events if u["context"] is None]
     biii = [branch_iii(st, alts, c, br) for c in cids]
     if unk:
-        biii.append({"status": "not_established", "why": "context unknown", "context": None, "sources": [], "uses": len(unk)})
+        biii.append({"status": "not_established", "why": "context unknown", "context": None, "sources": [], "uses": len(unk),
+                     "depends_on": []})
     uc["branch_iii"] = biii
     i_ok = bi["status"] == "held"
     iii_ok = bool(biii) and all(x["status"] == "held" for x in biii)
@@ -1620,7 +1751,7 @@ def explain_row(ctx, rowkey, consumer, br):
         if not iii_ok:
             why.append("(iii) %s" % ", ".join(sorted({x["status"] for x in biii})) if biii else "(iii) no context")
         sub = ("context unknown" if any(x.get("why") == "context unknown" for x in biii) else
-               "rests on an unverified entry or a premise" if any("rests on an unverified" in (x.get("why") or "") for x in biii) else
+               "rests on an unverified entry or a premise" if any("rests on an unverified" in (x.get("why") or "") for x in biii + [bi]) else
                "; ".join(why).replace(";", ","))
         uc["caller_dependence"] = {"status": "missing", "text": "; ".join(why), "sources": bi["sources"] + [s for x in biii for s in x["sources"]]}
         um.append("caller_dependence_unknown(%s)" % sub)
@@ -1941,7 +2072,7 @@ def ground_ok(g):
     return isinstance(g, str) and bool(g) and not re.search(r"\b(hand reading|판의 읽기|사람의 읽기)\b", g)
 
 
-def check_record(rec, vocab):
+def check_record(rec, vocab, admitted=None):
     bad = []
     tv = rec.get("tool_verdict", {})
     vio = tv.get("violation", {}).get("value")
@@ -2022,6 +2153,12 @@ def check_record(rec, vocab):
                 bad.append("JR 8.13 item 21 (14): use %d has no context field" % i)
             if u.get("link_result") not in ("bound", "linked", "refuted") and not u.get("link_reasons"):
                 bad.append("JR 8.13 item 21 (14): use %d unlinked with no reason" % i)
+            if u.get("context") is not None and not any(x.get("context") == u.get("context") and x.get("sources")
+                                                        for x in uc.get("branch_iii", [])):
+                bad.append("JR 8.13 item 21 (14), spec 11 item 1: use %d has context %s with no alternatives line of it"
+                           % (i, u.get("context")))
+            if u.get("outcome") == "found" and u.get("name_state") == "unmet":
+                bad.append("JR 8.13 item 21 (14), spec 11 item 4: use %d found its object and its name state is unmet" % i)
     if not (0 <= rec.get("uses_decided", 0) <= rec.get("uses_reached", 0) <= rec.get("uses", 0)):
         bad.append("JR 8.13 item 21 (14): uses_decided <= uses_reached <= uses does not hold")
     if eb.get("data") == "D1":                                                      # 16
@@ -2037,6 +2174,32 @@ def check_record(rec, vocab):
             e = uc.get(k, {})
             if e.get("status") == "present" and e.get("premises") and e.get("reading") not in rd:
                 bad.append("JR 8.13 item 21 (16): D1 record with use_cond.%s present on a premise" % k)
+    # 16 extended (spec 11 item 6): (a) every element, (c3) branch and (da) item has its depends_on field; (b) a D1
+    # record has nothing present or held on a list entry; (c) a D2 record's present or held things rest on admitted
+    # lines only; (d) nothing whose sub-reason is 'no entry: ...' is present or held
+    elems = [("use_cond.%s" % k, uc.get(k)) for k in ("callee_check", "reach", "writers", "branch_i")] + \
+            [("use_cond.branch_iii[%d]" % i, x) for i, x in enumerate(uc.get("branch_iii", []))] + \
+            [("pair %d (da)" % i, p.get("items", {}).get("da_no_name_mapping")) for i, p in enumerate(pairs)]
+    if uc:
+        for name, e in elems:
+            if not isinstance(e, dict) or not isinstance(e.get("depends_on"), list):
+                bad.append("JR 8.13 item 21 (16) (a): %s has no depends_on field" % name)
+    db_ = rec.get("data_branch") or {}
+    kinds = set(db_.get("admitted_kinds") or [])
+    things = list(elems) + [("pair %d %s" % (i, k), v) for i, p in enumerate(pairs) for k, v in p.get("items", {}).items()
+                            if k != "da_no_name_mapping"]
+    for name, e in things:
+        if not isinstance(e, dict) or e.get("status") not in ("present", "held"):
+            continue
+        dep = e.get("depends_on") or []
+        if eb.get("data") == "D1" and dep:
+            bad.append("JR 8.13 item 21 (16) (b): D1 record with %s %s on a list entry" % (name, e.get("status")))
+        if eb.get("data") != "D1" and any(d.split("\t")[-1] not in kinds or (admitted is not None and d not in admitted)
+                                          for d in dep):
+            bad.append("JR 8.13 item 21 (16) (c): %s %s on a line not in the admission file of %s" % (name, e.get("status"), eb.get("data")))
+        texts = [e.get("reason") or "", e.get("why") or ""] + [g for g in e.get("grounds", []) if isinstance(g, str)]
+        if any("no entry: " in t for t in texts):
+            bad.append("JR 8.13 item 21 (16) (d): %s %s with the sub-reason no entry" % (name, e.get("status")))
     for g in rec.get("order_ground", []):
         if not (isinstance(g, dict) and g.get("src")) and not (isinstance(g, str) and g.startswith("order_basis_unknown")):
             bad.append("JR 8.13 item 21 (16): order_ground is neither a pair-file line nor order_basis_unknown")
@@ -2195,7 +2358,7 @@ def main(argv):
     rc = 3 if mism else 0
     summary = []
     for bdesc in N["branches"]:
-        br = Branch(bdesc, N["candidates"])
+        br = Branch(bdesc, N["candidates"], N.get("named_calls"))
         bdir = os.path.join(o.out, br.id)
         os.makedirs(os.path.join(bdir, "records"))
         ctx = {"N": N, "sc": sc, "sites": sites, "run": run, "runN": runN, "bound": N["plan"]["bindings"]["bound"],
@@ -2206,6 +2369,7 @@ def main(argv):
                "buildids": [{k: v for k, v in x.items() if k != "src"} for x in (runN["dump"]["buildids"] if runN else [])],
                "tok_counts": runN["dump"]["tok_counts"] if runN else None, "use_rows": [], "lifetime_ends": []}
         index, refused = [], []
+        adm_lines = set(br.admitted["lines"]) if br.admitted else set()
         for k in sorted(planned, key=lambda x: (int(sc["rows"][x].get("position", "0")), x)):
             rid = sc["rows"][k]["id"]
             rows = N["relations"]["rows"]
@@ -2232,7 +2396,7 @@ def main(argv):
             for c in consumers:
                 rec = explain_row(ctx, k, c, br)
                 rec["inputs"] = inputs
-                bad = check_record(rec, vocab)
+                bad = check_record(rec, vocab, adm_lines)
                 cname = c if not isinstance(c, tuple) else "static-%s" % (c[1] or "none")
                 if bad:
                     refused.extend("%s %s consumer %s: %s" % (k, rid, cname, x) for x in bad)

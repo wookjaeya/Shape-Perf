@@ -3,8 +3,12 @@
 
     python3 -I explain_expect.py --expect FILE --records EXPLAIN_OUT_DIR --out FILE
 
-One output line per expectation: match, mismatch (with the value found) or no_record.  It never changes a record.
-rc 0 written (whatever the matches), 2 the expectation file is not of its form, 64 usage.
+One output line per expectation: match, mismatch (with the value found) or no_record, with the line's class.  It never
+changes a record.  rc 0 written (whatever the matches), 2 the expectation file is not of its form, 64 usage.
+Spec 11 item 12 (2026-11-19): every expect line has an eighth column class, one of boot (a boot can make it fail),
+static (the frozen judgement part gives it from the static inputs alone), format (only a script error can make it
+fail) (evaluation protocol 14.6); a line without it or with another value refuses the file (rc 2).  The tail gives the
+counts per class and result.
 """
 import argparse
 import json
@@ -12,6 +16,7 @@ import os
 import re
 import sys
 
+CLASSES = ("boot", "static", "format")
 
 def get(rec, field):
     m = re.match(r"pair\[(.+)\]\.(missing_items|result)$", field)
@@ -56,12 +61,16 @@ def main(argv):
         return 2
     ex = [ln.split("\t") for ln in lines if ln.startswith("expect\t")]
     tail = [ln for ln in lines if ln.startswith("lines ")]
-    if not tail or tail[0] != "lines %d" % len(ex) or any(len(x) != 7 for x in ex):
-        print("explain_expect.py: tail count or columns wrong", file=sys.stderr)
+    if not tail or tail[0] != "lines %d" % len(ex) or any(len(x) != 8 for x in ex):
+        print("explain_expect.py: tail count or columns wrong (eight columns: spec 11 item 12)", file=sys.stderr)
         return 2
-    out = ["# explain_expect.py revision 4 (2026-11-19): expectation\tresult\tfound"]
+    if any(x[7] not in CLASSES for x in ex):
+        print("explain_expect.py: a class outside %s" % ", ".join(CLASSES), file=sys.stderr)
+        return 2
+    out = ["# explain_expect.py revision 4, spec 11 item 12 (2026-11-19): expectation\tclass\tresult\tfound"]
     counts = {}
-    for _, br, build, key, root, field, val in ex:
+    per_class = {}
+    for _, br, build, key, root, field, val, cls in ex:
         d = os.path.join(o.records, br, "records")
         recs = []
         if os.path.isdir(d):
@@ -80,7 +89,10 @@ def main(argv):
             found = "|".join(fv)
             res = "match" if fv == [norm(field, val)] else "mismatch"
         counts[res] = counts.get(res, 0) + 1
-        out.append("\t".join([br, build, key, root, field, val, res, found]))
+        per_class[(cls, res)] = per_class.get((cls, res), 0) + 1
+        out.append("\t".join([br, build, key, root, field, val, cls, res, found]))
+    out.append("# by class: " + "; ".join("%s: %s" % (c, ", ".join("%s %d" % (r, per_class.get((c, r), 0)) for r in ("match", "mismatch", "no_record")))
+                                         for c in CLASSES))
     out.append("# " + ", ".join("%s %d" % x for x in sorted(counts.items())))
     with open(o.out, "w") as f:
         f.write("\n".join(out) + "\n")

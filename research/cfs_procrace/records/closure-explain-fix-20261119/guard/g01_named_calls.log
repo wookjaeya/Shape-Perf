@@ -1,0 +1,5 @@
+# space_guard.sh kind=named-calls need=20000000 floor=314572800 interval=2 cmd=python3 -I scripts/named_calls.py --out candidates/named_calls.tsv --kzdump /home/user/work/merge-check/kz-llvm/tools/kz-dump/kz-dump /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx:/home/user/work/redesign/obs1/cz_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx:/home/user/work/redesign/obs1/cz_final_extract/c1_post_tx/c1_post_tx/NP/facts.kz
+start 2026-11-19T14:21:49.308Z free=1212997632 threshold=334572800
+sample 2026-11-19T14:21:49.312Z 1212993536
+sample 2026-11-19T14:21:51.319Z 1212993536
+end 2026-11-19T14:21:53.327Z kind=named-calls verdict=completed rc=0 free=1212985344 lowest=1212985344 dip=12288 change=-12288

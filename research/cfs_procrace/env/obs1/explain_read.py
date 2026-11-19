@@ -4,7 +4,8 @@ sections 2, 4 and 10).
 
     python3 -I explain_read.py --sidecar plan.side --manifest plan.kzs --bindings binds.kzs --relations relations.txt \
         --keys keys.txt --facts-view facts_view.txt --bprime-basis basis.kz --build-label NAME --branches branches.txt \
-        --normal-out normal.json [--pairs pairs.tsv] [--namespaces FILE]... [--candidates FILE] [--label-record TEXT] \
+        --normal-out normal.json [--pairs pairs.tsv] [--namespaces FILE]... [--candidates FILE --named-calls FILE] \
+        [--label-record TEXT] \
         [--dump-text tx.dump.txt --run-meta run.meta --chain chain.txt --startup-script scr [--stop-eval tsv]
          [--instance-list list] [--boot-budget tsv]]
 
@@ -13,6 +14,9 @@ normal form `kz-explain-normal 1` (one JSON file): every value carries the file 
 event its actor and sequence number.  It computes no item, element or verdict.  A failed check refuses that input only
 (input_checks); a failed check of the branch inputs (branch file, candidate list, admission files) stops with rc 2 and
 writes nothing.  rc 0 written; 2 branch inputs refused; 64 usage.  Standard library only; imports no other part.
+Spec 11 item 2 (2026-11-19): --named-calls (kz-named-calls 1) goes with --candidates; its form, its plan lines (the
+candidate list's) and the calls the plan's name-space lines name are checked, and a failed check stops with rc 2 as for
+the candidate list; the normal form gains named_calls{function: {named_by, records, unverified, layers, src}}.
 """
 import argparse
 import hashlib
@@ -21,7 +25,7 @@ import os
 import re
 import sys
 
-READER_REV = "explain_read.py revision 4 (2026-11-19)"
+READER_REV = "explain_read.py revision 4, spec 11 item 2 (2026-11-19)"
 INPUTS = {}
 CHECKS = []
 UNPARSED = {}
@@ -468,6 +472,79 @@ def parse_candidates(text, fname):
     return out
 
 
+NAMED_COLS = ["function", "named_by", "records", "unverified", "layers"]
+NAMED_FIELDS = ("compare-call", "copy-call", "length-call", "fill-call")
+
+
+def parse_named_calls(text, fname):
+    """The rule-made file of the library calls the plans' name-space lines name (spec 11 item 2, kz-named-calls 1)."""
+    lines = text.splitlines()
+    out = {"plans": [], "facts": [], "calls": {}, "ok": True, "why": []}
+    if not lines or lines[0] != "kz-named-calls 1":
+        out["ok"] = False
+        out["why"].append("first line is not kz-named-calls 1")
+        return out
+    tail, body, seen_cols, ended = None, [], False, False
+    for n, ln in enumerate(lines[1:], 2):
+        if ln == "end":
+            ended = True
+            break
+        if ln.startswith("rule "):
+            continue
+        if ln.startswith("plan "):
+            out["plans"].append(ln.split(" ", 2)[1] if len(ln.split(" ", 2)) > 1 else "")
+            continue
+        if ln.startswith("facts "):
+            out["facts"].append(ln.split(" ", 2)[1] if len(ln.split(" ", 2)) > 1 else "")
+            continue
+        if ln.startswith("columns "):
+            seen_cols = True
+            if ln[len("columns "):].split("\t") != NAMED_COLS:
+                out["ok"] = False
+                out["why"].append("columns line is not the five columns of spec 11 item 2")
+            continue
+        if ln.startswith("lines "):
+            tail = ln
+            continue
+        f = ln.split("\t")
+        if len(f) != 5 or not f[2].isdigit() or not f[3].isdigit():
+            out["ok"] = False
+            out["why"].append("line %d is not a call line of five columns" % n)
+            continue
+        body.append((n, f))
+    if not seen_cols:
+        out["ok"] = False
+        out["why"].append("no columns line")
+    if not ended:
+        out["ok"] = False
+        out["why"].append("no end line")
+    noent = sum(1 for _, f in body if f[2] == "0")
+    if tail != "lines %d no_entry %d" % (len(body), noent):
+        out["ok"] = False
+        out["why"].append("the tail %r is not 'lines %d no_entry %d'" % (tail, len(body), noent))
+    for n, f in body:
+        if f[0] in out["calls"]:
+            out["ok"] = False
+            out["why"].append("function %s twice" % f[0])
+        out["calls"][f[0]] = {"named_by": f[1], "records": int(f[2]), "unverified": int(f[3]), "layers": f[4], "src": [fname, n]}
+    return out
+
+
+def named_in_plan(sc):
+    """The library calls the plan's namespace-entry lines of planned rows and their namespace-layer lines name."""
+    planned = {k for k, r in sc["rows"].items() if r.get("state") == "planned" or r.get("control-state") == "planned"}
+    ents = [e for e in sc["namespace_entries"] if e.get("row") in planned]
+    datas = {e.get("data") for e in ents}
+    lays = [x for x in sc["namespace_layers"] if x.get("data") in datas]
+    out = set()
+    for a in ents + lays:
+        for fld in NAMED_FIELDS:
+            for x in str(a.get(fld, "-")).split(","):
+                if x and x != "-":
+                    out.add(x.split("@")[0])
+    return out
+
+
 def data_kinds(data):
     if data == "D1":
         return None
@@ -680,7 +757,7 @@ def main(argv):
     ap = argparse.ArgumentParser()
     for a in ("sidecar", "manifest", "bindings", "relations", "keys", "facts-view", "bprime-basis", "dump-text",
               "run-meta", "chain", "stop-eval", "startup-script", "instance-list", "boot-budget", "build-label",
-              "normal-out", "pairs", "candidates", "branches", "label-record"):
+              "normal-out", "pairs", "candidates", "branches", "label-record", "named-calls"):
         ap.add_argument("--" + a)
     ap.add_argument("--namespaces", action="append", default=[])
     o = ap.parse_args(argv)
@@ -774,6 +851,26 @@ def main(argv):
         if sha_of("sidecar") not in cand["plans"]:
             print("explain_read.py: the candidate list names no plan line of this sidecar", file=sys.stderr)
             return 2
+        if not o.named_calls:   # spec 11 item 2: the named-calls file goes with the candidate list
+            print("explain_read.py: --named-calls is required with --candidates", file=sys.stderr)
+            return 2
+    named = None
+    if o.named_calls:
+        named = parse_named_calls(read_input("named_calls", o.named_calls), os.path.basename(o.named_calls))
+        why = list(named["why"])
+        if cand is not None and sorted(named["plans"]) != sorted(cand["plans"]):
+            why.append("its plan lines are not the candidate list's")
+        if sha_of("sidecar") not in named["plans"]:
+            why.append("it names no plan line of this sidecar")
+        miss = sorted(named_in_plan(sc) - set(named["calls"]))
+        if miss:
+            why.append("calls the plan names are not in it: %s" % ", ".join(miss))
+        if why:
+            print("explain_read.py: named-calls file refused: " + "; ".join(why), file=sys.stderr)
+            return 2
+        check("named calls", True, "%d calls, %d with no entry; plan lines = the candidate list's; every call the plan's "
+              "namespace-entry and namespace-layer lines name is in it" % (len(named["calls"]),
+                                                                         sum(1 for x in named["calls"].values() if x["records"] == 0)))
 
     def load(p):
         with open(p, "rb") as f:
@@ -886,7 +983,8 @@ def main(argv):
               "unparsed": UNPARSED, "mismatch": mism, "rel_name": rel_name,
               "plan": {"sidecar": sc, "sites": man["sites"], "bindings": binds}, "keys": keys, "keys_head": khead,
               "relations": {"head": rhead, "rows": rows, "namespace_blocks": blocks}, "pairs": pairs,
-              "namespaces": nsfiles, "candidates": cand, "branches": branches, "facts_view": facts_view, "run": run}
+              "namespaces": nsfiles, "candidates": cand, "named_calls": named["calls"] if named else None,
+              "branches": branches, "facts_view": facts_view, "run": run}
     try:
         with open(os.path.abspath(__file__), "rb") as f:
             normal["reader"]["sha256"] = hashlib.sha256(f.read()).hexdigest()

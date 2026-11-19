@@ -185,3 +185,16 @@ end
 ```
 
 `필드` 는 기록의 칸 경로(`tool_verdict.violation.value`, `use_cond.status`, `use_cond.branch_i.status`, `link.status`)이거나 `pair[<생성 site 위치>].missing_items`(쉼표로 이은 이름, 차례 무관)·`pair[<위치>].result`·`use[<n>].name_state` 다. `explain_expect.py` 는 기록을 바꾸지 않고 줄마다 `match`·`mismatch`·`no_record` 를 쓴다. 기대 파일은 주기를 준비하는 단계가 평가 절차 5절에서 만든다. 이 단계는 fixture 로만 시험한다.
+
+### 10.7 코드를 쓰며 정한 것 둘째 (2026-11-19; 코드 커밋보다 먼저 커밋함)
+
+10.1–10.6 을 커밋한 뒤 코드를 짜고 scratch 에서 돌리며(합성 fixture, 2026-11-16 입력, 두 C1 빌드의 정적 출력) 드러난, 위 글이 정하지 않은 것이다. 판정 규칙의 글은 바꾸지 않는다.
+
+1. **서식 검사 16 과 읽기 갈래.** 8.13-21 의 16(자료 상태 1 에 전제에 기댄 `held` 가 없다)을 글자대로 걸면, 전제를 받는 읽기(8.13-5 의 `Rd`: 생성자 집합과 그 전제, `Re`: 필드 단위 규칙만 선 완전성)가 든 `D1` 갈래의 기록은 모두 물린다(scratch 의 정적 예행: `D1-Rd` 46 기록 가운데 46 이 물림). 8.13-5 는 읽기 갈래를 "전제나 다른 증거를 받는 읽기"로 두고 모든 갈래를 평가하라고 한다. 그래서 검사 16 은 이렇게 읽는다: 읽기가 받는 전제로 선 항목·요소는 칸 `reading`(그 읽기 이름)과 `premises` 를 달고, 그 기록의 갈래가 그 읽기를 담을 때만 검사 16 을 지난다. 그 밖의 전제(읽기가 이름 대지 않은 것)는 어느 갈래에서도 성립이 아니다. `R0` 갈래의 결과는 바뀌지 않는다.
+2. **자기 sha256.** 읽는 부분과 판정 부분은 자기 파일을 읽어 sha256 을 기록에 적는다(그 밖의 파일은 10.1 대로). fixture 의 열기 시험은 이 하나를 허용한다.
+3. **프로세스의 첫 스레드가 만든 생성.** 그 행위자는 생성 호출이 없으므로 생성 인자 묶기가 정해지지 않는다. 기초 2 는 글대로 그 쌍에서 `missing` 이다(규칙을 바꾸지 않는다; 열린 점).
+4. **사용의 수.** `uses` = 행의 서로 다른 사용 호출(at-call·after-call 짝을 하나로) × 문맥 수(적어도 1); `uses_reached` = 사건이 하나 이상인 (호출, 문맥); `uses_decided` = 기록의 `violation` 이 `observed`·`not_observed_in_runs`·`refuted_link` 이면 `uses_reached`, 아니면 0.
+5. **순서 근거는 연결된 쌍에서만**(8.13-14): `bound` 쌍과 인스턴스로 연결된 사용의 생성에만 쌍 파일의 줄을 찾는다. 연결된 쌍이 없으면 기록의 `order_ground` 는 `order_basis_unknown(no linked pair)` 이고 `order.static` 은 `unknown` 이다.
+6. **삭제의 성공 값.** 삭제 마무리 호출의 반환을 그 행의 성공 경로 줄의 성공 값(outcome class rule)과 비교한다. 그 줄이 없으면 삭제의 성공을 모르고, 그 사건은 이름 상태를 `undecided` 로, (마)를 "배제되지 않음"으로 만든다.
+7. **경로 B·C 의 writer 호출.** 행의 writer site 의 호출 인스턴스는 개정 3 처럼 게시 사건(`other_kind writer`)으로 남긴다. 쌍(이름 결합)은 경로 A 의 생성 site 에서만 만든다.
+8. **요약의 미확정 종류.** 바탕 사유를 평가 절차 8절의 다섯 종류로 나누는 표: `no_run`·`target_not_reached`·`record_insufficient` → 실행 증거 없음; `absent_result_unevaluated`·`key_unresolved`·`writer_set_incomplete`·`fixed_proof_open`·`caller_dependence_unknown`·`actor_not_extracted` → 정적 입력 없음; `plan_missing` → 자원; `link_unlinked`·`multi_state_unlinked`·`build_mismatch`·`intervention_out_of_scope` → 구조; 하위 사유 `absence after a live create of the same name` → 모순; 그 밖 → `other`. 요약은 필드 저장값 규칙으로 선 (iii)을 가진 기록을 따로 센다.

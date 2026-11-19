@@ -1,0 +1,4 @@
+# space_guard.sh kind=classify-c1_post_tx_script need=2000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/scripts/classify_compare.py --compare /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/compare/synth_c1_post_tx_script.txt --records /home/user/work/redesign/obs1/xr5_synth_c1_post_tx_script/explain --order script --uses /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/uses/uses_c1_post_tx.tsv --out /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/compare/classify_synth_c1_post_tx_script.tsv
+start 2026-11-19T15:21:49.330Z free=815505408 threshold=316572800
+sample 2026-11-19T15:21:49.339Z 815501312
+end 2026-11-19T15:21:51.346Z kind=classify-c1_post_tx_script verdict=completed rc=1 free=815501312 lowest=815501312 dip=4096 change=-4096

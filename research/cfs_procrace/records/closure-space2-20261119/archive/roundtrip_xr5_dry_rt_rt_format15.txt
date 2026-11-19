@@ -1,0 +1,6 @@
+# archive.sh xr5_dry_rt_rt_format15 records/closure-explain-fix-20261119/xr5_dry_rt_rt_format15.sha256 2026-11-19T18:16:00Z
+1. directory = list: 793 files, 22646154 bytes (apparent), 24371200 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/xr5_dry_rt_rt_format15/xr5_dry_rt_rt_format15.tar.xz 113780 bytes sha256 b5d9ee783b11e114b581f3484c590b87466ac3b1046bc9b46684dac57b9e41e4
+4. round trip: 793 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/xr5_dry_rt_rt_format15 removed 2026-11-19T18:16:06Z
+PASS

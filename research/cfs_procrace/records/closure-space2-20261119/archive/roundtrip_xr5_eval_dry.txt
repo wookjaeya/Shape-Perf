@@ -1,0 +1,6 @@
+# archive.sh xr5_eval_dry records/closure-explain-fix-20261119/xr5_eval_dry.sha256 2026-11-19T18:15:02Z
+1. directory = list: 7 files, 6891710 bytes (apparent), 6909952 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/xr5_eval_dry/xr5_eval_dry.tar.xz 96184 bytes sha256 47cc600ab528e3e86248525b4ac71e7945107ca027768e223ffef806875988b8
+4. round trip: 7 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/xr5_eval_dry removed 2026-11-19T18:15:03Z
+PASS

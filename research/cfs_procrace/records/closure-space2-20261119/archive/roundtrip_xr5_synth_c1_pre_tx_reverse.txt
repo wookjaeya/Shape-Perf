@@ -1,0 +1,6 @@
+# archive.sh xr5_synth_c1_pre_tx_reverse records/closure-explain-fix-20261119/xr5_synth_c1_pre_tx_reverse.sha256 2026-11-19T18:15:09Z
+1. directory = list: 792 files, 46905031 bytes (apparent), 48758784 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/xr5_synth_c1_pre_tx_reverse/xr5_synth_c1_pre_tx_reverse.tar.xz 308732 bytes sha256 ce8b29d9ff620fe546a3f5ebe9f6e177f88b1cb064768fdd0e6f96898f9fffbc
+4. round trip: 792 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_reverse removed 2026-11-19T18:15:14Z
+PASS

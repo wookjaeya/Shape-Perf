@@ -16,3 +16,15 @@ space_guard.sh --need 5000000 --kind selftest --log guard/g03_selftest.log -- ba
 ../../env/tools/ledger_check.sh > ledger/check_start.txt                          rc 0 (205 rows, 0 failing; ledger sha256 5a93fa7b...)
 ledger_rewrite.py on a scratch copy for line 1 (diff read, the copy removed)      rc 0 (one row and the header line)
 the listing, the need, the chosen list, the scripts, the convention and results 26.8 (the plan) are committed before step 2
+committed as 874c4b4
+## 2. the archives, one directory at a time (run_seq.sh FROM TO; SPACE_TMP=<scratch>)
+df -B1 /                                                                          18:14:36Z (available 757645312)
+SPACE_TMP=<scratch> bash run_seq.sh 1 1                                          rc 0: xr5_synth_c1_pre_tx_script_trial1 archived
+    (367868 bytes), round trip 888 of 888, ledger_check of the proposed ledger 205 rows 0 failing; the header line of this
+    step added once; free 757628928 -> 810438656
+SPACE_TMP=<scratch> bash run_seq.sh 2 12                                         rc 0: lines 2-8 archived (7), each round trip
+    PASS and ledger_check of the proposed ledger 205 rows 0 failing (progress.tsv, archive/, ledger/, guard/a_*); "need met
+    before line 9: free 1059622912 >= target 1036296448"; lines 9-12 not touched
+../../env/tools/ledger_check.sh > ledger/check_after_archive.txt                 rc 0 (205 rows, 0 failing; ledger sha256 6763efd1...)
+git grep of the committed scripts for xr5_ > scripts_naming_archived.txt         (42 lines in the two runs.sh of results 26.3 and
+    26.5; no step still to run)

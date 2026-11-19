@@ -1,0 +1,9 @@
+seq	name	row	free_before	free_after	archive_bytes	guard_lowest	ledger_check
+1	xr5_synth_c1_pre_tx_script_trial1	OBS_xr5_synth_c1_pre_tx_script_trial1	757628928	810438656	367868	757006336	ledger_check: 205 rows, 0 failing
+2	xr5_eval_dry	OBS_xr5_eval_dry	810430464	817192960	96184	810426368	ledger_check: 205 rows, 0 failing
+3	xr5_synth_c1_pre_tx_reverse	OBS_xr5_synth_c1_pre_tx_reverse	817188864	865484800	308732	816701440	ledger_check: 205 rows, 0 failing
+4	xr5_synth_c1_pre_tx_script	OBS_xr5_synth_c1_pre_tx_script	865484800	913825792	311168	864997376	ledger_check: 205 rows, 0 failing
+5	xr5_synth_c1_post_tx_reverse	OBS_xr5_synth_c1_post_tx_reverse	913825792	962117632	318384	913330176	ledger_check: 205 rows, 0 failing
+6	xr5_synth_c1_post_tx_script	OBS_xr5_synth_c1_post_tx_script	962117632	1010388992	319832	961626112	ledger_check: 205 rows, 0 failing
+7	xr5_dry_rt_rt_objects	OBS_xr5_dry_rt_rt_objects	1010388992	1035550720	113684	1010069504	ledger_check: 205 rows, 0 failing
+8	xr5_dry_rt_rt_format15	OBS_xr5_dry_rt_rt_format15	1035550720	1059622912	113780	1035239424	ledger_check: 205 rows, 0 failing

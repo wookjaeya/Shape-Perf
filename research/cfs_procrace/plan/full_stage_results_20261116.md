@@ -3069,3 +3069,7 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 **(아) 순서.** 사본(kz, kz-rt-dump, kz-instr-clang; xz, 왕복 확인, 등록부 줄; `/home/user/work/preserve/tools-20261119-c/`) → 옛 도구의 다시 읽기(`rtb_regress_old`)와 옛 플러그인의 판 1–3 묶음(`rtb_regress_manifest_old`) → MC 빌드(`make all`, 감시 아래) → 빌드 뒤 점검 → 새 도구의 다시 읽기와 비교 → 플러그인 두 빌드(새 디렉터리)와 그 ctest → 새 플러그인의 판 1–3 묶음과 비교 → 묶음 점검 → 등록부·원장 줄 → 결과. 명령마다 rc 를 본 뒤 다음으로 간다. 선언 밖의 차이가 나오면 그 단계에서 멈추고 덧붙임을 커밋한 뒤에만 잇는다.
 
 **(자) 공간.** 시작 678,703,104 B(바닥 314,572,800). 먼저 이 단계의 scratch(런타임·플러그인·점검 빌드, 약 140 MB)를 지운다. 필요량: 사본 약 40 MB(앞 사본 크기에서: kz 18 MB, kz-instr-clang 21 MB, kz-rt-dump 1 MB) [I]; MC 빌드 감시 필요량 250 MB(목적 파일 약 60 과 바이너리 63 을 제자리에서 다시 씀; 가장 큰 kz 77 MB) [I]; 플러그인 빌드 둘 약 30 MB(scratch 의 12·14 MB 에서); 다시 읽기 출력 둘 약 2 MB, 판 1–3 묶음 둘 약 2 MB, 묶음 점검 둘 약 4 MB; 기록 수 MB. 바닥 위에서 맞는다. 맞지 않으면 rule 3 의 압축 허용만 쓴다.
+
+#### 23.0.1 덧붙임 1 (묶음 점검의 site 집합; 다시 하는 묶음 점검보다 먼저 커밋함)
+
+첫 묶음 점검(`scripts/bind_check.py` → `obs1/rtb_bind_c1_pre_tx`, `_post_tx`)은 행의 site 를 `row=` 열쇠가 그 행을 이름 대는 site 로만 잡았다. 그러나 계획 규칙 개정 5 의 생성 쪽 종류 값·되돌림·삭제·지우기 site 는 `row=` 를 갖지 않고, 그 행의 `need … state=planned sites=…` 문이 이름 댄다(예: c1_pre_tx 의 `s0256.object-rollback`, `s0264.object-clear` 는 `osapi-idmap.c` 에 있어 첫 점검에서 컴파일되지 않았다). 그래서 (사) 5 의 "행의 site" 를 다음으로 바로잡는다: `row=` 가 그 행을 이름 대는 site, **또는** 그 행을 subject 로 하는 계획된 need 가 `sites=` 로 이름 대는 site. 그 행들의 `gap` 문도 보고에 적는다. 다시 하는 점검은 `scripts/bind_check_2.py` 로 새 디렉터리 `obs1/rtb_bind2_c1_pre_tx`, `obs1/rtb_bind2_c1_post_tx` 에 낸다(첫 점검의 출력은 그대로 남긴다). 컴파일하는 단위가 늘 뿐 도구·허용 차이는 그대로다. 공간: 출력 둘 약 1 MB 씩.

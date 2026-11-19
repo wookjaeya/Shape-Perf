@@ -1,0 +1,12 @@
+kz convert --kzrt /home/user/work/redesign/obs1/c1cyc_post_boot1/tx/dump/tx.kzrt (instrumented run)
+dump_sha256 4125d8a54c76ca2f84487bf2520eb314270ddee07387e896fba8a19bf939e83d
+manifest /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/plan.kzs sha256 ef35173ee767be1afbfa5d786c8f473f7505e325cacad3884796adc864655593
+manifest /home/user/work/redesign/obs1/c1p2_post_derived/binds_instr.kzs sha256 b719efeea53fec55d5b852380d81b75ddfb105a3bbbe4511027f1318af627a2f
+neutral layer: sites 302, slots 663, events 1177, values 2050, actors 16, losses 0, control records 0
+run: backend kzrt kzgcc 0.5 (gcc-plugin), flags {loss-evidence,complete,stopped}, start evidence bootstrap-buffer
+end: the process's own dump (in-process)
+build-id records: 7
+note: end: the process's own dump, store memory
+note: initial thread: run actor 1 of process 12590 (recorded by a constructor of the executable, thread id = process id)
+wrote /home/user/work/redesign/obs1/c1cyc_post_convert1/run.kzt artifact_sha256 3bdac5b157d3ebf62123822da64e8dcbef053cf7254a0a8e145c99d0ab8d8b6a
+convert rc=0

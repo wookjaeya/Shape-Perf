@@ -963,6 +963,19 @@ end
   - `lifetime end [<묶음>]: release through parameter <k> of <함수> at <위치>: <A> := <값 글>; callers <n>: <호출자> at <위치> passes <인자 글> [rollback: the creator callees of <묶음> reach it | delete: no creator callee reaches it; <호출자> is called from <m> functions]; …; names the record <key 글>; the value passed is not tied (these facts do not give the definitions of a local whose address is passed, as in the success path line)` — 활성 필드의 writer 가운데 값 글이 `*<p>` 이고 guard 에 `param:<p>#<k>` 가 있는 것. 호출자 C 가 키 매개변수 creator 함수(개정 12 의 live writer 에 닿는 것) 자신이거나 그 본문이 C 를 직접 부르면(한 단계; fixture 에서 creator 가 마무리 단계를 스스로 부르는 꼴을 보고 코드 커밋 전에 더함) 실패한 생성의 되돌림 쪽(`rollback: called directly by the creator callees <함수들> (<묶음들>)`), 아니면 삭제 쪽(`delete`)이다. 여러 단계로 닿는 것을 되돌림으로 읽지 않는 까닭: 생성자가 실패를 치우려고 삭제 함수를 부를 수 있다(scratch 판에서 c1 의 삭제 쪽 함수가 creator 셋에서 여러 단계로 닿았다; 이 고침은 그 판을 본 뒤, 코드 커밋 전에 한다). 어느 쪽이든 끝내는 id 의 값은 이 사실에 없다(lead 판단 (b): 그 추출의 틈은 이 빌드에서 고치지 않는다).
 - **머리 줄.** `summary stored-name buffer and lifetime end (relations rules revision 14): name stores <n>; buffers <b>: complete <c>, not complete <m> (<까닭> <수>; …), not decided <x>; address uses <u>: discharged <d>, not discharged <x>; writer groups <g> (shared <s>, none <z>); lifetime ends: clear-table <a>, clear-slot <s> (free-record condition shown <h>, not shown <t>), release <r>, release through a parameter <p> (callers: rollback <x>, delete <y>)`. 다섯 빌드에서 이 줄이 서는 곳과 서지 않는 곳의 수는 이 머리 줄에서 읽는다(설계 행에만 보이는 줄이 없게).
 
+**5x 덧붙임 아홉째 (2026-11-19; 규칙 개정의 이름, 그 이름을 쓰는 코드보다 먼저 커밋함).** 개정 14 와 order 개정 8 의 내용이 모두 소스에 들어간 뒤, 개정의 이름이 어느 줄에 나오는지 정한다. 위 형식의 두 문장, "없는 사실은 앞판의 바이트에 도구 줄만 더함"(relations)과 "글 출력과 `edges.tsv` 는 도구 줄 말고 바뀌지 않는다"(order), 그리고 golden 시험의 "`--pairs` 가 글을 바꾸지 않는다"를 지키는 자리다.
+- **relations 의 `rules` 줄은 그대로다**: `rules relations rules revision 12 (2026-11-18)`. 이 줄은 기본 경로의 개정을 이름 댄다. 개정 11 과 13 은 자기 줄(`rules with lock handles:`, `rules with result flow:`)에서 이름이 나온다. 개정 14 도 같은 꼴로 자기 줄을 둔다. 사실에 OBJECT_ACCESS 가 있을 때만, `rules with result flow:` 줄과 그 뒤 `handling labels` 줄 다음에(RESULT_FLOW 가 없으면 `rules with lock handles:` 줄 자리 뒤에) 한 줄을 쓴다:
+
+  ```
+  rules with object access: relations rules revision 14 (2026-11-19), over OBJECT_ACCESS (extract --object-access, docs/static_facts.md 5x): key texts by source tree <n> (BASIS source_tree items); <with RESULT_FLOW and RESULT_EFFECT: the success path, absence origins, holder, alternatives, stored-name buffer and lifetime-end lines | without RESULT_FLOW and RESULT_EFFECT: no line of items 1-5>
+  ```
+
+  OBJECT_ACCESS 가 없는 사실은 이 줄이 없고, 앞판의 바이트에 도구 줄만 더한 글이다. OBJECT_ACCESS 만 있는 사실(RESULT_FLOW 없음)에서 개정 14 가 바꾸는 것은 키 글의 소스 트리 토큰뿐이다(BASIS 에 `source_tree` 항목이 있을 때). 그래도 이 줄은 그 사실에 쓴다. 키를 만든 규칙의 이름이 그 줄에 있어야 하기 때문이다. 개정 14 의 줄들 안의 `(relations rules revision 14)` 글은 그대로 둔다.
+- **키 목록(`--keys`)**: `rules` 줄 바로 뒤에 같은 줄(위의 한 줄)을 둔다(OBJECT_ACCESS 가 있을 때만). 키 글이 소스 트리 토큰으로 바뀐 목록을 앞판의 목록과 가를 수 있게 하는 것이다.
+- **쌍 파일의 `relations` 줄**: relations 머리의 `rules` 로 시작하는 줄들을 이으므로 위 줄이 저절로 들어간다(형식 그대로).
+- **order 의 글은 그대로다**: 첫 줄 `kz-static order (order rules revision 5 (2026-11-18))`, `relations` 줄, `rules with …` 줄. order rules revision 8 은 쌍 파일의 개정이다. 그래서 그 이름은 쌍 파일의 `order` 줄 맨 앞에 쓴다: `order order rules revision 8 (2026-11-19): the complete pair file; <글의 첫 줄의 개정>; <글의 rules 줄들>` (`; ` 로 이음). `--pairs` 가 없는 실행의 출력은 바이트로 바뀌지 않는다.
+- 계획의 이름은 `docs/plan_manifest.md` 10.9 다.
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).

@@ -410,3 +410,20 @@ and the relations lines of relations rules revision 14 that sections 10.1-10.4 r
   stored name with a constant extent (two creates keep the name in two fields, as the file systems of the OSAL files of
   coverage rule revision 2 do), the bound is the **largest** of them, so that no name that fits one of the stored names
   is cut (2026-11-19, after the scratch plans of the five builds; before the code is committed).
+
+### 10.9 Revision names (2026-11-19, committed before the code that renames)
+
+Written when the remaining contents of the build that implements revision 5 were in the source.  It settles the
+renaming that 10.8 leaves to "the step that renames the rule revisions".
+
+- **The `rules` line of the sidecar and the manifest header** name `plan rules revision 5 (2026-11-19)` for every plan
+  made with `--manifest 4`, whatever the name-space files: revision 5 is revision 4 with the lines of 10.1-10.5, and with
+  revision-1 files the output is that of revision 4 apart from the generator identity and this name (section 10).  The
+  text after the name lists what revision 4 added and then the lines of 10.1-10.5 (written only with the files of
+  coverage rule revision 2).  The default path (no `--manifest`) keeps `plan rules revision 2 (2026-11-16)`.
+- **The plan id** is computed from the same text (`obsrules=`), so every plan of `--manifest 4` gets a new plan id.  The
+  plan goldens mask the plan id (19.3 of the results); the rules line in them changes.
+- **The relations part of the line** (`; relations rules revision 12 (2026-11-18)`, and `relrules=` of the plan id and
+  of the manifest header) stays the name of the relations `rules` line: `docs/static_facts.md` 5x, ninth addendum, keeps
+  that line and names revision 14 in a line of its own, which the generator does not copy.
+

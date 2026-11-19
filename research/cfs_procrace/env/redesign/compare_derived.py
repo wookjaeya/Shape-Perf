@@ -21,6 +21,10 @@
 #                              kairos/lib/llvm/serialize.cpp:1196-1212) is written as its directory <dir>; a derived work
 #                              space copies the sources without their git metadata (derive_c1.sh D2), so B' has no source
 #                              tree and writes those names with the absolute path
+#                    pathlen   (2026-11-19) a changed ARG_TYPES record of a character array: the two are equal once
+#                              extent= and type= are left out, each type is "[const ]char[<its extent>]", and the
+#                              extent grows by the length difference of one line of the path map (a string literal that
+#                              is a source path, as __FILE__ gives it, is as long as the work space's path)
 #                  A plain RE is both=RE.
 #
 # Steps:
@@ -63,6 +67,7 @@ for line in open(opts['--path-map'], encoding='utf-8'):
         sys.exit(2)
     pairs.append((t.rstrip('/'), f.rstrip('/')))
 pairs.sort(key=lambda p: -len(p[0]))
+PATHLEN_ = {len(t) - len(f) for t, f in pairs}
 prx = [(re.compile(re.escape(t) + r'(?=/|"|\'|\s|:|,|;|\)|$)'), f) for t, f in pairs]
 
 
@@ -82,7 +87,7 @@ for line in open(opts['--declared'], encoding='utf-8'):
         sys.stderr.write('declared list: want 4 tab-separated fields: %r\n' % line)
         sys.exit(2)
     for t in p[2].split(';;'):
-        re.compile(t.split('=', 1)[1] if re.match(r'(both|new|old)=', t) else ('' if t.startswith('only=') or t == 'treetok' else t))
+        re.compile(t.split('=', 1)[1] if re.match(r'(both|new|old)=', t) else ('' if t.startswith('only=') or t in ('treetok', 'pathlen') else t))
     decl.append((p[0], p[1], p[2], p[3]))
 
 
@@ -93,8 +98,8 @@ def strip_fields(r, fields):
 
 
 def holds(term, old, new):
-    if term == 'treetok':
-        k, v = 'treetok', ''
+    if term in ('treetok', 'pathlen'):
+        k, v = term, ''
     else:
         k, _, v = term.partition('=') if re.match(r'(both|new|old|only)=', term) else ('both', '', term)
     if k == 'both':
@@ -108,7 +113,18 @@ def holds(term, old, new):
         return old is not None and new is not None and strip_fields(old, v.split(',')) == strip_fields(new, v.split(','))
     if k == 'treetok':
         return old is not None and new is not None and bool(TREES) and expand_trees(old) == new
+    if k == 'pathlen':
+        if old is None or new is None or strip_fields(old, ['extent', 'type']) != strip_fields(new, ['extent', 'type']):
+            return False
+        ea, eb = re.search(r'(?:^|\s)extent=(\d+)', old), re.search(r'(?:^|\s)extent=(\d+)', new)
+        ta, tb = re.search(r'(?:^|\s)type="(?:const )?char\[(\d+)\]"', old), re.search(r'(?:^|\s)type="(?:const )?char\[(\d+)\]"', new)
+        if not (ea and eb and ta and tb) or ta.group(1) != ea.group(1) or tb.group(1) != eb.group(1):
+            return False
+        return int(eb.group(1)) - int(ea.group(1)) in PATHLEN
     return False
+
+
+PATHLEN = set()  # the length differences (derived prefix minus reference prefix) of the path map's lines
 
 
 TREES = []  # (token, directory) of B's facts BASIS source_tree items, the longest token first (filled by cmp_container)
@@ -270,6 +286,7 @@ def cmp_text(name):
     summ.append('%s: lines %d vs %d, findings %d' % (name, len(la), len(lb), nd))
 
 
+PATHLEN.update(PATHLEN_)
 rb_ = cmp_container('basis.kz')
 # the path map confirmed by content: FILE_HASHES of B' (mapped) against B
 fa = {}

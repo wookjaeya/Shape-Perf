@@ -319,7 +319,21 @@ cdt "$X/tP" "$X/decl3b.tsv"; h1=$?
 mkt "$X/tP2" /w ba 1 no 'v@/w/src/t/a_c:2::type'; cdt "$X/tP2" "$X/decl3.tsv"; h2=$?
 mkt "$X/tP3" /w ba 0 no 'v@/w/src/t/a_c:1::type'; cdt "$X/tP3" "$X/decl3.tsv"; h3=$?
 [ $c3 -eq 0 ] && [ $h1 -eq 1 ] && [ $h2 -eq 1 ] && [ $h3 -eq 1 ] || ok=1
-res "derived comparison (stand-in kz-dump)" $ok "control rc $c (declared findings $cl); undeclared record rc $f1; undeclared text line rc $f2; path outside the map rc $f3; (b) shifted tu= and escaped quotes rc $c2 (undeclared $nd2); real tu= change rc $g1; change outside the stripped fields rc $g2; (c) shifted decl_fh=/effect_fh= and a source-tree token declared by treetok rc $c3; without the treetok line rc $h1; a change beyond the token rc $h2; a real effect_fh= change rc $h3"
+# (d) 2026-11-19: a character-array literal whose length follows the work space's path (term pathlen; the map /ref/ ->
+# /w/ makes paths 2 shorter)
+mka() { # DIR EXTENT TYPE-N
+  mkdir -p "$1"
+  { echo "kz-dump 1"; echo "container abi=1 kind=basis size=10"; echo "tool_sha256=t"; } > "$1/basis.kz"
+  { echo "kz-dump 1"; echo "container abi=1 kind=facts size=10"; echo "tool_sha256=t"
+    echo "section ARG_TYPES type=8 count=1 crc32=0x7"; echo "  ARG_TYPES[0] call=1 pos=0 extent=$2 decl_fh=none type_class=char-array flags={const-pointee} type=\"char[$3]\" decl_object=\"\""; } > "$1/facts.kz"
+  printf 'basis x\n' > "$1/basis.txt"; echo e > "$1/extract.txt"; echo rel > "$1/relations.txt"; : > "$1/relations.log"; echo a > "$1/args.txt"; echo s > "$1/sha256.txt"
+}
+mka "$X/aB" 10 10; mka "$X/aP" 8 8; mka "$X/aP2" 9 9; mka "$X/aP3" 8 10
+printf 'facts.kz\tARG_TYPES\tpathlen\tD1 path strings\n' > "$X/decl4.tsv"
+cda() { python3 -I "$R/env/redesign/compare_derived.py" "$X/kzd" "$X/outa.txt" "$X/aB" "$1" --path-map "$X/map.tsv" --declared "$X/decl4.tsv" > "$X/cda.log" 2>&1; }
+cda "$X/aP"; c4=$?; cda "$X/aP2"; k1=$?; cda "$X/aP3"; k2=$?
+[ $c4 -eq 0 ] && [ $k1 -eq 1 ] && [ $k2 -eq 1 ] || ok=1
+res "derived comparison (stand-in kz-dump)" $ok "control rc $c (declared findings $cl); undeclared record rc $f1; undeclared text line rc $f2; path outside the map rc $f3; (b) shifted tu= and escaped quotes rc $c2 (undeclared $nd2); real tu= change rc $g1; change outside the stripped fields rc $g2; (c) shifted decl_fh=/effect_fh= and a source-tree token declared by treetok rc $c3; without the treetok line rc $h1; a change beyond the token rc $h2; a real effect_fh= change rc $h3; (d) a literal longer by the map's length difference declared by pathlen rc $c4; another length rc $k1; a type that is not its extent rc $k2"
 
 # 12 binding report
 X=$W/b; mkdir -p "$X"

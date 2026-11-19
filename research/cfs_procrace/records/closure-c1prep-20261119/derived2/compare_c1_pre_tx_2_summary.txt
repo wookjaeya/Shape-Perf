@@ -1,0 +1,29 @@
+# summary of /home/user/work/redesign/obs1/c1p2_compare/compare_c1_pre_tx_2.tsv (sha256 2b1d04e0c5a8d31271224efb8270b8a90ed483507e25d0de9fa1d975dc44b428, 529 lines): findings by file and part and verdict
+      1 args.txt	line	declared
+     29 basis.kz	BASIS	declared
+      1 basis.kz	DEVIATIONS	declared
+     17 basis.kz	FILE_HASHES	declared
+    177 basis.kz	TUS	declared
+      2 basis.kz	header	declared
+      6 basis.kz	section-line	declared
+     40 basis.txt	line	declared
+      1 extract.txt	line	declared
+     89 facts.kz	ARG_TYPES	NOT-DECLARED
+     11 facts.kz	BASIS	declared
+      3 facts.kz	CALL_TARGETS	declared
+      3 facts.kz	FACT_EXPRS	declared
+      3 facts.kz	FIELD_STATUS	declared
+      3 facts.kz	FIELD_TYPES	declared
+      1 facts.kz	FILE_HASHES	declared
+      4 facts.kz	FUNC_WRITES	declared
+      1 facts.kz	GLOBAL_IMAGES	declared
+     23 facts.kz	LOCKSET	declared
+     13 facts.kz	OBJECT_ACCESS	declared
+     13 facts.kz	READS	declared
+      4 facts.kz	header	declared
+     43 facts.kz	section-line	declared
+      3 relations.txt	line	declared
+      3 sha256.txt	line	declared
+# first two undeclared findings of each file and part
+facts.kz	ARG_TYPES	changed B[823] B'[823]: call=387 pos=0 extent=69 decl_line=0 decl_fh=none read=none type_class=char-array width=8 read_dom=not-computed flags={const-pointee} type="char[69]" decl_object=""  ->  call=387 pos=0 extent=78 decl_line=0 decl_fh=none read=none type_class=char-array width=8 read_dom=not-computed flags={const-pointee} type="char[78]" decl_object=""	NOT-DECLARED
+facts.kz	ARG_TYPES	changed B[944] B'[944]: call=458 pos=0 extent=69 decl_line=0 decl_fh=none read=none type_class=char-array width=8 read_dom=not-computed flags={const-pointee} type="char[69]" decl_object=""  ->  call=458 pos=0 extent=78 decl_line=0 decl_fh=none read=none type_class=char-array width=8 read_dom=not-computed flags={const-pointee} type="char[78]" decl_object=""	NOT-DECLARED

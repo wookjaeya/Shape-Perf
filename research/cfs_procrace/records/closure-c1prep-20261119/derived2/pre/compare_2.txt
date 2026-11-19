@@ -1,0 +1,35 @@
+basis.kz FILE_HASHES: same order after the map: no; same entries: no
+basis.kz: sections 6, equal in order 2, findings 232
+path map by content: FILE_HASHES B 194, B' 195; same path after the map 194, of them same sha256 178, other sha256 16 (/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/bp/CMakeFiles/bp.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/bplib/CMakeFiles/bplib.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/cf/CMakeFiles/cf.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/ci_lab/CMakeFiles/ci_lab.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/sch_lab/CMakeFiles/sch_lab.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/to_lab/CMakeFiles/to_lab.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/compile_commands.json, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/CMakeFiles/core-tx.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/cfe_build_env_table.c, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/bp.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/bplib.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/cf.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/ci_lab.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/sch_lab.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/to_lab.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/core-tx); only in B 0; only in B' 1; derived paths left unmapped 0
+facts.kz FILE_HASHES: same order after the map: no; same entries: no
+facts.kz: sections 47, equal in order 35, findings 214
+basis.txt: lines 130 vs 140, findings 40
+extract.txt: lines 369 vs 369, findings 1
+relations.txt: lines 7945 vs 7945, findings 3
+relations.log: lines 1 vs 1, findings 0
+args.txt: lines 7 vs 8, findings 1
+sha256.txt: lines 6 vs 6, findings 3
+NOT-DECLARED 89
+declared:D1 path strings (no site in bplib; the reference built at the derived path gives the same file, build_ref.record) 1
+declared:D2 no source tree (B's source_tree items) 3
+declared:D2 no source tree (a name with B's source-tree token is B''s absolute path; nothing else in the record differs) 65
+declared:D2 no source tree (the count of source trees in the rules line) 1
+declared:D2 no source tree (the counts move from by source tree to absolute) 2
+declared:D4 build environment table 2
+declared:D4 build environment table (records of facts read from that unit) 1
+declared:identity 12
+declared:identity (a section's crc32 follows its records, which are compared one by one) 43
+declared:identity (records added by the categories below; the string pool follows the path strings) 6
+declared:identity (the basis artifact hash; removed and added when the removed source_tree items realign the records) 2
+declared:identity (the derived-workspace mode names its map) 1
+declared:instrumented and linked files (the same files as binary.sha256 and module[*].link.output_is_the_loaded_file) 6
+declared:plugin options 187
+declared:plugin options (CMake's link rule of a C shared module carries CMAKE_C_FLAGS, so the plugin options; diff of apps/bp link.txt) 6
+declared:plugin options (facts copy the basis deviations) 5
+declared:plugin options (the plugin file is hashed, basis.cpp:1091-1094) 1
+declared:runtime linked 37
+declared:runtime linked (calls into the runtime at bound sites; the module files are rebuilt) 16
+declared:runtime linked (the count of references across units) 2
+declared:runtime linked (the runtime objects have no compile command in the cFS build) 6
+not declared 89
+rc=1

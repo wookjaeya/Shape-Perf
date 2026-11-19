@@ -59,3 +59,20 @@ Fourth run (2026-11-19, results section 18; the MC tool is still `bf2ec2ee…`, 
 | `scratch4/golden_scratch/` | `closure_np.golden_4` (to commit with the declared build), the sha256 of the five scratch goldens and which equal earlier scratch goldens |
 | `scratch4/logs/` | cmake, make, extraction and ctest logs; `ctest_golden_lint_4d.log` and `reasons_4c.log` are the ones the results cite (earlier trials kept under their names) |
 | `scripts/buffer_counts.py` | counts of the stored-name buffer and lifetime-end lines of a relations text (a check, not a tool of the method) |
+
+Fifth run (2026-11-19, results section 19; the MC tool is still `bf2ec2ee…`, `scratch5/mc_tool_sha256_start.txt`, `_end.txt`):
+
+| Path | Content |
+|---|---|
+| `free_start_attempt5.txt`, `free_end_attempt5.txt` | free space at the start and the end of the fifth run (the end after its scratch was removed) |
+| `scratch_guard5/` | the guard logs of the fifth run's scratch cmake, builds, re-extraction, relations, plan runs and ctest (`w01`-`w25`) |
+| `scratch5/scratch_tool_sha256.txt` | the sha256 of the last scratch kz-static of the run (the one that made `plans/` and the scratch goldens) |
+| `scratch5/facts_scratch_sha256.txt` | sha256 and size of the five builds' facts re-extracted by this run's scratch tool (`run.sh extract_final`; removed after the run) |
+| `scratch5/plans/` | the plans of the last scratch tool compared with the kept revision-4 plans `rf2_plans_v4` (by `scripts/plan_rev5_compare.py`): `rev1_keptfacts_vs_kept_v4.txt` (revision-1 data on the kept facts: byte comparison apart from the generator line), `rev2_keptfacts_vs_kept_v4_<b>.txt`, `rev1_scratchfacts_vs_kept_v4_<b>.txt`, `rev2_scratchfacts_vs_kept_v4_<b>.txt`, `rev2_vs_rev1_scratchfacts_<b>.txt` (what revision 5 adds on the same facts); the counts of 10.7 (`counts_rev2_scratchfacts.txt`, `counts_rev2_keptfacts.txt`, by `scripts/plan_rev5_counts.py`) |
+| `scratch5/plans_trial1_before_largest_extent/` | the same outputs of the scratch tool before the extent bound took the largest stored-name extent (kept, not cited for the result) |
+| `scratch5/plans_new_lines/` | the new sidecar lines of the revision-5 plans on the re-extracted facts per build, the sha256 of every scratch plan file, one argument file |
+| `scratch5/golden_scratch/` | `planv5_np.plan.golden` (first, plan id not masked) and `planv5_np.plan.golden_2` (the one to commit with the declared build), `planv4_np.plan.golden` and `_2` (the plan id masked; `_2` to commit), their differences from the repository's planv4 golden, and the run of test_static_plan against a scratch data directory holding the `_2` goldens (389 checks passed) |
+| `scratch5/fixture/` | the relations text and the revision-5 sidecar of planv5.c (`planv5_relations_trial.txt`: an earlier scratch tool, kept, not cited) |
+| `scratch5/logs/` | cmake, make, extraction and ctest logs (`ctest5d.log` is the one the results cite; earlier trials kept under their names) |
+| `scripts/plan_one_ns.sh` | one plan with `--manifest 4` and the namespace data files of coverage rule revision 1 or 2 (a scratch runner) |
+| `scripts/plan_rev5_compare.py`, `scripts/plan_rev5_counts.py` | the comparison of a revision-5 plan with a kept revision-4 plan by site keys, and the counts of 10.7 (checks, not tools of the method) |

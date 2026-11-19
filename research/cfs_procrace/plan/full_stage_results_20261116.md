@@ -2523,3 +2523,85 @@ scratch Release 빌드는 kz-static, static_golden, kz_lint, test_static_reasons
   - (7) `source_tree`·`absence origins`·(5)의 fixture.
   - (8) 완전한 소스의 scratch 점검 빌드 → 선언 → 사본 → MC 빌드 → 다시 뽑기 → 끝 점검 → 결과 절.
 - §15.7 의 key-clearing 이름 문제(할당 때의 자리 비우기를 지우기로 셈)는 위 clear-slot 줄이 그 꼴을 보이므로, 계획 규칙 개정 5 의 수명 끝 site 와 함께 다룰 수 있다. 다루는 방법은 lead 의 판단을 기다린다. absence origins 의 이름 칸 문제와 §12.10 5 항의 PI 결정은 그대로 남아 있다.
+
+## 19. C1 닫기의 kz-static 한 빌드: 소스 진행분 다섯째, 계획 규칙 개정 5 (2026-11-19, 선언 전에 멈춤)
+
+§18.8 의 다음 차례 (5)(계획 규칙 개정 5 생성기)를 글 → 코드 → scratch 점검의 차례로 넣었다. **선언, 도구 사본, MC 빌드, 다섯 빌드의 선언된 다시 뽑기는 하지 않았다**: 넣을 것이 아직 다 들어가지 않았으므로(§18.8 의 (6)–(8)) §12.10 6 항대로 선언 전에 멈췄다. MC 의 kz-static 은 `bf2ec2ee…` 그대로다(시작과 끝에 sha256 을 보았다, `../records/closure-kzstatic-20261119/scratch5/mc_tool_sha256_start.txt`·`_end.txt`). 소스가 그 바이너리보다 더 앞서 있다. 기록: `../records/closure-kzstatic-20261119/`(`scratch5/`, `scratch_guard5/`, `scripts/plan_one_ns.sh`·`plan_rev5_compare.py`·`plan_rev5_counts.py`, README). cFS 를 부팅하지 않았고 push 하지 않았다. 아래 수는 모두 기록 디렉터리의 출력 파일에서 왔고, scratch 도구(`scratch5/scratch_tool_sha256.txt`)의 수라서 [I] 다.
+
+### 19.0 lead 의 판단 (2026-11-19, §17 의 열린 것에 대해)
+lead 가 2026-11-19 에 정한 (a)–(e)는 §18.0 에 적은 그대로다. 이 단계에 닿는 것만 적는다.
+- (a) 17 번 조건 (6)은 쓰인 대로(필드 단위와 형 단위 모두) 적용한다. 계획 생성기는 이 조건을 읽지 않는다. Re 가 그것을 덮는지는 설명 스크립트 단계의 일이다.
+- (b) out 저장된 지역 변수의 추출 틈은 그대로 두고 `include/` 는 바꾸지 않는다. 이 단계도 `include/` 와 추출을 바꾸지 않았다. 되돌림 site 의 after-call 은 out 인자를 런타임에 기록하므로(10.4) 정적 틈을 정적으로 메우지 않는다.
+- (c) 저장된 이름 버퍼는 §18.2 대로이고 이 단계에서 풀지 않았다.
+- (d) 바뀌는 golden 은 선언된 빌드에서 커밋한다. 이 단계에서 둘이 더해진다(19.3): `planv4_np.plan.golden`(plan id 를 가림)과 새 `planv5_np.plan.golden`. 첫 ctest 실패 목록은 **완전한 소스**의 scratch 점검 빌드에서 다시 이름으로 확인한다.
+- (e) 둘째 주소 넘김 호출 자리와 `other` 종류는 빌드 단계의 측정으로 미룬다.
+
+### 19.1 바뀐 것 [F]
+- **글(코드보다 먼저)**: `kairos/docs/plan_manifest.md` 10.8 (`3f82845`)과 그 다듬기 하나(`fcf34ab`). 생성기를 고치며 개정 2 자료와 relations 개정 14 의 줄을 읽고, 10.1–10.6 이 열어 둔 선택을 정했다: 새 줄을 쓰는 조건(모든 `--namespaces` 파일이 `semantics-data 2` 일 때; 두 개정을 섞으면 거절), 읽는 쪽이 받는 문장, 두 세대(`kind`/`table`) 항목의 칸, 사실에서 읽는 칸(FIELD_TYPES 의 저장 이름과 extent, 비교·복사·길이 호출; 길이 호출은 PARAM_FLOW 의 모든 깊이), `success-path` 칸, 구성 요소가 적용되는 조건, sidecar 의 자리, kind 값의 층 호출과 그 두 not-planned 사유, 되돌림·채움·slot clear 의 site, lifetime 줄의 `sites=`, `lifetime-complete` 가 yes 인 조건, 새 need, bound 줄. **고침 하나(10.3)**: 문맥 틀은 at-call 과 after-call 두 site 이므로 `frame=<at-call id>,<after-call id>` 로 쓰고, 문맥은 서로 다른 사슬마다 하나다. **다듬기(`fcf34ab`)**: 저장 이름이 둘이고 extent 가 다른 항목(osal-7.0.1 의 파일 시스템 종류: 64 와 32, `kairos/semantics/framework_namespaces2_osal-7.0.1.txt:152-153`)은 가장 **큰** extent 로 key text 를 묶는다(작은 쪽으로 묶으면 큰 필드에 맞는 이름을 자른다). scratch 계획을 본 뒤, 코드 커밋 전에 했다.
+- **소스(`5a47dcc`)**: `lib/llvm/plan_gen.cpp`·`plan_gen.hpp`.
+  - 읽는 쪽: `layer-fn`, `layer-op`, `kind … value= at=`, `rollback`, `stored-name`, `extent`, 두 `compare` 꼴을 읽고 `kind-unresolved`·`not-covered` 는 읽고 쓰지 않는다. 개정 1 파일의 이 문장은 전처럼 거절한다.
+  - 계획된 경로 A 행(층 또는 대조)의 use 나 creator callee 가 적용되는 항목의 lookup·create 이면: `namespace-entry` 줄, `kind-value` site(lookup 과 create 의 층 호출에서 `kind-param` 인자), `object-rollback` site(create-finalize 호출의 at-call 의 status 인자와 after-call 의 out 인자, `reentry`), `object-clear` site(clear-table 의 채움 호출, relations 가 빈 레코드 조건을 보이지 않는 clear-slot 의 저장; 보이면 `not-a-lifetime-end(…)`), `sites=` 가 붙은 `lifetime` 줄, 종류마다 `lifetime-complete`, 저장 이름 extent 로 묶은 key text(10.5).
+  - 적용되는 파일마다 `namespace-layer` 줄. 사슬이 둘 이상인 계획된 행의 문맥마다 틀 site 와 `context` 줄(10.3).
+  - `plan_reasons()` 에 둘: `plan_missing(no call site tells the context apart)`, `plan_missing(no lifetime-end entry in the namespace data)`.
+  - 바꾸지 않은 것: 선택(`observation-set`), 우선순위, 예산, 대조 선택, 층 라벨, 행 줄(라벨 둘은 개정 4 부터 있음), `rules` 줄과 plan id 의 글(규칙 개정 이름 바꾸기는 §18.8 의 (6)), `include/`, 추출, relations, order.
+- **fixture 와 시험(`5a47dcc`)**: `tests/static/fixtures/planv5.c`(종류 매개변수가 있는 조회·할당, 실패한 생성을 되돌리는 마무리, 삭제 마무리, 표 채움, 빈 레코드 조건이 있는 slot clear 와 없는 slot clear, 삭제가 없는 종류, strncmp 로 찾는 표, 호출 문맥이 둘인 초기화 함수), 손으로 쓴 개정 2 자료 둘(`tests/static/data/planv5_fixture/`), `test_static_plan.cpp` 의 개정 5 블록, `tests/static/CMakeLists.txt`(fixture 컴파일 목록과 설명). 계획 golden 의 가림에 plan id 를 더했다(19.3).
+
+### 19.2 scratch 점검 [I]
+scratch Release 빌드(kz-static, static_golden, kz_lint, test_static_reasons, test_static_plan)는 모두 감시 아래에서 돌렸다(`scratch_guard5/w01`–`w25`, 모두 `verdict=completed`). 다섯 빌드는 이 실행의 scratch 도구로 `run.sh extract_final` 한 번(`w03`, rc 0)으로 다시 뽑았다(`scratch5/facts_scratch_sha256.txt`; sha256 은 넷째 실행의 것과 다르다. facts 는 뽑은 도구의 정체성을 싣는다).
+
+| 점검 | 결과 | 출력 |
+|---|---|---|
+| 개정 1 자료, 남긴 rf2 사실, 다섯 빌드 | sidecar 는 `generator` 줄 말고, manifest 는 sidecar sha256 말고, 요청·모듈 표·실행 파일 목록은 첫 줄 말고 `rf2_plans_v4` 와 같다(5/5) | `scratch5/plans/rev1_keptfacts_vs_kept_v4.txt` |
+| 선택·층·위치·라벨·대조(개정 2 자료) | 남긴 사실에서도 다시 뽑은 사실에서도 다섯 빌드 모두 같다: 층 계획 행 9/8/3/8/7, 대조 계획 행 5/5/4/2/2, 층 같음(`equal=yes` 30 개, `no` 0 개). 행 줄은 c1 두 빌드의 다시 뽑은 사실에서 키 셋(A20, A27, A30)만 움직인다. 소스 트리 토큰 키 때문이고(§15.3), 같은 사실의 개정 1 계획에서도 같다 | `scratch5/plans/rev2_keptfacts_vs_kept_v4_<b>.txt`, `rev2_scratchfacts_vs_kept_v4_<b>.txt`, `rev1_scratchfacts_vs_kept_v4_<b>.txt` |
+| 같은 사실에서 개정 5 가 더한 것 | 없어진 site 0. 더한 site 14/11/14/0/0. 있던 site 가운데 규칙이 더해진 것 2/1/0/0/0(조회의 층 호출에 `kind-value`, 문맥 틀이 된 `CF_Init` 의 after-call), 값이 바뀐 것 1/1/0/0/0(조회 key text 의 bound 64 → 20). 새 need 14/12/12/0/0. 바뀐 need 2/2/1/0/0(시간 기준 종류의 `object-delete` 가 `no namespace data entry` 에서 planned 로: 개정 1 의 osal-f34759d·osal-7.0.1 파일에 그 종류가 없었다). 요청은 site 번호를 키로 바꾸면 같다. 나머지 sidecar 줄은 같다 | `scratch5/plans/rev2_vs_rev1_scratchfacts_<b>.txt` |
+| golden·fixture 컴파일·lint·reasons·plan 72 | 실패 6: order golden 셋, `resultflow_np`, `closure_np`(§18.8 과 같음), `test_static_plan`(검사 389 가운데 2: planv4 의 plan id 를 가린 golden, 새 planv5 golden; 둘 다 저장소에 아직 없다). lint 통과, test_static_reasons 통과 | `scratch5/logs/ctest5d.log` |
+| scratch golden 둘을 놓은 scratch 자료 디렉터리 | test_static_plan 389 확인 통과 | `scratch5/golden_scratch/test_static_plan_scratch_data.log` |
+
+### 19.3 golden 의 plan id [I]
+- `planv4_np.plan.golden` 은 `plan`·`plan-id` 의 16 hex 가 다르면 실패한다. plan id 는 facts 의 artifact hash(golden 에서 이미 가림)와 규칙 글의 sha256 이고, facts 는 뽑은 도구의 정체성을 싣는다. 그래서 도구 소스가 바뀔 때마다 이 golden 이 실패한다. 저장소 golden 의 `1362f7e3…` 이 이 실행의 scratch 빌드에서 `86afd55f…` 가 되었다(`scratch5/golden_scratch/planv4_np.plan.golden.diff_vs_repo.txt`; 이 실행의 앞 scratch 빌드에서도 다른 값이었으나 그 출력은 남지 않았다). 앞 실행들의 남은 scratch ctest 기록에는 test_static_plan 이 없다(`scratch*/logs/`). 그래서 그 실행들은 이것을 보지 못했다 [I].
+- 시험의 가림에 plan id 를 더했다. 그래서 planv4 golden 은 두 줄(`<plan-id>`)만 바뀐다(`planv4_np.plan.golden_2.diff_vs_repo.txt`). 선언된 빌드는 `golden_2` 둘을 커밋한다. 그 뒤로는 도구가 바뀌어도 이 두 golden 이 plan id 때문에 실패하지 않는다.
+
+### 19.4 다섯 빌드에서 새 줄이 서는 곳과 서지 않는 곳 [I]
+수는 `scratch5/plans/counts_rev2_scratchfacts.txt`(다시 뽑은 사실, 차례 c1_pre_tx/c1_post_tx/r2_core/c5_641/c5_642)다. 줄은 계획된 모든 경로 A 행과 적용되는 모든 자료 파일에서 나온다. 설계 행에만 보이는 줄은 없다.
+
+| 줄·site | 서는 것 | 서지 않는 것 |
+|---|---|---|
+| `namespace-entry` | 계획된 경로 A 행 5/5/4/2/2 가운데 4/4/4/0/0(c1: 셈 세마포어 A20·A21, 시간 기준 A22·A26; r2: 파일 시스템 셋, 시간 기준 하나) | 1/1/0/2/2: c1 의 A63(lookup·creator `OS_FileOpenCheck`·`OS_mv` 가 이 빌드에 적용되는 항목에 없음), c5 의 A16·A17(lookup·creator `CFE_ES_DeleteCDS`·`CFE_ES_RegisterCDSEx` 가 cFE 6.4 자료의 항목에 없음; 이유는 sidecar 의 need 줄 글) |
+| `namespace-layer` | 1/1/1/2/2 | — |
+| `kind-value` | need planned 4/4/4/0/0 | — |
+| `object-rollback` | planned 4/4/4/0/0; lifetime 줄 2/2/3/0/0, 모두 `reentry=none` | — |
+| `object-clear` | planned 4/4/4/0/0; clear-table 과 clear-slot 각 2/2/2/0/0 줄 | slot clear 가 `not-a-lifetime-end` 인 것 0(다섯 빌드의 clear-slot 줄은 모두 `not shown`, §18.5) |
+| `lifetime-complete` | yes 2/2/2/0/0(종류마다) | no 0 |
+| `context` 와 틀 | 사슬이 둘인 계획된 행 1/0/0/0/0(c1_pre_tx 의 A21), 틀 2/0/0/0/0 | 틀 없는 문맥 0 |
+| extent 로 묶은 key text | 1/1/0/0/0 | r2 의 파일 시스템 종류는 가장 큰 extent 가 64 라 `KZ_RT_STR_MAX` 보다 작지 않다 |
+
+- c5 두 빌드(cFE 6.4.x·OSAL 4.1.1, 세대 T)는 `namespace-layer` 줄 둘(칸이 모두 `-`) 말고 개정 5 가 더한 것이 없다.
+- fixture(`scratch5/fixture/planv5_plan.side`)는 다섯 빌드에 없는 꼴을 보인다: `lifetime-complete … no(no delete statement)`, 표 항목의 `no(no delete statement; no rollback statement; no layer-op statement)`, 빈 레코드 조건이 보이는 slot clear 의 `not-a-lifetime-end(…)`, 표 항목의 `kind-value … plan_missing(no rule of this revision)`. 틀 없는 문맥(`plan_missing(no call site tells the context apart)`)은 fixture 에도 다섯 빌드에도 없다.
+
+### 19.5 C1 에서 줄이 보인 것 [I]
+- **설계 행 A21**(`plans_new_lines/rev2_scratchfacts_c1_pre_tx.txt`): `kind=OS_OBJECT_TYPE_OS_COUNTSEM value=3`, `stored-name=OS_count_sem_internal_record_t.obj_name extent-value=20`, `compare-call=strcmp@…/osapi-idmap.c:271`, `copy-call=memset@…/osapi-countsem.c:100,strncpy@…:100`(이름 저장 매크로가 한 줄에서 펼쳐짐), `length-call=memchr@…/osapi-countsem.c:91,memchr@…/osapi-idmap.c:973`, `success-path=OS_CountSemCreate:missing`. 조회 key text 의 bound 는 64 에서 20 이 된다. 문맥 둘: 1 은 `CF_Init` 의 `CF_CFDP_InitEngine` 호출(`cf_app.c:252:18`), 2 는 `CF_CmdEnableEngine` 의 호출(`cf_cmd.c:1119:13`)이 틀이다. 되돌림 site 는 `OS_CountSemCreate` 의 `OS_ObjectIdFinalizeNew`(`osapi-countsem.c:106:23`, status arg0, out arg2), 수명 끝은 삭제(`OS_CountSemDelete`), 표 초기화(`osapi-idmap.c:120`의 memset), slot clear(`osapi-idmap.c:640`)다.
+- §15.7 의 key-clearing 이름 문제: `OS_ObjectIdFindNextFree` 의 slot clear 는 relations 가 빈 레코드 조건을 보이지 않으므로(§18.5) 10.4 대로 `object-clear` site 로 계획된다. 10.4 는 그 사건이 id 를 이름 대지 않고 그것이 든 생성의 실행에 속한다고 읽는다. 다루는 다른 방법은 lead 의 판단을 기다린다.
+
+### 19.6 공간 [M]
+- 시작: 1,209,716,736 B(`free_start_attempt5.txt`, 04:24Z).
+- 감시 기록의 가장 낮은 값: 810,037,248 B. 하한 314,572,800 B 를 넘지 않았다.
+- 크기: scratch 빌드 tree 289 MB, 다시 뽑은 다섯 빌드 70 MB, 계획·fixture 21 MB.
+- scratch 를 모두 지운 뒤: 1,205,841,920 B(`free_end_attempt5.txt`, 04:50Z). 기록 디렉터리에 더한 것은 약 0.7 MB 다. 압축 대체는 쓰지 않았다.
+
+### 19.7 계획과 다르게 한 것
+- **글 다듬기 하나.** extent 를 가장 큰 것으로 하는 다듬기는 다섯 빌드의 scratch 계획을 본 뒤에 했다(코드 커밋 전, 19.1). 그 전 도구의 출력은 `scratch5/plans_trial1_before_largest_extent/` 에 남겼다. 다른 것은 r2 의 줄뿐이다: 묶은 key text 2 → 0, 값이 바뀐 site 2 → 0, `bound` 줄 하나가 없어짐.
+- **fixture 를 고쳤다.** 첫 판은 층 조회 함수 안에 길이 검사의 이른 반환이 있어 relations 가 부재 값을 정하지 않았고(`absence: unevaluated`), 그래서 문맥 줄이 없었다. 길이 검사를 API 쪽으로 옮겼다(세마포어는 도우미 함수 안: 길이 호출을 깊이 1 에서 찾음; 큐는 API 본문: 깊이 0). 그 시도의 출력은 scratch 에만 있었고 남지 않았다. `scratch5/fixture/planv5_relations_trial.txt` 는 고친 fixture 에 대한 앞 scratch 도구의 출력이다.
+- **시도 계획.** 마지막 도구 앞의 두 도구로 만든 계획이 있었다: 첫 판(표 항목에 층 연산을 붙이지 않게 고치기 전)과 둘째 판(extent 다듬기 전). 첫 판의 출력은 scratch 에만 있었고 남지 않았다. 그래서 이 절은 그 판의 수를 쓰지 않는다. 둘째 판은 위 trial 디렉터리다.
+- **kind 값의 역할 이름.** 층 호출의 kind 인자가 다른 행의 key 로 이미 기록된 site(fixture 의 kind 필드 이름 공간)에서는 값의 역할이 `key` 로 남는다. 같은 인자가 기록되므로 바꾸지 않았다.
+- **golden 가림.** test_static_plan 의 가림에 plan id 를 더했다(19.3). 시험의 변경이고, planv4 golden 이 두 줄 바뀐다.
+- `scratch_guard5/` 에 처음 함께 복사한 ctest 기록 넷은 `scratch5/logs/` 와 같은 바이트라서 README 커밋에서 지웠다.
+
+### 19.8 열린 것과 다음 차례
+- **자료 파일의 머리 주석.** `framework_namespaces2_*.txt` 다섯의 머리는 "No tool reads this file yet"라고 적는다. 이제 읽는 쪽이 소스에 있다. 이 파일은 훑기가 만들고 계획이 sha256 으로 붙잡으므로 이 단계에서 고치지 않았다. 고치려면 훑기(`env/tools/semantics_scan.py`)의 머리 글을 바꾸고 다시 만드는 자료 단계가 필요하다.
+- 틀 없는 문맥의 꼴은 fixture 와 다섯 빌드 어디에도 없어 시험되지 않았다.
+- 첫 ctest 실패(지금 소스의 scratch): `static_golden_order_np`, `static_golden_resultflow_np`, `static_golden_resultflow_order_np`, `static_golden_looplock_order_np`, `static_golden_closure_np`, `test_static_plan`. 커밋할 golden 은 §18.8 의 다섯에 `scratch5/golden_scratch/planv4_np.plan.golden_2`, `planv5_np.plan.golden_2` 를 더한 일곱이다. 남은 내용을 넣으면 다시 정한다(lead 의 판단 (d)).
+- §18.8 의 다음 차례 가운데 남은 것:
+  - (6) 규칙 개정 이름 바꾸기(relations 14, order 8, plan 5). 계획의 `rules` 줄과 plan id 의 글도 이때 바뀐다(10.8).
+  - (7) `source_tree`·`absence origins` 의 fixture. 개정 5 의 fixture 는 이 단계에서 넣었다.
+  - (8) 완전한 소스의 scratch 점검 빌드 → 선언 → 사본 → MC 빌드 → 다시 뽑기 → relations, 쌍 파일을 낸 order, 새 자료 파일 위의 개정 4·5 계획 → 끝 점검 → 결과 절.
+- §18.8 의 lead 판단(FIELD_STATUS 의 배열 표시), PI 결정(C 라이브러리 항목; PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)), lead 의 판단 (a)·(b)·(e)의 열린 것, absence origins 의 이름 칸 문제는 그대로다.

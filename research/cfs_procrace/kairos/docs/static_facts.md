@@ -900,6 +900,7 @@ end
 - 꼬리 줄의 `pairs` 는 `no_pair` 가 아닌 줄의 수이고, 값마다의 수의 합이다. `unknown` 은 까닭과 상관없이 센다.
 - 쌍 파일의 쌍은 글 출력을 다 쓴 뒤에 계산한다. 닫힘을 따라가며 HB-seq 단계 간선이 새로 생길 수 있는데(쌍 파일에만 있는 쌍, 인쇄 한도 밖의 쌍), 그것이 글의 `HB-seq steps the closures followed` 수나 `edges.tsv` 를 바꾸지 않게 하려는 것이다. 그래서 `edges` 칸의 id 가운데 `edges.tsv` 에 없는 것이 있다: 그런 간선은 쌍 줄 뒤, 꼬리 줄 앞에 `edge<TAB><edges.tsv 의 열한 칸>` 줄로 한 번씩 적고, 꼬리 줄 끝에 ` edges_not_in_tsv <n>` 을 더한다. 읽는 쪽은 `edges` 칸의 모든 id 가 `edges.tsv` 나 이 `edge` 줄에 있는지 본다.
 - BASIS `source_tree[i]` 는 `--object-access` 아래에서 FUNCS 에 절대 경로(묶음 루트 밖)로 기록된 함수의 파일마다, 그 파일 위로 가장 가까운 `.git` 항목을 가진 디렉터리(형 이름의 토큰과 같은 규칙, 5s)를 찾아 디렉터리의 차례로 적는다: 값은 `<디렉터리> <토큰>`, 토큰은 `<디렉터리 이름>`. 그런 디렉터리가 없는 파일은 항목이 없고 키 글에 절대 경로가 남는다. relations 의 키 글은 내부 연결 함수의 파일이 어느 항목의 디렉터리 아래에 있으면(가장 긴 디렉터리부터) 그 앞부분을 토큰으로 바꿔 쓴다. 키 글 말고 relations 의 어느 줄도 바뀌지 않는다.
+- `absence origins:` 줄(개정 14 의 2 항)은 RESULT_FLOW·RESULT_EFFECT 와 OBJECT_ACCESS 가 함께 있는 사실에서만 쓴다. 기원 하나는 사슬(`absence:` 줄의 `no match:` 사슬, 조회 함수에서 검색 함수까지)의 한 함수의 RET_CONSTS 행 가운데 그 값을 내는 것 하나다. `<위치>` 는 같은 함수의 RETURNS 행 가운데 그 상수를 바로 돌려주는 return 문의 위치들(쉼표로; 없으면 `-`), `<조건>` 은 그 RET_CONSTS 행의 `when` 이다(없으면 `always`). `[search no-match]` 는 검색 함수의 행 가운데 조회의 비교가 맞지 않을 때 참으로 읽히는 것(`absence:` 의 값을 정한 행)이고, 나머지는 `[other]` 다. 사슬이 정해지지 않은 행(`absence: unevaluated`)은 이 줄이 없다.
 
 ## 6. core-cpu1 결과 [M]
 

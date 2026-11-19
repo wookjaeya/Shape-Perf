@@ -2,6 +2,8 @@
 
 설명 스크립트(`env/obs1/explain.py`, 지금 개정 3)의 다음 개정이 무엇을 읽고 무엇을 내는지를 항목마다 적는다. 코드는 아직 없다. 이 글이 코드보다 먼저 커밋되고, 코드가 이 글과 달라야 하면 이 글을 먼저 고쳐 커밋한다. 따로 표시하지 않는 한 [보강 제안]이다.
 
+(2026-11-19) 2026-11-18 의 판을 판정 규칙 8.13, 형식(`kairos/docs/static_facts.md` 5x, `kairos/docs/plan_manifest.md` 10절, `kairos/docs/event_semantics.md` 13절), 평가 절차와 맞춰 보고 마무리했다. 더한 것: 후보 목록과 인정 파일의 형식(4.1), 실패한 생성의 되돌림을 이름에 붙이는 규칙의 재진입 조건(3절 5), 필드 저장값 규칙으로 선 갈래의 표지(3절 8), 요약과 기대 대조 스크립트의 동결(3절 13, 8절). 앞판의 뜻은 바꾸지 않았다.
+
 - 규칙: 판정 규칙(`plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md`) 3.2–3.6, 8.2–8.5, 8.12, 8.13. 아래에서 "8.13-n" 은 8.13 의 n 번이다.
 - 형식: relations rules revision 14 의 줄과 쌍 파일(`kairos/docs/static_facts.md` 5x), 계획 sidecar 의 줄(`kairos/docs/plan_manifest.md` 10절), dump 글과 같은 빌드 줄(`kairos/docs/event_semantics.md` 13절).
 - 절차: `plan/c1_closure_evaluation_protocol_20261118.md`.
@@ -33,15 +35,15 @@
 | 2 | 사건 | 읽는 | dump 글, manifest, 결합 파일, sidecar | `uses[]`: 행의 사용 site 의 모든 호출 인스턴스를 행위자 차례로(상태 값, out 값, 키 포인터, 안쪽 키 글과 잘림 표지·길이, 종류 값, 문맥 틀로 배정한 문맥 또는 `unknown`). `creates[]`: 행의 `creator:` 줄과 `not a pair: key constants differ` 줄의 생성 site 의 모든 인스턴스, 탐침 행의 대조 기록에서는 `not a pair: probe-create` 줄의 것도(8.12 (ㄴ)); 상태, out 값, 키 글, 종류 값, 행위자. `lifetime_ends[]`: 삭제·되돌림·표 초기화·빈 자리 지우기 사건과 각 사건이 이름 댄 것(id, 이름 글, 표 전체; 8.13-13). `buildids[]`: `buildid` 줄. `tok-*` 줄은 읽어 수만 센다 | 중간 글의 사건 목록 |
 | 3 | 쌍의 항목 열둘 | 판정 | 2 의 사건; relations 행의 줄(`callee-check (success path)`, `absence origins:`, partition); 이름 공간 블록의 줄(`stored-name buffer:`, `lifetime end:`); sidecar 의 `namespace-entry`·`namespace-layer`·`lifetime` 줄; 연결 점검의 `same_build_object` 줄; 후보 목록과 인정 파일 | 기초 1–6, (가), (나) 의미, (나) 한도, (다), (라), (마)를 8.13-6…13 으로. 항목마다 `held`·`missing(<하위 사유>)`·`contradicted`, 근거, `depends_on`(기대는 후보 목록 줄), `premises`. 자료 갈래의 규칙(8.13-2)을 모든 항목에 건다 | `link.name_binding.pairs[]` 의 `items{}`, `missing_items[]`(이름), `missing_count`. 항목 하나만 보는 지름길 필드는 없다 |
 | 4 | 쌍의 결과 | 판정 | 3 | `bound`: 열둘이 `held` 이고 두 키 글의 바이트가 같다. `refuted`: 8.3 의 조건 위에서 글이 다르다. `differs_from_use_key`: 글이 다르나 조건이 모두 서지 않는다(증거일 뿐). `unlinked`: 그 밖. 8.2 의 모순과 여럿 규칙 | `pairs[].result` |
-| 5 | 수명과 이름 상태 | 판정 | `creates[]`, `lifetime_ends[]`, sidecar 의 `lifetime-complete` | 세대 = (종류 값, 이름 글, id), 성공한 생성에서 첫 수명 끝까지(8.13-13). 사용마다 이름 상태: `met`(사용의 at-call 앞에 끝난 생성의 세대가 사용 내내 열려 있음), `unmet`(그 종류·글의 세대가 사용 구간 어디에도 열려 있지 않고, 생성자 site 와 수명 끝 site 가 완전함), `undecided(<까닭>)`(겹침, 완전하지 않음, 손실, 종류 값 없음) | `uses[].name_state`, 완전성 깃발 |
+| 5 | 수명과 이름 상태 | 판정 | `creates[]`, `lifetime_ends[]`, sidecar 의 `lifetime-complete` | 세대 = (종류 값, 이름 글, id), 성공한 생성에서 첫 수명 끝까지(8.13-13). 되돌림 사건은 id 를 이름 대지 않으므로 같은 행위자에서 그 앞에 있는 같은 생성 함수 실행의 `key-text` 사건의 이름 글에 붙인다. sidecar 의 `lifetime` 줄이 `reentry=possible` 이면 붙이지 않고, 그 사건은 구간 안에서 그 종류의 모든 이름에 대한 수명 끝으로 센다(`kairos/docs/plan_manifest.md` 10.4). 사용마다 이름 상태: `met`(사용의 at-call 앞에 끝난 생성의 세대가 사용 내내 열려 있음), `unmet`(그 종류·글의 세대가 사용 구간 어디에도 열려 있지 않고, 생성자 site 와 수명 끝 site 가 완전함), `undecided(<까닭>)`(겹침, 완전하지 않음, 손실, 종류 값 없음) | `uses[].name_state`, 완전성 깃발 |
 | 6 | 인스턴스 연결 | 판정 | `uses[]`, `creates[]`, 5 | 8.13-14: 열린 세대에만. 같은 글의 연결 없는 생성은 `same_text_unbound` 증거 | `uses[].instance_link` |
 | 7 | 기록의 연결 | 판정 | 4, 6 | 사용 사건마다의 결과를 검증된 키 글로 묶고 8.12 (ㄹ)로 집계한다. `link.basis` 는 `established` 일 때만 | `link.status`, `link.basis`, `link.missing[]` |
-| 8 | 사용 조건 | 판정 | relations 행의 줄: `callee-check`, `flip:`, `absence:`, `holder:`, `alternatives [context …]:`, `creator:`, `feasibility:`; 사용의 문맥 | (c1) 개정 3 그대로. (c2) flip 줄(`Rc` 면 부재 줄). (c3): `branch_i` ∈ {`held`, `not_held(<근거>)`, `not_established(<까닭>)`}, 문맥마다 `branch_iii` ∈ 같은 셋(8.13-15, 16, 17). (c4) 개정 3 그대로(`Rd` 면 그 읽기). `derived` 는 `R0` 에서 (c1), (c2), (c4)와 (i)·(iii)(또는 (ii))이 모두 설 때. 출처는 정적 줄뿐이다. 읽기 갈래는 `--readings` 에 든 것만 건다 | `use_cond.*`, `use_cond.branch_i`, `use_cond.branch_iii[]`, `use_cond.caller_dependence` |
+| 8 | 사용 조건 | 판정 | relations 행의 줄: `callee-check`, `flip:`, `absence:`, `holder:`, `alternatives [context …]:`, `creator:`, `feasibility:`; 사용의 문맥 | (c1) 개정 3 그대로. (c2) flip 줄(`Rc` 면 부재 줄). (c3): `branch_i` ∈ {`held`, `not_held(<근거>)`, `not_established(<까닭>)`}, 문맥마다 `branch_iii` ∈ 같은 셋(8.13-15, 16, 17). (c4) 개정 3 그대로(`Rd` 면 그 읽기). (iii)이 `alternatives` 줄의 `decided calls:` 에 기대어 섰으면(필드 저장값 규칙, 8.13-17) 그 갈래에 `decided_by = stored-field rule` 과 그 호출 자리를 적는다. 요약은 그런 갈래를 따로 세고, 그 규칙을 쓰기 전에 읽은 행(설계 행) 밖의 진술에 넣지 않는다. `derived` 는 `R0` 에서 (c1), (c2), (c4)와 (i)·(iii)(또는 (ii))이 모두 설 때. 출처는 정적 줄뿐이다. 읽기 갈래는 `--readings` 에 든 것만 건다 | `use_cond.*`, `use_cond.branch_i`, `use_cond.branch_iii[]`, `use_cond.caller_dependence` |
 | 9 | 순서 | 판정 | 쌍 파일만 | 연결된 쌍마다: 행 키, 두 위치, 실행 행위자를 root 묶기로 옮긴 두 뿌리로 쌍 파일의 줄을 찾는다. 찾으면 값·간선·전제, 못 찾으면 `order_basis_unknown`. 행 값으로 대신하지 않는다. `order.status` 는 3.2 축 3 그대로(P 가 유도되지 않았으면 `events_only`). `hard_before` 인 쌍에 `unmet` 사용이 있으면 표시하고 따로 센다 | `order.*`, `order_ground` |
 | 10 | 판정 | 판정 | 축의 상태 | 3.3 의 표 그대로 | `tool_verdict.*` |
 | 11 | 중립 필드 | 판정 | 행위자의 뿌리와 소속(개정 3 의 근거), RUNX 의 프로세스 | `pair_kind` ∈ {`app-app`, `core-app`, `process-app`, `same-app-other`, `same_actor`, `core-core`, `creator-app`, `same-app-main-child`, `unknown`}; `order_ground`; `other_order_seen_in_boots`(요약이 부팅에 걸쳐 채움); 객체마다의 `same_build`; `uses`, `uses_reached`, `uses_decided`; `eval_branch`, 자료 갈래, 인정 파일과 후보 목록의 sha256 | 기록의 머리 필드 |
 | 12 | 평가 갈래 | 판정 | 같은 중간 글 | 갈래마다 한 번 돌리고 출력 디렉터리를 갈래마다 따로 둔다. 읽는 부분의 출력은 갈래와 무관하다(한 번 만든 중간 글을 모든 갈래가 읽는다) | 갈래마다의 기록과 `index.tsv` |
-| 13 | 요약 | 따로 둔 스크립트 | 모든 부팅·갈래의 `index.tsv` 와 기록 | 평가 절차 8·10절의 표: 판정 × `pair_kind` × 순서 값, 부팅별 분포, `other_order_seen_in_boots`, 미확정의 종류별 수. "탐지" 수와 주장의 말은 없다. 기대와의 대조는 요약도 판정 부분도 하지 않는다: 채운 기대 표를 읽는 비교 스크립트가 따로 하고, 그 스크립트는 기록을 바꾸지 않는다 | 요약 표 |
+| 13 | 요약 | 따로 둔 스크립트 | 모든 부팅·갈래의 `index.tsv` 와 기록 | 평가 절차 8·10절의 표: 판정 × `pair_kind` × 순서 값, 부팅별 분포, `other_order_seen_in_boots`, 미확정의 종류별 수. "탐지" 수와 주장의 말은 없다. 기대와의 대조는 요약도 판정 부분도 하지 않는다: 채운 기대 표를 읽는 비교 스크립트가 따로 하고, 그 스크립트는 기록을 바꾸지 않는다. 필드 저장값 규칙으로 선 갈래(8)는 제 칸에 센다. 요약과 비교 스크립트의 sha256 도 부팅 선언에 든다(8절) | 요약 표 |
 
 ## 4. 입력의 형식 점검 (읽는 부분)
 
@@ -53,7 +55,39 @@
 | 이름 공간 자료 | `semantics-data 2`, `rule` 줄, sha256 = sidecar | 그 파일을 물린다: (가) `missing` |
 | dump 글 | `format kzrt-dump 1.<n>` 줄; `buildid` 줄은 1.5 부터; `ev` 줄의 칸 | `buildid` 줄이 없으면 기초 1 이 `missing(same build not confirmed)`; 값을 지어내지 않는다 |
 | 연결 점검의 글 | `same_build_object`·`same_build`·`chain` 줄 | 기초 1 이 `missing` |
-| 후보 목록, 인정 파일 | 머리, 줄의 일곱 칸, 부분집합 관계 | 자료 갈래를 `D1` 로 낮추지 않는다: 그 실행을 rc 2 로 멈춘다(갈래가 정해지지 않은 평가는 하지 않는다) |
+| 후보 목록, 인정 파일 | 4.1 의 머리와 줄의 여덟 칸, 꼬리의 수, 부분집합 관계 | 자료 갈래를 `D1` 로 낮추지 않는다: 그 실행을 rc 2 로 멈춘다(갈래가 정해지지 않은 평가는 하지 않는다) |
+
+### 4.1 후보 목록과 인정 파일의 형식
+
+판정 규칙 8.13 의 3·4번. 둘 다 탭으로 나눈 글이고, 주기를 준비하는 단계의 스크립트가 규칙으로 만든다(손으로 줄을 고르지 않는다). 판정 규칙이 적은 한 줄의 일곱 요소 가운데 "자료 파일과 sha256" 을 두 칸으로 나눠 여덟 칸이다.
+
+```
+kz-candidates 1
+rule judgement rules 8.13 item 3 (2026-11-18)
+plan <sidecar 의 sha256> <sidecar 의 경로>            (계획마다 한 줄)
+columns layer<TAB>function<TAB>column<TAB>data_file<TAB>data_sha256<TAB>data_line<TAB>named_by<TAB>kind
+<항목마다 한 줄>
+lines <n> kinds <k>: <종류> <줄 수>; ...
+end
+```
+
+- `layer`: `P0` 또는 `framework`. `function`, `column`: 그 자료 파일의 항목. `data_line`: 그 항목의 줄 번호.
+- `named_by`: 그 항목을 이름 댄 줄의 종류: `P0-unverified`, `sem-unverified`(행의 계층 줄), `compare-call`, `copy-call`, `length-call`, `fill-call`(sidecar 의 `namespace-entry`·`namespace-layer` 줄). 한 항목을 여러 줄이 이름 대면 쉼표로 잇는다.
+- `kind`: P0 항목은 P0 표의 family 이름, 프레임워크 항목은 `framework:<column>`. 같은 (layer, function, column) 은 한 줄이다.
+
+```
+kz-admitted 1
+candidates <후보 목록의 sha256>
+branch D2|D2[<종류>,...]
+ground <종류>: <PI 가 댄 근거의 글 | none: evaluation branch written before the PI's answer>   (종류마다 한 줄)
+columns (후보 목록과 같은 여덟 칸)
+<인정하는 항목마다 한 줄: 후보 목록의 줄 그대로>
+lines <n>
+end
+```
+
+- `D2` 의 인정 파일은 후보 목록의 모든 줄이고, `D2[…]` 는 그 종류의 줄 모두다(종류 안에서 줄을 고르지 않는다).
+- 읽는 부분의 점검: 인정 파일의 `candidates` = 넘겨받은 후보 목록의 sha256; 줄마다 후보 목록에 같은 줄이 있음; `branch` 의 종류 집합 = 줄들의 종류 집합 = `--data-branch` 의 것; 꼬리의 수. 하나라도 어긋나면 4절의 표대로 rc 2.
 
 ## 5. 서식 검사 (판정 부분; `--check` 도 같은 검사를 한다)
 
@@ -70,6 +104,7 @@
 - 문맥 둘의 사용 하나씩과 틀이 싸지 않는 사용; (c3)(i)의 `held`·`not_held`(지우는 정의, 다른 정의)·`not_established`; (c3)(iii)의 `held`·`not_held`·미대조 항목에 기댄 것·전제에 기댄 것; 읽기 `Ra`–`Rf` 하나씩이 움직이는 것.
 - `buildid` 줄이 없는 dump(모든 쌍의 기초 1 이 빠짐), 한 객체만 `refused` 인 것, note 가 없는 객체; `tok-*` 줄이 든 합성 dump(수만 셈).
 - 서식 검사 9–17 을 하나씩 깨는 기록(모두 물려야 한다); 판정 부분이 중간 글 말고 다른 파일을 열려 하면 실패하는 시험.
+- (2026-11-19) 4.1 의 점검을 하나씩 깨는 인정 파일(후보 목록에 없는 줄, 종류 안의 일부 줄만, `candidates` 의 sha256 이 다름: 모두 rc 2); `reentry=possible` 인 되돌림(이름에 붙지 않고 그 종류의 모든 이름에 대해 셈); `decided calls:` 에 기댄 (iii)(표지가 붙고 요약에서 따로 셈).
 
 ## 7. 2026-11-16 의 입력에 대한 회귀
 
@@ -80,7 +115,7 @@
 - fixture 가 모두 통과한다(수는 남긴 출력에서). `--check` 가 서식 검사를 깨는 기록을 물린다.
 - kz-static 단계의 실제 정적 출력(두 C1 빌드)과 빈 실행(`no_run`)으로 예행해, 새 줄 종류가 모두 읽히고 `unparsed` 가 0 이거나 나열된다.
 - 런타임 단계의 시험 dump(시험 실행 파일과 등록된 모듈 하나의 `buildid` 줄)로 예행한다.
-- 그 뒤 두 부분의 sha256 을 부팅 선언에 적는다.
+- 그 뒤 두 부분의 sha256 을 부팅 선언에 적는다. 요약 스크립트와 기대 대조 스크립트의 sha256 도 함께 적는다. 이 둘은 기록을 바꾸지 않으므로, 부팅 뒤에 고치면 고친 판으로 다시 내고 앞판 출력과의 diff 를 남긴다(평가 절차 12절).
 
 ## 9. 열린 것
 

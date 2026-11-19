@@ -1,0 +1,8 @@
+# space_guard.sh kind=unit need=60000000 floor=314572800 interval=2 cmd=bash -c bash env/redesign/step2a_tests_unit.sh > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/prebuild/unit_step2a_pre.txt 2>&1
+start 2026-11-19T05:58:39.602Z free=1187508224 threshold=374572800
+sample 2026-11-19T05:58:39.607Z 1187504128
+sample 2026-11-19T05:58:41.612Z 1185488896
+sample 2026-11-19T05:58:43.617Z 1184722944
+sample 2026-11-19T05:58:45.622Z 1183780864
+sample 2026-11-19T05:58:47.627Z 1181044736
+end 2026-11-19T05:58:49.635Z kind=unit verdict=completed rc=0 free=1187500032 lowest=1181044736 dip=6463488 change=-8192

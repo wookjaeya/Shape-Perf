@@ -1,0 +1,14 @@
+lib/llvm/libkz-llvm.a
+tools/kz-static/kz-static
+tests/static/static_golden
+tests/static/test_static_cli
+tests/static/test_static_elf32
+tests/static/test_static_expr
+tests/static/test_static_flow
+tests/static/test_static_gitrev
+tests/static/test_static_link
+tests/static/test_static_plan
+tests/static/test_static_reasons
+tests/static/test_static_recipe
+tests/static/test_static_unroll
+tests/static/test_static_wrappers

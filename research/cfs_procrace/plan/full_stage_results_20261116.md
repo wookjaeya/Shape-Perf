@@ -2736,3 +2736,75 @@ lead 가 2026-11-19 에 정한 (a)–(e)는 §18.0 에 적은 그대로다. 이 
   - lead 의 판단: §18.8 의 배열 표시, key-clearing 이름 문제.
   - PI 결정: C 라이브러리 항목(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)).
   - absence origins 의 이름 칸 문제.
+
+## 21. C1 닫기의 kz-static 한 빌드: 선언, 도구 사본, MC 빌드와 빌드 뒤 점검 (2026-11-19)
+
+§20.8 의 다음 차례 1–9 를 한다. 이 절은 이 단계만 고친다. 기록: `../records/closure-kzstatic-mc-20261119/`(`README.md`). 출력: `/home/user/work/redesign/obs1/cz_*`(새 디렉터리 열). cFS 를 부팅하지 않고 push 하지 않는다.
+
+### 21.0 선언 (2026-11-19, 도구 사본과 빌드 전에 적고 커밋함) [D]
+
+아래 밖의 차이는 결함이다. 결함이면 그 점검에서 멈추고, 까닭을 밝혀 새로 커밋한 덧붙임으로 선언하기 전에는 다음으로 가지 않는다. 덧붙임은 그것을 쓰는 비교를 돌리기 전에 커밋한다. 모든 일은 공간 감시(`env/tools/space_guard.sh`, 하한 314,572,800 B) 아래에서 돌리고, 감시 기록은 `guard/` 에 둔다. 출력은 덮어쓰지 않고 새 이름으로 둔다.
+
+#### 21.0 (가) lead 의 판단 (2026-11-19, §17 의 열린 것에 대해)
+lead 가 2026-11-19 에 정한 것을 그대로 적는다. 이 빌드는 이 판단을 바꾸지 않는다.
+- (a) 판정 규칙 8.13 의 17 번 조건 (6)은 쓰인 대로 적용한다. writer 집합은 필드 단위 규칙과 형 단위 규칙 **모두**에서 완전해야 한다. 도구를 필드 단위로만 읽게 바꾸지 않는다. 필드 단위만의 읽기는 설계 행을 본 뒤의 규칙 읽기다. 이미 커밋된 평가 갈래 Re 가 그것을 덮는지는 설명 스크립트 단계와 평가 파일이 정한다. Re 의 커밋된 글이 17 번 조건 (6)을 덮지 않으면 PI 의 열린 것으로 적고, 지금 어떤 글도 넓히지 않는다.
+- (b) 성공 경로 줄에서 out 으로 저장되는 지역 변수의 추출 틈은 그대로 둔다. 이 빌드는 `include/` 아래를 바꾸지 않는다(바꾸면 모든 바이너리가 다시 링크된다). 성공 경로 줄은 그 까닭과 함께 계속 missing 이라고 적는다. 열린 것이다.
+- (c) 저장된 이름 버퍼: scalar-array FIELD_STATUS 상태가 건전하게 complete 가 될 수 있는지는 scratch 출력에서 깃발마다 정한다. 건전하게 뺄 수 없는 깃발이 하나라도 있으면 그 줄은 not complete 와 그 깃발을 적고, 설계 행이 나오게 하려고 아무것도 느슨하게 하지 않는다(§18.2 에서 정한 대로; 이 빌드의 소스가 그것이다).
+- (d) 바뀌는 golden(order golden 셋, `resultflow_np`, `closure_np`, 새것)은 선언된 빌드에서 커밋한다. 선언은 첫 ctest 의 실패를 **완전한 소스**의 scratch 점검 빌드에서 확인한 이름으로 적는다(아래 (마)).
+- (e) C1 빌드의 둘째 주소 넘김 호출 자리와 열린 까닭의 `other` 종류는 맞으면 이 빌드의 측정에서 가리고 센다. 아니면 열린 것으로 둔다.
+
+#### 21.0 (나) 소스와 도구 정체성
+- **소스**: 이 선언을 커밋하는 HEAD 의 `kairos/` 다. `kairos/` 는 `aa8968f` 뒤로 바뀌지 않았다(`git log aa8968f..HEAD -- research/cfs_procrace/kairos` 가 비어 있음). 그러므로 scratch 점검 빌드(§20.2: `aa8968f` 의 `git archive`, 681 파일)와 같은 소스다. §15–§20 의 소스 진행분이 모두 이 빌드로 도구에 들어간다.
+- **정체성이 바뀌는 도구는 kz-static 하나다**(`prebuild/pre_mc.txt`). 파일 sha256 `bf2ec2ee…` 이 바뀐다. `--identity` 는 `tool_sha256` `73c3491c…` → `36e0299521014b926b2f7d2bf6784b5b4ec97a929ff67799a34f72d610509eb5`, `tool_source` `2b8834da…` → `3b89477d1e4fe817d172d12fa839005f3f598e39143a21ff0fb3120279be972c` 여야 한다. 이 값은 scratch 점검 빌드의 값이다(`../records/closure-kzstatic-20261119/scratch6/checkbuild/scratch_tool_identity.txt`). 정체성은 소스 파일의 sha256 에서 나오고 빌드 구성에 기대지 않는다(`kairos/cmake/KzSourceIdentity.cmake`). MC 는 RelWithDebInfo, 점검 빌드는 Release 라서 파일 sha256 은 다를 수 있다. `core_source` `568e5061…`, `schema_revision=12`, `schema_fingerprint` `6fbff6c6…` 는 그대로다.
+- **그대로인 도구**(파일과 `--identity`): kz `fd40bc4d…`, kz-dump `32a96ae7…`, kz-phi `df79fb82…`, kz_lint `3d4d5a8f…`, kz-rt-dump `40e23d4d…`, kz-instr-clang `36becd04…`.
+- **다시 링크되는 것 14**(`prebuild/relink_expected.txt`, 빌드 전 sha256 `prebuild/relink_expected.sha256`): 이 실행의 dry run(`make -n all`, 감시 `guard/d01_make_dryrun.log`, `prebuild/make_dryrun.log`)은 여섯째 실행의 dry run 과 같은 바이트다. 링크 스크립트 여섯(`kz-llvm`, `kz-static`, `static_golden`, `test_static_cli`, `test_static_plan`, `test_static_reasons`), 다시 컴파일되는 목적 파일 열넷이다. 여기에 MC 의 `link.txt` 가운데 `libkz-llvm.a` 를 이름 대는 것을 더한다. 목록: `lib/llvm/libkz-llvm.a`, `tools/kz-static/kz-static`, `tests/static/{static_golden,test_static_cli,test_static_elf32,test_static_expr,test_static_flow,test_static_gitrev,test_static_link,test_static_plan,test_static_reasons,test_static_recipe,test_static_unroll,test_static_wrappers}`. 반드시 바뀌는 것은 `libkz-llvm.a`, kz-static, `static_golden`, `test_static_cli`, `test_static_plan`, `test_static_reasons` 다 [I]. 나머지 여덟은 같은 바이트로 다시 링크될 수도 있다.
+- **다시 링크되지 않아야 하는 것 110**(`prebuild/not_relink_paths.txt`, 빌드 전 sha256 `prebuild/not_relink.sha256`): 이 선언 직전에 다시 쟀고, 여섯째 실행의 `not_relink_now.sha256` 과 같은 바이트다. 빌드 뒤에도 같은 sha256 이어야 한다. `CMakeCache.txt` 의 sha256 `bc2f43b4…` 도 그대로여야 한다 [I]. `CMakeLists.txt` 가 바뀌었으므로 다시 구성된다. 그래서 시험이 268 에서 271 로 는다: `static_fixture_compile_closure`, `static_fixture_compile_planv5`, `static_golden_closure_np`(`prebuild/mc_tests_not_in_scratch.txt` 와 점검 빌드의 목록).
+
+#### 21.0 (다) 도구 보존
+PI 결정은 이렇다: in-place MC 재빌드는 사본을 압축하고 왕복 확인한 뒤 중간 도구를 덮을 수 있다(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)). 빌드 전에 kz-static `bf2ec2ee…` 를 새 디렉터리 `/home/user/work/preserve/tools-20261119-b/` 에 xz 로 사본하고 왕복 확인한다(`tool_copy/copy.sh`, 감시 필요량 150,000,000). 사본 직후 등록부(`records/TOOLS.tsv`)의 그 행을 in-place+copy 로 고치고, 빌드 뒤 copy 로 고치며 새 kz-static 을 in-place 로 더한다. 장부 행은 `TOOLS_20261119_B` 다.
+
+#### 21.0 (라) 빌드
+MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make kz-static` 다음 `make all` 이고, 각각 감시 아래 필요량 480,000,000 이다. 근거는 §12.11 의 dip 170,074,112 와 40,079,360 이다(같은 relink 집합). 빌드 뒤 `--identity` 가 (나)의 값을 적고, 다시 링크된 것과 되지 않은 것이 (나)의 목록과 맞을 때까지 출력을 내지 않는다(`relink_result.txt`).
+
+#### 21.0 (마) 시험
+- **첫 ctest**(전체 271, `-V`): 실패는 정확히 다음 여섯이어야 한다(`ctest_first_expected_fail.txt`): `static_golden_order_np`, `static_golden_resultflow_np`, `static_golden_resultflow_order_np`, `static_golden_looplock_order_np`, `static_golden_closure_np`, `test_static_plan`. 근거는 완전한 소스의 scratch 점검 빌드다. 그 첫 ctest(static·lint 82, `-V`)에서 이 여섯이 실패했고, 나머지는 통과했다(그 가운데 처음 Not Run 이던 9 는 빌드한 뒤 통과; §20.2, `cb_ctest_first_V.log`, `cb_ctest_g5-7.log`). 정체성 시험 둘도 통과했다(`cb_ctest_identity.log`). 그 밖의 187 은 다시 링크되는 바이너리의 시험이 아니다. 이 선언 전에 지금 MC 에서 돌렸고, 실패 0·건너뜀 1(`test_probe_anchor_reached`)이었다(`prebuild/ctest_prebuild_187.log`, 감시 `guard/p01_ctest_prebuild_187.log`).
+- **golden**: 그 여섯 시험만 `KZ_GOLDEN_UPDATE=1` 로 돌려 쓴다. 바뀌는 golden 은 일곱이다(`kairos/tests/static/data/`). `order_np.golden`, `resultflow_np.golden`, `resultflow_order_np.golden`, `looplock_order_np.golden`, `planv4_np.plan.golden` 은 바뀌고, `closure_np.golden`, `planv5_np.plan.golden` 은 새로 생긴다. 각각 `../records/closure-kzstatic-20261119/scratch6/checkbuild/golden_scratch/` 의 같은 이름 파일과 `cmp` 같아야 한다(`golden_expected.sha256`). `kairos/` 의 그 밖의 파일은 바뀌지 않는다(`git status`; 갱신이 다시 쓰는 `plangen_np.plan.golden` 도 같은 바이트).
+- **그 뒤**: 전체 ctest 271, 실패 0, 건너뜀 1. 확인 수는 남긴 출력에서 센다 [I: scratch 점검 빌드]: `test_static_cli` 1,217, `test_static_reasons` 771, `test_static_plan` 389, lint selftest 114 경우 실패 0, lint 규칙 일곱 clean, `test_core_schema` 34,017(그대로). 단위 점검은 `env/tools/tests/run_unit.sh` 17/17, `env/redesign/step2a_tests_unit.sh` 7/7 이다(빌드 전 `prebuild/unit_*_pre.txt` 도 같음).
+- **누적 바이트 동일성**: 빌드 뒤와 실행 뒤에 각각 `env/tools/ledger_check.sh`(빌드 전 147 행 실패 0: `prebuild/ledger_check_pre.txt`)와 `env/tools/tools_check.sh --deep`(빌드 전 50 행 실패 0: `prebuild/tools_check_pre.txt`)를 돌린다. 출력은 단계마다 새 이름이다.
+
+#### 21.0 (바) 다섯 빌드의 실행과 허용 차이
+- **실행**: `run.sh <step>`. 단계는 여섯째 실행의 scratch 실행기(`scripts/scratch6_run.sh`)와 같은 인자다. 출력 뿌리만 `/home/user/work/redesign/obs1/cz_<step>` 이다. 단계는 relcheck, order, extract_off, extract_final, off_order, final_order, plans_t8cf, plans_final, plans_v4, plans_v4_ns2 이다. 다시 뽑기는 단일 빌드 실행기 `env/redesign/one_build.sh` 로 한 번씩 한다(마지막 옵션과 기본 경로). order 단계는 `--pairs` 로 쌍 파일을 쓴다. 개정 4 계획(`plans_v4`: 이름 공간 자료 개정 1, `plans_v4_ns2`: 개정 2, 계획 규칙 개정 5)의 대조 예산 이유 글은 "control runs of design rows … not a test of the name-binding rule" 다(`plan_one.sh`, `plan_one_ns.sh`). 자료 파일은 단계마다 `data_inputs.sha256` 과 대조한다. 실행 단계의 감시 필요량은 extract·order 150,000,000, 그 밖 30,000,000 이다.
+- **허용 차이, 출력 종류와 칸마다**(`compare.sh <step>`, 보고는 `compare/`): 고친 도구 `bf2ec2ee` 의 남긴 출력(`rf2_*`)과의 차이는 §20.3 의 표와 `../records/closure-kzstatic-20261119/scratch6/compare_2_table.txt` 그대로다. 출력 종류마다 이렇다.
+  - relations: 도구 줄, 개정 14 의 줄, 새 머리 셋, 새 행 줄들(`success path`, `writers [..]`, `alternatives`, `lifetime end`, `holder`, `absence origins`, `stored-name buffer`, `callee-check (success path)`). 없어지는 줄은 0 이다.
+  - order: 도구 줄과 c1 의 행 키 줄 −3/+3(A20, A27, A30). keys 는 개정 14 줄과 c1 의 키 줄 −3/+3, `edges.tsv`·`cdr.txt` 는 같다.
+  - 쌍 파일: 새 출력이다. 머리·꼬리·값의 수를 선언한다.
+  - 컨테이너: 절마다 BASIS(c1 −49/+52, 그 밖 −1/+1), RESULT_EFFECT −72/+72(c1), STRINGS 수, 머리 칸.
+  - 보기, `basis.txt`·`sha256.txt`, 계획(개정 이름, plan id, 생성기·입력·요청 sha256, c1 의 움직인 키 셋, 개정 5 가 더하는 줄).
+- **수까지**(`compare.sh declared`): 이 실행의 보고 260(`.samples` 를 뺀 것)이 커밋된 `compare_2/` 의 같은 이름 보고와 **같은 바이트**여야 하고, 이름 집합도 같아야 한다. 그 보고들은 `declared_reports.sha256` 으로 고정한다. 보고는 줄의 종류와 수, 쌍 파일의 줄 수·바이트·sha256·머리·꼬리·값의 수, 컨테이너의 절과 레코드 수를 적는다.
+- **쌍둥이**(`compare.sh twin`, `twin_sha.py`, `twin_map.tsv`): §20.8 이 남긴 고름이다. scratch 출력은 지웠고 sha256 만 `s6_outputs.sha256` 에 남았으므로 그것과 견준다. MC 출력의 바이트에서 선언된 문자열 셋만 scratch 쪽 문자열로 바꾸고 sha256 을 견준다. 셋은 출력 뿌리, 도구 디렉터리, MC kz-static 의 파일 sha256(scratch 쪽 `de7fcdd1…`)이다. 둘째 걸음에서는 바꾼 뒤 같지만 바이트로 다른 파일의 sha256 쌍을 바꿈에 더한다(§12.0 (나-2) 의 2 항). scratch 쪽 뿌리는 남긴 계획 sidecar 사본(`<scratch>` 로 가린 것)의 sha256 을 맞추어 되찾았다(`selftest_twin_sha.txt`: 열 파일이 같고, 한 바이트를 바꾸면 DIFF, 지우거나 더하면 한 쪽에만 있음). 견주지 않는 것은 셋이다. `space_guard.log`, `status.txt`(실행 시각과 저장소 HEAD 를 적음; `result PASS` 는 비교가 본다), `again/`(첫 실행과 같은 바이트임을 비교가 본 뒤 지움)이다. 선언: 320 파일이 모두 같고, DIFF 0, 한 쪽에만 있음 0 이다 [I]. 컨테이너(facts.kz, basis.kz)도 바이트로 같아야 한다. 경로가 없고 도구 정체성이 같기 때문이다.
+- **그 밖**: order 의 두 실행이 같은 바이트, 로그 빈 파일, 다시 뽑기의 `relations.log` 가 남긴 것과 같은 바이트, `status.txt` 가 `result PASS`, `plan.log` 가 남긴 것과 같은 바이트.
+
+#### 21.0 (사) 끝 점검과 측정 (비교가 모두 OK 인 뒤; 판정이 아님)
+1. 두 C1 빌드의 키 글이 같다: 367 가운데 367 [I](`scripts/keys_compare.py`).
+2. 쌍 파일이 완전하다: 열 사실 모두 `scripts/pair_check.py` 가 PASS 다. 두 C1 계획(개정 1·2 자료)의 계획된 행 13 이 모두 쌍 파일에 줄을 가진다 [I].
+3. 탐침을 도구 줄이 재현하는지 본다. 남긴 탐침 출력(`../records/closure-kzstatic-20261119/probes/out/`)과 새 줄의 수를 탐침마다 놓는다. 맞지 않으면 적고 아무것도 맞추지 않는다.
+4. 새 줄마다 다섯 빌드에서 서는 곳과 빠지는 곳의 수를 센다: 성공 경로(held/missing 과 그 까닭), absence origins, holder, alternatives 와 정한 호출, 버퍼·수명 끝. 모두 이 실행의 relations 글에서 `scripts/` 의 셈 스크립트로 센다. 설계 행에서만 보이는 줄이 없게 하려는 것이다.
+5. lead 의 판단 (e): 주소 넘김 호출 자리와 `other` 종류를 이 실행의 사실에서 다시 센다. [I]: 자리 2(필드 1), `other` 2,398 이다(§20.5).
+
+#### 21.0 (아) 공간
+선언 직전 여유는 1,188,790,272 B(`guard/p03_tools_check_pre.log` 끝)이고 하한은 314,572,800 이다.
+
+| 일 | 감시 필요량 | 예상 크기 [I] |
+|---|---|---|
+| kz-static 사본(xz) | 150,000,000 | 약 47 MB, 남음 |
+| `make kz-static`, `make all` | 480,000,000 씩 | dip 약 170 MB, 잠깐 |
+| ctest, golden, 단위 점검 | 60,000,000 | 작음 |
+| `tools_check --deep` | 300,000,000 | 잠깐 |
+| 실행 열 | 150,000,000 / 30,000,000 | 남길 출력 245.7 MB, `again/` 97.5 MB(비교 뒤 지움) |
+| 비교의 facts 보기 | 150,000,000 | 88.5 MB, 빌드마다 지움 |
+
+가장 낮은 값은 약 0.70 GB 로 예상한다. 압축 대체(§12.10 2 항)는 필요 없다 [I]. 모자라면 그 대체만 쓴다.
+
+#### 21.0 (자) 함께 커밋하는 것
+- 스크립트: `run.sh`, `compare.sh`, `twin_sha.py`, `twin_map.tsv`, `selftest_twin_sha.txt`, `tool_copy/copy.sh`. Python 은 `python3 -I` 로 돌린다. `diffkinds.py`·`sections_cmp.py`·`plan_one*.sh`·셈 스크립트는 앞 기록 디렉터리의 것을 그 자리에서 읽는다.
+- 목록: `declared_reports.sha256`, `golden_expected.sha256`, `ctest_first_expected_fail.txt`, `data_inputs.sha256`, `prebuild/`(dry run, relink 목록과 sha256, `pre_mc.txt`, `cmakecache.sha256`, 빌드 전 ctest·점검·단위 점검).

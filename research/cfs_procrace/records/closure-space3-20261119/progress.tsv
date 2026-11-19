@@ -1,0 +1,5 @@
+seq	name	row	free_before	free_after	archive_bytes	guard_lowest	ledger_check
+9	xr5_dry_static_c1_pre_tx	OBS_xr5_dry_static_c1_pre_tx	1034665984	1062350848	128092	1034330112	ledger_check: 205 rows, 0 failing
+10	xr5_dry_static_c1_post_tx	OBS_xr5_dry_static_c1_post_tx	1062350848	1090039808	125644	1062023168	ledger_check: 205 rows, 0 failing
+11	xr5_regress_rev4fix	OBS_xr5_regress_rev4fix	1090039808	1113792512	121804	1090027520	ledger_check: 205 rows, 0 failing
+12	xr5_candidates_regen	OBS_xr5_candidates_regen	1113792512	1114177536	4088	1113788416	ledger_check: 205 rows, 0 failing

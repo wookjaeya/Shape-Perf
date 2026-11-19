@@ -13,3 +13,14 @@ space_guard.sh --need 5000000 --kind selftest --log guard/g02_selftest.log -- ba
 ../../env/tools/ledger_check.sh > ledger/check_start.txt                          rc 0 (205 rows, 0 failing; ledger sha256 6763efd1...)
 git grep -n xr5_ in records/closure-c1prep-20261119/boot, env/obs1 and the three freeze files                      0 lines
 the need, the chosen list, the scripts and results 26.9 (the plan) are committed before step 2
+committed as 1522f83
+## 2. the archives, one directory at a time (run_seq.sh FROM TO; SPACE_TMP=<scratch>)
+df -B1 --output=avail /                                                          19:29:23Z (available 1034678272)
+SPACE_TMP=<scratch> bash run_seq.sh 9 12                                         rc 0: lines 9-12 archived (4), each round trip
+    PASS (64 + 788 + 788 + 388 members) and ledger_check of the proposed ledger 205 rows 0 failing (progress.tsv, archive/,
+    ledger/, guard/a_*); the header line of this step added once; "need met after line 12: free 1114177536 >= target
+    1068392704"
+../../env/tools/ledger_check.sh > ledger/check_after_archive.txt                 rc 0 (205 rows, 0 failing; ledger sha256 6d9cc76a...)
+git grep of the committed scripts (*.sh, *.py) for the four names > scripts_naming_archived.txt    (the runs.sh of 26.3 and 26.5;
+    need.py of 26.8 names them in its order list; no step still to run)
+{ date -u; df -B1 /; } > free_after_archive.txt

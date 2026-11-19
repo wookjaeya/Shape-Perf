@@ -1,0 +1,6 @@
+# archive.sh xr5_regress_rev4fix records/closure-explain-fix-20261119/xr5_regress_rev4fix.sha256 2026-11-19T19:29:45Z
+1. directory = list: 388 files, 23165224 bytes (apparent), 23973888 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/xr5_regress_rev4fix/xr5_regress_rev4fix.tar.xz 121804 bytes sha256 9a56fa141072ba9bc9dfacf116b0cb348efa982ed63ae45a5dc9e2e4fcc83a86
+4. round trip: 388 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/xr5_regress_rev4fix removed 2026-11-19T19:29:49Z
+PASS

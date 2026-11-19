@@ -1,0 +1,50 @@
+OK extract_off_basis_sections_c1_pre_tx: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK extract_off_facts_sections_c1_pre_tx: summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+OK extract_off_view_c1_pre_tx: diffkinds old_lines=149111 new_lines=149111 only_old=1 only_new=1 labels=1
+OK extract_off_extract_c1_pre_tx: diffkinds old_lines=363 new_lines=363 only_old=0 only_new=0 labels=0
+OK extract_off_relations_c1_pre_tx: diffkinds old_lines=7256 new_lines=7257 only_old=0 only_new=1 labels=1
+OK extract_off_basis_c1_pre_tx: diffkinds old_lines=129 new_lines=129 only_old=1 only_new=1 labels=1
+OK extract_off_sha256_c1_pre_tx: diffkinds old_lines=5 new_lines=5 only_old=3 only_new=3 labels=1
+OK extract_off_args_c1_pre_tx: diffkinds old_lines=6 new_lines=6 only_old=0 only_new=0 labels=0
+OK c1_pre_tx relations.log the same bytes as the kept one
+OK c1_pre_tx status.txt result PASS
+OK extract_off_basis_sections_c1_post_tx: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK extract_off_facts_sections_c1_post_tx: summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+OK extract_off_view_c1_post_tx: diffkinds old_lines=149147 new_lines=149147 only_old=1 only_new=1 labels=1
+OK extract_off_extract_c1_post_tx: diffkinds old_lines=363 new_lines=363 only_old=0 only_new=0 labels=0
+OK extract_off_relations_c1_post_tx: diffkinds old_lines=7256 new_lines=7257 only_old=0 only_new=1 labels=1
+OK extract_off_basis_c1_post_tx: diffkinds old_lines=129 new_lines=129 only_old=1 only_new=1 labels=1
+OK extract_off_sha256_c1_post_tx: diffkinds old_lines=5 new_lines=5 only_old=3 only_new=3 labels=1
+OK extract_off_args_c1_post_tx: diffkinds old_lines=6 new_lines=6 only_old=0 only_new=0 labels=0
+OK c1_post_tx relations.log the same bytes as the kept one
+OK c1_post_tx status.txt result PASS
+OK extract_off_basis_sections_r2_core: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK extract_off_facts_sections_r2_core: summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+OK extract_off_view_r2_core: diffkinds old_lines=96823 new_lines=96823 only_old=1 only_new=1 labels=1
+OK extract_off_extract_r2_core: diffkinds old_lines=263 new_lines=263 only_old=0 only_new=0 labels=0
+OK extract_off_relations_r2_core: diffkinds old_lines=5113 new_lines=5114 only_old=0 only_new=1 labels=1
+OK extract_off_basis_r2_core: diffkinds old_lines=67 new_lines=67 only_old=1 only_new=1 labels=1
+OK extract_off_sha256_r2_core: diffkinds old_lines=5 new_lines=5 only_old=3 only_new=3 labels=1
+OK extract_off_args_r2_core: diffkinds old_lines=6 new_lines=6 only_old=0 only_new=0 labels=0
+OK r2_core relations.log the same bytes as the kept one
+OK r2_core status.txt result PASS
+OK extract_off_basis_sections_c5_641: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK extract_off_facts_sections_c5_641: summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+OK extract_off_view_c5_641: diffkinds old_lines=64542 new_lines=64542 only_old=1 only_new=1 labels=1
+OK extract_off_extract_c5_641: diffkinds old_lines=281 new_lines=281 only_old=0 only_new=0 labels=0
+OK extract_off_relations_c5_641: diffkinds old_lines=3611 new_lines=3612 only_old=0 only_new=1 labels=1
+OK extract_off_basis_c5_641: diffkinds old_lines=122 new_lines=122 only_old=1 only_new=1 labels=1
+OK extract_off_sha256_c5_641: diffkinds old_lines=5 new_lines=5 only_old=3 only_new=3 labels=1
+OK extract_off_args_c5_641: diffkinds old_lines=6 new_lines=6 only_old=0 only_new=0 labels=0
+OK c5_641 relations.log the same bytes as the kept one
+OK c5_641 status.txt result PASS
+OK extract_off_basis_sections_c5_642: summary sections old=6 new=6 same=6 differing=0 only-old=0 only-new=0
+OK extract_off_facts_sections_c5_642: summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0
+OK extract_off_view_c5_642: diffkinds old_lines=64695 new_lines=64695 only_old=1 only_new=1 labels=1
+OK extract_off_extract_c5_642: diffkinds old_lines=283 new_lines=283 only_old=0 only_new=0 labels=0
+OK extract_off_relations_c5_642: diffkinds old_lines=3559 new_lines=3560 only_old=0 only_new=1 labels=1
+OK extract_off_basis_c5_642: diffkinds old_lines=122 new_lines=122 only_old=1 only_new=1 labels=1
+OK extract_off_sha256_c5_642: diffkinds old_lines=5 new_lines=5 only_old=3 only_new=3 labels=1
+OK extract_off_args_c5_642: diffkinds old_lines=6 new_lines=6 only_old=0 only_new=0 labels=0
+OK c5_642 relations.log the same bytes as the kept one
+OK c5_642 status.txt result PASS

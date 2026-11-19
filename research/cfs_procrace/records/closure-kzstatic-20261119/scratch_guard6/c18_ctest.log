@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-ctest need=50000000 floor=314572800 interval=2 cmd=ctest -V -R ^tool_identity_schema_revision$|^source_identity_cmake$
+start 2026-11-19T05:24:05.064Z free=863387648 threshold=364572800
+sample 2026-11-19T05:24:05.068Z 863383552
+end 2026-11-19T05:24:07.075Z kind=scratch-ctest verdict=completed rc=0 free=863379456 lowest=863379456 dip=8192 change=-8192

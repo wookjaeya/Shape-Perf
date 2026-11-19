@@ -1,0 +1,46 @@
+[  4%] Building C object tests/static/CMakeFiles/kz_static_lazy_unused.dir/objects/lazy_unused.c.o
+[  4%] Building C object tests/static/CMakeFiles/kz_static_main_obj.dir/objects/main_obj.c.o
+[  9%] Building C object tests/static/CMakeFiles/kz_static_whole_member.dir/objects/whole_member.c.o
+[ 47%] Built target kz-core
+[ 47%] Building C object tests/static/CMakeFiles/kz_static_lazy_used.dir/objects/lazy_used.c.o
+[ 47%] Built target kz_static_lazy_unused
+[ 47%] Built target kz_static_whole_member
+[ 47%] Built target kz_static_main_obj
+[ 47%] Built target kz_static_lazy_used
+[ 52%] Built target kz-testsupport
+[ 95%] Built target kz-llvm
+[ 95%] Building CXX object tests/static/CMakeFiles/test_static_link.dir/test_static_link.cpp.o
+[100%] Linking CXX executable test_static_link
+[100%] Built target test_static_link
+[ 40%] Built target kz-core
+[ 45%] Built target kz-testsupport
+[ 90%] Built target kz-llvm
+[100%] Built target kz-static
+[100%] Building CXX object tests/static/CMakeFiles/test_static_elf32.dir/test_static_elf32.cpp.o
+[100%] Linking CXX executable test_static_elf32
+[100%] Built target test_static_elf32
+[  0%] Building C object runtime/CMakeFiles/kzrt-decode.dir/tools/decode/kz_rt_decode.c.o
+[  0%] Built target kzrt-manifest
+[ 50%] Built target kz-core
+[ 56%] Built target kz-testsupport
+[ 62%] Linking C static library libkzrt-decode.a
+[ 62%] Built target kzrt-decode
+[ 68%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/decode_merge.cpp.o
+[ 68%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/decode_perf.cpp.o
+[ 68%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/decode_match.cpp.o
+[ 75%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/decode_sites.cpp.o
+[ 75%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/hold_nctl.cpp.o
+[ 75%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/identity_join.cpp.o
+[ 75%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/identity_rule.cpp.o
+[ 81%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/identity_symbols.cpp.o
+[ 81%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/kzrt_convert.cpp.o
+[ 81%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/neutral.cpp.o
+[ 87%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/occ_table.cpp.o
+[ 87%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/real_trace.cpp.o
+[ 87%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/replay_container.cpp.o
+[ 93%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/static_closure.cpp.o
+[ 93%] Linking CXX static library libkz-trace.a
+[ 93%] Built target kz-trace
+[100%] Building CXX object tests/cfs-free/CMakeFiles/test_trace_static_closure.dir/test_trace_static_closure.cpp.o
+[100%] Linking CXX executable test_trace_static_closure
+[100%] Built target test_trace_static_closure

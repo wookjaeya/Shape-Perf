@@ -1,0 +1,18 @@
+- 0|generator tool=kz-static	generator tool=kz-static tool_sha256=73c3491cead05ce1f4f6adb999970a41e680569182848a644646fca65613ecff tool_source=2b8834da4c83efe08b12d090bf2db4b269edf14d67fac0b8da25cc3ef012c13b core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
++ 0|generator tool=kz-static	generator tool=kz-static tool_sha256=36e0299521014b926b2f7d2bf6784b5b4ec97a929ff67799a34f72d610509eb5 tool_source=3b89477d1e4fe817d172d12fa839005f3f598e39143a21ff0fb3120279be972c core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+- 0|input facts	input facts sha256=473236053e4ee6bfcda09568b127208f5ae8f543bf565c33da4f63dac4451fa4 path=/home/user/work/redesign/obs1/rf2_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz
++ 0|input facts	input facts sha256=7403a3775bb49f9f0e1e347236ac4b11ed655f5b8fbe69625f8743fe14c1f3f9 path=<scratch>/o/s6_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz
+- 0|input basis	input basis sha256=ef87126efb90fce024e6a01b916c81993ad033dbe0a5835a7911504b0f501596 path=/home/user/work/redesign/obs1/rf2_final_extract/c1_pre_tx/c1_pre_tx/NP/basis.kz
++ 0|input basis	input basis sha256=09606e23af3902f0643f9c9c0646a969234b9d0fdea1d78425b08addbec9ba31 path=<scratch>/o/s6_final_extract/c1_pre_tx/c1_pre_tx/NP/basis.kz
+- 0|facts-artifact H	facts-artifact 473236053e4ee6bfcda09568b127208f5ae8f543bf565c33da4f63dac4451fa4
++ 0|facts-artifact H	facts-artifact 7403a3775bb49f9f0e1e347236ac4b11ed655f5b8fbe69625f8743fe14c1f3f9
+- 0|basis-artifact H	basis-artifact ef87126efb90fce024e6a01b916c81993ad033dbe0a5835a7911504b0f501596
++ 0|basis-artifact H	basis-artifact 09606e23af3902f0643f9c9c0646a969234b9d0fdea1d78425b08addbec9ba31
+- 0|row H	row 35f07539e7606e2e A20 tier=2 position=10 label=H class=decided order=RELOC reach=REACH-STATED disposition=D04 state=cut why="probe-create, or a delayed retry loop on a failure status"
+- 0|row H	row bc5b8f661dacf8e0 A27 tier=3 position=310 label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
++ 0|row H	row bb0951052e63f1bc A20 tier=2 position=10 label=H class=decided order=RELOC reach=REACH-STATED disposition=D04 state=cut why="probe-create, or a delayed retry loop on a failure status"
++ 0|row H	row c025f98401a2b54f A27 tier=3 position=310 label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+- 0|need row	need row 35f07539e7606e2e observation not-planned reason=budget_not_run(row outside the budget)
+- 0|need row	need row bc5b8f661dacf8e0 observation not-planned reason=budget_not_run(row outside the budget)
++ 0|need row	need row bb0951052e63f1bc observation not-planned reason=budget_not_run(row outside the budget)
++ 0|need row	need row c025f98401a2b54f observation not-planned reason=budget_not_run(row outside the budget)

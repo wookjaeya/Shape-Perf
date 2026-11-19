@@ -1,0 +1,33 @@
+lines 10158 bytes 4194135 sha256 6fd2be45c23584642b1074008981e0db3c914a878ec335c2566e4feb6e98efc9
+kz-order-pairs 1
+facts <masked>
+tool kz-static <masked>
+relations rules relations rules revision 12 (2026-11-18)
+order order rules revision 8 (2026-11-19): the complete pair file; order rules revision 5 (2026-11-18)
+domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B and C); a pair in one thread has the value same_thread
+columns row_key	path	use_pos	use_function	use_root	other_kind	other_pos	other_function	other_root	value	edges	premises	row_line
+rows 295 pairs 9582 hard_before 1117 conditional_before 0 fixed_early_proved 825 fixed_early_candidate 0 unordered 6465 unknown 173 same_thread 1002 no_pair 21 edges_not_in_tsv 546
+end
+value-counts:
+21	-	no_pair
+49	CFE_ES_BackgroundTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+59	CFE_ES_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+17	CFE_ES_TaskMain (table-walk-entry)	program order of one thread: the event is inside the call 
+64	CFE_EVS_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+61	CFE_SB_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+58	CFE_TBL_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+35	CFE_TIME_Local1HzTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+1	CFE_TIME_TaskMain (table-walk-entry)	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call 
+83	CFE_TIME_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+42	CFE_TIME_TaskMain (table-walk-entry)	program order of one thread: the event is inside the call 
+52	CFE_TIME_Tone1HzTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+1	creator	unordered
+3	creator-not-a-pair(key constants differ)	same_thread
+12	creator-not-a-pair(same actor only)	same_thread
+25	main (process)	program order of one thread: the event is inside the call 
+1	other_kind	value
+825	writer	fixed_early_proved
+1117	writer	hard_before
+987	writer	same_thread
+173	writer	unknown
+6464	writer	unordered

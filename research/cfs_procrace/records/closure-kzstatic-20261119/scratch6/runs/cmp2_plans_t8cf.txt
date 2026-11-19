@@ -1,0 +1,30 @@
+OK plans_t8cf_plan_kzs_c1_pre_tx: diffkinds old_lines=835 new_lines=835 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_side_c1_pre_tx: diffkinds old_lines=1044 new_lines=1044 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_mod_c1_pre_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_exe_c1_pre_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_t8cf_args_txt_c1_pre_tx: diffkinds old_lines=24 new_lines=24 only_old=4 only_new=4 labels=4
+OK c1_pre_tx plan.log the same bytes as the kept one
+OK plans_t8cf_plan_kzs_c1_post_tx: diffkinds old_lines=791 new_lines=791 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_side_c1_post_tx: diffkinds old_lines=1027 new_lines=1027 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_mod_c1_post_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_exe_c1_post_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_t8cf_args_txt_c1_post_tx: diffkinds old_lines=24 new_lines=24 only_old=4 only_new=4 labels=4
+OK c1_post_tx plan.log the same bytes as the kept one
+OK plans_t8cf_plan_kzs_r2_core: diffkinds old_lines=110 new_lines=110 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_side_r2_core: diffkinds old_lines=660 new_lines=660 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_mod_r2_core: diffkinds old_lines=3 new_lines=3 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_exe_r2_core: diffkinds old_lines=3 new_lines=3 only_old=1 only_new=1 labels=1
+OK plans_t8cf_args_txt_r2_core: diffkinds old_lines=24 new_lines=24 only_old=4 only_new=4 labels=4
+OK r2_core plan.log the same bytes as the kept one
+OK plans_t8cf_plan_kzs_c5_641: diffkinds old_lines=433 new_lines=433 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_side_c5_641: diffkinds old_lines=552 new_lines=552 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_mod_c5_641: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_exe_c5_641: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_t8cf_args_txt_c5_641: diffkinds old_lines=24 new_lines=24 only_old=4 only_new=4 labels=4
+OK c5_641 plan.log the same bytes as the kept one
+OK plans_t8cf_plan_kzs_c5_642: diffkinds old_lines=413 new_lines=413 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_side_c5_642: diffkinds old_lines=536 new_lines=536 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_mod_c5_642: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_t8cf_plan_exe_c5_642: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_t8cf_args_txt_c5_642: diffkinds old_lines=24 new_lines=24 only_old=4 only_new=4 labels=4
+OK c5_642 plan.log the same bytes as the kept one

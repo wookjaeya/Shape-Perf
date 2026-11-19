@@ -1,0 +1,14 @@
+s6_final_extract total=72956458 again=0 kept_after_again_removed=72956458
+s6_final_order total=75898179 again=33637521 kept_after_again_removed=42260658
+s6_off_extract total=46955814 again=0 kept_after_again_removed=46955814
+s6_off_order total=71489496 again=31936553 kept_after_again_removed=39552943
+s6_order total=63872596 again=31936298 kept_after_again_removed=31936298
+s6_plans_final total=897450 again=0 kept_after_again_removed=897450
+s6_plans_t8cf total=888278 again=0 kept_after_again_removed=888278
+s6_plans_v4 total=1199028 again=0 kept_after_again_removed=1199028
+s6_plans_v4_ns2 total=1267731 again=0 kept_after_again_removed=1267731
+s6_relcheck total=7615561 again=0 kept_after_again_removed=7615561
+pairs.tsv bytes per build (final_order): 9083448 9083684 4206477 1285408 1344266 
+pairs.tsv bytes per build (off_order): 9070884 9071120 4194135 1261528 1320386 
+pairs.tsv bytes per build (order): 9070884 9071120 4194135 1261528 1320386 
+kept rf2 outputs of the fixed-tool build: 206949766

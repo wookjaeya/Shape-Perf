@@ -1,0 +1,22 @@
+-- LLVM 23.0.0git at /home/user/work/llvm-project/build/lib/cmake/llvm; Clang at /home/user/work/llvm-project/build/lib/cmake/clang
+-- libkz-core source identity 568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+-- Configuring done (0.1s)
+-- Generating done (0.3s)
+-- Build files have been written to: <scratch>/build
+[  0%] Built target kzrt-manifest
+[ 40%] Built target kz-core
+[ 45%] Built target kz-testsupport
+[ 90%] Built target kz-llvm
+[ 90%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_extract.cpp.o
+[ 90%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_basis.cpp.o
+[ 95%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_show.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/main.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_plan.cpp.o
+[100%] Linking CXX executable kz-static
+[100%] Built target kz-static
+[100%] Building CXX object tests/static/CMakeFiles/test_static_plan.dir/test_static_plan.cpp.o
+[100%] Linking CXX executable test_static_plan
+[100%] Built target test_static_plan
+[ 42%] Built target kz-core
+[ 89%] Built target kz-llvm
+[100%] Built target kz-static

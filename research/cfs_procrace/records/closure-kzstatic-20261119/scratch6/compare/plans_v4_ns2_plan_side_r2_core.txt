@@ -1,0 +1,26 @@
+diffkinds old_lines=724 new_lines=765 only_old=39 only_new=80 labels=25
+label removed=1 added=1 0|generator tool=kz-static
+label removed=1 added=1 0|input facts
+label removed=1 added=1 0|input basis
+label removed=5 added=5 0|input namespace-data
+label removed=1 added=1 0|facts-artifact H
+label removed=1 added=1 0|basis-artifact H
+label removed=1 added=1 0|rules plan rules revision N (N-N-N)
+label removed=1 added=1 0|plan-id H
+label removed=1 added=1 0|requests shaN=H
+label removed=0 added=2 0|namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespacesN_cfe-N.N.N.txt
+label removed=0 added=2 0|namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespacesN_osal-N.N.N.txt
+label removed=0 added=1 0|namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespacesN_osal-fNd.txt
+label removed=0 added=1 0|namespace-layer data=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespacesN_osal-N.N.N.txt
+label removed=1 added=1 0|bound sites<=N
+label removed=11 added=25 0|site N
+label removed=4 added=4 0|map H
+label removed=4 added=16 0|need row
+label removed=1 added=5 0|lifetime OS_OBJECT_TYPE_OS_FILESYS
+label removed=0 added=4 0|lifetime OS_OBJECT_TYPE_OS_TIMEBASE
+label removed=0 added=1 0|lifetime-complete kind=OS_OBJECT_TYPE_OS_FILESYS
+label removed=0 added=1 0|lifetime-complete kind=OS_OBJECT_TYPE_OS_TIMEBASE
+label removed=0 added=4 0|namespace-entry row=H
+label removed=2 added=0 0|namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces_cfe-N.N.N.txt
+label removed=2 added=0 0|namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces_osal-N.N.N.txt
+label removed=1 added=0 0|namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces_osal-fNd.txt

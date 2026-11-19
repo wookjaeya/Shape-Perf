@@ -1,0 +1,34 @@
+facts 63be28137a9df8058bc38ecbe7695f55fafe84b61e310955217733eee2381997
+extract
+  translation units          1
+  functions                  42 (bodies read 37, in system headers skipped 0)
+  call sites                 77
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                9 (entry resolved 9)
+  loops                      10 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 6, await 0, star-closed 4
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 3, escaping 0, unsummarized 2
+  untyped write sites        1 in the program, 1 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Chan.sem   writers 2 (direct 0, data function 1, out-pointer 1, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Com.act   writers 3 (direct 2, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Com.nm   writers 5 (direct 4, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Ent.id   writers 5 (direct 5, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 0, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Ent.name   writers 5 (direct 0, data function 5, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Ent.used   writers 5 (direct 5, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 0, cast 0, union 0, unknown effect 0  -> DISABLED
+  location KindA.label   writers 3 (direct 0, data function 3, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 1, cast 0, union 0, unknown effect 0  -> DISABLED
+  location KindB.tag   writers 2 (direct 0, data function 2, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 1, cast 0, union 0, unknown effect 0  -> DISABLED
+  location RunState.mode   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location RunState.run   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 37, control-flow graphs 37, call-graph components 37 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 2, may 0 (all vocabulary)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 1 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               10 (R-T1 7, R-T2 5, both 2; left out, reached only through an unshared base: R-T1 0, R-T2 0)
+result flow                  97 rows (uses: branch 31, return 4, argument 8, store 5, other 9, none 24; guard rows 16); calls with a result 66
+result effect                190 rows (open 90; event send 0, application exit 0, terminal 5; calls on the paths that are none of these, no row: 44); calls explored 34, outcomes 83

@@ -1,0 +1,45 @@
+UpdateCTestConfiguration  from :<scratch>/cb/DartConfiguration.tcl
+UpdateCTestConfiguration  from :<scratch>/cb/DartConfiguration.tcl
+Test project <scratch>/cb
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 264
+    Start 264: test_static_gitrev
+
+264: Test command: <scratch>/cb/tests/static/test_static_gitrev
+264: Working Directory: <scratch>/cb/tests/static
+264: Test timeout computed to be: 10000000
+264: test_static_gitrev: 13 checks passed
+1/3 Test #264: test_static_gitrev ...............   Passed    0.01 sec
+test 265
+    Start 265: test_static_unroll
+
+265: Test command: <scratch>/cb/tests/static/test_static_unroll
+265: Working Directory: <scratch>/cb/tests/static
+265: Test timeout computed to be: 10000000
+265: test_static_unroll: 90 checks passed
+2/3 Test #265: test_static_unroll ...............   Passed    0.01 sec
+test 266
+    Start 266: test_static_wrappers
+
+266: Test command: <scratch>/cb/tests/static/test_static_wrappers
+266: Working Directory: <scratch>/cb/tests/static
+266: Test timeout computed to be: 10000000
+266: test_static_wrappers: 512 checks passed
+3/3 Test #266: test_static_wrappers .............   Passed    0.01 sec
+
+The following tests passed:
+	test_static_gitrev
+	test_static_unroll
+	test_static_wrappers
+
+100% tests passed, 0 tests failed out of 3
+
+Label Time Summary:
+static    =   0.02 sec*proc (3 tests)
+
+Total Test time (real) =   0.03 sec

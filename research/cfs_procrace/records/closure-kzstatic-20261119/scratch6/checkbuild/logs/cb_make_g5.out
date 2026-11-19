@@ -1,0 +1,18 @@
+[ 42%] Built target kz-core
+[ 47%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[100%] Building CXX object tests/static/CMakeFiles/test_static_expr.dir/test_static_expr.cpp.o
+[100%] Linking CXX executable test_static_expr
+[100%] Built target test_static_expr
+[ 42%] Built target kz-core
+[ 47%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[ 94%] Building CXX object tests/static/CMakeFiles/test_static_flow.dir/test_static_flow.cpp.o
+[100%] Linking CXX executable test_static_flow
+[100%] Built target test_static_flow
+[ 42%] Built target kz-core
+[ 47%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[ 94%] Building CXX object tests/static/CMakeFiles/test_static_recipe.dir/test_static_recipe.cpp.o
+[100%] Linking CXX executable test_static_recipe
+[100%] Built target test_static_recipe

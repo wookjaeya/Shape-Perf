@@ -1,0 +1,23 @@
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static basis --no-profile --compile-db /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/compile_commands.json --build-dir /home/user/work/procrace/c1_build/pre/1df262a/build --bundle-root /home/user/work/procrace/c1_build/bundle_1df262a --recipe /home/user/work/redesign/extract_baseline/inputs/c1_pre_tx.kzb --text -o <scratch>/o/s6_final_extract/c1_pre_tx/c1_pre_tx/NP/basis.kz.partial
+start 2026-11-19T05:26:21.090Z free=1043976192 threshold=334572800
+sample 2026-11-19T05:26:21.094Z 1043972096
+end 2026-11-19T05:26:23.102Z kind=extract verdict=completed rc=0 free=1043824640 lowest=1043824640 dip=151552 change=-151552
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static extract --no-profile --basis <scratch>/o/s6_final_extract/c1_pre_tx/c1_pre_tx/NP/basis.kz.partial --targets-rule R-T1,R-T2 --object-access --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_cfe-6.4.1.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_cfe-6.4.2.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_cfe-6cccb3f.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_cfe-7.0.1.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_osal-4.1.1.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_osal-7.0.1.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_osal-f34759d.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/p0_declarations_glibc-2.39-headers.txt --result-flow --loop-defs --lock-handles -o <scratch>/o/s6_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz.partial
+start 2026-11-19T05:26:23.110Z free=1043824640 threshold=334572800
+sample 2026-11-19T05:26:23.114Z 1043824640
+sample 2026-11-19T05:26:25.120Z 1043824640
+sample 2026-11-19T05:26:27.127Z 1043824640
+sample 2026-11-19T05:26:29.134Z 1043824640
+sample 2026-11-19T05:26:31.140Z 1043824640
+sample 2026-11-19T05:26:33.146Z 1043824640
+sample 2026-11-19T05:26:35.152Z 1043824640
+sample 2026-11-19T05:26:37.158Z 1043824640
+sample 2026-11-19T05:26:39.165Z 1043824640
+sample 2026-11-19T05:26:41.172Z 1043824640
+sample 2026-11-19T05:26:43.177Z 1043824640
+sample 2026-11-19T05:26:45.184Z 1025679360
+end 2026-11-19T05:26:47.190Z kind=extract verdict=completed rc=0 free=1025675264 lowest=1025675264 dip=18149376 change=-18149376
+# space_guard.sh kind=relations need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static relations <scratch>/o/s6_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz.partial -o <scratch>/o/s6_final_extract/c1_pre_tx/c1_pre_tx/NP/relations.txt.partial
+start 2026-11-19T05:26:47.197Z free=1025675264 threshold=334572800
+sample 2026-11-19T05:26:47.201Z 1025675264
+end 2026-11-19T05:26:49.207Z kind=relations verdict=completed rc=0 free=1023246336 lowest=1023246336 dip=2428928 change=-2428928

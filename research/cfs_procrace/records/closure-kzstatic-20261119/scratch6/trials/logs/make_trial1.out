@@ -1,0 +1,62 @@
+[  0%] Building CXX object lib/core/CMakeFiles/kz-core.dir/container_writer.cpp.o
+[  0%] Building CXX object lib/core/CMakeFiles/kz-core.dir/crc32.cpp.o
+[  5%] Building CXX object lib/core/CMakeFiles/kz-core.dir/container_reader.cpp.o
+[  5%] Building CXX object lib/core/CMakeFiles/kz-core.dir/dump.cpp.o
+[ 10%] Building CXX object lib/core/CMakeFiles/kz-core.dir/identity.cpp.o
+[ 10%] Building CXX object lib/core/CMakeFiles/kz-core.dir/record_codec.cpp.o
+[ 10%] Building CXX object lib/core/CMakeFiles/kz-core.dir/registry.cpp.o
+[ 15%] Building CXX object lib/core/CMakeFiles/kz-core.dir/schema_tables.cpp.o
+[ 15%] Building CXX object lib/core/CMakeFiles/kz-core.dir/sha256.cpp.o
+[ 15%] Building CXX object lib/core/CMakeFiles/kz-core.dir/status.cpp.o
+[ 21%] Building CXX object lib/core/CMakeFiles/kz-core.dir/verdict.cpp.o
+[ 21%] Building CXX object lib/core/CMakeFiles/kz-core.dir/eval_abstract.cpp.o
+[ 21%] Building CXX object lib/core/CMakeFiles/kz-core.dir/eval_concrete.cpp.o
+[ 26%] Building CXX object lib/core/CMakeFiles/kz-core.dir/eval_trace.cpp.o
+[ 26%] Building CXX object lib/core/CMakeFiles/kz-core.dir/phi_allowed.cpp.o
+[ 26%] Building CXX object lib/core/CMakeFiles/kz-core.dir/phi_check.cpp.o
+[ 26%] Building CXX object lib/core/CMakeFiles/kz-core.dir/phi_expr.cpp.o
+[ 31%] Building CXX object lib/core/CMakeFiles/kz-core.dir/phi_lexer.cpp.o
+[ 31%] Building CXX object lib/core/CMakeFiles/kz-core.dir/phi_parser.cpp.o
+[ 31%] Building CXX object lib/core/CMakeFiles/kz-core.dir/phi_print.cpp.o
+[ 36%] Building CXX object lib/core/CMakeFiles/kz-core.dir/phi_profile.cpp.o
+[ 36%] Building CXX object lib/core/CMakeFiles/kz-core.dir/phi_provenance.cpp.o
+[ 36%] Building CXX object lib/core/CMakeFiles/kz-core.dir/phi_stats.cpp.o
+[ 42%] Linking CXX static library libkz-core.a
+[ 42%] Built target kz-core
+[ 47%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/spec.cpp.o
+[ 47%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/model.cpp.o
+[ 47%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/p0.cpp.o
+[ 47%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/wrappers.cpp.o
+[ 52%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/finalize.cpp.o
+[ 52%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/argflow.cpp.o
+[ 52%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/lockset.cpp.o
+[ 52%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/target_rules.cpp.o
+[ 57%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/serialize.cpp.o
+[ 57%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/facts_text.cpp.o
+[ 57%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/facts_query.cpp.o
+[ 63%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/rel_facts.cpp.o
+[ 63%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/relations.cpp.o
+[ 63%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/semantics.cpp.o
+[ 68%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/result_flow.cpp.o
+[ 68%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/plan_gen.cpp.o
+[ 68%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/order.cpp.o
+[ 68%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/unroll.cpp.o
+[ 73%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/elf_info.cpp.o
+[ 73%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/linkset.cpp.o
+[ 73%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/gitrev.cpp.o
+[ 78%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/recipe.cpp.o
+[ 78%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/profile_load.cpp.o
+[ 78%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/basis.cpp.o
+[ 84%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/ast_tu.cpp.o
+[ 84%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/ast_fn.cpp.o
+[ 84%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/ast_run.cpp.o
+[ 89%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/ast_basis.cpp.o
+[ 89%] Linking CXX static library libkz-llvm.a
+[ 89%] Built target kz-llvm
+[ 89%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_extract.cpp.o
+[ 89%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_basis.cpp.o
+[ 94%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/main.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_show.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_plan.cpp.o
+[100%] Linking CXX executable kz-static
+[100%] Built target kz-static

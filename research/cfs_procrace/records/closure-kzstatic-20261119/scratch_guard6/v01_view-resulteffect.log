@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-view-resulteffect need=50000000 floor=314572800 interval=2 cmd=bash -c <scratch>/cb/tools/kz-static/kz-static show <scratch>/o/s6_final_extract/c1_post_tx/c1_post_tx/NP/facts.kz --section resulteffect > <scratch>/views/re_c1post.txt
+start 2026-11-19T05:41:56.335Z free=687329280 threshold=364572800
+sample 2026-11-19T05:41:56.340Z 687325184
+end 2026-11-19T05:41:58.347Z kind=scratch-view-resulteffect verdict=completed rc=0 free=680382464 lowest=680382464 dip=6946816 change=-6946816

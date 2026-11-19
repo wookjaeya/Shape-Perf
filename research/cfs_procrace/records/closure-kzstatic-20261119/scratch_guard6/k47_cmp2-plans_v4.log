@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-cmp2-plans_v4 need=200000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-20261119/scripts/scratch6_compare.sh plans_v4
+start 2026-11-19T05:38:20.125Z free=696320000 threshold=514572800
+sample 2026-11-19T05:38:20.129Z 696315904
+end 2026-11-19T05:38:22.135Z kind=scratch-cmp2-plans_v4 verdict=completed rc=0 free=696057856 lowest=696057856 dip=262144 change=-262144

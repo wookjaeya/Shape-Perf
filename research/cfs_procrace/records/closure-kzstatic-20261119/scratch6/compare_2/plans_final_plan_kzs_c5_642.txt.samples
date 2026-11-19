@@ -1,0 +1,4 @@
+- 0|# sidecar	# sidecar sha256=947cc9e5e8a1ea3ff107a8645aac12f5940c4c09d2b81fb28c752c9c88e9b8a0
++ 0|# sidecar	# sidecar sha256=2871b981f2c707acb14e61ed1425ec3c5a5853c310a4e47167edf06ac11fa713
+- 0|source build	source build rev=basis-f301ec70b7148775af89841d3d972d4bb17e1f51342bc661e5356f48b2eda7d6 ref="the analysis basis: every source file read is hashed in its FILE_HASHES; no source tree revision checked (basis source.worktree_state)"
++ 0|source build	source build rev=basis-407ea604958089f205bb4920d68d876a82baa7a2226c1bd6377fba7ec0794bdd ref="the analysis basis: every source file read is hashed in its FILE_HASHES; no source tree revision checked (basis source.worktree_state)"

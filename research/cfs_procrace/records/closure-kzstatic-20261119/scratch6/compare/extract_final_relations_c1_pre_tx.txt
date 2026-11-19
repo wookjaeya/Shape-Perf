@@ -1,0 +1,21 @@
+diffkinds old_lines=7700 new_lines=7944 only_old=0 only_new=244 labels=20
+label removed=0 added=1 0|tool kz-static
+label removed=0 added=1 0|rules with object access
+label removed=0 added=1 0|summary success path
+label removed=0 added=1 0|rules with decided call results
+label removed=0 added=1 0|summary stored-name
+label removed=0 added=13 6|success path
+label removed=0 added=32 6|writers [..]
+label removed=0 added=65 6|alternatives [..]
+label removed=0 added=4 6|lifetime end
+label removed=0 added=13 6|lifetime end [..]
+label removed=0 added=26 6|holder
+label removed=0 added=39 6|absence origins
+label removed=0 added=14 8|callee-check (success path)
+label removed=0 added=9 6|writers [..] of OS_common_record_t.name_entry
+label removed=0 added=1 6|stored-name address
+label removed=0 added=2 6|stored-name buffer
+label removed=0 added=14 6|stored-name buffer [..]
+label removed=0 added=5 6|callee-check (success path)
+label removed=0 added=1 6|writers [..] of OS_filesys_internal_record_t.virtual_mountpt
+label removed=0 added=1 6|writers [..] of OS_stream_internal_record_t.stream_name

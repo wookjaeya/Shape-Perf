@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-relcheck need=120000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-20261119/scripts/scratch6_run.sh relcheck
+start 2026-11-19T05:31:58.540Z free=776040448 threshold=434572800
+sample 2026-11-19T05:31:58.544Z 776036352
+end 2026-11-19T05:32:00.552Z kind=scratch-relcheck verdict=completed rc=0 free=768372736 lowest=768372736 dip=7667712 change=-7667712

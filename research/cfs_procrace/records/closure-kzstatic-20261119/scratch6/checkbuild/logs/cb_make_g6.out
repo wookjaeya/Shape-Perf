@@ -1,0 +1,18 @@
+[ 44%] Built target kz-core
+[ 50%] Built target kz-testsupport
+[100%] Built target kz-llvm
+[100%] Building CXX object tests/static/CMakeFiles/test_static_gitrev.dir/test_static_gitrev.cpp.o
+[100%] Linking CXX executable test_static_gitrev
+[100%] Built target test_static_gitrev
+[ 44%] Built target kz-core
+[ 50%] Built target kz-testsupport
+[100%] Built target kz-llvm
+[100%] Building CXX object tests/static/CMakeFiles/test_static_unroll.dir/test_static_unroll.cpp.o
+[100%] Linking CXX executable test_static_unroll
+[100%] Built target test_static_unroll
+[ 42%] Built target kz-core
+[ 47%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[ 94%] Building CXX object tests/static/CMakeFiles/test_static_wrappers.dir/test_static_wrappers.cpp.o
+[100%] Linking CXX executable test_static_wrappers
+[100%] Built target test_static_wrappers

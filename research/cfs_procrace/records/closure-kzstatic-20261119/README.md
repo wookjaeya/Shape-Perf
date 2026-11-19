@@ -76,3 +76,25 @@ Fifth run (2026-11-19, results section 19; the MC tool is still `bf2ec2ee…`, `
 | `scratch5/logs/` | cmake, make, extraction and ctest logs (`ctest5d.log` is the one the results cite; earlier trials kept under their names) |
 | `scripts/plan_one_ns.sh` | one plan with `--manifest 4` and the namespace data files of coverage rule revision 1 or 2 (a scratch runner) |
 | `scripts/plan_rev5_compare.py`, `scripts/plan_rev5_counts.py` | the comparison of a revision-5 plan with a kept revision-4 plan by site keys, and the counts of 10.7 (checks, not tools of the method) |
+
+Sixth run (2026-11-19, results section 20: the revision names, the remaining fixtures and the scratch check build of the complete source; the MC tool is still `bf2ec2ee…`, `scratch6/mc_tool_sha256_start.txt`, `_end.txt`):
+
+| Path | Content |
+|---|---|
+| `free_start_attempt6.txt`, `free_end_attempt6.txt` | free space at the start and the end of the sixth run (the end after its scratch was removed) |
+| `scratch_guard6/` | the guard logs of the sixth run: trial builds and ctest (`x01`-`x05`), the check build (`c01`-`c18`), the runs of the five builds (`r01`-`r10`), the comparisons (`k21`-`k30` first labels, `k41`-`k50` the reports cited), the dry run (`d01`), one view (`v01`), and the guard logs of `one_build.sh` (`one_build_<final|off>_<b>.log`) |
+| `scratch6/trials/` | the trial build of the uncommitted source: its logs, the relations texts of the two fixture tries for the absence origins (`fixture/fx1_peek_in_search`: an early return in the search left the absence value unevaluated; `fx2_wrapper`: the wrapper form that was committed) and its scratch goldens |
+| `scratch6/checkbuild/` | the check build of the committed source (commit `aa8968f`, a `git archive` of `kairos/`, `logs/src_files.sha256`): `scratch_tool_identity.txt`, `logs/` (cmake, make, the first ctest with `-V` of the static and lint set `cb_ctest_first_V.log`, the batches of the other static test executables `cb_ctest_g5-7.log`, the identity tests, the golden updates into a scratch data directory and the run of the 36 golden, plan and reasons commands against it `cb_golden_scratchdata.log`), `golden_scratch/` the seven goldens to commit with the declared build and their sha256 |
+| `scratch6/data_inputs.sha256` | the data files of `kairos/semantics` the runs read (the kept build's list and the five revision-2 name-space files) |
+| `scratch6/s6_outputs.sha256` | the sha256 of every output file of the scratch runs of the five builds (relative paths; the outputs were removed after the run) |
+| `scratch6/runs/` | the rc lines of `scripts/scratch6_run.sh` per step and of `scripts/scratch6_compare.sh` per step (`cmp_*`: the first labels, `cmp2_*`: the reports cited) |
+| `scratch6/compare/`, `compare_table.txt`, `compare_summary.txt` | the first reports (labels before absolute paths were folded; kept, not cited) |
+| `scratch6/compare_2/`, `compare_2_table.txt` | the reports cited: every output file of the five builds by the scratch tool against the kept output of the fixed tool (`diffkinds.py` for text, `sections_cmp.py` of `records/review-fixes-2-mc-20261119` for containers); the `*_pairs_*` reports have no counterpart (the pair file is new) and give the head, the tail and the counts by kind and value |
+| `scratch6/keys/keys_compare.txt` | the use-site keys of the final-option facts against the fixed tool's, and the two C1 builds against each other |
+| `scratch6/pairs/` | `scripts/pair_check.py` on the pair files of the final-option and default-path facts, with the two revision-4 plans of the final facts |
+| `scratch6/heads/` | the header lines of the relations texts and of the pair files of the final facts |
+| `scratch6/plans_v4_ns2/`, `plans_v4_ns2_counts.txt`, `plans_v4_ns2_counts_vs_scratch5.txt` | the sidecars and requests of the revision-5 plans on the revision-2 name-space data (scratch paths written `<scratch>`), their counts of plan_manifest 10.7 and the comparison with the fifth run's counts |
+| `scratch6/dryrun/` | the dry run of the MC tree (`make -n all`), the 14 binaries that relink (`relink_expected.txt`, `_now.sha256`), the 110 that must not (`not_relink_paths.txt`, `not_relink_now.sha256`: the same sha256 as before the fixed-tool build) |
+| `scratch6/address_passing_sites.txt`, `open_other_c1_*.txt` | lead's ruling (e): the address-passing call sites of the two C1 builds and the kinds of the `other` open-reason class (`scripts/open_other.py`; `_2` with the kinds) |
+| `scratch6/output_sizes.txt` | the sizes of the scratch outputs per step, with and without the second runs (`again/`), and of the kept outputs of the fixed-tool build |
+| `scripts/scratch6_run.sh`, `scripts/scratch6_compare.sh`, `scripts/diffkinds.py`, `scripts/compare_table.py`, `scripts/open_other.py` | the runner, the comparison, the line-kind difference, the table and the `other` class reader of this run (checks, not tools of the method) |

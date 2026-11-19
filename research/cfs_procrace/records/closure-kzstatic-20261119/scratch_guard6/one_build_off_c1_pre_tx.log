@@ -1,0 +1,21 @@
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static basis --no-profile --compile-db /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/compile_commands.json --build-dir /home/user/work/procrace/c1_build/pre/1df262a/build --bundle-root /home/user/work/procrace/c1_build/bundle_1df262a --recipe /home/user/work/redesign/extract_baseline/inputs/c1_pre_tx.kzb --text -o <scratch>/o/s6_off_extract/c1_pre_tx/c1_pre_tx/NP/basis.kz.partial
+start 2026-11-19T05:28:11.835Z free=970829824 threshold=334572800
+sample 2026-11-19T05:28:11.839Z 970825728
+end 2026-11-19T05:28:13.846Z kind=extract verdict=completed rc=0 free=970678272 lowest=970678272 dip=151552 change=-151552
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static extract --no-profile --basis <scratch>/o/s6_off_extract/c1_pre_tx/c1_pre_tx/NP/basis.kz.partial --targets-rule R-T1,R-T2 -o <scratch>/o/s6_off_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz.partial
+start 2026-11-19T05:28:13.856Z free=970678272 threshold=334572800
+sample 2026-11-19T05:28:13.862Z 970678272
+sample 2026-11-19T05:28:15.868Z 970678272
+sample 2026-11-19T05:28:17.874Z 970678272
+sample 2026-11-19T05:28:19.880Z 970678272
+sample 2026-11-19T05:28:21.887Z 970678272
+sample 2026-11-19T05:28:23.894Z 970678272
+sample 2026-11-19T05:28:25.901Z 970678272
+sample 2026-11-19T05:28:27.907Z 970678272
+sample 2026-11-19T05:28:29.913Z 970678272
+sample 2026-11-19T05:28:31.920Z 970678272
+end 2026-11-19T05:28:33.928Z kind=extract verdict=completed rc=0 free=959606784 lowest=959606784 dip=11071488 change=-11071488
+# space_guard.sh kind=relations need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static relations <scratch>/o/s6_off_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz.partial -o <scratch>/o/s6_off_extract/c1_pre_tx/c1_pre_tx/NP/relations.txt.partial
+start 2026-11-19T05:28:33.934Z free=959606784 threshold=334572800
+sample 2026-11-19T05:28:33.939Z 959606784
+end 2026-11-19T05:28:35.947Z kind=relations verdict=completed rc=0 free=957464576 lowest=957464576 dip=2142208 change=-2142208

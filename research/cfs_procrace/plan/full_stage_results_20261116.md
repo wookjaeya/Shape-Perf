@@ -2605,3 +2605,134 @@ scratch Release 빌드(kz-static, static_golden, kz_lint, test_static_reasons, t
   - (7) `source_tree`·`absence origins` 의 fixture. 개정 5 의 fixture 는 이 단계에서 넣었다.
   - (8) 완전한 소스의 scratch 점검 빌드 → 선언 → 사본 → MC 빌드 → 다시 뽑기 → relations, 쌍 파일을 낸 order, 새 자료 파일 위의 개정 4·5 계획 → 끝 점검 → 결과 절.
 - §18.8 의 lead 판단(FIELD_STATUS 의 배열 표시), PI 결정(C 라이브러리 항목; PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)), lead 의 판단 (a)·(b)·(e)의 열린 것, absence origins 의 이름 칸 문제는 그대로다.
+
+## 20. C1 닫기의 kz-static 한 빌드: 개정 이름, 남은 fixture, 완전한 소스의 scratch 점검 빌드 (2026-11-19, 선언 전에 멈춤)
+
+§19.8 의 다음 차례 (6)(규칙 개정 이름), (7)(`source_tree`·`absence origins` 의 fixture)과 (8)의 앞 절반(완전한 소스의 scratch 점검 빌드, 다섯 빌드의 scratch 다시 뽑기, 선언이 쓸 값)을 했다. **선언, 도구 사본, MC 빌드는 하지 않았다**: 이 단계의 끝 조건이 선언 전이다. MC 의 kz-static 은 `bf2ec2ee…` 그대로다(시작과 끝에 sha256 을 보았다, `../records/closure-kzstatic-20261119/scratch6/mc_tool_sha256_start.txt`·`_end.txt`). 기록: `../records/closure-kzstatic-20261119/`(`scratch6/`, `scratch_guard6/`, `scripts/scratch6_run.sh`·`scratch6_compare.sh`·`diffkinds.py`·`compare_table.py`·`open_other.py`, README). cFS 를 부팅하지 않았고 push 하지 않았다. 아래 수는 모두 기록 디렉터리의 출력 파일에서 왔다. scratch 도구의 수라서 [I] 다(공간의 수는 [M]).
+
+### 20.0 lead 의 판단 (2026-11-19, §17 의 열린 것에 대해)
+lead 가 2026-11-19 에 정한 (a)–(e)는 §18.0 에 적은 그대로다. 이 단계에서 어떻게 지켰는지만 적는다.
+- (a) 판정 규칙 8.13 의 17 번 조건 (6)은 쓰인 대로 적용한다(필드 단위와 형 단위 **모두**). 도구는 바꾸지 않았다. 다섯 빌드의 머리 줄은 여전히 정함 0 이고, (5)·(6)이 전제인 덩이가 66 이다(`scratch6/heads/relations_heads_c1_pre_tx.txt`). 평가 갈래 Re 가 이것을 덮는지는 설명 스크립트 단계와 평가 파일의 일이다. 덮지 않으면 PI 의 열린 것으로 적는다. 어떤 글도 넓히지 않았다.
+- (b) out 저장된 지역 변수의 추출 틈은 그대로다. `include/` 를 바꾸지 않았다. 성공 경로 줄은 계속 missing 이다(`summary success path: creator callees 14: held 0`, c1_pre_tx). 열린 것이다.
+- (c) 저장된 이름 버퍼는 §18.2 에서 깃발마다 정한 대로다. 아무 깃발도 빼지 않았다. 버퍼 줄은 `not complete` 와 풀리지 않은 깃발을 적는다(머리 줄: buffers 16, complete 0).
+- (d) 바뀌는 golden 일곱은 선언된 빌드에서 커밋한다. 첫 ctest 실패는 **완전한 소스**의 scratch 점검 빌드에서 이름으로 확인했다(20.2).
+- (e) C1 의 둘째 주소 넘김 호출 자리와 열린 까닭의 `other` 종류를 scratch 사실에서 가리고 셌다(20.5). 선언된 빌드의 측정에서 다시 센다.
+
+### 20.1 바뀐 것 [F]
+- **글(코드보다 먼저, `680dc66`)**: `kairos/docs/static_facts.md` 5x 덧붙임 아홉째와 `kairos/docs/plan_manifest.md` 10.9. 개정 이름이 나오는 자리를 정한다.
+  - relations 의 `rules` 줄은 그대로 `relations rules revision 12 (2026-11-18)` 다. 5x 의 "없는 사실은 앞판의 바이트에 도구 줄만 더함"을 지키려는 것이다. 개정 14 는 개정 11·13 처럼 자기 줄을 둔다: OBJECT_ACCESS 가 있는 사실에서만 `rules with object access: relations rules revision 14 (2026-11-19), …` 한 줄을 relations 머리와 키 목록(`--keys`)에 쓴다. 쌍 파일의 `relations` 줄은 이 줄을 저절로 담는다.
+  - order 의 글은 그대로다. 5x 의 "글과 `edges.tsv` 는 도구 줄 말고 바뀌지 않는다"와 golden 시험의 "`--pairs` 가 글을 바꾸지 않는다"를 지키려는 것이다. order rules revision 8 은 쌍 파일의 개정이다. 그래서 쌍 파일의 `order` 줄 맨 앞에 이름을 둔다.
+  - 계획: `--manifest 4` 의 `rules` 줄·manifest 머리·plan id 가 `plan rules revision 5 (2026-11-19)` 를 이름 댄다. 이름 공간 파일의 개정과 상관없다(10 절 머리: 개정 1 파일이면 생성기 정체성과 이 이름 말고 개정 4 의 출력). 기본 경로는 `plan rules revision 2` 그대로다.
+- **소스(`aa8968f`)**:
+  - `lib/llvm/relations.cpp`·`.hpp`: `relations_object_access_revision()`, 머리 줄과 키 목록의 줄.
+  - `lib/llvm/order.cpp`·`.hpp`: `order_pairs_revision()`, 쌍 파일의 `order` 줄.
+  - `lib/llvm/plan_gen.cpp`: 개정 5 의 이름과 글.
+  - `tools/kz-static/main.cpp`·`cmd_plan.cpp`: 도움말과 주석.
+  - `tests/static/test_static_plan.cpp`: 개정 5 를 읽는 확인 둘.
+  - fixture 둘:
+    - `tests/static/fixtures/closure.c` 에 `ent_look` 를 더했다. 널 out 포인터면 스스로 부재 상수를 돌려주고, 아니면 검색의 결과를 돌려주는 감싸개다. 명령 스레드가 쓴다. 이 행의 줄은 `absence origins: -17 [CL_ERR_NOT_FOUND]: 2 origin(s): ent_look at closure.c:225:17 when (eq param:out#0 0) [other]; ent_get at closure.c:218:3 when always [search no-match]` 이다. 기원이 둘인 꼴과 `[other]` 꼴이 fixture 에 처음 들어온다.
+    - `tests/static/test_static_cli.cpp` 에 소스 트리 키 블록을 더했다. 루트 밖 머리 파일의 static 키 매개변수 함수를, `.git` 항목이 있는 같은 트리의 두 checkout 에 둔다. 옵션을 켜면 BASIS `source_tree[0] = <checkout>/app <app>` 이 나오고, 키 글 `…|t_find@<app>/src/kt.h#0|1` 은 두 checkout 에서 같다. 옵션이 없으면 절대 경로가 남아 키가 다르다. 개정 14 의 줄은 옵션을 켰을 때만 머리와 키 목록에 있다.
+  - `CMakeLists.txt` 의 fixture 설명.
+- 바꾸지 않은 것: `include/`, 추출, 선택 규칙, 층 라벨, 저장소의 golden(20.4). 개정 5 와 (3)–(4)의 fixture 는 앞 실행들이 넣었다(§17·§18·§19).
+
+### 20.2 scratch 점검 빌드와 시험 [I]
+- **시도 빌드**(커밋 전 소스, `scratch6/trials/`). 감싸개 꼴을 고르기 전에 한 번 시도했다. 검색 함수 안에 이른 부재 반환을 둔 첫 판은 부재 값을 정하지 않았다(`fixture/fx1_peek_in_search/rel.txt`: `absence: unevaluated`). 끝 반환의 조건에 그 앞 조건의 부정이 들어가기 때문으로 보인다 [미확인: 코드에서 그 항까지 따라가지 않음]. 개정 이름을 읽던 `test_static_plan` 의 두 확인도 이 빌드에서 잡았다(`logs/ctest_trial1.log`).
+- **점검 빌드**는 커밋 `aa8968f` 의 `kairos/` 를 `git archive` 로 꺼낸 것(681 파일, 작업 트리의 추적 파일과 sha256 이 같음)을 Release 로 빌드했다. 모두 감시 아래에서 돌렸다(`scratch_guard6/c01`–`c18`). scratch kz-static 의 정체성은 `checkbuild/scratch_tool_identity.txt` 에 있다: 파일 `de7fcdd1…`, `tool_sha256=36e02995…`, `tool_source=3b89477d…`, 스키마 12.
+
+| 시험 | 결과 | 출력 |
+|---|---|---|
+| 첫 ctest(`-V`), static·lint 82 | 실패 6: `static_golden_order_np`, `static_golden_resultflow_np`, `static_golden_resultflow_order_np`, `static_golden_looplock_order_np`, `static_golden_closure_np`, `test_static_plan`(389 가운데 2: planv4·planv5 의 plan golden). Not Run 9: 이 차례에 빌드하지 않은 실행 파일 | `checkbuild/logs/cb_ctest_first_V.log` |
+| Not Run 이던 9(세 묶음으로 빌드, 돌리고 지움) | 모두 통과: `test_static_expr` 26, `flow` 36, `recipe` 71, `gitrev` 13, `unroll` 90, `wrappers` 512, `link` 68, `elf32` 233, `test_trace_static_closure` 114 확인 | `cb_ctest_g5.log`–`g7.log` |
+| 첫 ctest 의 통과 | `test_static_cli` 1,217, `test_static_reasons` 771 확인; lint selftest 114 경우 실패 0, lint 규칙 일곱 clean | `cb_ctest_first_V.log` |
+| 정체성 시험 | `tool_identity_schema_revision`, `source_identity_cmake` 통과 | `cb_ctest_identity.log` |
+| scratch 자료 디렉터리의 golden 일곱 | golden·plan·reasons 명령 36 이 모두 rc 0 | `cb_golden_scratchdata.log`, `golden_scratch/` |
+| golden 일곱의 바이트 | 시도 빌드의 것과 같다. 앞 scratch golden 과 다른 곳은 다음뿐이다. order 셋: 쌍 파일의 `order` 줄. planv4·planv5: 머리 주석, `obsrules`, `rules` 세 줄. `resultflow_np`: §17 의 것과 같은 바이트. `closure_np`: 새 조회의 줄들 | `trials/golden_scratch/`, `checkbuild/golden_scratch/goldens_sha256.txt` |
+
+점검 빌드 tree 의 271 시험 가운데 위 84(static·lint 82, 그 가운데 Not Run 이던 9 는 빌드한 뒤 다시 돌림; 정체성 2)만 돌렸다. 나머지 187 은 다시 링크되지 않는 바이너리의 시험이다(20.4). 그 시험의 결과는 선언된 빌드의 전체 ctest 가 낸다.
+
+### 20.3 다섯 빌드의 scratch 다시 뽑기와 고친 도구 출력과의 차이 [I]
+- 실행: `scripts/scratch6_run.sh`, 단계 열(relcheck, order, extract_off, extract_final, off_order, final_order, plans_t8cf, plans_final, plans_v4, plans_v4_ns2). 모두 rc 0 이다(`scratch6/runs/run_*.txt`). order 단계는 `--pairs` 로 쌍 파일을 쓴다. 다시 뽑기는 `env/redesign/one_build.sh` 다(마지막 옵션 회차의 인자, 기본 경로).
+- 비교: `scripts/scratch6_compare.sh` 로 출력 파일마다 고친 도구 `bf2ec2ee` 의 남긴 출력(`/home/user/work/redesign/obs1/rf2_*`)과 비교했다. 보고 485 는 `scratch6/compare_2/` 에, 표는 `compare_2_table.txt` 에 있다. 바이트 점검은 모두 OK 다(BAD 0, `runs/cmp2_*.txt`): 두 실행이 같은 바이트(order·edges·pairs·cdr), 로그가 빔, relations 글이 다시 뽑기의 것과 같음, status PASS, plan.log 가 남긴 것과 같음.
+- 출력 종류마다 다른 줄(차례 c1_pre_tx/c1_post_tx/r2_core/c5_641/c5_642). `facts` 줄과 도구 줄은 꼴로만 가려 셌다(diffkinds 의 가림).
+
+| 출력 | 다른 것 |
+|---|---|
+| relcheck(T8CF 사실) relations.txt / keys.txt | 도구 줄 +1 / 같음 |
+| order(T8CF), off_order: order.txt / edges.tsv / keys.txt | 도구 줄 +1 / 같음 / 같음 |
+| final_order: order.txt / keys.txt / edges.tsv·cdr.txt | 도구 줄 +1, 행 키 줄 −3/+3(c1 두 빌드: A20, A27, A30) / 개정 14 줄 +1(다섯 빌드), 키 줄 −3/+3(c1 둘) / 같음 |
+| 쌍 파일(새 파일) | 줄 수 27,123/27,123/10,158/5,145/5,134(order·off_order), 27,163/27,163/10,198/5,241/5,230(final_order). 꼬리(final): 쌍 26,572/26,572/9,622/5,160/5,149, no_pair 62/62/21/58/58 |
+| extract_off: basis.kz / facts.kz | 머리의 `tool_sha256` / 머리 셋(`basis_sha256`, `parent[0]`, `tool_sha256`)과 BASIS 1 레코드 |
+| extract_off: basis.txt / sha256.txt / 보기 / relations.txt / extract.txt·args.txt | 1 줄(basis 해시) / 3 줄(basis, facts, 도구) / `extract.units_from` 1 줄 / 도구 줄 +1 / 같음 |
+| extract_final: facts.kz | 머리(c1 넷 `container` 포함, 나머지 셋). BASIS −49/+52(c1 둘: `source_tree` 셋을 더하고 뒤 번호가 밀림), 나머지 −1/+1. RESULT_EFFECT −72/+72(c1 둘: `chain` 의 경로 덩이), STRINGS 크기 |
+| extract_final: 보기 | c1 −74/+77(`source_tree` +3, `chain` −72/+72, BASIS 수 줄, `extract.units_from`), 나머지 −1/+1 |
+| extract_final: relations.txt | 없어진 줄 0. 더한 줄 244/243/149/297/297: 도구 줄, 개정 14 줄, 머리 셋(성공 경로, 정한 호출, 버퍼·수명), 성공 경로의 이름 공간 머리 13/13/8/31/31, 행의 `callee-check (success path)` 14/14/12/15/15, 그 블록 줄 5/5/1/2/2, `writers [..]` 43/43/28/96/96, `alternatives` 65/64/26/66/66, `lifetime end` 17/17/13/41/41, `holder` 26/26/21/18/18, `absence origins` 39/39/17/23/23, `stored-name address uses` 1/1/1/0/0, `stored-name buffer` 16/16/17/0/0 |
+| plans_t8cf·plans_final | 생성기·입력·artifact 줄. final 의 c1 은 행·need 줄 −3/+3(움직인 키) |
+| plans_v4(개정 1 이름 공간 자료) | 개정 이름의 셋(머리 주석, `plan` 줄, sidecar `rules`), plan id, 생성기·입력·요청 sha256. c1 둘: 행 3, site 11, need 8, 요청 16, map 1 이 −/+ 같은 수(움직인 키의 글) |
+| plans_v4_ns2(개정 2 이름 공간 자료: 새 계획) | sidecar −82/+127, −82/+120, −39/+80, −18/+20, −18/+20. 더한 것: `namespace-entry` 4/4/4/0/0, `namespace-layer` 1/1/1/2/2, `lifetime-complete` 2/2/2/0/0, `context` 2/0/0/0/0, extent `bound` 1/1/0/0/0, site·need·lifetime 줄(표). 요청 줄 −26/+26, −20/+20(site 번호), r2·c5 는 머리만 |
+
+- **키 글**: 두 C1 빌드의 키 글이 367 개 가운데 367 개 같다. 움직인 행은 c1 의 셋뿐이고 공유 키는 0 이다(`scratch6/keys/keys_compare.txt`).
+- **쌍 파일**: `pair_check.py` 가 다섯 빌드의 마지막 옵션 사실(22 점검)과 기본 경로 사실(20 점검)에서 모두 PASS 다. 두 C1 계획(개정 1·2 자료)의 계획된 행 13 이 모두 쌍 파일에 줄을 가진다(그 줄 1,125)(`scratch6/pairs/`).
+- **개정 5 계획의 수**(`scratch6/plans_v4_ns2_counts.txt`)는 다섯째 실행의 수와 같다. 다른 곳은 디렉터리 머리의 꼴뿐이다(`plans_v4_ns2_counts_vs_scratch5.txt`).
+
+### 20.4 선언이 쓸 값 [I]
+- **다시 링크되는 것**(MC tree 의 dry run `make -n all`, 감시 아래 `d01`; `scratch6/dryrun/`): link script 가 돌 것 여섯(`libkz-llvm.a`, `kz-static`, `static_golden`, `test_static_cli`, `test_static_plan`, `test_static_reasons`). 여기에 `libkz-llvm.a` 를 이름 대는 link 파일의 실행 파일을 더해 열넷이다(`relink_expected.txt`: `test_static_elf32`, `expr`, `flow`, `gitrev`, `link`, `recipe`, `unroll`, `wrappers` 더함). §12.11 의 열넷과 같은 집합이다. 정체성이 바뀌는 도구는 kz-static 하나다. 다시 컴파일되는 목적 파일은 열넷이다: `kz-llvm` 의 `ast_fn`·`order`·`plan_gen`·`rel_facts`·`relations`·`semantics`·`serialize`, `kz-static` 의 `cmd_plan`·`cmd_show`·`main`, 시험 넷.
+- **다시 링크되지 않아야 할 것** 110: 지금 sha256 이 §12.11 의 빌드 전 목록과 같다(`not_relink_now.sha256`). 선언은 빌드 바로 전에 다시 잰다.
+- **첫 ctest 의 실패, 이름으로**(완전한 소스, lead 의 판단 (d)): `static_golden_order_np`, `static_golden_resultflow_np`, `static_golden_resultflow_order_np`, `static_golden_looplock_order_np`, `static_golden_closure_np`, `test_static_plan`. 커밋할 golden 일곱은 `scratch6/checkbuild/golden_scratch/` 에 있다. `order_np`, `resultflow_np`, `resultflow_order_np`, `looplock_order_np` 은 바꾸고, `closure_np` 는 새것이다. `planv4_np.plan` 은 바꾸고, `planv5_np.plan` 은 새것이다. 앞 실행들의 scratch golden(`scratch/`, `scratch3/`, `scratch4/`, `scratch5/` 의 것)은 이 일곱이 대신한다.
+- **허용 차이**: 출력 종류와 칸마다 20.3 의 표와 `compare_2_table.txt` 다. 선언은 이 보고를 `declared/` 로 삼아 그 줄과 수를 적는다. 쌍 파일은 비교할 짝이 없는 새 출력이다. 그래서 머리·꼬리·값의 수를 선언한다.
+- **공간이 드는 곳**(선언된 빌드):
+
+| 일 | 크기 | 근거 |
+|---|---|---|
+| kz-static 사본(xz) | 약 47 MB [I] | `1a47abd0` 사본 47,373,676 B(§12.11). 같은 크기의 바이너리 |
+| MC 빌드의 dip | 약 170 MB, 잠깐 | §12.11 의 `make kz-static` dip 170,074,112 B, `make all` 40,079,360 B(같은 relink 집합) |
+| 남길 새 출력 | 245.7 MB | `scratch6/output_sizes.txt`: final_extract 73.0, off_extract 47.0, final_order 42.3, off_order 39.6, order 31.9, relcheck 7.6, 계획 넷 4.3(MB). 쌍 파일이 order 출력의 대부분이다 |
+| 두 번째 실행(`again/`) | 97.5 MB, 비교 뒤 지움 | 같은 파일 |
+| 비교의 facts 보기 | 88.5 MB, 잠깐 | `scratch_guard6/k50_cmp2-extract_final.log` 의 dip 88,514,560 B |
+
+그 합은 약 480 MB 다. 지금 여유는 1,193,545,728 B 다. 그러므로 가장 낮은 값은 약 0.71 GB 로 하한 314,572,800 B 위다. 압축 대체는 필요 없다 [I].
+
+### 20.5 lead 의 판단 (e): 둘째 주소 넘김 호출 자리와 `other` 종류 [I]
+- **호출 자리 둘**(`scratch6/address_passing_sites.txt`, 두 C1 빌드 같음):
+  - `CFE_ES_RunLoop` at `cf_app.c:338:12`: 주소 넘김 덩이 68. 설계 행의 자리다(§17.3).
+  - `CFE_ES_RunLoop` at `bp/fsw/src/bp_app.c:818:12`(`BP_AppMain`): 덩이 4. 저장한 위치는 지역 변수 `run_status` 다(`:814:9` 의 `CFE_ES_RunStatus_APP_RUN`, `:834:13` 의 실패 값). 머리의 "저장한 위치가 필드가 아님 4" 가 이 자리다.
+  - 그러므로 필드 저장값 규칙이 필드에 적용되는 자리는 C1 에서 하나뿐이다(§17.3 의 [미확인]이 풀림).
+- **`other` 종류 2,398 행**(c1_pre_tx·c1_post_tx 같음; `open_other_c1_*_2.txt`, 열린 행 8,549/8,554):
+  - 2,065 행은 "returns <식>, neither a constant nor this result" 부분을 가진다. 함수가 상수도 아니고 그 호출의 결과도 아닌 값을 돌려주는 경우다. 그 가운데 2,006 은 이 종류만 가진다.
+  - 392 행은 괄호 안의 `; ` 에서 잘린 꼬리(`and N more)`)를 가진다. 머리 줄의 분류(`relations.cpp` `sf_class`)가 까닭을 괄호를 보지 않고 `; ` 로 나누기 때문이다. 그 가운데 **333 행은 이 잘림 때문에만 `other` 로 세어진다**(앞 부분은 다른 종류, 대개 `outcome not enumerated`).
+  - 그 밖의 `other` 부분은 없다.
+- 이 세기의 결함은 머리 줄의 수에만 닿는다. 대안 줄과 정한 호출에는 닿지 않는다. 고치면 소스가 바뀌어 scratch 점검 빌드를 다시 해야 하므로 이 단계에서 고치지 않았다(20.8).
+
+### 20.6 공간 [M]
+- 시작: 1,204,490,240 B(`free_start_attempt6.txt`, 05:01Z).
+- 감시 기록 58 이 모두 `verdict=completed` 다(`scratch_guard6/`). 가장 낮은 값은 606,969,856 B 다(`k50`: 마지막 옵션 회차 비교의 facts 보기를 만들 때. 다섯 빌드의 scratch 출력 343 MB 와 점검 빌드 tree 가 함께 있었다). 하한을 넘지 않았다.
+- 크기: 시도 빌드 tree 283 MB, 점검 빌드 tree 283 MB(시험 실행 파일은 묶음마다 지움; 묶음 dip 242/244/170 MB), scratch 출력 343 MB.
+- scratch 를 모두 지운 뒤: 1,193,545,728 B(`free_end_attempt6.txt`, 05:43Z). 기록 디렉터리에 더한 것은 약 6.5 MB 다. 압축 대체는 쓰지 않았다.
+
+### 20.7 계획과 다르게 한 것
+- **개정 이름의 자리.** §15.2 는 "`relations rules revision 12`·`order rules revision 5` 를 바꾼다"고 적었다. 그러나 5x 의 형식 두 문장("없는 사실은 앞판의 바이트에 도구 줄만", "글은 도구 줄 말고 바뀌지 않는다")과 golden 시험의 `--pairs` 점검이 그것을 막는다. 그래서 형식대로 개정 14 와 8 에 자기 줄과 자리를 주고, 덧붙임 아홉째로 먼저 커밋했다. 기본 `rules` 줄과 order 첫 줄은 그대로다.
+- **부재 기원 fixture 의 꼴.** 첫 시도(검색 안의 이른 반환)는 부재 값을 정하지 않아 줄이 나오지 않았다. 감싸개 꼴로 바꿨다. 첫 시도의 출력은 `trials/fixture/` 에 남겼다.
+- **"전체 ctest".** 점검 빌드 tree 에서 271 가운데 84 를 돌렸다. 다시 링크되는 열넷의 시험, kz-static 을 부르는 시험, 정체성 시험이다. 나머지 187 은 다시 링크되지 않는 110 바이너리의 시험이다. scratch 에 모두 빌드할 공간이 없다(MC tree 4.1 GB). 그 결과는 선언된 빌드의 전체 ctest 에서 나온다.
+- **비교 보고의 첫 판.** `compare/` 는 절대 경로 줄을 경로마다 따로 묶었다. 경로 줄을 접는 판으로 `compare_2/` 를 새로 만들었고, 이 절은 그것을 쓴다. 첫 판의 보고와 표는 덮어쓰지 않고 남겼다. scratch 경로는 남긴 기록에서 `<scratch>` 로 썼다.
+- **계획 sidecar 의 사본**(`scratch6/plans_v4_ns2/`)은 scratch 경로를 `<scratch>` 로 바꿨다. 그래서 `s6_outputs.sha256` 의 값과 바이트가 다르다.
+- 이 단계는 다섯 빌드의 scratch 출력을 지웠다. sha256 은 모두 `s6_outputs.sha256` 에 남겼다. 선언된 빌드의 쌍둥이 비교는 이 sha256 과 하거나, 점검 빌드를 다시 해서 한다(20.8).
+
+### 20.8 열린 것과 다음 차례
+- **다음 차례**(§19.8 (8)의 뒤 절반):
+  1. 선언을 커밋한다. 허용 차이는 출력 종류·칸마다 `compare_2/` 를 `declared/` 로 삼는다. relink 는 열넷, 다시 링크되지 않아야 할 것은 110(빌드 바로 전의 sha256)이다. 첫 ctest 실패는 20.4 의 여섯 이름이고, 공간은 20.4 의 표다. 쌍둥이 비교를 sha256 으로 할지 정한다.
+  2. kz-static `bf2ec2ee` 의 사본을 만든다(xz, 왕복 점검, 등록부 행).
+  3. MC 빌드를 한다(`make kz-static`, `make all`).
+  4. 첫 ctest(`-V`)에서 여섯 실패를 확인하고 golden 일곱을 갱신하며 `scratch6/checkbuild/golden_scratch/` 와 대조한다.
+  5. 누적 점검을 한다: 바이트 동일성 목록, `ledger_check.sh`, `tools_check.sh --deep`, 전체 ctest, lint, `env` 단위 점검.
+  6. 다섯 빌드를 한 번 다시 뽑는다(마지막 옵션, 기본 경로; 절마다 sha256).
+  7. relations, 쌍 파일을 낸 order, 새 자료 파일 위의 개정 4·5 계획(대조 예산 사유는 "control runs of design rows")을 돌린다.
+  8. 끝 점검을 한다: 선언된 차이만 있는지, 두 C1 빌드의 키 글이 같은지, 두 C1 계획의 모든 계획된 행에 쌍 파일이 완전한지, 탐침을 도구 줄이 재현하는지, 새 줄마다 다섯 빌드에서 서는 곳과 빠지는 곳.
+  9. 결과 절을 쓴다.
+- **머리 줄의 `other` 세기**(20.5): 괄호 안의 `; ` 로 까닭을 나누어 c1 에서 333 행이 `other` 로 더 세어진다. 고칠지(소스 변경, 다시 scratch 점검)는 lead 의 판단을 기다린다. 고치지 않으면 선언된 빌드의 머리 줄은 이 수를 그대로 낸다.
+- **lead 의 판단 (a)**: 평가 갈래 Re 가 17 번 조건 (6)을 덮는지 본다(설명 스크립트 단계). 덮지 않으면 PI 의 열린 것이다.
+- **lead 의 판단 (b)**: 성공 경로 줄의 추출 틈. 열린 것이다.
+- 틀 없는 문맥(`plan_missing(no call site tells the context apart)`)은 fixture 에도 다섯 빌드에도 없다(§19.8). 이 단계에서도 시험하지 않았다.
+- `framework_namespaces2_*.txt` 머리의 "No tool reads this file yet"(§19.8)은 그대로다. 자료 단계의 일이다.
+- 다음은 그대로 기다린다.
+  - lead 의 판단: §18.8 의 배열 표시, key-clearing 이름 문제.
+  - PI 결정: C 라이브러리 항목(PI 결정 (결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함)).
+  - absence origins 의 이름 칸 문제.

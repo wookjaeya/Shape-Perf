@@ -21,7 +21,9 @@ import os
 import re
 import sys
 
-JUDGE_REV = "explain_judge.py revision 4, spec 11 fixes (2026-11-19)"
+JUDGE_REV = "explain_judge.py revision 4, spec 11 fixes and spec 11.5 item 1 (2026-11-19)"
+# the dump 1.5 LOSS kinds that lose no event (kairos/docs/event_semantics.md 13.5 (다), (바); spec 11.5 item 1): not a loss marker
+NONEVENT_LOSS = ("no-build-id", "object-table")
 READING_TAG = "4.2 의 읽기 갈래(PI 결정 전)"
 ITEMS = ["basis1_same_build", "basis2_ties", "basis3_absence_constant", "basis4_creator_success", "basis5_key_texts",
          "basis6_create_after_use", "ga_namespace_entry", "na_semantics", "na_bound", "da_no_name_mapping",
@@ -998,6 +1000,17 @@ def lifetime_complete(ctx, nsf):
     return True, "lifetime-complete yes; %d lifetime-end sites bound" % len(ls)
 
 
+def lifetime_reason(why):
+    """The reason of an instance link left unlinked by incomplete lifetime ends, by its cause (spec 11.5 item 1; the
+    need states of NEED_REASON): a loss marker, a lifetime-end site not bound, else the plan (lifetime-complete not yes,
+    no namespace-entry line)."""
+    if why.startswith("loss markers"):
+        return NEED_REASON["unknown-loss"]
+    if why.startswith("lifetime-end sites not bound"):
+        return NEED_REASON["unbound"]
+    return NEED_REASON["not-planned"]
+
+
 def ends_naming(ends, name, gen_id, t0, t1, own=None):
     """Lifetime ends in [t0, t1] that name the name text, the id, the whole table or every name of the kind."""
     hit, maybe = [], []
@@ -1495,7 +1508,7 @@ def explain_row(ctx, rowkey, consumer, br):
             outv = run.val(ui.after, "out0")
             g = [x for x in gens if x["id"] == outv]
             if not lc_ok:
-                u["instance_link"] = {"status": "unlinked", "reason": "plan_missing(need not planned)", "why": lc_why}
+                u["instance_link"] = {"status": "unlinked", "reason": lifetime_reason(lc_why), "why": lc_why}
             elif not g:
                 u["instance_link"] = {"status": "unlinked", "reason": "link_unlinked(no create of the id in the record)"}
             elif g[0]["start"] < ui.at.t and (g[0]["end"] is None or g[0]["end"] > ui.at.t):
@@ -2331,7 +2344,7 @@ def main(argv):
     if run is not None:
         d = runN["dump"]
         rx = d["runx"]
-        loss_any = bool(d["loss"]) or any(int(rx.get(k, "0") or 0) for k in ("pool_dropped", "boot_bytes_dropped")) or \
+        loss_any = any((ln.split() + ["", ""])[1] not in NONEVENT_LOSS for ln in d["loss"]) or any(int(rx.get(k, "0") or 0) for k in ("pool_dropped", "boot_bytes_dropped")) or \
             any(int(a.get("overflow", "0") or 0) or int(a.get("partial", "0") or 0) or int(a.get("dropped_bytes", "0") or 0)
                 for a in d["actors"].values()) or int(d["format"].get("partial", "0") or 0) > 0
     mism = N["mismatch"]

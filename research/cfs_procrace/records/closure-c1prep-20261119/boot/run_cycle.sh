@@ -4,16 +4,24 @@
 # the verify step first, the eval step after explain, the named-calls input of explain, the uses list of summary.  Revised again
 # before any boot (results 26.4): the declaration it verifies is boot/declaration2.tsv (it supersedes declaration.tsv of
 # 860c2cd, kept unchanged), and the eval and expect steps read expect/expect_c1_2.tsv (the expectations rewritten from
-# the rules; expect_c1.tsv is kept unchanged and read by no step).  BUILD c1_pre_tx | c1_post_tx; N is the boot's number: 1, then 2-5 only
+# the rules; expect_c1.tsv is kept unchanged and read by no step).  Revised again before any boot (results 26.5; evaluation
+# protocol 14.13 items 8-9; spec 11.5 item 4): the declaration it verifies is boot/declaration3.tsv (it supersedes
+# declaration2.tsv, kept unchanged), whose count rows give the number of regular files under a directory; the boot step
+# checks that the declaration and this script are committed and runs the verify step again right before the boot
+# command; control and gate name every loss record of the dump by kind and count.  BUILD c1_pre_tx | c1_post_tx; N is the boot's number: 1, then 2-5 only
 # after boot 1 (or its one retry 1r) passed the gate, or 1r only after boot 1 failed it and the cause is committed in
 # <build>/addendum_1r.txt.  Every output directory is new; nothing is replaced.  Logs and small records go into
 # <build>/boot<N>/ beside this script; large outputs into /home/user/work/redesign/obs1/c1cyc_<s>_<what><N>.
-#   verify    re-hash every sha256 row and re-read every build-id row of boot/declaration2.tsv (readelf -n, as when the
-#             declaration was written; a plan-id row against its plan.side) into <build>/boot<N>/verify.txt (kz-verify 1);
-#             rc 0 when no row differs and none is missing, 1 otherwise, 64 on usage
+#   verify    re-hash every sha256 row and re-read every build-id row of boot/declaration3.tsv (readelf -n, as when the
+#             declaration was written; a plan-id row against its plan.side; a count row: the regular files under the
+#             directory) into <build>/boot<N>/verify.txt (kz-verify 1); rc 0 when no row differs and none is missing, 1
+#             otherwise, 64 on usage
 #   boot      the natural boot (run_gi_c1.sh, tx records, rx off) of the derived build with kzgcc 0.5; only after a clean
-#             verify.txt of the same N whose head names the sha256 of the declaration as it is now (else rc 1, no boot)
-#   control   control record check of the dump text (kz-rt-dump check line), record kinds, losses
+#             verify.txt of the same N whose head names the sha256 of the declaration as it is now, with the declaration
+#             and this script in git and not changed, and after a verify of the same N run again by this step is clean
+#             (else rc 1, no boot)
+#   control   control record check of the dump text (kz-rt-dump check line), record kinds, loss fields, loss records by
+#             kind and count
 #   convert   MC kz convert of the dump with the plan and the binding file, the B' basis
 #   kzt-text  kz-dump text of run.kzt and the facts header
 #   chain     chain_check.py (manifest, executable, facts_build; same_build_object per object)
@@ -37,7 +45,7 @@ GUARD=$R/env/tools/space_guard.sh
 EX=$R/env/obs1
 SEM=$R/kairos/semantics
 O=${RUN_CYCLE_OBS:-/home/user/work/redesign/obs1}
-DECL=$HERE/declaration2.tsv
+DECL=$HERE/declaration3.tsv
 MC=/home/user/work/merge-check/kz-llvm
 STEP=${1:?usage: run_cycle.sh STEP BUILD N}; B=${2:?build}; N=${3:-}
 case "$B" in c1_pre_tx) S=pre; CFG=pre ;; c1_post_tx) S=post; CFG=post ;; *) echo "run_cycle.sh: BUILD is c1_pre_tx or c1_post_tx" >&2; exit 64 ;; esac
@@ -77,7 +85,9 @@ case "$STEP" in
   verify)
     [ -f "$DECL" ] || { echo "run_cycle.sh: no declaration $DECL" >&2; exit 64; }
     mkdir -p "$L" || exit 2
-    [ ! -e "$L/verify.txt" ] || mv "$L/verify.txt" "$L/verify.$(date -u +%Y%m%dT%H%M%SZ).txt"
+    if [ -e "$L/verify.txt" ]; then   # keep the earlier output under a new name (nanoseconds: two verifies in one second, results 26.5)
+      kept=$L/verify.$(date -u +%Y%m%dT%H%M%S.%NZ).txt; [ ! -e "$kept" ] || kept=$kept.$$; mv "$L/verify.txt" "$kept" || exit 2
+    fi
     { echo "kz-verify 1"
       echo "declaration sha256=$(sha256sum < "$DECL" | cut -c1-64) path=$DECL"
       echo "measured $(date -u +%FT%TZ)"
@@ -91,6 +101,8 @@ case "$STEP" in
           sp=$(awk -F'\t' -v b="$bld" '$1=="plan" && $2==b && $3=="plan.side" {print $5}' "$DECL")
           f=$(resolve "$sp"); got=$( [ -f "$f" ] && sed -n 's/^plan-id //p' "$f" | head -1 )
           [ -f "$f" ] || got=missing
+        elif [ "$kind" = count ]; then   # the number of regular files under a directory (results 26.5)
+          f=$(resolve "$path"); if [ -d "$f" ]; then got=$(find "$f" -type f | wc -l); else got=missing; fi
         else
           f=$(resolve "$path")
           if [ ! -f "$f" ]; then got=missing
@@ -109,6 +121,11 @@ case "$STEP" in
   boot)
     allowed || { echo "run_cycle.sh: boot $N of $B is not allowed by the boot-number rule (results 25.12)" >&2; exit 2; }
     verify_clean || { echo "run_cycle.sh: no clean verify.txt of boot $N naming the declaration as it is now: not booting (results 26.0 (h))" >&2; exit 1; }
+    # results 26.5 (protocol 14.13 item 9): the declaration and this script committed and unchanged, then verify again here
+    git -C "$R" ls-files --error-unmatch "$DECL" "$HERE/run_cycle.sh" > /dev/null 2>&1 && [ -z "$(git -C "$R" status --porcelain -- "$DECL" "$HERE/run_cycle.sh")" ] \
+      || { echo "run_cycle.sh: the declaration or run_cycle.sh is not committed or has uncommitted changes: not booting (results 26.5)" >&2; exit 1; }
+    bash "$HERE/run_cycle.sh" verify "$B" "$N" > "$L/verify_at_boot.txt" 2>&1 && verify_clean \
+      || { echo "run_cycle.sh: the verify step run again before the boot is not clean: not booting (results 26.5)" >&2; exit 1; }
     [ ! -e "$RUND" ] || { echo "run_cycle.sh: $RUND exists; one boot per number" >&2; exit 2; }
     mkdir -p "$L" && mkdir "$RUND" || exit 2
     if [ -n "${RUN_CYCLE_BOOT_CMD:-}" ]; then
@@ -124,6 +141,7 @@ case "$STEP" in
       echo "record kinds (first word, count):"; awk '{print $1}' "$T" | sort | uniq -c | sed 's/^/  /'
       grep -E '^run abi|^runx |^caps|^buildid ' "$T" | sed 's/^/  /'
       echo "loss fields not 0 (kind=value, count): $(grep -oE '\b(overflow|partial|dropped_bytes|pool_dropped|boot_bytes_dropped)=[1-9][0-9]*' "$T" | sort | uniq -c | tr -s ' ' | tr '\n' ';')"
+      echo "loss records by kind (lines, sum of count=; no-build-id and object-table lose no event, event_semantics 13.5): $(awk '$1=="loss"{n=0; for(i=3;i<=NF;i++) if ($i ~ /^count=/) n=substr($i,7); c[$2]+=n; l[$2]++} END{for (k in c) printf "%s lines=%d count=%d\n", k, l[k], c[k]}' "$T" | sort | tr '\n' ';')"
       echo "pool overflow fields not 0: $(grep -oE '\b(overflow|pool_dropped)=[1-9][0-9]*' "$T" | wc -l)"
       echo "kz-rt-dump check summary: $(grep -E '^check ' "$T" | tail -1)"
     } > "$L/control_check.txt"; cat "$L/control_check.txt" ;;
@@ -156,9 +174,10 @@ case "$STEP" in
     c2=$(grep -c '^pool overflow fields not 0: 0$' "$L/control_check.txt")
     c3=$(grep -cP '^chain\tconfirmed\t' "$L/chain.txt")
     lo=$(sed -n 's/^loss fields not 0 (kind=value, count): //p' "$L/control_check.txt")
+    lr=$(sed -n 's/^loss records by kind ([^)]*): //p' "$L/control_check.txt")
     { if [ "$c1" = 1 ] && [ "$c2" = 1 ] && [ "$c3" = 1 ]; then echo "gate PASS"; else
         echo "gate FAIL control_ok=$c1 no_pool_overflow=$c2 chain_confirmed=$c3"; fi
-      echo "losses: ${lo:-none}"
+      echo "losses: fields ${lo:-none}; records ${lr:-none}"
       echo "inputs: control_check.txt $(sha256sum < "$L/control_check.txt" | cut -c1-16) chain.txt $(sha256sum < "$L/chain.txt" | cut -c1-16)"
     } > "$L/gate.txt"; cat "$L/gate.txt" ;;
   explain)
@@ -172,7 +191,7 @@ case "$STEP" in
       --dump-text "$RUN/tx.dump.txt" --run-meta "$RUN/run.meta" --chain "$L/chain.txt" --stop-eval "$L/stop_eval.tsv" \
       --startup-script "$RUN/inst/tx/cf/cfe_es_startup.scr" --instance-list "$IL" \
       --branches "$D/candidates/branches_16.txt" --candidates "$D/candidates/candidates.tsv" --named-calls "$D/candidates/named_calls.tsv" \
-      --label-record "C1 cycle boot $N of $B (results 26.4, boot/declaration2.tsv)" \
+      --label-record "C1 cycle boot $N of $B (results 26.5, boot/declaration3.tsv)" \
       --vocabulary "$R/kairos/tests/static/data/reason_vocabulary.txt" --out "$XO" > "$L/explain.txt" 2>&1; rc=$?
     echo "rc=$rc" >> "$L/explain.txt"; tail -20 "$L/explain.txt"; exit $rc ;;
   eval)

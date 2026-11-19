@@ -188,6 +188,19 @@ def case(tag, mod, checks):
         ok("%s: %s" % (tag, name), c, [x for x in rows if x["result"] in ("fail", "not_evaluable", "met", "unmet", "not_counted")][:4])
 
 
+MAIN = "branch D1-R0 main (declared before the boot: D1/R0): "
+AUX = "branch D2-R0 auxiliary (data D2, readings R0): "
+
+
+def tail_line(lines, prefix, what):
+    return next((ln for ln in lines if ln.startswith(prefix + what)), "")
+
+
+def boot_pass(line):
+    m = re.search(r"boot: pass (\d+) / (\d+) \(fail (\d+), not evaluable (\d+)\)", line)
+    return tuple(int(x) for x in m.groups()) if m else None
+
+
 def only_fail(check, branch=None, key=None):
     """The check fails on the selected unit and no other check fails."""
     return lambda rows, lines: (any(x["result"] == "fail" for x in sel(rows, check, branch, key))
@@ -214,8 +227,15 @@ def main():
          lambda rows, lines: {x["result"] for x in sel(rows, "expect_discriminate", key=K1)} == {"met"} and {x["result"] for x in sel(rows, "expect_discriminate", key=K2)} == {"not_counted"}),
         ("precision and recall undefined (no reader)", lambda rows, lines: {x["result"] for x in sel(rows, "precision") + sel(rows, "in_plan_recall")} == {"undefined(no reader)"}),
         ("undetermined split by kind", lambda rows, lines: any("structure 2" in x["note"] and "static input 2" in x["note"] for x in sel(rows, "undetermined_split", "D1-R0"))),
-        ("tail: falsifiers and expect_safe by class, expect_discriminate met / counted", lambda rows, lines: any(ln.startswith("falsifiers F1-F10 by class") for ln in lines)
-         and any(ln.startswith("expect_safe s1-s4 by class") for ln in lines) and "expect_discriminate: met 2 / counted 2 (unmet 0; not_counted 2); by class: boot 0, static 4, format 0" in lines),
+        ("tail per branch (protocol 14.13 item 3): the main D1-R0 block first, the auxiliary D2-R0 block named, F8 (a) on its own line, nothing pooled",
+         lambda rows, lines: [ln for ln in lines if ln.startswith("branch ")][0].startswith(MAIN + "falsifiers F1-F10 by class")
+         and MAIN + "expect_discriminate: met 1 / counted 1 (unmet 0; not_counted 1); by class: boot 0, static 2, format 0" in lines
+         and AUX + "expect_discriminate: met 1 / counted 1 (unmet 0; not_counted 1); by class: boot 0, static 2, format 0" in lines
+         and any(ln.startswith(AUX + "expect_safe s1-s4 by class") for ln in lines)
+         and any(ln.startswith("branch * no branch (the pair file against the relations rows, F8 (a)): falsifiers") for ln in lines)
+         and not any(ln.startswith(("falsifiers F1-F10", "expect_safe s1-s4", "expect_discriminate:")) for ln in lines)),
+        ("count lines carry the branch", lambda rows, lines: all(len(ln.split("\t")) == 6 for ln in lines if ln.startswith("count\t"))),
+        ("F4 not evaluable on records with no found use (protocol 14.13 item 4)", lambda rows, lines: {x["result"] for x in sel(rows, "F4")} == {"not_evaluable"}),
     ])
 
     def recs(W, br, i):
@@ -249,10 +269,38 @@ def main():
         recs(W, "D2-R0", 0)["events"]["lifetime_ends"] = [{"t_ms": 50.0, "names": "table", "form": "clear-table"}]
     case("F3-end", f3_end, [("a lifetime end between: F3 passes", lambda rows, lines: not [x for x in rows if x["result"] == "fail"])])
 
+    def f3_slot(W):
+        f3(W)
+        recs(W, "D2-R0", 0)["events"]["lifetime_ends"] = [{"t_ms": 50.0, "names": "slot", "form": "clear-slot"}]
+    case("F3-slot", f3_slot, [("a slot clear alone between: F3 passes and the note names the create as excused by a slot clear only (weak)",
+                               lambda rows, lines: {x["result"] for x in sel(rows, "F3", "D2-R0", K1)} == {"pass"}
+                               and all("slot clear only (weak" in x["note"] for x in sel(rows, "F3", "D2-R0", K1)))])
+    case("F3-end-note", f3_end, [("a table clear between: the note names the create as excused by a lifetime end", lambda rows, lines: all(
+        "excused by a lifetime end:" in x["note"] and "slot clear only" not in x["note"] for x in sel(rows, "F3", "D2-R0", K1)))])
+    case("tail-branch", f3, [("a failure in D2-R0 only: the main line counts D1-R0 units and fails 0, the D2-R0 auxiliary line fails 1",
+                              lambda rows, lines: boot_pass(tail_line(lines, MAIN, "falsifiers"))[2] == 0
+                              and boot_pass(tail_line(lines, AUX, "falsifiers"))[2] == 1
+                              and sum(boot_pass(tail_line(lines, MAIN, "falsifiers"))[1:])
+                              == sum(1 for x in rows if x["branch"] == "D1-R0" and x["class"] == "boot" and re.fullmatch(r"F\d+[ab]?", x["check"])))])
+
     def f3_ne(W):
         f3(W)
         W["rel"]["C1"][3] = "      callee-check: Ns_Make returns 0 [OK]"
     case("F3-novalue", f3_ne, [("no success path line: F3 not evaluable", lambda rows, lines: any(x["result"] == "not_evaluable" for x in sel(rows, "F3", "D2-R0", K1)))])
+    # protocol 14.13 item 4: a unit with no event is not evaluable, never a boot pass
+    case("F3-pathB", lambda W: recs(W, "D2-R0", 0).__setitem__("path", "B"),
+         [("a path B record: F3 not evaluable (8.2 applies to path A only)", lambda rows, lines: [(x["result"], x["class"]) for x in sel(rows, "F3", "D2-R0", K1)]
+           == [("not_evaluable", "boot")] and "not a path A record" in sel(rows, "F3", "D2-R0", K1)[0]["note"]),
+          ("the auxiliary line's boot pass count is the boot pass lines of its branch", lambda rows, lines: boot_pass(tail_line(lines, AUX, "falsifiers"))[0]
+           == sum(1 for x in rows if x["branch"] == "D2-R0" and x["class"] == "boot" and x["result"] == "pass" and re.fullmatch(r"F\d+[ab]?", x["check"])))])
+
+    def found_only(W):
+        recs(W, "D2-R0", 0)["order"]["use_events"][0].update(outcome="found", out={"read": True, "value": "0x50001"}, status_value="0x0")
+    case("F3-foundonly", found_only, [("a path A record with only a found use: F3 not evaluable, F4 counted", lambda rows, lines: {x["result"] for x in sel(rows, "F3", "D2-R0", K1)}
+                                       == {"not_evaluable"} and {x["result"] for x in sel(rows, "F4", "D2-R0", K1)} == {"fail"})])
+    case("noevents", lambda W: recs(W, "D2-R0", 1)["order"].__setitem__("use_events", []),
+         [("a record with no use event: F3, F4 and F9 not evaluable", lambda rows, lines: all({x["result"] for x in sel(rows, c, "D2-R0", K2)} == {"not_evaluable"}
+                                                                                           for c in ("F3", "F4", "F9")))])
     # F4
     def f4(W):
         u = recs(W, "D2-R0", 1)["order"]["use_events"][0]
@@ -323,10 +371,37 @@ def main():
     def ed_found(W):
         u = recs(W, "D2-R0", 0)["order"]["use_events"][0]
         u.update(outcome="found", out={"read": True, "value": "0x40001"}, instance_link={"status": "unlinked", "reason": "link_unlinked(no create of the id in the record)"})
-    case("ED-found", ed_found, [("a found use without an instance link: unmet", lambda rows, lines: {x["result"] for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {"unmet"}),
-                                ("its class static (no generation can form)", lambda rows, lines: {x["class"] for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {"static"})])
-    case("ED-found-boot", lambda W: (ed_found(W), held_sp(W)), [("with a held success path line its class is boot", lambda rows, lines: {
-        x["class"] for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {"boot"})])
+    case("ED-found", ed_found, [("a found use on a row with requirements (1) and (2): still met (rule (3) only on rows without them, protocol 14.13 item 1)",
+                                 lambda rows, lines: {x["result"] for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {"met"}),
+                                ("its class static (no context line, one alternatives context)", lambda rows, lines: {x["class"] for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {"static"})])
+    case("ED-found-heldsp", lambda W: (ed_found(W), held_sp(W)), [("(1) and (2) with a held success path line: still static (the requirements are static lines)", lambda rows, lines: {
+        (x["result"], x["class"]) for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {("met", "static")})])
+
+    def ed3_found(W):
+        ed_none(W)
+        ed_found(W)
+    case("ED-3-found", ed3_found, [("rule (3) on a row with no (1) or (2): a found use with no generation is unmet, static", lambda rows, lines: {
+        (x["result"], x["class"]) for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {("unmet", "static")}
+        and all("rule (3): required: (3) use 0" in x["note"] for x in sel(rows, "expect_discriminate", "D2-R0", K1)))])
+
+    def ed3_boot(W):
+        ed_none(W)
+        held_sp(W)
+        recs(W, "D2-R0", 0)["order"]["use_events"][0].update(outcome="found", out={"read": True, "value": "0x40001"}, instance_link={"status": "linked", "id": "0x40001"})
+    case("ED-3-boot", ed3_boot, [("rule (3) with a held success path line and a linked found use: met, boot", lambda rows, lines: {
+        (x["result"], x["class"]) for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {("met", "boot")})])
+    case("ED-3-boot-unmet", lambda W: (ed3_found(W), held_sp(W)), [("rule (3) with a held success path line and an unlinked found use: unmet, boot", lambda rows, lines: {
+        (x["result"], x["class"]) for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {("unmet", "boot")})])
+
+    def ed_ctx(W):   # a control row with two context lines: the record's use is in the other context
+        W["sidecar"] += ['context row=%s id=1 frame=60,61 chain="p"' % K1, 'context row=%s id=2 frame=62,63 chain="q"' % K1]
+        r = recs(W, "D2-R0", 0)
+        r["order"]["use_events"][0]["context"] = "2"
+        r["use_cond"]["branch_iii"] = [{"status": "not_established", "why": "no alternatives line of context 2", "context": "2", "sources": [], "depends_on": []}]
+    case("ED-ctx", ed_ctx, [("(1) on a row whose (iii) follows the record's contexts: unmet when the found line's context has no use, boot", lambda rows, lines: {
+        (x["result"], x["class"]) for x in sel(rows, "expect_discriminate", "D2-R0", K1)} == {("unmet", "boot")}),
+                            ("the same row in a branch whose record carries the found context: met, boot", lambda rows, lines: {
+        (x["result"], x["class"]) for x in sel(rows, "expect_discriminate", "D1-R0", K1)} == {("met", "boot")})])
     # precision and in-plan recall
     def observed(W):
         for br in ("D1-R0", "D2-R0"):
@@ -382,7 +457,7 @@ def main():
     ok("negative control: a copy that writes beside its output is caught", g3.returncode != 0 and "wrote" in g3.stderr + g3.stdout, (g3.stdout + g3.stderr)[-300:])
     # the form check: a broken output is refused by the script's own check (tail counts)
     rc, rows, lines, log, a = run(world(), "form")
-    ok("form: the written file says form ok and its tail counts equal its lines", "form ok" in lines and sum(int(ln.split("\t")[4]) for ln in lines if ln.startswith("count\t")) == len(rows))
+    ok("form: the written file says form ok and its tail counts equal its lines", "form ok" in lines and sum(int(ln.split("\t")[5]) for ln in lines if ln.startswith("count\t")) == len(rows))
     n_pass = sum(1 for _, c in RESULTS if c)
     print("eval fixtures: %d checks, %d passed, %d failed" % (len(RESULTS), n_pass, len(RESULTS) - n_pass))
     return 0 if n_pass == len(RESULTS) else 1

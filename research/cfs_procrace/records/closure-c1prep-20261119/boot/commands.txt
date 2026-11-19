@@ -1,9 +1,11 @@
 # the exact boot commands of the C1 cycle (results 25.12; revised before any boot by results 26.0 (e), (h) and spec 11
 # items 14-15), in order; NOT RUN by the step that wrote them.  The boot declaration they are read against is
-# boot/declaration2.tsv (results 26.4; it supersedes declaration.tsv of 860c2cd); the verify step re-measures it before
-# every boot and the boot step refuses without a clean verify.txt of its N that names it as it is.  Before boot 1 of each
-# build: measure the free space (df -B1 /) against the need written in declaration2.tsv; below it, do not boot (results
-# 26.0 (k): ask the PI).
+# boot/declaration3.tsv (results 26.5; it supersedes declaration2.tsv of 549dc94, which superseded declaration.tsv of
+# 860c2cd; both kept); the verify step re-measures it before every boot and the boot step refuses without a clean
+# verify.txt of its N that names it as it is; the boot step itself also refuses unless declaration3.tsv and run_cycle.sh
+# are committed and unchanged, and runs the verify step again right before the boot command (evaluation protocol 14.13
+# item 9).  Before boot 1 of each build: measure the free space (df -B1 /) against the need written in declaration3.tsv;
+# below it, do not boot (results 26.0 (카): ask the PI).
 # B in c1_pre_tx c1_post_tx (each build on its own; c1_pre_tx first). Root is needed for the boot step (run_gi_c1.sh).
 # boot 1 (verify is the first command of each build and the step before each boot N):
 bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh verify $B 1

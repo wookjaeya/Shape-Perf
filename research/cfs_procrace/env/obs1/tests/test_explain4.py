@@ -737,11 +737,11 @@ def main():
     # 12.3 item 3: a named call with no entry, a call with records that are not unverified, an entry not read, address uses
     PART = "D2_byte-string_comparison_data_function-R0"
 
-    def noentry(W):
-        W["cands"] = [c for c in W["cands"] if c[1] != "memchr"]
-        W["named"]["memchr"] = ("length-call", "0", "0", "-")
+    def noentry(W):   # spec 11.5 item 2: a synthetic length call with no record, in no candidate line
+        W["entry"]["length-call"] = "zlen@lib/ns.c:11"
+        W["named"]["zlen"] = ("length-call", "0", "0", "-")
         W["admitted"] = [("D2", None, {}), ("D2[byte-string comparison,data function]", ["byte-string comparison", "data function"], {})]
-    NOE = "link_unlinked(name binding: no entry: memchr)"
+    NOE = "link_unlinked(name binding: no entry: zlen)"
     for br_ in ("D1-R0", "D2-R0", PART, "D2-all"):
         FX["noentry-" + br_], _ = case("noentry-" + br_, noentry, [("(na) semantics missing, sub-reason no entry", lambda r, rc, o: item(r, "na_semantics") == ("missing", NOE)),
                                         ("the ground names the named-calls line", lambda r, rc, o: any(isinstance(g, dict) and g["file"][0] == "named.tsv"
@@ -749,10 +749,25 @@ def main():
              branch=br_)
 
     def notunver(W):
-        W["cands"] = [c for c in W["cands"] if c[1] != "memchr"]
-        W["named"]["memchr"] = ("length-call", "2", "0", "P0")
+        W["entry"]["length-call"] = "zlen@lib/ns.c:11"
+        W["named"]["zlen"] = ("length-call", "2", "0", "P0")
     case("named-not-unverified", notunver, [("a call with records none of them unverified: (na) held, the pair bound", lambda r, rc, o: pair0(r)["missing_items"] == []
                                               and pair0(r)["result"] == "bound")])
+    def noentry_cmp(W):   # a compare call with no record
+        W["entry"]["compare-call"] = "zcmp@lib/ns.c:12"
+        W["named"]["zcmp"] = ("compare-call", "0", "0", "-")
+    for br_ in ("D1-R0", "D2-R0"):
+        case("noentry-cmp-" + br_, noentry_cmp, [("a compare call with no entry: (na) semantics missing, sub-reason no entry: zcmp", lambda r, rc, o: item(r, "na_semantics")
+                                                   == ("missing", "link_unlinked(name binding: no entry: zcmp)")),
+                                                  ("its ground is the named-calls line", lambda r, rc, o: any(isinstance(g, dict) and g["file"][0] == "named.tsv"
+                                                                                                         and "zcmp" in g["text"] for g in pair0(r)["items"]["na_semantics"]["grounds"]))],
+             branch=br_)
+
+    def noentry_list(W):   # two calls in one field, one of them with no record
+        W["entry"]["copy-call"] = "zput@lib/ns.c:60,strncpy@lib/ns.c:60"
+        W["named"]["zput"] = ("copy-call", "0", "0", "-")
+    case("noentry-list", noentry_list, [("a comma list with one call of no entry: (na) missing in D2, naming only that call", lambda r, rc, o: item(r, "na_semantics")
+                                         == ("missing", "link_unlinked(name binding: no entry: zput)") and pair0(r)["missing_items"] == ["na_semantics"])])
     case("entry-not-read", lambda W: W["rel"].__setitem__("alt1", W["rel"]["alt1"].replace("P0-unverified(xexit)", "P0-unverified(yexit)")),
          [("a rests-on entry in neither file: (iii) not established, its state not read", lambda r, rc, o: r["use_cond"]["branch_iii"][0]["status"] == "not_established"
            and "the state of the entry of yexit is not read" in r["use_cond"]["branch_iii"][0]["why"])])
@@ -831,6 +846,25 @@ def main():
                                  and r["use_cond"]["branch_i"]["depends_on"] == ["\t".join(CR)])])
     case("dep-none", lambda W: None, [("no listed entry named: every element and (da) depends_on none", lambda r, rc, o: all(
         r["use_cond"][k]["depends_on"] == [] for k in ("callee_check", "reach", "writers", "branch_i")) and pair0(r)["items"]["da_no_name_mapping"]["depends_on"] == [])])
+
+    # 12.6 spec 11.5 item 1: the dump 1.5 kinds no-build-id and object-table lose no event; the link reason follows the cause
+    noloss = lambda r: '"unknown-loss"' not in json.dumps(r)
+    case("loss-nobuildid", lambda W: W["tok"].extend(["loss no-build-id actor=- key=9 count=1", "loss object-table actor=- key=0 count=2"]),
+         [("only the bookkeeping kinds: no loss marker, the use unmet as without them", lambda r, rc, o: use0(r)["name_state"] == "unmet" and noloss(r)),
+          ("(ma) held, the pair bound", lambda r, rc, o: pair0(r)["missing_items"] == [] and pair0(r)["result"] == "bound")])
+    case("loss-event", lambda W: W["tok"].append("loss after-stop actor=2 key=0 count=1"),
+         [("an event loss: the name state undecided on the loss markers", lambda r, rc, o: use0(r)["name_state"] == "undecided(lifetime ends not complete: loss markers in the record)"),
+          ("needs not reached become unknown-loss", lambda r, rc, o: not noloss(r)),
+          ("(ma) missing", lambda r, rc, o: "ma_no_lifetime_end" in pair0(r)["missing_items"])])
+    case("found-loss", lambda W: (found(W), W["tok"].append("loss after-stop actor=2 key=0 count=1")),
+         [("a found use under an event loss: unlinked, record_insufficient(loss marker)", lambda r, rc, o: use0(r)["instance_link"] == {
+             "status": "unlinked", "reason": "record_insufficient(loss marker)", "why": "loss markers in the record"})])
+    case("found-nobuildid", lambda W: (found(W), W["tok"].append("loss no-build-id actor=- key=1 count=1")),
+         [("a found use with only a no-build-id loss line: linked on its open generation as without it", lambda r, rc, o: use0(r)["instance_link"]["status"] == "linked"
+           and use0(r)["name_state"] == "met")])
+    case("found-unbound-end", lambda W: (found(W), W["unbound"].add(30)),
+         [("a lifetime-end site not bound: unlinked, record_insufficient(site not bound in the build)", lambda r, rc, o: use0(r)["instance_link"] == {
+             "status": "unlinked", "reason": "record_insufficient(site not bound in the build)", "why": "lifetime-end sites not bound: 30"})])
 
     # 10. format checks: break each of 9-17 in a good record; --check refuses every one
     good = rec(os.path.join(WORK, "001_base", "out"), "D2-R0")

@@ -17,12 +17,18 @@ the sidecar, requirements by the static lines of the relations text.  Standard l
 
 Output kz-eval 1: one line per unit of each check (check, class, branch, build, row_label, row_key, use, result, ground,
 note); class is boot (a boot can make it fail), static (the static inputs fix it), format (only a script error can
-make it fail) by the rules of spec 11.4 (evaluation protocol 14.6); result pass / fail / not_evaluable for a check,
-met / unmet / not_counted for expect_discriminate, a value or undefined(...) for a number.  The tail counts check x
-class x result, the falsifiers and expect_safe by class (only the boot class is a falsifier or safety result; static,
-format and not evaluable apart), expect_discriminate met / counted, precision, in-plan recall and the undetermined
-split.  The form is checked at the end (every unit has its line, the class and result values are in their sets, the
-tail counts equal the lines); rc 0 written and checked, 3 the form check failed, 2 an input not of its form, 64 usage.
+make it fail) by the rules of spec 11.4 and 11.5 (evaluation protocol 14.6, 14.13); result pass / fail / not_evaluable
+for a check (a unit with no event to check is not_evaluable, never pass: protocol 14.13 item 4), met / unmet /
+not_counted for expect_discriminate, a value or undefined(...) for a number.  The tail (protocol 14.13 item 3) counts
+check x class x result x branch, then per branch -- D1-R0 first, labelled main (declared before the boot: D1/R0), every
+other branch auxiliary with its data branch and readings, the branchless units on their own line -- the falsifiers
+and expect_safe by class (only the boot class is a falsifier or safety result; static, format and not evaluable apart)
+and expect_discriminate met / counted; nothing is pooled across branches; then precision, in-plan recall and the
+undetermined split per branch.  The form is checked at the end (every unit has its line, the class and result values
+are in their sets, the tail counts equal the lines); rc 0 written and checked, 3 the form check failed, 2 an input not
+of its form, 64 usage.  Revision 2 (spec 11.5 item 3): expect_discriminate rule (3) only on a control row with no
+requirement (1) or (2), and its class from the static inputs; the tail per branch; units with no event not_evaluable;
+F3 notes the creates a lifetime end excused, and those a slot clear alone excused.
 """
 import argparse
 import hashlib
@@ -31,7 +37,8 @@ import os
 import re
 import sys
 
-EVAL_REV = "explain_eval.py revision 1 (2026-11-19)"
+EVAL_REV = "explain_eval.py revision 2 (2026-11-19)"
+MAIN = "D1-R0"   # the main result, declared before the boot (evaluation protocol 14.1; a constant, not a row or a key)
 INPUTS = []
 CLASSES = ("boot", "static", "format")
 RESULTS = ("pass", "fail", "not_evaluable", "met", "unmet", "not_counted")
@@ -394,7 +401,7 @@ def main(argv):
                         continue
                     n3 += 1
                     ut = t_of(u, "at_call")
-                    hit, ne = [], []
+                    hit, ne, exc, weak = [], [], [], []
                     for c in pe:
                         if c.get("other_kind") == "writer":
                             continue
@@ -412,7 +419,10 @@ def main(argv):
                         if c.get("status_value") != hx(sp["value"]):
                             continue
                         ids = {(c.get("out") or {}).get("value"), (c.get("out") or {}).get("raw")} - {None}
-                        if ends_between(r, ct, ut, u["key"]["text"], ids):
+                        eb_ = ends_between(r, ct, ut, u["key"]["text"], ids)
+                        if eb_:   # excused by a lifetime end between (judgement rules 8.13 item 13); a slot clear alone is weak
+                            (weak if all(x.get("names") == "slot" for x in eb_) else exc).append(
+                                "%s (%d end(s): %s)" % (c.get("call"), len(eb_), ",".join(sorted({str(x.get("names")) for x in eb_}))))
                             continue
                         hit.append("%s (%s)" % (c.get("call"), S["ref"](sp["n"])))
                     if hit:
@@ -422,9 +432,16 @@ def main(argv):
                         emit("F3", "boot", br, key, i, "not_evaluable", fn, "the success value of %s is not read (no success path line)" % "; ".join(ne),
                              unit=("F3", br, fn))
                     else:
-                        emit("F3", "boot", br, key, i, "pass", fn, "no earlier finished successful create of the same kind and text", unit=("F3", br, fn))
-            if n3 == 0:
-                emit("F3", "boot", br, key, "*", "pass", fn, "no absent use event in this record", unit=("F3", br, fn))
+                        emit("F3", "boot", br, key, i, "pass", fn,
+                             ("no earlier finished successful create of the same kind and text" if not (exc or weak) else
+                              "every earlier finished successful create of the same kind and text has a lifetime end before the use")
+                             + ("; excused by a lifetime end: " + "; ".join(exc) if exc else "")
+                             + ("; excused by a slot clear only (weak: judgement rules 8.13 item 13): " + "; ".join(weak) if weak else ""),
+                             unit=("F3", br, fn))
+            if r.get("path") != "A":
+                emit("F3", "boot", br, key, "*", "not_evaluable", fn, "not a path A record (judgement rules 8.2 applies to path A only)", unit=("F3", br, fn))
+            elif n3 == 0:
+                emit("F3", "boot", br, key, "*", "not_evaluable", fn, "no absent use event in this record", unit=("F3", br, fn))
             # F4 (found uses)
             expected.add(("F4", br, fn))
             n4 = 0
@@ -440,7 +457,7 @@ def main(argv):
                      ("create of the id %s recorded: %s" % (fid, cs[0].get("call"))) if cs else "no recorded create whose out value is the found id %s" % fid,
                      unit=("F4", br, fn))
             if n4 == 0:
-                emit("F4", "boot", br, key, "*", "pass", fn, "no found use event in this record", unit=("F4", br, fn))
+                emit("F4", "boot", br, key, "*", "not_evaluable", fn, "no found use event in this record", unit=("F4", br, fn))
             # F5, s2-s4, expect_discriminate (control rows)
             if key in control:
                 expected.add(("F5", br, fn))
@@ -496,7 +513,7 @@ def main(argv):
                      unit=("s4", br, fn))
                 # expect_discriminate (evaluation protocol 14.7 rules (1)-(3))
                 expected.add(("ED", br, fn))
-                req, got, cls = [], [], "static"
+                req, got = [], []
                 for cid, a in sorted(S["alts"].items()):
                     if a["verdict"] == "found":
                         req.append("(1) context %s (iii) not_held on %s" % (cid, S["ref"](a["n"])))
@@ -509,12 +526,22 @@ def main(argv):
                         bi = uc.get("branch_i", {})
                         if bi.get("status") == "not_held" and any(s.get("ref") == S["ref"](n) for s in bi.get("sources", [])):
                             got.append(req[-1])
-                for i, u in enumerate(ue):
-                    if u.get("outcome") == "found":
-                        req.append("(3) use %d instance-linked on an open generation" % i)
-                        cls = "boot" if gp else cls
-                        if (u.get("instance_link") or {}).get("status") == "linked":
-                            got.append(req[-1])
+                # evaluation protocol 14.13 items 1-2: rule (3) only on a control row with no requirement (1) or (2);
+                # the class from the static inputs: (1) on a row whose (iii) entries follow the record's contexts (context
+                # lines in the sidecar, or not exactly one alternatives context) -> boot; no (1)/(2): boot when a success
+                # path line is held (a generation can form); else static
+                has1 = any(x.startswith("(1) ") for x in req)
+                if req:
+                    rules_ = "rules (1)-(2)"
+                    cls = "boot" if has1 and (side_ctx.get(key) or len(S["alts"]) != 1) else "static"
+                else:
+                    rules_ = "rule (3)"
+                    cls = "boot" if gp else "static"
+                    for i, u in enumerate(ue):
+                        if u.get("outcome") == "found":
+                            req.append("(3) use %d instance-linked on an open generation" % i)
+                            if (u.get("instance_link") or {}).get("status") == "linked":
+                                got.append(req[-1])
                 other = [x for x in ("refuted_link", "not_observed_in_runs") if r["tool_verdict"]["violation"]["value"] == x]
                 if key not in only_control:
                     res = "not_counted"
@@ -522,7 +549,7 @@ def main(argv):
                     res = "unmet"
                 else:
                     res = "met" if len(got) == len(req) else "unmet"
-                emit("expect_discriminate", cls, br, key, "*", res, fn,
+                emit("expect_discriminate", cls, br, key, "*", res, fn, "%s: " % rules_ +
                      ("required: %s; given: %s" % (" | ".join(req), " | ".join(got) or "none") if req else "nothing to require from the static lines and the record")
                      + ("; other grounds: " + ", ".join(other) if other else "") + ("; plan_state tier+control: not counted" if res == "not_counted" else ""),
                      unit=("ED", br, fn))
@@ -552,7 +579,7 @@ def main(argv):
             if len(side_ctx.get(key, [])) >= 2:
                 expected.add(("F9", br, fn))
                 unk = [i for i, u in enumerate(ue) if u.get("context") is None]
-                emit("F9", "boot", br, key, "*", "fail" if unk else "pass", fn,
+                emit("F9", "boot", br, key, "*", "fail" if unk else ("pass" if ue else "not_evaluable"), fn,
                      ("uses with context unknown: %s" % unk) if unk else ("%d use events, each with one context" % len(ue) if ue else "no use event in this record"),
                      unit=("F9", br, fn))
             # F10
@@ -652,10 +679,23 @@ def main(argv):
     # ---- tail and the form check
     counts = {}
     for x in L:
-        k = (x["check"], x["class"], x["result"] if x["result"] in RESULTS else "value")
+        k = (x["check"], x["class"], x["result"] if x["result"] in RESULTS else "value", x["branch"])
         counts[k] = counts.get(k, 0) + 1
-    fal = [x for x in L if re.fullmatch(r"F\d+[ab]?", x["check"])]
-    safe = [x for x in L if x["check"] in ("s1", "s2", "s3", "s4")]
+    eb_of = {}
+    for br in per:
+        if per[br]:
+            e = per[br][0][1].get("eval_branch", {})
+            eb_of[br] = (e.get("data") or "?", ",".join(e.get("readings") or ["R0"]))
+
+    def label(br):   # evaluation protocol 14.1 and 14.13 item 3
+        if br == MAIN:
+            return "main (declared before the boot: D1/R0)"
+        if br == "*":
+            return "no branch (the pair file against the relations rows, F8 (a))"
+        d, rd = eb_of.get(br, ("?", "?"))
+        return "auxiliary (data %s, readings %s)" % (d, rd)
+    order_ = ([MAIN] if any(x["branch"] == MAIN for x in L) else []) + sorted({x["branch"] for x in L} - {MAIN, "*"}) + \
+        (["*"] if any(x["branch"] == "*" for x in L) else [])
 
     def by_class(xs):
         out = []
@@ -665,22 +705,27 @@ def main(argv):
                                                                        sum(1 for y in ys if y["result"] in ("pass", "fail")),
                                                                        sum(1 for y in ys if y["result"] == "fail"), sum(1 for y in ys if y["result"] == "not_evaluable")))
         return "; ".join(out)
-    ed = [x for x in L if x["check"] == "expect_discriminate"]
     head = ["kz-eval 1", "script %s sha256 %s" % (EVAL_REV, self_sha), "boot %s build %s gate %s" % (o.boot, o.build, gate)]
     head += ["input %s %s %s" % x for x in INPUTS if not x[0].startswith("record:")]
     nrec = sum(1 for x in INPUTS if x[0].startswith("record:"))
     head.append("records %d (sha256 of every record: %s)" % (nrec, hashlib.sha256("".join(x[1] for x in INPUTS if x[0].startswith("record:")).encode()).hexdigest()))
     head.append("columns check\tclass\tbranch\tbuild\trow_label\trow_key\tuse\tresult\tground\tnote")
     body = ["\t".join([x["check"], x["class"], x["branch"], o.build, x["row_label"], x["row_key"], x["use"], x["result"], x["ground"], x["note"]]) for x in L]
-    tail = ["count\t%s\t%s\t%s\t%d" % (k[0], k[1], k[2], n) for k, n in sorted(counts.items())]
-    tail.append("falsifiers F1-F10 by class (only the boot class is a falsifier result): " + by_class(fal))
-    tail.append("expect_safe s1-s4 by class (only the boot class is a safety result): " + by_class(safe))
-    tail.append("expect_discriminate: met %d / counted %d (unmet %d; not_counted %d); by class: %s" % (
-        sum(1 for x in ed if x["result"] == "met"), sum(1 for x in ed if x["result"] in ("met", "unmet")), sum(1 for x in ed if x["result"] == "unmet"),
-        sum(1 for x in ed if x["result"] == "not_counted"),
-        ", ".join("%s %d" % (c, sum(1 for x in ed if x["class"] == c)) for c in CLASSES)))
+    tail = ["count\t%s\t%s\t%s\t%s\t%d" % (k[0], k[1], k[2], k[3], n) for k, n in sorted(counts.items(), key=lambda kv: (order_.index(kv[0][3]), kv[0]))]
+    for br in order_:
+        lb = "branch %s %s: " % (br, label(br))
+        fb = [x for x in L if x["branch"] == br and re.fullmatch(r"F\d+[ab]?", x["check"])]
+        sb = [x for x in L if x["branch"] == br and x["check"] in ("s1", "s2", "s3", "s4")]
+        eb = [x for x in L if x["branch"] == br and x["check"] == "expect_discriminate"]
+        tail.append(lb + "falsifiers F1-F10 by class (only the boot class is a falsifier result): " + by_class(fb))
+        if br != "*":
+            tail.append(lb + "expect_safe s1-s4 by class (only the boot class is a safety result): " + by_class(sb))
+            tail.append(lb + "expect_discriminate: met %d / counted %d (unmet %d; not_counted %d); by class: %s" % (
+                sum(1 for x in eb if x["result"] == "met"), sum(1 for x in eb if x["result"] in ("met", "unmet")), sum(1 for x in eb if x["result"] == "unmet"),
+                sum(1 for x in eb if x["result"] == "not_counted"),
+                ", ".join("%s %d" % (c, sum(1 for x in eb if x["class"] == c)) for c in CLASSES)))
     for m in metrics:
-        tail.append("%s %s: %s" % m)
+        tail.append("%s %s %s: %s" % (m[0], m[1], label(m[1]), m[2]))
     # form check
     bad = []
     for x in L:
@@ -699,7 +744,7 @@ def main(argv):
         f.write("\n".join(head + body + tail) + "\n")
     print("eval %s: lines %d; form %s" % (o.out, len(body), "ok" if not bad else "FAILED"))
     for t in tail:
-        if t.startswith(("falsifiers", "expect_safe", "expect_discriminate")):
+        if t.startswith("branch %s main " % MAIN):
             print(t)
     return 3 if bad else 0
 

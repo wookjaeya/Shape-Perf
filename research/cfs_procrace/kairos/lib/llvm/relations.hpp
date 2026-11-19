@@ -53,7 +53,10 @@ const char* relations_lock_handle_revision();  // relations rules revision 11: w
 const char* relations_result_flow_revision();  // relations rules revision 10: what facts with RESULT_FLOW and RESULT_EFFECT add
 
 struct RelationsOptions {
-  // nothing yet: the query has no parameter that selects what it reports
+  // nothing selects what the query reports.  `tool_line`: when not empty, the header carries it as one line right after
+  // the `rules` line (static_facts.md 5x: "tool kz-static tool_sha256=<hex> tool_source=<hex>", written by the command;
+  // readers of the rows inside another command leave it empty)
+  std::string tool_line;
 };
 
 // A line of a row between its first line and its columns: what it is (`name`: "site", "creator", "write after the

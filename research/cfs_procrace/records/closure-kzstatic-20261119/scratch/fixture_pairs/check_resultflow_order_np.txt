@@ -1,0 +1,22 @@
+ok   first line kz-order-pairs 1
+ok   facts line equal to the order text's
+ok   tool line equal to the order text's
+ok   column line
+ok   13 fields on every line (11 lines)
+ok   tail rows 6 = row keys 6
+ok   tail pairs 11 = lines without no_pair 11
+ok   tail hard_before 1 = lines 1
+ok   tail conditional_before 0 = lines 0
+ok   tail fixed_early_proved 0 = lines 0
+ok   tail fixed_early_candidate 0 = lines 0
+ok   tail unordered 9 = lines 9
+ok   tail unknown 0 = lines 0
+ok   tail same_thread 1 = lines 1
+ok   tail no_pair 0 = lines 0
+ok   last line end
+ok   edge ids of the pair lines resolved by edges.tsv or edge lines: 1 of 1 (edge lines 0)
+ok   tail edges_not_in_tsv 0 = edge lines 0, 12 fields each, none in edges.tsv
+ok   listed pair lines of the text with a line of the same value: 6 of 6
+ok   rows whose text pairs counts equal the file's creator and writer lines: 6 of 6
+counts hard_before 1 same_thread 1 unordered 9; lines 11; other_kind creator 5 creator-not-a-pair(key constants differ) 5 writer 1
+result PASS

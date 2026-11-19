@@ -117,6 +117,7 @@ class Ord : public RelFacts {
     waits();
     rows();
     render(text, tsv);
+    for (const DeferredRow& d : deferred_) pair_file_row(*d.row, d.us, d.others, d.override_actors ? &d.u_actors : nullptr);
     return kz::Status::success();
   }
 
@@ -1434,14 +1435,27 @@ class Ord : public RelFacts {
         std::vector<Ev> ws, us;
         std::vector<std::string> missing;
         std::set<uint32_t> u_actors_override;
+        // the pair file's domain (order rules revision 8): every creator and writer the row names, with the kind and the
+        // relations line it comes from; the creators of `not a pair` lines are in it, never in the text's pairs
+        std::vector<PairOther> others;
         if (row.path == 'A') {
           if (row.call < calls_.size()) us.push_back(Ev{'c', row.call});
           for (const RelLine& l : row.lines) {
             std::smatch m;
+            if (l.name == "not a pair" && pairs_on_ && std::regex_search(l.text, m, creator)) {
+              const std::string kind = not_a_pair_kind(l.text);
+              const Ev e = ev_at(m[1].str(), 'c');
+              if (!kind.empty() && e.ok()) others.push_back(PairOther{e, kind, l.name});
+              continue;
+            }
             if (l.name != "creator" || !std::regex_search(l.text, m, creator)) continue;
             const Ev e = ev_at(m[1].str(), 'c');
-            if (e.ok()) ws.push_back(e);
-            else missing.push_back(m[1].str());
+            if (e.ok()) {
+              ws.push_back(e);
+              others.push_back(PairOther{e, "creator", l.name});
+            } else {
+              missing.push_back(m[1].str());
+            }
           }
         } else if (row.path == 'B') {
           for (uint32_t ci : row.site_calls) us.push_back(Ev{'c', ci});
@@ -1449,8 +1463,12 @@ class Ord : public RelFacts {
             std::smatch m;
             if (l.name != "writer" || !std::regex_search(l.text, m, writer)) continue;
             const Ev e = ev_at(m[1].str(), 'w');
-            if (e.ok()) ws.push_back(e);
-            else missing.push_back(m[1].str());
+            if (e.ok()) {
+              ws.push_back(e);
+              others.push_back(PairOther{e, "writer", l.name});
+            } else {
+              missing.push_back(m[1].str());
+            }
           }
         } else {
           if (row.read < reads_.size()) us.push_back(Ev{'r', row.read});
@@ -1464,12 +1482,19 @@ class Ord : public RelFacts {
             std::smatch m;
             if (l.text.compare(0, 21, "write after the spawn") != 0 || !std::regex_search(l.text, m, wpos)) continue;
             const Ev e = ev_at(m[1].str(), 'w');
-            if (e.ok()) ws.push_back(e);
-            else missing.push_back(m[1].str());
+            if (e.ok()) {
+              ws.push_back(e);
+              others.push_back(PairOther{e, "writer", l.name});
+            } else {
+              missing.push_back(m[1].str());
+            }
           }
         }
         std::sort(ws.begin(), ws.end());
         ws.erase(std::unique(ws.begin(), ws.end()), ws.end());
+        // the pair file is computed after the text: its pairs may add HB-seq steps to the closures, which must not change the
+        // text or the edges
+        if (pairs_on_) deferred_.push_back(DeferredRow{&row, us, others, u_actors_override, row.path == 'C'});
         // the pairs
         std::map<std::string, int> values;
         std::map<std::string, std::vector<std::string>> by_value;
@@ -1571,12 +1596,143 @@ class Ord : public RelFacts {
       }
   }
 
+  // ---------------------------------------------------------------- the pair file (order rules revision 8)
+  struct PairOther {
+    Ev e;
+    std::string kind, line;
+  };
+  struct DeferredRow {
+    const RelRow* row = nullptr;
+    std::vector<Ev> us;
+    std::vector<PairOther> others;
+    std::set<uint32_t> u_actors;
+    bool override_actors = false;
+  };
+  static std::string not_a_pair_kind(const std::string& t) {
+    static const std::string p = "not a pair: ";
+    if (t.rfind(p, 0) != 0) return std::string();
+    const std::string r = t.substr(p.size());
+    if (r.rfind("key constants differ: ", 0) == 0) return "creator-not-a-pair(key constants differ)";
+    if (r.rfind("probe-create (", 0) == 0) return "creator-not-a-pair(probe-create)";
+    if (r.rfind("same actor only (program order): ", 0) == 0) return "creator-not-a-pair(same actor only)";
+    return std::string();  // "not a probe-create although ...": its creator is on another line of the row
+  }
+  static std::string tsv_field(std::string s) {
+    for (char& ch : s)
+      if (ch == '\t' || ch == '\n') ch = ' ';
+    return s.empty() ? std::string("-") : s;
+  }
+  void pair_line(const RelRow& row, const Ev& u, const std::string& use_root, const PairOther& o, const std::string& other_root, const std::string& value,
+                 const PairOrder* po) {
+    std::vector<std::string> ids, prem;
+    std::set<std::string> seen;
+    if (po != nullptr)
+      for (size_t e : po->path) {
+        ids.push_back(edges_[e].id);
+        if (tsv_ids_.count(edges_[e].id) == 0) extra_edges_.insert(e);
+        for (const std::string& p : edges_[e].premises)
+          if (seen.insert(p).second) prem.push_back(p);
+      }
+    const std::vector<std::string> f = {row.key, std::string(1, row.path), ev_pos(u), fname(ev_fn(u)), use_root, o.kind, ev_pos(o.e), fname(ev_fn(o.e)), other_root, value,
+                                        ids.empty() ? std::string("-") : join(ids, ","), prem.empty() ? std::string("-") : join(prem, "; "), o.line};
+    std::string l;
+    for (size_t i = 0; i < f.size(); ++i) l += (i == 0 ? "" : "\t") + tsv_field(f[i]);
+    pair_lines_.push_back(l);
+    const size_t paren = value.find('(');
+    ++pair_counts_[paren == std::string::npos ? value : value.substr(0, paren)];
+  }
+  void pair_file_row(const RelRow& row, const std::vector<Ev>& us, std::vector<PairOther> others, const std::set<uint32_t>* u_override) {
+    ++n_pair_rows_;
+    std::sort(others.begin(), others.end(), [](const PairOther& a, const PairOther& b) { return std::tie(a.e, a.kind) < std::tie(b.e, b.kind); });
+    others.erase(std::unique(others.begin(), others.end(), [](const PairOther& a, const PairOther& b) { return a.e == b.e && a.kind == b.kind; }), others.end());
+    size_t n = 0;
+    for (const PairOther& o : others)
+      for (const Ev& u : us) {
+        const std::set<uint32_t> pa = actor_set(ev_fn(o.e));
+        const std::set<uint32_t> qa = u_override != nullptr ? *u_override : actor_set(ev_fn(u));
+        if (pa.empty() || qa.empty()) {
+          pair_line(row, u, qa.empty() ? std::string("-") : actors_text(qa), o, pa.empty() ? std::string("-") : actors_text(pa),
+                    "unknown(no root reaches " + (pa.empty() ? fname(ev_fn(o.e)) : fname(ev_fn(u))) + ")", nullptr);
+          ++n;
+          continue;
+        }
+        for (uint32_t P : pa)
+          for (uint32_t Q : qa) {
+            ++n;
+            if (P == Q) {
+              pair_line(row, u, actor_text(Q), o, actor_text(P), "same_thread", nullptr);
+              continue;
+            }
+            const PairOrder po = pair(o.e, P, u, Q);
+            pair_line(row, u, actor_text(Q), o, actor_text(P), po.value == "unknown" ? "unknown(" + po.why + ")" : po.value, &po);
+          }
+      }
+    if (n != 0) return;
+    const std::string why = us.empty() ? "the row names no use that these facts locate"
+                                       : "the row names no creator or writer that these facts locate (creator, not-a-pair, writer and write-after-the-spawn lines)";
+    std::string l = tsv_field(row.key) + "\t" + std::string(1, row.path) + "\t" + (us.empty() ? std::string("-") : tsv_field(ev_pos(us[0]))) + "\t" +
+                    (us.empty() ? std::string("-") : tsv_field(fname(ev_fn(us[0])))) + "\t-\t-\t-\t-\t-\tno_pair(" + why + ")\t-\t-\t-";
+    pair_lines_.push_back(l);
+    ++pair_counts_["no_pair"];
+  }
+ public:
+  // the pair file: the header from the relations rows' and the order text's rules lines, every pair line, the tail
+  std::string pair_file(const std::string& text) const {
+    auto rules_of = [](const std::string& t, const char* first) {
+      std::vector<std::string> v;
+      if (first != nullptr) v.push_back(first);
+      std::istringstream in(t);
+      for (std::string l; std::getline(in, l);)
+        if (l.rfind("rules", 0) == 0) v.push_back(l);
+      return join(v, "; ");
+    };
+    std::ostringstream os;
+    os << "kz-order-pairs 1\n";
+    os << "facts " << kz::to_hex(c_.artifact_hash()) << "\n";
+    os << (tool_line_.empty() ? std::string("tool -") : tool_line_) << "\n";
+    os << "relations " << rules_of(rel_.header, nullptr) << "\n";
+    os << "order " << rules_of(text, order_rules_revision()) << "\n";
+    os << "domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B "
+          "and C); a pair in one thread has the value same_thread\n";
+    os << "columns row_key\tpath\tuse_pos\tuse_function\tuse_root\tother_kind\tother_pos\tother_function\tother_root\tvalue\tedges\tpremises\trow_line\n";
+    for (const std::string& l : pair_lines_) os << l << "\n";
+    // the edges the pair lines name that edges.tsv does not list (HB-seq steps of paths no listed pair uses), in the
+    // columns of edges.tsv
+    for (size_t i : extra_edges_) {
+      const Edge& e = edges_[i];
+      os << "edge\t" << e.id << "\t" << e.rule << "\t" << e.kind << "\t" << e.from << "\t" << e.from_actor << "\t" << e.to << "\t" << e.to_actor << "\t" << e.condition << "\t"
+         << join(e.premises, "; ") << "\t" << e.scope << "\t" << e.instance << "\n";
+    }
+    auto cnt = [&](const char* k) {
+      auto it = pair_counts_.find(k);
+      return it == pair_counts_.end() ? size_t(0) : it->second;
+    };
+    size_t pairs = 0;
+    for (const auto& [k, v] : pair_counts_)
+      if (k != "no_pair") pairs += v;
+    os << "rows " << n_pair_rows_ << " pairs " << pairs << " hard_before " << cnt("hard_before") << " conditional_before " << cnt("conditional_before") << " fixed_early_proved "
+       << cnt("fixed_early_proved") << " fixed_early_candidate " << cnt("fixed_early_candidate") << " unordered " << cnt("unordered") << " unknown " << cnt("unknown")
+       << " same_thread " << cnt("same_thread") << " no_pair " << cnt("no_pair") << " edges_not_in_tsv " << extra_edges_.size() << "\n";
+    os << "end\n";
+    return os.str();
+  }
+  std::string tool_line_;
+  bool pairs_on_ = false;
+ private:
+  std::vector<std::string> pair_lines_;
+  std::map<std::string, size_t> pair_counts_;
+  size_t n_pair_rows_ = 0;
+  std::vector<DeferredRow> deferred_;
+  std::set<size_t> extra_edges_;
+  mutable std::set<std::string> tsv_ids_;  // the ids of edges.tsv (render)
+
   // ---------------------------------------------------------------- text
   void render(std::string* text, std::string* tsv) const {
     std::ostringstream os;
     os << "kz-static order (" << order_rules_revision() << ")\n";
     os << "facts " << kz::to_hex(c_.artifact_hash()) << "\n";
     os << "relations " << relations_rules_revision() << "\n";
+    if (!tool_line_.empty()) os << tool_line_ << "\n";
     if (result_flow_)
       os << "rules with result flow: " << order_result_flow_revision() << ", over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects "
          << n_cws_rf_inner_ << "; caller-side uses of waits " << n_caller_side_ << ", HB-await edges to them " << n_await_caller_side_ << "\n";
@@ -1640,6 +1796,7 @@ class Ord : public RelFacts {
       os << "      scope: " << e.scope << "\n";
       os << "      instance key: " << e.instance << "\n";
       for (const std::string& n : e.notes) os << "      " << n << "\n";
+      tsv_ids_.insert(e.id);
       ts << e.id << "\t" << e.rule << "\t" << e.kind << "\t" << e.from << "\t" << e.from_actor << "\t" << e.to << "\t" << e.to_actor << "\t" << e.condition << "\t" << join(e.premises, "; ") << "\t"
          << e.scope << "\t" << e.instance << "\n";
     }
@@ -1726,7 +1883,10 @@ kz::Status order_report(const kz::Container& facts, const OrderOptions& options,
   if (facts.header().artifact_kind != KZ_ARTIFACT_FACTS) return kz::Status::error(kz::Err::Invalid, "not a facts container");
   Ord o(facts);
   o.record_pairs_ = options.caller_dependent_report != nullptr;
+  o.tool_line_ = options.tool_line;
+  o.pairs_on_ = options.pairs != nullptr;
   kz::Status s = o.run(text, tsv);
+  if (s.ok() && options.pairs != nullptr) *options.pairs = o.pair_file(*text);
   if (!s.ok() || options.caller_dependent_report == nullptr) return s;
   // the measurement of the caller-dependent spawn rule (static_facts.md 5v): the callers of caller-dependent spawn calls that
   // pass on no resolved entry, and the pairs whose order a closure that lets such a caller create any of the call's own

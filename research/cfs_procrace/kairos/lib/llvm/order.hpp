@@ -47,6 +47,12 @@ struct OrderOptions {
   // the measurement of the caller-dependent spawn rule (static_facts.md 5v): when set, the report is written there; the
   // order text and the edges are not changed by it
   std::string* caller_dependent_report = nullptr;
+  // when not empty: the tool line of the header, right after the `relations` line (static_facts.md 5x), also the third
+  // line of the pair file
+  std::string tool_line;
+  // the complete pair file (order rules revision 8, static_facts.md 5x): when set, written there; the order text and the
+  // edges are not changed by it apart from the tool line
+  std::string* pairs = nullptr;
 };
 
 // the text (`text`) and one line per edge (`tsv`, with a header line)

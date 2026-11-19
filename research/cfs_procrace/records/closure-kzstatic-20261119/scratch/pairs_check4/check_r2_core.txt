@@ -1,0 +1,24 @@
+ok   first line kz-order-pairs 1
+ok   facts line equal to the order text's
+ok   tool line equal to the order text's
+ok   column line
+ok   13 fields on every line (9643 lines)
+ok   tail rows 295 = row keys 295
+ok   tail pairs 9622 = lines without no_pair 9622
+ok   tail hard_before 1117 = lines 1117
+ok   tail conditional_before 0 = lines 0
+ok   tail fixed_early_proved 825 = lines 825
+ok   tail fixed_early_candidate 0 = lines 0
+ok   tail unordered 6489 = lines 6489
+ok   tail unknown 173 = lines 173
+ok   tail same_thread 1018 = lines 1018
+ok   tail no_pair 21 = lines 21
+ok   last line end
+ok   edge ids of the pair lines resolved by edges.tsv or edge lines: 1011 of 1011 (edge lines 546)
+ok   tail edges_not_in_tsv 546 = edge lines 546, 12 fields each, none in edges.tsv
+ok   listed pair lines of the text with a line of the same value: 1607 of 1607
+ok   rows whose text pairs counts equal the file's creator and writer lines: 271 of 271
+ok   /home/user/work/redesign/obs1/rf2_plans_v4/r2_core/plan.side: planned rows with lines in the pair file 7 of 7
+  pair lines of the planned rows 47
+counts fixed_early_proved 825 hard_before 1117 no_pair 21 same_thread 1018 unknown 173 unordered 6489; lines 9643; other_kind - 21 creator 1 creator-not-a-pair(key constants differ) 3 creator-not-a-pair(same actor only) 12 writer 9606
+result PASS

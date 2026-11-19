@@ -263,8 +263,24 @@ int run_fixture(const Case& c, const std::string& tool, const std::string& fixtu
     std::string ord;
     std::istringstream lines(o1);
     for (std::string l; std::getline(lines, l);)
-      if (l.rfind("facts ", 0) != 0) ord += l + "\n";
-    return compare(c.name, without_first_line(log1) + view + "\n# order\n" + ord, data);
+      if (l.rfind("facts ", 0) != 0 && l.rfind("tool kz-static ", 0) != 0) ord += l + "\n";
+    // the complete pair file (order rules revision 8): written with the same text, the same bytes twice; the facts and tool
+    // lines are left out
+    const std::string pf1 = work + "/" + c.name + ".pairs1.tsv", pf2 = work + "/" + c.name + ".pairs2.tsv";
+    std::string o3, p1, p2;
+    if (run(quote(tool) + " order " + quote(out1) + " --pairs " + quote(pf1), &o3) != 0 || run(quote(tool) + " order " + quote(out1) + " --pairs " + quote(pf2), &o2) != 0) {
+      std::fprintf(stderr, "order --pairs failed:\n%s\n", o3.c_str());
+      return 1;
+    }
+    if (o3 != o1 || !read_file(pf1, &p1) || !read_file(pf2, &p2) || p1 != p2) {
+      std::fprintf(stderr, "%s: order --pairs changes the text, or two pair files differ\n", c.name);
+      return 1;
+    }
+    std::string pairs;
+    std::istringstream plines(p1);
+    for (std::string l; std::getline(plines, l);)
+      if (l.rfind("facts ", 0) != 0 && l.rfind("tool kz-static ", 0) != 0) pairs += l + "\n";
+    return compare(c.name, without_first_line(log1) + view + "\n# order\n" + ord + "\n# pairs\n" + pairs, data);
   }
   if (!c.relations) return compare(c.name, without_first_line(log1) + view, data);
   // the relations: the same bytes twice; the line with the facts hash (it changes with the tool) is left out
@@ -280,7 +296,7 @@ int run_fixture(const Case& c, const std::string& tool, const std::string& fixtu
   std::string rel;
   std::istringstream lines(r1);
   for (std::string l; std::getline(lines, l);)
-    if (l.rfind("facts ", 0) != 0) rel += l + "\n";
+    if (l.rfind("facts ", 0) != 0 && l.rfind("tool kz-static ", 0) != 0) rel += l + "\n";
   return compare(c.name, without_first_line(log1) + view + "\n# relations\n" + rel, data);
 }
 

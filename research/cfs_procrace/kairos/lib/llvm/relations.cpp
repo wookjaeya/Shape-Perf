@@ -4326,10 +4326,16 @@ const std::vector<RelReason>& relations_incomplete_reasons() {
 std::string reason_text(const RelReason& r) { return std::string(r.reason) + "(" + r.sub + ")"; }
 
 kz::Status relations_rows(const kz::Container& facts, const RelationsOptions& options, RelReport* out) {
-  (void)options;
   if (facts.header().artifact_kind != KZ_ARTIFACT_FACTS) return kz::Status::error(kz::Err::Invalid, "not a facts container");
   Rel r(facts);
-  return r.run(out);
+  const kz::Status s = r.run(out);
+  if (!s.ok() || options.tool_line.empty()) return s;
+  // the tool line right after the `rules` line (static_facts.md 5x)
+  const size_t at = out->header.find("\nrules ");
+  if (at == std::string::npos) return kz::Status::error(kz::Err::Invalid, "relations header without a rules line");
+  const size_t end = out->header.find('\n', at + 1);
+  out->header.insert(end == std::string::npos ? out->header.size() : end + 1, options.tool_line + "\n");
+  return s;
 }
 
 std::string render_row(const RelRow& r) {

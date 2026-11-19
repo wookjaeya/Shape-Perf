@@ -1,0 +1,649 @@
+extract
+  translation units          1
+  functions                  44 (bodies read 37, in system headers skipped 0)
+  call sites                 66
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                23 (entry resolved 23)
+  loops                      6 (table walks resolved 1, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 4, await 0, star-closed 2
+  spawn parameters           5, unrolled iteration rows 6
+  out-pointer summaries      store-only 0, escaping 3, unsummarized 2
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Config.level   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Gate.ready   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Name.name   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Name.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Peer.stamp   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Task.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Task.registered   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location WTask.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 3, cast 0, union 0, unknown effect 0  -> DISABLED
+  location WTask.registered   writers 3 (direct 3, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 37, control-flow graphs 37, call-graph components 37 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 3 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
+  spawn operations (F7)      entry-argument 5, called-by-entry 0, fixed-entry 10 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               9 (R-T1 6, R-T2 5, both 2; left out, reached only through an unshared base: R-T1 1, R-T2 0)
+facts-view 1
+[functions] 44
+  fn 0 app_one order.c:292-295 params=1 {defined}
+  fn 1 app_two order.c:297-300 params=1 {defined}
+  fn 2 apps_start order.c:310-319 params=0 {defined}
+  fn 3 config_reader order.c:240-244 params=1 {defined,address-taken}
+  fn 4 config_writer order.c:246-250 params=1 {defined,address-taken}
+  fn 5 cont_wait order.c:275-282 params=0 {defined}
+  fn 6 early_child order.c:81-86 params=1 {defined,address-taken}
+  fn 7 gate_main order.c:259-263 params=1 {defined,address-taken}
+  fn 8 held_spawn order.c:142-149 params=1 {defined}
+  fn 9 late_child order.c:95-100 params=1 {defined,address-taken}
+  fn 10 level_check order.c:235-238 params=1 {defined}
+  fn 11 local_child order.c:366-369 params=1 {defined,address-taken}
+  fn 12 main order.c:371-389 params=0 {defined}
+  fn 13 mapped_spawn order.c:219-226 params=1 {defined}
+  fn 14 name_create order.c:63-79 params=2 {defined}
+  fn 15 name_find order.c:52-61 params=2 {defined}
+  fn 16 names_start order.c:102-112 params=0 {defined}
+  fn 17 peer_one order.c:344-349 params=1 {defined,address-taken}
+  fn 18 peer_quiet order.c:339-342 params=1 {defined,address-taken}
+  fn 19 peer_reader order.c:333-337 params=1 {defined,address-taken}
+  fn 20 peer_two order.c:351-356 params=1 {defined,address-taken}
+  fn 21 plain_spawn order.c:210-217 params=1 {defined}
+  fn 22 probe_child order.c:88-93 params=1 {defined,address-taken}
+  fn 23 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 24 pthread_getspecific /usr/include/pthread.h:1305 params=1 {}
+  fn 25 pthread_mutex_lock /usr/include/pthread.h:794 params=1 {}
+  fn 26 pthread_mutex_unlock /usr/include/pthread.h:835 params=1 {}
+  fn 27 skip_wait order.c:265-273 params=0 {defined}
+  fn 28 spawn_via order.c:328-331 params=2 {defined}
+  fn 29 start_checked order.c:183-187 params=2 {defined}
+  fn 30 start_local order.c:359-364 params=2 {defined}
+  fn 31 start_mapped order.c:195-199 params=2 {defined}
+  fn 32 start_plain order.c:189-191 params=2 {defined}
+  fn 33 strcmp /usr/include/string.h:156 params=2 {builtin}
+  fn 34 strncpy /usr/include/string.h:144 params=3 {builtin}
+  fn 35 task_check order.c:128-134 params=0 {defined}
+  fn 36 task_child order.c:136-140 params=1 {defined,address-taken}
+  fn 37 task_self order.c:124-126 params=0 {defined}
+  fn 38 usleep order.c:34 params=1 {}
+  fn 39 waiter_main order.c:284-289 params=1 {defined,address-taken}
+  fn 40 window_spawn order.c:151-157 params=1 {defined}
+  fn 41 wrapped_child order.c:177-181 params=1 {defined,address-taken}
+  fn 42 wrapped_spawn order.c:201-208 params=1 {defined}
+  fn 43 wtask_check order.c:169-175 params=0 {defined}
+[lockpaths] 53
+  after-spawn row 8 call at order.c:107:9 in names_start after the spawn order.c:106:3 pthread_create
+  after-spawn row 9 call at order.c:108:3 in names_start after the spawn order.c:106:3 pthread_create
+  after-spawn row 10 call at order.c:109:3 in names_start after the spawn order.c:106:3 pthread_create
+  after-spawn row 10 call at order.c:109:3 in names_start after the spawn order.c:108:3 pthread_create
+  after-spawn row 11 call at order.c:110:9 in names_start after the spawn order.c:106:3 pthread_create
+  after-spawn row 11 call at order.c:110:9 in names_start after the spawn order.c:108:3 pthread_create
+  after-spawn row 11 call at order.c:110:9 in names_start after the spawn order.c:109:3 pthread_create
+  after-spawn row 19 call at order.c:147:3 in held_spawn after the spawn order.c:145:8 pthread_create
+  after-spawn row 21 call at order.c:153:3 in window_spawn after the spawn order.c:152:12 pthread_create
+  after-spawn row 22 call at order.c:155:3 in window_spawn after the spawn order.c:152:12 pthread_create
+  after-spawn row 32 call at order.c:206:3 in wrapped_spawn after the spawn order.c:204:8 start_checked
+  after-spawn row 35 call at order.c:215:3 in plain_spawn after the spawn order.c:213:8 start_plain
+  after-spawn row 38 call at order.c:224:3 in mapped_spawn after the spawn order.c:222:8 start_mapped
+  after-spawn row 46 call at order.c:317:5 in apps_start after the spawn order.c:317:5 pthread_create
+  after-spawn row 59 call at order.c:381:3 in main after the spawn order.c:380:3 pthread_create
+  after-spawn row 60 call at order.c:382:3 in main after the spawn order.c:380:3 pthread_create
+  after-spawn row 60 call at order.c:382:3 in main after the spawn order.c:381:3 pthread_create
+  after-spawn row 61 call at order.c:383:3 in main after the spawn order.c:380:3 pthread_create
+  after-spawn row 61 call at order.c:383:3 in main after the spawn order.c:381:3 pthread_create
+  after-spawn row 61 call at order.c:383:3 in main after the spawn order.c:382:3 pthread_create
+  after-spawn row 62 call at order.c:384:3 in main after the spawn order.c:380:3 pthread_create
+  after-spawn row 62 call at order.c:384:3 in main after the spawn order.c:381:3 pthread_create
+  after-spawn row 62 call at order.c:384:3 in main after the spawn order.c:382:3 pthread_create
+  after-spawn row 62 call at order.c:384:3 in main after the spawn order.c:383:3 pthread_create
+  after-spawn row 63 call at order.c:385:3 in main after the spawn order.c:380:3 pthread_create
+  after-spawn row 63 call at order.c:385:3 in main after the spawn order.c:381:3 pthread_create
+  after-spawn row 63 call at order.c:385:3 in main after the spawn order.c:382:3 pthread_create
+  after-spawn row 63 call at order.c:385:3 in main after the spawn order.c:383:3 pthread_create
+  after-spawn row 64 call at order.c:386:3 in main after the spawn order.c:380:3 pthread_create
+  after-spawn row 64 call at order.c:386:3 in main after the spawn order.c:381:3 pthread_create
+  after-spawn row 64 call at order.c:386:3 in main after the spawn order.c:382:3 pthread_create
+  after-spawn row 64 call at order.c:386:3 in main after the spawn order.c:383:3 pthread_create
+  after-spawn row 64 call at order.c:386:3 in main after the spawn order.c:385:3 pthread_create
+  after-spawn row 65 call at order.c:387:9 in main after the spawn order.c:380:3 pthread_create
+  after-spawn row 65 call at order.c:387:9 in main after the spawn order.c:381:3 pthread_create
+  after-spawn row 65 call at order.c:387:9 in main after the spawn order.c:382:3 pthread_create
+  after-spawn row 65 call at order.c:387:9 in main after the spawn order.c:383:3 pthread_create
+  after-spawn row 65 call at order.c:387:9 in main after the spawn order.c:385:3 pthread_create
+  after-spawn row 65 call at order.c:387:9 in main after the spawn order.c:386:3 pthread_create
+  after-spawn row 75 read at order.c:185:7 in start_checked after the spawn order.c:184:7 pthread_create
+  after-spawn row 81 read at order.c:315:9 in apps_start after the spawn order.c:317:5 pthread_create
+  after-spawn row 82 read at order.c:317:30 in apps_start after the spawn order.c:317:5 pthread_create
+  after-spawn row 90 write Task.registered at order.c:146:3 in held_spawn after the spawn order.c:145:8 pthread_create
+  after-spawn row 91 write <global>.task_mutex at order.c:147:24 in held_spawn after the spawn order.c:145:8 pthread_create
+  after-spawn row 93 write <global>.task_mutex at order.c:153:22 in window_spawn after the spawn order.c:152:12 pthread_create
+  after-spawn row 94 write Task.registered at order.c:154:3 in window_spawn after the spawn order.c:152:12 pthread_create
+  after-spawn row 95 write <global>.task_mutex at order.c:155:24 in window_spawn after the spawn order.c:152:12 pthread_create
+  after-spawn row 100 write WTask.registered at order.c:205:16 in wrapped_spawn after the spawn order.c:204:8 start_checked
+  after-spawn row 101 write <global>.wtask_mutex at order.c:206:24 in wrapped_spawn after the spawn order.c:204:8 start_checked
+  after-spawn row 104 write WTask.registered at order.c:214:16 in plain_spawn after the spawn order.c:213:8 start_plain
+  after-spawn row 105 write <global>.wtask_mutex at order.c:215:24 in plain_spawn after the spawn order.c:213:8 start_plain
+  after-spawn row 108 write WTask.registered at order.c:223:16 in mapped_spawn after the spawn order.c:222:8 start_mapped
+  after-spawn row 109 write <global>.wtask_mutex at order.c:224:24 in mapped_spawn after the spawn order.c:222:8 start_mapped
+
+# order
+kz-static order (order rules revision 5 (2026-11-18))
+relations relations rules revision 12 (2026-11-18)
+kinds: hard: every execution in which both instances occur has them in this order, under the premises; conditional: only when the condition holds; observed-only: no rule of this revision orders them, a run record may show an order
+closure: hard_before and fixed_early_proved follow hard edges only; a conditional edge makes the path conditional (conditional_before, fixed_early_candidate) and is never in the hard closure; observed-only edges are not followed; a caller-dependent spawn call (in a function a call of a spawn operation's chain calls) is followed from a thread only to the threads that thread's own outer spawn calls create
+values: hard_before, conditional_before (the write or creation before the use), fixed_early_proved, fixed_early_candidate (the use before it), unordered (no path either way between two threads of resolved roots), unknown (why)
+summary edges listed 43 (HB-await 4, HB-lock 4, HB-seq 10, HB-spawn 25; conditional 2, hard 40, observed-only 1); HB-seq steps the closures followed 81 (listed where a listed pair's path uses them)
+listing: a row lists at most 6 pairs per value (a print bound); its `pairs` line counts them all
+summary spawn calls with resolved threads 23; child without success: possible 3, not found 19, unknown 1 (position-based 1)
+summary waits 2 (poll 2, count-bounded 0; predicate recognised 2); dependent uses continue 4, inside 4, skip 2
+summary rows A 3 (fixed_early_proved 1, hard_before 1, unordered 1)
+summary rows B 3 (conditional_before 1, unordered 2)
+summary rows C 5 (hard_before 4, unordered 1)
+[edges] 43
+  Ea3ef0434d3a65a90 HB-await hard
+      from: write order.c:261:3 in gate_main [Gate.ready] gate_main (spawn-entry)
+      to: call order.c:272:10 in skip_wait -> level_check waiter_main (spawn-entry)
+      condition: the wait at order.c:267:3 was left by its condition exit, which read this write
+      premise: reads-from: the condition exit reads the value this write stored (the only write of the awaited fields in another thread)
+      premise: the awaited fields' writer sets are complete under the per-field rule of FIELD_STATUS
+      premise: L1 under the per-field rule: await
+      premise: the condition exit is false at the initial values: checked
+      scope: one run of the wait at order.c:267:3 on the waiting thread and the use after it
+      instance key: the loop instance at order.c:267:3 and the exit it takes (condition or budget)
+      wait W70f8a1e31cecdc78; budget exit: skip
+  E97511afa2f26067f HB-await conditional
+      from: write order.c:261:3 in gate_main [Gate.ready] gate_main (spawn-entry)
+      to: call order.c:281:10 in cont_wait -> level_check waiter_main (spawn-entry)
+      condition: the wait at order.c:277:3 was left by its condition exit, which read this write; its budget exit also reaches the use (continue)
+      premise: reads-from: the condition exit reads the value this write stored (the only write of the awaited fields in another thread)
+      premise: the awaited fields' writer sets are complete under the per-field rule of FIELD_STATUS
+      premise: L1 under the per-field rule: await
+      premise: the condition exit is false at the initial values: checked
+      scope: one run of the wait at order.c:277:3 on the waiting thread and the use after it
+      instance key: the loop instance at order.c:277:3 and the exit it takes (condition or budget)
+      wait W62855148dcca42b1; budget exit: continue
+  E808a5a68d6495649 HB-await hard
+      from: write order.c:261:3 in gate_main [Gate.ready] gate_main (spawn-entry)
+      to: read order.c:272:27 in skip_wait [gate.ready] waiter_main (spawn-entry)
+      condition: the wait at order.c:267:3 was left by its condition exit, which read this write
+      premise: reads-from: the condition exit reads the value this write stored (the only write of the awaited fields in another thread)
+      premise: the awaited fields' writer sets are complete under the per-field rule of FIELD_STATUS
+      premise: L1 under the per-field rule: await
+      premise: the condition exit is false at the initial values: checked
+      scope: one run of the wait at order.c:267:3 on the waiting thread and the use after it
+      instance key: the loop instance at order.c:267:3 and the exit it takes (condition or budget)
+      wait W70f8a1e31cecdc78; budget exit: skip
+  E658452c4202e15ac HB-await conditional
+      from: write order.c:261:3 in gate_main [Gate.ready] gate_main (spawn-entry)
+      to: read order.c:281:27 in cont_wait [gate.ready] waiter_main (spawn-entry)
+      condition: the wait at order.c:277:3 was left by its condition exit, which read this write; its budget exit also reaches the use (continue)
+      premise: reads-from: the condition exit reads the value this write stored (the only write of the awaited fields in another thread)
+      premise: the awaited fields' writer sets are complete under the per-field rule of FIELD_STATUS
+      premise: L1 under the per-field rule: await
+      premise: the condition exit is false at the initial values: checked
+      scope: one run of the wait at order.c:277:3 on the waiting thread and the use after it
+      instance key: the loop instance at order.c:277:3 and the exit it takes (condition or budget)
+      wait W62855148dcca42b1; budget exit: continue
+  Eca6b6a50d016c081 HB-lock hard
+      from: write order.c:146:3 in held_spawn [Task.registered] main (process)
+      to: read order.c:131:26 in task_check [tasks[task_self()].registered] task_child (spawn-entry)
+      condition: the write runs: it follows the spawn call order.c:145:8 in this call of held_spawn; pthread_create returns 0 when it created the thread (P0 pthread_create); child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+      premise: lock #0 &task_mutex@order.c:121 held from one acquisition across the spawn and the write, and held by the read (relations path C, row C1: proven-impossible)
+      premise: rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)
+      scope: one call of held_spawn and the thread its spawn call order.c:145:8 creates
+      instance key: the acquisition of the lock in that call (held across the spawn and the write) and the reader's acquisition of it
+  Ee06e16eace79f753 HB-lock hard
+      from: write order.c:205:16 in wrapped_spawn [WTask.registered] main (process)
+      to: read order.c:172:27 in wtask_check [wtasks[task_self()].registered] wrapped_child (spawn-entry)
+      condition: the write runs: it follows the spawn call order.c:204:8 in this call of wrapped_spawn under (eq local:rc 0); start_checked returns 0 [0]; failure class: -11 [ERR_SETUP], -5 [ERR_ILLEGAL]; child without success: possible: start_checked returns -11 [ERR_SETUP] at order.c:185:25 after order.c:184:7
+      premise: lock #1 &wtask_mutex@order.c:166 held from one acquisition across the spawn and the write, and held by the read (relations path C, row C3: proven-impossible)
+      premise: rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)
+      scope: one call of wrapped_spawn and the thread its spawn call order.c:204:8 creates
+      instance key: the acquisition of the lock in that call (held across the spawn and the write) and the reader's acquisition of it
+  E3d6e80571876ba3d HB-lock hard
+      from: write order.c:214:16 in plain_spawn [WTask.registered] main (process)
+      to: read order.c:172:27 in wtask_check [wtasks[task_self()].registered] wrapped_child (spawn-entry)
+      condition: the write runs: it follows the spawn call order.c:213:8 in this call of plain_spawn under (eq local:rc 0); start_plain returns 0 [pthread_create created the thread (P0 pthread_create)]; child without success: not found: no return of failure class after the creation call in start_plain (below: not found: pthread_create creates no thread when it fails (P0 pthread_create))
+      premise: lock #1 &wtask_mutex@order.c:166 held from one acquisition across the spawn and the write, and held by the read (relations path C, row C4: proven-impossible)
+      premise: rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)
+      scope: one call of plain_spawn and the thread its spawn call order.c:213:8 creates
+      instance key: the acquisition of the lock in that call (held across the spawn and the write) and the reader's acquisition of it
+  E50954cf2e827bf8c HB-lock hard
+      from: write order.c:223:16 in mapped_spawn [WTask.registered] main (process)
+      to: read order.c:172:27 in wtask_check [wtasks[task_self()].registered] wrapped_child (spawn-entry)
+      condition: the write runs: it follows the spawn call order.c:222:8 in this call of mapped_spawn under (eq local:rc 0); start_mapped returns 0 [0]; failure class: -12 [ERR_MAPPED]; child without success: possible: start_mapped returns -12 [ERR_MAPPED] at order.c:197:16 after order.c:196:12 (the inner call order.c:196:12 may report a failure after its thread started: possible)
+      premise: lock #1 &wtask_mutex@order.c:166 held from one acquisition across the spawn and the write, and held by the read (relations path C, row C5: proven-impossible)
+      premise: rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)
+      scope: one call of mapped_spawn and the thread its spawn call order.c:222:8 creates
+      instance key: the acquisition of the lock in that call (held across the spawn and the write) and the reader's acquisition of it
+  E7d851affcc56c045 HB-seq hard
+      from: call order.c:105:9 in names_start -> name_create main (process)
+      to: spawn call order.c:106:3 in names_start main (process)
+      premise: program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included)
+      scope: one call of names_start
+      instance key: the call instance of names_start
+  E3da1671bfbbaf52e HB-seq hard
+      from: call order.c:107:9 in names_start -> name_find main (process)
+      to: spawn call order.c:108:3 in names_start main (process)
+      premise: program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included)
+      scope: one call of names_start
+      instance key: the call instance of names_start
+  E23b6dd40b7ceb474 HB-seq hard
+      from: spawn call order.c:317:5 in iteration 0 (app_one) {main (process)}
+      to: spawn call order.c:317:5 in iteration 1 (app_two) {main (process)}
+      premise: program order of one thread: the iterations of one run of the loop follow one another (LOOP_ITERS of the unrolled walk)
+      scope: one run of the loop that walks the table
+      instance key: the loop instance and its iterations 0, 1
+  E1013d9e37e0edc91 HB-seq observed-only
+      from: the start of the thread of app_one app_one (table-walk-entry)
+      to: the start of the thread of app_two app_two (table-walk-entry)
+      condition: none: the two threads are created in this order (iteration 0 before iteration 1 at order.c:317:5); which of them runs its code first is not fixed by any rule of this revision
+      scope: the two threads created at order.c:317:5
+      instance key: the two creation links of order.c:317:5
+  E275835f5f57a09b8 HB-seq hard
+      from: the start of the thread of config_reader config_reader (spawn-entry)
+      to: call order.c:242:9 in config_reader -> level_check config_reader (spawn-entry)
+      premise: program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)
+      scope: the thread of config_reader
+      instance key: the thread (its creation link) and the event's instance on it
+  Efd0fb73724635517 HB-seq hard
+      from: the start of the thread of early_child early_child (spawn-entry)
+      to: call order.c:84:9 in early_child -> name_find early_child (spawn-entry)
+      premise: program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)
+      scope: the thread of early_child
+      instance key: the thread (its creation link) and the event's instance on it
+  Ee1b63c9646b7d472 HB-seq hard
+      from: the start of the thread of peer_reader peer_reader (spawn-entry)
+      to: call order.c:335:9 in peer_reader -> level_check peer_reader (spawn-entry)
+      premise: program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)
+      scope: the thread of peer_reader
+      instance key: the thread (its creation link) and the event's instance on it
+  E4cba82ac87496495 HB-seq hard
+      from: the start of the thread of probe_child probe_child (spawn-entry)
+      to: call order.c:91:9 in probe_child -> name_create probe_child (spawn-entry)
+      premise: program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)
+      scope: the thread of probe_child
+      instance key: the thread (its creation link) and the event's instance on it
+  Eb884b23bff61df4d HB-seq hard
+      from: write order.c:329:3 in spawn_via [Peer.stamp] peer_two (spawn-entry)
+      to: spawn call order.c:330:10 in spawn_via peer_two (spawn-entry)
+      premise: program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included)
+      scope: one call of spawn_via
+      instance key: the call instance of spawn_via
+  Ed3f858b4148eab69 HB-seq hard
+      from: write order.c:379:3 in main [Config.level] main (process)
+      to: spawn call order.c:380:3 in main main (process)
+      premise: program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included)
+      scope: one call of main
+      instance key: the call instance of main
+  Ea6caa2ffffc32fc1 HB-spawn hard
+      from: spawn call order.c:106:3 in names_start -> pthread_create {main (process)}
+      to: the start of the thread of early_child early_child (spawn-entry)
+      condition: a thread of early_child is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:106:3 and the thread it creates
+      instance key: the call instance at order.c:106:3 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  Ec1fd2925dcaa3fd1 HB-spawn hard
+      from: spawn call order.c:108:3 in names_start -> pthread_create {main (process)}
+      to: the start of the thread of probe_child probe_child (spawn-entry)
+      condition: a thread of probe_child is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:108:3 and the thread it creates
+      instance key: the call instance at order.c:108:3 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  E402f7008248ba2d2 HB-spawn hard
+      from: spawn call order.c:109:3 in names_start -> pthread_create {main (process)}
+      to: the start of the thread of late_child late_child (spawn-entry)
+      condition: a thread of late_child is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:109:3 and the thread it creates
+      instance key: the call instance at order.c:109:3 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  E93ab18b72877c425 HB-spawn hard
+      from: spawn call order.c:145:8 in held_spawn -> pthread_create {main (process)}
+      to: the start of the thread of task_child task_child (spawn-entry)
+      condition: a thread of task_child is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:145:8 and the thread it creates
+      instance key: the call instance at order.c:145:8 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  Ee89ec8fbb2415893 HB-spawn hard
+      from: spawn call order.c:152:12 in window_spawn -> pthread_create {main (process)}
+      to: the start of the thread of task_child task_child (spawn-entry)
+      condition: a thread of task_child is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:152:12 and the thread it creates
+      instance key: the call instance at order.c:152:12 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  Ed1e6e8ed0b27a136 HB-spawn hard
+      from: spawn call order.c:184:7 in start_checked -> pthread_create {main (process)}
+      to: the start of the thread of wrapped_child wrapped_child (spawn-entry)
+      condition: a thread of wrapped_child is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:184:7 and the thread it creates
+      instance key: the call instance at order.c:184:7 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+      caller-dependent: start_checked is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure follows this edge only from the threads whose own outer spawn calls create this thread: {main (process)}
+  Efb0bde7a70958f49 HB-spawn hard
+      from: spawn call order.c:190:10 in start_plain -> pthread_create {main (process)}
+      to: the start of the thread of wrapped_child wrapped_child (spawn-entry)
+      condition: a thread of wrapped_child is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:190:10 and the thread it creates
+      instance key: the call instance at order.c:190:10 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+      caller-dependent: start_plain is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure follows this edge only from the threads whose own outer spawn calls create this thread: {main (process)}
+  E8fc0204b03c724b9 HB-spawn hard
+      from: spawn call order.c:196:12 in start_mapped -> start_checked {main (process)}
+      to: the start of the thread of wrapped_child wrapped_child (spawn-entry)
+      condition: a thread of wrapped_child is created by this call (start_checked returns 0 [0]; failure class: -11 [ERR_SETUP], -5 [ERR_ILLEGAL])
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:196:12 and the thread it creates
+      instance key: the call instance at order.c:196:12 (its call link) and the thread it creates (the creation link)
+      create primitive: start_checked -> pthread_create
+      status condition: start_checked returns 0 [0]; failure class: -11 [ERR_SETUP], -5 [ERR_ILLEGAL]
+      child without success: possible: start_checked returns -11 [ERR_SETUP] at order.c:185:25 after order.c:184:7
+      caller-dependent: start_mapped is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure follows this edge only from the threads whose own outer spawn calls create this thread: {main (process)}
+  Eb2e449830177530d HB-spawn hard
+      from: spawn call order.c:204:8 in wrapped_spawn -> start_checked {main (process)}
+      to: the start of the thread of wrapped_child wrapped_child (spawn-entry)
+      condition: a thread of wrapped_child is created by this call (start_checked returns 0 [0]; failure class: -11 [ERR_SETUP], -5 [ERR_ILLEGAL])
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:204:8 and the thread it creates
+      instance key: the call instance at order.c:204:8 (its call link) and the thread it creates (the creation link)
+      create primitive: start_checked -> pthread_create
+      status condition: start_checked returns 0 [0]; failure class: -11 [ERR_SETUP], -5 [ERR_ILLEGAL]
+      child without success: possible: start_checked returns -11 [ERR_SETUP] at order.c:185:25 after order.c:184:7
+  Eb2f2e89488120c9c HB-spawn hard
+      from: spawn call order.c:213:8 in plain_spawn -> start_plain {main (process)}
+      to: the start of the thread of wrapped_child wrapped_child (spawn-entry)
+      condition: a thread of wrapped_child is created by this call (start_plain returns 0 [pthread_create created the thread (P0 pthread_create)])
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:213:8 and the thread it creates
+      instance key: the call instance at order.c:213:8 (its call link) and the thread it creates (the creation link)
+      create primitive: start_plain -> pthread_create
+      status condition: start_plain returns 0 [pthread_create created the thread (P0 pthread_create)]
+      child without success: not found: no return of failure class after the creation call in start_plain (below: not found: pthread_create creates no thread when it fails (P0 pthread_create))
+  E586eba888994582a HB-spawn hard
+      from: spawn call order.c:222:8 in mapped_spawn -> start_mapped {main (process)}
+      to: the start of the thread of wrapped_child wrapped_child (spawn-entry)
+      condition: a thread of wrapped_child is created by this call (start_mapped returns 0 [0]; failure class: -12 [ERR_MAPPED])
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:222:8 and the thread it creates
+      instance key: the call instance at order.c:222:8 (its call link) and the thread it creates (the creation link)
+      create primitive: start_mapped -> start_checked -> pthread_create
+      status condition: start_mapped returns 0 [0]; failure class: -12 [ERR_MAPPED]
+      child without success: possible: start_mapped returns -12 [ERR_MAPPED] at order.c:197:16 after order.c:196:12 (the inner call order.c:196:12 may report a failure after its thread started: possible)
+  Ec6a8f60808bb8c5d HB-spawn hard
+      from: spawn call order.c:317:5 in apps_start -> pthread_create {main (process)}
+      to: the start of the thread of app_one app_one (table-walk-entry)
+      condition: a thread of app_one is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:317:5 and the thread it creates
+      instance key: the call instance at order.c:317:5 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  E904ba9fc77c8702f HB-spawn hard
+      from: spawn call order.c:317:5 in apps_start -> pthread_create {main (process)}
+      to: the start of the thread of app_two app_two (table-walk-entry)
+      condition: a thread of app_two is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:317:5 and the thread it creates
+      instance key: the call instance at order.c:317:5 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  E6bc76067c837d785 HB-spawn hard
+      from: spawn call order.c:330:10 in spawn_via -> pthread_create {peer_one (spawn-entry), peer_two (spawn-entry)}
+      to: the start of the thread of peer_quiet peer_quiet (spawn-entry)
+      condition: a thread of peer_quiet is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:330:10 and the thread it creates
+      instance key: the call instance at order.c:330:10 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+      caller-dependent: spawn_via is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure follows this edge only from the threads whose own outer spawn calls create this thread: {peer_one (spawn-entry)}
+  E47f096678e9b0e54 HB-spawn hard
+      from: spawn call order.c:330:10 in spawn_via -> pthread_create {peer_one (spawn-entry), peer_two (spawn-entry)}
+      to: the start of the thread of peer_reader peer_reader (spawn-entry)
+      condition: a thread of peer_reader is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:330:10 and the thread it creates
+      instance key: the call instance at order.c:330:10 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+      caller-dependent: spawn_via is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure follows this edge only from the threads whose own outer spawn calls create this thread: {peer_two (spawn-entry)}
+  E7ac773b15abfdd96 HB-spawn hard
+      from: spawn call order.c:347:9 in peer_one -> spawn_via {peer_one (spawn-entry)}
+      to: the start of the thread of peer_quiet peer_quiet (spawn-entry)
+      condition: a thread of peer_quiet is created by this call (spawn_via returns 0 [pthread_create created the thread (P0 pthread_create)])
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:347:9 and the thread it creates
+      instance key: the call instance at order.c:347:9 (its call link) and the thread it creates (the creation link)
+      create primitive: spawn_via -> pthread_create
+      status condition: spawn_via returns 0 [pthread_create created the thread (P0 pthread_create)]
+      child without success: not found: no return of failure class after the creation call in spawn_via (below: not found: pthread_create creates no thread when it fails (P0 pthread_create))
+  Ecf7931fd5680d0d2 HB-spawn hard
+      from: spawn call order.c:354:9 in peer_two -> spawn_via {peer_two (spawn-entry)}
+      to: the start of the thread of peer_reader peer_reader (spawn-entry)
+      condition: a thread of peer_reader is created by this call (spawn_via returns 0 [pthread_create created the thread (P0 pthread_create)])
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:354:9 and the thread it creates
+      instance key: the call instance at order.c:354:9 (its call link) and the thread it creates (the creation link)
+      create primitive: spawn_via -> pthread_create
+      status condition: spawn_via returns 0 [pthread_create created the thread (P0 pthread_create)]
+      child without success: not found: no return of failure class after the creation call in spawn_via (below: not found: pthread_create creates no thread when it fails (P0 pthread_create))
+  Ef8c552116c5e8e8b HB-spawn hard
+      from: spawn call order.c:361:8 in start_local -> pthread_create {main (process)}
+      to: the start of the thread of local_child local_child (spawn-entry)
+      condition: a thread of local_child is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:361:8 and the thread it creates
+      instance key: the call instance at order.c:361:8 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+      caller-dependent: start_local is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure follows this edge only from the threads whose own outer spawn calls create this thread: {main (process)}
+  Ed44225ae90579246 HB-spawn hard
+      from: spawn call order.c:380:3 in main -> pthread_create {main (process)}
+      to: the start of the thread of config_reader config_reader (spawn-entry)
+      condition: a thread of config_reader is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:380:3 and the thread it creates
+      instance key: the call instance at order.c:380:3 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  Efe59ec758f22177e HB-spawn hard
+      from: spawn call order.c:381:3 in main -> pthread_create {main (process)}
+      to: the start of the thread of config_writer config_writer (spawn-entry)
+      condition: a thread of config_writer is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:381:3 and the thread it creates
+      instance key: the call instance at order.c:381:3 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  Ef665d699af8b7be9 HB-spawn hard
+      from: spawn call order.c:382:3 in main -> pthread_create {main (process)}
+      to: the start of the thread of gate_main gate_main (spawn-entry)
+      condition: a thread of gate_main is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:382:3 and the thread it creates
+      instance key: the call instance at order.c:382:3 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  E5ad67a59df320954 HB-spawn hard
+      from: spawn call order.c:383:3 in main -> pthread_create {main (process)}
+      to: the start of the thread of waiter_main waiter_main (spawn-entry)
+      condition: a thread of waiter_main is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:383:3 and the thread it creates
+      instance key: the call instance at order.c:383:3 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  E54bf749bf3479094 HB-spawn hard
+      from: spawn call order.c:385:3 in main -> pthread_create {main (process)}
+      to: the start of the thread of peer_one peer_one (spawn-entry)
+      condition: a thread of peer_one is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:385:3 and the thread it creates
+      instance key: the call instance at order.c:385:3 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  E4877a11fbd818990 HB-spawn hard
+      from: spawn call order.c:386:3 in main -> pthread_create {main (process)}
+      to: the start of the thread of peer_two peer_two (spawn-entry)
+      condition: a thread of peer_two is created by this call (pthread_create returns 0 when it created the thread (P0 pthread_create))
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:386:3 and the thread it creates
+      instance key: the call instance at order.c:386:3 (its call link) and the thread it creates (the creation link)
+      create primitive: pthread_create
+      status condition: pthread_create returns 0 when it created the thread (P0 pthread_create)
+      child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+  Ebd4dc42feb9585d2 HB-spawn hard
+      from: spawn call order.c:387:9 in main -> start_local {main (process)}
+      to: the start of the thread of local_child local_child (spawn-entry)
+      condition: a thread of local_child is created by this call (start_local returns 0 [0]; failure class: -5 [ERR_ILLEGAL])
+      premise: P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization)
+      scope: one call at order.c:387:9 and the thread it creates
+      instance key: the call instance at order.c:387:9 (its call link) and the thread it creates (the creation link)
+      create primitive: start_local -> pthread_create
+      status condition: start_local returns 0 [0]; failure class: -5 [ERR_ILLEGAL]
+      child without success: unknown (position-based): every witness rests on the source position alone (a value redefined later on a path, a condition that reads a local, or an inner flag that does): start_local returns -5 [ERR_ILLEGAL] at order.c:362:16 after order.c:361:8
+[waits] 2
+  W70f8a1e31cecdc78 order.c:267:3 in skip_wait poll actors {waiter_main (spawn-entry)}
+      budget: the locals budget; delay order.c:269:5 -> usleep arg 0 [1000] = 1000
+      exit 0 condition at order.c:267:3: condition part (not (eq field:Gate.ready 0)); budget part -
+      exit 1 return at order.c:268:22: condition part -; budget part (le local:budget 0)
+      predicate: direct-test (not (eq field:Gate.ready 0)); AWAIT_L1 per-field await
+      awaited: Gate.ready; writers in other threads 1: write order.c:261:3 in gate_main [Gate.ready] gate_main (spawn-entry); writer sets complete under the per-field rule: yes; the condition exit at the initial values: false (only a write makes it true)
+      use read order.c:267:15 in skip_wait [gate.ready]: inside
+      use read order.c:272:27 in skip_wait [gate.ready]: skip
+      use call order.c:269:5 in skip_wait -> usleep: inside
+      use call order.c:272:10 in skip_wait -> level_check: skip
+      use the call of skip_wait order.c:286:9 in waiter_main (result discarded): continue
+  W62855148dcca42b1 order.c:277:3 in cont_wait poll actors {waiter_main (spawn-entry)}
+      budget: the locals budget; delay order.c:278:5 -> usleep arg 0 [1000] = 1000
+      exit 0 condition at order.c:277:3: condition part (not (eq field:Gate.ready 0)); budget part (not (gt local:budget 0))
+      predicate: direct-test (not (eq field:Gate.ready 0)); AWAIT_L1 per-field await
+      awaited: Gate.ready; writers in other threads 1: write order.c:261:3 in gate_main [Gate.ready] gate_main (spawn-entry); writer sets complete under the per-field rule: yes; the condition exit at the initial values: false (only a write makes it true)
+      use read order.c:277:15 in cont_wait [gate.ready]: inside
+      use read order.c:281:27 in cont_wait [gate.ready]: continue
+      use call order.c:278:5 in cont_wait -> usleep: inside
+      use call order.c:281:10 in cont_wait -> level_check: continue
+      use the call of cont_wait order.c:287:9 in waiter_main (result discarded): continue
+[rows] 11
+  A1 key 1c0a30d177620101 order.static hard_before
+      pair: call order.c:105:9 in names_start -> name_create main (process) -> call order.c:84:9 in early_child -> name_find early_child (spawn-entry): hard_before; path E7d851affcc56c045 HB-seq, Ea6caa2ffffc32fc1 HB-spawn, Efd0fb73724635517 HB-seq
+      pairs: hard_before 1
+      threads started by: early_child <- Ea6caa2ffffc32fc1 HB-spawn order.c:106:3
+      opposite: undecidable (the relations row's feasibility of the other order)
+  A2 key a020d4050a5d2b7a order.static fixed_early_proved
+      pair: call order.c:91:9 in probe_child -> name_create probe_child (spawn-entry) -> call order.c:107:9 in names_start -> name_find main (process): fixed_early_proved; path E3da1671bfbbaf52e HB-seq, Ec1fd2925dcaa3fd1 HB-spawn, E4cba82ac87496495 HB-seq
+      pairs: fixed_early_proved 1
+      threads started by: probe_child <- Ec1fd2925dcaa3fd1 HB-spawn order.c:108:3
+      opposite: undecidable (the relations row's feasibility of the other order)
+  A3 key 854b0dfe2bcbd4c9 order.static unordered
+      pair: call order.c:98:9 in late_child -> name_create late_child (spawn-entry) -> call order.c:110:9 in names_start -> name_find main (process): unordered: no path of hard or conditional edges either way
+      pairs: unordered 1
+      threads started by: late_child <- E402f7008248ba2d2 HB-spawn order.c:109:3
+      opposite: undecidable (the relations row's feasibility of the other order)
+  B1 key ebe18d4a377ee401 order.static unordered
+      pair: write order.c:379:3 in main [Config.level] main (process) -> call order.c:242:9 in config_reader -> level_check config_reader (spawn-entry): hard_before; path Ed3f858b4148eab69 HB-seq, Ed44225ae90579246 HB-spawn, E275835f5f57a09b8 HB-seq
+      pair: write order.c:248:3 in config_writer [Config.level] config_writer (spawn-entry) -> call order.c:242:9 in config_reader -> level_check config_reader (spawn-entry): unordered: no path of hard or conditional edges either way
+      pairs: hard_before 1, unordered 1
+      threads started by: config_reader <- Ed44225ae90579246 HB-spawn order.c:380:3; config_writer <- Efe59ec758f22177e HB-spawn order.c:381:3
+      opposite: undecidable (the relations row's feasibility of the other order)
+  B2 key a174564dd63c63eb order.static conditional_before
+      pair: write order.c:261:3 in gate_main [Gate.ready] gate_main (spawn-entry) -> call order.c:281:10 in cont_wait -> level_check waiter_main (spawn-entry): conditional_before; path E97511afa2f26067f HB-await; conditions: the wait at order.c:277:3 was left by its condition exit, which read this write; its budget exit also reaches the use (continue)
+      pair: write order.c:261:3 in gate_main [Gate.ready] gate_main (spawn-entry) -> call order.c:272:10 in skip_wait -> level_check waiter_main (spawn-entry): hard_before; path Ea3ef0434d3a65a90 HB-await
+      pairs: conditional_before 1, hard_before 1
+      threads started by: gate_main <- Ef665d699af8b7be9 HB-spawn order.c:382:3; waiter_main <- E5ad67a59df320954 HB-spawn order.c:383:3
+      opposite: undecidable (the relations row's feasibility of the other order)
+  B3 key c6a19adc817be061 order.static unordered
+      pair: write order.c:329:3 in spawn_via [Peer.stamp] peer_two (spawn-entry) -> call order.c:335:9 in peer_reader -> level_check peer_reader (spawn-entry): hard_before; path Eb884b23bff61df4d HB-seq, E47f096678e9b0e54 HB-spawn, Ee1b63c9646b7d472 HB-seq
+      pair: write order.c:329:3 in spawn_via [Peer.stamp] peer_one (spawn-entry) -> call order.c:335:9 in peer_reader -> level_check peer_reader (spawn-entry): unordered: no path of hard or conditional edges either way
+      pairs: hard_before 1, unordered 1
+      threads started by: peer_one <- E54bf749bf3479094 HB-spawn order.c:385:3; peer_reader <- E47f096678e9b0e54 HB-spawn order.c:330:10; peer_reader <- Ecf7931fd5680d0d2 HB-spawn order.c:354:9; peer_two <- E4877a11fbd818990 HB-spawn order.c:386:3
+      opposite: undecidable (the relations row's feasibility of the other order)
+  C1 key 38625094dbfe3d32 order.static hard_before
+      pair: write order.c:146:3 in held_spawn [Task.registered] main (process) -> read order.c:131:26 in task_check [tasks[task_self()].registered] task_child (spawn-entry): hard_before; path Eca6b6a50d016c081 HB-lock; applies when the write runs: it follows the spawn call order.c:145:8 in this call of held_spawn; pthread_create returns 0 when it created the thread (P0 pthread_create); child without success: not found: pthread_create creates no thread when it fails (P0 pthread_create)
+      pairs: hard_before 1
+      threads started by: task_child <- E93ab18b72877c425 HB-spawn order.c:145:8
+      opposite: proven-impossible (the relations row's feasibility of the other order)
+  C2 key 5c107e915293b1fc order.static unordered
+      pair: write order.c:154:3 in window_spawn [Task.registered] main (process) -> read order.c:131:26 in task_check [tasks[task_self()].registered] task_child (spawn-entry): unordered: no path of hard or conditional edges either way
+      pairs: unordered 1
+      threads started by: task_child <- Ee89ec8fbb2415893 HB-spawn order.c:152:12
+      opposite: possible (the relations row's feasibility of the other order)
+  C3 key be8a1be22466766b order.static hard_before
+      pair: write order.c:205:16 in wrapped_spawn [WTask.registered] main (process) -> read order.c:172:27 in wtask_check [wtasks[task_self()].registered] wrapped_child (spawn-entry): hard_before; path Ee06e16eace79f753 HB-lock; applies when the write runs: it follows the spawn call order.c:204:8 in this call of wrapped_spawn under (eq local:rc 0); start_checked returns 0 [0]; failure class: -11 [ERR_SETUP], -5 [ERR_ILLEGAL]; child without success: possible: start_checked returns -11 [ERR_SETUP] at order.c:185:25 after order.c:184:7
+      pairs: hard_before 1
+      threads started by: wrapped_child <- Eb2e449830177530d HB-spawn order.c:204:8
+      opposite: proven-impossible (the relations row's feasibility of the other order)
+  C4 key af2bf2915a81b9df order.static hard_before
+      pair: write order.c:214:16 in plain_spawn [WTask.registered] main (process) -> read order.c:172:27 in wtask_check [wtasks[task_self()].registered] wrapped_child (spawn-entry): hard_before; path E3d6e80571876ba3d HB-lock; applies when the write runs: it follows the spawn call order.c:213:8 in this call of plain_spawn under (eq local:rc 0); start_plain returns 0 [pthread_create created the thread (P0 pthread_create)]; child without success: not found: no return of failure class after the creation call in start_plain (below: not found: pthread_create creates no thread when it fails (P0 pthread_create))
+      pairs: hard_before 1
+      threads started by: wrapped_child <- Eb2f2e89488120c9c HB-spawn order.c:213:8
+      opposite: proven-impossible (the relations row's feasibility of the other order)
+  C5 key c88e0f650e6aa75f order.static hard_before
+      pair: write order.c:223:16 in mapped_spawn [WTask.registered] main (process) -> read order.c:172:27 in wtask_check [wtasks[task_self()].registered] wrapped_child (spawn-entry): hard_before; path E50954cf2e827bf8c HB-lock; applies when the write runs: it follows the spawn call order.c:222:8 in this call of mapped_spawn under (eq local:rc 0); start_mapped returns 0 [0]; failure class: -12 [ERR_MAPPED]; child without success: possible: start_mapped returns -12 [ERR_MAPPED] at order.c:197:16 after order.c:196:12 (the inner call order.c:196:12 may report a failure after its thread started: possible)
+      pairs: hard_before 1
+      threads started by: wrapped_child <- E586eba888994582a HB-spawn order.c:222:8
+      opposite: proven-impossible (the relations row's feasibility of the other order)
+
+# pairs
+kz-order-pairs 1
+relations rules relations rules revision 12 (2026-11-18)
+order order rules revision 5 (2026-11-18)
+domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B and C); a pair in one thread has the value same_thread
+columns row_key	path	use_pos	use_function	use_root	other_kind	other_pos	other_function	other_root	value	edges	premises	row_line
+1c0a30d177620101	A	order.c:84:9	early_child	early_child (spawn-entry)	creator-not-a-pair(key constants differ)	order.c:91:9	probe_child	probe_child (spawn-entry)	unordered	-	-	not a pair
+1c0a30d177620101	A	order.c:84:9	early_child	early_child (spawn-entry)	creator-not-a-pair(key constants differ)	order.c:98:9	late_child	late_child (spawn-entry)	unordered	-	-	not a pair
+1c0a30d177620101	A	order.c:84:9	early_child	early_child (spawn-entry)	creator	order.c:105:9	names_start	main (process)	hard_before	E7d851affcc56c045,Ea6caa2ffffc32fc1,Efd0fb73724635517	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included); P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization); program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)	creator
+a020d4050a5d2b7a	A	order.c:107:9	names_start	main (process)	creator	order.c:91:9	probe_child	probe_child (spawn-entry)	fixed_early_proved	E3da1671bfbbaf52e,Ec1fd2925dcaa3fd1,E4cba82ac87496495	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included); P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization); program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)	creator
+a020d4050a5d2b7a	A	order.c:107:9	names_start	main (process)	creator-not-a-pair(key constants differ)	order.c:98:9	late_child	late_child (spawn-entry)	fixed_early_proved	Ee729ed330c5b3abb,E402f7008248ba2d2,E70e2a005b413b8cb	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included); P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization); program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)	not a pair
+a020d4050a5d2b7a	A	order.c:107:9	names_start	main (process)	creator-not-a-pair(key constants differ)	order.c:105:9	names_start	main (process)	same_thread	-	-	not a pair
+854b0dfe2bcbd4c9	A	order.c:110:9	names_start	main (process)	creator-not-a-pair(key constants differ)	order.c:91:9	probe_child	probe_child (spawn-entry)	unordered	-	-	not a pair
+854b0dfe2bcbd4c9	A	order.c:110:9	names_start	main (process)	creator	order.c:98:9	late_child	late_child (spawn-entry)	unordered	-	-	creator
+854b0dfe2bcbd4c9	A	order.c:110:9	names_start	main (process)	creator-not-a-pair(key constants differ)	order.c:105:9	names_start	main (process)	same_thread	-	-	not a pair
+ebe18d4a377ee401	B	order.c:242:9	config_reader	config_reader (spawn-entry)	writer	order.c:248:3	config_writer	config_writer (spawn-entry)	unordered	-	-	writer
+ebe18d4a377ee401	B	order.c:242:9	config_reader	config_reader (spawn-entry)	writer	order.c:379:3	main	main (process)	hard_before	Ed3f858b4148eab69,Ed44225ae90579246,E275835f5f57a09b8	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included); P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization); program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)	writer
+a174564dd63c63eb	B	order.c:272:10	skip_wait	waiter_main (spawn-entry)	writer	order.c:261:3	gate_main	gate_main (spawn-entry)	hard_before	Ea3ef0434d3a65a90	reads-from: the condition exit reads the value this write stored (the only write of the awaited fields in another thread); the awaited fields' writer sets are complete under the per-field rule of FIELD_STATUS; L1 under the per-field rule: await; the condition exit is false at the initial values: checked	writer
+a174564dd63c63eb	B	order.c:281:10	cont_wait	waiter_main (spawn-entry)	writer	order.c:261:3	gate_main	gate_main (spawn-entry)	conditional_before	E97511afa2f26067f	reads-from: the condition exit reads the value this write stored (the only write of the awaited fields in another thread); the awaited fields' writer sets are complete under the per-field rule of FIELD_STATUS; L1 under the per-field rule: await; the condition exit is false at the initial values: checked	writer
+c6a19adc817be061	B	order.c:335:9	peer_reader	peer_reader (spawn-entry)	writer	order.c:329:3	spawn_via	peer_one (spawn-entry)	unordered	-	-	writer
+c6a19adc817be061	B	order.c:335:9	peer_reader	peer_reader (spawn-entry)	writer	order.c:329:3	spawn_via	peer_two (spawn-entry)	hard_before	Eb884b23bff61df4d,E47f096678e9b0e54,Ee1b63c9646b7d472	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included); P0 thread creation: the new thread starts after the creation call has begun, and what the creator did before the call is visible to it (POSIX.1-2017 pthread_create; XBD 4.12 memory synchronization); program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)	writer
+38625094dbfe3d32	C	order.c:131:26	task_check	task_child (spawn-entry)	writer	order.c:146:3	held_spawn	main (process)	hard_before	Eca6b6a50d016c081	lock #0 &task_mutex@order.c:121 held from one acquisition across the spawn and the write, and held by the read (relations path C, row C1: proven-impossible); rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)	write after the spawn
+5c107e915293b1fc	C	order.c:131:26	task_check	task_child (spawn-entry)	writer	order.c:154:3	window_spawn	main (process)	unordered	-	-	write after the spawn
+be8a1be22466766b	C	order.c:172:27	wtask_check	wrapped_child (spawn-entry)	writer	order.c:205:16	wrapped_spawn	main (process)	hard_before	Ee06e16eace79f753	lock #1 &wtask_mutex@order.c:166 held from one acquisition across the spawn and the write, and held by the read (relations path C, row C3: proven-impossible); rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)	write after the spawn
+af2bf2915a81b9df	C	order.c:172:27	wtask_check	wrapped_child (spawn-entry)	writer	order.c:214:16	plain_spawn	main (process)	hard_before	E3d6e80571876ba3d	lock #1 &wtask_mutex@order.c:166 held from one acquisition across the spawn and the write, and held by the read (relations path C, row C4: proven-impossible); rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)	write after the spawn
+c88e0f650e6aa75f	C	order.c:172:27	wtask_check	wrapped_child (spawn-entry)	writer	order.c:223:16	mapped_spawn	main (process)	hard_before	E50954cf2e827bf8c	lock #1 &wtask_mutex@order.c:166 held from one acquisition across the spawn and the write, and held by the read (relations path C, row C5: proven-impossible); rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)	write after the spawn
+edge	Ee729ed330c5b3abb	HB-seq	hard	call order.c:107:9 in names_start -> name_find	main (process)	spawn call order.c:109:3 in names_start	main (process)		program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call (no path of the control-flow graph reaches it after the call, back edges included)	one call of names_start	the call instance of names_start
+edge	E70e2a005b413b8cb	HB-seq	hard	the start of the thread of late_child	late_child (spawn-entry)	call order.c:98:9 in late_child -> name_create	late_child (spawn-entry)		program order of one thread: a thread's start precedes every event of its code (the code of the root: the call graph from it, direct calls and resolved indirect targets)	the thread of late_child	the thread (its creation link) and the event's instance on it
+rows 11 pairs 20 hard_before 8 conditional_before 1 fixed_early_proved 2 fixed_early_candidate 0 unordered 7 unknown 0 same_thread 2 no_pair 0 edges_not_in_tsv 2
+end

@@ -33,3 +33,9 @@ archive.sh fixed (both comparisons read the list in the form ./<path>; MEMBERS.s
     case 5 (a list without ./)
 space_guard.sh --need 5000000 --kind selftest -- bash selftest.sh <scratch> > selftest_2.txt               rc 0, 5 of 5 (guard/g07_selftest_2.log)
 the fix is committed before the next archive
+committed as ea19ba4
+SPACE_TMP=<scratch> bash run_seq.sh 4 4                                          rc 0: rf2_final_extract archived (5117540 bytes),
+    round trip 50 of 50, ledger_check of the proposed ledger 193 rows 0 failing; free 408137728 -> 475467776
+SPACE_TMP=<scratch> bash run_seq.sh 5 21                                         rc 0: 17 archived, each round trip PASS and
+    ledger_check 0 failing (progress.tsv, archive/, ledger/, guard/a_*); free 475459584 -> 1077710848; short of target 136311040
+the tier 1 result is committed before tier 2

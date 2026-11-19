@@ -1,0 +1,6 @@
+# archive.sh schema12_on_extract records/schema-rev12-20261116/schema12_on_extract.sha256 2026-11-19T13:52:40Z
+1. directory = list: 15 files, 7758336 bytes (apparent), 7802880 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/schema12_on_extract/schema12_on_extract.tar.xz 113892 bytes sha256 7b227543e881680aeaaef0831e605670b4c065f14d7a0146ebd55f208c21e304
+4. round trip: 15 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/schema12_on_extract removed 2026-11-19T13:52:41Z
+PASS

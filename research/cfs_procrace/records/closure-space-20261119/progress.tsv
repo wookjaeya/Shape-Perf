@@ -1,1 +1,19 @@
 seq	name	row	free_before	free_after	archive_bytes	guard_lowest	ledger_check
+4	rf2_final_extract	OBS_rf2_final_extract	408137728	475467776	5117540	402989056	ledger_check: 193 rows, 0 failing
+5	ll_final_extract	OBS_ll_final_extract	475459584	542572544	5133268	470265856	ledger_check: 193 rows, 0 failing
+6	rf_on_extract	OBS_rf_on_extract	542564352	609341440	5102996	537329664	ledger_check: 193 rows, 0 failing
+7	sem_on_extract	OBS_sem_on_extract	609341440	661180416	3918420	605409280	ledger_check: 193 rows, 0 failing
+8	objacc_on_extract	OBS_objacc_on_extract	661180416	711454720	3821736	657321984	ledger_check: 193 rows, 0 failing
+9	revfix_extract	OBS_revfix_extract	711454720	755163136	3390692	711442432	ledger_check: 193 rows, 0 failing
+10	rf2_off_extract	OBS_rf2_off_extract	755163136	798855168	3391580	755150848	ledger_check: 193 rows, 0 failing
+11	extfix_extract	OBS_extfix_extract	798855168	842448896	3415616	795385856	ledger_check: 193 rows, 0 failing
+12	order_rev1_extract	OBS_orderrev1_extract	842448896	886018048	3426624	838991872	ledger_check: 193 rows, 0 failing
+13	order_rev1b_extract	OBS_orderrev1b_extract	886018048	929619968	3390940	882601984	ledger_check: 193 rows, 0 failing
+14	relrev7_extract	OBS_relrev7_extract	929619968	973230080	3386188	929607680	ledger_check: 193 rows, 0 failing
+15	schema12_extract	OBS_schema12_extract	973230080	1016823808	3396284	969805824	ledger_check: 193 rows, 0 failing
+16	extfix_on_extract	OBS_extfix_onextract	1016823808	1031942144	220372	1016819712	ledger_check: 193 rows, 0 failing
+17	revfix_on_extract	OBS_revfix_onextract	1031942144	1046433792	211916	1031938048	ledger_check: 193 rows, 0 failing
+18	extfix_pre_onextract	OBS_extfix_pre_onextract	1046433792	1054818304	148852	1046429696	ledger_check: 193 rows, 0 failing
+19	order_rev1b_on_extract	OBS_orderrev1b_onextract	1054818304	1062457344	113892	1054814208	ledger_check: 193 rows, 0 failing
+20	schema12_on_extract	OBS_schema12_onextract	1062457344	1070100480	113892	1062453248	ledger_check: 193 rows, 0 failing
+21	order_rev1_on_extract	OBS_orderrev1_onextract	1070100480	1077710848	113744	1070096384	ledger_check: 193 rows, 0 failing

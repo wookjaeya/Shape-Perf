@@ -1,0 +1,6 @@
+# archive.sh ll_final_extract records/loop-lock-20261116/ll_final_extract.sha256 2026-11-19T13:48:50Z
+1. directory = list: 50 files, 72159659 bytes (apparent), 72331264 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/ll_final_extract/ll_final_extract.tar.xz 5133268 bytes sha256 e798db399afea70b168d367d63a597212d583533137cece008acd357e98eb37a
+4. round trip: 50 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/ll_final_extract removed 2026-11-19T13:49:10Z
+PASS

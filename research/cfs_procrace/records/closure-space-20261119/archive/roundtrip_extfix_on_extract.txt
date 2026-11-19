@@ -1,0 +1,6 @@
+# archive.sh extfix_on_extract records/extract-fixes-20261116/extfix_on_extract.sha256 2026-11-19T13:52:16Z
+1. directory = list: 30 files, 15324352 bytes (apparent), 15384576 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/extfix_on_extract/extfix_on_extract.tar.xz 220372 bytes sha256 d2e0eb4d185f15e648d1b5190e14872b1effdf8e95dd42d66eb3f1e322c49408
+4. round trip: 30 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/extfix_on_extract removed 2026-11-19T13:52:17Z
+PASS

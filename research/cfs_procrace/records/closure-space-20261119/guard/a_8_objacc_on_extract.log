@@ -1,0 +1,10 @@
+# space_guard.sh kind=archive need=20000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-space-20261119/archive.sh objacc_on_extract records/object-access-20261116/objacc_on_extract.sha256
+start 2026-11-19T13:50:02.502Z free=661180416 threshold=334572800
+sample 2026-11-19T13:50:02.506Z 661176320
+sample 2026-11-19T13:50:04.514Z 661164032
+sample 2026-11-19T13:50:06.520Z 661164032
+sample 2026-11-19T13:50:08.527Z 661164032
+sample 2026-11-19T13:50:10.533Z 661164032
+sample 2026-11-19T13:50:12.539Z 661164032
+sample 2026-11-19T13:50:14.545Z 657321984
+end 2026-11-19T13:50:16.552Z kind=archive verdict=completed rc=0 free=711479296 lowest=657321984 dip=3858432 change=50298880

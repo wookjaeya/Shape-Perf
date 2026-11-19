@@ -28,3 +28,9 @@ SPACE_TMP=<scratch> bash run_seq.sh 2 12                                        
 ../../env/tools/ledger_check.sh > ledger/check_after_archive.txt                 rc 0 (205 rows, 0 failing; ledger sha256 6763efd1...)
 git grep of the committed scripts for xr5_ > scripts_naming_archived.txt         (42 lines in the two runs.sh of results 26.3 and
     26.5; no step still to run)
+committed as c367219
+## 3. end
+../../env/tools/ledger_check.sh > ledger/check_end.txt                           rc 0 (205 rows, 0 failing)
+space_guard.sh --need 5000000 --kind tools-check --log guard/g04_tools_check_deep.log -- bash ../../env/tools/tools_check.sh --deep
+    > tools_check_deep_end.txt                                                    rc 0 (59 rows, 0 failing, deep)
+{ date -u; df -B1 /; } > free_end.txt                                             18:20:17Z (available 1059168256)

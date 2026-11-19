@@ -14,6 +14,8 @@
 | `run_seq.sh` | `chosen.tsv` 의 줄을 하나씩: 줄 앞에서 여유가 필요량(`need.txt` 의 `need_free`)에 닿았으면 멈춤; 감시 아래 압축 → 제안 장부 → 제안 장부의 `ledger_check.sh` → 장부 교체 → `progress.tsv` 한 줄. `../closure-space-20261119/run_seq.sh` 에서 머리글, 층 이름, 필요량 줄 이름만 바꿈 |
 | `guard/` | 출력을 쓰는 모든 실행의 `space_guard.sh` 기록 |
 | `archive/`, `ledger/`, `progress.tsv` | 압축마다의 왕복 기록(`roundtrip_<이름>.txt`), 장부 고침과 점검(`rewrite.txt`, 줄마다 `check_<줄>_<이름>.txt`, 시작과 끝의 점검), 진행(줄마다 앞뒤 여유, 압축 크기, 감시의 가장 낮은 값) |
+| `free_end.txt`, `tools_check_deep_end.txt` | 끝의 `df -B1 /`, 등록부 `--deep` 점검 |
+| `scripts_naming_archived.txt` | `xr5_` 를 이름 대는 커밋된 스크립트의 줄(26.3 과 26.5 의 `runs.sh` 둘; 끝난 단계의 것) |
 | `commands.txt` | 돌린 차례 |
 
 ## 고르는 규칙 (`listing.py` 의 머리글)

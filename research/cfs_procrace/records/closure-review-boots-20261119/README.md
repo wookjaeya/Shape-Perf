@@ -4,7 +4,9 @@ The review read results 27.1-27.4 (`plan/full_stage_results_20261116.md`) agains
 outputs and the texts that govern the report (lead ruling 26.7 (마), evaluation protocol 3, 6, 8, 10, 12, 14, judgement
 rules 8.13, 8.14, spec 11).  It gave 22 findings; the verification judged every one real and to be corrected before the
 report goes to the PI.  What was done with each is in `findings.tsv` (one line per finding, with its group) and in results
-27.4, where every corrected place carries the finding id.  No boot is run in this step; no boot of the cycle is left.
+27.4, where every corrected place carries the group of its findings (`[고침 Gn]`).  `notes27_4.md` (Korean, written with
+the corrections) holds the evidence and the next-cycle items of the groups that 27.4 states only briefly (G1, G2, G3, G7,
+G16), with file and line references.  No boot is run in this step; no boot of the cycle is left.
 
 **What changes and what does not.** Only the report text changes: results 27.4 and the heads of the expectation columns
 of the 27.1 and 27.2 tables.  The diff of the results document is kept as `out/results27.diff`.  The boot records, the
@@ -57,10 +59,13 @@ the committed `../closure-report-20261119/out/`, its sha256 and line count in ea
 committed one the number of lines of `diff`.  The earlier text of report27.py that made `dev1` was not kept by the report
 step and cannot be recovered; this record says so instead of claiming it.
 
-**Other files.** `out/free_*.txt`, `out/ledger_check_*.txt`, `out/tools_check_deep_end.txt`: start and end checks;
+**Other files.** `notes27_4.md`: the evidence of the longer corrections (above); `out/results27.diff`: the diff of the
+results document made by this step; `out/review27.stdout`, `out/review27.stderr`: the check script's own output;
+`out/free_*.txt`, `out/ledger_check_*.txt`, `out/tools_check_deep_end.txt`: start, middle and end checks;
 `guard/`: the space-guard log of every run of this step that writes outputs; `commands.txt`: what was run, in order, with
 each rc.
 
-**Size of the results document.** It was 994,533 B before this step.  27.3 keeps it under 10^6 B; the corrections replace
-the wrong sentences in place and cite the files above for line values, so the document stays under that bound (its size
-after the step is in `commands.txt`).
+**Size of the results document.** It was 994,533 B before this step and is 999,813 B after it (27.3 keeps it under
+10^6 B).  The corrections replace the wrong sentences in place, state the corrected facts with their counts, and cite
+`out/review27/` and `notes27_4.md` for the line values and the longer evidence.  There is no room left in the document for
+another section; where the next one goes is for the lead (27.4 (하) 5).

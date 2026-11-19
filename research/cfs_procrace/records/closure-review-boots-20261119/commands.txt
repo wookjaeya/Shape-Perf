@@ -23,3 +23,12 @@ ledger row OBS_c1cyc_report27_dev appended to records/LEDGER.tsv; ledger_check.s
                                                                                 dev1 differs in t09_aux.tsv (640 against 636 lines,
                                                                                 diff 848 lines) and run.txt, and has inputs.sha256
                                                                                 (7,700 lines) in place of inputs.txt; guard completed
+plan/full_stage_results_20261116.md: 27.4 corrected in place (dated header, [고침 G1]-[고침 G16]), the expectation column
+    head of the 27.1 and 27.2 tables labelled '(16 갈래 합)'; notes27_4.md written     994,533 B -> 999,813 B (under 10^6 B)
+    (one earlier draft of the same edits reached 999,254 B before all corrections were in; it was reverted with
+    git checkout of the file and the edits re-applied in a shorter form; no output depended on it)
+git diff -- plan/full_stage_results_20261116.md > out/results27.diff             rc 0 (33,581 B)
+../../env/tools/ledger_check.sh > out/ledger_check_end.txt                       rc 0 (246 rows, 0 failing)
+space_guard.sh --need 10000000 --kind tools-check-deep --log guard/tools_check_deep.log -- tools_check.sh --deep
+    > out/tools_check_deep_end.txt                                               rc 0 (59 rows, 0 failing; guard completed)
+{ date -u; df -B1 /; } > out/free_end.txt                                        22:11:36Z (available 451514368)  rc 0

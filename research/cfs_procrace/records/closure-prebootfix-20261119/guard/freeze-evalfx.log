@@ -1,0 +1,5 @@
+# space_guard.sh kind=freeze-evalfx need=20000000 floor=314572800 interval=2 cmd=python3 -I env/obs1/tests/test_explain_eval.py env/obs1 <scratch>/fev
+start 2026-11-19T17:49:04.489Z free=764227584 threshold=334572800
+sample 2026-11-19T17:49:04.494Z 764223488
+sample 2026-11-19T17:49:06.501Z 759984128
+end 2026-11-19T17:49:08.508Z kind=freeze-evalfx verdict=completed rc=0 free=759398400 lowest=759398400 dip=4829184 change=-4829184

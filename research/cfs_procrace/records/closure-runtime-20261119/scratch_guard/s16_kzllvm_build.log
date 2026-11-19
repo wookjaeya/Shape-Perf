@@ -1,0 +1,7 @@
+# space_guard.sh kind=scratch-plugin need=157286400 floor=314572800 interval=2 cmd=cmake --build <scratch>/kzllvm -j8
+start 2026-11-19T07:12:54.833Z free=784199680 threshold=471859200
+sample 2026-11-19T07:12:54.837Z 784195584
+sample 2026-11-19T07:12:56.844Z 778289152
+sample 2026-11-19T07:12:58.851Z 775835648
+sample 2026-11-19T07:13:00.859Z 774975488
+end 2026-11-19T07:13:02.867Z kind=scratch-plugin verdict=completed rc=0 free=772042752 lowest=772042752 dip=12156928 change=-12156928

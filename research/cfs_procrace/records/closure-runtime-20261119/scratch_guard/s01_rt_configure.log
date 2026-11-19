@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-rt need=104857600 floor=314572800 interval=2 cmd=cmake -S /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime -B <scratch>/rt -DCMAKE_BUILD_TYPE=RelWithDebInfo
+start 2026-11-19T07:02:27.053Z free=828071936 threshold=419430400
+sample 2026-11-19T07:02:27.057Z 828067840
+end 2026-11-19T07:02:29.063Z kind=scratch-rt verdict=completed rc=0 free=826306560 lowest=826306560 dip=1765376 change=-1765376

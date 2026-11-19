@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-rt need=52428800 floor=314572800 interval=2 cmd=ctest -j4
+start 2026-11-19T07:03:13.626Z free=800616448 threshold=367001600
+sample 2026-11-19T07:03:13.631Z 800612352
+end 2026-11-19T07:03:15.639Z kind=scratch-rt verdict=completed rc=0 free=799117312 lowest=799117312 dip=1499136 change=-1499136

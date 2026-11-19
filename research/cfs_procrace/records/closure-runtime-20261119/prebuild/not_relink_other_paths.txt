@@ -1,0 +1,10 @@
+tests/cfs-free/anchor_reached_run/tailjump_prog
+tests/cfs-free/observe_it/tampered_last
+tests/cfs-free/observe_it/tampered_target
+tests/cfs-free/observe_it/target_copy
+tests/cfs-free/observe_it/truncated
+tests/cfs-free/tailjump_prog_alt
+tests/cfs-free/tailjump_prog_cc
+tests/cfs-free/target_prog_alt
+tests/cfs-free/target_prog_dwarf4
+tests/cfs-free/target_prog_nodebug

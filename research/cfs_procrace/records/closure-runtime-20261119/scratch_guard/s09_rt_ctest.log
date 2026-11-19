@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-rt need=52428800 floor=314572800 interval=2 cmd=ctest -R rt_objects|rt_format15 --output-on-failure
+start 2026-11-19T07:05:57.961Z free=798916608 threshold=367001600
+sample 2026-11-19T07:05:57.966Z 798912512
+end 2026-11-19T07:05:59.972Z kind=scratch-rt verdict=completed rc=0 free=798900224 lowest=798900224 dip=16384 change=-16384

@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-rt need=104857600 floor=314572800 interval=2 cmd=cmake --build <scratch>/rt -j8
+start 2026-11-19T07:03:04.090Z free=807976960 threshold=419430400
+sample 2026-11-19T07:03:04.094Z 807972864
+sample 2026-11-19T07:03:06.101Z 806854656
+end 2026-11-19T07:03:08.107Z kind=scratch-rt verdict=completed rc=0 free=800624640 lowest=800624640 dip=7352320 change=-7352320

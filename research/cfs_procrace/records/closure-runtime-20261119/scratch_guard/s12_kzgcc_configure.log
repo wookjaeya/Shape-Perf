@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-plugin need=104857600 floor=314572800 interval=2 cmd=cmake -S /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc -B <scratch>/kzgcc
+start 2026-11-19T07:11:05.687Z free=797523968 threshold=419430400
+sample 2026-11-19T07:11:05.691Z 797519872
+end 2026-11-19T07:11:07.699Z kind=scratch-plugin verdict=completed rc=0 free=796880896 lowest=796880896 dip=643072 change=-643072

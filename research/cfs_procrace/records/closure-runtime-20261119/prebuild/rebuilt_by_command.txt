@@ -1,0 +1,2 @@
+instrument/clang/transform_test/instr
+instrument/clang/transform_test/orig

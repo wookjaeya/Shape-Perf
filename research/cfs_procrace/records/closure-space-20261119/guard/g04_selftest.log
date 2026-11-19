@@ -1,0 +1,4 @@
+# space_guard.sh kind=selftest need=5000000 floor=314572800 interval=2 cmd=bash selftest.sh <scratch>
+start 2026-11-19T13:42:17.085Z free=378937344 threshold=319572800
+sample 2026-11-19T13:42:17.090Z 378933248
+end 2026-11-19T13:42:19.096Z kind=selftest verdict=completed rc=0 free=378925056 lowest=378925056 dip=12288 change=-12288

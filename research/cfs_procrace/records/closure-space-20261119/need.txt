@@ -1,0 +1,28 @@
+# kz-space-need 1 (records/closure-space-20261119/need.py); all [I] except the inputs, which are [M] in kept files
+floor 314572800
+free_now 379064320
+per_boot.boot 2736128 (dip, records/obs1-20261116-boot/df_boot.log)
+per_boot.convert 864256 (blocks of obs1/c1pre_convert)
+per_boot.explain16 47800320 (16 x 23900160 / 8; records/closure-explain-rev4-20261119/guard/g06_regress_rev4_2.log)
+per_boot.explain16_static 26869760 (beside it, not used: records/closure-c1prep-20261119/guard/s_explaincheck2_pre.log)
+per_boot.records 409600 (blocks of records/obs1-20261116-boot and records/obs1-20261116-reviewfix)
+per_boot 51810304
+boots 12
+boots_total 621723648
+code.fixtures 72712192 (scratch, removed at the end; g09_fixtures.log)
+code.regression 23900160 (g06_regress_rev4_2.log)
+code.dry_static 56123392 (2 orders x (g07 c1_pre_tx + g07 c1_post_tx))
+code.dry_rt 24989696 (g08 rt_objects + g08 rt_format15)
+code_total 177725440
+margin 100000000
+need_above_floor 899449088
+target_free 1214021888
+to_reclaim_now 834957568
+beside: with the static 16-branch measure per boot the need would be 648282368 (target 962855168)
+archive_ratio rf_off_extract 0.071751 (3383000 / 47149056)
+archive_ratio sem_off_extract 0.071998 (3394656 / 47149056)
+archive_ratio objacc_off_extract 0.072036 (3396416 / 47149056)
+archive_ratio ll_off_extract 0.072207 (3404512 / 47149056)
+archive_ratio_used 0.072207
+chosen 35 directories (tier 1 18, R 3, tier 2 14); expected free after all 1237242431
+expected: need met after seq 32

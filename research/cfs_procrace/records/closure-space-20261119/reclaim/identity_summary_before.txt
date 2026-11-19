@@ -1,0 +1,6 @@
+# root /home/user/work/redesign/obs1; run 2026-11-19T13:43:10Z
+# candidate	reference	candidate_row	reference_row	files_candidate	bytes_candidate	allocated_bytes_candidate	files_reference	bytes_reference	same	bytes_same	differs	only_candidate	only_reference	other_candidate	other_reference	empty_dir_candidate	shared_inode	verdict
+rf2_pre_final_order	ll_final_order	OBS_rf2_pre_final_order	OBS_ll_final_order	35	15953440	15998976	35	15953440	35	15953440	0	0	0	0	0	0	0	identical-no-extra
+rf2_pre_relcheck	revfix_relcheck	OBS_rf2_pre_relcheck	OBS_revfix_relcheck	15	7630029	7647232	15	7630029	15	7630029	0	0	0	0	0	0	0	identical-no-extra
+rf2_pre_order	revfix_order	OBS_rf2_pre_order	OBS_revfix_order	15	7058482	7077888	15	7058482	15	7058482	0	0	0	0	0	0	0	identical-no-extra
+# pairs 3; identical-no-extra 3 (files 65, bytes 30641951, allocated bytes 30724096); not eligible 0

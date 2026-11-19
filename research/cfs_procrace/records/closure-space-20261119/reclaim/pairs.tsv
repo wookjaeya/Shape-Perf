@@ -1,0 +1,7 @@
+# rf2_pre_* (results 26.0 (k)): recorded earlier as byte-identical to kept directories (ledger notes of the three rows;
+# records/review-fixes-2-20261118/prebuild/prebuild_regress.txt). rf2_pre_relcheck and rf2_pre_order were the same bytes as ll_relcheck and
+# ll_order, whose bytes are in revfix_relcheck and revfix_order (records/reclaim-20261118); rf2_pre_final_order was the same bytes as ll_final_order.
+# candidate	reference	candidate_row	reference_row
+rf2_pre_final_order	ll_final_order	OBS_rf2_pre_final_order	OBS_ll_final_order
+rf2_pre_relcheck	revfix_relcheck	OBS_rf2_pre_relcheck	OBS_revfix_relcheck
+rf2_pre_order	revfix_order	OBS_rf2_pre_order	OBS_revfix_order

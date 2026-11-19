@@ -1,0 +1,8 @@
+# readers_extra.txt -- inputs of steps still to run that are given on a command line rather than written in a script
+# (listing.sh reads this file as one more reader; each obs1 name below is marked "read by extra").
+# the candidate list's command (results 25.10) and the rule-made named-calls file of spec 11 item 2 (same plans):
+#   cz_plans_v4_ns2 cz_final_order cz_final_extract
+# the dry run with synthetic use events on the two real plans (results 26.0 (b); spec 11 item 16): the plans, the
+# relations and pair files, the facts and the binding files of the derived builds:
+#   cz_plans_v4_ns2 cz_final_order cz_final_extract xr4_dry_inputs c1p2_pre_derived c1p2_post_derived
+#   c1p2_pre_bprime c1p2_post_bprime rtb_bind2_c1_pre_tx rtb_bind2_c1_post_tx

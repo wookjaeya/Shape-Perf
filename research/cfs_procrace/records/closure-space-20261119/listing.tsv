@@ -1,0 +1,170 @@
+# kz-space-listing 1 (records/closure-space-20261119/listing.py); sizes from lstat: apparent = sum of file sizes, blocks = 512 x st_blocks over files and directories (what df counts)
+dir	kind	apparent	blocks	files	symlinks	hardlinks	other	ledger_rows	list_names_disk	read_by	archivable	tier	reason
+redesign/obs1/c1p2_compare	other	7258602	7270400	4	0	0	0	OBS_c1p2_compare	yes	-	no	-	not an extract or order round (other); never: the derived builds of the cycle
+redesign/obs1/c1p2_post_bprime	derived	20774310	20807680	10	0	0	0	OBS_c1p2_post_bprime	yes	declaration,extra	no	-	not an extract or order round (derived); never: the derived builds of the cycle; read or referenced: declaration,extra
+redesign/obs1/c1p2_post_derived	derived	33189602	46903296	3956	0	0	0	OBS_c1p2_post_derived	yes	declaration,extra	no	-	not an extract or order round (derived); never: the derived builds of the cycle; read or referenced: declaration,extra
+redesign/obs1/c1p2_post_rt	derived	5911187	7503872	403	0	0	0	OBS_c1p2_post_rt	yes	declaration	no	-	not an extract or order round (derived); never: the derived builds of the cycle; read or referenced: declaration
+redesign/obs1/c1p2_pre_bprime	derived	20769365	20803584	10	0	0	0	OBS_c1p2_pre_bprime	yes	declaration,extra	no	-	not an extract or order round (derived); never: the derived builds of the cycle; read or referenced: declaration,extra
+redesign/obs1/c1p2_pre_derived	derived	33165775	46870528	3957	0	0	0	OBS_c1p2_pre_derived	yes	declaration,extra	no	-	not an extract or order round (derived); never: the derived builds of the cycle; read or referenced: declaration,extra
+redesign/obs1/c1p2_pre_rt	derived	5910406	7503872	403	0	0	0	OBS_c1p2_pre_rt	yes	declaration	no	-	not an extract or order round (derived); never: the derived builds of the cycle; read or referenced: declaration
+redesign/obs1/c1p_pre_derived	derived	25833674	38617088	3482	0	0	0	OBS_c1p_pre_derived	yes	-	no	-	not an extract or order round (derived)
+redesign/obs1/c1p_pre_rt	derived	5909628	7503872	403	0	0	0	OBS_c1p_pre_rt	yes	-	no	-	not an extract or order round (derived)
+redesign/obs1/c1p_regen	other	712370	761856	10	0	0	0	OBS_c1p_regen	yes	-	no	-	not an extract or order round (other)
+redesign/obs1/c1p_regress_manifest_k05	regress	222652	339968	31	0	0	0	OBS_c1p_regress_manifest_k05	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/c1p_unitcheck_k04_post	regress	686132	987136	64	0	0	0	OBS_c1p_unitcheck_k04_post	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/c1p_unitcheck_k04_pre	regress	712859	1024000	66	0	0	0	OBS_c1p_unitcheck_k04_pre	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/c1p_unitcheck_k05_post	regress	721920	1028096	66	0	0	0	OBS_c1p_unitcheck_k05_post	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/c1p_unitcheck_k05_pre	regress	748645	1064960	68	0	0	0	OBS_c1p_unitcheck_k05_pre	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/c1pre_boot	boot	3613913	2732032	52	0	0	0	OBS_c1pre_boot	yes	regress,regress-inputs	no	-	not an extract or order round (boot); never: the 2026-11-16 boot, its build and its explanations; read or referenced: regress,regress-inputs
+redesign/obs1/c1pre_bprime	derived	13100847	13135872	10	0	0	0	OBS_c1pre_bprime	yes	regress,regress-inputs	no	-	not an extract or order round (derived); never: the 2026-11-16 boot, its build and its explanations; read or referenced: regress,regress-inputs
+redesign/obs1/c1pre_convert	boot	844336	864256	5	0	0	0	OBS_c1pre_convert	yes	-	no	-	not an extract or order round (boot); never: the 2026-11-16 boot, its build and its explanations
+redesign/obs1/c1pre_derived	derived	33032031	46743552	3957	0	0	0	OBS_c1pre_derived	yes	regress,regress-inputs	no	-	not an extract or order round (derived); never: the 2026-11-16 boot, its build and its explanations; read or referenced: regress,regress-inputs
+redesign/obs1/c1pre_explain	boot	7091104	7438336	145	0	0	0	OBS_c1pre_explain	yes	regress,regress-inputs	no	-	not an extract or order round (boot); never: the 2026-11-16 boot, its build and its explanations; read or referenced: regress,regress-inputs
+redesign/obs1/c1pre_explain_reviewfix	boot	2553952	2686976	49	0	0	0	OBS_c1pre_explain_reviewfix	yes	-	no	-	not an extract or order round (boot); never: the 2026-11-16 boot, its build and its explanations
+redesign/obs1/c1pre_rt	derived	5032847	6463488	355	0	0	0	OBS_c1pre_rt	yes	-	no	-	not an extract or order round (derived); never: the 2026-11-16 boot, its build and its explanations
+redesign/obs1/cz_final_extract	extract	72953356	73129984	50	0	0	0	OBS_cz_final_extract	yes	boot,declaration,dryrun,extra	no	-	never: the current round (the last kz-static build) and its plans; read or referenced: boot,declaration,dryrun,extra
+redesign/obs1/cz_final_order	order	42260658	42340352	40	0	0	0	OBS_cz_final_order	yes	boot,declaration,dryrun,extra	no	-	never: the current round (the last kz-static build) and its plans; read or referenced: boot,declaration,dryrun,extra
+redesign/obs1/cz_off_extract	extract	46953038	47136768	50	0	0	0	OBS_cz_off_extract	yes	-	no	-	never: the current round (the last kz-static build) and its plans
+redesign/obs1/cz_off_order	order	39552943	39624704	35	0	0	0	OBS_cz_off_order	yes	-	no	-	never: the current round (the last kz-static build) and its plans
+redesign/obs1/cz_order	order	31936298	31989760	20	0	0	0	OBS_cz_order	yes	-	no	-	never: the current round (the last kz-static build) and its plans
+redesign/obs1/cz_plans_final	plans	894450	983040	30	0	0	0	OBS_cz_plans_final	yes	-	no	-	not an extract or order round (plans); never: the current round (the last kz-static build) and its plans
+redesign/obs1/cz_plans_t8cf	plans	886478	978944	30	0	0	0	OBS_cz_plans_t8cf	yes	-	no	-	not an extract or order round (plans); never: the current round (the last kz-static build) and its plans
+redesign/obs1/cz_plans_v4	plans	1195728	1302528	35	0	0	0	OBS_cz_plans_v4	yes	-	no	-	not an extract or order round (plans); never: the current round (the last kz-static build) and its plans
+redesign/obs1/cz_plans_v4_ns2	plans	1264431	1372160	35	0	0	0	OBS_cz_plans_v4_ns2	yes	boot,declaration,dryrun,extra	no	-	not an extract or order round (plans); never: the current round (the last kz-static build) and its plans; read or referenced: boot,declaration,dryrun,extra
+redesign/obs1/cz_relcheck	order	7615561	7659520	15	0	0	0	OBS_cz_relcheck	yes	-	no	-	never: the current round (the last kz-static build) and its plans
+redesign/obs1/extfix_extract	extract	46902429	47083520	50	0	0	0	OBS_extfix_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/extfix_on_extract	extract	15324352	15384576	30	0	0	0	OBS_extfix_onextract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/extfix_order	order	7758336	7802880	15	0	0	0	OBS_extfix_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/extfix_plans	plans	886411	978944	30	0	0	0	OBS_extfix_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/extfix_plans_on_extract	plans	886913	978944	30	0	0	0	OBS_extfix_plans_onextract	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/extfix_pre_onextract	extract	8452020	8585216	46	0	0	0	OBS_extfix_pre_onextract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/extfix_relcheck	order	7564932	7606272	15	0	0	0	OBS_extfix_relcheck	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/ll_final_extract	extract	72159659	72331264	50	0	0	0	OBS_ll_final_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/ll_final_order	order	15953440	16023552	35	0	0	0	OBS_ll_final_order	yes	reference-root	no	-	read or referenced: reference-root
+redesign/obs1/ll_off_order	order	14689595	14749696	30	0	0	0	OBS_ll_off_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/ll_plans	plans	886291	978944	30	0	0	0	OBS_ll_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/ll_plans_final	plans	894413	983040	30	0	0	0	OBS_ll_plans_final	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/ll_plans_off	plans	886583	978944	30	0	0	0	OBS_ll_plans_off	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/mv_plans_v3_final	plans	894503	983040	30	0	0	0	OBS_mv_plans_v3_final	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/mv_plans_v3_t8cf	plans	886531	978944	30	0	0	0	OBS_mv_plans_v3_t8cf	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/mv_plans_v4	plans	1267187	1359872	35	0	0	0	OBS_mv_plans_v4	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/mv_plans_v4_all	plans	6881805	6975488	35	0	0	0	OBS_mv_plans_v4_all	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/mv_regress_manifest	regress	15465021	16465920	389	0	0	0	OBS_mv_regress_manifest	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/mv_regress_tools_new	regress	1451851	1482752	9	0	0	0	OBS_mv_regress_tools_new	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/mv_regress_tools_old	regress	1451851	1482752	9	0	0	0	OBS_mv_regress_tools_old	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/objacc_off_order	order	14689595	14749696	30	0	0	0	OBS_objacc_off_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/objacc_on_extract	extract	53971697	54153216	50	0	0	0	OBS_objacc_on_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/objacc_on_order	order	14759451	14823424	30	0	0	0	OBS_objacc_on_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/objacc_plans	plans	886411	978944	30	0	0	0	OBS_objacc_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/objacc_plans_off	plans	886783	978944	30	0	0	0	OBS_objacc_plans_off	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/objacc_plans_on	plans	894463	983040	30	0	0	0	OBS_objacc_plans_on	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/order_rev1	order	7729151	7770112	15	0	0	0	OBS_orderrev1_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/order_rev1_extract	extract	46861781	47046656	50	0	0	0	OBS_orderrev1_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/order_rev1_on_extract	extract	7729151	7770112	15	0	0	0	OBS_orderrev1_onextract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/order_rev1_plans	plans	886531	978944	30	0	0	0	OBS_orderrev1_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/order_rev1b	order	7758336	7802880	15	0	0	0	OBS_orderrev1b_order,OBS_schema12_order	yes	reference-root	no	-	read or referenced: reference-root
+redesign/obs1/order_rev1b_extract	extract	46861849	47046656	50	0	0	0	OBS_orderrev1b_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/order_rev1b_on_extract	extract	7758336	7802880	15	0	0	0	OBS_orderrev1b_onextract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/order_rev1b_plans	plans	886561	978944	30	0	0	0	OBS_orderrev1b_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/plangen	plans	994424	1089536	30	0	0	0	OBS_plangen	yes	regress,regress-inputs	no	-	not an extract or order round (plans); read or referenced: regress,regress-inputs
+redesign/obs1/plangen_bref	regress	13059496	13094912	10	0	0	0	OBS_plangen_bref	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/plangen_relcheck	order	7316380	7360512	17	0	0	0	OBS_plangen_relcheck	yes	regress,regress-inputs	no	-	read or referenced: regress,regress-inputs
+redesign/obs1/relincomplete_check	check	6444906	6483968	15	0	0	0	OBS_relincomplete	yes	-	no	-	not an extract or order round (check)
+redesign/obs1/relincomplete_sens	regress	12955197	12992512	13	0	0	0	OBS_relincomplete_sens	no(missing=0,extra=2)	-	no	-	not an extract or order round (regress); list does not name the files on disk: no(missing=0,extra=2)
+redesign/obs1/relrev7_check	check	7564932	7606272	15	0	0	0	OBS_relrev7_check,OBS_orderrev1_relcheck,OBS_orderrev1b_relcheck,OBS_schema12_relcheck	yes	reference-root	no	-	not an extract or order round (check); read or referenced: reference-root
+redesign/obs1/relrev7_extract	extract	46861749	47046656	50	0	0	0	OBS_relrev7_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/relrev7_plans	plans	886441	978944	30	0	0	0	OBS_relrev7_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/relrows_check	check	340285	372736	5	0	0	0	OBS_relrows_keys	yes	-	no	-	not an extract or order round (check)
+redesign/obs1/revfix_extract	extract	46967397	47149056	50	0	0	0	OBS_revfix_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/revfix_on_extract	extract	14689595	14749696	30	0	0	0	OBS_revfix_onextract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/revfix_order	order	7058482	7102464	15	0	0	0	OBS_revfix_order,OBS_objacc_order,OBS_sem_order,OBS_rf_order,OBS_ll_order	yes	reference-root	no	-	read or referenced: reference-root
+redesign/obs1/revfix_plans	plans	886411	978944	30	0	0	0	OBS_revfix_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/revfix_plans_on_extract	plans	886913	978944	30	0	0	0	OBS_revfix_plans_onextract	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/revfix_relcheck	order	7630029	7671808	15	0	0	0	OBS_revfix_relcheck,OBS_objacc_relcheck,OBS_sem_relcheck,OBS_rf_relcheck,OBS_ll_relcheck	yes	reference-root	no	-	read or referenced: reference-root
+redesign/obs1/revfix_relrev7_extract_keys	check	7564932	7606272	15	0	0	0	OBS_revfix_relrev7_extract_keys	yes	-	no	-	not an extract or order round (check)
+redesign/obs1/rf2_final_extract	extract	72324880	72499200	50	0	0	0	OBS_rf2_final_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf2_final_order	order	16668891	16740352	35	0	0	0	OBS_rf2_final_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf2_off_extract	extract	46952338	47136768	50	0	0	0	OBS_rf2_off_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf2_off_order	order	14633200	14696448	30	0	0	0	OBS_rf2_off_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf2_order	order	7017400	7061504	15	0	0	0	OBS_rf2_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf2_plans_final	plans	894500	983040	30	0	0	0	OBS_rf2_plans_final	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/rf2_plans_t8cf	plans	886508	978944	30	0	0	0	OBS_rf2_plans_t8cf	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/rf2_plans_v4	plans	1192273	1294336	35	0	0	0	OBS_rf2_plans_v4	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/rf2_plans_v4_all	plans	6930506	7032832	35	0	0	0	OBS_rf2_plans_v4_all	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/rf2_plans_v4_keptfacts	plans	1192603	1294336	35	0	0	0	OBS_rf2_plans_v4_keptfacts	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/rf2_pre_final_order	order	15953440	16023552	35	0	0	0	OBS_rf2_pre_final_order	yes	-	yes	R	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf2_pre_order	order	7058482	7102464	15	0	0	0	OBS_rf2_pre_order	yes	-	yes	R	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf2_pre_relcheck	order	7630029	7671808	15	0	0	0	OBS_rf2_pre_relcheck	yes	-	yes	R	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf2_relcheck	order	7614716	7659520	15	0	0	0	OBS_rf2_relcheck	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf_off_order	order	14689595	14749696	30	0	0	0	OBS_rf_off_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf_on_extract	extract	71867429	72040448	50	0	0	0	OBS_rf_on_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf_on_order	order	15166777	15233024	30	0	0	0	OBS_rf_on_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/rf_plans	plans	886291	978944	30	0	0	0	OBS_rf_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/rf_plans_off	plans	886583	978944	30	0	0	0	OBS_rf_plans_off	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/rf_plans_on	plans	894263	983040	30	0	0	0	OBS_rf_plans_on	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/rtb_bind2_c1_post_tx	other	227091	294912	26	0	0	0	OBS_rtb_bind2_c1_post_tx	yes	extra	no	-	not an extract or order round (other); read or referenced: extra
+redesign/obs1/rtb_bind2_c1_pre_tx	other	254284	331776	28	0	0	0	OBS_rtb_bind2_c1_pre_tx	yes	extra	no	-	not an extract or order round (other); read or referenced: extra
+redesign/obs1/rtb_bind_c1_post_tx	other	197432	262144	24	0	0	0	OBS_rtb_bind_c1_post_tx	yes	-	no	-	not an extract or order round (other)
+redesign/obs1/rtb_bind_c1_pre_tx	other	224521	294912	26	0	0	0	OBS_rtb_bind_c1_pre_tx	yes	-	no	-	not an extract or order round (other)
+redesign/obs1/rtb_regress_manifest_new	regress	222652	339968	31	0	0	0	OBS_rtb_regress_manifest_new	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/rtb_regress_manifest_old	regress	222652	339968	31	0	0	0	OBS_rtb_regress_manifest_old	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/rtb_regress_new	regress	1970002	2011136	14	0	0	0	OBS_rtb_regress_new	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/rtb_regress_old	regress	1969287	2011136	14	0	0	0	OBS_rtb_regress_old	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/schema12_c1boot_convert	boot	683469	696320	3	0	0	0	OBS_schema12_c1boot_convert	yes	-	no	-	not an extract or order round (boot)
+redesign/obs1/schema12_extract	extract	46861817	47046656	50	0	0	0	OBS_schema12_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/schema12_on_extract	extract	7758336	7802880	15	0	0	0	OBS_schema12_onextract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/schema12_plans	plans	886471	978944	30	0	0	0	OBS_schema12_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/schema12_readback	regress	251675	262144	4	0	0	0	OBS_schema12_readback	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/schema12_regress	regress	12432623	12906496	189	0	0	0	OBS_schema12_regress	yes	-	no	-	not an extract or order round (regress)
+redesign/obs1/sem_off_order	order	14689595	14749696	30	0	0	0	OBS_sem_off_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/sem_on_extract	extract	55626663	55808000	50	0	0	0	OBS_sem_on_extract	yes	-	yes	1	intermediate or superseded round, read by nothing still to run
+redesign/obs1/sem_on_order	order	14832806	14897152	30	0	0	0	OBS_sem_on_order	yes	-	yes	2	intermediate or superseded round, read by nothing still to run
+redesign/obs1/sem_plans	plans	886321	978944	30	0	0	0	OBS_sem_plans	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/sem_plans_off	plans	886633	978944	30	0	0	0	OBS_sem_plans_off	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/sem_plans_on	plans	894313	983040	30	0	0	0	OBS_sem_plans_on	yes	-	no	-	not an extract or order round (plans)
+redesign/obs1/xr4_dry_inputs	explain-dry	56027	81920	6	0	0	0	OBS_xr4_dry_inputs	yes	boot,declaration,dryrun,extra,baseline	no	-	not an extract or order round (explain-dry); read or referenced: boot,declaration,dryrun,extra,baseline
+redesign/obs1/xr4_dry_rt_rt_format15	explain-dry	11380636	12206080	401	0	0	0	OBS_xr4_dry_rt_rt_format15	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_dry_rt_rt_format15_2	explain-dry	11383760	12206080	401	0	0	0	OBS_xr4_dry_rt_rt_format15_2	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_dry_rt_rt_objects	explain-dry	11679129	12742656	401	0	0	0	OBS_xr4_dry_rt_rt_objects	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_dry_rt_rt_objects_2	explain-dry	11682253	12767232	401	0	0	0	OBS_xr4_dry_rt_rt_objects_2	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_dry_static_c1_post_tx	explain-dry	13113568	14016512	396	0	0	0	OBS_xr4_dry_static_c1_post_tx	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_dry_static_c1_post_tx_2	explain-dry	13113898	14016512	396	0	0	0	OBS_xr4_dry_static_c1_post_tx_2	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_dry_static_c1_pre_tx	explain-dry	13121606	14028800	396	0	0	0	OBS_xr4_dry_static_c1_pre_tx	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_dry_static_c1_pre_tx_2	explain-dry	13121764	14028800	396	0	0	0	OBS_xr4_dry_static_c1_pre_tx_2	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_regress_rev3	explain-dry	2520776	2646016	48	0	0	0	OBS_xr4_regress_rev3	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_regress_rev4	explain-dry	23103482	23867392	388	0	0	0	OBS_xr4_regress_rev4	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+redesign/obs1/xr4_regress_rev4_2	explain-dry	23104204	23867392	388	0	0	0	OBS_xr4_regress_rev4_2	yes	baseline	no	-	not an extract or order round (explain-dry); read or referenced: baseline
+c5/dl	excluded:source-archives	-	-	-	-	-	-	-	-	-	no	-	excluded class (source-archives)
+c5/ref	work	263325	323584	19	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+c5/src	excluded:source-tree	-	-	-	-	-	-	-	-	-	no	-	excluded class (source-tree)
+c5run	work	9105120	9433088	108	0	0	0	O_c5-20261029-replays	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+c5tools/build	work	483443261	516849664	11027	0	0	0	C5_641_B	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+c5tools/eid1	work	101123709	102682624	559	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+c5tools/kz-llvm	excluded:toolchain	-	-	-	-	-	-	-	-	-	no	-	excluded class (toolchain)
+c5tools/logs	work	318471	475136	55	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+c5tools/plugin-build	excluded:toolchain	-	-	-	-	-	-	-	-	-	no	-	excluded class (toolchain)
+c5tools/pre	work	7436903	8945664	428	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+env_20261029	work	117275	139264	5	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+expect_src	excluded:source-trees	-	-	-	-	-	-	-	-	-	no	-	excluded class (source-trees)
+instr	excluded:toolchains	-	-	-	-	-	-	-	-	-	no	-	excluded class (toolchains)
+kairos-build	excluded:kairos-build	-	-	-	-	-	-	-	-	-	no	-	excluded class (kairos-build)
+lead-tools	work	50059	65536	3	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+llvm-project	excluded:llvm-project	-	-	-	-	-	-	-	-	-	no	-	excluded class (llvm-project)
+merge-check	excluded:toolchain	-	-	-	-	-	-	-	-	-	no	-	excluded class (toolchain)
+preserve	excluded:preserve	-	-	-	-	-	-	-	-	-	no	-	excluded class (preserve)
+procrace/c1_build	work	110710428	151838720	11431	4	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+procrace/c1_runs	work	0	24576	0	20	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+procrace/cfs_ref	excluded:source-tree	-	-	-	-	-	-	-	-	-	no	-	excluded class (source-tree)
+procrace/refs	excluded:source-refs	-	-	-	-	-	-	-	-	-	no	-	excluded class (source-refs)
+rebuild/bundle	work	26950440	27852800	297	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+rebuild/c1_asis	work	8499193	14995456	1663	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+rebuild/logs	work	1502323	1630208	37	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+rebuild/scripts	work	9735	24576	5	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+redesign/extract_baseline	work	325344562	326434816	383	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+redesign/rv3_check	work	19613116	19968000	118	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+redesign/step2a	work	2652957125	2661679104	2353	5	0	0	T,T_RV4,T_8B,T_8BF,T_8C,T8CF	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+w6/bprime_f1	work	19497541	19628032	42	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+w6/closures	work	19332474	19492864	50	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+w6/predict	work	855437	1282048	140	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+w6/replay	work	31586461	34197504	1024	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)
+w6/run	work	81700848	63139840	1449	0	0	0	-	-	-	no	-	outside the obs1 round sequence: not chosen by the rule (no single ledger row whose list names its files)

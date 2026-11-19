@@ -4110,3 +4110,53 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - 목록(`chosen.tsv`): 26.8 의 `chosen.tsv` 9–12 줄을 그대로 옮겼다(정적 예행 둘, 2026-11-16 입력의 회귀, 후보 다시 돎; 블록 80,388,096 B). 다시 보았다: 장부 행이 하나씩이고 링크나 다른 형의 항목이 없으며, 부팅 단계의 파일·`env/obs1`·동결 파일 셋이 `xr5_` 를 적지 않는다(`git grep` 0 줄).
 - 이 단계는 네 줄을 모두 쓴다. 줄 앞에서 멈추지 않는다. 까닭: 지금 모자라고, 멈춤 규칙으로는 10 번째 줄 뒤에 남는 여유(약 24 MB [I])가 26.8 끝부터 이 단계 시작까지 다른 쓰기로 준 양(23 MB)과 비슷하며, 아직 돌 어느 단계도 이 넷을 읽지 않는다. 판정 부분이 다시 바뀌어 회귀·예행을 다시 해야 하면 압축에서 scratch 로 풀어 `MEMBERS.sha256` 로 점검한 뒤 읽는다(26.8 열린 점 2 와 같음).
 - 방법: 26.8 과 같다. `archive.sh`, `selftest.sh` 는 머리글만, `run_seq.sh` 는 머리글과 줄 앞의 멈춤 한 줄을 뺀 것만, `ledger_rewrite.py` 는 기록 디렉터리·절·장부 머리 줄(넷째 쓰임, 셋째 쓰임 줄 아래)만 바꿨다. 자체 시험 다섯 모두 통과(`selftest.txt`, 감시 기록 `guard/g02_selftest.log`). 시작 점검 `ledger_check` 205 행 실패 0(`ledger/check_start.txt`; 장부 sha256 `6763efd1…`).
+
+**결과 [M]** (`../records/closure-review-bootfix-20261119/`, `../records/closure-space3-20261119/`; README 와 `commands.txt` 가 파일과 차례를 적음). cFS 를 부팅하지 않았고 push 하지 않았다. 커밋의 차례: `1522f83` 검토 기록·글·계획 → `8d94350` 압축 → `adfc67d` 실행 스크립트·시험·명령 → `66397fc` 시험 한 경우 더함 → `4152b47` 부팅 선언 4 → 이 커밋(verify, 끝 점검, 이 결과).
+
+| 번호 | 한 것 | 다시 돈 것과 그 결과 |
+|---|---|---|
+| `fix-judge-01`, `fix-decl-08` | `eval` 단계: 전문은 `<작업>/c1cyc_<s>_eval<N>/eval.txt`(그 디렉터리가 있으면 rc 2), 기록 디렉터리에는 `eval_tail.txt`(26.5 의 뽑는 법)만; 기록 디렉터리의 `eval.txt`·`eval_tail.txt` 가 있어도 rc 2; 새 단계 `keep`(목록, 장부 행, 제안 장부의 `ledger_check.sh`, 실패한 시도는 `*.failed.*` 로 남고 다시 돎); 명세 11 의 15 의 '작은 글, 기록 디렉터리'를 14.14 의 1 이 대신함 | 시험 20(전문의 자리, 꼬리의 줄, 두 번째 `eval` rc 2), 22(목록과 행, 빈·없는 디렉터리는 행 없음, 두 번째 `keep` rc 2), 25(제안 장부의 점검 실패: rc 1, 장부 그대로, 다시 돎). 변이 `eval_into_record_dir`, `keep_no_ledger_check` 가 시험에서 어긋남 |
+| `fix-decl-05` | `control`, `kzt-text`, `chain`, `stop`, `gate` 는 출력이 있으면 rc 2(14.14 의 2). 옮겨 남기는 길은 쓰지 않음 | 시험 14(FAIL 문이 두 번째 `gate` 뒤에도 FAIL, 출력의 sha256 그대로, `gate*` 파일 하나). 변이 `gate_no_refusal`, `control_no_refusal` 이 어긋남 |
+| `fix-decl-12` | 부팅하지 않음: 명령이 0 이 아닌 rc 로 끝나고 `$RUN` 이 없으면 빈 디렉터리를 지우고 `boot.notbooted.<UTC ns>.txt` 를 남기며 고정 파일을 쓰지 않음(14.14 의 3). `convert`·`explain`·`eval` 의 시작 전 거절(rc 75)도 디렉터리를 남기지 않음 | 시험 16(rc 3 → 디렉터리 없음, 기록 하나, 고정 없음; 같은 N 이 다시 돎), 23(`convert` 가 두 번 rc 75, 디렉터리 없음, 거절 기록 둘). 변이 `not_booted_rule_off`, `convert_refusal_keeps_dir` 가 어긋남 |
+| `fix-judge-02`, `fix-decl-01`, `fix-decl-02`, `fix-decl-03` | 부팅 하나 54,484,992 B [I](`need.txt`); 부팅 단계가 남은 부팅의 수로 필요를 재고 `space_at_boot.txt` 를 남기며 못 미치면 rc 1(14.14 의 4); 이미 한 부팅이 남긴 바이트가 더 크면 그것을 씀; 선언 4 의 `need` 줄; 26.8 목록 9–12 줄의 압축 | 시험 17(`c1_pre_tx` 1 의 필요 14,000,000 = 1M + 1M + 12 × 1M, 1 B 모자라면 부팅 안 함, 같으면 부팅; `c1_post_tx` 1 은 6 ×), 18(측정 3,035,136 B 가 선언 1,000,000 B 보다 커서 씀). 변이 `no_space_check` 가 어긋남. 압축 넷 모두 왕복 PASS(멤버 2,028), 장부 넷 번 점검 205 행 실패 0, 여유 1,034,665,984 → 1,114,177,536 B |
+| `fix-decl-10` | `explain` 이 같은 N 의 verify 를 다시(`verify_at_explain.txt`), `summary` 가 N = 5 의 verify 를 다시(`verify_at_summary.txt`, `boot5/gate.txt` 필요); `eval` 은 언제나 `--sheets-boot none`, `sheet_boot.tsv` 가 있으면 rc 2 | 시험 20(`sheet_boot.tsv` 가 있으면 rc 2, 평가 디렉터리 없음; 꼬리에 `sheets-boot none`), 21(선언된 파일이 바뀌면 `explain` rc 1, 설명 출력 없음), 24(`summary` 는 `boot5/gate.txt` 없이 rc 2, 바뀐 파일로 rc 1). 변이 `eval_sheet_accepted`, `explain_no_reverify` 가 어긋남 |
+| `fix-decl-11`, `fix-judge-07` | `count` 줄은 `find ! -type d`(14.14 의 7) | 시험 13(심볼릭 링크 하나로 `differs`). 변이 `count_regular_files_only` 가 어긋남. 두 빌드의 값은 31 그대로(정규 파일이 아닌 항목 0, `out/free_start.txt` 의 시점에 셈; `commands.txt`), 선언 4 의 verify 에서 `31 31 ok` |
+| `fix-judge-05` | 시험 두 경우 | 시험 11(`run_cycle.sh` 의 커밋되지 않은 고침: 부팅 안 함), 12(센 디렉터리 없음: `missing`). 검증이 쓴 변이 둘(`git_check_declaration_only`, `count_missing_as_zero`)이 이제 어긋남. 26.5 의 표 아래 날짜 붙인 주 |
+| `fix-judge-06` | 다시 쓰는 기록(`verify.txt`, `verify_at_*`, `space_at_boot.txt`, `explain.txt`, `boot.txt`, `eval_run.txt`)은 쓰기 전에 앞의 것을 `<이름>.<UTC ns>.<확장자>` 로 | 시험 15(중첩 verify 가 거절한 부팅을 다시 함: `verify_at_boot` 기록 둘, 앞의 것에 `differs 1`). 변이 `verify_at_boot_overwritten` 이 어긋남 |
+| `fix-decl-09` | 고정 파일 `boot/declaration_pin.txt`(주기의 첫 부팅이 씀; 그 뒤의 부팅·`explain`·`eval`·`summary` 는 sha256 이 같아야 돎; 고정 없이 도는 부팅은 `c1_pre_tx` 1 뿐) | 시험 19(커밋된 선언 고침 뒤의 부팅 2 거절, 고정 없는 `c1_post_tx` 1 거절). 변이 `no_pin_check` 가 어긋남 |
+| `fix-judge-08` | `gate` 의 주석을 판정 부분의 `NONEVENT_LOSS` 로 고침; 결과 27 은 판정 부분과 선언 머리를 인용 | 없음(주석) |
+| `fix-decl-06` | 선언 4 의 머리: 값은 `predictions3.tsv` 의 것, 단계가 읽는 기대 파일은 `expect_c1_2.tsv` 하나(`eval` 의 F1 과 `expect`) | `boot/no_expect_input_check4.txt`: 기대 파일을 이름 대는 단계는 `eval)`·`expect)` 둘, 설명 단계 0, 두 계획의 `args.txt` 0 |
+| `fix-judge-03`, `fix-judge-04` | 위 날짜 붙인 주(결과 27 이 따름). 동결은 그대로 | 없음 |
+
+**시험 [M]** (모두 감시 아래; 출력은 scratch 에 쓰고 결과와 sha256 을 남긴 뒤 지움).
+- `boot/test_run_cycle.sh`: 개발 실행 1(커밋 전)은 24/25 였다. 부팅하지 않음의 경우가 뒤 실행이 덮어쓴 `boot.out` 을 읽은 시험의 잘못이었고, 코드는 맞게 했다(`out/dev_run_cycle_tests1.txt`; 시험을 고쳐 `adfc67d` 에 넣음). `adfc67d` 위에서 25/25(`out/run_cycle_tests.txt`).
+- 변이 실행 1(`scripts/mutants.sh`; 한 변이마다 고침 하나를 한 줄로 뺀 `run_cycle.sh` 에 바뀌지 않은 시험): 13/14 가 시험에서 어긋났다. `keep` 의 장부 점검을 뺀 변이는 통과했다(그 변이는 장부도 지웠음; 시험에 점검이 실패하는 경우가 없었다). 고정의 변이는 뒤의 모든 부팅을 거절해 다른 까닭으로 어긋났다(`out/mutants.trial1.txt`).
+- 그래서 시험 25 를 더하고 고정의 경우가 고정 문구 자체를 보게 했다(`66397fc`; 개발 실행 2 26/26, `out/dev_run_cycle_tests2.txt`). 두 변이는 점검만 빼는 한 줄 고침으로 좁혔다.
+- `66397fc` 위에서 26/26(`out/run_cycle_tests_final.txt`; 두 스크립트의 sha256 앞뒤 같음), 변이 14/14 가 시험에서 어긋남(`out/mutants.txt`). `bash -n` 깨끗함.
+
+**부팅 선언 4 [D]** (`boot/declaration4.tsv`, `b268e2d2…`, 줄 165; `4152b47`). `declaration3.tsv`(`a6d242be…`)는 그대로다.
+- 옛 줄 159 를 다시 쟀다(`declaration/remeasure_declaration3.tsv`): 같음 154, plan-id 둘은 옮김, 바뀜 3(`run_cycle.sh` `2508f144…`, `commands.txt` `365ce243…`, `test_run_cycle.sh` `f76b63f9…`; `declaration/changes_vs_declaration3.tsv` 가 커밋을 적음). `count` 줄 둘은 새 셈(디렉터리가 아닌 항목)으로도 31 이라 같다.
+- 더한 줄 6: `need` 셋(바닥 314,572,800, 여유 100,000,000, 부팅 하나 54,484,992; `need.txt` 에서 읽음), `env/tools/ledger_check.sh`, `records/closure-space3-20261119/need.txt`, `boot/no_expect_input_check4.txt`.
+- **verify 한 번**: `run_cycle.sh verify <빌드> 0` 을 두 빌드에 돌렸다. 둘 다 rc 0, `rows 162 ok 162 differs 0 missing 0`, `need` 줄은 값으로 적힘(`boot/<빌드>/boot0/verify.txt`; 26.5 의 출력은 `verify.20261119T194536.428774735Z.txt`, `verify.20261119T194538.455749636Z.txt` 로 남음). 고정 파일은 아직 없다(부팅 없음).
+
+**공간 [M].**
+- 압축(`../records/closure-space3-20261119/progress.tsv`): 9–12 줄 넷, 파일 2,028, 블록 80,388,096 B 가 xz tar 379,628 B(줄마다 4,088–128,092 B)가 되었다. 압축 디렉터리는 이제 44 개, 67,502,080 B 다. 장부 sha256 `6d9cc76a…`.
+- 여유: 시작 1,036,095,488 B(19:21:05Z), 압축 앞 1,034,665,984 B(19:29:23Z), 압축 뒤 1,114,177,536 B, 선언 때 1,113,055,232 B(19:44:35Z), 끝 1,112,498,176 B(19:48:04Z, `out/free_end.txt`). **`c1_pre_tx` 첫 부팅 앞의 필요 1,068,392,704 B 보다 44,105,472 B 위**이고, 바닥 위 797,925,376 B 다.
+- 감시 기록 16 개(이 기록 10, 공간 단계 6)는 모두 `verdict=completed` 다. 가장 낮은 값은 1,034,330,112 B(`../records/closure-space3-20261119/guard/a_9_xr5_dry_static_c1_pre_tx.log`)이고, 가장 큰 dip 는 시험의 16,683,008 B 다.
+
+**끝 점검 [M].** `ledger_check` 205 행 실패 0(`out/ledger_check_end.txt`), `tools_check --deep` 59 행 실패 0(`out/tools_check_deep_end.txt`). 커밋마다 금지어 grep 과 이름 점검(`--cached`, 새 디렉터리 `--tree`)을 했다.
+
+**계획과 다르게 한 것.**
+1. 공간 단계는 26.8 의 디렉터리를 쓰지 않고 새 기록 디렉터리 `closure-space3-20261119` 를 두었다. 26.8 의 `run_seq.sh` 는 제 `need.txt`(선언 3 의 값)로 멈추므로, 다시 적은 필요로는 쓸 수 없었다. 스크립트는 옮겨 머리글과 멈춤 한 줄만 바꿨다.
+2. 9–12 줄을 멈춤 없이 넷 모두 썼다(위 공간 계획의 까닭). 줄 앞의 멈춤 규칙(26.8)을 이 단계에서 쓰지 않은 것은 계획에 먼저 적었다.
+3. 부팅 하나의 필요에 verify 출력 셋, 평가의 머리·꼬리, `keep` 의 목록을 넣었다. 지적이 든 부분(설명, 평가, 기대 대조) 밖의 것이다. 새 실행 스크립트가 부팅마다 남기는 것이기 때문이다.
+4. 지적 밖의 고침: 시작 전 거절(rc 75)을 부팅 밖의 `convert`·`explain`·`eval` 에도 같은 규칙으로 다뤘다(그러지 않으면 그 번호의 단계가 다시 돌지 못함). `keep` 의 실패한 시도를 `*.failed.*` 로 남겨 다시 돌게 했다.
+5. 부팅 전이 아니던 `fix-judge-05`, `-06`, `-07`, `-08`, `fix-decl-06`, `-09` 는 선언 4 를 어차피 만들므로 코드에 넣었다. `fix-judge-03`, `-04` 는 동결을 다시 열지 않으려고 글로만 두었다.
+6. 시도 출력은 새 이름으로 남겼다: 개발 실행 둘(`out/dev_run_cycle_tests{1,2}.txt`), 변이 실행 1(`out/mutants.trial1.txt`, 감시 기록 `guard/mutants.trial1.log`).
+7. 감시 기록 첫 줄의 scratch 경로는 돈 뒤에 `<scratch>` 로 고쳐 적었다(앞 단계와 같은 꼴).
+
+**열린 점.**
+1. 부팅 하나의 필요는 [I] 다. 첫 부팅 뒤로는 부팅 단계가 이미 한 부팅이 남긴 바이트로 스스로 고친다. 끝의 여유는 첫 필요보다 44 MB 남짓 위이고 다른 쓰기로 계속 준다 [I](26.8 열린 점 1 의 빠르기면 몇 시간). 부팅 단계가 거절하면 남은 압축 줄이 없으므로 PI 에게 묻는다(26.0 (카), 26.7 (나)).
+2. 압축은 같은 디스크에만 있다(26.2 열린 점 3).
+3. 결과 27 이 할 것: 부팅마다 `space_at_boot.txt` 와 감시 기록의 dip, 부팅하지 않은 단계가 있으면 그 까닭; F3 `note` 의 600 글자 줄 수(`fix-judge-03`); 시험되지 않은 꼴 넷(`fix-judge-04`); 모든 `verify*.txt` 의 선언 sha256 과 고정 파일(`fix-decl-09`); 부팅마다 `run.meta` 의 `other=` 와 `inst_files.sha256.other`(정규 파일이 아닌 항목; 이제 verify 도 셈); 고정 파일, 목록, 꼬리, 장부를 함께 커밋.
+4. 다음 단계의 차례(26.7 (라)): 부팅 선언 4 와 `boot/commands.txt` 대로 `c1_pre_tx` 먼저 부팅한다(root; 첫 명령은 `verify`, 부팅마다 열두 단계, 끝에 `summary`). 그다음 `c1_post_tx`.

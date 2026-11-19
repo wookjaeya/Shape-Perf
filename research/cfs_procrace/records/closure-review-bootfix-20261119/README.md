@@ -16,6 +16,8 @@ run in this step.
   first boot.  The judgement part, the evaluation script, the expectation files and the freeze are not changed by this
   step (no finding before the boot touches them; fix-judge-03 and fix-judge-04 are dated notes for section 27).  The run
   script, its tests and the commands change, so a new boot declaration (`boot/declaration4.tsv`) supersedes declaration 3.
-- `out/`: the start and end measurements of this step (free space, ledger and registry checks) and the outputs of the
-  runs of the revised run script's tests and of the verify step; `guard/`: the space guard logs of every run that writes
-  outputs.  The space step of fix-judge-02 and fix-decl-03 has its own record directory, `../closure-space3-20261119/`.
+- `out/`: the start and end measurements of this step (free space, ledger and registry checks), the outputs of the
+  runs of the revised run script's tests (two development runs, the run on adfc67d, the final run on 66397fc) and of the
+  mutant runs; `guard/`: the space guard logs of every run that writes outputs; `scripts/`: the mutant script, the
+  writer of boot declaration 4 and its header, the no-expect-input check; `declaration/`: the re-measure of declaration 3
+  and the list of what changed; `commands.txt`: what was run, in order, with each rc.  The space step of fix-judge-02 and fix-decl-03 has its own record directory, `../closure-space3-20261119/`.

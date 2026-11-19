@@ -23,4 +23,5 @@ SPACE_TMP=<scratch> bash run_seq.sh 9 12                                        
 ../../env/tools/ledger_check.sh > ledger/check_after_archive.txt                 rc 0 (205 rows, 0 failing; ledger sha256 6d9cc76a...)
 git grep of the committed scripts (*.sh, *.py) for the four names > scripts_naming_archived.txt    (the runs.sh of 26.3 and 26.5;
     need.py of 26.8 names them in its order list; no step still to run)
-{ date -u; df -B1 /; } > free_after_archive.txt
+{ date -u; df -B1 /; } > free_after_archive.txt                                    19:30:21Z (available 1114116096)
+committed as 8d94350

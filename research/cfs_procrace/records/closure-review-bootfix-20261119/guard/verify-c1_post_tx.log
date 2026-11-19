@@ -1,0 +1,4 @@
+# space_guard.sh kind=verify-c1_post_tx need=5000000 floor=314572800 interval=2 cmd=bash ../closure-c1prep-20261119/boot/run_cycle.sh verify c1_post_tx 0
+start 2026-11-19T19:45:38.444Z free=1112637440 threshold=319572800
+sample 2026-11-19T19:45:38.449Z 1112633344
+end 2026-11-19T19:45:40.457Z kind=verify-c1_post_tx verdict=completed rc=0 free=1112596480 lowest=1112596480 dip=40960 change=-40960

@@ -1,0 +1,42 @@
+derive_plan.sh: module table /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.mod from plan sidecar /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side (sha256 a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4)
+# derive_c1.sh check pre 1df262a 2026-11-19T09:11:05Z
+objects: 261, differing: 33
+units with sites (binding files): 33
+differs (instrumented unit): ./apps/bp/CMakeFiles/bp.dir/fsw/src/bp_app.c.o
+differs (instrumented unit): ./apps/bp/CMakeFiles/bp.dir/fsw/src/bp_cla_bundle_io.c.o
+differs (instrumented unit): ./apps/bp/CMakeFiles/bp.dir/fsw/src/bp_flow.c.o
+differs (instrumented unit): ./apps/cf/CMakeFiles/cf.dir/fsw/src/cf_app.c.o
+differs (instrumented unit): ./apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp.c.o
+differs (instrumented unit): ./apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp_r.c.o
+differs (instrumented unit): ./apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp_s.c.o
+differs (instrumented unit): ./apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cmd.c.o
+differs (instrumented unit): ./apps/ci_lab/CMakeFiles/ci_lab.dir/fsw/src/ci_lab_app.c.o
+differs (instrumented unit): ./apps/sch_lab/CMakeFiles/sch_lab.dir/fsw/src/sch_lab_app.c.o
+differs (instrumented unit): ./apps/to_lab/CMakeFiles/to_lab.dir/fsw/src/to_lab_app.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_api.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_apps.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_backgroundtask.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_start.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_task.c.o
+differs (instrumented unit): ./evs/CMakeFiles/evs.dir/fsw/src/cfe_evs_task.c.o
+differs (instrumented unit): ./osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-countsem.c.o
+differs (instrumented unit): ./osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-file.c.o
+differs (instrumented unit): ./osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-idmap.c.o
+differs (instrumented unit): ./osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-timebase.c.o
+differs (instrumented unit): ./osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-tasks.c.o
+differs (instrumented unit): ./psp/soft_timebase-pc-linux-impl/CMakeFiles/soft_timebase.dir/cfe_psp_soft_timebase.c.o
+differs (instrumented unit): ./sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_api.c.o
+differs (instrumented unit): ./sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_buf.c.o
+differs (instrumented unit): ./sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_init.c.o
+differs (instrumented unit): ./sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_task.c.o
+differs (instrumented unit): ./tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_api.c.o
+differs (instrumented unit): ./tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_internal.c.o
+differs (instrumented unit): ./tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_task.c.o
+differs (instrumented unit): ./tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_task_cmds.c.o
+differs (instrumented unit): ./time/CMakeFiles/time.dir/fsw/src/cfe_time_task.c.o
+differs (instrumented unit): ./time/CMakeFiles/time.dir/fsw/src/cfe_time_tone.c.o
+binds_instr.kzs: 305 bindings (    295 bound       2 duplicated       7 inlined       1 unsupported)
+hook calls: basis 310
+hookcheck basis rc=0 summary: gap=1 ok=304
+installed files: 31, same as the reference 15, differing 16, in the plan's list 7 (install_inventory.tsv)
+rc=0

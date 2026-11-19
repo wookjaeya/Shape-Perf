@@ -1,0 +1,53 @@
+# summary of /home/user/work/redesign/obs1/c1p2_compare/compare_c1_pre_tx.tsv (sha256 809045f24a5e0ada7aff8122f73ec3782a7449b45e8d63c901cf17bcb1157a68, 4149 lines): findings by file and part and verdict
+      1 args.txt	line	declared
+     29 basis.kz	BASIS	declared
+      1 basis.kz	DEVIATIONS	declared
+     17 basis.kz	FILE_HASHES	declared
+    177 basis.kz	TUS	declared
+      2 basis.kz	header	declared
+      6 basis.kz	section-line	declared
+     40 basis.txt	line	declared
+      1 extract.txt	line	declared
+    252 facts.kz	ARG_TYPES	NOT-DECLARED
+      7 facts.kz	BASIS	NOT-DECLARED
+      4 facts.kz	BASIS	declared
+      3 facts.kz	CALL_TARGETS	NOT-DECLARED
+      3 facts.kz	FACT_EXPRS	NOT-DECLARED
+      3 facts.kz	FIELD_STATUS	NOT-DECLARED
+      3 facts.kz	FIELD_TYPES	NOT-DECLARED
+      1 facts.kz	FILE_HASHES	declared
+      4 facts.kz	FUNC_WRITES	NOT-DECLARED
+      1 facts.kz	GLOBAL_IMAGES	declared
+     23 facts.kz	LOCKSET	NOT-DECLARED
+     13 facts.kz	OBJECT_ACCESS	NOT-DECLARED
+     13 facts.kz	READS	NOT-DECLARED
+   3462 facts.kz	RESULT_EFFECT	NOT-DECLARED
+      4 facts.kz	header	declared
+     43 facts.kz	section-line	declared
+      1 relations.txt	line	NOT-DECLARED
+      2 relations.txt	line	declared
+      3 sha256.txt	line	declared
+# first two undeclared findings of each file and part
+facts.kz	BASIS	removed B[465]: name="count.type_names_outside_root" value="by source tree 2, absolute (no source tree) 0" policy=unset prov=none deviation=none	NOT-DECLARED
+facts.kz	BASIS	removed B[466]: name="source_tree[0]" value="/home/user/work/procrace/c1_build/pre/src/bp <bp>" policy=unset prov=none deviation=none	NOT-DECLARED
+facts.kz	FACT_EXPRS	changed B[4190] B'[4190]: op=load flags=field a=none b=none value=0 name="item@<cf>/fsw/src/cf_cmd_c:945::type.size"  ->  op=load flags=field a=none b=none value=0 name="item@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd_c:945::type.size"	NOT-DECLARED
+facts.kz	FACT_EXPRS	changed B[4200] B'[4200]: op=load flags=field a=none b=none value=0 name="item@<cf>/fsw/src/cf_cmd_c:945::type.fn"  ->  op=load flags=field a=none b=none value=0 name="item@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd_c:945::type.fn"	NOT-DECLARED
+facts.kz	CALL_TARGETS	changed B[136] B'[136]: site=8522 fn=951 kind=indirect-call reason=resolved n=2 via="item@<cf>/fsw/src/cf_cmd_c:945::type.fn"  ->  site=8522 fn=951 kind=indirect-call reason=resolved n=2 via="item@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd_c:945::type.fn"	NOT-DECLARED
+facts.kz	CALL_TARGETS	changed B[137] B'[137]: site=8522 fn=952 kind=indirect-call reason=resolved n=2 via="item@<cf>/fsw/src/cf_cmd_c:945::type.fn"  ->  site=8522 fn=952 kind=indirect-call reason=resolved n=2 via="item@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd_c:945::type.fn"	NOT-DECLARED
+facts.kz	FUNC_WRITES	changed B[3127] B'[3127]: fn=941 kind=record type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="*" file="/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c" line=950 fh=</home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c>  ->  fn=941 kind=record type="item@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd_c:945::type" field="*" file="/home/user/
+facts.kz	FUNC_WRITES	changed B[3128] B'[3128]: fn=941 kind=field type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="fn" file="/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c" line=977 fh=</home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c>  ->  fn=941 kind=field type="item@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd_c:945::type" field="fn" file="/home/user/
+facts.kz	READS	changed B[2068] B'[2068]: fn=941 loop=none site=none arg_index=none index_root=none guard_root=none ctx_root=4191 kind=field root_kind=local use={branch} flags={} root_param=none type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="size" root="item" text="item.size" file="/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c" line=1000 col=14 fh=</home/user/work/procrace/c1_bu
+facts.kz	READS	changed B[2069] B'[2069]: fn=941 loop=none site=none arg_index=none index_root=none guard_root=4199 ctx_root=4201 kind=field root_kind=local use={branch} flags={} root_param=none type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="fn" root="item" text="item.fn" file="/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c" line=1012 col=18 fh=</home/user/work/procrace/c1_build/
+facts.kz	LOCKSET	changed B[20183] B'[20183]: fn=941 site=none read=none n_held=0 held_root=none opener_root=none first=none line=950 col=5 fh=</home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c> kind=write flags={} type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="*" file="/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c"  ->  fn=941 site=none read=none n_held=0 held_root=
+facts.kz	LOCKSET	changed B[20184] B'[20184]: fn=941 site=none read=none n_held=0 held_root=none opener_root=none first=none line=955 col=13 fh=</home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c> kind=write flags={} type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="ptr" file="/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c"  ->  fn=941 site=none read=none n_held=0 held_ro
+facts.kz	FIELD_STATUS	changed B[1721] B'[1721]: n_writers=3 n_direct=2 n_data_fn=1 n_outptr=0 n_init=0 n_instances=3 own_escape=0 own_cast=0 own_union=0 own_unknown=0 sibling_hits=0 untyped=133 status_field=writer-set-complete status_type=writer-set-complete once=not-once flags={untyped-in-program,writer-function-not-once,several-instances} type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="fn" wr
+facts.kz	FIELD_STATUS	changed B[1722] B'[1722]: n_writers=11 n_direct=10 n_data_fn=1 n_outptr=0 n_init=0 n_instances=11 own_escape=0 own_cast=0 own_union=0 own_unknown=0 sibling_hits=0 untyped=133 status_field=writer-set-complete status_type=writer-set-complete once=not-once flags={untyped-in-program,writer-function-not-once,several-instances} type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="ptr
+facts.kz	OBJECT_ACCESS	changed B[2068] B'[2068]: fn=941 site=none read=2068 writer=none index_root=none line=1000 col=14 fh=</home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c> kind=read base_kind=local status=resolved flags={} type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="size" base_object="CF_CmdGetSetParam/item" path="item.size"  ->  fn=941 site=none read=2068 writer=none index_
+facts.kz	OBJECT_ACCESS	changed B[2069] B'[2069]: fn=941 site=none read=2069 writer=none index_root=none line=1012 col=18 fh=</home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c> kind=read base_kind=local status=resolved flags={} type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="fn" base_object="CF_CmdGetSetParam/item" path="item.fn"  ->  fn=941 site=none read=2069 writer=none index_root
+facts.kz	FIELD_TYPES	changed B[1735] B'[1735]: extent=0 elem_size=8 bit_width=0 line=942 col=16 fh=</home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c> elem_kind=pointer extent_kind=none flags={} type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="ptr" elem_type="void *" extent_text=""  ->  extent=0 elem_size=8 bit_width=0 line=942 col=16 fh=</home/user/work/procrace/c1_build/pre/src/cf/
+facts.kz	FIELD_TYPES	changed B[1736] B'[1736]: extent=0 elem_size=4 bit_width=0 line=943 col=16 fh=</home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c> elem_kind=unsigned-integer extent_kind=none flags={typedef-named} type="item@<cf>/fsw/src/cf_cmd_c:945::type" field="size" elem_type="uint32" extent_text=""  ->  extent=0 elem_size=4 bit_width=0 line=943 col=16 fh=</home/user/work/procra
+facts.kz	ARG_TYPES	changed B[29] B'[29]: call=16 pos=0 extent=20 decl_line=48 decl_fh=16 read=none type_class=char-array width=8 read_dom=not-read flags={} type="char[20]" decl_object="BP_GlobalData_t.AppName"  ->  call=16 pos=0 extent=20 decl_line=48 decl_fh=8 read=none type_class=char-array width=8 read_dom=not-read flags={} type="char[20]" decl_object="BP_GlobalData_t.AppName"	NOT-DECLARED
+facts.kz	ARG_TYPES	changed B[52] B'[52]: call=30 pos=0 extent=20 decl_line=48 decl_fh=16 read=none type_class=char-array width=8 read_dom=not-read flags={const-pointee} type="char[20]" decl_object="BP_GlobalData_t.AppName"  ->  call=30 pos=0 extent=20 decl_line=48 decl_fh=8 read=none type_class=char-array width=8 read_dom=not-read flags={const-pointee} type="char[20]" decl_object="BP_GlobalData_t.
+facts.kz	RESULT_EFFECT	changed B[3] B'[3]: outcome_value=0 effect_value=3355443205 site=10 fn=62 flow=11 effect_site=none effect_line=123 effect_fh=11 outcome=success reach=reached effect=return-const status=open flags={} detail="CFE_STATUS_EXTERNAL_RESOURCE_FAIL" reason="on a path through a branch this value does not decide" chain="call bplib_init at 112:9 -> value 0 -> branches decided by it at 
+facts.kz	RESULT_EFFECT	changed B[4] B'[4]: outcome_value=0 effect_value=0 site=10 fn=62 flow=11 effect_site=none effect_line=126 effect_fh=11 outcome=success reach=reached effect=return-const status=open flags={} detail="CFE_SUCCESS" reason="on a path through a branch this value does not decide" chain="call bplib_init at 112:9 -> value 0 -> branches decided by it at 112:9 -> 126:5"  ->  outcome_va
+relations.txt	line	changed 21/21: rules with object access: relations rules revision 14 (2026-11-19), over OBJECT_ACCESS (extract --object-access, docs/static_facts.md 5x): key texts by source tree 3 (BASIS source_tree items); with RESULT_FLOW and RESULT_EFFECT: the success path, absence origins, holder, alternatives, stored-name buffer and lifetime-end lines  ->  rules with object access: relatio

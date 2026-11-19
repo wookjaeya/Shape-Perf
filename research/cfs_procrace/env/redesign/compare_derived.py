@@ -16,6 +16,11 @@
 #                    old=RE    RE is found in the B record (a removed or changed record)
 #                    only=F,G  a changed record: the two are equal once the fields F, G (name=value; a quoted value may
 #                              hold escaped quotes) are left out
+#                    treetok   (2026-11-19) a changed record of facts.kz: B's record equals B''s once every source-tree
+#                              token "<t>" of B (B's facts BASIS items source_tree[i] = "<dir> <t>", static_facts.md 5x,
+#                              kairos/lib/llvm/serialize.cpp:1196-1212) is written as its directory <dir>; a derived work
+#                              space copies the sources without their git metadata (derive_c1.sh D2), so B' has no source
+#                              tree and writes those names with the absolute path
 #                  A plain RE is both=RE.
 #
 # Steps:
@@ -77,7 +82,7 @@ for line in open(opts['--declared'], encoding='utf-8'):
         sys.stderr.write('declared list: want 4 tab-separated fields: %r\n' % line)
         sys.exit(2)
     for t in p[2].split(';;'):
-        re.compile(t.split('=', 1)[1] if re.match(r'(both|new|old)=', t) else ('' if t.startswith('only=') else t))
+        re.compile(t.split('=', 1)[1] if re.match(r'(both|new|old)=', t) else ('' if t.startswith('only=') or t == 'treetok' else t))
     decl.append((p[0], p[1], p[2], p[3]))
 
 
@@ -88,7 +93,10 @@ def strip_fields(r, fields):
 
 
 def holds(term, old, new):
-    k, _, v = term.partition('=') if re.match(r'(both|new|old|only)=', term) else ('both', '', term)
+    if term == 'treetok':
+        k, v = 'treetok', ''
+    else:
+        k, _, v = term.partition('=') if re.match(r'(both|new|old|only)=', term) else ('both', '', term)
     if k == 'both':
         rx = re.compile(v)
         return all(rx.search(r) for r in (old, new) if r is not None)
@@ -98,7 +106,18 @@ def holds(term, old, new):
         return old is not None and re.search(v, old) is not None
     if k == 'only':
         return old is not None and new is not None and strip_fields(old, v.split(',')) == strip_fields(new, v.split(','))
+    if k == 'treetok':
+        return old is not None and new is not None and bool(TREES) and expand_trees(old) == new
     return False
+
+
+TREES = []  # (token, directory) of B's facts BASIS source_tree items, the longest token first (filled by cmp_container)
+
+
+def expand_trees(r):
+    for t, d in TREES:
+        r = r.replace(t + '/', d + '/')
+    return r
 
 
 def declared(fname, part, old, new):
@@ -143,8 +162,9 @@ def dump(path, mapped):
         recs[cur].append(re.sub(r'^\s*\S+\[\d+\] ', '', line))
     fh = [re.match(r'path="([^"]*)"', x).group(1) for x in recs.get('FILE_HASHES', [])]
     # fields that hold a FILE_HASHES index: fh= in every container; in facts also tu= (the unit's main file,
-    # kairos/lib/llvm/serialize.cpp:175, :198, :314 r.tu = fh_of(...)); in basis tu= is the TUS ordinal and stays
-    idx = r'\b(fh|tu)=(\d+)' if head.get('container.kind') == 'facts' else r'\b(fh)=(\d+)'
+    # kairos/lib/llvm/serialize.cpp:175, :198, :314 r.tu = fh_of(...)); in basis tu= is the TUS ordinal and stays.
+    # (2026-11-19) In facts also decl_fh= (ARG_TYPES, serialize.cpp:1032) and effect_fh= (RESULT_EFFECT, :1356)
+    idx = r'\b(fh|tu|decl_fh|effect_fh)=(\d+)' if head.get('container.kind') == 'facts' else r'\b(fh)=(\d+)'
     for s in recs:
         recs[s] = [re.sub(idx, lambda m: '%s=<%s>' % (m.group(1), fh[int(m.group(2))] if int(m.group(2)) < len(fh) else '?' + m.group(2)), x)
                    for x in recs[s]]
@@ -166,6 +186,9 @@ def finding(fname, part, what, old, new):
 def cmp_container(name):
     ha, sa, ra = dump(os.path.join(BD, name), False)
     hb, sb, rb = dump(os.path.join(PD, name), True)
+    if ha.get('container.kind') == 'facts':
+        TREES[:] = sorted(((m.group(2), m.group(1)) for m in (re.match(r'name="source_tree\[\d+\]" value="(\S+) (<[^>"]+>)"', r)
+                                                         for r in ra.get('BASIS', [])) if m), key=lambda x: -len(x[0]))
     nd = 0
     for k in sorted(set(ha) | set(hb)):
         if ha.get(k) != hb.get(k):

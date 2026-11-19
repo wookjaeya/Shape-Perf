@@ -106,7 +106,7 @@ case "$STEP" in
       --module-flags "$MF" --file-hashes "$T/basis_dump.txt" -o "$OUTD/bindings_report.tsv"; rc=$?
     rm -rf "$T"; echo "plan_bindings rc=$rc"; tail -12 "$OUTD/bindings_report.tsv"; exit $rc ;;
   compare)
-    N=${3:-}; L=$D/derived/declared_diff${N:+_$N}.tsv; OF=$D/derived2/compare_${B}${N:+_$N}.tsv
+    N=${3:-}; L=$D/derived/declared_diff${N:+_$N}.tsv; OF=/home/user/work/redesign/obs1/c1p2_compare/compare_${B}${N:+_$N}.tsv
     [ -f "$L" ] || { echo "no list $L" >&2; exit 2; }
     [ ! -e "$OF" ] || { echo "refusing: $OF exists" >&2; exit 2; }
     g compare 10000000 python3 -I "$R/env/redesign/compare_derived.py" "$MC/tools/kz-dump/kz-dump" "$OF" "$BREF" "$BP/$B/NP" \

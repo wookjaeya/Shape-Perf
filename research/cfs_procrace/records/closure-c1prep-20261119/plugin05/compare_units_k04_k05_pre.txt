@@ -1,0 +1,2 @@
+A-FAILED cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c (A rc=1, B rc=0): B binding lines bound 17, unsupported 1
+units 33: same apart from the version text 32, different 0, failed in A 1

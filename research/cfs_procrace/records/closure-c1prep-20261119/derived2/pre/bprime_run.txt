@@ -1,0 +1,2 @@
+one_build.sh c1_pre_tx: PASS -> /home/user/work/redesign/obs1/c1p2_pre_bprime/c1_pre_tx/NP
+rc=0

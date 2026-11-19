@@ -293,7 +293,33 @@ cdf "$X/fP"; c2=$?; nd2=$(grep -c 'NOT-DECLARED' "$X/outf.txt")
 mkf "$X/fP1" /w ba 0 "$FLP" c c2; cdf "$X/fP1"; g1=$?
 mkf "$X/fP2" /w ba 1 "$FLP" cxx c2; cdf "$X/fP2"; g2=$?
 [ $c2 -eq 0 ] && [ "$nd2" = 0 ] && [ $g1 -eq 1 ] && [ $g2 -eq 1 ] || ok=1
-res "derived comparison (stand-in kz-dump)" $ok "control rc $c (declared findings $cl); undeclared record rc $f1; undeclared text line rc $f2; path outside the map rc $f3; (b) shifted tu= and escaped quotes rc $c2 (undeclared $nd2); real tu= change rc $g1; change outside the stripped fields rc $g2"
+# (c) 2026-11-19: facts decl_fh= and effect_fh= under another FILE_HASHES order; a source-tree token of B written as
+# its directory in B' (term treetok), and a change beyond the token
+mkt() { # DIR ROOT ORDER(ab|ba) EFFECT-FH TREE(yes|no) TYPE-TEXT
+  local d=$1 r=$2 o=$3 ef=$4 tr=$5 ty=$6 fh
+  mkdir -p "$d"
+  if [ "$o" = ab ]; then fh=$(printf '  FILE_HASHES[0] path="%s/src/a.c" sha256=aa size=1\n  FILE_HASHES[1] path="%s/ws/build/b.c" sha256=bb size=1' "$r" "$r")
+  else fh=$(printf '  FILE_HASHES[0] path="%s/ws/build/b.c" sha256=bb size=1\n  FILE_HASHES[1] path="%s/src/a.c" sha256=aa size=1' "$r" "$r"); fi
+  { echo "kz-dump 1"; echo "container abi=1 kind=basis size=10"; echo "tool_sha256=t"
+    echo "section FILE_HASHES type=3 count=2 crc32=0x2"; echo "$fh"; } > "$d/basis.kz"
+  { echo "kz-dump 1"; echo "container abi=1 kind=facts size=10"; echo "tool_sha256=t"
+    echo "section FILE_HASHES type=3 count=2 crc32=0x2"; echo "$fh"
+    if [ "$tr" = yes ]; then echo "section BASIS type=2 count=1 crc32=0x4"; echo "  BASIS[0] name=\"source_tree[0]\" value=\"$r/src/t <t>\""
+    else echo "section BASIS type=2 count=0 crc32=0x4"; fi
+    echo "section RESULT_EFFECT type=6 count=1 crc32=0x5"; echo "  RESULT_EFFECT[0] site=1 effect_fh=$ef decl_fh=$ef outcome=success"
+    echo "section READS type=7 count=1 crc32=0x6"; echo "  READS[0] fn=0 type=\"$ty\" field=\"x\""; } > "$d/facts.kz"
+  printf 'basis x\n' > "$d/basis.txt"; echo e > "$d/extract.txt"; echo rel > "$d/relations.txt"; : > "$d/relations.log"; echo a > "$d/args.txt"; echo s > "$d/sha256.txt"
+}
+mkt "$X/tB" /ref ab 0 yes 'v@<t>/a_c:1::type'; mkt "$X/tP" /w ba 1 no 'v@/w/src/t/a_c:1::type'
+printf 'facts.kz\tsection-line\tboth=^BASIS count$\tidentity\nfacts.kz\tBASIS\told=^name="source_tree\\[\tno source tree\nfacts.kz\t*\ttreetok\tno source tree\n' > "$X/decl3.tsv"
+printf 'facts.kz\tsection-line\tboth=^BASIS count$\tidentity\nfacts.kz\tBASIS\told=^name="source_tree\\[\tno source tree\n' > "$X/decl3b.tsv"
+cdt() { python3 -I "$R/env/redesign/compare_derived.py" "$X/kzd" "$X/outt.txt" "$X/tB" "$1" --path-map "$X/map.tsv" --declared "$2" > "$X/cdt.log" 2>&1; }
+cdt "$X/tP" "$X/decl3.tsv"; c3=$?
+cdt "$X/tP" "$X/decl3b.tsv"; h1=$?
+mkt "$X/tP2" /w ba 1 no 'v@/w/src/t/a_c:2::type'; cdt "$X/tP2" "$X/decl3.tsv"; h2=$?
+mkt "$X/tP3" /w ba 0 no 'v@/w/src/t/a_c:1::type'; cdt "$X/tP3" "$X/decl3.tsv"; h3=$?
+[ $c3 -eq 0 ] && [ $h1 -eq 1 ] && [ $h2 -eq 1 ] && [ $h3 -eq 1 ] || ok=1
+res "derived comparison (stand-in kz-dump)" $ok "control rc $c (declared findings $cl); undeclared record rc $f1; undeclared text line rc $f2; path outside the map rc $f3; (b) shifted tu= and escaped quotes rc $c2 (undeclared $nd2); real tu= change rc $g1; change outside the stripped fields rc $g2; (c) shifted decl_fh=/effect_fh= and a source-tree token declared by treetok rc $c3; without the treetok line rc $h1; a change beyond the token rc $h2; a real effect_fh= change rc $h3"
 
 # 12 binding report
 X=$W/b; mkdir -p "$X"

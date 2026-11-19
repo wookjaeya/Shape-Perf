@@ -1,0 +1,24 @@
+Test project /home/user/work/merge-check/kz-llvm
+    Start 110: lint_selftest
+1/8 Test #110: lint_selftest ....................   Passed    0.07 sec
+    Start 111: lint_case-ids
+2/8 Test #111: lint_case-ids ....................   Passed    2.03 sec
+    Start 112: lint_case-ids-data
+3/8 Test #112: lint_case-ids-data ...............   Passed    0.18 sec
+    Start 113: lint_semantics-names
+4/8 Test #113: lint_semantics-names .............   Passed    0.08 sec
+    Start 114: lint_retired-term
+5/8 Test #114: lint_retired-term ................   Passed    0.06 sec
+    Start 115: lint_banned-files
+6/8 Test #115: lint_banned-files ................   Passed    0.03 sec
+    Start 116: lint_no-llvm
+7/8 Test #116: lint_no-llvm .....................   Passed    0.05 sec
+    Start 117: lint_no-generated
+8/8 Test #117: lint_no-generated ................   Passed    0.07 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Label Time Summary:
+lint    =   2.56 sec*proc (8 tests)
+
+Total Test time (real) =   2.57 sec

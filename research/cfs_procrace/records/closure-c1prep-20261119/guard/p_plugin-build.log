@@ -1,0 +1,5 @@
+# space_guard.sh kind=plugin-build need=40000000 floor=314572800 interval=2 cmd=bash -c cmake -S '/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc' -B '/home/user/work/instr/kzgcc-0.5/plugin-build' -DKZGCC_KZ='/home/user/work/merge-check/kz-llvm/tools/kz/kz' > '/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/plugin05/configure.log' 2>&1 && cmake --build '/home/user/work/instr/kzgcc-0.5/plugin-build' -j4 > '/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/plugin05/build.log' 2>&1
+start 2026-11-19T09:07:31.501Z free=653549568 threshold=354572800
+sample 2026-11-19T09:07:31.506Z 653545472
+sample 2026-11-19T09:07:33.529Z 646868992
+end 2026-11-19T09:07:35.540Z kind=plugin-build verdict=completed rc=0 free=642494464 lowest=642494464 dip=11055104 change=-11055104

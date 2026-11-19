@@ -1,0 +1,98 @@
+Test project <scratch>/kzc_build
+      Start 105: lint_selftest
+ 1/40 Test #105: lint_selftest ........................   Passed    0.04 sec
+      Start 106: lint_case-ids
+ 2/40 Test #106: lint_case-ids ........................   Passed    1.61 sec
+      Start 107: lint_case-ids-data
+ 3/40 Test #107: lint_case-ids-data ...................   Passed    0.14 sec
+      Start 108: lint_semantics-names
+ 4/40 Test #108: lint_semantics-names .................   Passed    0.06 sec
+      Start 109: lint_retired-term
+ 5/40 Test #109: lint_retired-term ....................   Passed    0.06 sec
+      Start 110: lint_banned-files
+ 6/40 Test #110: lint_banned-files ....................   Passed    0.02 sec
+      Start 111: lint_no-llvm
+ 7/40 Test #111: lint_no-llvm .........................   Passed    0.05 sec
+      Start 112: lint_no-generated
+ 8/40 Test #112: lint_no-generated ....................   Passed    0.07 sec
+      Start 225: static_golden_writers
+ 9/40 Test #225: static_golden_writers ................   Passed    0.04 sec
+      Start 226: static_golden_outptr
+10/40 Test #226: static_golden_outptr .................   Passed    0.04 sec
+      Start 227: static_golden_derives
+11/40 Test #227: static_golden_derives ................   Passed    0.03 sec
+      Start 228: static_golden_loops
+12/40 Test #228: static_golden_loops ..................   Passed    0.04 sec
+      Start 229: static_golden_spawn
+13/40 Test #229: static_golden_spawn ..................   Passed    0.04 sec
+      Start 230: static_golden_atype
+14/40 Test #230: static_golden_atype ..................   Passed    0.04 sec
+      Start 231: static_golden_wrappers
+15/40 Test #231: static_golden_wrappers ...............   Passed    0.07 sec
+      Start 232: static_golden_flowfacts
+16/40 Test #232: static_golden_flowfacts ..............   Passed    0.07 sec
+      Start 233: static_golden_argflow
+17/40 Test #233: static_golden_argflow ................   Passed    0.05 sec
+      Start 234: static_golden_lockset
+18/40 Test #234: static_golden_lockset ................   Passed    0.05 sec
+      Start 235: static_golden_relations
+19/40 Test #235: static_golden_relations ..............   Passed    0.08 sec
+      Start 236: static_golden_clobber
+20/40 Test #236: static_golden_clobber ................   Passed    0.03 sec
+      Start 237: static_golden_flowfacts_np
+21/40 Test #237: static_golden_flowfacts_np ...........   Passed    0.05 sec
+      Start 238: static_golden_argflow_np
+22/40 Test #238: static_golden_argflow_np .............   Passed    0.06 sec
+      Start 239: static_golden_lockset_np
+23/40 Test #239: static_golden_lockset_np .............   Passed    0.07 sec
+      Start 240: static_golden_relations_np
+24/40 Test #240: static_golden_relations_np ...........   Passed    0.12 sec
+      Start 241: static_golden_lockpaths_np
+25/40 Test #241: static_golden_lockpaths_np ...........   Passed    0.15 sec
+      Start 242: static_golden_relpaths_np
+26/40 Test #242: static_golden_relpaths_np ............   Passed    0.15 sec
+      Start 243: static_golden_relsound_np
+27/40 Test #243: static_golden_relsound_np ............   Passed    0.27 sec
+      Start 244: static_golden_imgbudget_np
+28/40 Test #244: static_golden_imgbudget_np ...........   Passed    0.05 sec
+      Start 245: static_golden_relincomplete_np
+29/40 Test #245: static_golden_relincomplete_np .......   Passed    0.10 sec
+      Start 246: static_golden_relincomplete_cut_np
+30/40 Test #246: static_golden_relincomplete_cut_np ...   Passed    0.13 sec
+      Start 247: static_golden_relcallback_np
+31/40 Test #247: static_golden_relcallback_np .........   Passed    0.12 sec
+      Start 248: static_golden_order_np
+32/40 Test #248: static_golden_order_np ...............***Failed    0.17 sec
+      Start 249: static_golden_anonrec_np
+33/40 Test #249: static_golden_anonrec_np .............   Passed    0.07 sec
+      Start 250: static_golden_objaccess
+34/40 Test #250: static_golden_objaccess ..............   Passed    0.05 sec
+      Start 251: static_golden_objaccess_off
+35/40 Test #251: static_golden_objaccess_off ..........   Passed    0.05 sec
+      Start 252: static_golden_semantics_np
+36/40 Test #252: static_golden_semantics_np ...........   Passed    0.12 sec
+      Start 253: static_golden_resultflow_np
+37/40 Test #253: static_golden_resultflow_np ..........   Passed    0.14 sec
+      Start 254: static_golden_resultflow_order_np
+38/40 Test #254: static_golden_resultflow_order_np ....***Failed    0.17 sec
+      Start 255: static_golden_looplock_np
+39/40 Test #255: static_golden_looplock_np ............   Passed    0.15 sec
+      Start 256: static_golden_looplock_order_np
+40/40 Test #256: static_golden_looplock_order_np ......***Failed    0.20 sec
+
+93% tests passed, 3 tests failed out of 40
+
+Label Time Summary:
+golden    =   2.99 sec*proc (32 tests)
+lint      =   2.06 sec*proc (8 tests)
+static    =   2.99 sec*proc (32 tests)
+
+Total Test time (real) =   5.08 sec
+
+The following tests FAILED:
+	248 - static_golden_order_np (Failed)
+	254 - static_golden_resultflow_order_np (Failed)
+	256 - static_golden_looplock_order_np (Failed)
+Errors while running CTest
+Output from these tests are in: <scratch>/kzc_build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.

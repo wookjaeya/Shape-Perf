@@ -1,0 +1,5 @@
+c1_pre_tx: absence lines 63 (unevaluated 24); absence origins lines 39: with a [search no-match] origin 39, without 0; origins per line      32 : 1 origin(s)       7 : 2 origin(s) 
+c1_post_tx: absence lines 63 (unevaluated 24); absence origins lines 39: with a [search no-match] origin 39, without 0; origins per line      32 : 1 origin(s)       7 : 2 origin(s) 
+r2_core: absence lines 25 (unevaluated 8); absence origins lines 17: with a [search no-match] origin 17, without 0; origins per line      13 : 1 origin(s)       4 : 2 origin(s) 
+c5_641: absence lines 66 (unevaluated 43); absence origins lines 23: with a [search no-match] origin 23, without 0; origins per line      23 : 1 origin(s) 
+c5_642: absence lines 66 (unevaluated 43); absence origins lines 23: with a [search no-match] origin 23, without 0; origins per line      23 : 1 origin(s) 

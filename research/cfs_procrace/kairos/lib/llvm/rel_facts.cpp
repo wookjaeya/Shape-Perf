@@ -51,6 +51,7 @@ kz::Status RelFacts::load() {
   if (!(s = read(KZ_SEC_RESULT_FLOW, &rflow_)).ok()) return s;
   if (!(s = read(KZ_SEC_RESULT_EFFECT, &reffect_)).ok()) return s;
   result_flow_ = c_.find_section(KZ_SEC_RESULT_FLOW) != nullptr && c_.find_section(KZ_SEC_RESULT_EFFECT) != nullptr;
+  has_objacc_ = c_.find_section(KZ_SEC_OBJECT_ACCESS) != nullptr;
   for (size_t i = 0; i < rflow_.size(); ++i) rflow_of_site_[rflow_[i].site].push_back(static_cast<uint32_t>(i));
   for (size_t i = 0; i < reffect_.size(); ++i) reffect_of_site_[reffect_[i].site].push_back(static_cast<uint32_t>(i));
   if (!(s = read(KZ_SEC_LOOP_DEFS, &loopdefs_)).ok()) return s;

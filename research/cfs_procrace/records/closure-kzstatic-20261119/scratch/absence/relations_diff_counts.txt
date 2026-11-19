@@ -1,0 +1,10 @@
+c1_pre_tx rc=0: lines removed 1 added 40 (added lines that are absence origins: 39)
+63
+c1_post_tx rc=0: lines removed 1 added 40 (added lines that are absence origins: 39)
+63
+r2_core rc=0: lines removed 1 added 18 (added lines that are absence origins: 17)
+25
+c5_641 rc=0: lines removed 1 added 24 (added lines that are absence origins: 23)
+66
+c5_642 rc=0: lines removed 1 added 24 (added lines that are absence origins: 23)
+66

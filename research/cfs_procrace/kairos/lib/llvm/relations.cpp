@@ -3177,7 +3177,10 @@ class Rel : public RelFacts {
   // returns evaluated so give its result, which must be one known value), carried unchanged up to the lookup's callee
   // over RETURNS rows that return a call result.  `match` gets the other constant returns of those searches.  Empty
   // when that is not established.
-  std::set<int64_t> nomatch_values(const Namespace& n, uint32_t lookup_fn, std::set<int64_t>* match, std::string* via) const {
+  // `chain`: the functions of the chain `via` names (from the lookup function to the search); `nm_rows`: the RET_CONSTS
+  // rows read as true when the comparison does not match (relations rules revision 14, the absence origins line)
+  std::set<int64_t> nomatch_values(const Namespace& n, uint32_t lookup_fn, std::set<int64_t>* match, std::string* via, std::vector<uint32_t>* chain_fns = nullptr,
+                                   std::set<uint32_t>* nm_rows = nullptr) const {
     std::map<uint32_t, Subst> subs;
     for (const KeyCmp& k : n.cmps)
       for (const Search& sr : searches_of(k)) {
@@ -3221,8 +3224,12 @@ class Rel : public RelFacts {
       for (uint32_t i : it->second) {
         const kz_fact_retconst& r = retconsts_[i];
         const Val c = r.cond_root == kN ? known(1) : eval(r.cond_root, sb, nullptr);
-        if (c.known && c.v != 0) nm[fn].insert(r.value);
-        else if (match != nullptr) match->insert(r.value);
+        if (c.known && c.v != 0) {
+          nm[fn].insert(r.value);
+          if (nm_rows != nullptr) nm_rows->insert(i);
+        } else if (match != nullptr) {
+          match->insert(r.value);
+        }
       }
     }
     std::set<int64_t> out;
@@ -3237,9 +3244,17 @@ class Rel : public RelFacts {
       if (ni != nm.end() && !ni->second.empty()) {
         out.insert(ni->second.begin(), ni->second.end());
         std::vector<std::string> chain;
-        for (uint32_t x = f; x != kN; x = parent.count(x) != 0 ? parent[x] : kN) chain.push_back(fname(x));
+        std::vector<uint32_t> cf;
+        for (uint32_t x = f; x != kN; x = parent.count(x) != 0 ? parent[x] : kN) {
+          chain.push_back(fname(x));
+          cf.push_back(x);
+        }
         std::reverse(chain.begin(), chain.end());
-        if (via != nullptr && via->empty()) *via = join(chain, " -> ");
+        std::reverse(cf.begin(), cf.end());
+        if (via != nullptr && via->empty()) {
+          *via = join(chain, " -> ");
+          if (chain_fns != nullptr) *chain_fns = cf;
+        }
         continue;
       }
       auto rit = returns_of_.find(f);
@@ -3772,11 +3787,13 @@ class Rel : public RelFacts {
       L.done();
       if (result_flow_) {
         std::string nm_via;
-        const std::set<int64_t> nm = nomatch_values(n, calls_[u.ci].callee_fn, nullptr, &nm_via);
+        std::vector<uint32_t> nm_chain;
+        std::set<uint32_t> nm_rows;
+        const std::set<int64_t> nm = nomatch_values(n, calls_[u.ci].callee_fn, nullptr, &nm_via, &nm_chain, &nm_rows);
         std::set<int64_t> absence;
         for (int64_t v : nm)
           if (rf_fail(v, calls_[u.ci].callee_fn)) absence.insert(v);
-        a_result_flow(L, u.ci, absence, nm_via, !probes.empty());
+        a_result_flow(L, u.ci, absence, nm_via, !probes.empty(), &nm_chain, &nm_rows);
         L.done();
       }
       std::string dep;
@@ -4072,8 +4089,37 @@ class Rel : public RelFacts {
     if (out.size() > 8) t += "; and " + std::to_string(out.size() - 8) + " more";
     return t;
   }
+  // relations rules revision 14 (static_facts.md 5x item 2 and its addendum): every RET_CONSTS row of the no-match chain
+  // that gives the absence value, with the constant return statements of it and the row's condition
+  std::string absence_origins(int64_t v, const std::vector<uint32_t>& chain, const std::set<uint32_t>& nm_rows) const {
+    std::vector<std::string> out;
+    std::string name;
+    for (uint32_t f : chain) {
+      auto it = retconsts_of_.find(f);
+      if (it == retconsts_of_.end()) continue;
+      for (uint32_t i : it->second) {
+        const kz_fact_retconst& r = retconsts_[i];
+        if (r.value != v) continue;
+        if (name.empty()) name = str(r.text);
+        std::vector<std::string> at;
+        auto rit = returns_of_.find(f);
+        if (rit != returns_of_.end())
+          for (uint32_t ri : rit->second) {
+            const kz_fact_return& x = returns_[ri];
+            if (x.vkind == KZ_RET_VALUE_CONST && x.value == v) at.push_back(pos(str(x.file), x.line, x.col));
+          }
+        std::sort(at.begin(), at.end());
+        at.erase(std::unique(at.begin(), at.end()), at.end());
+        out.push_back(fname(f) + " at " + (at.empty() ? std::string("-") : join(at, ", ")) + " when " + (r.cond_root == kN ? std::string("always") : ex(r.cond_root)) +
+                      (nm_rows.count(i) != 0 && f == chain.back() ? " [search no-match]" : " [other]"));
+      }
+    }
+    return "absence origins: " + std::to_string(v) + " [" + (name.empty() ? std::string("-") : name) + "]: " + std::to_string(out.size()) + " origin(s): " +
+           (out.empty() ? std::string("none in the return constants of the chain") : join(out, "; "));
+  }
   // a path A row: the absence line and the handling label (the absence values of the lookup, else its failure values)
-  void a_result_flow(RowLines& L, uint32_t ci, const std::set<int64_t>& absence, const std::string& via, bool probe) {
+  void a_result_flow(RowLines& L, uint32_t ci, const std::set<int64_t>& absence, const std::string& via, bool probe, const std::vector<uint32_t>* chain = nullptr,
+                     const std::set<uint32_t>* nm_rows = nullptr) {
     const kz_fact_call& c = calls_[ci];
     std::set<int64_t> values = absence;
     std::string over = "the absence value";
@@ -4091,6 +4137,7 @@ class Rel : public RelFacts {
         const std::vector<uint32_t> rows = reff_rows(c.site, v, &comp);
         std::string reach = comp || rows.empty() ? "not enumerated at the call" : enum_text("KZ_REFF_REACH", reffect_[rows.front()].reach);
         L.line("absence") << "absence: " << v << " (no match: " << via << ") at the call " << call_pos(ci) << ": " << reach << "; effects: " << effects_text(c.site, v);
+        if (has_objacc_ && chain != nullptr && nm_rows != nullptr) L.line("absence origins") << absence_origins(v, *chain, *nm_rows);
       }
     std::string label, why;
     if (probe) {

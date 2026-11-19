@@ -1,0 +1,7 @@
+check: the expectation file and the hand predictions are no input of the generator, the runner, the boot, the conversion, the chain check, the stop evaluation or the explanation (results 25.12)
+lines of run_cycle.sh that name the expectation file or the predictions:
+  117:    python3 -I "$EX/explain_expect.py" --expect "$D/expect/expect_c1.tsv" --records "$XO" --out "$L/expect_compare.txt"; rc=$?
+steps whose command names it (by case label):
+  expect)
+explain.py arguments (the explain step) naming an expect file: 0
+plan generation (args.txt of the two plans) naming an expect file: /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/args.txt:0 /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/args.txt:0 

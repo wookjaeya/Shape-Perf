@@ -34,3 +34,6 @@ declaration. No cFS boot. Nothing is pushed.
 | `expect/expect_c1.tsv`, `expect/predictions.tsv`, `scripts/expect_write.py` | (4) the filled expectations of the 16 branches (kz-expect 1; results 25.11): the static element values, the hand-written boot predictions with their grounds, the writer |
 | `scratch/branches16/static_elements_16.tsv`, `guard/s_explaincheck2_<pre|post>.log` | the element values (c1)-(c4) per branch and row from the frozen script on the static inputs (its output deleted) |
 | `expect/form_check_no_records.txt` | the frozen comparison script on an empty record directory: the expectation file is of its form (no_record 2144) |
+| `boot/run_cycle.sh`, `boot/commands.txt` | (5) the boots of the cycle: the exact commands, written and NOT RUN (results 25.12); the gate and the boot-number rule in the script |
+| `boot/declaration.tsv` | (5) the boot declaration's list: plans, sidecars, binding files, B' basis, derived builds, ELF sha256 and build-ids, frozen scripts, cycle files, tools |
+| `boot/no_expect_input_check.txt` | the expectation file and the predictions are an input of the expect step only |

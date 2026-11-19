@@ -1,0 +1,16 @@
+# the exact boot commands of the C1 cycle (results 25.12), in order; written by the cycle preparation step and NOT RUN by it
+# B in c1_pre_tx c1_post_tx (each build on its own; c1_pre_tx first). Root is needed for the boot step (run_gi_c1.sh).
+# boot 1:
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh boot $B 1
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh control $B 1
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh convert $B 1
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh kzt-text $B 1
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh chain $B 1
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh stop $B 1
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh gate $B 1
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh explain $B 1
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh expect $B 1
+# if boot/<B>/boot1/gate.txt says PASS: the same nine steps with N = 2, 3, 4, 5 (exactly four more), then:
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh summary $B
+# if it says FAIL: write the cause into boot/<B>/addendum_1r.txt and commit it, then the nine steps with N = 1r;
+#   if 1r passes, N = 2, 3, 4, 5 follow and summary; if 1r fails, the boots of that build end there (summary is not run)

@@ -10,6 +10,9 @@
 #   mode v4-O0|O2         build kzgcc_v4.c with kzgcc_v4.kzs (kzs-sites 4, kzgcc 0.4): two calls on one line told apart
 #                         by col=, a column no call has (unsupported), a nested call whose GCC column differs, place=load
 #                         (unsupported, counted), a spawn statement (a plain at-call, noted), the counted header lines
+#   mode outagg-O0|O2     build kzgcc_outagg.c with kzgcc_outagg.kzs (kzgcc 0.5, docs/event_semantics.md 13.7): an
+#                         after-call out0 that points to a 20-byte character array (the site unsupported, the unit
+#                         compiles, no event), to an 8-byte structure and to a scalar (bound, their values)
 # Unit test of the plugin; the values are unit-test values.
 set -uo pipefail
 MODE=$1 CC=$2 PLUGIN=$3 RT=$4 EVENTS=$5 T=$6 W=$7
@@ -100,6 +103,27 @@ case "$MODE" in
     ev 4 | awk -F'\t' '$9=="0x1e"' | grep -q . || fail "site 4 value: $(ev 4)"
     [ "$(ev 3 | wc -l)" = 0 ] && [ "$(ev 6 | wc -l)" = 0 ] || fail "an unbound site has events"
     [ "$(ev 7 | wc -l)" = 1 ] || fail "site 7: one event expected"
+    echo "ok: $MODE"; exit 0 ;;
+  outagg-*)
+    OPT=-${MODE#outagg-}
+    SP=(-fplugin="$PLUGIN" -fplugin-arg-kzgcc-manifest="$T/kzgcc_outagg.kzs" -fplugin-arg-kzgcc-out="$W/binds")
+    "$CC" $OPT -c "$T/kzgcc_outagg.c" -o "$W/a.o" "${SP[@]}" 2> "$W/cc.err" || { cat "$W/cc.err"; fail "compile"; }
+    [ -s "$W/cc.err" ] && { cat "$W/cc.err"; fail "compiler diagnostics"; }
+    "$CC" $OPT "$W/a.o" -o "$W/a" -Wl,--whole-archive "$RT/libkzrt-posix.a" "$RT/libkzrt.a" -Wl,--no-whole-archive \
+        "$RT/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o" -lpthread || fail "link"
+    KZ_RT_DUMP="$W/dump.bin" "$W/a" > "$W/out.txt" || fail "target exit"
+    grep -q "^outagg 52 n7$" "$W/out.txt" || fail "target output: $(cat "$W/out.txt")"
+    B=$(ls "$W"/binds/*.kzs); [ -n "$B" ] || fail "no binding file"
+    "$RT/kz-rt-dump" --manifest "$T/kzgcc_outagg.kzs" --manifest "$B" "$W/dump.bin" > "$W/dump.txt" || { tail -5 "$W/dump.txt"; fail "kz-rt-dump check"; }
+    "$EVENTS" "$W/dump.bin" > "$W/events.tsv" || fail "kzgcc-events"
+    ev() { awk -F'\t' -v s="$1" '$1=="ev" && $4==s' "$W/events.tsv"; }
+    grep -q 'site=1 .*status=unsupported reason="aggregate operand larger than 8 bytes"' "$B" || fail "site 1: $(grep 'site=1 ' "$B")"
+    for s in 2 3 4; do grep -E "^bind [0-9]+ site=$s .*status=bound" "$B" > /dev/null || fail "site $s not bound: $(grep "site=$s " "$B")"; done
+    [ "$(ev 1 | wc -l)" = 0 ] || fail "the unsupported site has events"
+    # the 8-byte structure {3, 4} read as one value (little-endian), the scalar 42; the status values 1 and 2
+    ev 2 | awk -F'\t' '$9=="0x1" && $10=="0x400000003"' | grep -q . || fail "site 2 values: $(ev 2)"
+    ev 3 | awk -F'\t' '$9=="0x2" && $10=="0x2a"' | grep -q . || fail "site 3 values: $(ev 3)"
+    [ "$(ev 4 | wc -l)" = 1 ] || fail "site 4: one event expected"
     echo "ok: $MODE"; exit 0 ;;
   owner-*)
     OPT=-${MODE#owner-}

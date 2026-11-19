@@ -29,6 +29,12 @@
 // identity read decoder=spawn-token has no reader here (counted).  The binding file of a version 4 manifest gets the
 // lines "# plan", "# unsupported-kind", "# not-applied" and "# v4 calls".  With a manifest of version 1, 2 or 3 the
 // objects and bind lines are kzgcc 0.3's; the version text differs.
+// kzgcc 0.5 (docs/event_semantics.md 13.7): every value of an event is checked (values_bindable) before any statement or
+// SSA name of the event is made, so an event that cannot be bound leaves the function as it was; an out<k> whose argument
+// points to an aggregate is read as an aggregate operand (at most 8 bytes, else the site is unsupported with "aggregate
+// operand larger than 8 bytes").  kzgcc 0.4 stopped the compiler there (make_ssa_name refuses such a type; at -O0 the
+// expansion stopped on the SSA names an earlier value of a refused event had made).  A bound event is built as in 0.4:
+// the objects and bind lines of units 0.4 compiles are 0.4's; the version text differs.
 // Values are the GIMPLE operands the original statement uses (SSA names or invariants), converted to
 // 64 bits per the manifest type: nothing is evaluated twice, no shared variable is re-read (except the
 // out<k> read the manifest declares), no store is changed.  A string is copied only at a slot the
@@ -98,7 +104,7 @@ int plugin_is_GPL_compatible;
 namespace {
 
 const char* const kPluginName = "kzgcc";
-const char* const kVersion = "kzgcc 0.4";
+const char* const kVersion = "kzgcc 0.5";
 const char* const kBackend = "gcc-plugin";
 
 // ---- plugin state (one translation unit per cc1 process) -----------------------------------------
@@ -307,6 +313,96 @@ tree store_address(tree lhs, gimple_seq* seq, std::string* why) {
 
 uint32_t bind_id(uint32_t module, uint32_t site, uint32_t n) { return (module << 16) | (site << 4) | n; }
 
+// kzgcc 0.5 (docs/event_semantics.md 13.7): whether every value of the event can be bound, checked before the building
+// loop of build_obs makes any statement or SSA name, with that loop's reasons and in its order.  An event that cannot be
+// bound then leaves the function as it was (kzgcc 0.4 could fail at a later value after an earlier one had made SSA
+// names; GCC's expansion at -O0 stopped on those names, and make_ssa_name refused the type of an out<k> that points to
+// an aggregate).
+bool type_to_u64_ok(tree type, std::string* why) {
+  if (AGGREGATE_TYPE_P(type)) {
+    if (!tree_fits_uhwi_p(TYPE_SIZE(type)) || tree_to_uhwi(TYPE_SIZE(type)) > 64 || tree_to_uhwi(TYPE_SIZE(type)) == 0) {
+      *why = "aggregate operand larger than 8 bytes";
+      return false;
+    }
+    return true;
+  }
+  if (POINTER_TYPE_P(type) || INTEGRAL_TYPE_P(type)) return true;
+  *why = "operand is neither integral, pointer nor a small aggregate";
+  return false;
+}
+
+bool values_bindable(const kzrt::Site& s, const Operands& ops, std::string* why) {
+  for (const kzrt::Value& val : s.values) {
+    if (val.slot > 3) {
+      *why = "slot > 3 (this prototype binds at most four values per event)";
+      return false;
+    }
+    tree type = NULL_TREE;
+    const std::string& f = val.from;
+    if (f == "ret") {
+      if (ops.ret == NULL_TREE) {
+        *why = "no result value at this binding";
+        return false;
+      }
+      type = TREE_TYPE(ops.ret);
+    } else if (f.compare(0, 3, "arg") == 0) {
+      size_t k = (size_t)std::atoi(f.c_str() + 3);
+      if (k >= ops.arg.size()) {
+        *why = "argument " + std::to_string(k) + " does not exist here";
+        return false;
+      }
+      if (ops.arg[k] != NULL_TREE) type = TREE_TYPE(ops.arg[k]);
+    } else if (f.compare(0, 3, "out") == 0) {
+      size_t k = (size_t)std::atoi(f.c_str() + 3);
+      if (ops.call == NULL || k >= gimple_call_num_args(ops.call)) {
+        *why = "out" + std::to_string(k) + " needs a call argument " + std::to_string(k);
+        return false;
+      }
+      tree p = gimple_call_arg(ops.call, k);
+      if (!POINTER_TYPE_P(TREE_TYPE(p))) {
+        *why = "out" + std::to_string(k) + ": the argument is not a pointer";
+        return false;
+      }
+      type = TREE_TYPE(TREE_TYPE(p));
+    } else if (f == "operand0") {
+      if (ops.operand0 != NULL_TREE) type = TREE_TYPE(ops.operand0);
+    } else if (f == "operand1") {
+      if (ops.operand1 != NULL_TREE) {
+        type = TREE_TYPE(ops.operand1);
+      } else if (ops.store_lhs != NULL_TREE) {
+        tree lhs = ops.store_lhs;  // store_address's two refusals, before it computes anything
+        if (TREE_CODE(lhs) == COMPONENT_REF && DECL_BIT_FIELD(TREE_OPERAND(lhs, 1))) {
+          *why = "the store is to a bit-field (it has no address)";
+          return false;
+        }
+        tree base = get_base_address(lhs);
+        if (base != NULL_TREE && DECL_P(base) && !is_global_var(base) && !TREE_ADDRESSABLE(base)) {
+          *why = "the store is to a local object whose address the code never takes";
+          return false;
+        }
+        type = ptr_type_node;
+      }
+    } else if (f.compare(0, 5, "param") == 0) {
+      size_t k = (size_t)std::atoi(f.c_str() + 5);
+      if (k >= ops.param.size()) {
+        *why = "parameter " + std::to_string(k) + " does not exist";
+        return false;
+      }
+      if (ops.param[k] == NULL_TREE) {
+        *why = "parameter " + std::to_string(k) + " is not a register value (its memory would be read again)";
+        return false;
+      }
+      type = TREE_TYPE(ops.param[k]);
+    }
+    if (type == NULL_TREE) {
+      *why = "value source " + f + " does not exist here";
+      return false;
+    }
+    if (!type_to_u64_ok(type, why)) return false;
+  }
+  return true;
+}
+
 // Builds the observation call for site s at one binding into *seq; returns its aseq SSA (uint32) or
 // NULL_TREE when a value could not be bound (then *why is set and nothing is added).
 tree build_obs(const kzrt::Site& s, uint32_t bind, tree link, const Operands& ops, gimple_seq* seq, uint32_t* vals, std::string* notes,
@@ -317,6 +413,7 @@ tree build_obs(const kzrt::Site& s, uint32_t bind, tree link, const Operands& op
   int str_slot = -1;
   uint32_t str_bound = 0;
   gimple_seq local = NULL;
+  if (!values_bindable(s, ops, why)) return NULL_TREE;
   for (const kzrt::Value& val : s.values) {
     if (val.slot > 3) {
       *why = "slot > 3 (this prototype binds at most four values per event)";
@@ -351,10 +448,10 @@ tree build_obs(const kzrt::Site& s, uint32_t bind, tree link, const Operands& op
       // *arg<k>, read by the same thread right after the call (event_semantics.md 8.1)
       tree pointee = TREE_TYPE(TREE_TYPE(p));
       tree mem = build2(MEM_REF, pointee, p, build_int_cst(TREE_TYPE(p), 0));
-      tree t = make_ssa_name(pointee);
       if (!is_gimple_reg_type(pointee)) {
-        op = mem;  // small aggregate: to_u64 reads it with a VIEW_CONVERT_EXPR
+        op = mem;  // small aggregate: to_u64 reads it with a VIEW_CONVERT_EXPR (kzgcc 0.5: no SSA name of its type)
       } else {
+        tree t = make_ssa_name(pointee);
         gimple_seq_add_stmt(&local, gimple_build_assign(t, mem));
         op = t;
       }

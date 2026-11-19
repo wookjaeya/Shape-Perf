@@ -29,6 +29,12 @@ foreach(opt O0 O2)
     COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/run_target_test.sh v4-${opt} ${KZGCC_GCC} $<TARGET_FILE:kzgcc> ${KZGCC_RT}
             $<TARGET_FILE:kzgcc-events> ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/v4_${opt})
 endforeach()
+# kzgcc 0.5: an out<k> that points to an aggregate (docs/event_semantics.md 13.7).
+foreach(opt O0 O2)
+  add_test(NAME kzgcc_outagg_${opt}
+    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/run_target_test.sh outagg-${opt} ${KZGCC_GCC} $<TARGET_FILE:kzgcc> ${KZGCC_RT}
+            $<TARGET_FILE:kzgcc-events> ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/outagg_${opt})
+endforeach()
 # The cooperative gate (stage F) end to end: hold_seq_prog.c with kzgcc_hold_seq.kzs, plans converted by kz rtplan and
 # loaded by the start-up object in control mode, one kzp-hold 1 rule per plan (run_hold_test.sh).  Needs the kz
 # executable of the Kairos build (KZGCC_KZ); skipped (77) without it.

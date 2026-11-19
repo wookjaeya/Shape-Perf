@@ -1,0 +1,23 @@
+# kzgcc_outagg.kzs -- logical sites of the kzgcc out-of-aggregate test (kzgcc 0.5, docs/event_semantics.md 13.7).
+# Generic names, unit-test values; not a cFS manifest and not research conditions.  Lines and columns are those of
+# kzgcc_outagg.c.
+kzs-sites 4
+plan 0123456789abcdee facts=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa relrules="unit test" obsrules="unit test" semantics=none select=unit-test budget=unit-test
+source unit rev=0000000000000000000000000000000000000000 ref="instrument/gcc/tests/kzgcc_outagg.c"
+module 1 name=kzgcc_outagg source=unit
+# out0 points to a character array of 20 bytes: unsupported (larger than 8 bytes), the unit compiles
+site 1 label=oa.array op=call.name_of phase=point tu=tests/kzgcc_outagg.c func=run callee=name_of line=23 place=after-call skey=00000000000000b1 col=11 nth=1
+value 1 0 role=status from=ret type=s32
+value 1 1 role=out0 from=out0 type=u64
+# out0 points to a structure of 8 bytes: bound, its bytes as one unsigned value
+site 2 label=oa.small op=call.fill_small phase=point tu=tests/kzgcc_outagg.c func=run callee=fill_small line=24 place=after-call skey=00000000000000b2 col=8 nth=1
+value 2 0 role=status from=ret type=s32
+value 2 1 role=out0 from=out0 type=u64
+# out0 points to a scalar: bound
+site 3 label=oa.scalar op=call.fill_int phase=point tu=tests/kzgcc_outagg.c func=run callee=fill_int line=25 place=after-call skey=00000000000000b3 col=8 nth=1
+value 3 0 role=status from=ret type=s32
+value 3 1 role=out0 from=out0 type=s32
+# the at-call of the first: its argument is a pointer, bound
+site 4 label=oa.arraycall op=call.name_of phase=point tu=tests/kzgcc_outagg.c func=run callee=name_of line=23 place=at-call skey=00000000000000b4 col=11 nth=1
+value 4 0 role=arg0 from=arg0 type=ptr
+value 4 1 role=id from=arg1 type=s32

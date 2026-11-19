@@ -915,6 +915,14 @@ end
 - 판정: 운반 대안마다 이름·out-id·값을 본다. 모두 서면 held. 어떤 대안은 서고 다른 대안이 서지 않으면 `a second origin can carry the value`. 그 밖에는 첫 운반 대안의 까닭이고, 차례는 이름 저장 없음, out-id 저장 없음, 정하지 못한 함의, 값이 묶이지 않음이다.
 - 줄의 꼴: `callee-check (success path): <callee>: held|missing(<까닭>): success value <v> [outcome class rule]; carried by <n> alternative(s): …; excluded: …; for alt <i>/<m> at <위치>: <이름 저장>; <out-id 저장>; <저장되는 값>` (운반 대안마다 `for alt` 한 덩이). 위 1 항의 꼴과 같은 항을 같은 말로 쓰고, 운반 대안이 여럿일 수 있어 대안마다 나눈다.
 
+**5x 덧붙임 여섯째 (2026-11-19; 3 항 holder 줄, 그것을 내는 코드보다 먼저 커밋함).**
+- 자리: 경로 A 행의 `id holder: the lookup's …` 줄들 바로 뒤, 조회의 out 포인터 인자마다 한 줄(사실은 1 항과 같다). 경로 B 행에는 조회의 `id holder:` 줄이 없으므로 이 줄도 없다.
+- holder 는 그 인자의 ARGFLOW 행에서 정한다. 형과 필드가 있으면(`<global>.` 이 아닌) `holder: field <Type.field>`. 지역 변수면 `holder: local <이름> in <함수>; writers 1: own out store <호출 위치>; local: definitions <n> (RESULT_FLOW)[: <이름@줄:열>, …]; readers: not decided: the uses of a local are not READS rows`. 그 밖(전역 객체·전역 배열의 원소 등)은 `holder: [<인자 글>] <원천> base <바탕> <이름>; writers: not decided: the holder is no record field (WRITERS names the stores of fields)`.
+- writers: 그 필드의 WRITERS 행 모두, 사실의 차례로. 조회 호출의 위치와 함수에 기록된 out-pointer 행이 `own out store`, 값 종류가 상수인 행이 `clearing … value=<c> [fill|assign]`(memset 이면 fill), 나머지가 `other definition … value=<const|symbolic|top> [<writer 종류>]` 이고, out-pointer 행이면 종류 자리에 `[out-pointer, stored in <저장하는 함수>]` 를 쓴다.
+- FIELD_STATUS: 두 상태 뒤에 막은 까닭: 깃발들(`flags …`), ATYPE 의 그 필드 행 가운데 `untyped-write` 가 아닌 것마다 `<종류> <위치>`, 형의 다른 필드 적중 수, 프로그램의 형 없는 쓰기 자리 수(이 자리들은 필드마다 같은 프로그램 전체의 것이라 위치를 적지 않는다).
+- readers: 그 필드의 READS 행 가운데 값이 분기 조건에 들어가지 않는 것(값이 조건이 되는 것, 조건이 되는 호출의 인자인 것은 시험 자체이고 괄호 안에 수만 적는다). 행마다 그 READS 행의 guard 가 그 필드를 읽으면(직접, 또는 guard 안 호출의 인자로) `tests the cleared value before the dependent use at <그 읽기의 위치>`, guard 가 같은 함수에서 그 필드의 값을 저장한 지역 변수를 읽으면 `not decided: the guard tests the local … , which may be redefined`, 아니면 `uses the value without such a test`. 끝의 괄호에 시험 읽기의 수와 지운 값(clearing 행의 상수)을 적는다.
+- 이 줄도 함수와 위치를 행의 layers 칸에 더하지 않는다.
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).

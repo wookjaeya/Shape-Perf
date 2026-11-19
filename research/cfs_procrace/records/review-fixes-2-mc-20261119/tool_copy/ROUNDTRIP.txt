@@ -1,0 +1,7 @@
+# round trip of the tool copy before the kz-static build of the second review-fix round (2026-11-19T01:39:38Z)
+copy: /home/user/work/preserve/tools-20261119/kz-static.1a47abd0.xz (47373676 B)
+xz -t: OK
+sha256 of the xz file: b00b8545799f51536ea269f5414072a552a0ac631a1eae9e7a61b870e24c3758
+xz -dc | sha256sum: 1a47abd05b8289bce90e6da8906d3b84d9bec48befc99634295d5350cd261086
+in place: 1a47abd05b8289bce90e6da8906d3b84d9bec48befc99634295d5350cd261086
+xz -dc | cmp in place: SAME

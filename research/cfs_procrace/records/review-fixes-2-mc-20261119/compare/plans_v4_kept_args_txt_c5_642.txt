@@ -1,0 +1,4 @@
+cdiff old_lines=42 new_lines=42 only_old=6 only_new=6 other=0
+class - args-output-path pairs=5
+class - args:control-budget-reason removed=1
+class - args:control-budget-reason added=1

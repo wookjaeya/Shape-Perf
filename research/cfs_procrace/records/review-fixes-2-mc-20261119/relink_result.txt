@@ -1,0 +1,24 @@
+# relink check after make all (2026-11-19T01:53:04Z)
+not_relink: 110 of 110 same
+relink changed lib/llvm/libkz-llvm.a e684aa4cdaed2d73b8863ebdc85c327995b2196442d91835089f566d333fd0b5 2026-11-19 01:46:38
+relink changed tools/kz-static/kz-static bf2ec2eedc756d72107a16532fa74f784cc7a1fd047d48edce62af20302fd460 2026-11-19 01:47:11
+relink changed tests/static/static_golden 32d6649ab0d6bb2702caacf5a0900193ce50270e0f0b4e1a7f72bca1c9123251 2026-11-19 01:47:28
+relink changed tests/static/test_static_cli 9e2d034327560d4fe83c5583acc4ed4c8994f5e7d56cd769885ea7db438b4fc8 2026-11-19 01:52:54
+relink changed tests/static/test_static_elf32 1ba19c9f30a8264a330850efaa98b0363089fcce72d2ff67f6024987be419386 2026-11-19 01:48:00
+relink changed tests/static/test_static_expr a1ae80841bbbef83c81da9a237d1dd274f6e91ef4e649ef92867772232ea92e1 2026-11-19 01:47:32
+relink changed tests/static/test_static_flow 329eb1837db37d594debea073ffd797ccd720103a242f0cd2fe912d57ee34d12 2026-11-19 01:47:36
+relink changed tests/static/test_static_gitrev c6ef152b68a12f02a9d3a4da3a15d17930cea72ef1a1937ce519b55edbbf07fe 2026-11-19 01:47:43
+relink changed tests/static/test_static_link e6db01a7a7f6625aea9352202bbf9e670a854058084c6256b176508bc1823548 2026-11-19 01:47:56
+relink changed tests/static/test_static_plan 186c62c53d272cc2d8b6e6170515c12bdf3e5fe17959dc4c475043f5797a5f61 2026-11-19 01:48:25
+relink changed tests/static/test_static_reasons eff67b870db8bc33643286f54f1b9f7190ee573c92bc7cc5dcea15cf974cb442 2026-11-19 01:48:06
+relink changed tests/static/test_static_recipe a19f00e74d15bdfa831bd94d2cc3c835727fc11115d1124b83e96decab1ef9aa 2026-11-19 01:47:39
+relink changed tests/static/test_static_unroll 83a0cd1e668ddd4658cad6c535e45ae0c65cf13f31c99c064f9cbdc68628c145 2026-11-19 01:47:48
+relink changed tests/static/test_static_wrappers e33fa99922c31eb21ec13dd3cd52f2082f0ca11548bfcc3fdc5eff1b77833991 2026-11-19 01:47:52
+bc2f43b405fb16bfe8a12974af2be70ce2600dd43aa5550bff1c5600e1a996da  CMakeCache.txt
+bc2f43b405fb16bfe8a12974af2be70ce2600dd43aa5550bff1c5600e1a996da  CMakeCache.txt
+tools/kz/kz fd40bc4dc76939abbd3a03ae1d3a6fbe5d387f49625e8b74f9066d13e0c140fe
+tools/kz-dump/kz-dump 32a96ae7138fd71c9efd63d0439021cae044c4045b6a9557b659e1e1911c0438
+tools/kz-phi/kz-phi df79fb82f962e69fdd29493cf9fd664feae38e370aa3578697227109cf1d59e2
+tests/lint/kz_lint 3d4d5a8faf6995d367ba428412f3d373615d064f45e009e9fb3a907ec38e91e5
+runtime/kz-rt-dump 40e23d4db230806c08742f7a33da5abda67dce7eb6e0f2d81532d890cb859ddc
+instrument/clang/kz-instr-clang 36becd040abec0b0bd302d59ae26b88252ad1e7c65ad1fb26cc31c5da86343f6

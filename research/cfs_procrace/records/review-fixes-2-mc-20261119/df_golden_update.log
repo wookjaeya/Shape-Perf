@@ -1,0 +1,5 @@
+# space_guard.sh kind=golden-update need=60000000 floor=314572800 interval=2 cmd=bash -c KZ_GOLDEN_UPDATE=1 ctest -V -R '^(static_golden_relations|static_golden_relations_np|static_golden_relpaths_np|static_golden_relsound_np|static_golden_relincomplete_np|static_golden_relincomplete_cut_np|static_golden_relcallback_np|static_golden_order_np|static_golden_objaccess|static_golden_objaccess_off|static_golden_semantics_np|static_golden_resultflow_np|static_golden_resultflow_order_np|static_golden_looplock_np|static_golden_looplock_order_np|test_static_plan)$' > /home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/golden_update.log 2>&1
+start 2026-11-19T01:54:18.563Z free=1260421120 threshold=374572800
+sample 2026-11-19T01:54:18.568Z 1260417024
+sample 2026-11-19T01:54:20.576Z 1260351488
+end 2026-11-19T01:54:22.582Z kind=golden-update verdict=completed rc=0 free=1261375488 lowest=1260351488 dip=69632 change=954368

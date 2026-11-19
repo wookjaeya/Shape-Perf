@@ -1,0 +1,15 @@
+OK c1_pre_tx relations.txt: cdiff old_lines=7259 new_lines=7255 only_old=18 only_new=14 other=0
+OK c1_pre_tx keys.txt: cdiff old_lines=739 new_lines=739 only_old=1 only_new=1 other=0
+OK c1_pre_tx relations.log empty
+OK c1_post_tx relations.txt: cdiff old_lines=7259 new_lines=7255 only_old=18 only_new=14 other=0
+OK c1_post_tx keys.txt: cdiff old_lines=739 new_lines=739 only_old=1 only_new=1 other=0
+OK c1_post_tx relations.log empty
+OK r2_core relations.txt: cdiff old_lines=5113 new_lines=5112 only_old=8 only_new=7 other=0
+OK r2_core keys.txt: cdiff old_lines=593 new_lines=593 only_old=1 only_new=1 other=0
+OK r2_core relations.log empty
+OK c5_641 relations.txt: cdiff old_lines=3658 new_lines=3610 only_old=149 only_new=101 other=0
+OK c5_641 keys.txt: cdiff old_lines=346 new_lines=346 only_old=1 only_new=1 other=0
+OK c5_641 relations.log empty
+OK c5_642 relations.txt: cdiff old_lines=3606 new_lines=3558 only_old=149 only_new=101 other=0
+OK c5_642 keys.txt: cdiff old_lines=339 new_lines=339 only_old=1 only_new=1 other=0
+OK c5_642 relations.log empty

@@ -1,0 +1,165 @@
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+Test project /home/user/work/merge-check/kz-llvm
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 235
+      Start 235: static_golden_relations
+
+235: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "relations" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_relations"
+235: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+235: Test timeout computed to be: 10000000
+235: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/relations.golden
+ 1/16 Test #235: static_golden_relations ..............   Passed    0.10 sec
+test 240
+      Start 240: static_golden_relations_np
+
+240: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "relations_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_relations_np"
+240: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+240: Test timeout computed to be: 10000000
+240: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/relations_np.golden
+ 2/16 Test #240: static_golden_relations_np ...........   Passed    0.13 sec
+test 242
+      Start 242: static_golden_relpaths_np
+
+242: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "relpaths_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_relpaths_np"
+242: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+242: Test timeout computed to be: 10000000
+242: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/relpaths_np.golden
+ 3/16 Test #242: static_golden_relpaths_np ............   Passed    0.14 sec
+test 243
+      Start 243: static_golden_relsound_np
+
+243: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "relsound_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_relsound_np"
+243: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+243: Test timeout computed to be: 10000000
+243: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/relsound_np.golden
+ 4/16 Test #243: static_golden_relsound_np ............   Passed    0.26 sec
+test 245
+      Start 245: static_golden_relincomplete_np
+
+245: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "relincomplete_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_relincomplete_np"
+245: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+245: Test timeout computed to be: 10000000
+245: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/relincomplete_np.golden
+ 5/16 Test #245: static_golden_relincomplete_np .......   Passed    0.12 sec
+test 246
+      Start 246: static_golden_relincomplete_cut_np
+
+246: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "relincomplete_cut_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_relincomplete_cut_np"
+246: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+246: Test timeout computed to be: 10000000
+246: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/relincomplete_cut_np.golden
+ 6/16 Test #246: static_golden_relincomplete_cut_np ...   Passed    0.12 sec
+test 247
+      Start 247: static_golden_relcallback_np
+
+247: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "relcallback_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_relcallback_np"
+247: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+247: Test timeout computed to be: 10000000
+247: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/relcallback_np.golden
+ 7/16 Test #247: static_golden_relcallback_np .........   Passed    0.13 sec
+test 248
+      Start 248: static_golden_order_np
+
+248: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "order_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_order_np"
+248: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+248: Test timeout computed to be: 10000000
+248: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/order_np.golden
+ 8/16 Test #248: static_golden_order_np ...............   Passed    0.14 sec
+test 250
+      Start 250: static_golden_objaccess
+
+250: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "objaccess" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_objaccess"
+250: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+250: Test timeout computed to be: 10000000
+250: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/objaccess.golden
+ 9/16 Test #250: static_golden_objaccess ..............   Passed    0.05 sec
+test 251
+      Start 251: static_golden_objaccess_off
+
+251: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "objaccess_off" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_objaccess_off"
+251: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+251: Test timeout computed to be: 10000000
+251: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/objaccess_off.golden
+10/16 Test #251: static_golden_objaccess_off ..........   Passed    0.05 sec
+test 252
+      Start 252: static_golden_semantics_np
+
+252: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "semantics_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_semantics_np"
+252: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+252: Test timeout computed to be: 10000000
+252: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/semantics_np.golden
+11/16 Test #252: static_golden_semantics_np ...........   Passed    0.11 sec
+test 253
+      Start 253: static_golden_resultflow_np
+
+253: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "resultflow_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_resultflow_np"
+253: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+253: Test timeout computed to be: 10000000
+253: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/resultflow_np.golden
+12/16 Test #253: static_golden_resultflow_np ..........   Passed    0.14 sec
+test 254
+      Start 254: static_golden_resultflow_order_np
+
+254: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "resultflow_order_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_resultflow_order_np"
+254: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+254: Test timeout computed to be: 10000000
+254: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/resultflow_order_np.golden
+13/16 Test #254: static_golden_resultflow_order_np ....   Passed    0.14 sec
+test 255
+      Start 255: static_golden_looplock_np
+
+255: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "looplock_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_looplock_np"
+255: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+255: Test timeout computed to be: 10000000
+255: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/looplock_np.golden
+14/16 Test #255: static_golden_looplock_np ............   Passed    0.16 sec
+test 256
+      Start 256: static_golden_looplock_order_np
+
+256: Test command: /home/user/work/merge-check/kz-llvm/tests/static/static_golden "fixture" "looplock_order_np" "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_looplock_order_np"
+256: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+256: Test timeout computed to be: 10000000
+256: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/looplock_order_np.golden
+15/16 Test #256: static_golden_looplock_order_np ......   Passed    0.19 sec
+test 267
+      Start 267: test_static_plan
+
+267: Test command: /home/user/work/merge-check/kz-llvm/tests/static/test_static_plan "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_plan"
+267: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+267: Test timeout computed to be: 10000000
+267: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv4_np.plan.golden
+267: updated /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/plangen_np.plan.golden
+267: test_static_plan: 275 checks passed
+16/16 Test #267: test_static_plan .....................   Passed    0.58 sec
+
+The following tests passed:
+	static_golden_relations
+	static_golden_relations_np
+	static_golden_relpaths_np
+	static_golden_relsound_np
+	static_golden_relincomplete_np
+	static_golden_relincomplete_cut_np
+	static_golden_relcallback_np
+	static_golden_order_np
+	static_golden_objaccess
+	static_golden_objaccess_off
+	static_golden_semantics_np
+	static_golden_resultflow_np
+	static_golden_resultflow_order_np
+	static_golden_looplock_np
+	static_golden_looplock_order_np
+	test_static_plan
+
+100% tests passed, 0 tests failed out of 16
+
+Label Time Summary:
+golden    =   1.99 sec*proc (15 tests)
+static    =   2.57 sec*proc (16 tests)
+
+Total Test time (real) =   2.59 sec

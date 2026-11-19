@@ -1,0 +1,41 @@
+header same=5 differing=3 [basis_sha256 parent[0] tool_sha256]
+section STRINGS old=0 new=0 same
+section BASIS old=381 new=381 differs removed=1 added=1
+section FILE_HASHES old=221 new=221 same
+section PROVENANCE old=4 new=4 same
+section FACTS old=5948 new=5948 same
+section FACT_ARGS old=12778 new=12778 same
+section DERIVES old=0 new=0 same
+section FACT_EXPRS old=17456 new=17456 same
+section FACT_LOOPS old=257 new=257 same
+section FACT_INIT old=233 new=233 same
+section FACT_CONSTS old=55 new=55 same
+section FACT_ATYPE old=13744 new=13744 same
+section WRITERS old=804 new=804 same
+section FUNCS old=1591 new=1591 same
+section CALL_TARGETS old=187 new=187 same
+section STATIC_IMAGE old=72 new=72 same
+section FACT_LOCS old=241 new=241 same
+section TERMINALS old=77 new=77 same
+section OUTCALLS old=257 new=257 same
+section LOOP_ITERS old=314 new=314 same
+section SPAWN_PARAMS old=3 new=3 same
+section FUNC_WRITES old=2997 new=2997 same
+section P0_TABLE old=72 new=72 same
+section OP_DERIV old=158 new=158 same
+section SPAWN_WRAP old=32 new=32 same
+section READS old=2884 new=2884 same
+section RETURNS old=2427 new=2427 same
+section RET_CONSTS old=1263 new=1263 same
+section LOOP_EXITS old=684 new=684 same
+section ARGFLOW old=12778 new=12778 same
+section PARAM_FLOW old=5135 new=5135 same
+section PTR_FIELDS old=132 new=132 same
+section GLOBAL_IMAGES old=362 new=362 same
+section LOCK_OPS old=1547 new=1547 same
+section LOCK_IDS old=4 new=4 same
+section LOCKSET old=13386 new=13386 same
+section FIELD_STATUS old=1222 new=1222 same
+section AWAIT_L1 old=8 new=8 same
+section LOCK_PATHS old=5882 new=5882 same
+summary sections old=39 new=39 same=38 differing=1 only-old=0 only-new=0

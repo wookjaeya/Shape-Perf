@@ -29,6 +29,8 @@
 #   twin          the outputs of the MC build against the outputs of the scratch check build of the same source
 #                 (TWIN_SCRATCH, TWIN_SCRATCH_TOOL, TWIN_SCRATCH_TOOL_SHA256; twin.py): the same bytes apart from the declared path, tool-file and
 #                 commit strings and the time line of status.txt
+#   twin_2        as twin with addendum 12.0 (나-2) (twin_2.py: the repo line of status.txt masked; the sha256 of a
+#                 file pair found the same after the replacement added to the map, then a second pass)
 #   declared      the class, section, header, count and summary lines of every report in CMP against ./declared
 # Environment: OROOT the root of the new outputs (default /home/user/work/redesign/obs1; the kept outputs are always read
 # from there), CMP the report directory, KZB the tool directory (default the MC tree's tools), SCRATCH a scratch directory
@@ -136,6 +138,18 @@ case "$STEP" in
     python3 -I "$HERE/twin.py" "$TS" "$O" "$SCRATCH/twin_map.tsv" rf2_relcheck rf2_order rf2_off_extract rf2_final_extract rf2_off_order rf2_final_order \
       rf2_plans_t8cf rf2_plans_final rf2_plans_v4 rf2_plans_v4_all rf2_plans_v4_keptfacts > "$rep"; r=$?
     [ $r = 0 ] && ok "twin: $(tail -1 "$rep")" || bad "twin: $(tail -1 "$rep") (twin.txt)" ;;
+  twin_2)
+    TS=${TWIN_SCRATCH:?TWIN_SCRATCH: the output root of the scratch check build}
+    TK=${TWIN_SCRATCH_TOOL:?TWIN_SCRATCH_TOOL: the path of the kz-static of the scratch check build, as its runs recorded it}
+    ts=${TWIN_SCRATCH_TOOL_SHA256:?TWIN_SCRATCH_TOOL_SHA256: the file sha256 of that kz-static (pre_mc.txt)}
+    SCRATCH=${SCRATCH:?SCRATCH: a scratch directory for the map}
+    rep=$C/twin_2.txt
+    [ -e "$rep" ] && { bad "twin_2: report exists"; exit 1; }
+    rs=$(sha256sum < "$KS" | cut -c1-64)
+    printf '%s\t%s\n%s\t%s\n%s\t%s\n' "$TS/" "$O/" "$TK" "$KS" "$ts" "$rs" > "$SCRATCH/twin_map_2.tsv"
+    python3 -I "$HERE/twin_2.py" "$TS" "$O" "$SCRATCH/twin_map_2.tsv" rf2_relcheck rf2_order rf2_off_extract rf2_final_extract rf2_off_order rf2_final_order \
+      rf2_plans_t8cf rf2_plans_final rf2_plans_v4 rf2_plans_v4_all rf2_plans_v4_keptfacts > "$rep"; r=$?
+    [ $r = 0 ] && ok "twin_2: $(tail -1 "$rep")" || bad "twin_2: $(tail -1 "$rep") (twin_2.txt)" ;;
   declared)
     D=$HERE/declared
     n=0
@@ -144,8 +158,8 @@ case "$STEP" in
       if [ ! -e "$g" ]; then bad "$(basename "$f"): no report in $(basename "$C")"; continue; fi
       if cmp -s <(grep -E '^(cdiff|class|header|section|count|summary) ' "$f") <(grep -E '^(cdiff|class|header|section|count|summary) ' "$g"); then ok "$(basename "$f") = declared"; else bad "$(basename "$f") differs from the declared report"; fi
     done
-    for g in "$C"/*.txt; do [ "$(basename "$g")" = twin.txt ] && continue; [ -e "$D/$(basename "$g")" ] || bad "$(basename "$g"): a report with no declared counterpart"; done
+    for g in "$C"/*.txt; do case "$(basename "$g")" in twin.txt|twin_2.txt) continue ;; esac; [ -e "$D/$(basename "$g")" ] || bad "$(basename "$g"): a report with no declared counterpart"; done
     echo "reports declared: $n" ;;
-  *) echo "usage: compare.sh relations|order|extract_off|extract_final|off_order|final_order|plans_t8cf|plans_final|plans_v4|plans_v4_all|plans_v4_kept|twin|declared" >&2; exit 64 ;;
+  *) echo "usage: compare.sh relations|order|extract_off|extract_final|off_order|final_order|plans_t8cf|plans_final|plans_v4|plans_v4_all|plans_v4_kept|twin|twin_2|declared" >&2; exit 64 ;;
 esac
 exit $rc

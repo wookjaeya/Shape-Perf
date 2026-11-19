@@ -1,7 +1,7 @@
 extract
   translation units          1
-  functions                  6 (bodies read 4, in system headers skipped 0)
-  call sites                 8
+  functions                  9 (bodies read 6, in system headers skipped 0)
+  call sites                 12
   indirect calls             0 (resolved 0, unresolved 0)
   spawn calls                0 (entry resolved 0)
   loops                      1 (table walks resolved 0, failed 0, under a declared assumption 0)
@@ -12,6 +12,10 @@ extract
   unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
   location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location Chan.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Ent.n_comma   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Ent.n_cond   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Ent.n_grid   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Ent.n_var   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location Mem.buf   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location Mem.count   writers 4 (direct 4, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location Mem.data   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
@@ -19,16 +23,19 @@ extract
   location Mem.pool   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location Mem.raw   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location Mem.tag   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
-  hand-entered inputs        20 (built-in data-function table 12, command line 8)
+  hand-entered inputs        24 (built-in data-function table 12, command line 12)
   declared assumptions       0 (static images of table-walk links that are not const)
 facts-view 1
-[functions] 6
-  fn 0 fill objaccess.c:52-52 params=1 {defined}
-  fn 1 init objaccess.c:56-76 params=0 {defined}
-  fn 2 lookup objaccess.c:45 params=2 {}
-  fn 3 memset /usr/include/string.h:61 params=3 {builtin}
-  fn 4 pool_create objaccess.c:47-50 params=2 {defined}
-  fn 5 set_count objaccess.c:54-54 params=2 {defined}
+[functions] 9
+  fn 0 decay_cases objaccess.c:90-95 params=1 {defined}
+  fn 1 ext_read objaccess.c:87 params=1 {}
+  fn 2 fill objaccess.c:52-52 params=1 {defined}
+  fn 3 init objaccess.c:56-76 params=0 {defined}
+  fn 4 log_text objaccess.c:88-88 params=1 {defined,variadic}
+  fn 5 lookup objaccess.c:45 params=2 {}
+  fn 6 memset /usr/include/string.h:61 params=3 {builtin}
+  fn 7 pool_create objaccess.c:47-50 params=2 {defined}
+  fn 8 set_count objaccess.c:54-54 params=2 {defined}
 [writers] 5
   Mem.buf memset at objaccess.c:66:3 in init value=const 0 [fill 0] key=mem.buf {} n/a
   Mem.count assign at objaccess.c:54:33 in set_count value=symbolic [v] key=m {} n/a
@@ -36,9 +43,13 @@ facts-view 1
   Mem.count assign at objaccess.c:72:34 in init value=const 3 [3] key=mem guard=(ne (index field:Chan.name 0) 0) {} n/a
   Mem.count assign at objaccess.c:75:22 in init value=const 4 [4] key=mem guard=(ne field:Mem.flag 0) {} n/a
 [atype] 0
-[locs] 9
+[locs] 13
   Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=0 unresolved-indirect=0
   Chan.name writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Ent.n_comma writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Ent.n_cond writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Ent.n_grid writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Ent.n_var writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
   Mem.buf writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
   Mem.count writer-set-complete writers=4 (direct 4, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
   Mem.data writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
@@ -47,9 +58,13 @@ facts-view 1
   Mem.raw writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
   Mem.tag writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
 [outcalls] 0
-[fstatus] 11
+[fstatus] 15
   Chan.name per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,array-element-stores-not-collected}
   Chan.used per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program} by init
+  Ent.n_comma per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,array-element-stores-not-collected}
+  Ent.n_cond per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,array-element-stores-not-collected}
+  Ent.n_grid per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,array-element-stores-not-collected}
+  Ent.n_var per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,array-element-stores-not-collected}
   Mem.addr per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program} by init
   Mem.buf per-field=DISABLED type-level=DISABLED writers=1 (direct 0, data 1, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,array-element-stores-not-collected} by init
   Mem.count per-field=writer-set-complete type-level=writer-set-complete writers=4 (direct 4, data 0, out-pointer 0, init 1) instances=4 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,several-instances} by init; set_count

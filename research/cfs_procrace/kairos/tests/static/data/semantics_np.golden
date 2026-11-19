@@ -21,7 +21,7 @@ profile-free mode            built-in profile, 72 P0 entries (P0 table revision 
   spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 1 (callers of a fixed-entry operation left as they are: 0)
   startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
   rule targets               2 (R-T1 1, R-T2 2, both 1; left out, reached only through an unshared base: R-T1 0, R-T2 0)
-semantics                    rows 29 (collated / rows: P0 2/6, framework 20/22, status-space 1/1; collated: a verification state other than unverified)
+semantics                    rows 33 (collated / rows: P0 2/6, framework 24/26, status-space 1/1; collated: a verification state other than unverified)
 facts-view 1
 [functions] 14
   fn 0 app_exit semantics.c:113-113 params=1 {defined}
@@ -50,22 +50,25 @@ facts-view 1
   reg_search@semantics.c:77 returns 0 [SEM_OK] rows=1 {in-loop,only-constants} when=(and (and (lt local:i 4) (eq field:Reg.used 1)) (eq (call-result strcmp (seq field:Reg.name (seq param:name#0))) 0))
   send_event returns 0 [SEM_OK] rows=1 {only-constants} when=always
   two_main returns 0 [0] rows=1 {only-constants} when=always
-[semantics] 29
+[semantics] 33
   P0 role exit unverified declared {} [process-exit (termination): ends the process after its exit handlers have run; does not return] (POSIX.1-2017 / glibc 2.39) source P0 table: source unverified decl /usr/include/stdlib.h:756
   P0 role pthread_create standard-collated declared {} [thread-create (thread creation): creates a thread that runs arg 2 with the argument arg 3; on success the id of the new thread is stored through arg 0, and it is stored before the new thread is started] (POSIX.1-2017 / glibc 2.39) source P0 table: glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 and :836); upstream copy sha256 36fd1e6da5cee9ce; the patches of a distribution package of glibc 2.39 are not checked decl /usr/include/pthread.h:202
   P0 out-behaviour pthread_create arg 0 standard-collated declared {} [arg 0 is written] (POSIX.1-2017 / glibc 2.39) source P0 table: glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 and :836); upstream copy sha256 36fd1e6da5cee9ce; the patches of a distribution package of glibc 2.39 are not checked decl /usr/include/pthread.h:202
   P0 role strcmp unverified declared {} [byte-string comparison: compares the strings arg 0 and arg 1; returns zero exactly when they are equal] (POSIX.1-2017 / glibc 2.39) source P0 comparison table: source unverified decl /usr/include/string.h:156
   P0 role strncpy unverified declared {} [data-function (data function): copies at most arg 2 bytes of the string arg 1 to arg 0, padding with zero] (POSIX.1-2017 / glibc 2.39) source P0 table: source unverified decl /usr/include/string.h:144
   P0 out-behaviour strncpy arg 0 unverified declared {} [arg 0 is written] (POSIX.1-2017 / glibc 2.39) source P0 table: source unverified decl /usr/include/string.h:144
+  framework none app_exit doc-collated doc-only {version-pinned} [return kind none (-)] (the semantics fixture) source semantics.c:65 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:113) decl semantics.c:113
   framework role app_exit body-derived derived {} [derived terminal operation (must, primitive exit)] (the semantics fixture) source OP_DERIV and SPAWN_WRAP of these facts decl semantics.c:113
   framework arg-role app_exit arg 0 doc-collated doc-only {version-pinned} [run-status (doc)] (the semantics fixture) source semantics.c:63 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:113) decl semantics.c:113
   framework arg-domain app_exit arg 0 doc-collated doc-only {version-pinned} [run-status: SEM_RUN=1, SEM_RUN_ERROR=3] (the semantics fixture) source semantics.c:63 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:113) decl semantics.c:113
   framework agreement app_exit unverified derived {} [not compared: no documented return] (the semantics fixture) source RET_CONSTS and RETURNS of these facts (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:113) decl semantics.c:113
+  framework none reg_create doc-collated doc-only {version-pinned} [return kind status (typed+body)] (the semantics fixture) source semantics.c:49 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:93) decl semantics.c:93
   framework success reg_create value 0 body-derived derived {value-set} [SEM_OK] (the semantics fixture) source RET_CONSTS of reg_create in these facts decl semantics.c:93
   framework failure reg_create value -14 body-derived derived {value-set} [SEM_ERR_NO_FREE] (the semantics fixture) source RET_CONSTS of reg_create in these facts decl semantics.c:93
   framework failure reg_create value -2 body-derived derived {value-set} [SEM_ERR_POINTER] (the semantics fixture) source RET_CONSTS of reg_create in these facts decl semantics.c:93
   framework failure reg_create value -13 body-derived derived {value-set} [SEM_ERR_TOO_LONG] (the semantics fixture) source RET_CONSTS of reg_create in these facts decl semantics.c:93
   framework agreement reg_create unverified derived {} [not compared: no documented return] (the semantics fixture) source RET_CONSTS and RETURNS of these facts (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:93) decl semantics.c:93
+  framework none reg_find doc-collated doc-only {version-pinned} [return kind status (typed+doc+body)] (the semantics fixture) source semantics.c:47 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:88) decl semantics.c:88
   framework success reg_find value 0 body-derived derived {value-set} [SEM_OK through reg_find -> reg_search] (the semantics fixture) source RET_CONSTS of reg_find in these facts decl semantics.c:88
   framework failure reg_find value -17 body-derived derived {value-set} [SEM_ERR_NOT_FOUND through reg_find -> reg_search] (the semantics fixture) source RET_CONSTS of reg_find in these facts decl semantics.c:88
   framework failure reg_find value -2 body-derived derived {value-set} [SEM_ERR_POINTER] (the semantics fixture) source RET_CONSTS of reg_find in these facts decl semantics.c:88
@@ -74,6 +77,7 @@ facts-view 1
   framework documented-return reg_find value -2 doc-collated doc-only {version-pinned,value-set} [SEM_ERR_POINTER] (the semantics fixture) source semantics.c:43 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:88) decl semantics.c:88
   framework documented-return reg_find value 0 doc-collated doc-only {version-pinned,value-set} [SEM_OK] (the semantics fixture) source semantics.c:42 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:88) decl semantics.c:88
   framework agreement reg_find body-derived derived {} [the documentation lists a value the body cannot return: SEM_ERR_NEVER (-99)] (the semantics fixture) source RET_CONSTS and RETURNS of these facts (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:88) decl semantics.c:88
+  framework none send_event doc-collated doc-only {version-pinned} [return kind status (typed+doc+body)] (the semantics fixture) source semantics.c:59 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:108) decl semantics.c:108
   framework arg-role send_event arg 1 doc-collated doc-only {version-pinned} [event-type (doc)] (the semantics fixture) source semantics.c:55 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:108) decl semantics.c:108
   framework arg-domain send_event arg 1 doc-collated doc-only {version-pinned} [event-type: SEM_EV_DEBUG=1, SEM_EV_ERROR=3] (the semantics fixture) source semantics.c:55 (framework_semantics_fixture-sem.txt, fixture-sem; applies by its definition semantics.c:108) decl semantics.c:108
   framework success send_event value 0 body-derived derived {value-set} [SEM_OK] (the semantics fixture) source RET_CONSTS of send_event in these facts decl semantics.c:108
@@ -83,7 +87,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 9 (2026-11-16)
+rules relations rules revision 12 (2026-11-18)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 
@@ -96,7 +100,7 @@ p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comp
 p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
 basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
 layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
-semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): rows 29 (collated / rows: P0 2/6, framework 20/22, status-space 1/1; collated: a verification state other than unverified); rows that name a function with framework semantics items 1, of them with items not verified 1 (sem-unverified(api:column) in the layers column; the P0 entries stay in P0-unverified)
+semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): rows 33 (collated / rows: P0 2/6, framework 24/26, status-space 1/1; collated: a verification state other than unverified); rows that name a function with framework semantics items 1, of them with items not verified 1 (sem-unverified(api:column) in the layers column; the P0 entries stay in P0-unverified)
 run order: no record given (this revision reads no run record; the column says so in every row)
 functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
 actors: roots 3 (process 1, spawn-entry 2, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0

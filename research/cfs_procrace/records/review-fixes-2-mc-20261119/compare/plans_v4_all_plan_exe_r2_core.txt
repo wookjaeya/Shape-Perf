@@ -1,0 +1,2 @@
+cdiff old_lines=3 new_lines=3 only_old=1 only_new=1 other=0
+class - table-header-path-and-sha256 pairs=1

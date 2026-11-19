@@ -130,8 +130,8 @@ facts-view 1
   after-spawn row 109 write <global>.wtask_mutex at order.c:224:24 in mapped_spawn after the spawn order.c:222:8 start_mapped
 
 # order
-kz-static order (order rules revision 2 (2026-11-16))
-relations relations rules revision 9 (2026-11-16)
+kz-static order (order rules revision 5 (2026-11-18))
+relations relations rules revision 12 (2026-11-18)
 kinds: hard: every execution in which both instances occur has them in this order, under the premises; conditional: only when the condition holds; observed-only: no rule of this revision orders them, a run record may show an order
 closure: hard_before and fixed_early_proved follow hard edges only; a conditional edge makes the path conditional (conditional_before, fixed_early_candidate) and is never in the hard closure; observed-only edges are not followed; a caller-dependent spawn call (in a function a call of a spawn operation's chain calls) is followed from a thread only to the threads that thread's own outer spawn calls create
 values: hard_before, conditional_before (the write or creation before the use), fixed_early_proved, fixed_early_candidate (the use before it), unordered (no path either way between two threads of resolved roots), unknown (why)

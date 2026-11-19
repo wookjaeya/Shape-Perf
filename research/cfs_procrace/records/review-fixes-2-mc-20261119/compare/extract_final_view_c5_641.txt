@@ -1,0 +1,15 @@
+cdiff old_lines=100878 new_lines=101128 only_old=12208 only_new=12458 other=0
+class basis section:basis removed=7
+class basis section:basis added=9
+class atype section:atype removed=68
+class atype section:atype added=68
+class semantics section:semantics removed=35
+class semantics section:semantics added=150
+class resultflow row-index pairs=5055
+class resultflow condition-and-flags pairs=367
+class resultflow section:resultflow removed=120
+class resultflow section:resultflow added=253
+class resulteffect flow-row-reference pairs=6276
+class resulteffect outcome-class pairs=279
+class loopdefs section:loopdefs removed=1
+class loopdefs section:loopdefs added=1

@@ -1,0 +1,29 @@
+# measure.py c1_post_tx (old: kz-static 1a47abd0 outputs; new: the rebuilt tool's)
+handling labels header old: handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: H 15 J 14 R 9 T 7 T? 46 none 142
+handling labels header new: handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: H 15 J 14 R 9 T 7 T? 46 none 142
+rows with a handling_label old=233 new=233 matched=233 only-old=0 only-new=0 label-moved=0
+label moves by kind: none
+result effect rows old: rows 15933 open 8554 event-send 1067 application-exit 305 terminal 159
+result effect rows new: rows 15933 open 8554 event-send 1067 application-exit 305 terminal 159
+extract semantics old: semantics                    rows 1773 (collated / rows: P0 30/77, framework 1578/1690, status-space 6/6; collated: a verification state other than unverified)
+extract semantics new: semantics                    rows 1931 (collated / rows: P0 30/77, framework 1736/1848, status-space 6/6; collated: a verification state other than unverified)
+extract result flow old: result flow                  12919 rows (uses: branch 2483, return 834, argument 1800, store 431, other 1352, none 2094; guard rows 3925); calls with a result 6020
+extract result flow new: result flow                  13036 rows (uses: branch 2483, return 834, argument 1800, store 431, other 1352, none 2094; guard rows 4042); calls with a result 6020
+extract lock handles old: lock handles                 1573 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 23, not-static 1550, of them no handle found 115)
+extract lock handles new: lock handles                 1573 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 23, not-static 1550, of them no handle found 187)
+key clearing lines new=0 (distinct 0)
+namespace with key-clearing calls 6: uses: lookups 7, creators 47 (calls from outside the key-parameter functions; a creator reaches a write of the key); key-clearing calls 6 (every write of the key they reach stores a constant, WRITERS:
+HB-await edges final round old=120 new=284
+  writer actor BP_AppMain (script-entry): 0 -> 56
+  writer actor CFE_ES_BackgroundTask (spawn-entry): 0 -> 56
+  writer actor CFE_ES_TaskMain (table-image-entry): 0 -> 56
+  writer actor CFE_TIME_TaskMain (table-image-entry): 0 -> 56
+  writer actor main (process): 120 -> 60
+HB-await edges T8CF old=0 new=0
+v4 control-budget old: rows=5 planned=5 cut=0 complete=yes | rows with control= 5
+v4 control-budget new: rows=5 planned=5 cut=0 complete=yes | rows with control= 5
+v4 sites old=291 new=291; gaps old=2 new=2
+v4 needs old=49 new=52
+  need event-send not-planned: 2 -> 4
+  need event-send planned: 3 -> 1
+  need event-send-other-outcome planned: 0 -> 3

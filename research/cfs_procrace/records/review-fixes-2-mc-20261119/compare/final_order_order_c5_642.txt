@@ -1,0 +1,14 @@
+cdiff old_lines=2378 new_lines=2352 only_old=58 only_new=32 other=0
+class - tool-line-revision pairs=1
+class - facts-hash pairs=1
+class - relations-line-revision pairs=1
+class - summary removed=1
+class - summary added=1
+class - row:order-static removed=13
+class - row:order-static added=13
+class - row:pair removed=13
+class - row:pairs removed=13
+class - row:pairs added=13
+class - row:threads-started-by removed=13
+class - header:rules-with-options removed=2
+class - header:rules-with-options added=2

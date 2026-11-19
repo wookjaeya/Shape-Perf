@@ -1,0 +1,5 @@
+cdiff old_lines=46 new_lines=23 only_old=40 only_new=17 other=0
+class - statement:request removed=39
+class - statement:request added=16
+class - statement:end-rows removed=1
+class - statement:end-rows added=1

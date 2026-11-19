@@ -1,0 +1,5 @@
+cdiff old_lines=64542 new_lines=64542 only_old=6 only_new=6 other=0
+class basis section:basis removed=1
+class basis section:basis added=1
+class atype section:atype removed=5
+class atype section:atype added=5

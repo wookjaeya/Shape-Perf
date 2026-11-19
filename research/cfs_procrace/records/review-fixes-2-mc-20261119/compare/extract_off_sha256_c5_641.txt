@@ -1,0 +1,3 @@
+cdiff old_lines=5 new_lines=5 only_old=3 only_new=3 other=0
+class - container-sha256 pairs=2
+class - tool-sha256-and-path pairs=1

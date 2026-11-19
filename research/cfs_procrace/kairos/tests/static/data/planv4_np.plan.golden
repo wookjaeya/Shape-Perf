@@ -1,8 +1,8 @@
-# kz plan written by kz-static plan (plan rules revision 3 (2026-11-16): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; relations rules revision 9 (2026-11-16))
+# kz plan written by kz-static plan (plan rules revision 4 (2026-11-18): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; relations rules revision 12 (2026-11-18))
 # sidecar sha256=<sha256>
 # every site: a label from the sorted site keys with its rule names, a ref to the facts it came from; the plan states what to record, never what to expect
 kzs-sites 4
-plan b67f3299474a135e facts=<sha256> relrules="relations rules revision 9 (2026-11-16)" obsrules="plan rules revision 3 (2026-11-16): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules" semantics="semantics join revision 1 (2026-11-16)" select=observation-set budget="all" control="all" ref="sidecar sha256 <sha256>"
+plan 1362f7e3f93a7d39 facts=<sha256> relrules="relations rules revision 12 (2026-11-18)" obsrules="plan rules revision 4 (2026-11-18): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart" semantics="semantics join revision 1 (2026-11-16)" select=observation-set budget="all" control="all" ref="sidecar sha256 <sha256>"
 source build rev=facts-<sha256> ref="facts extracted without a basis: every source file read is hashed in their FILE_HASHES"
 module 1 name=program source=build
 site 1 label=s0001.stop-event op=entry.app_exit phase=before tu=planv4.c func=app_exit skey=f42260f57be6a7b9 ref="framework-layer data line 5: app-exit app_exit planv4.c:93 (fixture planv4.c)"
@@ -122,7 +122,7 @@ need 6 subject="row 0cab3eacd5372d0b" what="event-send" state=planned sites=11
 need 7 subject="row 0cab3eacd5372d0b" what="wait-result planv4.c:150:3" state=planned sites=8,12 note="predicate LOOP_DEFS value"
 need 8 subject="row 0cab3eacd5372d0b" what="lock-result" state=not-planned reason="plan_missing(no rule of this revision)" note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
 need 9 subject="row 6a69c9e16dc94a34" what="use-result" state=planned sites=31
-need 10 subject="row 6a69c9e16dc94a34" what="event-send" state=not-planned reason="plan_missing(need not planned)" note="no event send or system log of RESULT_EFFECT with a call for the row's use"
+need 10 subject="row 6a69c9e16dc94a34" what="event-send" state=not-planned reason="plan_missing(need not planned)" note="no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use"
 need 11 subject="row 6a69c9e16dc94a34" what="wait-result" state=not-planned reason="plan_missing(need not planned)" note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
 need 12 subject="row 6a69c9e16dc94a34" what="lock-result" state=not-planned reason="plan_missing(no rule of this revision)" note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
 need 13 subject="row 8aab7be8c192de75" what="read-value" state=planned sites=16
@@ -141,9 +141,9 @@ input facts sha256=<sha256> path=<path>
 input framework-layer-data sha256=<sha256> path=<path>
 input namespace-data sha256=<sha256> path=<path>
 facts-artifact <sha256>
-rules plan rules revision 3 (2026-11-16): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; relations rules revision 9 (2026-11-16)
+rules plan rules revision 4 (2026-11-18): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; relations rules revision 12 (2026-11-18)
 manifest-revision 4 (kzs-sites 4)
-plan-id b67f3299474a135e
+plan-id 1362f7e3f93a7d39
 selection observation-set: every row of the relations (method document 3.1, the revised rule: no label and no proof of a row removes it)
 priority method-priority: method priority port revision 1 (2026-11-16): label, order class, reach mark and disposition of the method document's S1 rule over the row text; tier 1 = disposition D07 (label R or J, counterpart, order class RELOC), tier 2 = the other rows of order class RELOC, tier 3 = the rest; within a tier the order of the relations text
 classes rows 4 tier1 1 tier2 2 tier3 1
@@ -158,10 +158,10 @@ bound slots=4 source=instrument/gcc/kzgcc.cpp build_obs reason="values per event
 bound sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason="the binding id scheme" sites=40
 param tu-root - (units outside the bundle root are named relative to it)
 param bundle-root -
-row c38b3c7e2daa7772 A1 tier=1 position=1 label=R class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned control=b control-state=planned why="label R, counterpart, no static order; reach REACH-FLIP"
-row 0cab3eacd5372d0b A2 tier=2 position=2 label=H class=decided order=RELOC reach=REACH-FLIP disposition=D04 state=planned control=b control-state=planned why="probe-create, or a delayed retry loop on a failure status"
-row 6a69c9e16dc94a34 A3 tier=2 position=3 label=H class=decided order=RELOC reach=REACH-STATED disposition=D04 state=planned control=a+b control-state=planned why="probe-create, or a delayed retry loop on a failure status"
-row 8aab7be8c192de75 C1 tier=3 position=4 label=E class=absence-undetermined order=ENF reach=UNEVALUATED disposition=D01 state=planned why="the row proves the opposite order impossible"
+row c38b3c7e2daa7772 A1 tier=1 position=1 label=R fact-label=T? class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned control=b control-state=planned why="label R, counterpart, no static order; reach REACH-FLIP"
+row 0cab3eacd5372d0b A2 tier=2 position=2 label=H fact-label=H class=decided order=RELOC reach=REACH-FLIP disposition=D04 state=planned control=b control-state=planned why="probe-create, or a delayed retry loop on a failure status"
+row 6a69c9e16dc94a34 A3 tier=2 position=3 label=H fact-label=H class=decided order=RELOC reach=REACH-STATED disposition=D04 state=planned control=a+b control-state=planned why="probe-create, or a delayed retry loop on a failure status"
+row 8aab7be8c192de75 C1 tier=3 position=4 label=E fact-label=- class=absence-undetermined order=ENF reach=UNEVALUATED disposition=D01 state=planned why="the row proves the opposite order impossible"
 site 1 s0001.stop-event key="planv4.c|app_exit|before|||0" refs="framework-layer data line 5: app-exit app_exit planv4.c:93 (fixture planv4.c)"
 site 2 s0002.handling-chain+use-call key="planv4.c|one_init|point|after-call|reg_find|133|col=16|nth=1" refs="row c38b3c7e2daa7772"
 site 3 s0003.use-call key="planv4.c|one_init|point|at-call|reg_find|133|col=16|nth=1" refs="row c38b3c7e2daa7772"
@@ -215,7 +215,7 @@ need row 0cab3eacd5372d0b event-send planned reason=- note="" sites=11
 need row 0cab3eacd5372d0b wait-result planv4.c:150:3 planned reason=- note="predicate LOOP_DEFS value" sites=8,12
 need row 0cab3eacd5372d0b lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
 need row 6a69c9e16dc94a34 use-result planned reason=- note="" sites=31
-need row 6a69c9e16dc94a34 event-send not-planned reason=plan_missing(need not planned) note="no event send or system log of RESULT_EFFECT with a call for the row's use"
+need row 6a69c9e16dc94a34 event-send not-planned reason=plan_missing(need not planned) note="no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use"
 need row 6a69c9e16dc94a34 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
 need row 6a69c9e16dc94a34 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
 need row 8aab7be8c192de75 read-value planned reason=- note="" sites=16

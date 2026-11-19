@@ -1,0 +1,17 @@
+ M research/cfs_procrace/kairos/tests/static/data/looplock_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/looplock_order_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/objaccess.golden
+ M research/cfs_procrace/kairos/tests/static/data/objaccess_off.golden
+ M research/cfs_procrace/kairos/tests/static/data/order_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/plangen_np.plan.golden
+ M research/cfs_procrace/kairos/tests/static/data/planv4_np.plan.golden
+ M research/cfs_procrace/kairos/tests/static/data/relations.golden
+ M research/cfs_procrace/kairos/tests/static/data/relations_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/relcallback_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/relincomplete_cut_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/relincomplete_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/relpaths_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/relsound_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/resultflow_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/resultflow_order_np.golden
+ M research/cfs_procrace/kairos/tests/static/data/semantics_np.golden

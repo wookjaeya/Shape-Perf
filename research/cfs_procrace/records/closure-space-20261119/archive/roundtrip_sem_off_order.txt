@@ -1,0 +1,6 @@
+# archive.sh sem_off_order records/semantics-20261116/sem_off_order.sha256 2026-11-19T13:54:01Z
+1. directory = list: 30 files, 14689595 bytes (apparent), 14749696 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/sem_off_order/sem_off_order.tar.xz 211936 bytes sha256 0cfa21cd92f250190f09a905dbf5d0533a1f6051f2e807f2bc297eea2ff7817f
+4. round trip: 30 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/sem_off_order removed 2026-11-19T13:54:02Z
+PASS

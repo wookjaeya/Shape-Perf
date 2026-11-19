@@ -1,0 +1,6 @@
+# archive.sh rf2_final_order records/review-fixes-2-mc-20261119/rf2_final_order.sha256 2026-11-19T13:53:18Z
+1. directory = list: 35 files, 16668891 bytes (apparent), 16740352 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/rf2_final_order/rf2_final_order.tar.xz 240964 bytes sha256 0af6c43a0beb6061f7f5d0c888591c1a4f0f3aca74b770bc4dbef8c53172bed8
+4. round trip: 35 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/rf2_final_order removed 2026-11-19T13:53:19Z
+PASS

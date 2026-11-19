@@ -1,0 +1,33 @@
+# committed scripts (sh, py, cmake; git ls-files at b09688d) that name a directory archived or removed by this step (results 26.2);
+# none of them is a step still to run (listing.tsv readers); as they are, they no longer find the directory. name<TAB>count<TAB>scripts
+rf2_final_extract	8	records/closure-kzstatic-20261119/probes/scripts/run_probes.sh records/closure-kzstatic-20261119/scripts/scratch6_compare.sh records/closure-kzstatic-20261119/scripts/scratch6_run.sh records/closure-kzstatic-mc-20261119/compare.sh records/closure-kzstatic-mc-20261119/run.sh records/review-fixes-2-mc-20261119/compare.sh records/review-fixes-2-mc-20261119/measure.py records/review-fixes-2-mc-20261119/run.sh 
+ll_final_extract	9	records/closure-texts-20261118/scripts/run_probes.sh records/loop-lock-20261116/compare.sh records/loop-lock-20261116/extract.sh records/loop-lock-20261116/section_text_cmp_ll.py records/manifest-v4-20261116/plans.sh records/review-fixes-2-20261118/prebuild/prebuild_regress.sh records/review-fixes-2-mc-20261119/compare.sh records/review-fixes-2-mc-20261119/measure.py records/review-fixes-2-mc-20261119/run.sh 
+rf_on_extract	5	records/loop-lock-20261116/compare.sh records/result-flow-20261116/compare.sh records/result-flow-20261116/extract.sh records/result-flow-20261116/measure_rf.py records/result-flow-20261116/section_text_cmp.py 
+sem_on_extract	6	records/loop-lock-20261116/compare.sh records/result-flow-20261116/compare.sh records/result-flow-20261116/section_text_cmp.py records/semantics-20261116/compare.sh records/semantics-20261116/compare_sections_text.py records/semantics-20261116/extract.sh 
+objacc_on_extract	5	records/loop-lock-20261116/compare.sh records/object-access-20261116/compare.sh records/object-access-20261116/extract.sh records/semantics-20261116/compare.sh records/semantics-20261116/compare_sections_text.py 
+revfix_extract	3	records/object-access-20261116/compare.sh records/review-fixes-20261116/compare.sh records/review-fixes-20261116/extract.sh 
+rf2_off_extract	4	records/closure-kzstatic-20261119/scripts/scratch6_compare.sh records/closure-kzstatic-mc-20261119/compare.sh records/review-fixes-2-mc-20261119/compare.sh records/review-fixes-2-mc-20261119/run.sh 
+extfix_extract	4	records/extract-fixes-20261116/compare.sh records/extract-fixes-20261116/extract.sh records/review-fixes-20261116/compare.sh records/review-fixes-20261116/extract_compare/compare_extract.sh 
+order_rev1_extract	2	records/order-rules-rev1-20261116/compare.sh records/order-rules-rev1-20261116/extract.sh 
+order_rev1b_extract	0	
+relrev7_extract	2	records/relrules-rev7-20261116/extract.sh records/review-fixes-20261116/keys_check/keys_check.sh 
+schema12_extract	8	records/extract-fixes-20261116/compare.sh records/extract-fixes-20261116/compare_plans.py records/extract-fixes-20261116/key_map.py records/extract-fixes-20261116/pre_ref.sh records/review-fixes-20261116/extract_compare/compare_extract.sh records/schema-rev12-20261116/check_extract.py records/schema-rev12-20261116/compare.sh records/schema-rev12-20261116/extract.sh 
+extfix_on_extract	2	records/extract-fixes-20261116/compare.sh records/review-fixes-20261116/compare.sh 
+revfix_on_extract	2	records/object-access-20261116/compare.sh records/review-fixes-20261116/compare.sh 
+extfix_pre_onextract	2	records/extract-fixes-20261116/compare.sh records/extract-fixes-20261116/pre_ref.sh 
+order_rev1b_on_extract	0	
+schema12_on_extract	2	records/extract-fixes-20261116/compare.sh records/schema-rev12-20261116/compare.sh 
+order_rev1_on_extract	1	records/order-rules-rev1-20261116/compare.sh 
+rf2_final_order	11	records/closure-kzstatic-20261119/probes/normcmp.py records/closure-kzstatic-20261119/probes/scripts/p5_pairs.py records/closure-kzstatic-20261119/probes/scripts/p6_keys.py records/closure-kzstatic-20261119/probes/scripts/p7_items.py records/closure-kzstatic-20261119/probes/scripts/run_probes.sh records/closure-kzstatic-20261119/scripts/scratch6_compare.sh records/closure-kzstatic-mc-20261119/compare.sh records/closure-kzstatic-mc-20261119/exit_checks.sh records/review-fixes-2-mc-20261119/compare.sh records/review-fixes-2-mc-20261119/measure.py records/review-fixes-2-mc-20261119/run.sh 
+rf_on_order	4	records/loop-lock-20261116/compare.sh records/loop-lock-20261116/compare_ord_ll.py records/result-flow-20261116/compare.sh records/result-flow-20261116/measure_rf.py 
+sem_on_order	3	records/result-flow-20261116/compare.sh records/result-flow-20261116/measure_rf.py records/semantics-20261116/compare.sh 
+objacc_on_order	2	records/object-access-20261116/compare.sh records/semantics-20261116/compare.sh 
+ll_off_order	2	records/loop-lock-20261116/compare.sh records/review-fixes-2-mc-20261119/compare.sh 
+objacc_off_order	2	records/object-access-20261116/compare.sh records/semantics-20261116/compare.sh 
+rf_off_order	2	records/loop-lock-20261116/compare.sh records/result-flow-20261116/compare.sh 
+sem_off_order	2	records/result-flow-20261116/compare.sh records/semantics-20261116/compare.sh 
+rf2_off_order	4	records/closure-kzstatic-20261119/scripts/scratch6_compare.sh records/closure-kzstatic-mc-20261119/compare.sh records/review-fixes-2-mc-20261119/compare.sh records/review-fixes-2-mc-20261119/run.sh 
+extfix_order	3	records/extract-fixes-20261116/compare.sh records/extract-fixes-20261116/order.sh records/review-fixes-20261116/compare.sh 
+rf2_pre_final_order	2	records/closure-space-20261119/listing.sh records/review-fixes-2-20261118/prebuild/prebuild_regress.sh 
+rf2_pre_relcheck	3	records/closure-space-20261119/listing.sh records/review-fixes-2-20261118/prebuild/prebuild_regress.sh records/review-fixes-2-mc-20261119/compare.sh 
+rf2_pre_order	4	records/closure-space-20261119/listing.sh records/review-fixes-2-20261118/prebuild/prebuild_regress.sh records/review-fixes-2-mc-20261119/compare.sh records/review-fixes-2-mc-20261119/measure.py 

@@ -39,3 +39,13 @@ SPACE_TMP=<scratch> bash run_seq.sh 4 4                                         
 SPACE_TMP=<scratch> bash run_seq.sh 5 21                                         rc 0: 17 archived, each round trip PASS and
     ledger_check 0 failing (progress.tsv, archive/, ledger/, guard/a_*); free 475459584 -> 1077710848; short of target 136311040
 the tier 1 result is committed before tier 2
+committed as b09688d
+SPACE_TMP=<scratch> bash run_seq.sh 22 35                                        rc 0: lines 22-31 archived (10), each round trip
+    PASS and ledger_check 0 failing; "need met before line 32: free 1217945600 >= target 1214021888"; lines 32-35 not touched
+## 4. end
+../../env/tools/ledger_check.sh > ledger/check_end.txt                           rc 0 (193 rows, 0 failing)
+space_guard.sh --need 5000000 --kind tools-check -- bash ../../env/tools/tools_check.sh --deep > tools_check_deep_end.txt
+                                                                                  rc 0 (57 rows, 0 failing, deep; guard/g08_tools_check_deep.log)
+{ date -u; df -B1 /; } > free_end.txt                                             13:56:56Z (available 1217867776)
+grep of the committed scripts for the 31 directories removed or archived > scripts_naming_removed.txt (109 references; none in a
+    step still to run)

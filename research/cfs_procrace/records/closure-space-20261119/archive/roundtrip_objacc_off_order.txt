@@ -1,0 +1,6 @@
+# archive.sh objacc_off_order records/object-access-20261116/objacc_off_order.sha256 2026-11-19T13:53:48Z
+1. directory = list: 30 files, 14689595 bytes (apparent), 14749696 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/objacc_off_order/objacc_off_order.tar.xz 211964 bytes sha256 f07fa11d04243088cfb7a10277016af94d502247e8e1c64ff73267608ed944b1
+4. round trip: 30 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/objacc_off_order removed 2026-11-19T13:53:50Z
+PASS

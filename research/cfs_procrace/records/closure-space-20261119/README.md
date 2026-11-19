@@ -15,7 +15,9 @@
 | `run_seq.sh` | `chosen.tsv` 의 줄을 하나씩: 감시 아래 압축 → 제안 장부 → 제안 장부의 `ledger_check.sh` → 장부 교체 → `progress.tsv` 한 줄. 줄마다 먼저 여유가 목표에 닿았는지 보고 닿았으면 멈춤 |
 | `reclaim/` | `rf2_pre_*` 셋: `pairs.tsv`, `../reclaim-20261118/identity_listing.py` 의 출력(`identity_summary_before.txt`, `listing_before_<디렉터리>.txt`), 그리고 뒤의 지우기 기록 |
 | `guard/` | 출력을 쓰는 모든 실행의 `space_guard.sh` 기록 |
-| `archive/`, `ledger/`, `progress.tsv` | 압축마다의 왕복 기록, 장부 점검, 진행 (압축을 시작한 뒤에 생김) |
+| `archive/`, `ledger/`, `progress.tsv` | 압축마다의 왕복 기록(`roundtrip_<이름>.txt`; 첫 시도의 실패 기록은 `.trial1_fail` 이름), 장부 고침과 점검(`rewrite.txt`, 압축마다 `check_<줄>_<이름>.txt`, 시작·회수·끝의 점검), 진행(줄마다 앞뒤 여유, 압축 크기, 감시의 가장 낮은 값) |
+| `free_end.txt`, `tools_check_deep_end.txt` | 끝의 `df -B1 /`, 등록부 `--deep` 점검 |
+| `scripts_naming_removed.txt` | 압축하거나 지운 31 디렉터리를 경로로 이름 대는 커밋된 스크립트(앞 단계의 것; 그대로는 다시 돌지 않음) |
 | `commands.txt` | 돌린 차례 |
 
 ## 고르는 규칙 (`listing.py` 의 머리글)

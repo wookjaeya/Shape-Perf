@@ -19,3 +19,13 @@ archive OBS_extfix_pre_onextract extfix_pre_onextract: row rewritten
 archive OBS_orderrev1b_onextract order_rev1b_on_extract: row rewritten
 archive OBS_schema12_onextract schema12_on_extract: row rewritten
 archive OBS_orderrev1_onextract order_rev1_on_extract: row rewritten
+archive OBS_rf2_final_order rf2_final_order: row rewritten
+archive OBS_rf_on_order rf_on_order: row rewritten
+archive OBS_sem_on_order sem_on_order: row rewritten
+archive OBS_objacc_on_order objacc_on_order: row rewritten
+archive OBS_ll_off_order ll_off_order: row rewritten
+archive OBS_objacc_off_order objacc_off_order: row rewritten
+archive OBS_rf_off_order rf_off_order: row rewritten
+archive OBS_sem_off_order sem_off_order: row rewritten
+archive OBS_rf2_off_order rf2_off_order: row rewritten
+archive OBS_extfix_order extfix_order: row rewritten

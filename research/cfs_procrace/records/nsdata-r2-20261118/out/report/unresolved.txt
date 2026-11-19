@@ -1,0 +1,16 @@
+== osal-f34759d
+OS_ObjectIdGetBySearch at=osal/src/os/shared/src/osapi-idmap.c:915: the kind argument is the parameter idtype of OS_ObjectIdGetBySearch | argument: idtype
+OS_ObjectIdGetByName at=osal/src/os/shared/src/osapi-idmap.c:950: the kind argument is the parameter idtype of OS_ObjectIdGetByName | argument: idtype
+OS_ObjectIdFindByName at=osal/src/os/shared/src/osapi-idmap.c:975: the kind argument is the parameter idtype of OS_ObjectIdFindByName | argument: idtype
+OS_ObjectIdGetById at=osal/src/os/shared/src/osapi-idmap.c:1004: the kind argument is the parameter idtype of OS_ObjectIdGetById | argument: idtype
+OS_ObjectIdAllocateNew at=osal/src/os/shared/src/osapi-idmap.c:1158: the kind argument is the parameter idtype of OS_ObjectIdAllocateNew | argument: idtype
+OS_ObjectIdIteratorInit at=osal/src/os/shared/src/osapi-idmap.c:1242: the kind argument is the parameter objtype of OS_ObjectIdIteratorInit | argument: objtype
+OS_GetResourceName at=osal/src/os/shared/src/osapi-idmap.c:1418: the kind argument is another text | argument: OS_ObjectIdToType_Impl(object_id)
+== osal-7.0.1
+OS_ObjectIdGetBySearch at=osal/src/os/shared/src/osapi-idmap.c:928: the kind argument is the parameter idtype of OS_ObjectIdGetBySearch | argument: idtype
+OS_ObjectIdGetByName at=osal/src/os/shared/src/osapi-idmap.c:963: the kind argument is the parameter idtype of OS_ObjectIdGetByName | argument: idtype
+OS_ObjectIdFindByName at=osal/src/os/shared/src/osapi-idmap.c:988: the kind argument is the parameter idtype of OS_ObjectIdFindByName | argument: idtype
+OS_ObjectIdGetById at=osal/src/os/shared/src/osapi-idmap.c:1017: the kind argument is the parameter idtype of OS_ObjectIdGetById | argument: idtype
+OS_ObjectIdAllocateNew at=osal/src/os/shared/src/osapi-idmap.c:1171: the kind argument is the parameter idtype of OS_ObjectIdAllocateNew | argument: idtype
+OS_ObjectIdIteratorInit at=osal/src/os/shared/src/osapi-idmap.c:1256: the kind argument is the parameter objtype of OS_ObjectIdIteratorInit | argument: objtype
+OS_GetResourceName at=osal/src/os/shared/src/osapi-idmap.c:1434: the kind argument is another text | argument: OS_ObjectIdToType_Impl(object_id)

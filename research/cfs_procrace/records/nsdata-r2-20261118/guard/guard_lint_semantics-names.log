@@ -1,0 +1,4 @@
+# space_guard.sh kind=lint need=20000000 floor=314572800 interval=2 cmd=<scratch>/lint/kz_lint semantics-names <scratch>/lint/tree/research/cfs_procrace/kairos --data <scratch>/lint/tree/research/cfs_procrace/kairos/tests/lint/data
+start 2026-11-19T01:40:55.000Z free=1341726720 threshold=334572800
+sample 2026-11-19T01:40:55.010Z 1341722624
+end 2026-11-19T01:40:57.018Z kind=lint verdict=completed rc=0 free=1341444096 lowest=1341444096 dip=282624 change=-282624

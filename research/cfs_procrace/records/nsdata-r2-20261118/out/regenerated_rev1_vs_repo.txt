@@ -1,0 +1,13 @@
+identical framework_semantics_cfe-6.4.1.txt
+identical framework_semantics_cfe-6.4.2.txt
+identical framework_semantics_cfe-6cccb3f.txt
+identical framework_semantics_cfe-7.0.1.txt
+identical framework_semantics_osal-4.1.1.txt
+identical framework_semantics_osal-7.0.1.txt
+identical framework_semantics_osal-f34759d.txt
+identical framework_namespaces_cfe-6.4.1.txt
+identical framework_namespaces_cfe-6.4.2.txt
+identical framework_namespaces_osal-4.1.1.txt
+identical framework_namespaces_osal-7.0.1.txt
+identical framework_namespaces_osal-f34759d.txt
+identical p0_declarations_glibc-2.39-headers.txt

@@ -1,0 +1,121 @@
+== osal-f34759d (generation N; revision-1 lines without the kind line, against revision-2 lines)
+OS_OBJECT_TYPE_OS_BINSEM + rollback OS_BinSemCreate def=osal/src/os/shared/src/osapi-binsem.c:91 at=osal/src/os/shared/src/osapi-binsem.c:114 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_BINSEM = 4 lines in both
+OS_OBJECT_TYPE_OS_CONDVAR + create OS_CondVarCreate def=osal/src/os/shared/src/osapi-condvar.c:79 at=osal/src/os/shared/src/osapi-condvar.c:90 public=yes
+OS_OBJECT_TYPE_OS_CONDVAR + delete OS_CondVarDelete def=osal/src/os/shared/src/osapi-condvar.c:114 at=osal/src/os/shared/src/osapi-condvar.c:125 public=yes
+OS_OBJECT_TYPE_OS_CONDVAR + lookup OS_CondVarGetIdByName def=osal/src/os/shared/src/osapi-condvar.c:266 at=osal/src/os/shared/src/osapi-condvar.c:274 public=yes
+OS_OBJECT_TYPE_OS_CONDVAR + rollback OS_CondVarCreate def=osal/src/os/shared/src/osapi-condvar.c:79 at=osal/src/os/shared/src/osapi-condvar.c:102 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_CONDVAR + stored-name OS_CondVarCreate at=osal/src/os/shared/src/osapi-condvar.c:96 extent=OS_MAX_API_NAME element=char decl=osal/src/os/shared/inc/os-shared-condvar.h:34
+OS_OBJECT_TYPE_OS_CONDVAR = 0 lines in both
+OS_OBJECT_TYPE_OS_CONSOLE + create OS_ConsoleAPI_Init def=osal/src/os/shared/src/osapi-printf.c:84 at=osal/src/os/shared/src/osapi-printf.c:95 public=no
+OS_OBJECT_TYPE_OS_CONSOLE + not-covered no public lookup and create; the layer is called with this kind by OS_ConsoleAPI_Init, not declared in the public headers
+OS_OBJECT_TYPE_OS_CONSOLE + rollback OS_ConsoleAPI_Init def=osal/src/os/shared/src/osapi-printf.c:84 at=osal/src/os/shared/src/osapi-printf.c:113 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_CONSOLE + stored-name OS_ConsoleAPI_Init at=osal/src/os/shared/src/osapi-printf.c:101 extent=OS_MAX_API_NAME element=char decl=osal/src/os/shared/inc/os-shared-console.h:46
+OS_OBJECT_TYPE_OS_CONSOLE = 0 lines in both
+OS_OBJECT_TYPE_OS_COUNTSEM + rollback OS_CountSemCreate def=osal/src/os/shared/src/osapi-countsem.c:83 at=osal/src/os/shared/src/osapi-countsem.c:106 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_COUNTSEM = 4 lines in both
+OS_OBJECT_TYPE_OS_DIR + not-covered no public lookup
+OS_OBJECT_TYPE_OS_DIR + rollback OS_DirectoryOpen def=osal/src/os/shared/src/osapi-dir.c:105 at=osal/src/os/shared/src/osapi-dir.c:131 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_DIR = 3 lines in both
+OS_OBJECT_TYPE_OS_FILESYS + not-covered no public lookup; the layer is called with this kind by OS_FileSys_Initialize, not declared in the public headers
+OS_OBJECT_TYPE_OS_FILESYS + rollback OS_FileSysAddFixedMap def=osal/src/os/shared/src/osapi-filesys.c:242 at=osal/src/os/shared/src/osapi-filesys.c:313 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_FILESYS + rollback OS_FileSys_Initialize def=osal/src/os/shared/src/osapi-filesys.c:132 at=osal/src/os/shared/src/osapi-filesys.c:212 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_FILESYS = 5 lines in both
+OS_OBJECT_TYPE_OS_MODULE + not-covered no public lookup
+OS_OBJECT_TYPE_OS_MODULE + rollback OS_ModuleLoad def=osal/src/os/shared/src/osapi-module.c:174 at=osal/src/os/shared/src/osapi-module.c:253 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_MODULE = 3 lines in both
+OS_OBJECT_TYPE_OS_MUTEX + rollback OS_MutSemCreate def=osal/src/os/shared/src/osapi-mutex.c:88 at=osal/src/os/shared/src/osapi-mutex.c:111 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_MUTEX = 4 lines in both
+OS_OBJECT_TYPE_OS_QUEUE + rollback OS_QueueCreate def=osal/src/os/shared/src/osapi-queue.c:84 at=osal/src/os/shared/src/osapi-queue.c:113 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_QUEUE = 4 lines in both
+OS_OBJECT_TYPE_OS_STREAM + rollback OS_OpenCreate def=osal/src/os/shared/src/osapi-file.c:107 at=osal/src/os/shared/src/osapi-file.c:148 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_STREAM + rollback OS_SocketAccept def=osal/src/os/shared/src/osapi-sockets.c:205 at=osal/src/os/shared/src/osapi-sockets.c:276 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_STREAM + rollback OS_SocketOpen def=osal/src/os/shared/src/osapi-sockets.c:119 at=osal/src/os/shared/src/osapi-sockets.c:143 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_STREAM = 8 lines in both
+OS_OBJECT_TYPE_OS_TASK + rollback OS_TaskCreate def=osal/src/os/shared/src/osapi-task.c:164 at=osal/src/os/shared/src/osapi-task.c:199 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_TASK = 5 lines in both
+OS_OBJECT_TYPE_OS_TIMEBASE + create OS_TimeBaseCreate def=osal/src/os/shared/src/osapi-timebase.c:93 at=osal/src/os/shared/src/osapi-timebase.c:122 public=yes
+OS_OBJECT_TYPE_OS_TIMEBASE + lookup OS_TimeBaseGetIdByName def=osal/src/os/shared/src/osapi-timebase.c:249 at=osal/src/os/shared/src/osapi-timebase.c:268 public=yes
+OS_OBJECT_TYPE_OS_TIMEBASE + rollback OS_TimeBaseCreate def=osal/src/os/shared/src/osapi-timebase.c:93 at=osal/src/os/shared/src/osapi-timebase.c:144 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_TIMEBASE = 2 lines in both
+OS_OBJECT_TYPE_OS_TIMECB + create OS_DoTimerAdd def=osal/src/os/shared/src/osapi-time.c:90 at=osal/src/os/shared/src/osapi-time.c:134 public=no
+OS_OBJECT_TYPE_OS_TIMECB + delete OS_TimerDelete def=osal/src/os/shared/src/osapi-time.c:362 at=osal/src/os/shared/src/osapi-time.c:439 public=yes
+OS_OBJECT_TYPE_OS_TIMECB + lookup OS_TimerGetIdByName def=osal/src/os/shared/src/osapi-time.c:464 at=osal/src/os/shared/src/osapi-time.c:483 public=yes
+OS_OBJECT_TYPE_OS_TIMECB + not-covered no public create; the layer is called with this kind by OS_DoTimerAdd, not declared in the public headers
+OS_OBJECT_TYPE_OS_TIMECB + rollback OS_DoTimerAdd def=osal/src/os/shared/src/osapi-time.c:90 at=osal/src/os/shared/src/osapi-time.c:184 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_TIMECB + stored-name OS_DoTimerAdd at=osal/src/os/shared/src/osapi-time.c:141 extent=OS_MAX_API_NAME element=char decl=osal/src/os/shared/inc/os-shared-time.h:38
+OS_OBJECT_TYPE_OS_TIMECB = 0 lines in both
+OS_OBJECT_TYPE_UNDEFINED + not-covered no lookup, create or delete of the layer is called with this kind in the scanned sources
+OS_OBJECT_TYPE_UNDEFINED = 0 lines in both
+OS_OBJECT_TYPE_USER + not-covered no lookup, create or delete of the layer is called with this kind in the scanned sources
+OS_OBJECT_TYPE_USER = 0 lines in both
+== osal-7.0.1 (generation N; revision-1 lines without the kind line, against revision-2 lines)
+OS_OBJECT_TYPE_OS_BINSEM + rollback OS_BinSemCreate def=osal/src/os/shared/src/osapi-binsem.c:91 at=osal/src/os/shared/src/osapi-binsem.c:114 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_BINSEM = 4 lines in both
+OS_OBJECT_TYPE_OS_CONDVAR + create OS_CondVarCreate def=osal/src/os/shared/src/osapi-condvar.c:80 at=osal/src/os/shared/src/osapi-condvar.c:91 public=yes
+OS_OBJECT_TYPE_OS_CONDVAR + delete OS_CondVarDelete def=osal/src/os/shared/src/osapi-condvar.c:115 at=osal/src/os/shared/src/osapi-condvar.c:126 public=yes
+OS_OBJECT_TYPE_OS_CONDVAR + lookup OS_CondVarGetIdByName def=osal/src/os/shared/src/osapi-condvar.c:267 at=osal/src/os/shared/src/osapi-condvar.c:275 public=yes
+OS_OBJECT_TYPE_OS_CONDVAR + rollback OS_CondVarCreate def=osal/src/os/shared/src/osapi-condvar.c:80 at=osal/src/os/shared/src/osapi-condvar.c:103 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_CONDVAR + stored-name OS_CondVarCreate at=osal/src/os/shared/src/osapi-condvar.c:97 extent=OS_MAX_API_NAME element=char decl=osal/src/os/shared/inc/os-shared-condvar.h:34
+OS_OBJECT_TYPE_OS_CONDVAR = 0 lines in both
+OS_OBJECT_TYPE_OS_CONSOLE + create OS_ConsoleAPI_Init def=osal/src/os/shared/src/osapi-printf.c:84 at=osal/src/os/shared/src/osapi-printf.c:95 public=no
+OS_OBJECT_TYPE_OS_CONSOLE + not-covered no public lookup and create; the layer is called with this kind by OS_ConsoleAPI_Init, not declared in the public headers
+OS_OBJECT_TYPE_OS_CONSOLE + rollback OS_ConsoleAPI_Init def=osal/src/os/shared/src/osapi-printf.c:84 at=osal/src/os/shared/src/osapi-printf.c:113 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_CONSOLE + stored-name OS_ConsoleAPI_Init at=osal/src/os/shared/src/osapi-printf.c:101 extent=OS_MAX_API_NAME element=char decl=osal/src/os/shared/inc/os-shared-console.h:46
+OS_OBJECT_TYPE_OS_CONSOLE = 0 lines in both
+OS_OBJECT_TYPE_OS_COUNTSEM + rollback OS_CountSemCreate def=osal/src/os/shared/src/osapi-countsem.c:83 at=osal/src/os/shared/src/osapi-countsem.c:106 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_COUNTSEM = 4 lines in both
+OS_OBJECT_TYPE_OS_DIR + not-covered no public lookup
+OS_OBJECT_TYPE_OS_DIR + rollback OS_DirectoryOpen def=osal/src/os/shared/src/osapi-dir.c:105 at=osal/src/os/shared/src/osapi-dir.c:131 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_DIR = 3 lines in both
+OS_OBJECT_TYPE_OS_FILESYS + not-covered no public lookup; the layer is called with this kind by OS_FileSys_Initialize, not declared in the public headers
+OS_OBJECT_TYPE_OS_FILESYS + rollback OS_FileSysAddFixedMap def=osal/src/os/shared/src/osapi-filesys.c:248 at=osal/src/os/shared/src/osapi-filesys.c:299 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_FILESYS + rollback OS_FileSys_Initialize def=osal/src/os/shared/src/osapi-filesys.c:132 at=osal/src/os/shared/src/osapi-filesys.c:218 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_FILESYS = 5 lines in both
+OS_OBJECT_TYPE_OS_MODULE + not-covered no public lookup
+OS_OBJECT_TYPE_OS_MODULE + rollback OS_ModuleLoad def=osal/src/os/shared/src/osapi-module.c:185 at=osal/src/os/shared/src/osapi-module.c:264 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_MODULE = 3 lines in both
+OS_OBJECT_TYPE_OS_MUTEX + rollback OS_MutSemCreate def=osal/src/os/shared/src/osapi-mutex.c:88 at=osal/src/os/shared/src/osapi-mutex.c:111 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_MUTEX = 4 lines in both
+OS_OBJECT_TYPE_OS_QUEUE + rollback OS_QueueCreate def=osal/src/os/shared/src/osapi-queue.c:84 at=osal/src/os/shared/src/osapi-queue.c:116 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_QUEUE = 4 lines in both
+OS_OBJECT_TYPE_OS_RWLOCK + rollback OS_RwLockCreate def=osal/src/os/shared/src/osapi-rwlock.c:88 at=osal/src/os/shared/src/osapi-rwlock.c:111 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_RWLOCK = 4 lines in both
+OS_OBJECT_TYPE_OS_STREAM + rollback OS_OpenCreate def=osal/src/os/shared/src/osapi-file.c:107 at=osal/src/os/shared/src/osapi-file.c:148 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_STREAM + rollback OS_SocketAcceptAbs def=osal/src/os/shared/src/osapi-sockets.c:284 at=osal/src/os/shared/src/osapi-sockets.c:355 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_STREAM + rollback OS_SocketOpen def=osal/src/os/shared/src/osapi-sockets.c:119 at=osal/src/os/shared/src/osapi-sockets.c:143 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_STREAM = 8 lines in both
+OS_OBJECT_TYPE_OS_TASK + rollback OS_TaskCreate def=osal/src/os/shared/src/osapi-task.c:164 at=osal/src/os/shared/src/osapi-task.c:207 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_TASK = 5 lines in both
+OS_OBJECT_TYPE_OS_TIMEBASE + create OS_TimeBaseCreate def=osal/src/os/shared/src/osapi-timebase.c:93 at=osal/src/os/shared/src/osapi-timebase.c:122 public=yes
+OS_OBJECT_TYPE_OS_TIMEBASE + lookup OS_TimeBaseGetIdByName def=osal/src/os/shared/src/osapi-timebase.c:249 at=osal/src/os/shared/src/osapi-timebase.c:268 public=yes
+OS_OBJECT_TYPE_OS_TIMEBASE + rollback OS_TimeBaseCreate def=osal/src/os/shared/src/osapi-timebase.c:93 at=osal/src/os/shared/src/osapi-timebase.c:144 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_TIMEBASE = 2 lines in both
+OS_OBJECT_TYPE_OS_TIMECB + create OS_DoTimerAdd def=osal/src/os/shared/src/osapi-time.c:90 at=osal/src/os/shared/src/osapi-time.c:138 public=no
+OS_OBJECT_TYPE_OS_TIMECB + delete OS_TimerDelete def=osal/src/os/shared/src/osapi-time.c:376 at=osal/src/os/shared/src/osapi-time.c:453 public=yes
+OS_OBJECT_TYPE_OS_TIMECB + lookup OS_TimerGetIdByName def=osal/src/os/shared/src/osapi-time.c:478 at=osal/src/os/shared/src/osapi-time.c:497 public=yes
+OS_OBJECT_TYPE_OS_TIMECB + not-covered no public create; the layer is called with this kind by OS_DoTimerAdd, not declared in the public headers
+OS_OBJECT_TYPE_OS_TIMECB + rollback OS_DoTimerAdd def=osal/src/os/shared/src/osapi-time.c:90 at=osal/src/os/shared/src/osapi-time.c:188 status-arg=0 out-arg=2
+OS_OBJECT_TYPE_OS_TIMECB + stored-name OS_DoTimerAdd at=osal/src/os/shared/src/osapi-time.c:145 extent=OS_MAX_API_NAME element=char decl=osal/src/os/shared/inc/os-shared-time.h:38
+OS_OBJECT_TYPE_OS_TIMECB = 0 lines in both
+OS_OBJECT_TYPE_UNDEFINED + not-covered no lookup, create or delete of the layer is called with this kind in the scanned sources
+OS_OBJECT_TYPE_UNDEFINED = 0 lines in both
+OS_OBJECT_TYPE_USER + not-covered no lookup, create or delete of the layer is called with this kind in the scanned sources
+OS_OBJECT_TYPE_USER = 0 lines in both
+== osal-4.1.1 (generation T)
+OS_FDTable[].Path: - 0 + 0 = 16
+OS_VolumeTable[].DeviceName: - 0 + 0 = 9
+OS_VolumeTable[].MountPoint: - 0 + 0 = 7
+OS_bin_sem_table[].name: - 0 + 0 = 8
+OS_count_sem_table[].name: - 0 + 0 = 8
+OS_module_table[].name: - 0 + 0 = 5
+OS_mut_sem_table[].name: - 0 + 0 = 8
+OS_queue_table[].name: - 0 + 0 = 8
+OS_task_table[].name: - 0 + 0 = 9
+OS_timer_table[].name: - 0 + 0 = 7
+== cfe-6.4.1 (generation T)
+CFE_ES_Global.AppTable[].StartParams.Name: - 0 + 0 = 4
+CFE_ES_Global.CounterTable[].CounterName: - 0 + 0 = 4
+== cfe-6.4.2 (generation T)
+CFE_ES_Global.AppTable[].StartParams.Name: - 0 + 0 = 4
+CFE_ES_Global.CounterTable[].CounterName: - 0 + 0 = 4

@@ -1,0 +1,8 @@
+# space_guard.sh kind=scan need=5000000 floor=314572800 interval=2 cmd=python3 -I env/tools/semantics_scan.py generate records/nsdata-r2-20261118/semantics_trees_r2.tsv kairos/lib/llvm/p0.cpp <scratch>/trial3
+start 2026-11-19T01:37:40.301Z free=1050480640 threshold=319572800
+sample 2026-11-19T01:37:40.306Z 1050476544
+sample 2026-11-19T01:37:42.313Z 1050476544
+sample 2026-11-19T01:37:44.320Z 1050476544
+sample 2026-11-19T01:37:46.326Z 1050476544
+sample 2026-11-19T01:37:48.333Z 1050476544
+end 2026-11-19T01:37:50.339Z kind=scan verdict=completed rc=0 free=1049907200 lowest=1049907200 dip=573440 change=-573440

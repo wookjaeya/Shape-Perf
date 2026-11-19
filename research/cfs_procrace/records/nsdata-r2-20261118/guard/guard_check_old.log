@@ -1,0 +1,7 @@
+# space_guard.sh kind=scan need=5000000 floor=314572800 interval=2 cmd=python3 -I env/tools/semantics_scan.py check records/semantics-20261116/semantics_trees.tsv kairos/lib/llvm/p0.cpp kairos/semantics
+start 2026-11-19T01:39:56.203Z free=1348542464 threshold=319572800
+sample 2026-11-19T01:39:56.207Z 1348538368
+sample 2026-11-19T01:39:58.213Z 1348530176
+sample 2026-11-19T01:40:00.220Z 1348530176
+sample 2026-11-19T01:40:02.227Z 1348509696
+end 2026-11-19T01:40:04.234Z kind=scan verdict=completed rc=1 free=1348505600 lowest=1348505600 dip=36864 change=-36864

@@ -1,0 +1,32 @@
+component	kind	lookup(public)	create(public)	delete(public)	rollback	stored-name	other-store	not-covered
+osal-f34759d	OS_OBJECT_TYPE_UNDEFINED	0(0)	0(0)	0(0)	0	0	0	no lookup, create or delete of the layer is called with this kind in the scanned sources
+osal-f34759d	OS_OBJECT_TYPE_OS_TASK	1(1)	1(1)	2(2)	1	1	0	-
+osal-f34759d	OS_OBJECT_TYPE_OS_QUEUE	1(1)	1(1)	1(1)	1	1	0	-
+osal-f34759d	OS_OBJECT_TYPE_OS_COUNTSEM	1(1)	1(1)	1(1)	1	1	0	-
+osal-f34759d	OS_OBJECT_TYPE_OS_BINSEM	1(1)	1(1)	1(1)	1	1	0	-
+osal-f34759d	OS_OBJECT_TYPE_OS_MUTEX	1(1)	1(1)	1(1)	1	1	0	-
+osal-f34759d	OS_OBJECT_TYPE_OS_STREAM	1(1)	3(3)	1(1)	3	1	2	-
+osal-f34759d	OS_OBJECT_TYPE_OS_DIR	0(0)	1(1)	1(1)	1	1	0	no public lookup
+osal-f34759d	OS_OBJECT_TYPE_OS_TIMEBASE	1(1)	1(1)	1(1)	1	1	0	-
+osal-f34759d	OS_OBJECT_TYPE_OS_TIMECB	1(1)	1(0)	1(1)	1	1	0	no public create; the layer is called with this kind by OS_DoTimerAdd, not declared in the public headers
+osal-f34759d	OS_OBJECT_TYPE_OS_MODULE	0(0)	1(1)	1(1)	1	1	0	no public lookup
+osal-f34759d	OS_OBJECT_TYPE_OS_FILESYS	0(0)	2(1)	1(1)	2	2	0	no public lookup; the layer is called with this kind by OS_FileSys_Initialize, not declared in the public headers
+osal-f34759d	OS_OBJECT_TYPE_OS_CONSOLE	0(0)	1(0)	0(0)	1	1	0	no public lookup and create; the layer is called with this kind by OS_ConsoleAPI_Init, not declared in the public headers
+osal-f34759d	OS_OBJECT_TYPE_OS_CONDVAR	1(1)	1(1)	1(1)	1	1	0	-
+osal-f34759d	OS_OBJECT_TYPE_USER	0(0)	0(0)	0(0)	0	0	0	no lookup, create or delete of the layer is called with this kind in the scanned sources
+osal-7.0.1	OS_OBJECT_TYPE_UNDEFINED	0(0)	0(0)	0(0)	0	0	0	no lookup, create or delete of the layer is called with this kind in the scanned sources
+osal-7.0.1	OS_OBJECT_TYPE_OS_TASK	1(1)	1(1)	2(2)	1	1	0	-
+osal-7.0.1	OS_OBJECT_TYPE_OS_QUEUE	1(1)	1(1)	1(1)	1	1	0	-
+osal-7.0.1	OS_OBJECT_TYPE_OS_COUNTSEM	1(1)	1(1)	1(1)	1	1	0	-
+osal-7.0.1	OS_OBJECT_TYPE_OS_BINSEM	1(1)	1(1)	1(1)	1	1	0	-
+osal-7.0.1	OS_OBJECT_TYPE_OS_MUTEX	1(1)	1(1)	1(1)	1	1	0	-
+osal-7.0.1	OS_OBJECT_TYPE_OS_STREAM	1(1)	3(3)	1(1)	3	1	2	-
+osal-7.0.1	OS_OBJECT_TYPE_OS_DIR	0(0)	1(1)	1(1)	1	1	0	no public lookup
+osal-7.0.1	OS_OBJECT_TYPE_OS_TIMEBASE	1(1)	1(1)	1(1)	1	1	0	-
+osal-7.0.1	OS_OBJECT_TYPE_OS_TIMECB	1(1)	1(0)	1(1)	1	1	0	no public create; the layer is called with this kind by OS_DoTimerAdd, not declared in the public headers
+osal-7.0.1	OS_OBJECT_TYPE_OS_MODULE	0(0)	1(1)	1(1)	1	1	0	no public lookup
+osal-7.0.1	OS_OBJECT_TYPE_OS_FILESYS	0(0)	2(1)	1(1)	2	2	0	no public lookup; the layer is called with this kind by OS_FileSys_Initialize, not declared in the public headers
+osal-7.0.1	OS_OBJECT_TYPE_OS_CONSOLE	0(0)	1(0)	0(0)	1	1	0	no public lookup and create; the layer is called with this kind by OS_ConsoleAPI_Init, not declared in the public headers
+osal-7.0.1	OS_OBJECT_TYPE_OS_CONDVAR	1(1)	1(1)	1(1)	1	1	0	-
+osal-7.0.1	OS_OBJECT_TYPE_OS_RWLOCK	1(1)	1(1)	1(1)	1	1	0	-
+osal-7.0.1	OS_OBJECT_TYPE_USER	0(0)	0(0)	0(0)	0	0	0	no lookup, create or delete of the layer is called with this kind in the scanned sources

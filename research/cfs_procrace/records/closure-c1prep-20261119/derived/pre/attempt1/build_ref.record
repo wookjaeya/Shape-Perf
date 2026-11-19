@@ -1,0 +1,22 @@
+# derive_c1.sh build pre 1df262a ref 2026-11-19T08:51:29Z user=root host gcc: gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+env CFS_APP_PATH=/home/user/work/redesign/obs1/c1p_pre_derived/src CMAKE_EXPORT_COMPILE_COMMANDS=ON CFLAGS=-Wno-error=restrict
+cmake rc=0
+make rc=0
+compiler warnings in the build log: 1
+arch cache CMAKE_BUILD_TYPE:STRING=Release
+arch cache CMAKE_C_FLAGS:STRING=-Wno-error=restrict
+arch cache CMAKE_EXE_LINKER_FLAGS:STRING=
+mission cache CMAKE_BUILD_TYPE:STRING=Release
+mission cache CMAKE_C_FLAGS:STRING=-Wno-error=restrict
+mission cache CMAKE_EXE_LINKER_FLAGS:STRING=
+exe/tx/core-tx sha256 de1df94be283ed07ff435b995bab1eb3a6f6f38bdabdb48aaefabe663b64d9d3 (reference 0052e7ab80d583e842162a27ca7e68029e981ca41ddaebbf5ee3b51c3f3ba6e9)
+exe/tx/cf/bp.so sha256 334b073b63dee85e1e16ed7d51594aaef7638ba909045a0926c1ae61ef94c75b (reference 334b073b63dee85e1e16ed7d51594aaef7638ba909045a0926c1ae61ef94c75b)
+exe/tx/cf/bplib.so sha256 2a63f50e3157d4b82baec1339176a3eb00277709dacfc592c77c67c1e0865dde (reference 1766ee36c5c16afd26bf7071fc17bf74f48fbcb4ca096c714ebbf16de85d9214)
+exe/tx/cf/cf.so sha256 1d27f27f2554dfed7c823e102dc4f807ffcf22e455d013e6bce6d092f67b0dee (reference 1d27f27f2554dfed7c823e102dc4f807ffcf22e455d013e6bce6d092f67b0dee)
+exe/tx/cf/ci_lab.so sha256 f878c43e080e845eb8fc69be07db2e59993cddbc0ea05adf1d153176598834c7 (reference f878c43e080e845eb8fc69be07db2e59993cddbc0ea05adf1d153176598834c7)
+exe/tx/cf/sch_lab.so sha256 7097d3d8fcce06a6f52785d15b17ad14fb73bdd226b98cbadd72b82439ca6992 (reference 7097d3d8fcce06a6f52785d15b17ad14fb73bdd226b98cbadd72b82439ca6992)
+exe/tx/cf/to_lab.so sha256 395e1ca4f9b96f819b53da170b4b195afcbe93e203bf502b7c4ff9743eed8362 (reference 395e1ca4f9b96f819b53da170b4b195afcbe93e203bf502b7c4ff9743eed8362)
+build/src/cfe_module_version_table.c sha256 c9f3362c6d22221a0c008a351c3970e24518c3eeb22153ac97298090cf07e4ab (reference c9f3362c6d22221a0c008a351c3970e24518c3eeb22153ac97298090cf07e4ab)
+build/src/cfe_build_env_table.c sha256 d53d4192d254badfea97f6e7622096dfe2d97a5f529fd025900b7dc929aff78e (reference 9ad6cf922e96e831c68e5a8d62faee4ec523183898baf18e6b6569a25e071d7f)
+objects: 261
+reference build tree removed after the hashes (it was built only for the byte comparison at the same path)

@@ -18,3 +18,6 @@ declaration. No cFS boot. Nothing is pushed.
 | `out/pre_mc.txt` | the MC tree before the derived builds (build_record.sh) |
 | `derived/declared_diff.tsv` | the declared base-to-derived differences, committed before the derived builds |
 | `derived/<pre|post>/` | per build: regen.txt, runtime.txt, prepare.txt, build_ref.txt, build_instr.txt, check.txt, rx_*.txt, bincheck_rx.txt, exe_buildids.tsv, bprime_run.txt, module_flags.txt, bindings_report.tsv, compare.txt |
+| `derived/pre/attempt1/` | the first derived build of c1_pre_tx (kzgcc 0.4): its records and the compiler-stop excerpt of its build log (results 25.4) |
+| `scripts/unit_check.py`, `scratch/unitcheck_kzgcc04_<pre|post>.txt`, `..._units.tsv` | every planned unit of a plan compiled with a plugin in scratch (kzgcc 0.4: one unit stops the compiler in each plan) |
+| `guard/s_*.log` | the space guard logs of scratch actions (scratch paths replaced by `<scratch>`) |

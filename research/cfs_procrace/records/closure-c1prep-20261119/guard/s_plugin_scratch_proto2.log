@@ -1,0 +1,5 @@
+# space_guard.sh kind=plugin-scratch need=40000000 floor=314572800 interval=2 cmd=cmake --build <scratch>/c1prep/kzb -j4
+start 2026-11-19T08:58:02.236Z free=642772992 threshold=354572800
+sample 2026-11-19T08:58:02.240Z 642768896
+sample 2026-11-19T08:58:04.246Z 643272704
+end 2026-11-19T08:58:06.253Z kind=plugin-scratch verdict=completed rc=0 free=642191360 lowest=642191360 dip=581632 change=-581632

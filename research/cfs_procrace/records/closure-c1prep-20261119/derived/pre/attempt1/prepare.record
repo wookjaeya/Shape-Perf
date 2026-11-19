@@ -1,0 +1,9 @@
+# derive_c1.sh prepare pre 1df262a 2026-11-19T08:51:22Z: copies of the reference inputs (tar --exclude=.git)
+diff -r reference bundle_1df262a (excluding .git): 0 differences
+diff -r reference pre/src (excluding .git): 0 differences
+diff -r reference bpxfer_defs: Only in /home/user/work/redesign/obs1/c1p_pre_derived/ws/bpxfer_defs: generate_module_version.cmake Only in /home/user/work/redesign/obs1/c1p_pre_derived/ws/bpxfer_defs: ref_module_version_table.c 
+ref_module_version_table.c sha256 c9f3362c6d22221a0c008a351c3970e24518c3eeb22153ac97298090cf07e4ab
+path map /home/user/work/redesign/obs1/c1p_pre_derived/path_map.tsv sha256 a298a530898836637b8803bc937fa8962ad4cc2fbbecfdc661ca5d2081d6b725:
+  /home/user/work/procrace/c1_build/bundle_1df262a/	/home/user/work/redesign/obs1/c1p_pre_derived/bundle_1df262a/
+  /home/user/work/procrace/c1_build/pre/src/	/home/user/work/redesign/obs1/c1p_pre_derived/src/
+  /home/user/work/procrace/c1_build/pre/1df262a/	/home/user/work/redesign/obs1/c1p_pre_derived/ws/

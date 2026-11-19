@@ -1,0 +1,2 @@
+units 32, failed 1; binding lines: bound 274, duplicated 2, inlined 7, unsupported 1
+FAILED cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c rc=1: /home/user/work/procrace/c1_build/bundle_1df262a/cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c:1456:1: internal compiler error: in make_ssa_name_fn, at tree-ssanames.cc:357

@@ -1,0 +1,4 @@
+# space_guard.sh kind=plugin-scratch need=40000000 floor=314572800 interval=2 cmd=bash -c cmake -S <scratch>/c1prep/kz/kairos/instrument/gcc -B <scratch>/c1prep/kzb > /dev/null 2>&1 && cmake --build <scratch>/c1prep/kzb -j4 > <scratch>/c1prep/kzb.build4.log 2>&1 && cd <scratch>/c1prep/kzb && ctest -R 'outagg|v4' --output-on-failure > <scratch>/c1prep/kzb.ctest_proto.log 2>&1
+start 2026-11-19T09:00:57.128Z free=640925696 threshold=354572800
+sample 2026-11-19T09:00:57.133Z 640921600
+end 2026-11-19T09:00:59.140Z kind=plugin-scratch verdict=completed rc=0 free=640503808 lowest=640503808 dip=421888 change=-421888

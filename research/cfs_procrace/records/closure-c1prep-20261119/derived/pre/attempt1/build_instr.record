@@ -1,0 +1,37 @@
+# derive_c1.sh build pre 1df262a instr 2026-11-19T08:51:49Z user=root host gcc: gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+env CFS_APP_PATH=/home/user/work/redesign/obs1/c1p_pre_derived/src CMAKE_EXPORT_COMPILE_COMMANDS=ON CFLAGS=-Wno-error=restrict
+D3 arch CMAKE_C_FLAGS=-Wno-error=restrict -fplugin=/home/user/work/instr/kzgcc-0.4/plugin-build/kzgcc.so -fplugin-arg-kzgcc-manifest=/home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs -fplugin-arg-kzgcc-out=/home/user/work/redesign/obs1/c1p_pre_derived/binds_instr -fplugin-arg-kzgcc-module=1:/home/user/work/redesign/obs1/c1p_pre_derived/src/bp/fsw/ -fplugin-arg-kzgcc-module=2:/home/user/work/redesign/obs1/c1p_pre_derived/src/bplib/ -fplugin-arg-kzgcc-module=3:/home/user/work/redesign/obs1/c1p_pre_derived/src/cf/fsw/src/ -fplugin-arg-kzgcc-module=4:/home/user/work/redesign/obs1/c1p_pre_derived/bundle_1df262a/apps/ci_lab/fsw/src/ -fplugin-arg-kzgcc-module=6:/home/user/work/redesign/obs1/c1p_pre_derived/bundle_1df262a/apps/sch_lab/fsw/src/ -fplugin-arg-kzgcc-module=7:/home/user/work/redesign/obs1/c1p_pre_derived/bundle_1df262a/apps/to_lab/fsw/src/ -fplugin-arg-kzgcc-default-module=5
+D3 arch CMAKE_EXE_LINKER_FLAGS=-Wl,--whole-archive /home/user/work/redesign/obs1/c1p_pre_rt/rt/libkzrt-posix.a /home/user/work/redesign/obs1/c1p_pre_rt/rt/libkzrt.a -Wl,--no-whole-archive /home/user/work/redesign/obs1/c1p_pre_rt/rt/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o /home/user/work/redesign/obs1/c1p_pre_rt/rt/CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o
+plugin sha256 985fc1025de287bfa9cd7466407ddb33a03b6800d728dbaa75f00d4630a707a2 manifest sha256 69a278b019281fd3015226b2ac188be0702613eb2a950fc12627c2603b53c9a0
+runtime # build_runtime.sh 2026-11-19T08:51:16Z: kairos/runtime at /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime, standalone, /usr/bin/gcc
+runtime build identity: backend="kzgcc 0.4 (gcc-plugin)" compiler="gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0" target="x86_64-linux-gnu" manifest=/home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs sha256 69a278b019281fd3015226b2ac188be0702613eb2a950fc12627c2603b53c9a0
+runtime tool capacities: the runtime defaults (KZ_RT_DEFINES empty; recorded in the dump's RUN/RUNX records)
+runtime cache CMAKE_BUILD_TYPE:STRING=
+runtime cache CMAKE_C_COMPILER:STRING=/usr/bin/gcc
+runtime cache CMAKE_C_FLAGS:STRING=
+runtime libkzrt.a sha256 7e1f2c47b25ed89f9aafe5de5ef43ede8cc8331455813b8b212727f3a5623465
+runtime libkzrt-posix.a sha256 70b8853651ab9c12115fb731a5b50e83b79ca564d37369e0ce7136729091cd6d
+runtime CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o sha256 813b529cdb56c2757898fc30760cd4ae43eec7e2458cd9b5916f9a5b034ba667
+runtime CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o sha256 be4edb60911604b67dae060c312f3de0f963a0fd91db5dbb85479c7f08afd265
+runtime kz-rt-dump sha256 d55a90811929106d8298bcfef96c13cda2a651ce4994b274046c346f5f138db1
+plan inputs: manifest /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs sha256 69a278b019281fd3015226b2ac188be0702613eb2a950fc12627c2603b53c9a0 modules /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.mod sha256 089e45001ba10988a2119886c58de6b54b6886ed4de9e69d9eb938916fb97949 exes /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.exe sha256 35497d8c373248f39ae432f77870e685c518c7fb891348b6e8fe881b1d6165a1 path map /home/user/work/redesign/obs1/c1p_pre_derived/path_map.tsv sha256 a298a530898836637b8803bc937fa8962ad4cc2fbbecfdc661ca5d2081d6b725
+cmake rc=0
+arch reconfigure rc=0
+make rc=2
+compiler warnings in the build log: 1
+arch cache CMAKE_BUILD_TYPE:STRING=Release
+arch cache CMAKE_C_FLAGS:STRING=-Wno-error=restrict -fplugin=/home/user/work/instr/kzgcc-0.4/plugin-build/kzgcc.so -fplugin-arg-kzgcc-manifest=/home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs -fplugin-arg-kzgcc-out=/home/user/work/redesign/obs1/c1p_pre_derived/binds_instr -fplugin-arg-kzgcc-module=1:/home/user/work/redesign/obs1/c1p_pre_derived/src/bp/fsw/ -fplugin-arg-kzgcc-module=2:/home/user/work/redesign/obs1/c1p_pre_derived/src/bplib/ -fplugin-arg-kzgcc-module=3:/home/user/work/redesign/obs1/c1p_pre_derived/src/cf/fsw/src/ -fplugin-arg-kzgcc-module=4:/home/user/work/redesign/obs1/c1p_pre_derived/bundle_1df262a/apps/ci_lab/fsw/src/ -fplugin-arg-kzgcc-module=6:/home/user/work/redesign/obs1/c1p_pre_derived/bundle_1df262a/apps/sch_lab/fsw/src/ -fplugin-arg-kzgcc-module=7:/home/user/work/redesign/obs1/c1p_pre_derived/bundle_1df262a/apps/to_lab/fsw/src/ -fplugin-arg-kzgcc-default-module=5
+arch cache CMAKE_EXE_LINKER_FLAGS:STRING=-Wl,--whole-archive /home/user/work/redesign/obs1/c1p_pre_rt/rt/libkzrt-posix.a /home/user/work/redesign/obs1/c1p_pre_rt/rt/libkzrt.a -Wl,--no-whole-archive /home/user/work/redesign/obs1/c1p_pre_rt/rt/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o /home/user/work/redesign/obs1/c1p_pre_rt/rt/CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o
+mission cache CMAKE_BUILD_TYPE:STRING=Release
+mission cache CMAKE_C_FLAGS:STRING=-Wno-error=restrict
+mission cache CMAKE_EXE_LINKER_FLAGS:STRING=
+exe/tx/core-tx sha256  (reference 0052e7ab80d583e842162a27ca7e68029e981ca41ddaebbf5ee3b51c3f3ba6e9)
+exe/tx/cf/bp.so sha256  (reference 334b073b63dee85e1e16ed7d51594aaef7638ba909045a0926c1ae61ef94c75b)
+exe/tx/cf/bplib.so sha256  (reference 1766ee36c5c16afd26bf7071fc17bf74f48fbcb4ca096c714ebbf16de85d9214)
+exe/tx/cf/cf.so sha256  (reference 1d27f27f2554dfed7c823e102dc4f807ffcf22e455d013e6bce6d092f67b0dee)
+exe/tx/cf/ci_lab.so sha256  (reference f878c43e080e845eb8fc69be07db2e59993cddbc0ea05adf1d153176598834c7)
+exe/tx/cf/sch_lab.so sha256  (reference 7097d3d8fcce06a6f52785d15b17ad14fb73bdd226b98cbadd72b82439ca6992)
+exe/tx/cf/to_lab.so sha256  (reference 395e1ca4f9b96f819b53da170b4b195afcbe93e203bf502b7c4ff9743eed8362)
+build/src/cfe_module_version_table.c sha256 c9f3362c6d22221a0c008a351c3970e24518c3eeb22153ac97298090cf07e4ab (reference c9f3362c6d22221a0c008a351c3970e24518c3eeb22153ac97298090cf07e4ab)
+build/src/cfe_build_env_table.c sha256 d53d4192d254badfea97f6e7622096dfe2d97a5f529fd025900b7dc929aff78e (reference 9ad6cf922e96e831c68e5a8d62faee4ec523183898baf18e6b6569a25e071d7f)
+objects: 63

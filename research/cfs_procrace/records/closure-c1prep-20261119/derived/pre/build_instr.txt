@@ -1,0 +1,12 @@
+derive_plan.sh: module table /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.mod from plan sidecar /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side (sha256 a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4)
+cmake rc=0
+arch reconfigure rc=0
+make rc=2
+sha256sum: /home/user/work/redesign/obs1/c1p_pre_derived/ws/exe/tx/core-tx: No such file or directory
+sha256sum: /home/user/work/redesign/obs1/c1p_pre_derived/ws/exe/tx/cf/bp.so: No such file or directory
+sha256sum: /home/user/work/redesign/obs1/c1p_pre_derived/ws/exe/tx/cf/bplib.so: No such file or directory
+sha256sum: /home/user/work/redesign/obs1/c1p_pre_derived/ws/exe/tx/cf/cf.so: No such file or directory
+sha256sum: /home/user/work/redesign/obs1/c1p_pre_derived/ws/exe/tx/cf/ci_lab.so: No such file or directory
+sha256sum: /home/user/work/redesign/obs1/c1p_pre_derived/ws/exe/tx/cf/sch_lab.so: No such file or directory
+sha256sum: /home/user/work/redesign/obs1/c1p_pre_derived/ws/exe/tx/cf/to_lab.so: No such file or directory
+rc=0

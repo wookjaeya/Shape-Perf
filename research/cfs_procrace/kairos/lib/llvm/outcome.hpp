@@ -91,6 +91,16 @@ struct OutcomeSpaces {
     s.has_success = !first && agree;
     return s;
   }
+  // the status space `cls` classes the values of fn in (no success constant: an entry whose return is no status)
+  OutcomeSpace space_of(uint32_t fn) const {
+    auto e = entry_of_fn.find(fn);
+    if (e != entry_of_fn.end()) {
+      if (!e->second.status) return OutcomeSpace{};
+      auto s = by_component.find(e->second.component);
+      if (s != by_component.end()) return s->second;
+    }
+    return shared();
+  }
   uint8_t cls(uint32_t fn, int64_t v) const {
     auto e = entry_of_fn.find(fn);
     if (e != entry_of_fn.end()) {

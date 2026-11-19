@@ -1,0 +1,7 @@
+# space_guard.sh kind=scratch-make need=50000000 floor=314572800 interval=2 cmd=make -j4 kz_lint
+start 2026-11-19T03:06:33.819Z free=1029656576 threshold=364572800
+sample 2026-11-19T03:06:33.823Z 1029652480
+sample 2026-11-19T03:06:35.828Z 1029636096
+sample 2026-11-19T03:06:37.834Z 1029017600
+sample 2026-11-19T03:06:39.840Z 1028325376
+end 2026-11-19T03:06:41.847Z kind=scratch-make verdict=completed rc=0 free=1028673536 lowest=1028325376 dip=1331200 change=-983040

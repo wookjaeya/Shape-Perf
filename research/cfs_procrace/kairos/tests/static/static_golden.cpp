@@ -130,6 +130,9 @@ const std::vector<Case>& cases() {
       {"looplock_np", "looplock.c",
        {"--targets-rule", "R-T1,R-T2", "--result-flow", "--loop-defs", "--lock-handles", "--semantics", "@data/looplock_fixture/framework_semantics_fixture-lock.txt"},
        kLoopLockSections, true, true},
+      // the lines of relations rules revision 14 (static_facts.md 5x and its addenda) over facts with result flow and object
+      // access: closure.c (the success path line of five creator callees, held and missing)
+      {"closure_np", "closure.c", {"--targets-rule", "R-T1,R-T2", "--result-flow", "--object-access"}, kResultFlowSections, true, true},
       {"looplock_order_np", "looplock.c",
        {"--targets-rule", "R-T1,R-T2", "--result-flow", "--loop-defs", "--lock-handles", "--semantics", "@data/looplock_fixture/framework_semantics_fixture-lock.txt"},
        kPathSections, true, false, true},

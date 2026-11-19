@@ -1,0 +1,86 @@
+Test project <scratch>/kzc2_build
+      Start 225: static_fixture_compile_closure
+ 1/34 Test #225: static_fixture_compile_closure .......   Passed    0.02 sec
+      Start 226: static_golden_writers
+ 2/34 Test #226: static_golden_writers ................   Passed    0.03 sec
+      Start 227: static_golden_outptr
+ 3/34 Test #227: static_golden_outptr .................   Passed    0.03 sec
+      Start 228: static_golden_derives
+ 4/34 Test #228: static_golden_derives ................   Passed    0.04 sec
+      Start 229: static_golden_loops
+ 5/34 Test #229: static_golden_loops ..................   Passed    0.04 sec
+      Start 230: static_golden_spawn
+ 6/34 Test #230: static_golden_spawn ..................   Passed    0.04 sec
+      Start 231: static_golden_atype
+ 7/34 Test #231: static_golden_atype ..................   Passed    0.04 sec
+      Start 232: static_golden_wrappers
+ 8/34 Test #232: static_golden_wrappers ...............   Passed    0.07 sec
+      Start 233: static_golden_flowfacts
+ 9/34 Test #233: static_golden_flowfacts ..............   Passed    0.05 sec
+      Start 234: static_golden_argflow
+10/34 Test #234: static_golden_argflow ................   Passed    0.05 sec
+      Start 235: static_golden_lockset
+11/34 Test #235: static_golden_lockset ................   Passed    0.05 sec
+      Start 236: static_golden_relations
+12/34 Test #236: static_golden_relations ..............   Passed    0.09 sec
+      Start 237: static_golden_clobber
+13/34 Test #237: static_golden_clobber ................   Passed    0.03 sec
+      Start 238: static_golden_flowfacts_np
+14/34 Test #238: static_golden_flowfacts_np ...........   Passed    0.06 sec
+      Start 239: static_golden_argflow_np
+15/34 Test #239: static_golden_argflow_np .............   Passed    0.06 sec
+      Start 240: static_golden_lockset_np
+16/34 Test #240: static_golden_lockset_np .............   Passed    0.06 sec
+      Start 241: static_golden_relations_np
+17/34 Test #241: static_golden_relations_np ...........   Passed    0.10 sec
+      Start 242: static_golden_lockpaths_np
+18/34 Test #242: static_golden_lockpaths_np ...........   Passed    0.12 sec
+      Start 243: static_golden_relpaths_np
+19/34 Test #243: static_golden_relpaths_np ............   Passed    0.13 sec
+      Start 244: static_golden_relsound_np
+20/34 Test #244: static_golden_relsound_np ............   Passed    0.26 sec
+      Start 245: static_golden_imgbudget_np
+21/34 Test #245: static_golden_imgbudget_np ...........   Passed    0.05 sec
+      Start 246: static_golden_relincomplete_np
+22/34 Test #246: static_golden_relincomplete_np .......   Passed    0.11 sec
+      Start 247: static_golden_relincomplete_cut_np
+23/34 Test #247: static_golden_relincomplete_cut_np ...   Passed    0.12 sec
+      Start 248: static_golden_relcallback_np
+24/34 Test #248: static_golden_relcallback_np .........   Passed    0.13 sec
+      Start 249: static_golden_order_np
+25/34 Test #249: static_golden_order_np ...............***Failed    0.16 sec
+      Start 250: static_golden_anonrec_np
+26/34 Test #250: static_golden_anonrec_np .............   Passed    0.06 sec
+      Start 251: static_golden_objaccess
+27/34 Test #251: static_golden_objaccess ..............   Passed    0.05 sec
+      Start 252: static_golden_objaccess_off
+28/34 Test #252: static_golden_objaccess_off ..........   Passed    0.05 sec
+      Start 253: static_golden_semantics_np
+29/34 Test #253: static_golden_semantics_np ...........   Passed    0.12 sec
+      Start 254: static_golden_resultflow_np
+30/34 Test #254: static_golden_resultflow_np ..........   Passed    0.13 sec
+      Start 255: static_golden_resultflow_order_np
+31/34 Test #255: static_golden_resultflow_order_np ....***Failed    0.19 sec
+      Start 256: static_golden_looplock_np
+32/34 Test #256: static_golden_looplock_np ............   Passed    0.15 sec
+      Start 257: static_golden_looplock_order_np
+33/34 Test #257: static_golden_looplock_order_np ......***Failed    0.24 sec
+      Start 258: static_golden_closure_np
+34/34 Test #258: static_golden_closure_np .............***Failed    0.13 sec
+
+88% tests passed, 4 tests failed out of 34
+
+Label Time Summary:
+golden    =   3.03 sec*proc (33 tests)
+static    =   3.06 sec*proc (34 tests)
+
+Total Test time (real) =   3.08 sec
+
+The following tests FAILED:
+	249 - static_golden_order_np (Failed)
+	255 - static_golden_resultflow_order_np (Failed)
+	257 - static_golden_looplock_order_np (Failed)
+	258 - static_golden_closure_np (Failed)
+Errors while running CTest
+Output from these tests are in: <scratch>/kzc2_build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.

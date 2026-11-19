@@ -105,6 +105,7 @@ struct Subst {
   std::map<std::string, int64_t> calls;
   std::set<std::string> nonzero_calls;
   std::map<uint32_t, int64_t> forced;  // FACT_EXPRS node -> value
+  std::map<std::string, int64_t> locals;  // relations rules revision 14 (the success path line): a local with a value
 };
 
 // The lines of the row being written: line(name) starts a line (the stream takes its text, without the indentation
@@ -277,6 +278,10 @@ class Rel : public RelFacts {
           auto it = s.params.find(static_cast<uint32_t>(e.value));
           if (it != s.params.end()) return known(it->second);
           return un("the parameter " + str(e.name) + "#" + std::to_string(e.value));
+        }
+        if (e.flags == KZ_EXPR_REF_LOCAL) {
+          auto it = s.locals.find(str(e.name));
+          if (it != s.locals.end()) return known(it->second);
         }
         return un(enum_text("KZ_EXPR_REF", e.flags) + " " + str(e.name));
       }
@@ -766,6 +771,22 @@ class Rel : public RelFacts {
     os << "]";
     if (n_a_clearing_ != 0) os << "; key-clearing calls, no creator sites (relations rules revision 12): " << n_a_clearing_;
     os << "\n";
+    // relations rules revision 14 (static_facts.md 5x item 1): the success path line over every pair of a namespace and a
+    // creator callee
+    if (result_flow_ && has_objacc_) {
+      size_t held = 0;
+      std::map<std::string, size_t> why;
+      for (const auto& [k, sp] : success_paths_) {
+        if (sp.held) ++held;
+        else ++why[sp.why];
+      }
+      const size_t miss = success_paths_.size() - held;
+      os << "summary success path: creator callees " << success_paths_.size() << ": held " << held << "; missing " << miss;
+      std::vector<std::string> ws;
+      for (const char* w : kSpWhy)
+        if (why.count(w) != 0) ws.push_back(std::string(w) + " " + std::to_string(why.at(w)));
+      os << " (" << (ws.empty() ? std::string("none") : join(ws, "; ")) << ")\n";
+    }
     // relations rules revision 6: the rows per incompleteness reason (the reason, then its sub-reasons)
     os << "summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m):";
     const std::vector<RelReason>& table = relations_incomplete_reasons();
@@ -3589,6 +3610,18 @@ class Rel : public RelFacts {
     }
     n_a_clearing_ += clearing;
     cur_ns_clearing_ = clearing;
+    // relations rules revision 14: the success path line of every creator callee of the namespace (the summary counts them
+    // all, whether a row names them or not)
+    if (result_flow_ && has_objacc_) {
+      std::set<uint32_t> fs;
+      for (const Use& u : uses)
+        if (u.creator) fs.insert(u.callee);
+      std::vector<std::pair<std::string, std::string>> ls;
+      for (uint32_t F : fs) ls.emplace_back(fname(F), success_path(n.key, F).text);
+      std::sort(ls.begin(), ls.end());
+      rows << "      success path of the creator callees of the namespace (relations rules revision 14): " << ls.size() << "\n";
+      for (const auto& [f, t] : ls) rows << "        " << t << "\n";
+    }
     rows << "      uses: lookups " << lookups << ", creators " << creators << " (calls from outside the key-parameter functions; a creator reaches a write of the key)";
     if (clearing != 0)
       rows << "; key-clearing calls " << clearing << " (every write of the key they reach stores a constant, WRITERS: no creator site and no lookup row)";
@@ -3771,6 +3804,8 @@ class Rel : public RelFacts {
           L.line("callee-check (set)") << "callee-check (set): " << fname(F) << ": not established (" << open.size() << " returns not followed, " << marked
                                        << " constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them";
         if (result_flow_) creator_result_flow(L, F);
+        // relations rules revision 14 (static_facts.md 5x item 1)
+        if (result_flow_ && has_objacc_) L.line("callee-check (success path)") << success_path(n.key, F).text;
       }
       // relations rules revision 7 (O4): the writer sets the row uses -- the key, the active fields, and the fields the keys
       // are read from in a static image -- with their rule statuses, premises and what they do not cover
@@ -4193,7 +4228,7 @@ class Rel : public RelFacts {
     ++n_lab_[best];
   }
   // a creator's callee: the values the RESULT_EFFECT rows of its calls show to reach its returns, and its success constants
-  void creator_result_flow(RowLines& L, uint32_t F) const {
+  std::map<int64_t, std::pair<std::string, bool>> callee_result_values(uint32_t F) const {
     std::map<int64_t, std::pair<std::string, bool>> vals;  // value -> (first text, shown: complete and reached)
     for (const kz_fact_reffect& e : reffect_) {
       if (e.fn != F || (e.effect != KZ_REFF_EFFECT_RETURN_RESULT && e.effect != KZ_REFF_EFFECT_RETURN_CONST)) continue;
@@ -4209,6 +4244,10 @@ class Rel : public RelFacts {
       if (it == vals.end()) vals[v] = {t, shown};
       else if (shown && !it->second.second) it->second = {t, true};
     }
+    return vals;
+  }
+  void creator_result_flow(RowLines& L, uint32_t F) const {
+    const std::map<int64_t, std::pair<std::string, bool>> vals = callee_result_values(F);
     std::vector<std::string> succ;
     for (const auto& [v, p] : vals) {
       L.line("callee-check (result flow)") << "callee-check (result flow): " << fname(F) << " returns " << v << ": " << p.first;
@@ -4217,6 +4256,430 @@ class Rel : public RelFacts {
     L.line("callee-check (result flow, success)") << "callee-check (result flow, success): " << fname(F) << ": "
                                                   << (succ.empty() ? std::string("no value of success class is shown to reach the return") : "shown to reach the return: " + join(succ, ", "))
                                                   << " (the values RESULT_EFFECT shows to reach a return of " << fname(F) << ", not all it returns: callee-check (set) says whether that set is complete)";
+  }
+
+  // ---------------------------------------------------------------- relations rules revision 14: the success path line
+  // (static_facts.md 5x item 1 and its fifth addendum).  A condition tree is read as a formula: and, or and not are its
+  // connectives, every other node an atom.  An atom is named by its tree in the scope of the function it belongs to
+  // (Scope); `ne` is the negation of `eq` of the same two operands, in either order; a `top` node and a name marked
+  // @addr-taken are an atom of their own at each occurrence.  An atom whose value the substitution decides takes that
+  // value.  Implication and satisfiability are decided by trying every assignment of the atoms (at most kSpAtoms of
+  // them; more is not decided).  The new lines name no file or function into the row's layers (the lines that were there
+  // stay as they were).
+  static constexpr size_t kSpAtoms = 16;
+  struct Scope {
+    uint32_t fn = kN;                           // the function the tree belongs to
+    bool own = true;                            // the creator callee's own tree (else a function it calls)
+    std::map<uint32_t, std::string> param_as;   // own == false: a parameter bound to a parameter of the creator callee
+  };
+  struct NoNotes {  // the row's file and function notes are not touched while it lives
+    explicit NoNotes(RelFacts* r) : r_(r), f_(r->file_notes_), g_(r->fn_notes_) {
+      r->file_notes_ = nullptr;
+      r->fn_notes_ = nullptr;
+    }
+    ~NoNotes() {
+      r_->file_notes_ = f_;
+      r_->fn_notes_ = g_;
+    }
+    RelFacts* r_;
+    std::set<std::string>* f_;
+    std::set<uint32_t>* g_;
+  };
+  bool sp_boolop(uint16_t op) const { return op == KZ_EXPR_OP_AND || op == KZ_EXPR_OP_OR || op == KZ_EXPR_OP_NOT; }
+  bool sp_child(uint32_t root, uint32_t c) const { return c != kN && c < root; }
+  // the text of a value tree in a scope: the loads of another function carry its name
+  std::string sp_text(uint32_t root, const Scope& sc, int depth = 0) const {
+    if (root == kN || root >= exprs_.size() || depth > 40) return "?";
+    const kz_fact_expr& e = exprs_[root];
+    if (e.op == KZ_EXPR_OP_TOP) return "top#" + std::to_string(root) + "@" + std::to_string(sc.fn);
+    const std::string name = str(e.name);
+    if (name.find("@addr-taken") != std::string::npos) return "addr-taken#" + std::to_string(root) + "@" + std::to_string(sc.fn);
+    const std::string at = sc.own ? std::string() : "@" + std::to_string(sc.fn);
+    if (e.op == KZ_EXPR_OP_LOAD && e.a == kN && e.b == kN) {
+      if (e.flags == KZ_EXPR_REF_PARAM) {
+        auto it = sc.param_as.find(static_cast<uint32_t>(e.value));
+        if (!sc.own && it != sc.param_as.end()) return it->second;
+        return "param" + at + "#" + std::to_string(e.value);
+      }
+      if (e.flags == KZ_EXPR_REF_STRING) return ex(root);
+      return enum_text("KZ_EXPR_REF", e.flags) + at + ":" + name;
+    }
+    if (e.op == KZ_EXPR_OP_CONST && e.a == kN && e.b == kN) return std::to_string(e.value);
+    std::string t = "(" + enum_text("KZ_EXPR_OP", e.op);
+    if (!name.empty()) t += " " + name + (e.op == KZ_EXPR_OP_CALL_RESULT ? at : std::string());
+    if (e.op == KZ_EXPR_OP_CONST || e.op == KZ_EXPR_OP_FORALL || e.op == KZ_EXPR_OP_CURSOR) t += " " + std::to_string(e.value);
+    if (sp_child(root, e.a)) t += " " + sp_text(e.a, sc, depth + 1);
+    if (sp_child(root, e.b)) t += " " + sp_text(e.b, sc, depth + 1);
+    return t + ")";
+  }
+  // the atom of a node: its name and whether the node is its negation
+  std::pair<std::string, bool> sp_atom(uint32_t root, const Scope& sc) const {
+    const kz_fact_expr& e = exprs_[root];
+    if ((e.op == KZ_EXPR_OP_EQ || e.op == KZ_EXPR_OP_NE) && sp_child(root, e.a) && sp_child(root, e.b)) {
+      std::string x = sp_text(e.a, sc), y = sp_text(e.b, sc);
+      if (y < x) std::swap(x, y);
+      return {"(eq " + x + " " + y + ")", e.op == KZ_EXPR_OP_NE};
+    }
+    return {sp_text(root, sc), false};
+  }
+  void sp_atoms(uint32_t root, const Scope& sc, const Subst& s, std::set<std::string>* out) const {
+    if (root == kN || root >= exprs_.size()) return;
+    const kz_fact_expr& e = exprs_[root];
+    if (sp_boolop(e.op)) {
+      if (sp_child(root, e.a)) sp_atoms(e.a, sc, s, out);
+      if (sp_child(root, e.b)) sp_atoms(e.b, sc, s, out);
+      return;
+    }
+    if (eval(root, s, nullptr).known) return;
+    out->insert(sp_atom(root, sc).first);
+  }
+  // 1 true, 0 false, -1 not decided (an atom without a value; a malformed tree)
+  int sp_val(uint32_t root, const Scope& sc, const Subst& s, const std::map<std::string, bool>& asg) const {
+    if (root == kN || root >= exprs_.size()) return -1;
+    const kz_fact_expr& e = exprs_[root];
+    if (e.op == KZ_EXPR_OP_NOT) {
+      const int a = sp_child(root, e.a) ? sp_val(e.a, sc, s, asg) : -1;
+      return a < 0 ? -1 : 1 - a;
+    }
+    if (e.op == KZ_EXPR_OP_AND || e.op == KZ_EXPR_OP_OR) {
+      const int a = sp_child(root, e.a) ? sp_val(e.a, sc, s, asg) : -1, b = sp_child(root, e.b) ? sp_val(e.b, sc, s, asg) : -1;
+      if (e.op == KZ_EXPR_OP_AND) return (a == 0 || b == 0) ? 0 : (a == 1 && b == 1) ? 1 : -1;
+      return (a == 1 || b == 1) ? 1 : (a == 0 && b == 0) ? 0 : -1;
+    }
+    const Val v = eval(root, s, nullptr);
+    if (v.known) return v.v != 0 ? 1 : 0;
+    const auto [name, neg] = sp_atom(root, sc);
+    auto it = asg.find(name);
+    if (it == asg.end()) return -1;
+    return (it->second != neg) ? 1 : 0;
+  }
+  struct SpCond {  // a condition: the conjunction of trees, each in its scope and under its substitution
+    std::vector<std::tuple<uint32_t, Scope, Subst>> parts;
+  };
+  // 1: some assignment makes `a` true and `b` false (b empty: makes `a` true); 0: none; -1: not decided
+  int sp_witness(const SpCond& a, const SpCond* b) const {
+    std::set<std::string> atoms;
+    for (const auto& [r, sc, s] : a.parts) sp_atoms(r, sc, s, &atoms);
+    if (b != nullptr)
+      for (const auto& [r, sc, s] : b->parts) sp_atoms(r, sc, s, &atoms);
+    if (atoms.size() > kSpAtoms) return -1;
+    const std::vector<std::string> names(atoms.begin(), atoms.end());
+    for (uint64_t m = 0; m < (uint64_t{1} << names.size()); ++m) {
+      std::map<std::string, bool> asg;
+      for (size_t i = 0; i < names.size(); ++i) asg[names[i]] = ((m >> i) & 1) != 0;
+      bool at = true;
+      for (const auto& [r, sc, s] : a.parts) {
+        const int v = r == kN ? 1 : sp_val(r, sc, s, asg);
+        if (v < 0) return -1;
+        if (v == 0) at = false;
+      }
+      if (!at) continue;
+      if (b == nullptr) return 1;
+      bool bt = true;
+      for (const auto& [r, sc, s] : b->parts) {
+        const int v = r == kN ? 1 : sp_val(r, sc, s, asg);
+        if (v < 0) return -1;
+        if (v == 0) bt = false;
+      }
+      if (!bt) return 1;
+    }
+    return 0;
+  }
+  // 1 implied, 0 not implied, -1 not decided
+  // 1 implied; -1 not shown: the atoms stand for values whose relations these facts do not give (a call's result, a local
+  // the RETURNS conditions unfold and the other guards do not), so an assignment that makes a true and b false is no
+  // proof that b can fail on the path
+  int sp_implies(const SpCond& a, const SpCond& b) const { return sp_witness(a, &b) == 0 ? 1 : -1; }
+  bool sp_reads_local(uint32_t root, const std::string& l) const {
+    bool hit = false;
+    visit(root, [&](const kz_fact_expr& e) {
+      if (e.op == KZ_EXPR_OP_LOAD && e.flags == KZ_EXPR_REF_LOCAL && str(e.name) == l) hit = true;
+    });
+    return hit;
+  }
+  struct SuccessPath {
+    bool held = false;
+    std::string why;  // the reason of `missing`
+    std::string text;
+  };
+  std::map<std::pair<std::string, uint32_t>, SuccessPath> success_paths_;  // (namespace key, creator callee) -> its line
+  static constexpr const char* kSpWhy[] = {"the returns are not all followed",     "a second origin can carry the value",
+                                           "no name store on a carrying path",     "no out-id store on a carrying path",
+                                           "the stored value is not tied to the success path", "an implication between conditions is not decided"};
+  // the line of a creator callee F of the namespace whose key is `key`
+  const SuccessPath& success_path(const std::string& key, uint32_t F) {
+    auto memo = success_paths_.find({key, F});
+    if (memo != success_paths_.end()) return memo->second;
+    NoNotes nn(this);
+    SuccessPath sp;
+    std::vector<std::string> parts;
+    auto done = [&](const std::string& why) -> const SuccessPath& {
+      sp.held = why.empty();
+      sp.why = why;
+      sp.text = "callee-check (success path): " + fname(F) + ": " + (sp.held ? std::string("held") : "missing(" + why + ")") + (parts.empty() ? std::string() : ": " + join(parts, "; "));
+      return success_paths_[{key, F}] = sp;
+    };
+    const OutcomeSpace osp = spaces().space_of(F);
+    if (!osp.has_success) {
+      parts.push_back("the outcome class rule gives no success constant for " + fname(F));
+      return done(kSpWhy[0]);
+    }
+    const int64_t v = osp.success;
+    parts.push_back("success value " + std::to_string(v) + " [outcome class rule]");
+    auto rit = returns_of_.find(F);
+    if (rit == returns_of_.end()) {
+      parts.push_back("no RETURNS row of " + fname(F));
+      return done(kSpWhy[0]);
+    }
+    Scope own;
+    own.fn = F;
+    struct Alt {
+      uint32_t ri;
+      Subst s;
+      std::string text;
+    };
+    std::vector<Alt> carry;
+    std::vector<std::string> excl, open;
+    for (uint32_t ri : rit->second) {
+      const kz_fact_return& x = returns_[ri];
+      const std::string at = pos(str(x.file), x.line, x.col) + " alt " + std::to_string(x.alt) + "/" + std::to_string(x.n_alts);
+      if (x.flags & (KZ_RET_FLAG_UNDEF_PATH | KZ_RET_FLAG_NO_CFG)) {
+        open.push_back(at + " (" + std::string((x.flags & KZ_RET_FLAG_NO_CFG) ? "no-cfg" : "undefined-on-a-path") + ")");
+        continue;
+      }
+      const std::string cond = x.cond_root == kN ? std::string("always") : ex(x.cond_root);
+      if (x.vkind == KZ_RET_VALUE_CONST) {
+        if (rf_same(x.value, v)) carry.push_back({ri, Subst{}, at + " = constant " + std::to_string(x.value) + " under " + cond});
+        else excl.push_back(at + " constant " + std::to_string(x.value));
+        continue;
+      }
+      std::string origin = enum_text("KZ_RET_VALUE", x.vkind) + " [" + str(x.text) + "]";
+      if (x.vkind == KZ_RET_VALUE_CALL && x.site != kN) {
+        auto cit = call_by_site_.find(x.site);
+        if (cit != call_by_site_.end()) origin = "result of " + str(calls_[cit->second].callee) + " at " + call_pos(cit->second);
+      }
+      Subst s;
+      const std::string l = str(x.local);
+      if ((x.flags & KZ_RET_FLAG_FROM_DEF) && !l.empty() && x.loop == kN && x.cond_root != kN && !sp_reads_local(x.guard_root, l) && !sp_reads_local(x.def_guard_root, l)) {
+        s.locals[l] = v;
+        SpCond c;
+        c.parts.emplace_back(x.cond_root, own, s);
+        const int w = sp_witness(c, nullptr);
+        if (w == 0) {
+          excl.push_back(at + " its own branch " + cond + " (false with " + l + " = " + std::to_string(v) + ")");
+          continue;
+        }
+      }
+      carry.push_back({ri, s, at + " = " + origin + " under " + cond});
+    }
+    std::vector<std::string> ct;
+    for (const Alt& a : carry) ct.push_back(a.text);
+    parts.push_back("carried by " + std::to_string(carry.size()) + " alternative(s): " + (ct.empty() ? std::string("none") : join(ct, "; ")));
+    parts.push_back("excluded: " + (excl.empty() ? std::string("none") : join(excl, "; ")));
+    if (!open.empty() || carry.empty()) {
+      if (!open.empty()) parts.push_back("returns not followed: " + join(open, "; "));
+      return done(kSpWhy[0]);
+    }
+    // the name stores of the key in F, and whether a function F calls has one
+    std::vector<uint32_t> name_stores;
+    bool name_in_callee = false;
+    {
+      const std::set<uint32_t> reach = reach_direct(F);
+      auto wit = writers_of_.find(key);
+      if (wit != writers_of_.end())
+        for (uint32_t i : wit->second) {
+          const kz_fact_writer& w = writers_[i];
+          if (w.value_kind == KZ_ARG_KIND_CONST) continue;
+          if (w.fn == F) name_stores.push_back(i);
+          else if (reach.count(w.fn) != 0) name_in_callee = true;
+        }
+    }
+    // the out-store rows of F's parameters
+    std::vector<uint32_t> outs;
+    for (auto it = pflow_of_.lower_bound({F, 0}); it != pflow_of_.end() && it->first.first == F; ++it)
+      for (uint32_t i : it->second)
+        if (pflow_[i].kind == KZ_PFLOW_KIND_OUT_STORE) outs.push_back(i);
+    int n_ok = 0;
+    std::vector<int> fail;
+    for (const Alt& a : carry) {
+      const kz_fact_return& x = returns_[a.ri];
+      const std::string tag = "alt " + std::to_string(x.alt) + "/" + std::to_string(x.n_alts) + " at " + pos(str(x.file), x.line, x.col);
+      SpCond C;
+      C.parts.emplace_back(x.cond_root, own, a.s);
+      int miss = -1;  // index into kSpWhy, -1 none (set below, after the three parts)
+      // name store
+      std::string nm;
+      int best = 0;
+      for (uint32_t i : name_stores) {
+        const kz_fact_writer& w = writers_[i];
+        SpCond G;
+        G.parts.emplace_back(w.guard_root, own, a.s);
+        const int im = w.guard_root == kN ? 1 : sp_implies(C, G);
+        const std::string t = pos(str(w.file), w.line, w.col) + " [" + key + "]";
+        if (im == 1) {
+          nm = "name store " + t + " implied by the carrying condition";
+          best = 1;
+          break;
+        }
+        if (best == 0) {
+          best = -1;
+          nm = "name store " + t + " under " + ex(w.guard_root) + ": not shown to be implied by the carrying condition";
+        }
+      }
+      if (best == 0) {
+        nm = name_in_callee ? "the name stores of " + key + " are in functions " + fname(F) + " calls (the guards of those calls are not read)" : "no store of " + key + " in " + fname(F) + " or the functions it calls";
+        if (name_in_callee) best = -1;
+      }
+      // out-id store
+      std::string os_t, sv_t;
+      int obest = 0;
+      const kz_fact_pflow* chosen = nullptr;
+      for (uint32_t i : outs) {
+        const kz_fact_pflow& p = pflow_[i];
+        const uint32_t sink = p.depth == 0 ? p.fn : p.sink_fn;
+        const std::string t = "out-id store " + pos(str(p.file), p.line, p.col) + " in " + fname(sink) + " through parameter " + std::to_string(p.param) + " (PARAM_FLOW out-store)";
+        if (p.depth > 1) {
+          if (obest == 0) {
+            obest = -1;
+            os_t = t + " through " + std::to_string(p.depth) + " calls: the guards of the calls between are not read";
+          }
+          continue;
+        }
+        SpCond G;
+        std::string under;
+        if (p.depth == 0) {
+          G.parts.emplace_back(p.guard_root, own, a.s);
+          under = p.guard_root == kN ? "always" : ex(p.guard_root);
+        } else {
+          Scope cs;
+          cs.fn = sink;
+          cs.own = false;
+          uint32_t call_guard = kN;
+          bool found = false;
+          for (auto it = pflow_of_.lower_bound({F, 0}); it != pflow_of_.end() && it->first.first == F; ++it)
+            for (uint32_t j : it->second) {
+              const kz_fact_pflow& q = pflow_[j];
+              if (q.depth != 0 || q.kind != KZ_PFLOW_KIND_CALL_ARG || q.site != p.site || q.next_fn != sink) continue;
+              cs.param_as[q.next_param] = "param#" + std::to_string(q.param);
+              if (q.param == p.param) {
+                call_guard = q.guard_root;
+                found = true;
+              }
+            }
+          // the other arguments of that call: a local or a parameter of F passed as it is (ARGFLOW, no hops) names the
+          // callee's parameter as that value at the call
+          if (found && p.site != kN && p.site < 0xFFFFFFFFu) {
+            auto cit = call_by_site_.find(p.site);
+            if (cit != call_by_site_.end())
+              for (uint32_t j = 0; j < calls_[cit->second].nargs; ++j) {
+                if (cs.param_as.count(j) != 0) continue;
+                auto af = argflow_at_.find({p.site, j});
+                if (af == argflow_at_.end()) continue;
+                const kz_fact_argflow& g = argflow_[af->second];
+                if (g.hops != 0) continue;
+                if (g.src == KZ_ARGSRC_LOCAL && g.base == KZ_ARGBASE_LOCAL && !str(g.root).empty()) cs.param_as[j] = "local:" + str(g.root);
+                else if (g.src == KZ_ARGSRC_PARAM && g.param != kN) cs.param_as[j] = "param#" + std::to_string(g.param);
+              }
+          }
+          if (!found) {
+            if (obest == 0) {
+              obest = -1;
+              os_t = t + ": no depth-0 call-argument row of the call it is reached through";
+            }
+            continue;
+          }
+          G.parts.emplace_back(call_guard, own, a.s);
+          G.parts.emplace_back(p.guard_root, cs, Subst{});
+          under = "the call's guard " + (call_guard == kN ? std::string("always") : ex(call_guard)) + " and " + (p.guard_root == kN ? std::string("always") : ex(p.guard_root));
+        }
+        const int im = sp_implies(C, G);
+        if (im == 1) {
+          os_t = t + " under " + under + ", implied by the carrying condition (the parameter non-null on the path)";
+          obest = 1;
+          chosen = &p;
+          break;
+        }
+        if (obest == 0) {
+          obest = -1;
+          os_t = t + " under " + under + ": not shown to be implied by the carrying condition";
+        }
+      }
+      if (outs.empty()) os_t = "no PARAM_FLOW out-store row of a parameter of " + fname(F);
+      // the stored value
+      bool tied = false;
+      if (chosen != nullptr) {
+        const kz_fact_pflow& p = *chosen;
+        const uint32_t sink = p.depth == 0 ? p.fn : p.sink_fn;
+        const uint32_t vr = p.expr_root;
+        const kz_fact_expr* e = vr != kN && vr < exprs_.size() ? &exprs_[vr] : nullptr;
+        const std::string where = pos(str(p.file), p.line, p.col);
+        const std::string vt = str(p.text);
+        // the row without a value tree gives the value as written: a name is a local of the storing function when the
+        // facts name a local of that name there (a READS store to it, an ARGFLOW address of it)
+        bool ident = !vt.empty() && (std::isalpha(static_cast<unsigned char>(vt[0])) || vt[0] == '_');
+        for (char ch : vt)
+          if (!(std::isalnum(static_cast<unsigned char>(ch)) || ch == '_')) ident = false;
+        if (e == nullptr) {
+          std::vector<std::string> defs;
+          if (ident) {
+            for (const kz_fact_read& r : reads_)
+              if (r.fn == sink && (r.use & KZ_READ_USE_STORE) && r.ctx_root != kN && r.ctx_root < exprs_.size() && exprs_[r.ctx_root].op == KZ_EXPR_OP_LOAD &&
+                  exprs_[r.ctx_root].flags == KZ_EXPR_REF_LOCAL && str(exprs_[r.ctx_root].name) == vt)
+                defs.push_back(str(r.text) + " at " + pos(str(r.file), r.line, r.col) + " under " + (r.guard_root == kN ? std::string("always") : ex(r.guard_root)) + " [READS]");
+            for (const kz_fact_argflow& g : argflow_)
+              if (g.fn == sink && g.src == KZ_ARGSRC_ADDRESS && g.base == KZ_ARGBASE_LOCAL && str(g.root) == vt) {
+                auto cit = call_by_site_.find(g.site);
+                defs.push_back("its address is argument " + std::to_string(g.arg_index) + " of " +
+                               (cit != call_by_site_.end() ? str(calls_[cit->second].callee) + " at " + call_pos(cit->second) : std::string("a call")) + " [ARGFLOW]");
+              }
+          }
+          const bool member = vt.compare(0, 36, "store to a member of the pointee: ") == 0 || vt.compare(0, 34, "store to a member of the pointee:") == 0;
+          if (!ident && !member && !vt.empty()) {
+            tied = true;
+            sv_t = "stored value: " + vt + " at " + where + ", the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard";
+          } else {
+            sv_t = "stored value: [" + vt + "] at " + where + " (the out-store row gives it as written, with no value tree)" +
+                   (member ? std::string("; a store to a member of the pointee, not of the value the parameter points to")
+                           : defs.empty() ? std::string("; a name these facts do not resolve to a definition")
+                                          : "; a local of " + fname(sink) + " in these facts, which do not give every definition of a local (READS gives those that read a field, RESULT_FLOW those of a call result): " + join(defs, "; "));
+          }
+        } else if (e->op == KZ_EXPR_OP_CONST && e->a == kN && e->b == kN) {
+          sv_t = "stored value: the constant " + std::to_string(e->value) + " at " + where;
+        } else if (e->op == KZ_EXPR_OP_LOAD && (e->flags == KZ_EXPR_REF_LOCAL || e->flags == KZ_EXPR_REF_PARAM) && e->a == kN && e->b == kN) {
+          const std::string l = str(e->name);
+          std::vector<std::string> defs;
+          if (e->flags == KZ_EXPR_REF_LOCAL) {
+            for (const kz_fact_read& r : reads_)
+              if (r.fn == sink && (r.use & KZ_READ_USE_STORE) && r.ctx_root != kN && r.ctx_root < exprs_.size() && exprs_[r.ctx_root].op == KZ_EXPR_OP_LOAD &&
+                  exprs_[r.ctx_root].flags == KZ_EXPR_REF_LOCAL && str(exprs_[r.ctx_root].name) == l)
+                defs.push_back(str(r.text) + " at " + pos(str(r.file), r.line, r.col) + " under " + (r.guard_root == kN ? std::string("always") : ex(r.guard_root)) + " [READS]");
+            for (const kz_fact_argflow& g : argflow_)
+              if (g.fn == sink && g.src == KZ_ARGSRC_ADDRESS && g.base == KZ_ARGBASE_LOCAL && str(g.root) == l) {
+                auto cit = call_by_site_.find(g.site);
+                defs.push_back("its address is argument " + std::to_string(g.arg_index) + " of " + (cit != call_by_site_.end() ? str(calls_[cit->second].callee) + " at " + call_pos(cit->second) : std::string("a call")) + " [ARGFLOW]");
+              }
+          }
+          sv_t = "stored value: " + std::string(e->flags == KZ_EXPR_REF_LOCAL ? "the local " : "the parameter ") + l + " of " + fname(sink) + " at " + where +
+                 "; these facts do not give every definition of it (READS gives those that read a field, RESULT_FLOW those of a call result)" + (defs.empty() ? std::string() : ": " + join(defs, "; "));
+        } else {
+          tied = true;
+          sv_t = "stored value: " + ex(vr) + " at " + where + ", the value expression of the store itself, the only definition that reaches the store under its guard";
+        }
+      }
+      // the reason of this alternative: a store that is not there, then one not shown on the path, then the value
+      if (best == 0) miss = 2;
+      else if (obest == 0) miss = 3;
+      else if (best < 0 || obest < 0) miss = 5;
+      else if (!tied) miss = 4;
+      std::vector<std::string> seg{nm, os_t};
+      if (!sv_t.empty()) seg.push_back(sv_t);
+      parts.push_back("for " + tag + ": " + join(seg, "; "));
+      if (miss < 0) ++n_ok;
+      else fail.push_back(miss);
+    }
+    if (fail.empty()) return done("");
+    if (n_ok > 0) return done(kSpWhy[1]);
+    return done(kSpWhy[fail.front()]);
   }
 
   // what the caller does with a lookup's result: a retry loop around it, and where the failure leads

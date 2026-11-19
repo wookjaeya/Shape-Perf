@@ -1,0 +1,4 @@
+# space_guard.sh kind=expect-changes need=2000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/scripts/expect_changes.py /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/expect_c1.tsv /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/expect_c1_2.tsv /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/changes_2.tsv
+start 2026-11-19T15:18:39.621Z free=817790976 threshold=316572800
+sample 2026-11-19T15:18:39.625Z 817786880
+end 2026-11-19T15:18:41.633Z kind=expect-changes verdict=completed rc=0 free=817512448 lowest=817512448 dip=278528 change=-278528

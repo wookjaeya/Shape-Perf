@@ -1,0 +1,4 @@
+# space_guard.sh kind=golden-update need=60000000 floor=314572800 interval=2 cmd=bash -c cd /home/user/work/merge-check/kz-llvm && KZ_GOLDEN_UPDATE=1 ctest -V -R '^(static_golden_order_np|static_golden_resultflow_np|static_golden_resultflow_order_np|static_golden_looplock_order_np|static_golden_closure_np|test_static_plan)$' > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/golden_update.log 2>&1
+start 2026-11-19T06:13:25.373Z free=1085460480 threshold=374572800
+sample 2026-11-19T06:13:25.377Z 1085456384
+end 2026-11-19T06:13:27.384Z kind=golden-update verdict=completed rc=0 free=1086279680 lowest=1085456384 dip=4096 change=819200

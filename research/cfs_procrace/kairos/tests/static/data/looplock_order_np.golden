@@ -544,3 +544,39 @@ summary rows C 7 (hard_before 2, unordered 5)
       pairs: unordered 1
       threads started by: task_entry_point <- E5d72d59a76b11718 HB-spawn looplock.c:325:9
       opposite: not-graded (the relations row's feasibility of the other order)
+
+# pairs
+kz-order-pairs 1
+relations rules relations rules revision 12 (2026-11-18); rules with lock handles: relations rules revision 11 (2026-11-16), over LOCK_HANDLES (extract --lock-handles, docs/static_facts.md 5v): 10 rows (static-instance 3, semantics-unverified 0, writer-set-incomplete 0, not-static 7, of them no handle found 1); path C rows whose common lock is identified by its handle 3, of them with a static-instance handle 2; rules with result flow: relations rules revision 13 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): 59 rows (uses: branch 6, return 6, argument 0, store 0, other 4, none 33; guard rows 10); calls with a result 45; 35 rows (open 17; event send 0, application exit 0, terminal 0; calls on the paths that are none of these, no row: 10); calls explored 10, outcomes 17
+order order rules revision 8 (2026-11-19): the complete pair file; order rules revision 5 (2026-11-18); rules with result flow: order rules revision 6 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects 0; caller-side uses of waits 6, HB-await edges to them 18; rules with loop definitions and lock handles: order rules revision 7 (2026-11-18), over LOOP_DEFS and LOCK_HANDLES (extract --loop-defs, --lock-handles, docs/static_facts.md 5v): waits with a predicate through local definitions 3; caller-side budget values through a flag 2; HB-lock edges whose lock is identified by its handle 2
+domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B and C); a pair in one thread has the value same_thread
+columns row_key	path	use_pos	use_function	use_root	other_kind	other_pos	other_function	other_root	value	edges	premises	row_line
+9744cd1792350924	B	looplock.c:59:34	shared_unlock	h_worker (spawn-entry)	writer	looplock.c:66:9	init_locks	main (process)	unordered	-	-	writer
+9744cd1792350924	B	looplock.c:59:34	shared_unlock	main (process)	writer	looplock.c:66:9	init_locks	main (process)	same_thread	-	-	writer
+9744cd1792350924	B	looplock.c:59:34	shared_unlock	parent_entry (spawn-entry)	writer	looplock.c:66:9	init_locks	main (process)	unordered	-	-	writer
+9744cd1792350924	B	looplock.c:59:34	shared_unlock	task_entry_point (spawn-entry)	writer	looplock.c:66:9	init_locks	main (process)	unordered	-	-	writer
+f1ca1cd782b97595	B	looplock.c:58:32	shared_lock	h_worker (spawn-entry)	writer	looplock.c:66:9	init_locks	main (process)	unordered	-	-	writer
+f1ca1cd782b97595	B	looplock.c:58:32	shared_lock	main (process)	writer	looplock.c:66:9	init_locks	main (process)	same_thread	-	-	writer
+f1ca1cd782b97595	B	looplock.c:58:32	shared_lock	parent_entry (spawn-entry)	writer	looplock.c:66:9	init_locks	main (process)	unordered	-	-	writer
+f1ca1cd782b97595	B	looplock.c:58:32	shared_lock	task_entry_point (spawn-entry)	writer	looplock.c:66:9	init_locks	main (process)	unordered	-	-	writer
+eef5b65738d574b4	B	looplock.c:109:3	p_used	p_worker (spawn-entry)	writer	looplock.c:66:9	init_locks	main (process)	unordered	-	-	writer
+eef5b65738d574b4	B	looplock.c:123:3	p_create	main (process)	writer	looplock.c:66:9	init_locks	main (process)	same_thread	-	-	writer
+941f14a38acf9546	B	looplock.c:111:3	p_used	p_worker (spawn-entry)	writer	looplock.c:66:9	init_locks	main (process)	unordered	-	-	writer
+941f14a38acf9546	B	looplock.c:126:3	p_create	main (process)	writer	looplock.c:66:9	init_locks	main (process)	same_thread	-	-	writer
+732cbda8eae00162	B	looplock.c:61:33	twice_unlock	main (process)	writer	looplock.c:67:9	init_locks	main (process)	same_thread	-	-	writer
+732cbda8eae00162	B	looplock.c:61:33	twice_unlock	w_worker (spawn-entry)	writer	looplock.c:67:9	init_locks	main (process)	unordered	-	-	writer
+732cbda8eae00162	B	looplock.c:61:33	twice_unlock	main (process)	writer	looplock.c:70:32	again_twice	main (process)	same_thread	-	-	writer
+732cbda8eae00162	B	looplock.c:61:33	twice_unlock	w_worker (spawn-entry)	writer	looplock.c:70:32	again_twice	main (process)	unordered	-	-	writer
+3c0ebafe1a33d6fc	B	looplock.c:60:31	twice_lock	main (process)	writer	looplock.c:67:9	init_locks	main (process)	same_thread	-	-	writer
+3c0ebafe1a33d6fc	B	looplock.c:60:31	twice_lock	w_worker (spawn-entry)	writer	looplock.c:67:9	init_locks	main (process)	unordered	-	-	writer
+3c0ebafe1a33d6fc	B	looplock.c:60:31	twice_lock	main (process)	writer	looplock.c:70:32	again_twice	main (process)	same_thread	-	-	writer
+3c0ebafe1a33d6fc	B	looplock.c:60:31	twice_lock	w_worker (spawn-entry)	writer	looplock.c:70:32	again_twice	main (process)	unordered	-	-	writer
+7b4b0ae6431965c1	C	looplock.c:81:17	h_used	h_worker (spawn-entry)	writer	looplock.c:96:3	h_create	main (process)	hard_before	E8d04024db7f8ab8f	lock (the relations row's) held from one acquisition across the spawn and the write, and held by the read (relations path C, row C1: proven-impossible); rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)	write after the spawn
+765672b3a88c12d5	C	looplock.c:110:17	p_used	p_worker (spawn-entry)	writer	looplock.c:125:3	p_create	main (process)	hard_before	Ef1ab0006942e5516	lock (the relations row's) held from one acquisition across the spawn and the write, and held by the read (relations path C, row C2: proven-impossible); rests on: assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)	write after the spawn
+03d73d3a26b3f19e	C	looplock.c:139:17	w_used	w_worker (spawn-entry)	writer	looplock.c:154:3	w_create	main (process)	unordered	-	-	write after the spawn
+f92c6a9a3efe4c03	C	looplock.c:183:14	get_task_function	task_entry_point (spawn-entry)	writer	looplock.c:212:3	task_start	main (process)	unordered	-	-	write after the spawn
+2b60c590fb88bd77	C	looplock.c:183:14	get_task_function	task_entry_point (spawn-entry)	writer	looplock.c:212:3	task_start	main (process)	unordered	-	-	write after the spawn
+de22ae5b21abcd64	C	looplock.c:183:14	get_task_function	task_entry_point (spawn-entry)	writer	looplock.c:328:3	parent_entry	parent_entry (spawn-entry)	unordered	-	-	write after the spawn
+edea5fbeddebc263	C	looplock.c:183:14	get_task_function	task_entry_point (spawn-entry)	writer	looplock.c:328:3	parent_entry	parent_entry (spawn-entry)	unordered	-	-	write after the spawn
+rows 13 pairs 27 hard_before 2 conditional_before 0 fixed_early_proved 0 fixed_early_candidate 0 unordered 17 unknown 0 same_thread 8 no_pair 0 edges_not_in_tsv 0
+end

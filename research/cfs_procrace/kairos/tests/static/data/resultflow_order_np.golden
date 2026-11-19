@@ -267,3 +267,23 @@ summary rows B 1 (hard_before 1)
       pairs: hard_before 1
       threads started by: gate_main <- Ee44c41f85b92fabd HB-spawn resultflow.c:278:9; waiter_main <- Ea774a5548077978e HB-spawn resultflow.c:279:9
       opposite: undecidable (the relations row's feasibility of the other order)
+
+# pairs
+kz-order-pairs 1
+relations rules relations rules revision 12 (2026-11-18); rules with result flow: relations rules revision 13 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): 54 rows (uses: branch 19, return 2, argument 1, store 1, other 2, none 11; guard rows 18); calls with a result 35; 62 rows (open 24; event send 0, application exit 0, terminal 5; calls on the paths that are none of these, no row: 20); calls explored 20, outcomes 41
+order order rules revision 8 (2026-11-19): the complete pair file; order rules revision 5 (2026-11-18); rules with result flow: order rules revision 6 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects 2; caller-side uses of waits 1, HB-await edges to them 1
+domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B and C); a pair in one thread has the value same_thread
+columns row_key	path	use_pos	use_function	use_root	other_kind	other_pos	other_function	other_root	value	edges	premises	row_line
+2a92d5cdd548dcff	A	resultflow.c:105:8	checker_init	checker_main (spawn-entry)	creator-not-a-pair(key constants differ)	resultflow.c:103:8	checker_init	checker_main (spawn-entry)	same_thread	-	-	not a pair
+2a92d5cdd548dcff	A	resultflow.c:105:8	checker_init	checker_main (spawn-entry)	creator	resultflow.c:180:7	maker_main	maker_main (spawn-entry)	unordered	-	-	creator
+adaea78073e9d368	A	resultflow.c:114:8	reporter_init	reporter_main (spawn-entry)	creator-not-a-pair(key constants differ)	resultflow.c:103:8	checker_init	checker_main (spawn-entry)	unordered	-	-	not a pair
+adaea78073e9d368	A	resultflow.c:114:8	reporter_init	reporter_main (spawn-entry)	creator	resultflow.c:180:7	maker_main	maker_main (spawn-entry)	unordered	-	-	creator
+764a5f6eb1d7ca30	A	resultflow.c:126:11	looper_init	reporter_main (spawn-entry)	creator-not-a-pair(key constants differ)	resultflow.c:103:8	checker_init	checker_main (spawn-entry)	unordered	-	-	not a pair
+764a5f6eb1d7ca30	A	resultflow.c:126:11	looper_init	reporter_main (spawn-entry)	creator	resultflow.c:180:7	maker_main	maker_main (spawn-entry)	unordered	-	-	creator
+9a12d57c5b95ba4c	A	resultflow.c:139:9	retrier_init	reporter_main (spawn-entry)	creator-not-a-pair(key constants differ)	resultflow.c:103:8	checker_init	checker_main (spawn-entry)	unordered	-	-	not a pair
+9a12d57c5b95ba4c	A	resultflow.c:139:9	retrier_init	reporter_main (spawn-entry)	creator	resultflow.c:180:7	maker_main	maker_main (spawn-entry)	unordered	-	-	creator
+f577c9464dcb5de9	A	resultflow.c:170:8	runner_main	runner_main (spawn-entry)	creator-not-a-pair(key constants differ)	resultflow.c:103:8	checker_init	checker_main (spawn-entry)	unordered	-	-	not a pair
+f577c9464dcb5de9	A	resultflow.c:170:8	runner_main	runner_main (spawn-entry)	creator	resultflow.c:180:7	maker_main	maker_main (spawn-entry)	unordered	-	-	creator
+5e366999b0be71de	B	resultflow.c:233:33	waiter_main	waiter_main (spawn-entry)	writer	resultflow.c:213:3	gate_main	gate_main (spawn-entry)	hard_before	E5920af8001fcffe4	reads-from: the condition exit reads the value this write stored (the only write of the awaited fields in another thread); the awaited fields' writer sets are complete under the per-field rule of FIELD_STATUS; L1 under the per-field rule: await; the condition exit is false at the initial values: checked	writer
+rows 6 pairs 11 hard_before 1 conditional_before 0 fixed_early_proved 0 fixed_early_candidate 0 unordered 9 unknown 0 same_thread 1 no_pair 0 edges_not_in_tsv 0
+end

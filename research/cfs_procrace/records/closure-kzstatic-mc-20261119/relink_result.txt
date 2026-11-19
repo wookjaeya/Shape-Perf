@@ -1,0 +1,27 @@
+# relink result (2026-11-19T06:11:57Z)
+## the 14 that may relink (before -> after)
+changed lib/llvm/libkz-llvm.a e684aa4cdaed2d73 -> 6989445c1e0ae042
+changed tools/kz-static/kz-static bf2ec2eedc756d72 -> 6f40dd60b29bb6bd
+changed tests/static/static_golden 32d6649ab0d6bb27 -> a07abc8c39a9108e
+changed tests/static/test_static_cli 9e2d034327560d4f -> 75574ba2d1989b2b
+changed tests/static/test_static_elf32 1ba19c9f30a8264a -> 3d1f951e3dd1882a
+changed tests/static/test_static_expr a1ae80841bbbef83 -> 12c3b1f5ed85e812
+changed tests/static/test_static_flow 329eb1837db37d59 -> 1fab8def36d2ba9f
+changed tests/static/test_static_gitrev c6ef152b68a12f02 -> c591b8c261077ef3
+changed tests/static/test_static_link e6db01a7a7f6625a -> 8c4453675c9961d0
+changed tests/static/test_static_plan 186c62c53d272cc2 -> 4a45d93210df9858
+changed tests/static/test_static_reasons eff67b870db8bc33 -> 87ec101cf8128706
+changed tests/static/test_static_recipe a19f00e74d15bdfa -> ee2dc048a6073297
+changed tests/static/test_static_unroll 83a0cd1e668ddd46 -> 9069d71888754699
+changed tests/static/test_static_wrappers e33fa99922c31eb2 -> 8a9b3f6288343acf
+## the 110 that must not relink
+    110 OK
+## CMakeCache.txt
+/home/user/work/merge-check/kz-llvm/CMakeCache.txt: OK
+## the other tools (file sha256 as pre_mc.txt)
+same tools/kz/kz
+same tools/kz-dump/kz-dump
+same tools/kz-phi/kz-phi
+same tests/lint/kz_lint
+same runtime/kz-rt-dump
+same instrument/clang/kz-instr-clang

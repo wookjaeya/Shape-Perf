@@ -257,7 +257,7 @@ facts-view 1
   site 27 resultflow.c:170:8 in runner_main failure -17 reached -> store at resultflow.c:171 value 3 [global:run_state := 3] complete flow 22 {}
       chain: call obj_find at 170:8 -> def st at 170:6 -> value -17 -> branches decided by it at 171:7 -> 171:20
   site 27 resultflow.c:170:8 in runner_main failure -17 reached -> terminal site 31 resultflow.c:175:3 value 3 [exit (terminal operation); the value of global:run_state stored on this path: 3] open (on a path through a branch this value does not decide; run_loop at resultflow.c:172:10 takes the address of global:run_state on these paths: it stores through its parameter 0) flow 22 {}
-      chain: call obj_find at 170:8 -> def st at 170:6 -> value -17 -> branches decided by it at 171:7 -> 175:3 (the store at 171:20 of global:run_state := 3 is its argument)
+      chain: call obj_find at 170:8 -> def st at 170:6 -> value -17 -> branches decided by it at 171:7 -> 175:3 (the store at 171:20 of global:run_state := 3 is its argument) [path from the store at 171:20: value constant 3; to run_loop at 172:10 argument 0: other calls 0, stores of global:run_state 0; to the effect at 175:3: branches 172:10 reads the result of the call at 172:10 toward false]
   site 27 resultflow.c:170:8 in runner_main success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 22 {}
       chain: call obj_find at 170:8 -> def st at 170:6 -> value 0 -> branches decided by it at 171:7
   site 29 resultflow.c:172:10 in runner_main success 0 reached -> terminal site 31 resultflow.c:175:3 [exit (terminal operation)] complete flow 23 {}

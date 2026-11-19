@@ -1,11 +1,16 @@
 # the exact boot commands of the C1 cycle (results 25.12; revised before any boot by results 26.0 (e), (h) and spec 11
-# items 14-15), in order; NOT RUN by the step that wrote them.  The boot declaration they are read against is
-# boot/declaration3.tsv (results 26.5; it supersedes declaration2.tsv of 549dc94, which superseded declaration.tsv of
-# 860c2cd; both kept); the verify step re-measures it before every boot and the boot step refuses without a clean
-# verify.txt of its N that names it as it is; the boot step itself also refuses unless declaration3.tsv and run_cycle.sh
-# are committed and unchanged, and runs the verify step again right before the boot command (evaluation protocol 14.13
-# item 9).  Before boot 1 of each build: measure the free space (df -B1 /) against the need written in declaration3.tsv;
-# below it, do not boot (results 26.0 (카): ask the PI).
+# items 14-15, by results 26.5 and by results 26.9), in order; NOT RUN by the step that wrote them.  The boot declaration
+# they are read against is boot/declaration4.tsv (results 26.9; it supersedes declaration3.tsv of 13cf028, which
+# superseded declaration2.tsv of 549dc94 and declaration.tsv of 860c2cd; all kept); the verify step re-measures it before
+# every boot and the boot step refuses without a clean verify.txt of its N that names it as it is; the boot step itself
+# also refuses unless declaration4.tsv and run_cycle.sh are committed and unchanged, unless the declaration's sha256 is the
+# one boot/declaration_pin.txt names (written by the cycle's first boot, c1_pre_tx 1, which is the only boot that runs
+# without it), unless the verify step it runs again right before the boot command is clean, and unless the free space
+# (df -B1 /, kept in boot/<B>/boot<N>/space_at_boot.txt) is at or above the need of the boots remaining: floor + margin +
+# (boots remaining in the cycle, this one included) x per boot, with the need rows of declaration4.tsv and the per-boot
+# value measured on the boots already run when it is larger (evaluation protocol 14.14 item 4: 1,068,392,704 B before
+# c1_pre_tx boot 1 and 741,482,752 B before c1_post_tx boot 1 with the declared value).  Below it the boot step does not
+# boot; then results 26.0 (카) and 26.7 (나): no archive line is left, ask the PI.
 # B in c1_pre_tx c1_post_tx (each build on its own; c1_pre_tx first). Root is needed for the boot step (run_gi_c1.sh).
 # boot 1 (verify is the first command of each build and the step before each boot N):
 bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh verify $B 1
@@ -19,8 +24,23 @@ bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh gat
 bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh explain $B 1
 bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh eval $B 1
 bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh expect $B 1
-# if boot/<B>/boot1/gate.txt says PASS: the same eleven steps with N = 2, 3, 4, 5 (exactly four more; verify first each time), then:
+bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh keep $B 1
+# if boot/<B>/boot1/gate.txt says PASS: the same twelve steps with N = 2, 3, 4, 5 (exactly four more; verify first each time), then:
 bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh summary $B
-# if it says FAIL: write the cause into boot/<B>/addendum_1r.txt and commit it, then the eleven steps with N = 1r;
+# if it says FAIL: write the cause into boot/<B>/addendum_1r.txt and commit it, then the twelve steps with N = 1r;
 #   if 1r passes, N = 2, 3, 4, 5 follow and summary; if 1r fails, the boots of that build end there (summary is not run)
-# a verify step that does not end clean (rc 1) stops that boot: the boot step refuses without a clean verify.txt of its N
+# a verify step that does not end clean (rc 1) stops that boot: the boot step refuses without a clean verify.txt of its N.
+# explain runs the verify step of its N again itself (verify_at_explain.txt) and refuses unless it is clean; summary runs
+#   it with N = 5 (verify_at_summary.txt) and refuses unless boot5/gate.txt exists and the verify is clean.
+# not booted (protocol 14.14 item 3): a boot step whose command ends non-zero before <work>/c1cyc_<s>_boot<N>/tx exists
+#   (the space guard refusing at start, not root, UDP 1234/1235 busy or another cFS running, a usage error) is no boot of
+#   protocol 2: the step removes the empty work directory and keeps boot.txt as boot.notbooted.<UTC ns>.txt; remove the
+#   cause, record it for results 27, and run the same N again from verify.  A boot command that created the instance
+#   directory is a boot whatever its rc: it is counted and gated.
+# write once (protocol 14.14 item 2): control, kzt-text, chain, stop, gate, eval and keep refuse an existing output (rc 2);
+#   never remove or rename one by hand to run a step again.  convert, explain and eval refused at start by the space
+#   guard (rc 75) did not run, leave no output directory and may run again.
+# eval writes the full output to <work>/c1cyc_<s>_eval<N>/eval.txt and its head and per-branch tail to
+#   boot/<B>/boot<N>/eval_tail.txt (lead ruling 26.7 (다)); keep writes the sha256 list of each of the boot's work
+#   directories into boot/<B>/boot<N>/ and adds their ledger rows to records/LEDGER.tsv only after ledger_check.sh passed
+#   on the proposed ledger.  boot/declaration_pin.txt, the lists, the tails and the ledger are committed with results 27.

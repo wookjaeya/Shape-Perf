@@ -1,0 +1,7 @@
+# space_guard.sh kind=dev-rct2 need=30000000 floor=314572800 interval=2 cmd=bash ../closure-c1prep-20261119/boot/test_run_cycle.sh <scratch>/rct3
+start 2026-11-19T19:40:57.891Z free=1113296896 threshold=344572800
+sample 2026-11-19T19:40:57.895Z 1113292800
+sample 2026-11-19T19:40:59.900Z 1105899520
+sample 2026-11-19T19:41:01.906Z 1099890688
+sample 2026-11-19T19:41:03.914Z 1099350016
+end 2026-11-19T19:41:05.921Z kind=dev-rct2 verdict=completed rc=0 free=1096622080 lowest=1096622080 dip=16674816 change=-16674816

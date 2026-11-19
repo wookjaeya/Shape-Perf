@@ -22,7 +22,8 @@
 # first boot; a committed change of the declaration refuses boot 2; c1_post_tx 1 without a pin refuses); the eval output
 # under the work directory and only the tail in the record directory, a second eval and a sheet_boot.tsv refused; explain
 # verifies again; keep (sha256 lists, ledger rows checked, a directory with no file gets no row, a second keep refused);
-# a convert refused at start by the guard leaves no directory and can run again; summary verifies again.
+# a convert refused at start by the guard leaves no directory and can run again; summary verifies again; a keep whose
+# proposed ledger fails its check leaves the ledger unchanged and can run again.
 # One line per check and a count; rc 0 when every check passes.  Writes only under WORK_DIR.  (2026-11-19, results 26.4:
 # the stub declaration was named declaration2.tsv; results 26.5: declaration3.tsv, the git stub, the count row and the
 # four cases after the sixth; results 26.9: declaration4.tsv, the need rows, the stub tools and the cases after the tenth.)
@@ -198,7 +199,7 @@ b=$(tree pin); r1=$(rc_step pin verify); r2=$(rc_step pin boot); p1=$(sed -n 's/
 echo "gate PASS" > "$b/c1_pre_tx/boot1/gate.txt"; echo "# a committed later line" >> "$b/declaration4.tsv"; commit pin
 r3=$(rc_step pin verify c1_pre_tx 2); r4=$(rc_step pin boot c1_pre_tx 2)
 b2=$(tree nopin); r5=$(rc_step nopin verify c1_post_tx 1); r6=$(rc_step nopin boot c1_post_tx 1)
-ok=0; [ "$r1" = 0 ] && [ "$r2" = 0 ] && [ -n "$p1" ] && [ "$r3" = 0 ] && [ "$r4" = 1 ] && grep -q 'declaration_pin' "$WK/pin/boot.out" && [ ! -e "$WK/pin/obs/c1cyc_pre_boot2" ] \
+ok=0; [ "$r1" = 0 ] && [ "$r2" = 0 ] && [ -n "$p1" ] && [ "$r3" = 0 ] && [ "$r4" = 1 ] && grep -q 'is not the one boot/declaration_pin.txt names' "$WK/pin/boot.out" && [ ! -e "$WK/pin/obs/c1cyc_pre_boot2" ] \
   && [ "$r5" = 0 ] && [ "$r6" = 1 ] && grep -q 'no boot/declaration_pin.txt' "$WK/nopin/boot.out" && [ ! -e "$WK/nopin/booted" ] || ok=1
 res "the pin: written by the first boot; a committed declaration change refuses boot 2; c1_post_tx 1 with no pin refuses" $ok "rc $r1 $r2 $r3 $r4, nopin $r5 $r6"
 # 20 the eval output under the work directory, the tail in the record directory (results 26.9, fix-judge-01, fix-decl-08, fix-decl-10)
@@ -235,5 +236,15 @@ mkdir -p "$b/c1_pre_tx/boot5"; echo "gate PASS" > "$b/c1_pre_tx/boot5/gate.txt";
 ok=0; [ "$r1" = 0 ] && [ "$r2" = 0 ] && [ "$r3" = 2 ] && [ "$r4" = 1 ] && grep -q 'before summary is not clean' "$WK/summ/summary.out" \
   && grep -q 'differs 1' "$b/c1_pre_tx/verify_at_summary.txt" && [ ! -e "$b/c1_pre_tx/summary.txt" ] || ok=1
 res "summary: refused before boot5/gate.txt; a declared file changed: the verify again is not clean, no summary" $ok "rc $r1 $r2 $r3 $r4"
+# 25 keep with a proposed ledger that fails its check: the ledger is not changed, the attempt is kept, keep runs again (results 26.9)
+b=$(tree keepbad); rr=$WK/keepbad/root/research/cfs_procrace; r1=$(rc_step keepbad verify); r2=$(rc_step keepbad boot)
+mkdir -p "$WK/keepbad/obs/c1cyc_pre_boot1/tx"; echo d > "$WK/keepbad/obs/c1cyc_pre_boot1/tx/tx.dump.txt"
+cp "$rr/records/LEDGER.tsv" "$WK/keepbad/ledger.orig"; printf 'BAD\toutput\tsha256c\trecords/none.sha256\t/nonexistent\tyes\tnone\tnone\tno\tbad\n' >> "$rr/records/LEDGER.tsv"
+s0=$(shaf "$rr/records/LEDGER.tsv"); r3=$(rc_step keepbad keep); s1=$(shaf "$rr/records/LEDGER.tsv"); L1=$b/c1_pre_tx/boot1
+nf=$(ls "$L1" | grep -c '\.failed\.'); g1=0; [ ! -e "$L1/c1cyc_pre_boot1.sha256" ] && [ ! -e "$L1/keep.txt" ] || g1=1
+cp "$WK/keepbad/ledger.orig" "$rr/records/LEDGER.tsv"; r4=$(rc_step keepbad keep)
+ok=0; [ "$r1" = 0 ] && [ "$r2" = 0 ] && [ "$r3" = 1 ] && [ "$s1" = "$s0" ] && [ "$nf" = 3 ] && [ "$g1" = 0 ] && [ "$r4" = 0 ] \
+  && [ "$(grep -c '^OBS_c1cyc_pre_boot1' "$rr/records/LEDGER.tsv")" = 1 ] || ok=1
+res "keep with a failing proposed ledger: rc 1, the ledger unchanged, the attempt kept as *.failed.*; keep runs again" $ok "rc $r1 $r2 $r3, failed files $nf, again $r4"
 echo "run_cycle tests: $((NC - NF)) of $NC pass"
 exit $((NF > 0))

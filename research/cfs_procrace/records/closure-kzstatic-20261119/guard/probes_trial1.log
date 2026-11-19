@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-probes need=50000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-20261119/probes/scripts/run_probes.sh <scratch>/kzc_work /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-20261119/probes/out
+start 2026-11-19T02:14:10.133Z free=1158578176 threshold=364572800
+sample 2026-11-19T02:14:10.137Z 1158574080
+sample 2026-11-19T02:14:12.143Z 1158352896
+end 2026-11-19T02:14:14.150Z kind=scratch-probes verdict=completed rc=1 free=1158352896 lowest=1158352896 dip=225280 change=-225280

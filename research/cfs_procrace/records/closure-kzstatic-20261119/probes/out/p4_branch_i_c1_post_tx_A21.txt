@@ -1,0 +1,6 @@
+row A21 (relations line 607) use /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c:1003:23 -> OS_CountSemGetIdByName
+  id holder (relations line 612): &CF_AppData.engine.channels[i].sem_id field CF_Channel_t.sem_id base global-array-element object
+  writers of CF_Channel_t.sem_id: 2 rows [WRITERS]: the lookup's own out store 1 (view line [30897]); clearing or initial (constant 0) 1; other 0
+  FIELD_STATUS (view line 147863): per-field=DISABLED type-level=DISABLED hits escape 0, cast 9, union 0, unknown 0, other fields 6; address-type hits on the field other than untyped writes: 3 ['address-escape@cf_cfdp.c:1372:13', 'address-escape@cf_cfdp.c:1372:9', 'cast@cf_cmd.c:734:83']
+  later readers of CF_Channel_t.sem_id: 2 rows [READS]: CF_CFDP_MsgOutGet -> OS_CountSemTimedWait x1; CF_CFDP_MsgOutGet -> OS_ObjectIdDefined x1
+  branch (i): NOT ESTABLISHED: no other definition among the 2 listed writers and 2 later readers, but the writer set of the holder is not complete (per-field=DISABLED)

@@ -892,6 +892,13 @@ end
 - 생성자도 writer 도 이름 붙지 않은 행은 `other_kind` 부터 `-` 이고 `value` 가 `no_pair(<까닭>)` 인 한 줄이다. 그래서 모든 행이 파일에 있다.
 - 읽는 쪽의 점검: `facts` 가 계획의 facts 와, `tool_sha256` 이 relations 머리와 같다; 글 출력에 적힌 `pair:` 줄마다 쌍 파일에 같은 값의 줄이 있다; 꼬리 줄의 수가 줄 수와 같다. 영역 안의 쌍에 줄이 없으면 파일이 완전하지 않은 것이다. 앞 도구의 글 출력에서 잰 것 [예비: `records/closure-texts-20261118/out/p5_pairs.txt`]: 쌍 24,796 / 24,796 / 8,739 / 4,406 / 4,395(다섯 빌드, `pairs:` 줄의 합; 다른 스레드의 생성자·writer 만), 적힌 `pair:` 줄 1,988 / 1,988 / 1,607 / 631 / 620.
 
+**5x 덧붙임 (2026-11-19; 그것을 내는 코드보다 먼저 커밋함).** 코드를 쓰며 위 형식에서 정해지지 않았던 것을 정한다.
+- order 글의 도구 줄은 `relations` 줄 바로 뒤에 둔다(order 글에는 `rules` 줄이 없고, 첫 줄이 order rules 개정을, `relations` 줄이 relations rules 개정을 이름 댄다). relations 글은 위대로 `rules` 줄 바로 뒤다. 도구 줄은 명령(`kz-static relations`, `kz-static order`)이 쓴다; 같은 사실을 안에서 읽는 다른 명령(계획 생성기, order 가 안에서 만드는 relations 행)은 그 줄을 내지 않는다.
+- 쌍 파일의 `other_kind` 에 `creator-not-a-pair(same actor only)` 를 더한다: relations 의 `not a pair: same actor only (program order): …` 줄의 생성자다. 영역("같은 스레드의 생성자")에 이미 들어 있던 것이고 이름만 없었다. `not a pair: not a probe-create although …` 줄은 쌍 파일의 줄을 만들지 않는다(그 생성자는 같은 행의 다른 줄, `creator` 나 다른 `not a pair`, 에도 적힌다).
+- `use_root` 와 `other_root` 가 같은 스레드면 값은 늘 `same_thread` 다. 글 출력은 그대로라서, 경로 B·C 의 글에 `unknown: one thread: …` 로 적힌 쌍은 쌍 파일에서 `same_thread` 다(읽는 쪽의 "같은 값" 점검은 이 짝을 같은 것으로 본다). 경로 A 의 글은 같은 스레드의 생성자를 쌍으로 세지 않으므로 그 줄은 쌍 파일에만 있다.
+- 뿌리에 닿지 않는 쪽이 있는 쌍은 `use_root` 또는 `other_root` 가 `-` 이고 값이 `unknown(no root reaches <함수>)` 다(글 출력의 `unknown: no root reaches …` 와 같은 쌍).
+- 꼬리 줄의 `pairs` 는 `no_pair` 가 아닌 줄의 수이고, 값마다의 수의 합이다. `unknown` 은 까닭과 상관없이 센다.
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).

@@ -1,0 +1,37 @@
+# name-space data: /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces_osal-f34759d.txt
+# facts view: views/c1_post_tx.txt
+# columns: nsd_line kind value create copy_at field extent target per-field type-level hits writers copy-at-entry fill0-at-entry fill0-elsewhere other atype-hits(non-untyped)
+54 OS_OBJECT_TYPE_OS_BINSEM 4 OS_BinSemCreate osal/src/os/shared/src/osapi-binsem.c:108 OS_bin_sem_internal_record_t.obj_name extent=constant 20 target=False per-field=DISABLED type-level=DISABLED hits[escape 1, cast 0, union 0, unknown 0, other fields 0] writers=3 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0 atype=1['address-escape'] => condition-input NOT-HELD
+      other writer: 31112:osal/src/os/shared/src/osapi-binsem.c:81 fill0 in OS_BinSemAPI_Init
+59 OS_OBJECT_TYPE_OS_COUNTSEM 3 OS_CountSemCreate osal/src/os/shared/src/osapi-countsem.c:100 OS_count_sem_internal_record_t.obj_name extent=constant 20 target=False per-field=DISABLED type-level=DISABLED hits[escape 1, cast 0, union 0, unknown 0, other fields 0] writers=3 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0 atype=1['address-escape'] => condition-input NOT-HELD
+      other writer: 31145:osal/src/os/shared/src/osapi-countsem.c:73 fill0 in OS_CountSemAPI_Init
+63 OS_OBJECT_TYPE_OS_DIR 7 OS_DirectoryOpen osal/src/os/shared/src/osapi-dir.c:125 OS_dir_internal_record_t.dir_name extent=constant 64 target=False per-field=DISABLED type-level=DISABLED hits[escape 1, cast 0, union 0, unknown 0, other fields 0] writers=3 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0 atype=1['address-escape'] => condition-input NOT-HELD
+      other writer: 31148:osal/src/os/shared/src/osapi-dir.c:75 fill0 in OS_DirAPI_Init
+67 OS_OBJECT_TYPE_OS_STREAM 6 OS_OpenCreate osal/src/os/shared/src/osapi-file.c:142 OS_stream_internal_record_t.stream_name extent=constant 64 target=False per-field=DISABLED type-level=DISABLED hits[escape 9, cast 0, union 0, unknown 0, other fields 0] writers=10 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=5 other=3 atype=9['address-escape'] => condition-input NOT-HELD
+      other writer: 31224:osal/src/os/shared/src/osapi-file.c:97 fill0 in OS_FileAPI_Init
+      other writer: 31227:osal/src/os/shared/src/osapi-file.c:374 in OS_rename top
+      other writer: 31228:osal/src/os/shared/src/osapi-file.c:375 fill0 in OS_rename
+      other writer: 31229:osal/src/os/shared/src/osapi-sockets.c:97 fill0 in OS_CreateSocketName
+      other writer: 31230:osal/src/os/shared/src/osapi-sockets.c:102 in OS_CreateSocketName top
+      other writer: 31231:osal/src/os/shared/src/osapi-sockets.c:109 in OS_CreateSocketName top
+      other writer: 31232:osal/src/os/shared/src/osapi-sockets.c:135 fill0 in OS_SocketOpen
+      other writer: 31233:osal/src/os/shared/src/osapi-sockets.c:259 fill0 in OS_SocketAccept
+72 OS_OBJECT_TYPE_OS_FILESYS 11 OS_FileSysAddFixedMap osal/src/os/shared/src/osapi-filesys.c:280 OS_filesys_internal_record_t.device_name extent=constant 32 target=False per-field=DISABLED type-level=DISABLED hits[escape 3, cast 0, union 0, unknown 0, other fields 11] writers=5 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=2 other=1 atype=3['address-escape'] => condition-input NOT-HELD
+      other writer: 31151:osal/src/os/shared/src/osapi-filesys.c:159 fill0 in OS_FileSys_Initialize
+      other writer: 31152:osal/src/os/shared/src/osapi-filesys.c:159 in OS_FileSys_Initialize top
+      other writer: 31153:osal/src/os/shared/src/osapi-filesys.c:231 fill0 in OS_FileSysAPI_Init
+73 OS_OBJECT_TYPE_OS_FILESYS 11 OS_FileSys_Initialize osal/src/os/shared/src/osapi-filesys.c:159 OS_filesys_internal_record_t.device_name extent=constant 32 target=False per-field=DISABLED type-level=DISABLED hits[escape 3, cast 0, union 0, unknown 0, other fields 11] writers=5 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=2 other=1 atype=3['address-escape'] => condition-input NOT-HELD
+      other writer: 31153:osal/src/os/shared/src/osapi-filesys.c:231 fill0 in OS_FileSysAPI_Init
+      other writer: 31154:osal/src/os/shared/src/osapi-filesys.c:280 fill0 in OS_FileSysAddFixedMap
+      other writer: 31155:osal/src/os/shared/src/osapi-filesys.c:280 in OS_FileSysAddFixedMap top
+77 OS_OBJECT_TYPE_OS_MODULE 10 OS_ModuleLoad osal/src/os/shared/src/osapi-module.c:209 OS_module_internal_record_t.module_name extent=constant 20 target=False per-field=DISABLED type-level=DISABLED hits[escape 1, cast 0, union 0, unknown 0, other fields 0] writers=3 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0 atype=1['address-escape'] => condition-input NOT-HELD
+      other writer: 31209:osal/src/os/shared/src/osapi-module.c:164 fill0 in OS_ModuleAPI_Init
+82 OS_OBJECT_TYPE_OS_MUTEX 5 OS_MutSemCreate osal/src/os/shared/src/osapi-mutex.c:105 OS_mutex_internal_record_t.obj_name extent=constant 20 target=False per-field=DISABLED type-level=DISABLED hits[escape 1, cast 0, union 0, unknown 0, other fields 0] writers=3 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0 atype=1['address-escape'] => condition-input NOT-HELD
+      other writer: 31216:osal/src/os/shared/src/osapi-mutex.c:78 fill0 in OS_MutexAPI_Init
+87 OS_OBJECT_TYPE_OS_QUEUE 2 OS_QueueCreate osal/src/os/shared/src/osapi-queue.c:104 OS_queue_internal_record_t.queue_name extent=constant 20 target=False per-field=DISABLED type-level=DISABLED hits[escape 2, cast 0, union 0, unknown 0, other fields 0] writers=3 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0 atype=2['address-escape'] => condition-input NOT-HELD
+      other writer: 31221:osal/src/os/shared/src/osapi-queue.c:74 fill0 in OS_QueueAPI_Init
+99 OS_OBJECT_TYPE_OS_TASK 1 OS_TaskCreate osal/src/os/shared/src/osapi-task.c:188 OS_task_internal_record_t.task_name extent=constant 20 target=False per-field=DISABLED type-level=DISABLED hits[escape 1, cast 0, union 0, unknown 0, other fields 0] writers=3 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0 atype=1['address-escape'] => condition-input NOT-HELD
+      other writer: 31241:osal/src/os/shared/src/osapi-task.c:154 fill0 in OS_TaskAPI_Init
+102 OS_OBJECT_TYPE_OS_TIMEBASE 8 OS_TimeBaseCreate osal/src/os/shared/src/osapi-timebase.c:128 OS_timebase_internal_record_t.timebase_name extent=constant 20 target=False per-field=DISABLED type-level=DISABLED hits[escape 1, cast 0, union 0, unknown 0, other fields 0] writers=3 copy-at-entry=1 fill0-at-entry=1 fill0-elsewhere=1 other=0 atype=1['address-escape'] => condition-input NOT-HELD
+      other writer: 31249:osal/src/os/shared/src/osapi-timebase.c:83 fill0 in OS_TimeBaseAPI_Init
+# entries 11, with a buffer field in FIELD_TYPES 11, input held 0

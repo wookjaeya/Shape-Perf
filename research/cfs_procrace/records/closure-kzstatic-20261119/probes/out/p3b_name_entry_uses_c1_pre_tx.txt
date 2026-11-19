@@ -1,0 +1,9 @@
+# view views/c1_pre_tx.txt field OS_common_record_t.name_entry
+FIELD_TYPES: OS_common_record_t.name_entry at osal/src/os/shared/inc/os-shared-idmap.h:39:17 element pointer [const char *] size 8 extent none 0 {}
+reads of the field's value by use: branch 3, branch,return 1, branch,return,call-argument 1, call-argument 13, call-argument,store 2
+  passed to OS_CreateSocketName parameter 2: 1 site(s); callee body in facts: yes; PARAM_FLOW kinds of that parameter: {'comparison': 1, 'call-argument': 1}; P0 semantics rows of the callee by state: -
+  passed to OS_SymbolLookup_Static parameter 2: 1 site(s); callee body in facts: yes; PARAM_FLOW kinds of that parameter: {'comparison': 1, 'call-argument': 1}; P0 semantics rows of the callee by state: -
+  passed to OS_strnlen parameter 0: 1 site(s); callee body in facts: yes; PARAM_FLOW kinds of that parameter: -; P0 semantics rows of the callee by state: -
+  passed to memcpy parameter 1: 1 site(s); callee body in facts: no; PARAM_FLOW kinds of that parameter: -; P0 semantics rows of the callee by state: {'doc-collated': 1, 'unverified': 2}
+  passed to strcmp parameter 1: 1 site(s); callee body in facts: no; PARAM_FLOW kinds of that parameter: -; P0 semantics rows of the callee by state: {'doc-collated': 2, 'unverified': 1}
+  passed to strncpy parameter 1: 11 site(s); callee body in facts: no; PARAM_FLOW kinds of that parameter: -; P0 semantics rows of the callee by state: {'doc-collated': 1, 'unverified': 2}

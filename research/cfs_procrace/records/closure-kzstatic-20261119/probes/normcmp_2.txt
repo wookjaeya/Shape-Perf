@@ -1,0 +1,56 @@
+same commands_rc.txt
+same open_reason_population.txt
+same-after-mask p1_alternatives_c1_post_tx_A20.txt
+same-after-mask p1_alternatives_c1_post_tx_A21.txt
+same-after-mask p1_alternatives_c1_pre_tx_A20.txt
+same-after-mask p1_alternatives_c1_pre_tx_A21.txt
+same-after-mask p1_alternatives_c1_pre_tx_A22.txt
+same-after-mask p1_alternatives_c1_pre_tx_A26.txt
+differs p2_success_path_c1_post_tx.txt old-only 2 new-only 2
+  < OS_CountSemCreate (name spaces OS_common_record_t.name_entry): success value 0; returns 5; cannot carry it: osal/src/os/shared/src/osapi-countsem.c:90:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-countsem.c:91:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-countsem.c:91:5 alt 0/1 constant -13; osal/src/os/shared/src/osapi-countsem.c:109:5 alt 0/2 result of the call at osal/src/os/share
+  < OS_TimeBaseCreate (name spaces OS_common_record_t.name_entry): success value 0; returns 6; cannot carry it: osal/src/os/shared/src/osapi-timebase.c:108:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-timebase.c:109:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-timebase.c:109:5 alt 0/1 constant -13; osal/src/os/shared/src/osapi-timebase.c:118:9 alt 0/1 constant -35; osal/src/os/shared/src
+  > OS_CountSemCreate (name spaces OS_common_record_t.name_entry): success value 0; returns 5; cannot carry it: osal/src/os/shared/src/osapi-countsem.c:90:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-countsem.c:91:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-countsem.c:91:5 alt 0/1 constant -13; osal/src/os/shared/src/osapi-countsem.c:109:5 alt 0/2 result of the call at osal/src/os/share
+  > OS_TimeBaseCreate (name spaces OS_common_record_t.name_entry): success value 0; returns 6; cannot carry it: osal/src/os/shared/src/osapi-timebase.c:108:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-timebase.c:109:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-timebase.c:109:5 alt 0/1 constant -13; osal/src/os/shared/src/osapi-timebase.c:118:9 alt 0/1 constant -35; osal/src/os/shared/src
+differs p2_success_path_c1_pre_tx.txt old-only 2 new-only 2
+  < OS_CountSemCreate (name spaces OS_common_record_t.name_entry): success value 0; returns 5; cannot carry it: osal/src/os/shared/src/osapi-countsem.c:90:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-countsem.c:91:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-countsem.c:91:5 alt 0/1 constant -13; osal/src/os/shared/src/osapi-countsem.c:109:5 alt 0/2 result of the call at osal/src/os/share
+  < OS_TimeBaseCreate (name spaces OS_common_record_t.name_entry): success value 0; returns 6; cannot carry it: osal/src/os/shared/src/osapi-timebase.c:108:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-timebase.c:109:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-timebase.c:109:5 alt 0/1 constant -13; osal/src/os/shared/src/osapi-timebase.c:118:9 alt 0/1 constant -35; osal/src/os/shared/src
+  > OS_CountSemCreate (name spaces OS_common_record_t.name_entry): success value 0; returns 5; cannot carry it: osal/src/os/shared/src/osapi-countsem.c:90:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-countsem.c:91:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-countsem.c:91:5 alt 0/1 constant -13; osal/src/os/shared/src/osapi-countsem.c:109:5 alt 0/2 result of the call at osal/src/os/share
+  > OS_TimeBaseCreate (name spaces OS_common_record_t.name_entry): success value 0; returns 6; cannot carry it: osal/src/os/shared/src/osapi-timebase.c:108:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-timebase.c:109:5 alt 0/1 constant -2; osal/src/os/shared/src/osapi-timebase.c:109:5 alt 0/1 constant -13; osal/src/os/shared/src/osapi-timebase.c:118:9 alt 0/1 constant -35; osal/src/os/shared/src
+same-after-mask p3_buffer_writers_c1_post_tx.txt
+same-after-mask p3_buffer_writers_c1_pre_tx.txt
+same p3b_name_entry_uses_c1_pre_tx.txt
+same-after-mask p4_branch_i_c1_post_tx_A20.txt
+same-after-mask p4_branch_i_c1_post_tx_A21.txt
+same-after-mask p4_branch_i_c1_pre_tx_A20.txt
+same-after-mask p4_branch_i_c1_pre_tx_A21.txt
+same-after-mask p4_branch_i_c1_pre_tx_A22.txt
+same-after-mask p4_branch_i_c1_pre_tx_A26.txt
+differs p5_pairs.txt old-only 9 new-only 9
+  < c1_pre_tx | 367 | 24796 | 1988 | 220 | 357 | 8862749 | 1870623
+  < c1_post_tx | 367 | 24796 | 1988 | 220 | 357 | 8864470 | 1875311
+  < r2_core | 295 | 8739 | 1607 | 158 | 372 | 3247710 | 1508554
+  < c5_641 | 172 | 4406 | 631 | 57 | 412 | 1815935 | 573018
+  <    planned rows 23 (rows of the sidecar with state=planned): order row found 23; all pairs listed 17, not all listed 6; pairs of the planned rows 1544, listed 78; row values {'unknown': 4, 'unordered': 19}
+  <    actors named in the listed pairs of planned rows without a root site in the plan: {'CI_Lab_AppMain (script-entry)': 11, 'SAMPLE_AppMain (script-entry)': 11, 'SCH_Lab_AppMain (script-entry)': 7, 'TO_Lab_AppMain (script-entry)': 12, 'CFE_ES_PerfLogDump (spawn-entry)': 8, 'CFE_TIME_Local1HzTask (spawn-entry)': 2, 'CFE_TIME_Tone1HzTask (spawn-entry)': 2}
+  < c5_642 | 169 | 4395 | 620 | 57 | 527 | 2315293 | 714386
+  <    planned rows 22 (rows of the sidecar with state=planned): order row found 22; all pairs listed 16, not all listed 6; pairs of the planned rows 1538, listed 72; row values {'unknown': 4, 'unordered': 18}
+  <    actors named in the listed pairs of planned rows without a root site in the plan: {'CI_Lab_AppMain (script-entry)': 10, 'SAMPLE_AppMain (script-entry)': 10, 'SCH_Lab_AppMain (script-entry)': 6, 'TO_Lab_AppMain (script-entry)': 11, 'CFE_ES_PerfLogDump (spawn-entry)': 8, 'CFE_TIME_Local1HzTask (spawn-entry)': 2, 'CFE_TIME_Tone1HzTask (spawn-entry)': 2}
+  > c1_pre_tx | 367 | 24796 | 1988 | 220 | 357 | 8863073 | 2045370
+  > c1_post_tx | 367 | 24796 | 1988 | 220 | 358 | 8864795 | 2050027
+  > r2_core | 295 | 8739 | 1607 | 158 | 372 | 3247852 | 1561359
+  > c5_641 | 172 | 4393 | 618 | 57 | 414 | 1818674 | 568005
+  >    planned rows 10 (rows of the sidecar with state=planned): order row found 10; all pairs listed 4, not all listed 6; pairs of the planned rows 1531, listed 65; row values {'unknown': 4, 'unordered': 6}
+  >    actors named in the listed pairs of planned rows without a root site in the plan: {'CI_Lab_AppMain (script-entry)': 9, 'SAMPLE_AppMain (script-entry)': 9, 'SCH_Lab_AppMain (script-entry)': 6, 'TO_Lab_AppMain (script-entry)': 4, 'CFE_ES_PerfLogDump (spawn-entry)': 8, 'CFE_TIME_Local1HzTask (spawn-entry)': 2, 'CFE_TIME_Tone1HzTask (spawn-entry)': 2}
+  > c5_642 | 169 | 4382 | 607 | 57 | 531 | 2327427 | 709373
+  >    planned rows 9 (rows of the sidecar with state=planned): order row found 9; all pairs listed 3, not all listed 6; pairs of the planned rows 1525, listed 59; row values {'unknown': 4, 'unordered': 5}
+  >    actors named in the listed pairs of planned rows without a root site in the plan: {'CFE_ES_PerfLogDump (spawn-entry)': 8, 'CFE_TIME_Local1HzTask (spawn-entry)': 2, 'CFE_TIME_Tone1HzTask (spawn-entry)': 2, 'CI_Lab_AppMain (script-entry)': 8, 'SAMPLE_AppMain (script-entry)': 8, 'SCH_Lab_AppMain (script-entry)': 5, 'TO_Lab_AppMain (script-entry)': 3}
+same p6_keys.txt
+same p7_items_c1_post_tx.txt
+same p7_items_c1_pre_tx.txt
+same-after-mask rel_post_A20.txt
+same-after-mask rel_post_A21.txt
+same-after-mask rel_pre_A20.txt
+same-after-mask rel_pre_A21.txt
+same-after-mask rel_pre_A22.txt
+same-after-mask rel_pre_A26.txt
+same-after-mask rel_pre_A63.txt

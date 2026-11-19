@@ -2172,3 +2172,47 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 - c5 의 이름 공간 둘의 key-clearing 함수(`CFE_ES_CleanUpApp` 등)는 소스와 대조하지 않았다.
 - handling label 은 하나의 outcome 규칙 아래에서도 다섯 빌드 모두 움직이지 않았다: `rules-05` 의 고침은 이 빌드들의 label 을 바꾸지 않는다 [M]. label 을 읽지 않는 선택 규칙(§12.10 2 항)은 그대로 뒤 단계다.
 - §12.9 의 판정 규칙 8.7 입력 표와 그 밖의 열린 것은 그대로다. 이 빌드는 그 입력을 하나도 주지 않는다.
+
+## 13. 규칙 글과 형식: 그것을 읽는 코드보다 먼저 커밋함 (2026-11-18–19)
+
+이 절은 글 단계가 돌려준 결과 글을 kz-static 단계(§15)가 놓은 것이다. 받은 글이 (6) 항의 중간에서 끊겨 있었으므로 (6) 항과 그 뒤의 짧은 항목은 커밋 `8605a04`·`4e29d50`·`95ce80e` 의 메시지와 `../records/closure-texts-20261118/README.md` 에서 적었다(§15 (바)).
+
+### 13.1 선언 [D]
+글만 고쳤다. 도구 빌드는 없고 MC 바이너리도 돌리지 않았다(나란히 가는 kz-static 단계가 제자리에서 다시 빌드했다, §12.11). 그래서 정체성이 바뀐 도구가 없고, 빌드 선언도 바이트 동일성 목록도 없다.
+
+### 13.2 바뀐 것 [F] (§12.10 4 항의 차례대로, 하나에 커밋 하나)
+(1) 판정 규칙 8.13 (`e809ba1`): 3.3 과 4.2 는 그대로 두고 입력만 댄다. 전제로 항목을 세우지 않는다. 자료 상태의 규칙은 모든 성립 항목과 사용 조건 요소에 걸고, 미대조 항목의 후보 목록은 규칙으로 만든다. 평가 갈래는 `D1`/`D2`/`D2[종류]` × `R0`/`Ra`–`Rf` 이고, PI 의 답은 보고할 갈래를 고를 뿐이다. 기초 1 은 문이 아니라 항목이다. 기초 4 는 성공 경로 줄이 저장 값의 묶임까지 보일 때만 선다. (다)는 저장된 이름 버퍼의 writer 와 그 주소가 간 곳을 요구한다. (c3)(i)은 지우는 것을 포함한 모든 writer 를 값 종류와 함께, 그리고 reader 의 가름을 읽는다. 문맥별 대안 줄을 둔다. 필드 저장값 규칙은 다섯 빌드에서 적용 자리 하나이고, 그 행을 읽은 뒤 썼으며, 경로 조건으로 보고, 설계 행 밖에는 쓰지 않는다. 수명 끝의 꼴은 셋, 인스턴스 연결은 열린 세대에만 한다. 쌍 종류 다섯, 쌍 파일의 영역, 서식 검사 13–17 을 둔다.
+(2) 범위 규칙 개정 2 (`5c460eb`, `kairos/docs/semantics_coverage.md` 8절): 종류는 표를 고르는 매개변수에 묶인 인자에서 오고, 구성 요소마다 `layer-fn` 의 정의 줄과 위치를 적는다. 실패한 생성의 되돌림을 적는다. 층의 지우기와 마무리는 최상위 `layer-op` 문으로 둔다(지금 읽는 쪽은 그 파일을 통째로 물리고 연산으로 잘못 읽지 않는다; 문장 점검 19 줄 가운데 9 줄을 물림, `records/closure-texts-20261118/out/ns_statement_check_2.txt`). 자료는 새 파일 이름 `framework_namespaces2_*` 에 쓴다.
+(3) 계획 규칙 개정 5 글 (`0eaf478`, `kairos/docs/plan_manifest.md` 10절): `namespace-entry` 줄과 `namespace-layer` 줄(extent 값과 상수), 생성 쪽 종류 값 site, 문맥 틀 site, 수명 끝 넷의 site 꼴과 사건이 id 를 이름 대는 방식(되돌림의 `reentry` 조건 포함)을 둔다. 행 줄에는 라벨 둘을 적고, 층 라벨과 선택은 그대로다. 대조 예산의 사유는 "대조 실행"이라는 말로 쓴다.
+(4) 형식 (`2e4827a`): `kairos/docs/static_facts.md` 5x 에 relations rules revision 14 의 줄 여섯, relations·order 머리의 도구 줄, 소스 트리 토큰 키(옵션을 켠 사실에서만 빌드 사이 행 정체성), order rules revision 8 의 완전한 쌍 파일(facts·tool sha256, domain, `same_thread`)을 둔다. `kairos/docs/event_semantics.md` 13절에 dump 1.5 의 `buildid` 줄, 예약한 `tok-*` 줄 셋, 연결 점검의 `same_build_object`/`same_build` 줄을 둔다. `include/`·`cmake/` 는 바꾸지 않는다.
+(5) 평가 절차 (`269bcbb`, 2026-11-19 고침 `eeeb77f`, `plan/c1_closure_evaluation_protocol_20261118.md`): 부팅 수는 조건만의 함수로 정한다. 문에는 `same_build` 를 넣지 않는다. 부팅 전에 써 두는 평가 갈래는 16 이다(처음 판의 "14"는 잘못 센 것; 2 × (1+6+1)). 쌍·사용·행마다의 기대는 `[채움]` 자리로 둔다. 틀릴 수 있는 점검은 F1–F10 이고, `expect_safe`(s1–s4)와 `expect_discriminate` 는 틀릴 수 있는 자리에 둔다. 분모를 정하고, 판독지는 정적 부분과 부팅별 부분으로 나눈다. 사례 카드는 읽는 사람의 파일 목록에서 빼고, 읽는 사람이 없을 때의 대체를 적는다. 요약과 기대 대조 스크립트도 동결한다. PI 에게 묻는 라이브러리 근거에는 종료 호출 항목과 프레임워크 `agreement` 항목도 든다.
+(6) 설명 스크립트 개정 4 명세 (`plan/c1_closure_explain_rev4_spec_20261118.md`): `8605a04` 는 사용 한도로 멈춘 때의 판(점검 전)이다. `4e29d50` 이 판정 규칙 8.13, 형식, 평가 절차와 대조해 마쳤다: 후보 목록과 인정 파일의 형식(여덟 칸, 머리, 꼬리, 부분 집합 점검, 어긋나면 rc 2), 되돌림을 이름에 잇는 재진입 조건, 필드 저장값 규칙에 기대는 갈래의 표시와 그 따로 센 수, 요약과 기대 대조 스크립트의 동결, 각각의 fixture [F: 커밋 메시지].
+(7) 탐침 기록 (`a414a58`, 읽기 주석 `95ce80e`): `../records/closure-texts-20261118/` 의 탐침 스크립트와 앞 도구 `1a47abd0…` 의 마지막 옵션 회차 사실에서 다시 돌린 출력(29 명령 모두 rc 0). 수는 [예비] 이고, 고친 도구의 사실에서 다시 돌린 것은 §15 (나).
+
+### 13.3 시험·바이트 동일성·공간
+빌드가 없어 ctest 와 바이트 동일성 목록이 없다. 이름 점검은 `a414a58` 부터 그 단계의 마지막 커밋까지 깨끗했다고 그 단계가 보고했다 [그 단계의 보고; 이 단계가 다시 돌린 점검은 §15 (마)]. 공간은 글 몇 KB 와 탐침 기록이다.
+
+### 13.4 열린 것
+판정 규칙 8.13 의 입력(성공 경로 줄, 쌍 파일 등)은 이 글을 구현하는 kz-static 빌드(§15)와 런타임 빌드가 낸다. §12.9·§12.10 5 항의 PI 결정은 그대로 기다린다.
+
+## 14. 이름 공간 자료: 범위 규칙 개정 2 의 새 파일 다섯 (2026-11-18–19)
+
+이 절도 kz-static 단계(§15)가 놓았다. 받은 결과 글에 이 단계의 글이 들어 있지 않아(§15 (바)) 커밋 `5d74967`·`090e280` 과 `../records/nsdata-r2-20261118/`(`README.md`, `declaration.md`, `commands.txt`, `out/`)에서 적었다.
+
+### 14.1 선언 [D]
+`records/nsdata-r2-20261118/declaration.md`(`5d74967`, 훑기 고침과 함께, 어느 개정 2 자료 파일보다 먼저 커밋함): 범위 규칙 개정 2(§13.2 (2))에 따라 `env/tools/semantics_scan.py` 를 고치고, 새 파일 이름 `kairos/semantics/framework_namespaces2_<component>.txt` 다섯을 만든다. 개정 1 의 다섯과 나머지 자료 여덟은 건드리지 않는다(남긴 개정 4 계획이 경로와 sha256 으로 붙잡고 있음). 도구 빌드도 MC 바이너리 실행도 없다.
+
+### 14.2 바뀐 것 [F]
+- 훑기: 종류는 층 함수가 표를 고르는 매개변수에 묶인 인자에서 온다(그 매개변수는 선언된 형으로 찾음). 실패한 생성의 되돌림(`rollback`), 층 함수(`layer-fn`), 층 연산(`layer-op`), `not-covered`·`kind-unresolved` 줄.
+- 자료(`090e280`): 새 파일 다섯, sha256 `../records/nsdata-r2-20261118/out/data2_sha256.txt`. 세대 N 의 두 구성 요소(osal-f34759d, osal-7.0.1): 종류 15/16 가운데 연산이 있는 것 13/14, 개정 1 에 없던 종류 셋(`CONDVAR`, `CONSOLE`, `TIMECB`), `layer-fn` 10, `layer-op` 4(`clear-table`, `clear-slot`, `rollback`, `delete-finalize`), `rollback` 16/17, `kind-unresolved` 7, `not-covered` 7(`out/report/kinds_per_component.txt`). 세대 T(osal-4.1.1, cfe-6.4.1, cfe-6.4.2)는 개정 1 의 항목 줄 그대로다.
+
+### 14.3 점검 [M]
+- `semantics_scan.py check` rc 0: 자료 18 파일(개정 1 열셋, 개정 2 다섯), 실패 0(`out/scan_check.txt`); fixture 점검 rc 0(`out/fixture_check.txt`); 옛 구성 요소 목록으로는 개정 2 의 세대 N 두 파일에서 rc 1(선언의 점검 6 대로, `out/scan_check_old_list.txt`).
+- 개정 1 의 열세 파일을 다시 만든 것이 저장소와 같은 바이트이고, `kairos/semantics` 의 git diff 가 비어 있음(`out/regenerated_rev1_vs_repo.txt`, `out/data_sha256_compare.txt`).
+- 남긴 개정 4 계획 다섯의 `input namespace-data` 붙잡기 25/25 같음(`out/plan_pins_check.txt`).
+- lint `case-ids-data`·`semantics-names` 가 새 파일이 있을 때와 없을 때 모두 rc 0, selftest 114 경우 실패 0, 심어 둔 이름은 찾음(rc 1)(`out/lint_*`).
+
+### 14.4 읽는 데 주의할 것과 열린 것
+- **지금의 계획 생성기는 새 파일을 읽지 못한다**(`lib/llvm/plan_gen.cpp` `read_namespaces` 가 `layer-fn`·`layer-op`·`kind-unresolved` 와 들여 쓴 `rollback`·`not-covered` 를 물림). 읽는 쪽은 계획 규칙 개정 5 의 kz-static 빌드(§15)가 들인다.
+- 세대 T 의 표에서 어느 항목 줄도 이름 대지 않는 이름 경로 쓰기(osal-4.1.1 의 `"\0"` 복사로 쓴 지우기 다섯, cfe 의 시작 객체 이름 복사와 끝 표지 저장 둘)는 기록만 했다(`out/report/writers.txt`). 개정 2 는 세대 T 를 바꾸지 않는다.
+- 층의 get-by-name 함수를 거치는 이름 조회(파일 시스템 종류, 구성 요소마다 2 호출)는 `lookup` 줄이 아니고 따로 보고했다(`out/report/get_by_name.txt`).

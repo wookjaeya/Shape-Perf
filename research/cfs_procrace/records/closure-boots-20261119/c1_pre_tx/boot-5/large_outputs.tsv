@@ -1,0 +1,6 @@
+what	path	files	apparent_bytes	blocks_bytes	keep_list_lines	keep_list_sha256	ledger_row
+boot	/home/user/work/redesign/obs1/c1cyc_pre_boot5	52	3647516	2760704	52	b1cdf7be7dff348dab75f2f88d35a35ee893ddd46576b5e73a10d1ed4c331746	OBS_c1cyc_pre_boot5
+convert	/home/user/work/redesign/obs1/c1cyc_pre_convert5	4	730071	741376	4	f8458917b294f03be155f7a4695907eb1d6fc1ab4a71f7fb361cdfe7a76b234b	OBS_c1cyc_pre_convert5
+explain	/home/user/work/redesign/obs1/c1cyc_pre_explain5	788	53009216	54976512	788	72cab8e8f99ba83e3f5ddfe7e11024b325c68c128dd1797a5a4940ea4cb1c745	OBS_c1cyc_pre_explain5
+eval	/home/user/work/redesign/obs1/c1cyc_pre_eval5	1	1225802	1232896	1	77bfa0439c11fa8b0772e7eef288062d80b2b2f1eaa4043514b4fd9a0391e8e5	OBS_c1cyc_pre_eval5
+record	records/closure-c1prep-20261119/boot/c1_pre_tx/boot5	27	581303	663552	-	-	-

@@ -1,0 +1,4 @@
+# space_guard.sh kind=notes-check need=10000000 floor=314572800 interval=2 cmd=bash -c bash check.sh > check.txt
+start 2026-11-19T13:14:18.603Z free=382668800 threshold=324572800
+sample 2026-11-19T13:14:18.607Z 382664704
+end 2026-11-19T13:14:20.613Z kind=notes-check verdict=completed rc=0 free=382648320 lowest=382648320 dip=20480 change=-20480

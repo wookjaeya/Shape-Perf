@@ -250,3 +250,23 @@ Operations reached through an accessor function instead of a field path (section
 name-initialising macro and the length checks (they are read from the facts at the positions these files give, by the
 plan rules, `docs/plan_manifest.md` section 10); the documented return of a function declared void (the facts mark it,
 `docs/static_facts.md` 5w; the scan does not); the platform support package and the applications.
+
+## 9. Known misses (2026-11-19; a note, not a rule revision)
+
+Misses of revisions 1 and 2 found by later readings.  This section changes no rule, no scan and no data file; the
+rule strings the data files cite (`semantics coverage rule revision 1 (2026-11-16)`, revision 2) stay valid.
+
+- **cFE 6.4.1 and 6.4.2.** `CFE_EVS_Register` (`cfe/fsw/cfe-core/src/inc/cfe_evs.h:204`), `CFE_TBL_Register`
+  (`cfe/fsw/cfe-core/src/inc/cfe_tbl.h:263`) and `CFE_TBL_Share` (`cfe_tbl.h:311`) have no entry in
+  `framework_semantics_cfe-6.4.1.txt` or `framework_semantics_cfe-6.4.2.txt`, although their header comments list
+  `\retcode` lines and both data files pin those two headers (`file` lines; the same sha256 in both versions).
+  `framework_semantics_cfe-6cccb3f.txt` and `framework_semantics_cfe-7.0.1.txt` have an entry for each of the three.
+  Why the scan left them out was not traced [unverified].
+- **OSAL 4.1.1.** A comparison found further misses among functions that return only `OS_FS_*` constants outside the
+  pinned status block, and among queue functions that have two definitions in the source text.  Their number is not
+  given here: no kept file holds a recount [unverified].
+- **The data files are not edited in place.**  Each declared build pins them by sha256 (`data_inputs.sha256` of its
+  record), and plan sidecars pin the name-space data and the role file (`input … sha256=` lines).  A later scan
+  revision that closes these misses writes new data file names, as revision 2 did (section 8.4).
+- The counts behind this section (entries and declarations per version file, distinct `api` names) are in the
+  research record `records/closure-notes-20261119/check.txt` (section I).

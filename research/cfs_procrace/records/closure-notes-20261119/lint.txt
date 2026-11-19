@@ -1,0 +1,14 @@
+lint case-ids: clean
+lint case-ids rc=0
+lint case-ids-data: clean
+lint case-ids-data rc=0
+lint semantics-names: clean
+lint semantics-names rc=0
+lint retired-term: clean
+lint retired-term rc=0
+lint banned-files: clean
+lint banned-files rc=0
+lint no-llvm: clean
+lint no-llvm rc=0
+lint no-generated: clean
+lint no-generated rc=0

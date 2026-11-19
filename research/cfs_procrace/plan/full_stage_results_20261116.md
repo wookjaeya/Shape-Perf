@@ -1222,6 +1222,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 | relations: framework 항목이 있는 함수를 이름 대는 행 / 그 가운데 검증 안 된 항목이 있는 행 | 274 / 262 | 274 / 262 | 193 / 183 | 147 / 86 | 142 / 81 |
 
 - **검증됨/전체 항목**: 빌드에 적용된 framework 항목은 c1 158/741, r2 137/741, c5_641 115/741(두 6.4 판 41 씩이 겹침, §8.7), c5_642 113/741. 적용되지 않은 판의 항목은 그 빌드에서 쓰이지 않는다(각 판의 "called but neither pin held" 수가 `count.semantics_entries[i]` 에 있음). 행 단위의 검증됨/전체는 위 표의 층별 값이다. framework 층의 `unverified` 는 모두 일치 칸의 "비교 못 함"이고, documented-return·arg-domain·arg-role 은 모두 doc-collated, success·failure·role 은 모두 body-derived 다.
+  - (2026-11-19 덧붙임, PI 결정 ①) 이 줄의 분자는 그 빌드에 적용된 항목의 수이고 '검증됨'의 수가 아니다. 741 은 일곱 판 파일의 끝줄 `entries=` 의 합이다(`declared=` 의 합 1,089, 서로 다른 `api` 이름 310). c1 의 158 은 그 빌드의 두 판(cfe-6cccb3f 129 항목, osal-f34759d 128 항목; 합 257) 가운데 적용된 것(76 + 82, 위 표의 '적용된 framework 항목' 줄)이다. 일치 칸의 158 줄 가운데 112 가 `unverified` 이고 46 이 `body-derived` 다(`../records/semantics-20261116/compare/agreement_c1_pre_tx.txt`). doc-collated 는 빌드의 판 고정 머리말(문서나 선언)에서 읽은 것이지 구현과 대조한 것이 아니다(`kairos/docs/semantics_coverage.md:111`). 수는 `../records/closure-notes-20261119/check.txt` I. [§26.1]
 - **첫 관측 경로가 쓰는 항목**(C1 관계 1, 사용 지점 키 `17975444d83f6589`, c1_pre_tx 의 A21 행): 그 행이 이름 대는 함수 가운데 framework 항목이 있는 것 15(`CFE_ES_ExitApp`, `CFE_ES_ResetCFE`, `OS_BinSemCreate`, `OS_CondVarCreate`, `OS_CountSemCreate`, `OS_CountSemGetIdByName`, `OS_DirectoryOpen`, `OS_FileSysAddFixedMap`, `OS_ModuleLoad`, `OS_MutSemCreate`, `OS_OpenCreate`, `OS_QueueCreate`, `OS_SocketBind`, `OS_TaskCreate`, `OS_TimeBaseCreate`), P0 항목 6(`abort`, `dlsym`, `exit`, `memset`, `pthread_exit`, `strcmp`). 곧 적용된 158 framework 항목 가운데 15, 적용된 P0 선언 35 가운데 6. 그 15 가운데 13 은 unverified 칸이 하나씩 있다(일치를 비교 못 함). c1_post_tx 의 같은 키 행은 16 과 7 이다(`OS_TaskDelay`, `clock_nanosleep` 더함). c1_pre_tx 계획의 site 가 이름 대는 19 함수 가운데 framework 항목이 있는 것 11, P0 3(`memset`, `pthread_create`, `strncpy`). r2·c5 에는 그 키가 없다.
 - **`OS_CountSemGetIdByName`**(osal-f34759d, 첫 경로의 사용 호출): 문서 반환 {0, -2, -13, -17}, 본문은 그에 더해 -35, -16, -33(`OS_ObjectIdConvertToken` 을 거친 것)을 돌려준다: "the body returns a value the documentation omits". 본문 8 항목 body-derived, 문서 4 항목 doc-collated.
 - **비교 못 함의 큰 몫**은 본문이 돌려주는 값의 집합이 서지 않는 함수다(c1 111): 따라가지 못한 반환(간접 호출의 결과, 예: `OS_NotifyEvent` 가 `<indirect>` 의 결과를 돌려줌 — c1_pre_tx 에서 이 까닭을 적은 일치 행 16)이나, 상수가 뒤에 다시 정의되는 정의를 지나 반환에 닿는다고 보이지 않는 것(relations rules revision 9 와 같은 표시)이다. c5 의 문서 반환 없음 37/35 는 OSAL 4.1.1 에 함수별 문서가 없기 때문이다(규칙 §3).
@@ -1263,6 +1264,7 @@ MC 에서 제자리, 목표별, 각각 공간 감시 아래(필요량 469,942,08
 - **범위 밖**: 플랫폼 지원 묶음과 응용, framework 의 단위 시험 stub. cFE 6.7.99(6cccb3f)·7.0.1 의 이름 공간은 저장된 이름이 필드 경로가 아니라 접근 함수로 닿아 규칙 T 가 잡지 못하고, 그 두 판의 이름 공간 파일은 없다(규칙 §7).
 - **이름 공간 자료는 kz-static 이 읽지 않는다**: 판정 규칙 8.2 조건 (가)의 입력으로 만들었고, 읽는 쪽(설명 스크립트의 다음 개정)은 다음 단계다 [I].
 - **읽기 전용 효과**(§7.8 첫 항목): `strcmp`·`strlen` 등의 pure 선언이 이제 doc-collated 로 SEMANTICS 에 있으나, writer 집합의 계산은 아직 그것을 쓰지 않는다. 쓰는 것은 뒤 단계다.
+  - (2026-11-19 덧붙임) `strlen` 은 P0 선언 자료에 항목이 없다(`kairos/semantics/p0_declarations_glibc-2.39-headers.txt` 에 `strlen` 이 든 줄 0). 그 자료에 pure 선언으로 있는 것은 `strcmp`(같은 파일 93 줄) 같은 비교 함수다. 수는 `../records/closure-notes-20261119/check.txt` J. [§26.1]
 - **문서와 본문이 다른 함수**: 문서가 본문이 돌려줄 수 없는 값을 적은 것 2/2/2/8/8, 본문이 문서에 없는 값을 돌려주는 것 23/23/24/2/2. 판정 규칙이 어느 쪽을 쓰는지(예: `OS_CountSemGetIdByName` 의 -35·-16·-33) 정해야 한다.
 - **두 6.4 판의 겹침**(§8.7): 결합이 빌드마다 판 하나를 고를지, 겹침을 그대로 둘지.
 - **루트 밖의 절대 키**(§7.8): 그대로다.
@@ -1880,6 +1882,7 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 - **도구 보존**(PI 결정: in-place MC 재빌드는 사본을 압축하고 왕복 확인한 뒤 중간 도구를 덮을 수 있다; 결정 검토서 2026-10-30; 2026-11-16 재확인. 원문은 이 작업 환경에 없어 대조하지 못함): 빌드 전에 kz-static `1a47abd0` 을 새 디렉터리 `/home/user/work/preserve/tools-20261119/` 에 xz 로 사본하고 왕복 확인한다(`tool_copy/copy.sh`, 감시 아래, 필요량 150,000,000). 사본 직후 등록부(`records/TOOLS.tsv`)의 그 행을 in-place+copy 로, 빌드 뒤 copy 로 고치고 새 kz-static 을 in-place 로 더한다. 장부 행 `TOOLS_20261119`.
 - **빌드**(MC `/home/user/work/merge-check/kz-llvm` 제자리, 각각 감시 아래, 필요량 480,000,000: 앞 kz-static 빌드 dip 의 최대 256,942,080 과 다시 링크되는 큰 실행 파일의 임시 쓰기와 여유): `make kz-static`, `make all`. 도구가 새 `--identity` 를 적을 때까지 출력을 내지 않는다.
 - **첫 ctest**(전체 268, `-V`): 실패는 정확히 다음 16 이어야 한다(`ctest_first_expected_fail.txt`): `static_golden_{relations,relations_np,relpaths_np,relsound_np,relincomplete_np,relincomplete_cut_np,relcallback_np,order_np,objaccess,objaccess_off,semantics_np,resultflow_np,resultflow_order_np,looplock_np,looplock_order_np}`, `test_static_plan`. 근거: scratch 점검 빌드의 첫 ctest(정적·lint 78 개, 같은 HEAD golden; `scratch/ctest_first_scratch.log`: 이 16 이 실패, `test_static_reasons` 는 통과). 그 밖의 190 개는 다시 링크되는 바이너리를 쓰지 않으며, 빌드 전 MC 에서 돌려 실패 0·건너뜀 1(`test_probe_anchor_reached`)이었다(`ctest_nonstatic_prebuild.log`).
+  - **(2026-11-19 덧붙임, `builds-05`)** 위의 '그 밖의 190 개는 다시 링크되는 바이너리를 쓰지 않으며' 는 맞지 않는다. 그 190 가운데 `tool_identity_schema_revision` 은 `$<TARGET_FILE:kz-static>` 을 부르고(`kairos/tests/unit/CMakeLists.txt:41-46`), kz-static 은 이 빌드에서 다시 링크되었다. 그 시험은 빌드 전 MC 에서 옛 바이너리로만 돌았고(`ctest_nonstatic_prebuild.log:142-143`) scratch 점검 빌드의 첫 ctest 에는 없다(`scratch/ctest_first_scratch.log` 에 0 줄; `../records/closure-notes-20261119/check.txt` E). 결과는 선언대로였다(첫 ctest 의 실패는 선언한 16, golden 뒤 268 가운데 실패 0; §12.11 (나)). [§26.1]
 - **golden**: 그 16 시험만 `KZ_GOLDEN_UPDATE=1` 로 돌려 쓴다. 바뀌는 golden 은 17(`tests/static/data/` 의 `relations`, `relations_np`, `relpaths_np`, `relsound_np`, `relincomplete_np`, `relincomplete_cut_np`, `relcallback_np`, `order_np`, `objaccess`, `objaccess_off`, `semantics_np`, `resultflow_np`, `resultflow_order_np`, `looplock_np`, `looplock_order_np` 의 `.golden` 과 `plangen_np.plan.golden`, `planv4_np.plan.golden`)이고 각각 `../records/review-fixes-2-20261118/golden_scratch/` 의 같은 이름 파일과 `cmp` 같아야 한다(`golden_scratch.sha256`). `kairos/` 의 그 밖의 파일은 바뀌지 않는다(`git status`).
 - **시험**: golden 뒤 전체 ctest 268, 실패 0, 건너뜀 1. 확인 수는 남긴 출력에서 센다 [I: `../records/review-fixes-2-20261118/scratch_ctest_static_2.log`]: `test_static_cli` 1,184, `test_static_reasons` 763, `test_static_plan` 277, `lint_selftest` 114 경우 실패 0, lint 규칙 일곱 clean, `test_core_schema` 34,017(그대로). 단위 점검 `env/tools/tests/run_unit.sh` 17/17, `env/redesign/step2a_tests_unit.sh` 7/7.
 - **누적 바이트 동일성**: 빌드 뒤와 실행 뒤 각각 `env/tools/ledger_check.sh`(빌드 전 135 행 실패 0: `ledger_check_pre.txt`)와 `env/tools/tools_check.sh --deep`(빌드 전 49 행 실패 0, 스트림 없이: `tools_check_pre.txt`). 출력은 단계마다 새 이름.
@@ -2138,6 +2141,7 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 - **LOCK_HANDLES**: 행 1573/1573/967/0/0 그대로, 그 가운데 핸들을 찾지 못한 행 115/115/83 → 187/187/97(사슬의 호출이 모두 찾아질 때만 핸들, lock handle rules revision 2). 핸들 있는 행은 1458/1458/884 → 1386/1386/870.
 - **decay**: FACT_ATYPE 레코드 수 그대로, 마지막 회차의 atype 줄 65/65/22/68/69 의 글이 바뀜(`compare/extract_final_view_<b>.txt`), extract.txt 의 location 상태 줄은 바뀐 것이 없다(상태 움직임 0).
 - **HB-await 간선, writer 행위자마다**(마지막 회차): 120/120/64/0/0 → 284/284/116/0/0. c1: `main (process)` 120 → 60, `BP_AppMain`·`CFE_ES_BackgroundTask`·`CFE_ES_TaskMain`·`CFE_TIME_TaskMain` 0 → 56 씩. r2: `main (process)` 64 → 32, `CFE_ES_BackgroundTask`·`CFE_ES_TaskMain`·`CFE_TIME_TaskMain` 0 → 28 씩. T8CF facts 에서는 다섯 빌드 모두 0 → 0.
+  - **(2026-11-19 덧붙임, `semantics-05`)** 이 수는 도구가 낸 간선의 수이고 소스가 허락하는 순서의 수가 아니다. §21 의 선언된 kz-static 이 낸 c1_pre_tx 마지막 회차(`obs1/cz_final_order/c1_pre_tx/edges.tsv`; 이 절의 284 와 같은 수)의 HB-await 284 간선은 모두 `cfe_es_apps.c:620:9` 의 `CFE_ES_TaskRecord_t.EntryFunc` 쓰기에서 나오고, writer × 대기 task 의 짝 71 에 사용 넷씩이다(writer 는 `main` 60, 나머지 넷 56 씩; `../records/closure-notes-20261119/check.txt` H). 소스에서 대기 루프(`cfe/modules/es/fsw/src/cfe_es_apps.c:508-529`)는 `CFE_ES_GetTaskRecordByContext()`(`:513`)로 자기 레코드를 읽고, 그 함수는 레코드를 `OS_TaskGetId()` 로 찾는다(`cfe_es_resource.c:285-286`): task 는 자기 레코드만 기다리고, 그것을 쓰는 것은 그 task 를 만든 쪽의 `CFE_ES_StartAppTask` 다. 그래서 성립할 수 있는 것은 생성자 → 만든 task 의 짝 15 의 60 간선이다(`main` → 코어 task 다섯과 시작 스크립트의 앱 다섯(`cfe_es_start.c:186`, `:199`), `CFE_ES_TaskMain` → `CFE_ES_BackgroundTask`, `CFE_TIME_TaskMain` → 1Hz task 둘, `BP_AppMain` → `BP_CLA` task 둘; 앱을 다시 시작하는 경로(`cfe_es_apps.c:1165`)의 생성자는 세지 않음 [I]). 나머지 224 는 소스가 부정하는 전제를 진다. 그 간선에 기대는 쌍은 없어(`obs1/cz_final_order/c1_pre_tx/pairs.tsv` 끝의 요약 줄 `conditional_before 0`) 어느 판정도 움직이지 않았다. r2 의 116 은 같은 방법으로 다시 세지 않았다 [미확인]. 도구의 한계이고 다음 kz-static 빌드가 다룬다(§26.0 (하)). [§26.1]
 - **대조 집합(생성과 삭제를 가른 뒤)**: 5/5/4/15/15 → 5/5/4/2/2(모두 `complete=yes`).
 - **key-clearing call 이 된 호출과 소스 대조**:
   - c5 두 빌드: 호출 하나, `cfe/fsw/cfe-core/src/sb/cfe_sb_priv.c:123:7` 의 `CFE_SB_CleanUpApp` → `CFE_SB_DeletePipeWithAppId`(행 줄 26). 소스에서 그 경로의 `CFE_SB_DeletePipeFull` 은 `CFE_SB.PipeTbl[PipeTblIdx].PipeId = CFE_SB_INVALID_PIPE`(`cfe_sb_api.c:431`)와 통계의 `PipeId = 0`(`:436`)을 쓴다: 삭제라는 읽기와 맞다. 같은 빌드의 이름 공간 둘에 key-clearing 함수 `CFE_ES_CleanUpApp#0`·`CFE_ES_ProcessControlRequest#0`·`CFE_TBL_CleanUpApp#0`·`CFE_TIME_CleanUpApp#0`, 호출 2 씩(행에 걸리지 않음; 소스 대조는 하지 않음 [미확인]).
@@ -2157,6 +2161,7 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 | scratch 를 모두 지운 뒤 | 1,253,584,896 | 남긴 새 출력 176,307,815 B, 사본 47,373,676 B |
 
 - 하한(314,572,800)을 넘지 않았다. 이 실행의 감시 기록 38(`df_*.log`)과 scratch 의 것 13(`scratch_guard/017-029`); 앞 에이전트의 감시 기록 16 은 `scratch_guard/001-016` 으로 옮겼다(그 scratch make 는 하한 아래 305,602,560 B 를 적었다, §12.0 (나-1)). 압축 대체는 쓰지 않았다.
+- **(2026-11-19 덧붙임, `builds-06`)** 선언 §12.0 (나-1)의 근거가 된 앞 에이전트의 scratch 점검 빌드는 선언한 필요량을 넘었다: `scratch_guard/002_scratch-make.log` 는 필요량 500,000,000 B 에 dip 1,235,963,904 B(약 2.5 배)이고 끝 여유 305,602,560 B 로 하한 아래인데 판정은 `verdict=completed` 다. 감시(`env/tools/space_guard.sh:51-77`)는 명령이 도는 동안의 표본에서만 멈추고, 끝난 뒤 잰 값이 하한 아래여도 판정을 바꾸지 않는다(고침은 §26.0 (차)). 그래서 '모두 `completed`' 는 하한을 지켰다는 근거가 아니고, 근거는 가장 낮은 값이다: 이 실행의 감시 기록 38 은 974,893,056 B, scratch 의 017–029 열셋은 948,453,376 B, 앞 에이전트의 001–016 열여섯은 305,602,560 B(위의 한 건, 끝 값이 하한 아래인 유일한 기록)(`../records/closure-notes-20261119/check.txt` A). [§26.1]
 
 #### 12.11 (바) 계획과 다르게 한 것
 
@@ -2165,6 +2170,10 @@ facts 는 마지막 옵션 회차(`ll_final_extract`, 장부 `OBS_ll_final_extra
 - 측정 계획(`plans_v4_all`)의 예산 이유 글을 앞 계획의 글(개정 번호가 든 글)과 다르게 썼다(선언에 적음). 대조 예산의 이유 글은 §12.10 3 항의 말로 썼다.
 - facts 보기의 허용 차이는 칸이 아니라 절 단위(네 칸의 가림 + 절 일곱)로 선언했다; 칸 단위 내용은 쌍둥이 비교(바이트)가 묶는다. 보기의 semantics 줄 차이(c1 32/190)는 SEMANTICS 레코드 차이(1696/1854)보다 훨씬 작다: 보기가 레코드의 모든 칸을 보이지 않기 때문으로 보인다 [미확인].
 - c1 의 key-clearing 호출 여섯 가운데 하나는 위치를 찾지 못했다.
+- **(2026-11-19 덧붙임, `builds-02`)** 측정은 선언 §12.0 (나-1)('비교가 모두 OK 인 뒤')과 달리 비교 도중과 쌍둥이 비교가 멈춘 뒤에 돌았다. `measure/measure_<b>.txt` 다섯은 02:03:56Z 에 쓰였고, 그때 끝난 비교는 relations·order·extract_off(02:03:26–02:03:40Z) 셋뿐이었다: extract_final 은 02:04:00Z, 나머지 일곱은 02:04:14Z 까지 끝났고 쌍둥이는 02:04:16Z 에 rc 1 로 멈췄다(`compare_all.txt`). `measure/c1_pre_tx_calls_of_allocatenew.txt` 는 02:04:10Z(그 facts 보기 `df_view_allocatenew.log` 02:04:09–02:04:11Z 는 `plans_v4`·`plans_v4_all` 의 비교와 겹침), `measure/c1_pre_tx_allocatenew_uses.txt` 는 02:04:28Z 로 쌍둥이 멈춤 뒤, 덧붙임 `5096d4a`(02:06:30Z) 전이다. `measure.py` 는 그 뒤 다시 돌리지 않았다. 측정이 읽은 `rf2_*` 는 실행 단계가 02:03:14Z 에 모두 끝낸 출력이고(`run_all.txt`), 뒤의 `twin_2`(350/350, 02:06:34Z)와 `declared`(275/275, 02:06:38Z)가 그 출력을 확인했다(`compare_rest.txt`). 시각은 `../records/closure-notes-20261119/check.txt` C·B. [§26.1]
+- **(2026-11-19 덧붙임, `builds-03`)** 한 단계가 앞 단계의 rc 를 보기 전에 시작한 곳이 있다(§12.10 6 항 '명령마다 rc 를 본 뒤 다음으로' 와 어긋남): 빌드 뒤 `tools_check --deep`(`df_tools_check_after_build.log` 01:56:25.023–01:58:21.400Z)이 도는 동안 `run.sh` 의 relcheck(01:56:35Z)·order(01:56:37Z)·extract_off(01:57:21Z)가 시작했다. 측정의 facts 보기도 비교와 겹쳤다(위 `builds-02`). 모든 rc 는 뒤에 0 이었다. 겹침의 목록은 `../records/closure-notes-20261119/check.txt` B. 뒤 빌드는 감시 아래의 단계를 첫 rc≠0 에서 멈추는 차례 실행기 하나로 돌린다. [§26.1]
+- **(2026-11-19 덧붙임, `builds-05`)** 첫 ctest 의 기대가 빌드 전 옛 바이너리의 실행에만 기댄 시험이 하나 있다: 다시 링크된 kz-static 을 부르는 `tool_identity_schema_revision`(§12.0 (나-1)의 덧붙임). 통과했다. 뒤 선언은 다시 링크되는 대상의 `TARGET_FILE` 인자에서 시험 집합을 낸다. [§26.1]
+- **(2026-11-19 덧붙임, `builds-07`)** 선언된 소스는 선언 커밋 `44a45c7`(01:39:29Z)의 `kairos/` 다. 빌드는 01:42:35Z 에 시작했고(`build_start.txt`), 그 사이 01:42:28Z 에 다른 단계의 `090e280` 이 `kairos/semantics/framework_namespaces2_*.txt` 다섯을 더했다. ctest 의 lint 시험 `lint_case-ids-data`·`lint_semantics-names` 는 `kairos/semantics/` 를 읽으므로(`kairos/tests/lint/CMakeLists.txt:8-9`, `kairos/tests/lint/kz_lint.cpp:403`, `:415`) 첫 ctest 와 전체 ctest 의 lint 는 선언보다 자료 파일이 다섯 많은 트리에서 돌았고 깨끗했다. 도구 정체성(`tool_source=2b8834da…`, 선언의 값 그대로; §12.11 (나))은 그 파일들을 덮지 않는다. 덧붙임 §12.0 (나-2) 1 은 실행 단계가 그 파일을 읽지 않는다는 것만 말했다. [§26.1]
 
 #### 12.11 (사) 열린 것
 
@@ -2867,8 +2876,10 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
    - absence origins(`exit/absence_origins_*.txt`): 줄 39/39/17/23/23 이다. 기원이 둘인 줄은 7/7/4/0/0 이다. 기원의 종류는 `[search no-match]` 39/39/17/23/23, `[other]` 7/7/4/0/0 이다.
    - holder(`exit/holder_*.txt`): 줄 26/26/21/18/18, 그 가운데 필드 holder 8/8/2/0/0 이다(c5 는 모두 지역 변수). 값을 시험하는 reader 18/18/5/0/0, 시험 없이 쓰는 reader 26/26/4/0/0 이다.
    - alternatives(`exit/alternatives_*.txt`): 줄 65/64/26/66/66 이다. found(문맥이 세워지지 않음) 5/6/2/0/0, none found 3/3/3/0/0 이고, 나머지는 not established 다. 정한 호출 0/0/0/0/0 이다. 전제 (6)이 걸린 줄은 c1_pre_tx 에 1 이다.
+     - **(2026-11-19 덧붙임, `rules-06`)** none found 9 줄(c1_pre_tx·c1_post_tx·r2_core 에 셋씩; c1_pre_tx 는 `obs1/cz_final_order/c1_pre_tx/relations.txt:856`, `:901`, `:1455`, 행 A23·A25·A48)은 모두 `rests on: none` 이다. 그 행들의 absence 효과는 `terminal [CFE_PSP_Panic (terminal operation)]` 이고, `CFE_PSP_Panic` 은 `abort()` 를 부른다(`psp/fsw/pc-linux/src/cfe_psp_support.c:133`, 묶음 `1df262a`). 그 행들의 `layers` 줄은 `P0-unverified(abort, …)` 를 적는다. 대안 줄의 `rests on` 은 효과의 직접 callee 의 항목만 적어(`kairos/lib/llvm/relations.cpp:4987-4994`, `:5050-5053`) 감싼 함수 아래의 P0 미대조 항목 `abort` 를 빠뜨린다. 동결한 판정 부분은 `rests on` 이 아무것도 이름 대지 않으면 그 줄을 `held` 로 읽는다(`env/obs1/explain_judge.py:1027-1039`). 이 주기의 계획된 행에는 그런 줄이 없다. 다음 kz-static 빌드로 미룬다(§26.0 (하)). 줄은 `../records/closure-notes-20261119/check.txt` F. [§26.1]
    - 저장된 이름 버퍼(`exit/buffer_*.txt`, `heads_*.txt`): 버퍼 16/16/17/0/0, complete 0 이다. FIELD_STATUS disabled 11/11/12, 다른 writer 5/5/5 이다. 깃발 address-escape 는 모든 버퍼에서 풀리지 않았다. array-element 깃발은 모든 버퍼에서 풀렸다(lead 의 판단 (c), §18.2). 주소 사용 20/20/21 가운데 풀린 것 6/6/6 이다.
    - 수명 끝: clear-table 5/5/6/0/0, clear-slot 10/10/6/18/18(free-record 조건이 보인 것 0), release 1/1/0/23/23, 매개변수를 통한 release 1/1/1/0/0 이다.
+     - **(2026-11-19 덧붙임, `semantics-03`)** 이 clear-slot 수는 lifetime end 의 수가 아니다. C1 의 10 줄(`obs1/cz_final_order/c1_pre_tx/relations.txt:207`, `:256`, `:329`, `:352`, `:353`, `:354`, `:627`, `:980`, `:1834`, `:1835`; c1_post_tx 도 같은 자리 10) 가운데 이름을 지우는 것은 2 다: `cfe/modules/tbl/fsw/src/cfe_tbl_api.c:637`(`CFE_TBL_Unregister`)과 `cfe_tbl_internal.c:1267`(`CFE_TBL_CleanUpApp`), 둘 다 주석 "Remove Table Name" 아래의 `Name[0] = '\0'` 이다. 여섯은 같은 필드로 `strncpy` 한 바로 다음 줄의 NUL 종결 저장이다(`bp_storage.c:132`, `cfe_psp_start.c:251`, `cfe_tbl_api.c:442`, `:312`, `osapi-filesys.c:462`, `osapi-file.c:375`). `osapi-sockets.c:97` 은 소켓 이름을 만들 때의 빈 이름 대체이고, `osapi-idmap.c:640` 은 할당의 초기화다(`semantics-02`, §25.11 의 덧붙임). relations rules revision 14 가 그것들을 `clear-slot` 으로 센다. 도구의 한계이고 다음 kz-static 빌드로 미룬다(§26.0 (하)). r2_core 6 과 c5 18 은 다시 보지 않았다 [미확인]. 계획된 행의 결과는 바뀌지 않는다: 두 C1 계획의 저장 쪽 수명 끝 site 는 `osapi-idmap.c:640` 의 site 264 하나다(`obs1/cz_plans_v4_ns2/c1_<pre|post>_tx/plan.kzs` 의 `object-clear` site 둘 가운데 다른 하나는 `OS_ObjectIdInit` 의 `memset` 호출). 줄의 자리는 `../records/closure-notes-20261119/check.txt` G. [§26.1]
    - 이 수들은 §16–§20 의 scratch 수와 같다. 줄이 설계 행에만 있지 않다. 다섯 빌드 모두에 서는 곳과 빠지는 곳이 있다.
 4. **탐침과 도구 줄**(`exit/probe_vs_tool.txt`; 탐침은 고친 도구의 사실에서 돌린 §15.1 의 출력):
    - P6 키: 탐침은 "소스 트리 토큰이면 367/367" 이다. 도구 줄도 그렇다(1). 재현된다.
@@ -2903,6 +2914,7 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 | 끝(06:30) | 833,384,448 | `again/` 를 지우고 scratch 를 모두 지운 뒤(`free_end.txt`) |
 
 - 하한(314,572,800)을 넘지 않았다. 감시 기록 45 가 모두 `verdict=completed` 다(`guard/`). 압축 대체는 쓰지 않았다.
+  - **(2026-11-19 덧붙임, `builds-06`)** '모두 `verdict=completed`' 는 하한의 근거가 아니다(감시는 끝난 뒤의 값이 하한 아래여도 `completed` 를 적는다; §12.11 (마)의 덧붙임). 근거는 감시 기록 45 의 가장 낮은 값 692,862,976 B 와, 끝 값이 하한 아래인 기록이 0 이라는 것이다(`../records/closure-notes-20261119/check.txt` A). [§26.1]
 - 남긴 것: 새 출력 245,512,941 B, 사본 47,808,316 B, 기록 디렉터리 약 6 MB.
 
 ### 21.7 계획과 다르게 한 것
@@ -2910,6 +2922,7 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - **쌍둥이 비교의 꼴.** scratch 출력은 여섯째 실행이 지웠다. 그래서 그 sha256 목록과 견주었다. 그러려면 scratch 쪽 뿌리의 바이트가 필요했다. 남긴 기록에서는 `<scratch>` 로 가려져 있었다. 그것을 가린 sidecar 사본의 sha256 을 맞추어 되찾았고(선언 21.0 (바)), 커밋한 파일에는 `<scratch>` 로만 적었다.
 - **`make kz-static` 의 dip** 은 340 MB 로 선언의 예상(약 170 MB)의 두 배였다. 감시 필요량(480,000,000) 안이고 하한 위다. 이번 빌드는 `CMakeLists.txt` 가 바뀌어 다시 구성까지 했기 때문으로 보인다 [미확인].
 - 탐침과 도구 줄의 대조(21.5 4)는 탐침마다 대상을 짝지어 놓은 것이다. 글이 다른 곳은 읽기만 견주었다. 도구도 탐침도 고치지 않았다.
+- **(2026-11-19 덧붙임, `builds-03`)** 실행 단계와 비교 단계가 나란히 돌았다: 실행 `extract_final`(`guard/r_extract_final.log` 06:21:38.980–06:23:15.285Z)이 도는 동안 비교 relcheck(06:22:04Z)·order(06:22:06Z)·extract_off(06:22:08–06:22:20Z)가 돌았고, 실행 `off_order` 는 06:23:15Z 에 그 비교들을 기다리지 않고 이어졌다. `extract_final` 실행은 그 비교들의 rc 가 나오기 전에 시작했다(§12.10 6 항 '명령마다 rc 를 본 뒤 다음으로' 와 어긋남). 모든 rc 는 0 이었다. `run_all.txt` 가 적은 `extract_final` 의 가장 낮은 값 889,491,456 B 에는 함께 돈 비교의 facts 보기(`guard/k_extract_off.log`, dip 26,329,088 B)의 공간이 들어 있을 수 있다 [I]. 겹침의 목록은 `../records/closure-notes-20261119/check.txt` B. [§26.1]
 
 ### 21.8 열린 것
 - **끝 조건**: 모두 섰다. MC 의 kz-static 은 새 도구 `6f40dd60…`(`tool_sha256=36e02995…`)이고, 빌드 뒤 점검이 모두 통과했으며, 지금까지의 차이는 모두 선언되었다(21.0, 21.0 (차)).
@@ -3009,6 +3022,9 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 | 남긴 쌍 측정과 `pairs:` 줄의 합 | 22.3 의 세 같음이 다섯 빌드 모두 섬 | — |
 | 계획 규칙 개정 5 | `namespace-entry` 행 4/4/4/0/0, 빠진 행 1/1/0/2/2. 그 밖의 줄은 22.5 | A20·A21·A22·A26: entry 줄 있음. A63: 없음(적용되는 항목이 없음). A21(c1_pre_tx): 문맥 틀 2 |
 
+- **(2026-11-19 덧붙임, `rules-06`)** 위 표의 alternatives 줄에 든 none found 9 줄의 `rests on: none` 은 감싼 함수 `CFE_PSP_Panic` 아래의 P0 미대조 항목 `abort` 를 빠뜨린다(§21.5 3 의 덧붙임). [§26.1]
+- **(2026-11-19 덧붙임, `semantics-03`)** 위 표 '수명 끝 줄' 의 C1 clear-slot 10 가운데 이름을 지우는 것은 2 다. 여섯은 `strncpy` 뒤의 NUL 종결, 하나는 빈 이름 대체, 하나는 할당의 초기화다(§21.5 3 의 덧붙임). [§26.1]
+
 ### 22.7 공간 [M]
 - 시작 831,086,592 B(06:35Z), 끝 830,013,440 B(06:45Z, `free_end.txt`)다.
 - 감시 기록은 19 개이고 모두 `verdict=completed` 다. 가장 큰 dip 은 절마다 sha256 의 53,248 B 이고, 하한을 넘지 않았다. 압축 대체는 쓰지 않았다.
@@ -3058,6 +3074,8 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 **(라) 다시 링크되는 것.** MC 의 dry run(`make -n all`, 감시 `guard/d01_make_dryrun.log`, `prebuild/make_dryrun.log`: 다시 컴파일되는 목적 파일 36, 링크 스크립트 30)에, MC 의 `link.txt` 가운데 `libkzrt*.a`·`libkz-trace.a`·`libkz-hold.a`·`libkz-loader.a`·`libkz-plan.a` 를 이름 대는 것을 더해 61 이다(`prebuild/relink_expected.txt`, 빌드 전 sha256 `prebuild/relink_expected.sha256`; `kz-instr-clang`·`test_static_plan` 포함). 여기에 kz-instr-clang 을 쓰는 명령이 만드는 `instrument/clang/transform_test/{instr,orig}` 둘. dry run 은 다시 구성(configure)을 하지 않으므로 kz 의 정체성 값이 바뀌어 다시 컴파일되는 `tools/kz` 의 목적 파일은 거기 나오지 않는다: 빌드는 구성을 다시 하고(`CMAKE_CONFIGURE_DEPENDS`) kz 를 모두 다시 컴파일한다 [I]. 새 대상(구성 뒤): `test_rt_objects`, `test_rt_format15`, `librt_objects_mod_id.so`, `librt_objects_mod_noid.so`.
 
 **(마) 첫 ctest(`-V`)에서 실패할 시험: 없음.** 시험 수는 271 에 새 시험 5(`rt_objects`, `rt_objects_readelf`, `rt_objects_noreader`, `rt_format15`, `rt_format15_dump`)를 더한 276 이다. 근거: (1) scratch 점검 빌드(완전한 소스 `139330e`, Release, LLVM 도구 없이, `KZ_WERROR=ON`; 대상은 다시 링크되는 61 가운데 LLVM 이 없는 59 와 새 대상 넷, `scratch/checkbuild_targets.txt`): 시험 202 가운데 지은 바이너리의 것 112 통과(`scratch/checkbuild_tests_passed_112.txt`, 새 시험 다섯 포함), 실패 10 은 모두 짓지 않은 kz-dump·kz-phi 를 부르는 시험(`scratch/checkbuild_tests_failed_10.txt`), 80 은 바이너리가 없어 돌지 않음. (2) 그 112 밖의 MC 시험 164(`prebuild/mc_tests_not_in_scratch_164.txt`)를 지금의 MC 트리(빌드 전)에서 돌려 164 통과(`test_probe_anchor_reached` 는 앞과 같이 건너뜀; `prebuild/ctest_prebuild_164.log`, 감시 `guard/p01_ctest_prebuild.log`). 그 가운데 이 빌드가 바꾸는 것을 쓰는 것은 다섯이다: `instr_clang_transform`(kz-instr-clang, 새 런타임 라이브러리와 머리, kz-rt-dump), `test_hold_ptrace`·`test_hold_sequence`(런타임 머리), `test_probe_anchor_reached`(건너뜀), `test_static_plan`(다시 링크): 통과할 것이다 [I]. 바뀌는 golden 은 없다. 플러그인 시험: scratch 에서 kzgcc 18 개(새 kz 를 준 `kzgcc_hold_*` 다섯 포함) 통과, kzllvm 8 개(첫 실행에서 `kzllvm_v4` 가 시험 manifest 의 잘못으로 실패했고 manifest 를 고친 뒤 통과; 고친 manifest 가 `c0a87fa` 의 것) 통과.
+
+**(2026-11-19 덧붙임, `builds-05`)** 위 (2)의 '이 빌드가 바꾸는 것을 쓰는 것은 다섯이다' 에서 하나가 빠졌다. 164 의 마지막 줄 `tool_identity_schema_revision`(`prebuild/mc_tests_not_in_scratch_164.txt:164`)은 다시 지은 `kz` 를 부른다(`kairos/tests/unit/CMakeLists.txt:41-46`). scratch 점검 빌드에서는 짓지 않은 kz-dump·kz-phi 때문에 실패한 열 가운데 하나였고(`scratch/checkbuild_tests_failed_10.txt:10`), 빌드 전 MC 트리에서 옛 바이너리로만 돌았다(`../records/closure-notes-20261119/check.txt` E). 첫 실행 전에 새 소스로 돌린 적이 없는 시험은 이것을 더해 여섯이다. 결과는 선언대로였다(276 시험 통과, `test_probe_anchor_reached` 는 건너뜀; §23.3). [§26.1]
 
 **(바) 출력 종류별 허용 차이.**
 1. 남긴 부팅 둘의 dump(형식 1.4)를 옛 도구와 새 도구로 다시 읽은 것(`scripts/regress.sh` → `obs1/rtb_regress_old`, `obs1/rtb_regress_new`; 비교 `scripts/compare_regress.py`): `rc.txt` 의 첫 줄(도구와 연결 점검 스크립트의 sha256); container 글의 `tool_sha256=`·`artifact_sha256=` 줄과 container 바이트의 오프셋 120..155(도구 sha256 과 머리 crc); convert 로그의 `wrote … artifact_sha256` 줄과 **새로 더한 줄 하나** `build-id records: none (kzrt-dump 1.4)`; 연결 점검에서 옛 `same_build` 줄 하나가 `same_build_object` 줄들(모두 `unconfirmed(no build-id in dump)`)과 요약 `same_build unconfirmed(no build-id in dump)` 줄로 바뀌는 것(그 밖의 줄, `chain` 판정 줄 포함, 같음). `kz-rt-dump` 의 글(manifest 를 준 것과 안 준 것, 두 부팅과 32·64 비트 ABI 점검 dump 둘)은 **같은 바이트**다.
@@ -3113,6 +3131,8 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 
 시작 678,703,104 B(`free_start.txt`), scratch 를 지운 뒤 818,524,160 B, 끝 729,747,456 B(`free_end.txt`). 감시 기록 27, 모두 `completed`; 가장 큰 dip 39,907,328 B(사본, `guard/b01_copy.log`), MC 빌드 21,458,944 B. 남긴 것: 사본 39,454,236 B, 플러그인 디렉터리 둘 10,653,237 B 와 11,483,888 B, 출력 `obs1/rtb_*` 여덟 5,287,921 B, 기록 수 MB. 압축 허용은 쓰지 않았다. scratch 는 이 단계가 만든 것만 지웠다(scratch 점검 빌드, 런타임·플러그인 scratch 빌드, 시험 출력).
 
+**(2026-11-19 덧붙임, `builds-06`)** '모두 `completed`' 는 하한의 근거가 아니다(§12.11 (마)의 덧붙임). 근거는 감시 기록 27 의 가장 낮은 값 679,084,032 B 와, 끝 값이 하한 아래인 기록이 0 이라는 것이다(`../records/closure-notes-20261119/check.txt` A). [§26.1]
+
 ### 23.6 벗어난 것
 
 1. **"두 플러그인"의 읽기.** 계획의 두 플러그인을 GCC 플러그인(kzgcc)과 LLVM pass 플러그인(kzllvm)으로 읽었다(둘 다 같은 manifest 파서를 쓴다). 등록부의 옛 kzgcc 둘(0.2, 0.3)을 뜻한 것이라면 kzgcc 0.4 하나가 둘을 대신한다. kzllvm 0.2 는 판 1 의 꼴만 묶고 판 4 의 `place=`·identity·spawn site 를 `unsupported` 로 센다(13.6); C1 의 묶음 점검은 kzgcc 로만 했다(kzllvm 의 묶음 점검은 clang 의 compile 명령이 필요하다).
@@ -3120,6 +3140,7 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 3. **묶음 점검의 site 집합을 한 번 바로잡았다**(덧붙임 23.0.1, 다시 한 점검보다 먼저 커밋). 첫 출력도 남겼다.
 4. **scratch 점검 빌드는 LLVM 도구 없이**(Release) 지었다: `kz-instr-clang`·`test_static_plan` 과 LLVM 이 필요한 시험은 scratch 에 없고, 빌드 전 MC 트리의 시험 164 와 빌드 뒤 첫 ctest 로 보았다.
 5. 등록부의 kz-instr-clang 은 같은 바이트일 수 있다고 적었으나 바뀌었다(`4041f6b4…`): 다시 컴파일된 manifest 파서의 목적 파일이 새 런타임 머리로 바뀐 것으로 본다 [I]. 선언은 바뀌는 것도 허용했다.
+6. **(2026-11-19 덧붙임, `builds-05`)** 첫 ctest 의 기대가 빌드 전 옛 바이너리의 실행에만 기댄 시험은 여섯이다: 23.0 (마)가 이름 댄 다섯과, 다시 지은 kz 를 부르는 `tool_identity_schema_revision`(23.0 (마)의 덧붙임). 건너뛴 `test_probe_anchor_reached` 밖에 모두 통과했다(23.3). 뒤 선언은 다시 링크되는 대상의 `TARGET_FILE` 인자에서 시험 집합을 낸다. [§26.1]
 
 ### 23.7 열린 점
 
@@ -3269,6 +3290,8 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 
 **(가) kzgcc 0.5 빌드** [M]: `scripts/plugin05.sh`(감시 `guard/p_*.log`). `/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so` `5e691ce73c59c95d323d4b332ee59e65d51945bc9ad7b86a90db716630ba1aa0`(scratch 점검 빌드와 같은 바이트; 판 글 `kzgcc 0.5`; 경고 0; `plugin05/build_result.txt`). 첫 ctest(`-V`) 20 시험 모두 통과(`plugin05/ctest_first.log`). 판 1–3 manifest: 네 묶음 목적 파일 15 같은 바이트, 결합 파일 11 이 2 번째 줄만 다름(`plugin05/compare_manifest_k04_k05.txt`; 출력 `obs1/c1p_regress_manifest_k05`). 두 계획의 모든 단위: kzgcc 0.4 로 c1_pre_tx 33·c1_post_tx 32 단위 가운데 `cfe_tbl_task_cmds.c` 하나씩 멈춤, 0.5 로 모두 컴파일; 0.4 가 컴파일한 32/31 단위의 목적 파일과 결합 줄이 판 글·dumpbase 밖에서 같음(`plugin05/compare_units_k04_k05_<pre|post>.txt`, `unitcheck_k0<4|5>_<pre|post>.txt`; 출력 `obs1/c1p_unitcheck_k0<4|5>_<pre|post>`). 빌드 뒤: MC lint 8/8(`plugin05/mc_lint_ctest.log`), 단위 점검 19/19·7/7(`plugin05/unit_tools.txt`, `unit_step2a.txt`), 등록부 새 행 하나, `tools_check` 57 행 실패 0(`plugin05/tools_check_after_build.txt`). 모두 선언 25.5 (나) 대로다.
 
+**(2026-11-19 덧붙임, `builds-01`)** 위 끝의 '모두 선언 25.5 (나) 대로다' 는 맞지 않는다. 선언 25.5 (나)의 빌드 뒤 점검 가운데 셋을 선언대로 하지 않았다. (1) 플러그인 빌드(`guard/p_plugin-build.log`, 09:07:31–09:07:35Z) 바로 뒤의 `ledger_check.sh` 가 없다: 원장 점검은 08:47:02Z(`reclaim/ledger_check_after_archive.txt`, 178 행 실패 0) 다음이 09:23:51Z(`out/ledger_check_after_builds.txt`)이고, 그 사이에 플러그인 빌드와 c1_pre_tx 파생 빌드 전체(`guard/2_runtime_pre.log` 09:10:21Z – `guard/2_bprime_pre.log` 09:11:54Z)가 있다. (2) `plugin05/tools_check_after_build.txt`(09:10:12Z)는 `--deep` 없이 돌았다(끝 줄 `tools_check: 57 rows, 0 failing`, `(deep)` 없음). (3) 플러그인의 첫 ctest(`scripts/plugin05.sh:21`, `ctest -V`)는 감시 밖에서 돌았다(`guard/` 에 ctest 기록 없음; 런타임 단계는 같은 종류의 시험을 감시 아래 돌렸다, `../records/closure-runtime-20261119/guard/b13_kzgcc_ctest.log`). 빌드 뒤의 첫 점검은 `out/ledger_check_after_builds.txt`(193 행 실패 0, 09:23:51Z)와 `out/tools_check_deep_after_builds.txt`(57 행 `--deep` 실패 0, 09:26:05Z)이고 둘 다 지났다. 시각과 끝 줄은 `../records/closure-notes-20261119/check.txt` D. 뒤 단계는 선언한 빌드 뒤 점검을 빌드 스크립트 안에 넣는다. [§26.1]
+
 **(나) c1_pre_tx 의 파생 빌드(둘째 시도)** [M] (`scripts/run2.sh`, 기록 `derived2/pre/`): 런타임 트리 `obs1/c1p2_pre_rt/rt`(backend `kzgcc 0.5 (gcc-plugin)`; build-info `e4caad6c…`, 그 밖의 라이브러리·시작 객체·kz-rt-dump 는 25.4 의 것과 같은 sha256), prepare, 같은 자리 기준 빌드, 계측 빌드 모두 `make rc=0`(계측 빌드 경고 1, 기준 빌드와 같은 수). check: 객체 261 가운데 다른 것 33 = 계측 단위 33(UNEXPECTED 0, 바뀌지 않은 계측 단위 0); D4 의 `cfe_build_env_table.c.o` 는 이번에는 다르지 않았다(선언의 "뿐"에 든다). 결합 305: bound 295, duplicated 2, inlined 7, unsupported 1(site 242). hookcheck rc 0(ok 304, gap 1). 설치 파일 31 가운데 기준과 다른 16 = 계획의 tx 일곱, 같은 이름의 rx 일곱(core-rx 포함), `cfe_assert.so` 둘(선언대로). rx: ELF 9, hook 호출 310, 계획의 그룹과 같은 목록. build-id: 설치된 ELF 21(`derived2/pre/exe_buildids.tsv`). B′(`obs1/c1p2_pre_bprime`, 추출 옵션 모두): `one_build.sh` PASS. 결합 보고(`derived2/pre/bindings_report.tsv`): 실패 0, 단위 33 모두 manifest sha256 = 계획, module 은 표와 플러그인 규칙대로, 단위의 소스 sha256 이 B′ basis 의 FILE_HASHES 와 디스크에서 같음.
 
 **(다) 기준-파생 첫 비교** [M] (`obs1/c1p2_compare/compare_c1_pre_tx.tsv`, 요약 `derived2/compare_c1_pre_tx_summary.txt`, rc 1): 선언 밖 3,787. **그 점검에서 멈췄다.** 갈래 둘이다.
@@ -3347,7 +3370,7 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 | 기초 2 | held | held | held | 없음 | `pthread_create` site 254·253, 시작 루틴 site 255, 뿌리 site 286·276·6 묶임(bound) | sidecar `creation` 줄 |
 | 기초 3 | held | held | held | 없음 | 키 글 site 262 | `absence: -17 …`, `absence origins` 의 `[other]` 기원은 null 시험이라 키 포인터와 글로 뺀다 |
 | 기초 4 | missing | missing | missing | 없음 | — | `callee-check (success path): OS_CountSemCreate: missing(the stored value is not tied to the success path)`(A21·A20 행; lead 판단 (b)) |
-| 기초 5 | held | held | held | 없음 | 키 글 site 259·262 | 글 길이 8·7 < 64 |
+| 기초 5 | held | held | held | 없음 | 키 글 site 259·262 | 글 길이 8·7 < 64 (2026-11-19 덧붙임, `semantics-07`: 한도는 64 가 아니라 20 이다 — site 259·262 의 `bound=20`(저장된 이름의 extent 에서 옴, §19.4·§19.5), `obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs:848`, `:856`; 8·7 < 20 이라 held 는 그대로) |
 | 기초 6 | held(생성이 조회 뒤) | missing(생성이 조회 전에 끝남) | held(첫 조회 뒤 자기 생성) | 없음 | — | 시작 스크립트의 차례 |
 | (가) | held | held | held | 없음 | — | `namespace-entry … lookup/create/compare …:applies`, 자료 sha256 `e587cee0…` |
 | (나) 의미 | D1 missing / D2 held | 같음 | 같음 | `byte-string-comparison` 과 `data-function` 이 둘 다 인정될 때 held (`memchr` 는 후보가 아님) | — | `compare-call=strcmp…`, `copy-call=memset…,strncpy…`, `length-call=memchr…` |
@@ -3356,6 +3379,7 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 | (라) | held | held | held | 없음 | 종류 값 site 257·262 묶임 | `namespace-entry … value=3` |
 | (마) | missing(사이의 다른 할당의 slot clear) | missing | held(사이에 자기 것뿐) | 없음 | 수명 끝 site 256·258·260·261·264·265 묶임, `lifetime-complete kind=OS_OBJECT_TYPE_OS_COUNTSEM yes` | sidecar `lifetime … clear-slot … not shown`(site 264) |
 
+- **(2026-11-19 덧붙임, `semantics-02`)** 위 (마)의 `missing(사이의 다른 할당의 slot clear)` 와 5.3 의 찾은 사용의 이름 상태 `undecided(a slot clear not shown to be no lifetime end)` 는 site 264 의 저장 `osal/src/os/shared/src/osapi-idmap.c:640`(`obj->name_entry = NULL`)에 기댄다. 소스에서 그 저장은 `return_code == OS_SUCCESS`(`:633`) 아래, `active_id := token->obj_id`(`:639`) 바로 뒤에 있고, `return_code = OS_SUCCESS` 는 `!OS_ObjectIdDefined(obj->active_id)`(`:626-628`) 아래에서만 선다: 빈 레코드에서 할당이 하는 초기화이고 열린 이름을 끝내지 않는다(도구의 줄도 '(the record is allocated here)' 를 적는다, `obs1/cz_final_order/c1_pre_tx/relations.txt:627`). 이 주기에는 판정 규칙 8.13 의 13 번(빈 레코드 조건을 줄이 보이지 않는 slot clear 는 끝으로 봄)을 그대로 따른다(§26.0 (파)). 판정 부분이 구간 안의 slot clear 를 종류나 레코드로 거르지 않는 것(`env/obs1/explain_judge.py:1365-1366`)도 그 규칙대로다. 다음 relations 개정에서 경로 조건으로 빈 레코드 조건을 낸다. 행들의 결과는 이것 하나에 달려 있지 않다(기초 4 와 (다)가 모든 갈래에서 빠짐). 열린 점으로 되살렸다(25.13 열린 점 9). [§26.1]
 - 빠지는 항목의 정확한 목록과 결과: 같은 글 다른 앱 — `D1` {기초 4, (나) 의미, (다), (마)} 4 개, `unlinked`; `D2` {기초 4, (다), (마)} 3 개, `unlinked`. 다른 글 — `D1` {기초 4, 기초 6, (나) 의미, (다), (마)} 5, `D2` 4, 결과 `differs_from_use_key`(두 키 글이 다 있고 다름; 기초 4 가 빠져 `refuted` 는 아님). 자기 생성 — `D1` {기초 4, (나) 의미, (다)} 3, `D2` {기초 4, (다)} 2, `unlinked`, `pair_kind = same_actor`. 기초 1 이 서지 않으면 모든 목록에 기초 1 이 더해진다(F10 으로 따로 보고). 어느 갈래에서도 `bound` 는 없다: (다)와 기초 4 는 정적 줄 때문에 모든 갈래에서 빠진다.
 - 파일의 쌍 줄은 생성 자리마다의 합집합이다(`pair[<자리>].missing_items` 는 그 자리의 모든 쌍의 항목을 모음): A21 의 BP 자리 `D1` `basis4_creator_success,da_no_name_mapping,ma_no_lifetime_end,na_semantics`, 결과 `differs_from_use_key,unlinked`; A20 의 BP 자리는 둘째 조회(`BP1_tsem`)가 첫 생성 뒤라 기초 6 이 더해진다; SCH_LAB 자리는 둘 다 기초 6 을 더해 결과 `differs_from_use_key`.
 
@@ -3371,6 +3395,9 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 | A22 (두 빌드, SCH_Lab_AppMain, `sch_lab_app.c:176:16`), A26 (CFE_TIME_TaskMain, `cfe_time_task.c:286:16`) | 생성이 먼저(프로세스 주 스레드의 `soft_timebase_Init`) | found | `-` | `undecided(a slot clear not shown to be no lifetime end)` | `linked`, 행의 연결 `established`(instance) |
 | A63 (두 빌드, 소비자 뿌리 없음, `OS_FileOpenCheck`) | — | 사건 없음(파일 보내기가 없음) | — | — | `unlinked`(`target_not_reached`) |
 
+- **(2026-11-19 덧붙임, `semantics-02`)** 위 표의 `undecided(a slot clear not shown to be no lifetime end)` 는 5.2 의 덧붙임대로 `osapi-idmap.c:640` 의 저장(할당의 초기화)에 기댄다. [§26.1]
+- **(2026-11-19 덧붙임, `semantics-04`)** 고친 빌드의 A21(`cf_cfdp.c:1003:23`, 재시도 루프)에서 루프는 25 번의 재시도 끝(`CF_STARTUP_SEM_MAX_RETRIES 25`, `cf/fsw/platform_inc/cf_platform_cfg.h:338`)이나 `break`(`:1008`)로 나가고, 그 뒤 `if (ret != OS_SUCCESS)`(`:1014`)가 `CFE_EVS_SendEvent(CF_EID_ERR_INIT_SEM, …)`(`:1016`)를 보낸다(고친 빌드의 소스 `cf/fsw/src/cf_cfdp.c:1000-1020`). facts 는 이 실패 이벤트를 놓친다: `obs1/cz_final_order/c1_post_tx/relations.txt` 에 `cf_cfdp.c:1014`·`:1016` 을 이름 대는 줄이 없고, A21 의 absence 줄(`:775`)은 `effects: retry at - open; return-result at …:1053 open` 인데 handling_label 줄(`:777`)은 `branches decided by it at 1006:21, 1014:17, 1048:9` 를 적는다. 그래서 계획(`obs1/cz_plans_v4_ns2/c1_post_tx/plan.side:1102`)의 `event-send not-planned` 의 note "no event send or system log of RESULT_EFFECT …" 는 프로그램의 성질이 아니라 도구의 빈틈(루프를 거쳐 나르는 값을 루프 뒤의 가지로 따라가지 않음)으로 읽는다. 고치기 전 빌드에서는 같은 이벤트(`cf_cfdp.c:997:17`)가 계획되어 있다(`obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side:1078`, 그 계획의 site 297). 부팅에서 모든 재시도 뒤의 실패는 사용 호출의 사건으로는 보인다 [I]. 다음 kz-static 빌드로 미룬다(§26.0 (하)); 열린 점 10(25.13). [§26.1]
+
 **5.4 행마다의 사용 조건 요소** (두 빌드 같음; 정적 확인 `static_elements_16.tsv`)
 
 | 요소 | `R0` 의 기대(`D1` / `D2`) | 움직이는 읽기 | 행 |
@@ -3385,6 +3412,8 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - **읽기 문제(부팅 전에 찾음, 고치지 않음)**: 동결한 판정 부분은 sidecar 에 `context` 줄이 없는 행의 사용 사건에 문맥 `"-"` 를 준다(`env/obs1/explain_judge.py` 의 `use_context`: 문맥 줄이 없으면 `"-"`). 그런데 그 행들의 alternatives 줄은 `[context 1: …]` 이라 부팅에서는 `branch_iii` 가 "no alternatives line of context -" 로 `not_established` 를 낸다(같은 파일 `branch_iii`). 정적 예행(실행 없음)은 alternatives 줄의 문맥을 그대로 써서 `not_held` 였다(24.4 표; 여기 `static_elements_16.tsv`). 그래서 c1_post_tx A21 의 `found: retry` 와 A20 의 자기 생성 `not_held` 는 부팅 기록에서 `not_established` 로 나오리라 본다 [I: 코드 읽기]. 기대 파일은 동결본이 낼 값(`(iii) not_established`)을 적었다. 이것은 판정 부분의 일이라 고치려면 다시 동결해야 한다(평가 절차 12 절 6). 열린 점으로 lead 에게 넘긴다(25.13).
 
 **5.5 다른 대조 행**: 시간 기준 행 A22·A26 — 생성자는 프로세스 행위자(`main (process)`, `psp/…/cfe_psp_soft_timebase.c:53:14`)라 `pair_kind = process-app`, 쌍 파일의 그 줄은 `unordered`(정적 순서 간선을 이 개정이 찾지 못함), 사용은 찾고(found) 이름 결합 규칙은 돌지 않으며, 인스턴스 연결은 `lifetime-complete kind=OS_OBJECT_TYPE_OS_TIMEBASE yes` 와 수명 끝 site 266–271·264·265 의 묶임으로 선다 [I]. 생성 사건이 기록되지 않으면(프로세스 주 스레드의 PSP 모듈 초기화가 기록보다 앞서면) 연결은 `unlinked(no create of the id in the record)` 이고 F4 가 어긋난다. 파일 이름 행 A63 — 행위자 뿌리가 사용에 닿지 않고(`actor_not_extracted(no root reaches the use)`) 부재 값이 평가되지 않으며(`alternatives [context -]`), 자연 부팅에서 사용이 닿지 않는다: 모든 항목이 빠지고 연결은 `target_not_reached`.
+
+**(2026-11-19 덧붙임, `semantics-06`)** A63 의 '행위자 뿌리가 사용에 닿지 않음'(`actor_not_extracted(no root reaches the use)`; 쌍 파일 `obs1/cz_final_order/c1_pre_tx/pairs.tsv:81` 의 `unknown(no root reaches CF_CFDP_R2_RecvMd)`)은 프로그램의 성질이 아니라 도구의 빈틈이다. relations 는 `CF_CFDP_R2_RecvMd`(`obs1/cz_final_order/c1_pre_tx/relations.txt:1186`, `:1204`, `:1224`)와 `CF_CFDP_S_SubstateSendMetadata`(`:1244`)를 'direct callers 0, called through a function pointer: no' 로 적지만, 소스(고치기 전 트리의 `cf/fsw/src/`)에서 둘은 함수 안의 `static const` 분배 표의 항목이다: `cf_cfdp_r.c:902`(`CF_CFDP_R2_Recv` 안의 `r2_fdir_handlers_normal`, `:899`), `cf_cfdp_s.c:650`·`:668`(`CF_CFDP_S1_Tx`·`CF_CFDP_S2_Tx` 안의 `substate_fns`, `:648`·`:666`). 도구는 함수 범위 정적 객체의 초기값에 든 함수 주소를 간접 호출의 대상으로 모으지 않는다. A63 은 어차피 미달로 기대되어(7 절의 `expect_discriminate`) 결과는 바뀌지 않는다. 다음 kz-static 빌드로 미룬다(§26.0 (하)). [§26.1]
 
 **6 절의 점검에 대한 기대**: F1 은 기대 파일의 줄마다(`match`). F2 `D1` 에 `bound` 쌍 없음, 미대조 항목에 기대어 `held` 인 항목 없음 — 지남. F3 같은 종류·같은 글의 생성이 끝난 뒤 수명 끝 없이 부재인 사용 없음 — 지남(시작 스크립트의 경우에서 그런 사용이 없음). F4 찾은 사용마다 그 id 의 생성 — 지남(A22·A26 의 PSP 생성이 기록될 때). F5 — 글로는 지나지만(고친 행과 탐침 행의 (iii)이 `held` 가 아님, 탐침 행의 (i)이 `not_held`) 위의 읽기 문제 때문에 (iii)은 `not_held` 가 아니라 `not_established` 로 지난다. F6 저장값 규칙으로 선 (iii) 없음(`stored_field_rule` 비어 있음) — 점검할 것 없음. F7 `derived`·`observed` 없음 — 지남. F8 쌍 파일의 줄이 있음(A21 둘, A20 둘, A22·A26 하나씩) — 지남. F9 c1_pre_tx A21 의 사용마다 문맥 하나(틀 site 293·292·305·304 bound) — 지남. F10 기초 1 — [미확인].
 
@@ -3427,6 +3456,7 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
   5. 평가 절차 5 절의 채운 판은 절차 문서가 아니라 25.10–25.11 과 기대 파일에 있다.
   6. (iii)의 기대는 `use_cond.caller_dependence.text` 로 적었다. 기대 대조 스크립트는 목록 칸에 들어가지 못한다(25.11).
   7. 큰 비교 출력은 `obs1/c1p2_compare` 에 두고 요약만 이 디렉터리에 남겼다.
+  8. **(2026-11-19 덧붙임, `builds-01`)** kzgcc 0.5 빌드 뒤 점검 셋을 선언 25.5 (나)대로 하지 않았다: 플러그인 빌드 바로 뒤의 `ledger_check.sh` 없음, 등록부 점검이 `--deep` 없이 돎, 플러그인 첫 ctest 가 감시 밖. 그 뒤의 첫 점검(`out/ledger_check_after_builds.txt` 193 행, `out/tools_check_deep_after_builds.txt` 57 행 `--deep`, 모두 실패 0)은 지났다. 25.6 (가)의 덧붙임. [§26.1]
 - **열린 점**:
   1. **문맥 `"-"` 읽기**(25.11): 동결한 판정 부분은 sidecar 문맥 줄이 없는 행의 사용에 문맥 `"-"` 를 주고, alternatives 줄은 문맥 1 을 이름 댄다. 그래서 부팅에서 고친 빌드의 행과 탐침 행의 (iii)이 `not_established` 가 되고 그 둘의 `expect_discriminate` 는 미달로 예측된다. 고치려면 판정 부분을 바꾸고 fixture·회귀·예행을 다시 하고 다시 동결한 뒤 이 선언을 새로 커밋해야 한다(첫 부팅 전). lead 의 판단.
   2. 다시 한 부팅 뒤의 네 번(평가 절차 13 절): 이 선언은 "1r 이 지나면 네 번 더"로 읽었다. lead 의 확인.
@@ -3436,6 +3466,8 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
   6. lead 판단 (a) `Re` 와 전제 (6), (b) 성공 경로의 빈자리, (c) 버퍼가 complete 가 아님은 그대로 열려 있다. 읽는 사람은 정해지지 않았다(PI 결정). 원 이슈의 글은 이 환경에 없다 [미확인].
   7. A22·A26 의 생성(프로세스 주 스레드의 PSP 모듈 초기화)이 기록되는지 [I]. 기록되지 않으면 F4 가 어긋나고 시간 기준 행의 `expect_discriminate` 도 미달이다.
   8. kzllvm 에 같은 `out<k>` 집합 피연산자의 꼴이 있는지 보지 않았다. B′ 에는 소스 트리 토큰이 없다(D2 사본에 git 메타데이터가 없음; `treetok`).
+  9. **(2026-11-19 덧붙임, `semantics-02`)** `osapi-idmap.c:640` 의 저장(site 264, 할당의 초기화)과 relations 의 key-clearing 이름(§12.11 (사), §15.7, §18.8, §19.5, §22.9 가 lead 의 판단으로 넘긴 것)이 이 목록에서 빠졌었다. 되살린다. lead 의 판단 §26.0 (파): 이 주기에는 판정 규칙 8.13 의 13 번대로 끝으로 보고, 다음 relations 개정에서 경로 조건으로 빈 레코드 조건을 낸다. 그때까지 25.11 (마)와 찾은 사용의 이름 상태는 이 저장에 기댄다(25.11 5.2 의 덧붙임). [§26.1]
+  10. **(2026-11-19 덧붙임, `semantics-04`)** 고친 빌드의 A21 에서 재시도 루프 뒤의 실패 이벤트(`cf_cfdp.c:1014`·`:1016`)를 facts 가 놓쳐 계획의 need note 가 'no event send' 라고 적는다(25.11 5.3 의 덧붙임). 도구의 빈틈이고 다음 kz-static 빌드가 다룬다(§26.0 (하)). [§26.1]
 - **다음 단계가 할 일**(차례): (1) 열린 점 1 의 lead 판단. 고치면 판정 부분의 고침, fixture 127, 2026-11-16 입력의 회귀, 두 빌드의 정적 예행, 다시 동결, `boot/declaration.tsv` 와 25.12 를 새로 커밋. (2) 열린 점 2·3 을 선언에 덧붙여 커밋. (3) `boot/commands.txt` 를 c1_pre_tx 에, 다음에 c1_post_tx 에 돌린다(root).
 
 ## 26. C1 주기: 부팅 전 고침 (2026-11-19, 첫 부팅 전)
@@ -3477,3 +3509,48 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 **(너) 바꾸지 않는 것.** 후보 목록, 갈래 파일, 미리 정한 사용, 판독지('채우지 않음: 읽는 사람 없음'), 파생 빌드, 계획은 그대로다. 기대 파일과 예측은 (나)·(다)·(라)에 따라 다시 쓰고, 부팅 선언은 다시 커밋한다.
 
 **(더) PI 에게 남는 것.** 읽는 사람(첫 부팅 전에 정해지면 판독지와 파일 목록과 부팅 선언을 다시 커밋한다), 기초 2 가 프로세스의 시작 스레드가 만든 것에서 설 수 없는 문제, 읽기 `Re` 가 (iii)을 움직이게 하는 도구 빌드, 그리고 PI 결정 기록이 PI 확인으로 남긴 것.
+
+### 26.1 검토 지적의 날짜 붙인 주 (2026-11-19; §26.0 (하)·(거), 부팅 없음)
+
+**무엇.** §26.0 (하)·(거)가 이름 댄 닫기 검토의 지적마다, 그것이 닿는 절에 날짜 붙인 주 '(2026-11-19 덧붙임, <번호>)' 를 달았다. 이 절과 그 주의 `rules-NN`·`builds-NN`·`semantics-NN` 은 `../records/closure-review-20261119/findings.json` 의 번호다(§12 이전의 검토가 쓴 같은 꼴의 번호와 다르다). 앞의 글은 지우거나 고치지 않고 주만 더했다(25.11 5.2 의 기초 5 는 표의 칸 안에 주를 더함). 주에 든 수는 남긴 파일에서 다시 읽었고(`../records/closure-notes-20261119/`), 인용한 소스·출력의 줄은 모두 그 파일에서 다시 보았다. cFS 를 부팅하지 않았고, 코드·자료·계획·동결·기대·부팅 선언은 건드리지 않았다. push 하지 않았다.
+
+| 번호 | 주를 단 곳 | 요지 |
+|---|---|---|
+| `builds-01` | 25.6 (가), 25.13 계획과 다르게 한 것 8 | kzgcc 0.5 빌드 뒤 점검 셋(바로 뒤의 원장 점검, 등록부의 `--deep`, 감시 아래의 플러그인 ctest)을 선언대로 하지 않음; 뒤의 첫 점검은 지남 |
+| `builds-02` | 12.11 (바) | 측정이 비교 도중과 쌍둥이 비교가 멈춘 뒤에 돎; 읽은 출력은 뒤의 `twin_2`·`declared` 가 확인 |
+| `builds-03` | 12.11 (바), 21.7 | 앞 단계의 rc 를 보기 전에 시작한 단계 |
+| `builds-05` | 12.0 (나-1) 첫 ctest, 12.11 (바), 23.0 (마), 23.6 6 | 옛 바이너리로만 돈 시험 `tool_identity_schema_revision` |
+| `builds-06` | 12.11 (마), 21.6, 23.5 | 선언한 필요량의 약 2.5 배를 쓴 scratch make; '모두 `completed`' 대신 가장 낮은 값 |
+| `builds-07` | 12.11 (바) | lint 가 선언보다 자료 파일이 다섯 많은 트리에서 돎 |
+| `rules-06` | 21.5 3, 22.6 | none found 9 줄의 `rests on: none` 이 감싼 함수 아래의 `abort` 를 빠뜨림 |
+| `semantics-02` | 25.11 5.2·5.3, 25.13 열린 점 9 | `osapi-idmap.c:640` 은 할당의 초기화; 25.13 에서 빠졌던 열린 점을 되살림 |
+| `semantics-03` | 21.5 3, 22.6 | C1 의 clear-slot 10 가운데 이름을 지우는 것은 2 |
+| `semantics-04` | 25.11 5.3, 25.13 열린 점 10 | 고친 빌드 A21 의 재시도 뒤 실패 이벤트를 facts 가 놓침; 계획의 need note 는 도구의 빈틈 |
+| `semantics-05` | 12.11 (라) | HB-await 284 가운데 소스가 허락하는 것은 생성자 → 만든 task 의 60 |
+| `semantics-06` | 25.11 5.5 | A63 의 '뿌리가 닿지 않음' 은 도구의 빈틈(함수 안 정적 분배 표) |
+| `semantics-07` | 25.11 5.2 기초 5 | 키 글의 한도는 64 가 아니라 20 |
+
+`rules-07`, `rules-08` 은 이미 적혀 있어 손대지 않았다(§26.0 (거)). 같은 날 더한 날짜 붙인 주가 넷 더 있다: 8.7 의 '검증됨/전체 항목' 아래(분자는 적용된 항목의 수; 741·1,089·310, c1 의 일치 칸 112 `unverified`·46 `body-derived`; PI 결정 ①)와 8.8 의 '읽기 전용 효과' 아래(`strlen` 은 P0 선언 자료에 없음); `plan/results_w6_20261029.md` 의 머리(옛 판정 경로의 재분류, 자동 판정의 표에 넣지 않음, PI 결정 ③); `kairos/docs/semantics_coverage.md` 9 절(알려진 빠짐; 규칙 개정이 아닌 주); `kairos/docs/static_facts.md` 5x 제목 아래(그 형식은 선언된 kz-static `6f40dd60…` 이 냄). 저장소 최상위 README 는 고치지 않았다.
+
+**점검.** `../records/closure-notes-20261119/check.sh`(bash, 읽기만; 행 번호·키·판정은 입력이 아님)를 공간 감시 아래 한 번 돌렸다: rc 0, 출력 `check.txt`(HEAD `3535b43`), 감시 기록 `guard_check.log`(dip 20,480 B). 그 앞에 같은 스크립트의 앞판을 저장소 밖에서 두 번 시험으로 돌려 출력의 꼴만 고쳤다(근거가 아님). `kairos/docs/` 의 두 문서는 도구 정체성의 경로 밖이고(`kairos/cmake/KzSourceIdentity.cmake`: 대상의 소스 디렉터리와 `include/`·`cmake/`·최상위 `CMakeLists.txt`), 스크립트는 주석에서만 그 이름을 댄다. 고친 트리에 MC 의 `kz_lint`(`3d4d5a8f…`)의 규칙 일곱을 감시 아래 돌려 모두 clean 이었다(`lint.txt`, `guard_lint.log`). 결과 문서와 W6 문서는 어느 스크립트도 읽지 않고 부팅 선언의 목록에도 없다. 커밋 전에 이름 점검(`--cached`, 새 디렉터리 `--tree`)과 금지어 grep 을 했다.
+
+**측정** (`check.txt`):
+- 감시 기록의 가장 낮은 값(A): 고침 빌드의 `df_*` 38 은 974,893,056 B; 그 scratch 의 017–029 열셋 948,453,376 B, 001–016 열여섯 305,602,560 B(`002_scratch-make.log`, 필요량 500,000,000 에 dip 1,235,963,904 B; 다섯 디렉터리에서 끝 값이 하한 아래인 유일한 기록); 닫기 kz-static 의 45 는 692,862,976 B; 런타임 27 은 679,084,032 B; 주기 준비 44 기록(끝 줄 50)은 393,605,120 B. 끝 줄의 판정은 모두 `completed` 다.
+- 시간 겹침(B): 고침 빌드 다섯(빌드 뒤 `tools_check --deep` 과 실행 셋; 측정의 facts 보기와 비교 둘), 닫기 kz-static 셋(실행 `extract_final` 과 비교 셋), 런타임·주기 준비 0.
+- 고침 빌드의 측정 파일: 다섯 02:03:56Z, 둘 02:04:10Z·02:04:28Z; 비교의 끝 02:03:26Z–02:04:14Z, 쌍둥이 rc 1 02:04:16Z, `twin_2`·`declared` 02:06:34Z·02:06:38Z(C). 주기 준비의 원장 점검 08:41:15Z·08:47:02Z·09:23:51Z·09:55:08Z, 깊지 않은 등록부 점검 09:10:12Z 하나(D).
+- none found 9 줄, 모두 `rests on: none`, 효과 `terminal [CFE_PSP_Panic …]`, `layers` 에 `P0-unverified(abort, …)`(F). clear-slot c1 10/10, r2 6, c5 18/18(G). HB-await c1 284 = 짝 71 × 4(writer `main` 60, 넷 56 씩), r2 116 = 짝 29 × 4(H). framework 항목 741, 선언 1,089, `api` 이름 310, c1 일치 칸 158 = `unverified` 112 + `body-derived` 46(I). `strlen` 0 줄, `strcmp` 93 줄(J).
+
+**공간.** 시작 384,884,736 B(13:00Z 무렵), 커밋 전 13:25:10Z 381,849,600 B(바닥 314,572,800 위 67,276,800 B). 다른 단계의 일로 계속 줄고 있다. 새로 남긴 것은 이 기록 디렉터리(26,481 B)뿐이다. scratch 는 이 단계의 시험 출력과 편집 스크립트만 만들었고 끝에 지운다.
+
+**계획과 다르게 한 것.**
+1. 주의 수를 남긴 파일에서 읽으려고 새 기록 디렉터리 `records/closure-notes-20261119/`(점검 스크립트, 출력, 감시 기록, README)를 더했다.
+2. `builds-06` 의 주를 12.11 (마)에 더해 21.6·23.5 에도 달았다(검토가 그 둘을 이름 댐). 23.5 의 가장 낮은 값 679,084,032 B 는 이번에 센 것이다.
+3. `semantics-05` 의 짝 15 는 검토의 소스 읽기를 따랐다. 앱을 다시 시작하는 경로(`cfe_es_apps.c:1165`)의 생성자는 세지 않았고 [I], r2 의 116 은 다시 세지 않았다.
+4. `rules-06` 의 주는 대안 줄 자체가 아니라 그 행의 absence 줄이 효과 `CFE_PSP_Panic` 을 적는다고 읽었다(검토의 말 'the lines end in' 을 줄의 자리대로 고침).
+5. `semantics-02`·`semantics-04` 의 열린 점은 25.13 의 열린 점에 번호를 이어 달았다(9, 10).
+
+**열린 점.**
+1. §26.0 (하)의 도구 한계 다섯(`rules-06`, `semantics-03`–`06`)은 다음 kz-static 빌드의 일이다. 그때 r2·c5 의 clear-slot 과 r2 의 HB-await 를 소스로 다시 센다.
+2. `space_guard.sh` 의 끝 값 판정(§26.0 (차))은 아직 고치지 않았다. 그때까지 결과 문서는 판정 대신 가장 낮은 값을 인용한다.
+3. 계획의 need note 글(`semantics-04`)과 site 264 의 계획(`semantics-02`)은 그대로다(§26.0 (너)).
+4. OSAL 4.1.1 의 빠짐의 수는 남긴 파일로 다시 센 뒤에 `semantics_coverage.md` 9 절에 적는다 [미확인].

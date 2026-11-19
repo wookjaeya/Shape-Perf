@@ -6,6 +6,8 @@
 
 (2026-11-19 PI 결정 뒤) 11절은 판정 규칙 8.14 와 평가 절차 14절을 따라 판정 부분의 고침 넷(문맥 줄이 없는 행의 문맥, 항목이 없는 라이브러리 호출, 찾은 사용의 이름 상태, 요소가 기대는 목록 항목)과 서식 검사 16 의 넓힘, 읽는 부분의 새 입력 하나, 요약의 주·보조 표지와 표, 기대의 줄마다 가름, 반증·평가 스크립트, 부팅 전 다시 재기를 정한다. 판정 부분과 읽는 부분의 sha256 이 바뀌므로 동결을 다시 한다. 1–10.7 의 글은 지우지 않는다.
 
+(2026-11-19, 다시 동결한 판의 검토 뒤) 11.5 는 평가 절차 14.13 을 따라 판정 부분의 손실 표지와 연결 사유, 반증·평가 스크립트의 `expect_discriminate`·갈래마다의 꼬리·단위가 없는 점검·F3 의 면함, 실행 스크립트의 부팅 선언 3·부팅 앞의 커밋 점검과 다시 재기·손실 기록의 이름, 항목이 없는 호출의 fixture 이름, 기대의 가름 규칙과 예측 파일의 새 이름을 적는다. 코드보다 먼저 커밋한다.
+
 - 규칙: 판정 규칙(`plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md`) 3.2–3.6, 8.2–8.5, 8.12, 8.13. 아래에서 "8.13-n" 은 8.13 의 n 번이다.
 - 형식: relations rules revision 14 의 줄과 쌍 파일(`kairos/docs/static_facts.md` 5x), 계획 sidecar 의 줄(`kairos/docs/plan_manifest.md` 10절), dump 글과 같은 빌드 줄(`kairos/docs/event_semantics.md` 13절).
 - 절차: `plan/c1_closure_evaluation_protocol_20261118.md`.
@@ -386,3 +388,43 @@ end
    - 시험은 `boot/test_run_cycle.sh` 다.
 7. **공간 감시(26.0 (차)).** `below_floor_at_end` 의 rc 는 77 이다(명령의 rc 는 끝 줄의 `rc=` 에 남는다). 끝 값을 읽지 못하면 0 으로 센다. 등록부 `records/TOOLS.tsv` 에는 줄 둘을 둔다. 하나는 지금 판(`in-place`)이고, 다른 하나는 앞 판 `730bcc06…` 이다. 앞 판은 `gone` 이고, 그 글은 git 에 있다고 적는다.
 8. **fixture.** 경로 B 행의 합성 세계에서 경로 A 행의 문맥 줄을 뺀다. 검사 14 에 더한 줄(문맥이 있으면 그 대안 줄이 있음)이 그 세계를 물리는데, 경로 B 행에는 대안 줄이 없기 때문이다.
+
+### 11.5 다시 동결한 판의 검토 뒤 고침 (2026-11-19; 코드 커밋보다 먼저 커밋함)
+
+근거: 평가 절차 14.13 과 그 검토·검증의 번호(`records/closure-review-preboot-20261119/findings.tsv`; 아래의 `pre-…`). 결과는 결과 문서 26.5 에 적는다. 11.1–11.4 의 뜻은 아래에서 **고침**이라 표시한 곳만 바꾼다. 행 번호, 키, 앱·함수 이름, 기대 판정은 어느 스크립트의 인자도 상수도 아니다. fixture 는 합성 이름만 쓰고 설계 행을 쓰지 않는다(6절).
+
+1. **판정 부분: 손실 표지와 연결의 사유 (`pre-semantics-01`; 판정 부분. 고침: 기록의 손실 표지, 11.1 의 4 의 인스턴스 연결).**
+   - 입력: 중간 글의 dump 의 `loss` 줄(읽는 부분은 바뀌지 않는다), 행위자·`runx`·서식의 칸.
+   - 규칙(평가 절차 14.13 의 8): 기록의 손실 표지는 dump 의 `loss` 줄 가운데 종류(둘째 낱말)가 `no-build-id`·`object-table` 이 아닌 줄이 하나라도 있거나, 지금대로의 칸(`pool_dropped`, `boot_bytes_dropped`, 행위자의 `overflow`·`partial`·`dropped_bytes`, 서식의 `partial`) 가운데 0 이 아닌 것이 있을 때 선다. 찾은 사용의 인스턴스 연결이 수명 끝의 불완전 때문에 `unlinked` 일 때, 그 `reason` 은 불완전의 까닭을 필요 상태의 표(`NEED_REASON`)로 옮긴다: `loss markers in the record` → `record_insufficient(loss marker)`, `lifetime-end sites not bound: …` → `record_insufficient(site not bound in the build)`, 그 밖(`lifetime-complete` 가 `yes` 가 아님, `namespace-entry` 줄이 없음) → `plan_missing(need not planned)`. `why` 는 그대로 둔다.
+   - 출력: 기록의 칸은 바뀌지 않는다(값만 바뀐다).
+   - fixture(합성 세계): 손실이 `loss no-build-id …` 한 줄뿐인 dump(이름 상태와 필요 상태가 손실 없는 기록과 같음); 사건 손실 종류(`after-stop`) 한 줄(이름 상태 `undecided(lifetime ends not complete: loss markers in the record)`, (마) `missing`); 그 dump 에서 찾은 사용(연결 사유 `record_insufficient(loss marker)`); 묶이지 않은 수명 끝 site 와 찾은 사용(`record_insufficient(site not bound in the build)`). `lifetime-complete … no` 의 찾은 사용(`plan_missing(need not planned)`)은 지금의 fixture 그대로다. 앞의 셋은 지금의 바이트(`1d0b4ae0…`)에서 어긋난다.
+2. **fixture: 항목이 없는 호출의 이름 (`pre-rules-05`; 11.1 의 3 의 fixture 를 고침).** '항목 없음'과 '기록이 있고 미대조가 아님'의 fixture 는 합성 호출 이름을 쓴다: `length-call` 의 `zlen`(기록 0 / 기록 2·미대조 0), `compare-call` 의 `zcmp`(기록 0), 그리고 `copy-call` 에 쉼표로 적은 둘 가운데 `zput`(기록 0; 옆의 호출은 기록이 있음). 셋 모두 후보 목록에 없고, 근거는 호출 파일의 줄이다. `fill-call` 은 어느 판정 항목도 읽지 않으므로 그 fixture 는 두지 않는다(결과 문서 26.5 의 열린 점). 판정 부분은 이 항목으로 바뀌지 않는다.
+3. **반증·평가 스크립트 (`pre-rules-01`, `pre-texts-01`, `pre-rules-02`, `pre-texts-02`, `pre-rules-07`; 고침: 11 의 13 의 출력과 셈, 11.4 의 5).**
+   - **`expect_discriminate`.** 평가 절차 14.13 의 1 대로 규칙 (3)은 (1)·(2)의 요구가 없는 대조 행에만 건다. `class` 는 14.13 의 2 대로 정적 입력(relations 의 대안 줄·holder 줄·성공 경로 줄, sidecar 의 `context` 줄)에서 셈하고 기록에 달리지 않는다. (1)이나 (2)가 있는 행은 (1)이 있고 그 행에 `context` 줄이 있거나 대안 줄의 문맥이 하나가 아니면 `boot`, 아니면 `static` 이다. (1)·(2)가 없는 행은 성공 경로 줄이 하나라도 `held` 면 `boot`, 아니면 `static` 이다. 11.4 의 5 의 "`expect_discriminate` 는 (3)의 요구가 있고 그 행의 성공 경로 줄이 `held` 일 때만 `boot`" 를 대신한다. `note` 에 어느 규칙을 걸었는지 적는다.
+   - **꼬리.** `count` 줄에 갈래를 다섯째 칸으로 더한다(`count <점검> <class> <result> <갈래> <수>`). 그 뒤 갈래마다 줄 셋(반증 점검 F1–F10 의 `class` 별, `expect_safe` s1–s4 의 `class` 별, `expect_discriminate` 의 충족 / 센 행)을 쓴다. 각 줄은 갈래의 표지로 시작한다: `D1-R0` 는 `main (declared before the boot: D1/R0)` 이고 먼저 온다. 나머지는 `auxiliary (data <자료 갈래>, readings <읽기들>)` 이다(자료 갈래와 읽기는 그 갈래 기록의 `eval_branch` 에서 읽음). 갈래 `*`(F8 (a))는 `no branch (the pair file against the relations rows, F8 (a))` 의 줄이다. 갈래를 넘어 합친 수는 쓰지 않는다. 정밀도·계획 안의 재현율·미확정 분해의 꼬리 줄에도 같은 표지를 단다. 꼬리의 형식 점검(`count` 의 합이 몸의 줄 수)은 그대로다. 표준 출력에는 `main` 의 줄 셋을 쓴다.
+   - **단위가 없는 기록.** F3(경로 A 가 아닌 기록; 부재 사용 사건이 없는 경로 A 기록), F4(찾은 사용 사건이 없는 기록), F9(사용 사건이 없는 기록)는 `not_evaluable` 이고 `note` 가 그 까닭을 적는다(경로 A 가 아닌 기록은 'not a path A record (judgement rules 8.2 applies to path A only)'). 11.4 의 5 의 "단위가 없는 기록 … 은 `pass` 로 적고" 를 대신한다.
+   - **F3 의 면함.** 부재 사용마다, 같은 종류·글의 끝난 성공한 생성이 그 사이의 수명 끝 때문에 면했으면 그 생성을 `note` 에 적는다. 그 끝이 모두 `slot` 이면 `slot clear only (weak: judgement rules 8.13 item 13)` 로 따로 적는다. 지남의 `note` 는 그런 생성이 있었는지를 말한다.
+   - 판의 이름은 `explain_eval.py revision 2 (2026-11-19)` 다.
+   - fixture(합성 행): (3)만 붙을 수 있는 대조 행(대안 줄이 `found` 가 아니고 다른 정의가 없음)에서 세대 없는 찾은 사용 → 미달·`static`; 그 행에 성공 경로 줄이 `held` 이고 연결된 찾은 사용 → 충족·`boot`; (1)·(2)가 있는 행에 찾은 사용이 더해짐 → 충족·`static`(지금의 `ED-found` 는 미달을 기대했다); `context` 줄이 둘인 대조 행에서 (1)의 문맥에 사용이 없음 → 미달·`boot`; 경로 B 기록의 F3, 찾은 사용뿐인 경로 A 기록의 F3, 사용 사건이 없는 기록의 F3·F4·F9 → `not_evaluable`, 그리고 `boot` 의 지남에 들지 않음; `D2-R0` 에서만 어긋나는 점검 → `main` 줄은 어긋남 0, 그 갈래의 `auxiliary` 줄은 어긋남 1, `main` 줄의 수는 `D1-R0` 의 단위만; slot clear 만으로 면한 생성의 `note`.
+4. **실행 스크립트 (`pre-builds-02`, `pre-builds-07`, `pre-semantics-01`, `pre-texts-08`; 고침: 11 의 14–15, 11.3 의 표).**
+   - 다시 재는 선언은 `boot/declaration3.tsv` 다. 11 의 14 와 11.3 의 표가 이름 댄 `boot/declaration.tsv` 를 대신한다(`549dc94` 부터는 `declaration2.tsv` 였다). `verify` 는 줄 종류 `count` 를 더 읽는다: 경로가 디렉터리이고, 값은 그 아래 일반 파일의 수(`find -type f`)다.
+   - `boot` 단계는 `allowed` 다음, 부팅 명령 앞에 둘을 더 본다. (1) `git ls-files --error-unmatch` 로 선언과 `run_cycle.sh` 가 git 에 있고, `git status --porcelain` 이 둘에 대해 비었음. (2) 같은 N 으로 `verify` 를 다시 돌려 rc 0 이고 그 `verify.txt` 가 깨끗하고 지금의 선언을 이름 댐. 아니면 rc 1 로 멈추고 부팅하지 않는다.
+   - `control` 단계는 dump 글의 `loss <종류>` 줄을 종류마다 줄 수와 `count=` 의 합으로 적는다(`no-build-id`·`object-table` 은 사건 손실이 아니라고 적음). `gate` 의 `losses:` 줄은 그것과 지금의 0 이 아닌 칸을 함께 이름 댄다. 문의 PASS·FAIL 규칙은 그대로다.
+   - 설명 단계의 기록 이름표는 결과 문서 26.5 와 `boot/declaration3.tsv` 를 가리킨다.
+   - 시험(`boot/test_run_cycle.sh`): 꾸민 선언의 이름은 `declaration3.tsv` 이고, 꾸민 뿌리는 git 저장소로 만들어 커밋한 뒤 돈다. 더하는 경우: 깨끗한 verify 뒤에 선언된 파일이 바뀜(부팅 안 함), 선언에 커밋되지 않은 고침(부팅 안 함), `count` 줄(맞으면 `ok`, 파일 하나를 더하면 `differs`), `control`·`gate` 가 손실 기록을 종류와 수로 이름 댐.
+   - `boot/commands.txt` 는 머리만 고친다(명령은 그대로).
+5. **기대 쪽 (`pre-texts-08`, `pre-builds-10`; 11 의 12 와 11.3 에 더함).** 이 주기의 기대 파일 `records/closure-c1prep-20261119/expect/expect_c1_2.tsv` 의 줄마다의 `class` 는 11 의 12 의 '출처로 가름'이 아니라, 평가 절차 14.6 의 가름 규칙을 14.12 의 1 이 읽은 대로 따른다(그 파일 머리의 `rule` 줄). 그 파일을 쓴 스크립트는 `records/closure-c1prep-20261119/scripts/expect_write2.py` 다(새 이름; `expect_write.py` 는 그대로; 결과 문서 26.4 의 계획과 다르게 한 것 2·4). 예측은 평가 절차 14.13 의 8 의 전제를 근거 칸에 더한 `expect/predictions3.tsv` 가 대신한다. 값이 같으므로 `expect_c1_2.tsv` 는 바뀌지 않는다. 같은 스크립트를 `predictions3.tsv` 로 다시 돌려 바이트가 같음을 보인다.
+6. **11 의 5 의 [I] (`pre-texts-07`).** "이 규칙으로 `use_cond.status` 와 `violation` 은 바뀌지 않으리라 본다"는 `use_cond` 에서 맞지 않았다. A63 의 (c1)이 `missing` 이고 그 `use_cond` 가 두 빌드의 `D1` 여덟 갈래에서 `not_derived` 다(16 줄; `expect/elements_by_rule_2.tsv`; 결과 문서 26.3 열린 점 4, 26.4 (2)). A63 의 `flip:` 줄이 이름 댄 `OS_FileOpenCheck` 의 `agreement` 항목이 후보 목록에 있기 때문이다. `violation` 은 160 줄 모두 `undetermined` 그대로다.
+7. **바뀌는 파일과 sha256 (11.3 에 더함).**
+
+| 파일 | 바꾸는 항목 | 결과 |
+|---|---|---|
+| `env/obs1/explain_judge.py` (판정 부분) | 1 | sha256 이 바뀐다(`1d0b4ae0…` 를 대신함). 다시 동결한다 |
+| `env/obs1/explain_eval.py` (반증·평가) | 3 | `f6b72fc4…` 를 대신한다 |
+| `env/obs1/tests/test_explain4.py`, `env/obs1/tests/test_explain_eval.py` | 1–3 | 다시 적는다 |
+| `records/closure-c1prep-20261119/boot/run_cycle.sh`, `test_run_cycle.sh`, `commands.txt` | 4 | 부팅 선언 3 에 새 값으로 든다 |
+| `records/closure-c1prep-20261119/expect/predictions3.tsv` (새로) | 5 | 새로 적는다 |
+
+바뀌지 않는 것: 읽는 부분(`ef20a760…`), 구동부(`af9d4395…`), 갈래 생성(`a722e4af…`), 요약(`5e19b419…`), 기대 대조(`a9a9fc3f…`), 개정 3(`acfd4271…`), 기대 파일, 후보 목록, 인정 파일, 갈래 파일, 미리 정한 사용, 판독지, 계획, 파생 빌드, 어휘 파일.
+
+8. **차례.** 평가 절차 14.13 의 12 와 같다. 판정 부분이 바뀌므로 fixture 전부, 2026-11-16 입력의 회귀, 16 갈래 정적 예행, 시험 dump, 합성 기록을 고친 판으로 다시 돌리고, 앞의 출력과 견주어 다른 칸을 센 뒤 다시 동결한다. 출력을 쓰는 실행은 모두 `space_guard.sh` 아래에서 돌리고 그 기록을 남긴다.

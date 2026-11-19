@@ -348,3 +348,62 @@ planned row: the branch taken (no site kind), an effect with no call, the lock c
 Per build of the five: the `namespace-entry` and `namespace-layer` lines; sites added per rule; contexts per planned row
 and frames found; `lifetime-complete` per kind; the sites of the new rules that the binding report lists as unbound
 (after a derived build).  Every count from a kept output of that step.
+
+### 10.8 Precisions and one correction (2026-11-19, committed before the code that implements revision 5)
+
+Written when the generator was changed, after reading the revision-2 data files (`semantics/framework_namespaces2_*.txt`)
+and the relations lines of relations rules revision 14 that sections 10.1-10.4 read (`docs/static_facts.md` 5x).  Where
+10.1-10.6 leave a choice open, the choice is this; the item marked *correction* changes the text above.
+
+- **When the lines are written.**  The lines and sites of 10.1-10.5 are written when every `--namespaces` file is a file
+  of coverage rule revision 2 (its `semantics-data 2` line).  A plan given files of both revisions is refused (a plan
+  names one set).  With revision-1 files the output is that of revision 4 (above).  The `rules` line and the plan id are
+  renamed by the step that renames the rule revisions; until then they keep the revision-4 text.
+- **The reader.**  In a `semantics-data 2` file the reader also accepts `layer-fn`, `layer-op` and `kind-unresolved`
+  statements and the `rollback` and `not-covered` sub-statements, and it reads `kind … value= at=`, `stored-name`,
+  `extent` and both `compare` forms for the fields of 10.1; `kind-unresolved`, `not-covered`, `other-store` and
+  `chain-status` are read and not used.  In a revision-1 file these statements are refused as before.  Where a field of
+  a `namespace-entry` line has more than one value (two lookups, two creates, two calls), they are comma-separated.
+- **10.1, an entry of the table-copy generation** (`table`): `kind=` is the table's name, `value=-`, `kind-at=-`;
+  `create=` lists its `copy` and `create-check` functions; `compare=` is the function of its `compare` sub-statement;
+  the stored name is the field declared at its `extent` sub-statement's `decl=`; `copy-call` is read on the line of
+  the `copy` statement's `at=`.  **An entry of the object-id generation** (`kind`): `compare=` is the component's
+  top-level `compare` statement; the stored names are those of its `stored-name` sub-statements (more than one:
+  comma-separated in each field).
+- **10.1 fields from the facts.**  `stored-name=<Type.field>` is the FIELD_TYPES row declared at the `decl=` position
+  (file by its tail, line); none: `-`.  `extent-value` is that row's extent when FIELD_TYPES gives a constant one.
+  `compare-call` are the calls of the P0 byte-string comparison family in the comparison function; `copy-call` the
+  calls of P0 data functions on that line of the function; `length-call` the bounded NUL searches of section 3 (memchr
+  with the byte 0 and a constant length, strnlen with a constant length) that the key parameter of the lookup and of
+  each create reaches through PARAM_FLOW **at any depth** (the bound of section 3 reads depth 0 only and stays as it
+  is).  Each call is written `<callee>@<file>:<line>`; none: `-`.  `success-path=` has one item per creator callee that
+  the row's `callee-check (success path)` lines name, comma-separated; `-` when the row has none.
+- **10.1, the component of a file applies** when a `layer-fn`, `layer-op` or entry operation of the file applies to
+  the build (section 8).  A field of a `namespace-layer` line whose statement the file does not have is `-` (the files
+  of the table-copy generation have no `layer-op` lines); two statements of one kind are comma-separated.
+- **Placement in the sidecar.**  `namespace-layer` lines follow the `namespace-data` lines.  After the `lifetime` lines:
+  the `lifetime-complete` lines, the `namespace-entry` lines, the `context` lines.
+- **10.2.**  The layer call is a call on the `at=` line in the operation's function whose callee a `layer-fn` line with a
+  `kind-param` names; its value has the role `kind` (from `arg<kind-param>`).  No such call in the facts:
+  `need row <key> kind-value not-planned reason=record_insufficient(site position not in the facts)`.  An entry of the
+  table-copy generation has no kind value: `need row <key> kind-value not-planned reason=plan_missing(no rule of this
+  revision)`.
+- **10.3, correction.**  The frame is two sites, the at-call and the after-call of one call; the sidecar writes
+  `frame=<at-call site id>,<after-call site id>` (or `-`).  The id `<n>` counts the distinct chains of the row's
+  `alternatives [context …]` lines in the order of the relations text (a chain written for two absence values is one
+  context).  A context with a frame also gets `need row <key> context-frame <n> planned … sites=…`.
+- **10.4.**  The rollback site's at-call is the call on the `rollback` statement's `at=` line whose callee the component's
+  `create-finalize` `layer-fn` (or its `layer-op rollback`) names; its status value has the role `status`.  `reentry`
+  is computed over the defined callees of CALLS.  The table initialisation's fill call is a P0 data-function call on the
+  `layer-op clear-table` line.  The slot clear is matched with the relations' `lifetime end […]: clear-slot <position>`
+  line by file tail and line.  The `lifetime` lines of revision 5 end with `sites=<ids>` (none: no field).
+  The `layer-op` lines belong to the object-id generation: a `table` entry has none.  `lifetime-complete kind=<k> yes`
+  when the kind has at least one `delete` and one `rollback` statement, its component has `layer-op clear-table` or
+  `clear-slot` lines, and each of these applies and has its sites or is `not-a-lifetime-end`; else `no(<what is not,
+  `; `-separated>)`.
+- **10.4, needs.**  `object-rollback` and `object-clear` are written per planned row with a `namespace-entry` line as
+  `object-delete` is (planned with the sites, or not planned with `plan_missing(no lifetime-end entry in the namespace
+  data)`).  An `object-delete` need of a row whose matching entries have no applying `delete` statement takes the same
+  sub-reason under revision 5 (revision 3 writes `no namespace data entry` there).
+- **10.5.**  The sidecar line is `bound string-namespace-extent source=namespace-entry extent reason=… sites=<n>`, written
+  when a key text was bounded so; the value's `ref` names the field and its extent.

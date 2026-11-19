@@ -3073,3 +3073,59 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 #### 23.0.1 덧붙임 1 (묶음 점검의 site 집합; 다시 하는 묶음 점검보다 먼저 커밋함)
 
 첫 묶음 점검(`scripts/bind_check.py` → `obs1/rtb_bind_c1_pre_tx`, `_post_tx`)은 행의 site 를 `row=` 열쇠가 그 행을 이름 대는 site 로만 잡았다. 그러나 계획 규칙 개정 5 의 생성 쪽 종류 값·되돌림·삭제·지우기 site 는 `row=` 를 갖지 않고, 그 행의 `need … state=planned sites=…` 문이 이름 댄다(예: c1_pre_tx 의 `s0256.object-rollback`, `s0264.object-clear` 는 `osapi-idmap.c` 에 있어 첫 점검에서 컴파일되지 않았다). 그래서 (사) 5 의 "행의 site" 를 다음으로 바로잡는다: `row=` 가 그 행을 이름 대는 site, **또는** 그 행을 subject 로 하는 계획된 need 가 `sites=` 로 이름 대는 site. 그 행들의 `gap` 문도 보고에 적는다. 다시 하는 점검은 `scripts/bind_check_2.py` 로 새 디렉터리 `obs1/rtb_bind2_c1_pre_tx`, `obs1/rtb_bind2_c1_post_tx` 에 낸다(첫 점검의 출력은 그대로 남긴다). 컴파일하는 단위가 늘 뿐 도구·허용 차이는 그대로다. 공간: 출력 둘 약 1 MB 씩.
+
+### 23.1 바뀐 것 [F]
+
+- **런타임 `kzrt 0.5.0`, dump 1.5** (`runtime/`): BUILDID 레코드(주 실행 파일 하나, 모듈 등록의 적재 객체마다 하나), LOSS `no-build-id`(15)·`object-table`(16), 생성 토큰의 예약 레코드 셋(읽는 쪽만). 더한 호출 `kz_rt_objects` 와 POSIX 쪽 `kz_rt_posix_objects`(시작 객체가 attach·init 뒤에 부름). 값은 store 에 있으므로 되살린 dump 도 같은 레코드를 낸다. 핵심은 여전히 라이브러리를 부르지 않는다(`rt_no_library_symbols` 통과).
+- **복호기·`kz-rt-dump`**: 1.0–1.5 를 읽고, `buildid` 줄과 `tok-create`·`tok-return`·`tok-start` 줄을 13.1·13.2 의 글로 찍는다. 토큰 레코드는 actor 의 aseq 점검에 든다.
+- **`kz convert`**: BUILDID 마다 NBUILD `link=build-id` 레코드(13.5 (바)); `no-build-id`·`object-table` 은 중립 손실로 옮기지 않음; 출력 줄 `build-id records: …`. `include/` 는 그대로이므로 이미 있는 칸(`build_id`, `path`, `reason`, `index`)만 채운다.
+- **`env/tools/chain_check.py`**: `same_build_object` 줄과 `same_build` 요약 줄(13.4, 13.5 (사)); 사슬 판정에 넣지 않는다. 단위 점검 18 을 더했다.
+- **kzgcc 0.4·kzllvm 0.2**: 13.6 대로. 판 1–3 manifest 의 경로는 손대지 않았다.
+
+### 23.2 빌드와 정체성 [M]
+
+`make -j8 all` rc 0(감시 `guard/b05_make_all.log`, dip 21,458,944 B; `make_all.log` 경고 0). `relink_result.txt`: 바뀌지 않아야 하는 61 이 모두 같은 바이트, `CMakeCache.txt` 같음, 다시 링크된다고 적은 63 가운데 33 이 바뀌고 30 이 같은 바이트(선언대로 둘 다 허용), 새 대상 넷이 생김. 도구(`post_mc.txt`): kz `fd40bc4d…` → `94cba72b6da18361b50989893dd2c5a4c5146c17ccb982d5462a0426c59c60e8`(`--identity` `tool_sha256` `80064cc3…` → `2a7bbe09…`, `tool_source` `500185a6…` → `8ded611a…`, `core_source` `568e5061…` 그대로); kz-rt-dump `40e23d4d…` → `d83fdde9b5009a3c0c0508125c08b4a424216065906fe2622cd384fd8e6645dc`; kz-instr-clang `36becd04…` → `4041f6b43abee6ad172f6437879f5c2ae838e482801b28a3231fe139b62ba9bd`(다시 링크로 바뀜; 선언이 허용한 쪽). kz-static `6f40dd60…`, kz-dump `32a96ae7…`, kz-phi `df79fb82…`, kz_lint `3d4d5a8f…` 그대로. 사본(`tool_copy/ROUNDTRIP.txt`, `/home/user/work/preserve/tools-20261119-c/`): 셋 모두 왕복 같음. 플러그인(새 디렉터리): kzgcc 0.4 `985fc1025de287bfa9cd7466407ddb33a03b6800d728dbaa75f00d4630a707a2`(`/home/user/work/instr/kzgcc-0.4/plugin-build`; scratch 빌드와 같은 바이트), kzllvm 0.2 `1900207f48576199e3f7e3fad4a94ab3664e7f7f9c6a5b6242d3b79c718ac665`(`/home/user/work/instr/kzllvm-0.2/plugin-build`); 빌드 로그 경고 0. 옛 플러그인 둘은 건드리지 않았다(`tools_check_end.txt`).
+
+### 23.3 시험 [M]
+
+- 첫 ctest(`-V`, `ctest_first.log`): 276 시험 100% 통과, `test_probe_anchor_reached` 는 앞과 같이 건너뜀. 선언한 실패 없음과 같다. golden 을 바꾸지 않았으므로 이 실행이 전체 ctest 다(lint 시험 포함).
+- 새 시험: `rt_objects`(BUILDID 다섯: main, 실행 파일 안의 모듈 3, 적재한 모듈 7 과 8, 어느 객체에도 없는 주소의 모듈 9), `rt_objects_readelf`(dump 의 build-id = `readelf -n`: main 과 모듈 3 `e840b203…`, 모듈 7 `03cb9ef0…`; 모듈 8 은 readelf 에도 없음), `rt_objects_noreader`(읽는 쪽이 없으면 BUILDID 없음, 모듈 3·9 의 `no-build-id`), `rt_format15`(합성 1.5 dump 의 BUILDID 셋·토큰 레코드 셋을 읽고, 잘못된 크기 둘을 거부), `rt_format15_dump`(그 글 줄) — 모두 `ctest_first.log` 에서 통과.
+- 플러그인: kzgcc 18/18(`plugins/kzgcc_ctest.log`; `kzgcc_v4_O0`·`_O2` 와 새 MC kz 로 도는 `kzgcc_hold_*` 다섯 포함), kzllvm 8/8(`plugins/kzllvm_ctest.log`, `kzllvm_v4` 포함).
+- `env` 단위 점검: `unit_tools.txt` 18/18, `unit_step2a.txt` 7/7.
+- 누적 목록과 등록부: `ledger_check_after_build.txt` 158 행 실패 0, `ledger_check_end_2.txt` 166 행 실패 0; `tools_check_after_build.txt` 54 행, `tools_check_end.txt` 56 행, 모두 `--deep` 실패 0.
+
+### 23.4 끝 점검 [M]
+
+1. **build-id = readelf**: 위 23.3(`rt_objects_readelf`).
+2. **부번호 4 dump 를 그대로 읽음**(`regress/compare_regress.txt`, rc 0): 두 부팅(C1 `tx.kzrt`, C5 `cpu1.kzrt`, 둘 다 1.4)과 32·64 비트 ABI dump 의 `kz-rt-dump` 글 여섯 파일이 같은 바이트; convert 로그는 선언한 한 줄 `build-id records: none (kzrt-dump 1.4)` 만 더해짐; container 는 도구 sha256·머리 crc 36 바이트만 다름; 연결 점검은 옛 `same_build` 한 줄이 객체 줄 7 과 요약 `unconfirmed(no build-id in dump)` 로 바뀌고 나머지 18 줄(사슬 판정 `confirmed` 포함) 같음.
+3. **합성 1.5 dump**: 위 23.3(`rt_format15`, `rt_format15_dump`).
+4. **판 1–3 manifest 가 같은 바이트로 묶임**(`regress/compare_manifest.txt`, rc 0): 옛 kzgcc 0.3 `27a49a6a` 와 새 kzgcc 0.4 에서 넷 묶음(판 1·2·3 의 시험 단위와 판 3 C1 계획의 열두 단위)의 목적 파일 15 가 모두 같은 바이트, binding 파일 11 이 판 줄만 다름.
+5. **묶음 점검**(덧붙임 23.0.1 의 site 집합, `bind/report2_c1_pre_tx.txt`, `bind/report2_c1_post_tx.txt`; 출력 `obs1/rtb_bind2_*`): 두 계획 모두 sidecar 의 `control-state=planned` 행 다섯(A20, A21, A22, A26, A63)이다.
+   - c1_pre_tx: 단위 13 컴파일, 실패 0. 행의 site 52(`row=` 42, need 가 이름 댄 것 10)가 모두 묶임(bound 45, inlined 7). 규칙별: use-call 9, creator-call 8, effect-call 7, handling-chain 5(+ use-call 과 겹친 1), key-text 4(+ kind-value 와 겹친 1), kind-value 3, context-frame 3(+ handling-chain 과 겹친 1), object-delete 4, object-rollback 4, object-clear 2. 같은 단위의 다른 site 3 도 묶임.
+   - c1_post_tx: 단위 12, 실패 0. 행의 site 49 가운데 48 묶임(bound 41, inlined 7), **묶이지 않은 것 하나**: site 297 `s0297.wait-exit`(행 A21 의 대기 루프 나가는 문, `cf_cfdp.c:1008` 의 `break`, place=line-start) — 까닭 `no statement on line 1008 of the function`: GIMPLE 에서 `break` 는 그 줄의 문으로 남지 않는다(가지로만 남음) [I: 까닭의 해석; 사실은 plugin 의 binding 줄]. 고친 빌드의 재시도 루프를 나가는 것은 그 행의 판별 요소이므로, 그 사건은 이 site 로는 기록되지 않는다(열린 점).
+   - 두 계획의 `gap` 문은 행 A63 의 하나씩(`key text of OS_mv parameter 0 …`, `record_insufficient(key text)`).
+   - **GCC 의 호출 열과 `col=`·`nth=`**(`# v4 calls` 줄의 합): c1_pre_tx 호출 site 47, c1_post_tx 43 이 모두 그 줄의 유일한 호출이었고(`line-unique`), GCC 의 열과 차례가 `col=`·`nth=` 와 다른 것은 0. 한 줄의 둘 이상의 호출을 열로 가르는 경우는 이 단위들에 없었다(단위 시험 `kzgcc_v4_*` 만이 그것과, 중첩 호출에서 GCC 의 열이 바깥 호출의 열이 되는 것을 보인다).
+   - 첫 점검(`row=` site 만, `bind/report_c1_*.txt`, `obs1/rtb_bind_*`): c1_pre_tx 12 단위 행 site 42 모두 묶임, c1_post_tx 11 단위 39 가운데 38(같은 site 297 이 빠짐). 덧붙임으로 바로잡은 까닭은 23.0.1.
+6. **플러그인 ctest**: 23.3.
+7. **빌드 뒤 점검**: 23.2·23.3.
+
+### 23.5 공간 [M]
+
+시작 678,703,104 B(`free_start.txt`), scratch 를 지운 뒤 818,524,160 B, 끝 729,747,456 B(`free_end.txt`). 감시 기록 27, 모두 `completed`; 가장 큰 dip 39,907,328 B(사본, `guard/b01_copy.log`), MC 빌드 21,458,944 B. 남긴 것: 사본 39,454,236 B, 플러그인 디렉터리 둘 10,653,237 B 와 11,483,888 B, 출력 `obs1/rtb_*` 여덟 5,287,921 B, 기록 수 MB. 압축 허용은 쓰지 않았다. scratch 는 이 단계가 만든 것만 지웠다(scratch 점검 빌드, 런타임·플러그인 scratch 빌드, 시험 출력).
+
+### 23.6 벗어난 것
+
+1. **"두 플러그인"의 읽기.** 계획의 두 플러그인을 GCC 플러그인(kzgcc)과 LLVM pass 플러그인(kzllvm)으로 읽었다(둘 다 같은 manifest 파서를 쓴다). 등록부의 옛 kzgcc 둘(0.2, 0.3)을 뜻한 것이라면 kzgcc 0.4 하나가 둘을 대신한다. kzllvm 0.2 는 판 1 의 꼴만 묶고 판 4 의 `place=`·identity·spawn site 를 `unsupported` 로 센다(13.6); C1 의 묶음 점검은 kzgcc 로만 했다(kzllvm 의 묶음 점검은 clang 의 compile 명령이 필요하다).
+2. **kzllvm 0.1 과의 판 1–3 바이트 동일성은 재지 않았다.** kzllvm 0.1 바이너리는 등록부에 없다(지어 둔 적이 없음). 판 1–3 에서 0.2 의 경로가 0.1 과 같다는 것은 코드(판 4 에서만 갈리는 가지)와 단위 시험 일곱의 통과에 기댄다 [I].
+3. **묶음 점검의 site 집합을 한 번 바로잡았다**(덧붙임 23.0.1, 다시 한 점검보다 먼저 커밋). 첫 출력도 남겼다.
+4. **scratch 점검 빌드는 LLVM 도구 없이**(Release) 지었다: `kz-instr-clang`·`test_static_plan` 과 LLVM 이 필요한 시험은 scratch 에 없고, 빌드 전 MC 트리의 시험 164 와 빌드 뒤 첫 ctest 로 보았다.
+5. 등록부의 kz-instr-clang 은 같은 바이트일 수 있다고 적었으나 바뀌었다(`4041f6b4…`): 다시 컴파일된 manifest 파서의 목적 파일이 새 런타임 머리로 바뀐 것으로 본다 [I]. 선언은 바뀌는 것도 허용했다.
+
+### 23.7 열린 점
+
+1. 고친 빌드(c1_post_tx)의 행 A21 의 대기 루프 나가는 문(`s0297.wait-exit`, `cf_cfdp.c:1008` 의 `break`)은 kzgcc 0.4 의 `line-start` 로 묶이지 않는다. 그 사건이 필요하면 계획 규칙(나가는 문 대신 루프 뒤 첫 문, 또는 그 가지의 끝)이나 플러그인(GIMPLE 가지의 위치)의 다음 개정이 정한다.
+2. 생성 토큰은 예약만 했다: 쓰는 쪽(런타임의 생성 래퍼 `kz_rt_posix_create`)과 결합(`kz convert`)은 없다. 그래서 C1 계획의 `spawn` 문과 `decoder=spawn-token` 은 묶음 뒤에도 `not-applied` 이고, `link_unlinked(no creation token)` 은 그대로다.
+3. `place=load` site 는 kzgcc 0.4 가 묶지 않는다. 다섯 빌드의 `cz_plans_v4_ns2` 계획에는 하나도 없다(`grep -c place=load` 0); 그것을 계획하는 경로 C 읽기 규칙이 site 를 내면 그때 묶을 꼴이 필요하다.
+4. 실제 cFS 파생 빌드의 모듈(`dlopen` 한 앱 .so)에서 BUILDID 가 나오는지는 부팅 전이라 재지 않았다 [미확인]; 시험 모듈로만 보였다. 파생 빌드는 주기 준비 단계에서 새 런타임 트리(0.5.0)와 kzgcc 0.4 로 다시 짓는다.
+5. lead 의 판단 (a)–(c)의 열린 점은 그대로(§22.9).
+6. 설명 스크립트 개정 4 는 이 빌드의 끝 점검 뒤에 동결한다(§12.10 4 항 (6)): 읽는 쪽은 `buildid` 줄과 `same_build_object` 줄을 13 절의 글로 읽는다.

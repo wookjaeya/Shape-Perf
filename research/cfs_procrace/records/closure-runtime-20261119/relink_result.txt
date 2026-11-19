@@ -1,0 +1,71 @@
+# not_relink: must be the same bytes
+not_relink OK: 61 of 61
+# relink_expected: changed or the same
+changed instrument/clang/kz-instr-clang
+changed lib/trace/libkz-trace.a
+changed probe/hold/libkz-hold.a
+same    probe/loader/libkz-loader.a
+same    probe/plan/libkz-plan.a
+changed runtime/kz-rt-dump
+changed runtime/libkzrt-decode.a
+changed runtime/libkzrt-manifest.a
+changed runtime/libkzrt-posix.a
+changed runtime/libkzrt.a
+changed runtime/tests/libkzrt-pool4.a
+changed runtime/tests/test_rt_auto
+changed runtime/tests/test_rt_auto_bad
+changed runtime/tests/test_rt_auto_bi
+changed runtime/tests/test_rt_bootstrap
+changed runtime/tests/test_rt_end
+changed runtime/tests/test_rt_gate
+changed runtime/tests/test_rt_holdsem
+changed runtime/tests/test_rt_loss
+changed runtime/tests/test_rt_manifest
+changed runtime/tests/test_rt_mode
+changed runtime/tests/test_rt_mode_api
+changed runtime/tests/test_rt_order
+changed runtime/tests/test_rt_plan
+changed runtime/tests/test_rt_plan_nb
+changed runtime/tests/test_rt_pool
+changed runtime/tests/test_rt_pool4
+changed runtime/tests/test_rt_serial
+same    tests/cfs-free/test_hold_plan
+changed tests/cfs-free/test_kzrt_app_request
+changed tests/cfs-free/test_kzrt_identity
+changed tests/cfs-free/test_kzrt_recovered
+changed tests/cfs-free/test_neutral_kzrt
+same    tests/cfs-free/test_probe_anchor_compilers
+same    tests/cfs-free/test_probe_anchor_reached
+same    tests/cfs-free/test_probe_basis
+same    tests/cfs-free/test_probe_elf_dwarf
+same    tests/cfs-free/test_probe_golden
+same    tests/cfs-free/test_probe_observe
+same    tests/cfs-free/test_probe_profile
+same    tests/cfs-free/test_probe_record
+same    tests/cfs-free/test_realrecord_derived
+changed tests/cfs-free/test_rt_plan_convert
+same    tests/cfs-free/test_trace_decode_fetch
+same    tests/cfs-free/test_trace_decode_merge
+same    tests/cfs-free/test_trace_decode_perf
+same    tests/cfs-free/test_trace_decode_real
+same    tests/cfs-free/test_trace_decode_sites
+same    tests/cfs-free/test_trace_hold_nctl
+same    tests/cfs-free/test_trace_identity
+same    tests/cfs-free/test_trace_key_separation
+same    tests/cfs-free/test_trace_merge_order
+same    tests/cfs-free/test_trace_neutral
+same    tests/cfs-free/test_trace_neutral_rev12
+same    tests/cfs-free/test_trace_occ_basis
+same    tests/cfs-free/test_trace_occ_match
+same    tests/cfs-free/test_trace_replay_out
+same    tests/cfs-free/test_trace_static_closure
+same    tests/cfs-free/test_trace_symbols
+changed tests/static/test_static_plan
+changed tools/kz/kz
+same    instrument/clang/transform_test/instr
+same    instrument/clang/transform_test/orig
+CMakeCache: OK
+new runtime/tests/test_rt_objects 609bdbb81680cf464100ef8e4268a97e9eb037f0daf1c7bccfff1e8a92d2e378
+new runtime/tests/test_rt_format15 7d7a1dc057bc03286b0f75a706a8dd7d84460d49905a099954256810b4203927
+new runtime/tests/librt_objects_mod_id.so ab79abe53569582a53485a940bcfdd81d702d08563ebee52c178ea1c9de45c0b
+new runtime/tests/librt_objects_mod_noid.so 266e85d4bef12ac29c6e62fb2c3cf19b0ec7f619c5cc9c9f7be54858208c1cc7

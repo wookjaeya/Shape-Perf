@@ -1,0 +1,4 @@
+# space_guard.sh kind=bind need=52428800 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-runtime-20261119/scripts/bind_check_2.py --plan /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs --sidecar /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side --modules /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.mod --compile-db /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/compile_commands.json --plugin /home/user/work/instr/kzgcc-0.4/plugin-build/kzgcc.so --out /home/user/work/redesign/obs1/rtb_bind2_c1_pre_tx
+start 2026-11-19T07:47:01.959Z free=730587136 threshold=367001600
+sample 2026-11-19T07:47:01.962Z 730583040
+end 2026-11-19T07:47:03.968Z kind=bind verdict=completed rc=0 free=730234880 lowest=730234880 dip=352256 change=-352256

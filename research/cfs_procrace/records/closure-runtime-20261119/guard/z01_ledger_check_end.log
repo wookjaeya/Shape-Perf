@@ -1,0 +1,6 @@
+# space_guard.sh kind=check need=10485760 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/env/tools/ledger_check.sh
+start 2026-11-19T07:43:08.521Z free=739041280 threshold=325058560
+sample 2026-11-19T07:43:08.525Z 739037184
+sample 2026-11-19T07:43:10.532Z 739016704
+sample 2026-11-19T07:43:12.537Z 739008512
+end 2026-11-19T07:43:14.544Z kind=check verdict=completed rc=0 free=739004416 lowest=739004416 dip=36864 change=-36864

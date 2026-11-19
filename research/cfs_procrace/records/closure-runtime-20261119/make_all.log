@@ -1,0 +1,243 @@
+-- GLOB mismatch!
+-- LLVM 23.0.0git at /home/user/work/llvm-project/build/lib/cmake/llvm; Clang at /home/user/work/llvm-project/build/lib/cmake/clang
+-- libkz-core source identity 568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+-- Configuring done (0.1s)
+-- Generating done (0.3s)
+-- Build files have been written to: /home/user/work/merge-check/kz-llvm
+[  0%] Building C object runtime/tests/CMakeFiles/rt_objects_mod_id.dir/rt_objects_module.c.o
+[  0%] Building C object runtime/CMakeFiles/kzrt.dir/src/kz_rt.c.o
+[  0%] Building C object runtime/CMakeFiles/kzrt-decode.dir/tools/decode/kz_rt_decode.c.o
+[  0%] Building C object runtime/tests/CMakeFiles/rt_objects_mod_noid.dir/rt_objects_module.c.o
+[  1%] Building C object runtime/tests/CMakeFiles/kzrt-pool4.dir/__/src/kz_rt.c.o
+[  1%] Building CXX object runtime/CMakeFiles/kzrt-manifest.dir/tools/manifest/kz_rt_manifest.cpp.o
+[  1%] Building C object runtime/tests/CMakeFiles/kzrt-build-info-test.dir/__/src/kz_rt_build_info.c.o
+[  2%] Linking C shared library librt_objects_mod_id.so
+[  9%] Built target kz-core
+[  9%] Linking C shared library librt_objects_mod_noid.so
+[ 10%] Building C object runtime/tests/CMakeFiles/kzrt-build-info-bad.dir/__/src/kz_rt_build_info.c.o
+[ 10%] Built target kzrt-build-info-test
+[ 10%] Built target rt_objects_mod_id
+[ 10%] Built target rt_objects_mod_noid
+[ 10%] Built target kzrt-build-info-bad
+[ 10%] Building C object runtime/CMakeFiles/kzrt.dir/src/kz_rt_plan.c.o
+[ 11%] Built target kz-dump
+[ 12%] Built target kz-phi
+[ 12%] Building C object runtime/tests/CMakeFiles/kzrt-pool4.dir/__/src/kz_rt_plan.c.o
+[ 14%] Built target kz-testsupport
+[ 14%] Built target kz_schema_c99
+[ 14%] Built target kz_schema_c11
+[ 14%] Built target test_core_identity
+[ 15%] Linking C static library libkzrt-decode.a
+[ 15%] Built target test_core_container
+[ 16%] Built target test_core_kzdump
+[ 17%] Built target test_core_crc32
+[ 18%] Built target test_core_container_corrupt
+[ 18%] Built target test_core_dump
+[ 18%] Built target kzrt-decode
+[ 19%] Built target test_core_phi_canonical
+[ 20%] Built target test_core_eval
+[ 21%] Built target test_core_monitor
+[ 21%] Built target test_core_phi_allowed
+[ 22%] Built target test_core_phi_parser
+[ 23%] Built target test_core_phi_provenance
+[ 23%] Built target test_core_phi_check
+[ 23%] Built target test_core_realrecord
+[ 24%] Built target test_core_replay
+[ 25%] Built target test_core_sha256
+[ 25%] Built target test_core_verdict
+[ 26%] Built target test_core_state_order
+[ 27%] Built target test_core_verify
+[ 27%] Built target test_core_vocab
+[ 27%] Built target kz_lint
+[ 28%] Built target kz_golden
+[ 28%] Built target target_prog
+[ 28%] Built target hold_prog
+[ 30%] Built target target_prog_variants
+[ 31%] Built target hold_seq_prog
+[ 32%] Built target kz_phi_golden
+[ 33%] Built target test_phi_cli
+[ 34%] Built target test_property_eval_agreement
+[ 34%] Built target kz_static_main_obj
+[ 35%] Built target kz_static_whole_member
+[ 35%] Built target kz_static_lazy_used
+[ 36%] Built target kz_static_lazy_unused
+[ 37%] Built target kz-predict
+[ 38%] Built target kz-anchor
+[ 38%] Building C object runtime/tests/CMakeFiles/test_rt_format15.dir/test_rt_format15.c.o
+[ 46%] Built target kz-llvm
+[ 47%] Built target test_predict_model
+[ 47%] Built target test_core_schema
+[ 47%] Built target test_static_expr
+[ 48%] Built target kz-static
+[ 49%] Built target test_static_flow
+[ 49%] Built target test_static_gitrev
+[ 49%] Built target test_static_unroll
+[ 50%] Built target test_static_recipe
+[ 51%] Built target test_static_wrappers
+[ 52%] Built target test_static_link
+[ 53%] Built target test_static_elf32
+[ 53%] Built target test_static_reasons
+[ 54%] Built target test_static_cli
+[ 54%] Linking C executable test_rt_format15
+[ 55%] Built target static_golden
+[ 55%] Built target test_rt_format15
+[ 55%] Linking C static library libkzrt.a
+[ 55%] Linking C static library libkzrt-pool4.a
+[ 55%] Built target kzrt
+[ 55%] Building C object runtime/CMakeFiles/kzrt-posix.dir/src/kz_rt_posix.c.o
+[ 55%] Built target kzrt-pool4
+[ 56%] Linking C static library libkzrt-posix.a
+[ 57%] Building C object runtime/tests/CMakeFiles/test_rt_pool4.dir/test_rt_pool.c.o
+[ 57%] Built target kzrt-posix
+[ 57%] Building C object runtime/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o
+[ 57%] Building C object runtime/tests/CMakeFiles/test_rt_serial.dir/test_rt_serial.c.o
+[ 58%] Building C object runtime/tests/CMakeFiles/test_rt_bootstrap.dir/test_rt_bootstrap.c.o
+[ 59%] Building C object runtime/tests/CMakeFiles/test_rt_loss.dir/test_rt_loss.c.o
+[ 60%] Building C object runtime/tests/CMakeFiles/test_rt_order.dir/test_rt_order.c.o
+[ 60%] Building C object runtime/tests/CMakeFiles/test_rt_gate.dir/test_rt_gate.c.o
+[ 60%] Linking C executable test_rt_pool4
+[ 60%] Built target kzrt-posix-auto
+[ 60%] Linking C executable test_rt_serial
+[ 60%] Building C object runtime/tests/CMakeFiles/test_rt_holdsem.dir/test_rt_holdsem.c.o
+[ 60%] Linking C executable test_rt_loss
+[ 60%] Built target test_rt_pool4
+[ 60%] Linking C executable test_rt_order
+[ 61%] Linking C executable test_rt_gate
+[ 60%] Linking C executable test_rt_bootstrap
+[ 61%] Building C object runtime/tests/CMakeFiles/test_rt_auto.dir/test_rt_auto.c.o
+[ 61%] Built target test_rt_loss
+[ 61%] Built target test_rt_serial
+[ 61%] Built target test_rt_bootstrap
+[ 61%] Linking C executable test_rt_auto
+[ 61%] Built target test_rt_order
+[ 61%] Built target test_rt_gate
+[ 61%] Building C object runtime/tests/CMakeFiles/test_rt_mode.dir/test_rt_mode.c.o
+[ 61%] Building C object runtime/tests/CMakeFiles/test_rt_pool.dir/test_rt_pool.c.o
+[ 61%] Building C object runtime/tests/CMakeFiles/test_rt_objects.dir/test_rt_objects.c.o
+[ 61%] Building C object runtime/tests/CMakeFiles/test_rt_mode_api.dir/test_rt_mode_api.c.o
+[ 61%] Building C object runtime/tests/CMakeFiles/test_rt_auto_bad.dir/test_rt_auto.c.o
+[ 61%] Linking C executable test_rt_mode
+[ 61%] Linking C executable test_rt_holdsem
+[ 61%] Linking C executable test_rt_objects
+[ 61%] Built target test_rt_auto
+[ 61%] Building C object runtime/tests/CMakeFiles/test_rt_auto_bi.dir/test_rt_auto.c.o
+[ 61%] Linking C executable test_rt_pool
+[ 61%] Built target test_rt_mode
+[ 61%] Built target test_rt_holdsem
+[ 61%] Built target test_rt_objects
+[ 62%] Linking C executable test_rt_auto_bad
+[ 62%] Building C object runtime/tests/CMakeFiles/test_rt_plan.dir/test_rt_plan.c.o
+[ 62%] Linking C executable test_rt_auto_bi
+[ 62%] Built target test_rt_auto_bad
+[ 63%] Linking C executable test_rt_plan
+[ 63%] Built target test_rt_pool
+[ 63%] Building C object runtime/tests/CMakeFiles/test_rt_plan_nb.dir/test_rt_plan.c.o
+[ 63%] Building C object runtime/tests/CMakeFiles/test_rt_end.dir/test_rt_end.c.o
+[ 64%] Linking C executable test_rt_mode_api
+[ 65%] Linking C executable test_rt_plan_nb
+[ 65%] Built target test_rt_mode_api
+[ 65%] Built target test_rt_plan
+[ 65%] Built target test_rt_auto_bi
+[ 66%] Linking C executable test_rt_end
+[ 66%] Built target test_rt_plan_nb
+[ 66%] Built target test_rt_end
+[ 66%] Linking CXX static library libkzrt-manifest.a
+[ 66%] Built target kzrt-manifest
+[ 67%] Linking CXX executable test_static_plan
+[ 67%] Building CXX object runtime/CMakeFiles/kz-rt-dump.dir/tools/kz-rt-dump/kz_rt_dump.cpp.o
+[ 67%] Building CXX object runtime/tests/CMakeFiles/test_rt_manifest.dir/test_rt_manifest.cpp.o
+[ 67%] Building CXX object lib/trace/CMakeFiles/kz-trace.dir/kzrt_convert.cpp.o
+[ 68%] Linking CXX executable kz-instr-clang
+[ 69%] Linking CXX executable test_rt_manifest
+[ 69%] Built target test_rt_manifest
+[ 70%] Linking CXX executable kz-rt-dump
+[ 70%] Built target kz-rt-dump
+[ 70%] Built target kz-instr-clang
+[ 70%] Built target test_static_plan
+[ 70%] Linking CXX static library libkz-trace.a
+[ 74%] Built target kz-trace
+[ 75%] Linking CXX executable test_trace_decode_fetch
+[ 75%] Linking CXX executable test_trace_decode_merge
+[ 75%] Linking CXX executable test_trace_decode_sites
+[ 75%] Linking CXX executable test_trace_decode_real
+[ 75%] Linking CXX executable test_trace_identity
+[ 76%] Linking CXX executable test_trace_decode_perf
+[ 77%] Linking CXX executable test_trace_hold_nctl
+[ 78%] Built target kz-plan
+[ 79%] Linking CXX executable test_trace_key_separation
+[ 79%] Built target test_trace_decode_real
+[ 79%] Built target test_trace_decode_perf
+[ 79%] Built target test_trace_decode_merge
+[ 79%] Linking CXX executable test_trace_merge_order
+[ 80%] Linking CXX executable test_trace_neutral
+[ 80%] Built target test_trace_decode_sites
+[ 81%] Linking CXX executable test_trace_neutral_rev12
+[ 81%] Built target test_trace_identity
+[ 81%] Built target test_trace_decode_fetch
+[ 82%] Linking CXX executable test_trace_occ_match
+[ 82%] Linking CXX executable test_trace_replay_out
+[ 82%] Linking CXX executable test_trace_static_closure
+[ 82%] Built target test_trace_occ_match
+[ 83%] Linking CXX executable test_trace_symbols
+[ 83%] Built target test_trace_neutral_rev12
+[ 84%] Linking CXX executable test_realrecord_derived
+[ 84%] Built target test_trace_symbols
+[ 84%] Built target test_trace_merge_order
+[ 84%] Built target test_trace_hold_nctl
+[ 84%] Built target test_trace_key_separation
+[ 84%] Building CXX object tests/cfs-free/CMakeFiles/test_kzrt_identity.dir/test_kzrt_identity.cpp.o
+[ 84%] Building CXX object tests/cfs-free/CMakeFiles/test_neutral_kzrt.dir/test_neutral_kzrt.cpp.o
+[ 84%] Building CXX object tests/cfs-free/CMakeFiles/test_kzrt_app_request.dir/test_kzrt_app_request.cpp.o
+[ 84%] Linking CXX executable test_kzrt_recovered
+[ 85%] Built target test_trace_neutral
+[ 85%] Building CXX object probe/hold/CMakeFiles/kz-hold.dir/rt_plan.cpp.o
+[ 85%] Built target test_realrecord_derived
+[ 85%] Built target test_trace_replay_out
+[ 87%] Built target kz-loader
+[ 88%] Built target test_trace_static_closure
+[ 89%] Built target test_kzrt_recovered
+[ 89%] Linking CXX static library libkz-hold.a
+[ 90%] Built target kz-hold
+[ 90%] Linking CXX executable test_hold_plan
+[ 90%] Building CXX object tools/kz/CMakeFiles/kz.dir/main.cpp.o
+[ 90%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_anchor.cpp.o
+[ 91%] Building CXX object tests/cfs-free/CMakeFiles/test_rt_plan_convert.dir/test_rt_plan_convert.cpp.o
+[ 91%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_convert.cpp.o
+[ 92%] Built target test_hold_plan
+[ 92%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_hits.cpp.o
+[ 92%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_hold.cpp.o
+[ 92%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_observe.cpp.o
+[ 92%] Linking CXX executable test_rt_plan_convert
+[ 93%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_occ.cpp.o
+[ 93%] Built target test_rt_plan_convert
+[ 93%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_predict.cpp.o
+[ 93%] Linking CXX executable test_kzrt_identity
+[ 94%] Linking CXX executable test_kzrt_app_request
+[ 94%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_replay.cpp.o
+[ 94%] Built target test_kzrt_identity
+[ 95%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_rtplan.cpp.o
+[ 95%] Linking CXX executable test_neutral_kzrt
+[ 95%] Built target test_kzrt_app_request
+[ 95%] Built target test_neutral_kzrt
+[ 95%] Linking CXX executable kz
+[ 95%] Built target kz
+[ 95%] Linking CXX executable test_probe_anchor_reached
+[ 95%] Linking CXX executable test_trace_occ_basis
+[ 95%] Linking CXX executable test_probe_basis
+[ 95%] Linking CXX executable test_probe_elf_dwarf
+[ 95%] Linking CXX executable test_probe_anchor_compilers
+[ 96%] Linking CXX executable test_probe_golden
+[ 96%] Linking CXX executable test_probe_profile
+[ 96%] Linking CXX executable test_probe_observe
+[ 97%] Built target test_probe_elf_dwarf
+[ 98%] Built target test_probe_anchor_reached
+[ 98%] Linking CXX executable test_probe_record
+[ 98%] Built target test_probe_anchor_compilers
+[ 99%] Built target test_hold_ptrace
+[100%] Built target test_probe_profile
+[100%] Built target test_hold_sequence
+[100%] Built target test_probe_observe
+[100%] Built target test_probe_golden
+[100%] Built target test_probe_basis
+[100%] Built target test_probe_record
+[100%] Built target test_trace_occ_basis

@@ -1,0 +1,7 @@
+tx.operational_at_5s=yes
+rx.operational_at_5s=yes
+stop=ci-es-restart-poweron (CI L196-L197)
+tx_exit=0 rx_exit=0
+dump tx.kzrt bytes=100268 sha256=8f4c272838bdf502e99e2fc92409e19e284094eddef1fd7dbef00d2865540da2
+kz-rt-dump exit=0
+rc=0

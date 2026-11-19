@@ -1,0 +1,4 @@
+# space_guard.sh kind=convert need=20000000 floor=314572800 interval=2 cmd=/home/user/work/merge-check/kz-llvm/tools/kz/kz convert --kzrt /home/user/work/redesign/obs1/c1cyc_pre_boot3/tx/dump/tx.kzrt --manifest /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs --manifest /home/user/work/redesign/obs1/c1p2_pre_derived/binds_instr.kzs --basis /home/user/work/redesign/obs1/c1p2_pre_bprime/c1_pre_tx/NP/basis.kz --out /home/user/work/redesign/obs1/c1cyc_pre_convert3/run.kzt
+start 2026-11-19T20:01:57.848Z free=983904256 threshold=334572800
+sample 2026-11-19T20:01:57.852Z 983900160
+end 2026-11-19T20:01:59.858Z kind=convert verdict=completed rc=0 free=983646208 lowest=983646208 dip=258048 change=-258048

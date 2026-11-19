@@ -1,0 +1,27 @@
+# chain_check.py --plan /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs --build-record /home/user/work/redesign/obs1/c1p2_pre_derived/build_instr.record --run-meta /home/user/work/redesign/obs1/c1cyc_pre_boot3/tx/run.meta --build-root /home/user/work/redesign/obs1/c1p2_pre_derived/ws --dump-text /home/user/work/redesign/obs1/c1cyc_pre_boot3/tx/tx.dump.txt --basis-text /home/user/work/redesign/obs1/c1p2_pre_bprime/c1_pre_tx/NP/basis.txt --main exe/tx/core-tx
+# and --sidecar /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side --plan-facts /home/user/work/redesign/obs1/cz_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz --plan-basis /home/user/work/redesign/obs1/cz_final_extract/c1_pre_tx/c1_pre_tx/NP/basis.kz --inst-list /home/user/work/redesign/obs1/c1cyc_pre_boot3/tx/inst_files.sha256 --inst-tree /home/user/work/redesign/obs1/c1p2_pre_derived/ws/exe --dump /home/user/work/redesign/obs1/c1cyc_pre_boot3/tx/dump/tx.kzrt --bindings /home/user/work/redesign/obs1/c1p2_pre_derived/binds_instr.kzs --bprime-basis /home/user/work/redesign/obs1/c1p2_pre_bprime/c1_pre_tx/NP/basis.kz --facts-header /home/user/work/redesign/obs1/c1cyc_pre_convert3/facts_header.txt --kzt-text /home/user/work/redesign/obs1/c1cyc_pre_convert3/run.kzt.txt
+manifest	confirmed	plan=69a278b019281fd3 build_record=69a278b019281fd3 run.meta=69a278b019281fd3 dump=69a278b019281fd3 kzt.nrun=69a278b019281fd3 kzt.file_hashes=69a278b019281fd3
+sidecar	confirmed	plan header=a18a03702a2e3396 = file
+plan_inputs	confirmed	facts=7403a3775bb49f9f basis=09606e23af3902f0
+inst_list	confirmed	run.meta list_sha256=19f809a452350e41 = file (31 entries)
+instance	confirmed	entries=31 equal=31 differing=0 missing=0
+exe exe/tx/core-tx	confirmed	record=bb80ce2833064dbf tree=bb80ce2833064dbf run.meta[tx/core-tx]=bb80ce2833064dbf inst_list[tx/core-tx]=bb80ce2833064dbf
+exe exe/tx/cf/bp.so	confirmed	record=bdd62c613a6f6492 tree=bdd62c613a6f6492 run.meta[tx/cf/bp.so]=bdd62c613a6f6492 inst_list[tx/cf/bp.so]=bdd62c613a6f6492
+exe exe/tx/cf/bplib.so	confirmed	record=a512f58dbce2ab08 tree=a512f58dbce2ab08 inst_list[tx/cf/bplib.so]=a512f58dbce2ab08
+exe exe/tx/cf/cf.so	confirmed	record=4b5ca8b7b6b214c3 tree=4b5ca8b7b6b214c3 run.meta[tx/cf/cf.so]=4b5ca8b7b6b214c3 inst_list[tx/cf/cf.so]=4b5ca8b7b6b214c3
+exe exe/tx/cf/ci_lab.so	confirmed	record=7176c66c7b033695 tree=7176c66c7b033695 inst_list[tx/cf/ci_lab.so]=7176c66c7b033695
+exe exe/tx/cf/sch_lab.so	confirmed	record=fe9750b58f80a7a1 tree=fe9750b58f80a7a1 inst_list[tx/cf/sch_lab.so]=fe9750b58f80a7a1
+exe exe/tx/cf/to_lab.so	confirmed	record=300ddab48d995dee tree=300ddab48d995dee inst_list[tx/cf/to_lab.so]=300ddab48d995dee
+facts_build	confirmed	basis binary.sha256=bb80ce2833064dbf = run main exe/tx/core-tx
+bprime	confirmed	basis=65c6b02eadec0209 facts.parent=65c6b02eadec0209 kzt.parent=65c6b02eadec0209
+dump	confirmed	file=8f4c272838bdf502 run.meta=8f4c272838bdf502 kzt=8f4c272838bdf502
+bindings	confirmed	file=5ed4ddb8b7344db4 run.meta=5ed4ddb8b7344db4 kzt=5ed4ddb8b7344db4
+same_build_object	confirmed	main path=exe/tx/core-tx tree=619614002e6d4556fa731365d88ee7f0d49c00cf dump=619614002e6d4556fa731365d88ee7f0d49c00cf
+same_build_object	unconfirmed(object not in the build record)	module:5 path=./core-tx tree=not read dump=619614002e6d4556fa731365d88ee7f0d49c00cf
+same_build_object	unconfirmed(object not in the build record)	module:4 path=./cf/ci_lab.so tree=not read dump=4074a88bb9a747f7729153fbb3444df21e668f39
+same_build_object	unconfirmed(object not in the build record)	module:7 path=./cf/to_lab.so tree=not read dump=1c6beabaaf271c405f3c9258340ecada8bf5b77d
+same_build_object	unconfirmed(object not in the build record)	module:6 path=./cf/sch_lab.so tree=not read dump=310dfddb52b7c0d5ca4db109fb866f14d6a7900d
+same_build_object	unconfirmed(object not in the build record)	module:3 path=./cf/cf.so tree=not read dump=c55b464be7b96ec2d0001b1a5ea296740c13e5c0
+same_build_object	unconfirmed(object not in the build record)	module:1 path=./cf/bp.so tree=not read dump=01db56cfd8f7a50b03665e022ca4c835f8f9fd8b
+same_build	unconfirmed(object not in the build record)	7 objects: confirmed 1, refused 0, unconfirmed 6
+chain	confirmed	16 links

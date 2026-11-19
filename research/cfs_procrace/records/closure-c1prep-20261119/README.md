@@ -31,3 +31,6 @@ declaration. No cFS boot. Nothing is pushed.
 | `candidates/branches_16.txt`, `candidates/branches_all.txt` | (3) the evaluation-branch files: the 16 branches evaluated at each boot, and all 512 kept for the partial admissions |
 | `out/candidates_named_check.txt` | the SEMANTICS records of the library calls the namespace-entry lines name (memchr has none) |
 | `scratch/branches16/`, `guard/s_explaincheck_<pre|post>.log` | the frozen explanation script with the candidate list and the 16 branches on the static inputs (no run): summaries, input checks, sha256 of the deleted outputs, the path A rows' static values per branch |
+| `expect/expect_c1.tsv`, `expect/predictions.tsv`, `scripts/expect_write.py` | (4) the filled expectations of the 16 branches (kz-expect 1; results 25.11): the static element values, the hand-written boot predictions with their grounds, the writer |
+| `scratch/branches16/static_elements_16.tsv`, `guard/s_explaincheck2_<pre|post>.log` | the element values (c1)-(c4) per branch and row from the frozen script on the static inputs (its output deleted) |
+| `expect/form_check_no_records.txt` | the frozen comparison script on an empty record directory: the expectation file is of its form (no_record 2144) |

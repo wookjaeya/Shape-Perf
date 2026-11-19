@@ -3330,3 +3330,64 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - **평가 갈래 파일**(8.13 의 5번; 동결한 `env/obs1/explain_branches.py` `a722e4af…` 로 만듦, rc 0): `candidates/branches_16.txt` sha256 `4d06783852faf48db766cfcb6f79265f2e1703679f3bd86871714176cc943234` — `D1`, `D2` × `R0`·`Ra`–`Rf` 하나씩·여섯 모두 = 16 갈래(평가 절차 4 절의 "부팅 전에 기대를 써 두는 조합"). `candidates/branches_all.txt` sha256 `2b22b76af01932678ebbc1a9470a570b59128004c619249f7dffae13c10d1495` — 자료 갈래 64(`D1`, `D2`, 부분 인정 62) × 8 = 512 갈래.
 - **부팅에서 평가하는 갈래 [D]**: 부팅마다 `branches_16.txt` 의 16 갈래를 평가한다. 평가 절차 4 절은 부분 인정 갈래도 "모두 평가"한다고 적지만, 정적 예행에서 16 갈래의 출력이 26,869,760 B 였으므로(`guard/s_explaincheck_pre.log`, c1_post_tx 26,845,184 B) 512 갈래는 부팅 하나에 약 860 MB 가 되어 바닥 위의 여유(지금 약 139 MB)에 들지 않는다. 그래서 부분 인정 갈래는 같은 기록과 같은 동결 스크립트로 자료 갈래 하나씩(8 갈래, 약 13 MB) 나중에 평가한다. 기록과 스크립트, 후보 목록, 인정 파일은 부팅 뒤에 바꾸지 않으므로 그 평가는 부팅의 지위를 바꾸지 않는다. 부분 인정 갈래의 기대는 4 절대로 25.11 의 "기대는 종류" 열에서 기계적으로 나온다.
 - **점검 [M]**: 동결한 `explain.py`(`af9d4395…`)를 두 빌드의 정적 입력(실행 없음)에 파생 빌드의 결합 파일(`obs1/c1p2_<pre|post>_derived/binds_instr.kzs`)과 B′ 기초(`obs1/c1p2_<pre|post>_bprime/<빌드>/NP/basis.kz`), 이 후보 목록, `branches_16.txt` 로 돌렸다: 두 빌드 rc 0, 입력 점검 16 거부 0·못 읽은 줄 0·불일치 0, 갈래 16, 갈래마다 기록 46·거부 0(`scratch/branches16/explain_<빌드>.txt`, `input_checks_<빌드>.txt`; 출력은 요약과 sha256(`sha_<빌드>.txt`)을 남기고 지웠다). 경로 A 행의 정적 값(갈래 16 × 행): `use_cond` 는 모두 `partial`, `violation` 은 모두 `undetermined`, `link` 는 모두 `unlinked`(`scratch/branches16/static_rows_16.tsv`, 160 줄). 이 값들이 25.11 의 기대의 정적 부분의 근거다.
+
+### 25.11 (4) 써 둔 16 갈래의 기대: 평가 절차 5절의 채운 판 [I][F]
+
+모든 기대는 측정 전이라 [I] 이다. 기대는 판정이 아니라 틀릴 수 있는 수준(쌍마다 빠지는 항목의 목록, 사용마다 이름 상태, 행마다 사용 조건의 요소)에 적었다. 평가 절차 5절의 `[채움]` 자리를 이 절이 채운다(절차 문서 자체는 고치지 않음).
+
+- **기대 파일**: `expect/expect_c1.tsv`(`kz-expect 1`, sha256 `d5501bf61d7ebfdf185bbadc0d89ddd75543bf9b66a93e67f1e8f038fe7fe7a3`), 2,144 줄 = 16 갈래 × 두 빌드의 경로 A 행 다섯 × 필드. 만든 것: `scripts/expect_write.py`(`e42a796a…`; 행 번호·키·값은 상수가 아니고 세 파일에서 읽음)가 (가) 동결 스크립트를 정적 입력에 다시 돌려 남긴 행·갈래별 요소 값(`scratch/branches16/static_elements_16.tsv` `94e7421c…`; 그 출력은 지움, `guard/s_explaincheck2_<빌드>.log`), (나) 손으로 쓴 부팅 예측(`expect/predictions.tsv` `44011827…`, 줄마다 근거), (다) 미리 정한 사용의 목록(25.8; 행 키와 소비자 뿌리)을 합친다. 형식 점검: 동결한 `explain_expect.py` 를 빈 기록 디렉터리에 돌려 rc 0, `no_record 2144`(`expect/form_check_no_records.txt`).
+- `explain_expect.py` 의 필드는 사전의 칸 경로만 따라가므로 문맥마다의 (iii) 목록(`use_cond.branch_iii[]`)은 칸으로 쓸 수 없다. 그래서 (iii)은 판정 부분이 쓰는 글 `use_cond.caller_dependence.text`("(i) <상태>; (iii) <상태들>")로 확인하고, 문맥마다의 값은 아래 표에 적는다.
+- 부팅의 순서는 통제하지 않는다. 파일의 줄은 시작 스크립트가 정하는 경우(소비자 CF 의 조회가 생성자 BP 의 생성보다 먼저; SCH_LAB 은 둘보다 먼저 시작, `ws/exe/tx/cf/cfe_es_startup.scr` 의 차례 ci_lab, to_lab, sch_lab, cf, bp)의 값이다. 다른 경우의 값은 5.3 의 표에 있고, 그 경우가 보이면 그 줄은 `mismatch` 로 나오며 표대로 읽는다.
+
+**5.2 쌍마다의 항목** (행 A21 은 CF 의 `OS_CountSemGetIdByName`, 키 `BP0_tsem`·`BP1_tsem` 은 CF 표 `ws/bpxfer_defs/tx/tables/cf_def_config.c:40, 54`; 행 A20 은 BP 자신의 조회 `bp_flow.c:126:13`; 생성 자리 `src/bp/fsw/src/bp_flow.c:132:18`(BP, 이름 `BP0_tsem`, `BP1_tsem`)과 `apps/sch_lab/fsw/src/sch_lab_app.c:168:16`(SCH_LAB, `SCH_LAB`)). 쌍은 결과가 부재인 사용마다 행의 생성 사건 모두와 맺어진다(`explain_judge.py` 의 name-binding 쌍).
+
+| 항목 | 같은 글, 다른 앱 (A21 × BP 의 같은 이름) | 다른 글의 생성 (A21·A20 × SCH_LAB, × 다른 throttle) | 같은 행위자의 자기 생성 (A20 × 자기 생성) | 기대는 종류 | 결합에 달린 조건 | 근거 |
+|---|---|---|---|---|---|---|
+| 기초 1 | held [미확인] | held [미확인] | held [미확인] | 없음 | 연결 점검의 `same_build_object` 가 main 과 그 두 모듈에 confirmed (F10) | 25.7 build-id; cFS 가 적재한 모듈에서 처음 읽음 |
+| 기초 2 | held | held | held | 없음 | `pthread_create` site 254·253, 시작 루틴 site 255, 뿌리 site 286·276·6 묶임(bound) | sidecar `creation` 줄 |
+| 기초 3 | held | held | held | 없음 | 키 글 site 262 | `absence: -17 …`, `absence origins` 의 `[other]` 기원은 null 시험이라 키 포인터와 글로 뺀다 |
+| 기초 4 | missing | missing | missing | 없음 | — | `callee-check (success path): OS_CountSemCreate: missing(the stored value is not tied to the success path)`(A21·A20 행; lead 판단 (b)) |
+| 기초 5 | held | held | held | 없음 | 키 글 site 259·262 | 글 길이 8·7 < 64 |
+| 기초 6 | held(생성이 조회 뒤) | missing(생성이 조회 전에 끝남) | held(첫 조회 뒤 자기 생성) | 없음 | — | 시작 스크립트의 차례 |
+| (가) | held | held | held | 없음 | — | `namespace-entry … lookup/create/compare …:applies`, 자료 sha256 `e587cee0…` |
+| (나) 의미 | D1 missing / D2 held | 같음 | 같음 | `byte-string-comparison` 과 `data-function` 이 둘 다 인정될 때 held (`memchr` 는 후보가 아님) | — | `compare-call=strcmp…`, `copy-call=memset…,strncpy…`, `length-call=memchr…` |
+| (나) 한도 | held | held | held | 없음 | 키 글 site | `extent-value=20` |
+| (다) | missing | missing | missing | 없음 (`Rf` 에서도: 버퍼 16 가운데 "every cause discharged" 0) | — | relations 요약 줄 `buffers 16: complete 0, not complete 16 (… causes not discharged 11; other writers 5)`, `writers [no key-parameter function reaches OS_ConsoleAPI_Init] of OS_common_record_t.name_entry … value=symbolic`(lead 판단 (c)) |
+| (라) | held | held | held | 없음 | 종류 값 site 257·262 묶임 | `namespace-entry … value=3` |
+| (마) | missing(사이의 다른 할당의 slot clear) | missing | held(사이에 자기 것뿐) | 없음 | 수명 끝 site 256·258·260·261·264·265 묶임, `lifetime-complete kind=OS_OBJECT_TYPE_OS_COUNTSEM yes` | sidecar `lifetime … clear-slot … not shown`(site 264) |
+
+- 빠지는 항목의 정확한 목록과 결과: 같은 글 다른 앱 — `D1` {기초 4, (나) 의미, (다), (마)} 4 개, `unlinked`; `D2` {기초 4, (다), (마)} 3 개, `unlinked`. 다른 글 — `D1` {기초 4, 기초 6, (나) 의미, (다), (마)} 5, `D2` 4, 결과 `differs_from_use_key`(두 키 글이 다 있고 다름; 기초 4 가 빠져 `refuted` 는 아님). 자기 생성 — `D1` {기초 4, (나) 의미, (다)} 3, `D2` {기초 4, (다)} 2, `unlinked`, `pair_kind = same_actor`. 기초 1 이 서지 않으면 모든 목록에 기초 1 이 더해진다(F10 으로 따로 보고). 어느 갈래에서도 `bound` 는 없다: (다)와 기초 4 는 정적 줄 때문에 모든 갈래에서 빠진다.
+- 파일의 쌍 줄은 생성 자리마다의 합집합이다(`pair[<자리>].missing_items` 는 그 자리의 모든 쌍의 항목을 모음): A21 의 BP 자리 `D1` `basis4_creator_success,da_no_name_mapping,ma_no_lifetime_end,na_semantics`, 결과 `differs_from_use_key,unlinked`; A20 의 BP 자리는 둘째 조회(`BP1_tsem`)가 첫 생성 뒤라 기초 6 이 더해진다; SCH_LAB 자리는 둘 다 기초 6 을 더해 결과 `differs_from_use_key`.
+
+**5.3 사용마다** (사용은 25.8 의 목록; 결과·문맥·이름 상태·연결)
+
+| 사용 | 순서의 경우 | 결과 종류 | 문맥 | 이름 상태 | 연결 결과 |
+|---|---|---|---|---|---|
+| c1_pre_tx A21 (CF_AppMain, `cf_cfdp.c:993:19`, 문맥 1 과 2) | 조회가 먼저(기대) | absent(-17), 한 번(실패하면 `break`, `cf_cfdp.c:996-1001`) | 1(틀 site 293·292). 문맥 2(명령 `CF_CmdEnableEngine`)는 자연 부팅에서 닿지 않음 | `undecided(the row's creator sites are not complete)`(행의 `incomplete:` 줄에 `actor_not_extracted(spawn call with no resolved entry)`) | `unlinked` |
+| 같음 | 생성이 먼저 | found 둘(BP0, BP1) | 1 | `undecided(a slot clear not shown to be no lifetime end)` | 열린 세대 위의 인스턴스 연결 `linked` |
+| c1_post_tx A21 (`cf_cfdp.c:1003:23`, 재시도 루프) | 조회가 먼저(기대) | absent 몇 번 뒤 found | `-`(문맥 줄 없음) | absent 는 위와 같음, found 는 slot clear 로 `undecided` | absent `unlinked`, found `linked`; 행의 연결은 섞여 `unlinked` |
+| 같음 | 생성이 먼저 | found | `-` | slot clear 로 `undecided` | `linked` |
+| A20 (두 빌드, BP_AppMain, `bp_flow.c:126:13`) | 조회가 먼저(같은 함수, 늘 그렇다) | absent 둘(BP0, BP1) | `-` | `undecided(the row's creator sites are not complete)` | `unlinked` |
+| A22 (두 빌드, SCH_Lab_AppMain, `sch_lab_app.c:176:16`), A26 (CFE_TIME_TaskMain, `cfe_time_task.c:286:16`) | 생성이 먼저(프로세스 주 스레드의 `soft_timebase_Init`) | found | `-` | `undecided(a slot clear not shown to be no lifetime end)` | `linked`, 행의 연결 `established`(instance) |
+| A63 (두 빌드, 소비자 뿌리 없음, `OS_FileOpenCheck`) | — | 사건 없음(파일 보내기가 없음) | — | — | `unlinked`(`target_not_reached`) |
+
+**5.4 행마다의 사용 조건 요소** (두 빌드 같음; 정적 확인 `static_elements_16.tsv`)
+
+| 요소 | `R0` 의 기대(`D1` / `D2`) | 움직이는 읽기 | 행 |
+|---|---|---|---|
+| (c1) callee-check | present / present | — | 모두 |
+| (c2) flip | missing / missing(A21 은 `flip: static-undetermined`) | `Rc` 와 all 에서 present(A20, A21, A22, A26); A63 은 모든 갈래에서 missing | |
+| (c3)(i) | A21·A20 `not_held`(A21: 지우는 채움 `cf_cfdp.c:965:5`; A20: 같은 함수의 생성 out 저장), A22·A26·A63 `not_established` | `Rb` 와 all 에서 A21 은 `not_established`(지우기를 빼도 FIELD_STATUS DISABLED); `Re` 는 움직이지 않음(24.4 (라)) | |
+| (c3)(iii), 문맥마다 | c1_pre_tx A21: 문맥 1 `not_established`(열린 효과, 저장값 규칙이 전제에 기댐), 문맥 2 `not_established`(호출자에게 돌아감). 다른 행: 부팅에서는 `not_established` — 아래의 읽기 문제 | 이 16 갈래 어디서도 움직이지 않음 | |
+| (c4) creator | missing / missing | `Rd` 와 all 에서 present(전제 표지 `reading Rd`). `Rd` 가 받는 줄: 행의 `creator:` 줄들(A21: `bp_flow.c:132:18`, `sch_lab_app.c:168:16`)과 그 `incomplete:` 사유(`key_unresolved(creator key)`, `actor_not_extracted(…)`), 쌍 파일의 그 쌍의 줄(`unordered`; A20 의 자기 생성은 `creator-not-a-pair(probe-create) … same_thread`) | 모두 |
+| `use_cond.status`, `violation` | **16 갈래 모두, 두 빌드의 행 다섯 모두 `partial`, `undetermined`** | — | |
+
+- **읽기 문제(부팅 전에 찾음, 고치지 않음)**: 동결한 판정 부분은 sidecar 에 `context` 줄이 없는 행의 사용 사건에 문맥 `"-"` 를 준다(`env/obs1/explain_judge.py` 의 `use_context`: 문맥 줄이 없으면 `"-"`). 그런데 그 행들의 alternatives 줄은 `[context 1: …]` 이라 부팅에서는 `branch_iii` 가 "no alternatives line of context -" 로 `not_established` 를 낸다(같은 파일 `branch_iii`). 정적 예행(실행 없음)은 alternatives 줄의 문맥을 그대로 써서 `not_held` 였다(24.4 표; 여기 `static_elements_16.tsv`). 그래서 c1_post_tx A21 의 `found: retry` 와 A20 의 자기 생성 `not_held` 는 부팅 기록에서 `not_established` 로 나오리라 본다 [I: 코드 읽기]. 기대 파일은 동결본이 낼 값(`(iii) not_established`)을 적었다. 이것은 판정 부분의 일이라 고치려면 다시 동결해야 한다(평가 절차 12 절 6). 열린 점으로 lead 에게 넘긴다(25.13).
+
+**5.5 다른 대조 행**: 시간 기준 행 A22·A26 — 생성자는 프로세스 행위자(`main (process)`, `psp/…/cfe_psp_soft_timebase.c:53:14`)라 `pair_kind = process-app`, 쌍 파일의 그 줄은 `unordered`(정적 순서 간선을 이 개정이 찾지 못함), 사용은 찾고(found) 이름 결합 규칙은 돌지 않으며, 인스턴스 연결은 `lifetime-complete kind=OS_OBJECT_TYPE_OS_TIMEBASE yes` 와 수명 끝 site 266–271·264·265 의 묶임으로 선다 [I]. 생성 사건이 기록되지 않으면(프로세스 주 스레드의 PSP 모듈 초기화가 기록보다 앞서면) 연결은 `unlinked(no create of the id in the record)` 이고 F4 가 어긋난다. 파일 이름 행 A63 — 행위자 뿌리가 사용에 닿지 않고(`actor_not_extracted(no root reaches the use)`) 부재 값이 평가되지 않으며(`alternatives [context -]`), 자연 부팅에서 사용이 닿지 않는다: 모든 항목이 빠지고 연결은 `target_not_reached`.
+
+**6 절의 점검에 대한 기대**: F1 은 기대 파일의 줄마다(`match`). F2 `D1` 에 `bound` 쌍 없음, 미대조 항목에 기대어 `held` 인 항목 없음 — 지남. F3 같은 종류·같은 글의 생성이 끝난 뒤 수명 끝 없이 부재인 사용 없음 — 지남(시작 스크립트의 경우에서 그런 사용이 없음). F4 찾은 사용마다 그 id 의 생성 — 지남(A22·A26 의 PSP 생성이 기록될 때). F5 — 글로는 지나지만(고친 행과 탐침 행의 (iii)이 `held` 가 아님, 탐침 행의 (i)이 `not_held`) 위의 읽기 문제 때문에 (iii)은 `not_held` 가 아니라 `not_established` 로 지난다. F6 저장값 규칙으로 선 (iii) 없음(`stored_field_rule` 비어 있음) — 점검할 것 없음. F7 `derived`·`observed` 없음 — 지남. F8 쌍 파일의 줄이 있음(A21 둘, A20 둘, A22·A26 하나씩) — 지남. F9 c1_pre_tx A21 의 사용마다 문맥 하나(틀 site 293·292·305·304 bound) — 지남. F10 기초 1 — [미확인].
+
+**7 절의 두 기대 (대조 행마다)**: `expect_safe` (s1) `D1` 에 `bound` 쌍 없음, (s2) 대조 행에 `held` 인 (c3) 갈래 없음, (s3) 열린 세대 없이 선 인스턴스 연결 없음, (s4) 다섯 조건 없이 난 refuted 없음 — 대조 행 다섯(A20, A21, A22, A26, A63) × 빌드 둘 × 넷 = 40 점검이 모두 지나리라 본다. `expect_discriminate`: 고친 빌드의 행(c1_post_tx A21) **미달**(재시도 줄은 있으나 부팅의 (iii)이 `not_established`, 위의 읽기 문제), 탐침 행(A20) **미달**((i) `not_held` 와 둘째 정의 줄은 나오나 (iii)이 같은 까닭으로 `not_established`), 시간 기준 행(A22·A26) **충족**(열린 세대 위의 인스턴스 연결), 파일 이름 행(A63) **미달**(낼 근거가 없음). 두 수치는 합치지 않는다.
+
+**8 절의 분모의 기대**: 계획된 행 / 추출된 행 — c1_pre_tx 층 9 + 대조 5(A21 은 둘 다) / 367, c1_post_tx 층 8 + 대조 5 / 367(`out/plan_budgets.txt`). 부팅마다 닿은 사용 / 정한 사용 — c1_pre_tx 4 / 6(A21 의 문맥 2 와 A63 이 닿지 않음), c1_post_tx 4 / 5(A63). 판정된 사용 / 닿은 사용 — 0 / 4: 모두 미확정이고 종류는 "정적 입력 없음"(`absent_result_unevaluated`, `key_unresolved`, `writer_set_incomplete`, `fixed_proof_open`, `caller_dependence_unknown`)과 "구조"(`link_unlinked`). 정밀도와 계획 안의 재현율은 정의되지 않음(25.9).

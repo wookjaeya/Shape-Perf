@@ -4,6 +4,8 @@
 
 (2026-11-19) 2026-11-18 의 판을 판정 규칙 8.13, 형식(`kairos/docs/static_facts.md` 5x, `kairos/docs/plan_manifest.md` 10절, `kairos/docs/event_semantics.md` 13절), 평가 절차와 맞춰 보고 마무리했다. 더한 것: 후보 목록과 인정 파일의 형식(4.1), 실패한 생성의 되돌림을 이름에 붙이는 규칙의 재진입 조건(3절 5), 필드 저장값 규칙으로 선 갈래의 표지(3절 8), 요약과 기대 대조 스크립트의 동결(3절 13, 8절). 앞판의 뜻은 바꾸지 않았다.
 
+(2026-11-19 PI 결정 뒤) 11절은 판정 규칙 8.14 와 평가 절차 14절을 따라 판정 부분의 고침 넷(문맥 줄이 없는 행의 문맥, 항목이 없는 라이브러리 호출, 찾은 사용의 이름 상태, 요소가 기대는 목록 항목)과 서식 검사 16 의 넓힘, 읽는 부분의 새 입력 하나, 요약의 주·보조 표지와 표, 기대의 줄마다 가름, 반증·평가 스크립트, 부팅 전 다시 재기를 정한다. 판정 부분과 읽는 부분의 sha256 이 바뀌므로 동결을 다시 한다. 1–10.7 의 글은 지우지 않는다.
+
 - 규칙: 판정 규칙(`plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md`) 3.2–3.6, 8.2–8.5, 8.12, 8.13. 아래에서 "8.13-n" 은 8.13 의 n 번이다.
 - 형식: relations rules revision 14 의 줄과 쌍 파일(`kairos/docs/static_facts.md` 5x), 계획 sidecar 의 줄(`kairos/docs/plan_manifest.md` 10절), dump 글과 같은 빌드 줄(`kairos/docs/event_semantics.md` 13절).
 - 절차: `plan/c1_closure_evaluation_protocol_20261118.md`.
@@ -198,3 +200,161 @@ end
 6. **삭제의 성공 값.** 삭제 마무리 호출의 반환을 그 행의 성공 경로 줄의 성공 값(outcome class rule)과 비교한다. 그 줄이 없으면 삭제의 성공을 모르고, 그 사건은 이름 상태를 `undecided` 로, (마)를 "배제되지 않음"으로 만든다.
 7. **경로 B·C 의 writer 호출.** 행의 writer site 의 호출 인스턴스는 개정 3 처럼 게시 사건(`other_kind writer`)으로 남긴다. 쌍(이름 결합)은 경로 A 의 생성 site 에서만 만든다.
 8. **요약의 미확정 종류.** 바탕 사유를 평가 절차 8절의 다섯 종류로 나누는 표: `no_run`·`target_not_reached`·`record_insufficient` → 실행 증거 없음; `absent_result_unevaluated`·`key_unresolved`·`writer_set_incomplete`·`fixed_proof_open`·`caller_dependence_unknown`·`actor_not_extracted` → 정적 입력 없음; `plan_missing` → 자원; `link_unlinked`·`multi_state_unlinked`·`build_mismatch`·`intervention_out_of_scope` → 구조; 하위 사유 `absence after a live create of the same name` → 모순; 그 밖 → `other`. 요약은 필드 저장값 규칙으로 선 (iii)을 가진 기록을 따로 센다.
+
+## 11. PI 결정 뒤 덧붙임: 판정 부분의 고침 넷, 읽는 부분의 입력 하나, 요약의 주·보조 표지, 기대의 가름, 반증·평가 스크립트, 부팅 전 다시 재기 (2026-11-19; 코드보다 먼저 커밋함)
+
+근거: 2026-11-19 PI 결정(`Architecture/spec/PI_DECISIONS_RESOLVED_20261119.md`), 판정 규칙 8.14, 평가 절차 14절, lead 의 판단(`plan/full_stage_results_20261116.md` 26.0 (나)–(자)). 이 절은 코드보다 먼저 커밋한다(머리의 규칙: 코드가 이 글과 달라야 하면 이 글을 먼저 고쳐 커밋한다). 1–10.7 의 뜻은 아래에서 **고침**이라고 표시한 곳만 바꾼다. 새 파일과 칸의 이름은 코드를 쓰는 단계가 이 절을 고쳐 먼저 커밋한 뒤 확정할 수 있다(9절 첫 항목과 같다; 뜻은 바꾸지 않는다). 행 번호, 키, 앱·함수 이름, 기대 판정은 어느 스크립트의 인자도 상수도 아니다(1절 2; 평가 절차 0절). fixture 는 합성 이름만 쓰고 설계 행을 쓰지 않는다(6절). 따로 표시하지 않는 한 [보강 제안]이다.
+
+**판정 부분을 바꾸는 항목은 1, 3, 4, 5, 6 이다.** 그래서 `explain_judge.py` 의 sha256(`531a6b3e…`)이 바뀌고 동결을 다시 한다(12절 6; 11.3). 2 는 읽는 부분을 바꾼다(`explain_read.py`, `ff0a0625…`). 7–9 와 11 은 요약, 12 는 기대 쪽, 13 은 새 스크립트, 14–15 는 실행 스크립트를 바꾼다. 이 넷은 판정 부분의 sha256 을 바꾸지 않는다. 다시 동결한 판이 생기기 전에는 부팅하지 않는다(평가 절차 14.0).
+
+### 11.1 판정 부분과 읽는 부분
+
+1. **문맥 줄이 없는 행의 문맥 (26.0 (나); `rules-01`; 판정 부분. 고침: 3절 2 의 문맥 배정, 10.3-7).**
+   - 입력: 중간 글의 그 행의 계획 `context` 줄, 그 행의 relations `alternatives [context <id>…]:` 줄, 그 행의 사용 사건.
+   - 규칙(판정 규칙 8.14 의 6 (가)): 행에 `context` 줄이 하나 이상 있으면 지금대로다(8.13-16: 그 행위자 안에서 사건을 정확히 한 문맥 틀이 싸면 그 문맥, 아니면 `unknown`). 행에 `context` 줄이 없으면, 그 행의 대안 줄들이 이름 붙인 서로 다른 문맥 id 의 집합을 본다. 그 집합이 정확히 하나이면 그 행의 모든 사용 사건의 문맥은 그 id 다. 사건의 틀과 at-call 의 유무에 달리지 않는다. id 는 줄이 적은 글 그대로이고, 줄이 `-` 를 적었으면 `-` 다. 집합이 비었거나 둘 이상이면 모든 사건의 문맥은 `unknown` 이고, 그 사건의 (c3)(iii)은 `not_established(context unknown)` 다. 줄에 없는 문맥 id 를 만들지 않는다. 지금 판의 "문맥 줄이 없으면 `-`" 길은 없앤다.
+   - 출력: `uses[].context`, 갈래마다의 `uses.tsv` 의 `context`, `use_cond.branch_iii[].context`.
+   - 서식 검사(5절의 14 에 더함): 문맥이 `unknown` 이 아닌 사용 사건마다 그 id 의 대안 줄이 그 행에 있다.
+   - fixture(합성 행): 문맥 줄이 없고 대안 줄이 문맥 하나를 이름 대는 행에서, 그 줄이 (a) `found: …`(→ (iii) `not_held`), (b) `none found (exploration complete)`(→ `held` 로 가는 길), (c) `not established (…)`(→ `not_established`)인 셋. 문맥 줄이 없는데 대안 줄이 문맥 둘을 이름 대는 행(→ `unknown`). 대안 줄이 `[context -]` 인 행(→ `-`).
+
+2. **이름 붙은 라이브러리 호출의 기록 수 (26.0 (다); 읽는 부분과 새 입력. 고침: 3절 1, 4절의 표, 4.1 에 더함).**
+   - 판정 부분은 중간 글과 어휘 파일만 연다(10.1). 그래서 '항목 없음'을 알아보려면 중간 글에 그 사실이 있어야 한다. 새 입력 파일 하나를 둔다. 꼴은 다음과 같다.
+     ```
+     kz-named-calls 1
+     rule judgement rules 8.14 item 5 (2026-11-19): every library call that a planned row's namespace-entry or namespace-layer line names, with its records in the facts
+     plan <sidecar 의 sha256> <sidecar 의 경로>            (계획마다 한 줄)
+     facts <facts 의 sha256> <facts 의 경로>              (계획마다 한 줄)
+     columns function<TAB>named_by<TAB>records<TAB>unverified<TAB>layers
+     <호출마다 한 줄>
+     lines <n> no_entry <m>
+     end
+     ```
+     `named_by` 는 그 호출을 이름 댄 칸(`compare-call`, `copy-call`, `length-call`, `fill-call`; 여럿이면 쉼표)이다. `records` 는 그 facts 의 P0 표와 SEMANTICS 기록 가운데 그 함수의 기록 수(모든 칸)다. `unverified` 는 그 가운데 `verify=unverified` 인 것의 수다. `layers` 는 기록이 있는 층(`P0`, `framework`; 없으면 `-`)이다. `no_entry` 는 `records = 0` 인 줄의 수다.
+   - 만드는 것: 주기를 준비하는 단계의 스크립트가 후보 목록과 같은 입력(두 계획, relations, facts)과 같은 규칙(판정 규칙 8.13 의 3번의 '이름 댄 항목')으로 만든다. 후보 목록을 만든 스크립트에 선택을 더해도 되고 따로 둔 스크립트로 만들어도 된다. 어느 쪽이든 후보 목록과 인정 파일이 바이트까지 같음을 다시 만들어 보인다(26.0 (너)). 두 빌드의 수가 다르면 그 스크립트는 멈춘다(후보 목록의 규칙과 같다). 파일의 자리는 `records/closure-c1prep-20261119/candidates/named_calls.tsv` 로 한다.
+   - 읽는 부분: 새 인자 `--named-calls FILE` 이다. `--candidates` 가 주어지면 이것도 있어야 한다. 점검은 머리, 열 다섯, 꼬리의 수, `plan` 줄들이 후보 목록의 `plan` 줄들과 같음, 그 실행의 sidecar sha256 이 그 가운데 있음, 그 계획의 `namespace-entry`·`namespace-layer` 줄의 네 칸이 이름 댄 함수가 모두 파일에 있음이다. 하나라도 어긋나면 후보 목록처럼 rc 2 로 멈추고 아무 기록도 쓰지 않는다(4절의 표: 갈래가 정해지지 않은 평가는 하지 않는다).
+   - 출력: 중간 글의 새 칸 `named_calls{<함수>: {named_by, records, unverified, layers, src: [파일 이름, 줄 번호]}}`, 그리고 `inputs`·`input_checks` 의 줄.
+   - fixture: 머리가 다른 것, 꼬리의 수가 틀린 것, `plan` 줄의 sha256 이 다른 것, 이름 붙은 호출이 빠진 것. 모두 rc 2 여야 한다.
+
+3. **항목이 없는 호출의 판정 (26.0 (다); `rules-04`; 판정 부분. 고침: `entry_state`, 3절 3 의 (나) 의미와 (다), 3절 8 의 (c3)(iii)).**
+   - 입력: 중간 글의 `candidates`, `named_calls`, 평가 갈래, relations 의 버퍼 주소 쓰임 줄.
+   - 규칙(판정 규칙 8.14 의 5): 라이브러리 호출 하나의 상태를 다음 차례로 정한다.
+     - (a) 후보 목록에 그 (층, 함수, 칸, 이름 댄 줄)의 줄이 있으면 지금대로다. 그 자료 갈래에서 인정되면 성립하고, 아니면 미대조다.
+     - (b) 후보 목록에 없고 `named_calls` 에서 그 함수의 `records = 0` 이면 **항목 없음**이다. 모든 자료 갈래에서 성립하지 않는다.
+     - (c) 후보 목록에 없고 `records > 0` 이면 지금대로 '미대조가 아님'이다. 검증 상태가 unverified 가 아닌 기록이 있다는 뜻이다(PI 결정 ⑤).
+     - (d) 후보 목록에도 `named_calls` 에도 없으면 상태를 읽지 못한 것이다. 성립하지 않고, 하위 사유는 `the state of the entry of <호출> is not read` 다.
+     - 후보 목록이 없는 실행(10.3-11)은 지금대로다.
+   - 조건 (다)의 버퍼 주소 쓰임(판정 규칙 8.13-11 (b), 8.14 의 5): relations 의 `stored-name address uses` 줄에서 `library: <호출> parameter <k>: no entry says the parameter is not written` 인 쓰임은 그 매개변수의 항목이 없는 것이다. 그런 쓰임이 하나라도 있으면 (다)는 모든 갈래에서 `missing` 이고, 근거에 그 쓰임들을 적는다. 읽기 `Rf` 도 이것을 움직이지 않는다. 이 주기에는 쓰임 20 가운데 풀리지 않은 14 의 13 이 이 꼴이고, 나머지 하나는 가변 인자다 [M: `/home/user/work/redesign/obs1/cz_final_order/c1_pre_tx/relations.txt:608` 의 `discharged 6, not discharged 14` 와 `no entry says the parameter is not written` 13 번; PI 결정 §2 A5].
+   - 사유의 꼴: 항목과 요소의 바탕 사유는 그대로 두고, 하위 사유를 `no entry: <호출>` 로 쓴다. 예를 들어 조건 (나)의 의미는 `link_unlinked(name binding: no entry: <호출>)` 다. 근거에는 `named_calls` 의 그 줄(파일 이름, 줄 번호)을 붙인다. 판정 부분은 규격(ISO C·POSIX)의 글을 읽지 않고 근거로 쓰지 않는다. 보고가 그 조항을 이름 붙인 전제로 따로 적을 수 있을 뿐이다. 바탕 사유가 어휘 자료에 있는 것이므로 어휘 파일은 바뀌지 않는다(8.10).
+   - 출력: `link.name_binding.pairs[].items.na_semantics`·`da_no_name_mapping` 의 상태, 사유, 근거. (c3)(iii)의 `depends_on` 과 사유.
+   - fixture(합성 호출 이름): 후보 목록에 없고 기록이 0 인 호출을 이름 댄 줄(`D1`, `D2`, 그 호출의 종류를 빼지 않는 부분 인정에서 모두 `missing`). 지금의 fixture(`tests/test_explain4.py`)는 그 호출을 P0 의 data function 후보로 두었으므로 이 꼴을 시험하지 못한다(`rules-04`). 기록이 있고 미대조가 아닌 호출(성립). 상태를 읽지 못한 호출(성립하지 않음). 버퍼 주소 쓰임 줄에 `no entry …` 가 있는 것(모든 갈래와 `Rf` 에서 (다)가 `missing`).
+
+4. **찾은 사용의 이름 상태와 인스턴스 연결 (26.0 (라); `semantics-01`; 판정 부분. 고침: 3절 5·6).**
+   - 입력: 사용 사건의 결과 종류, 생성 사건, 세대(지금대로 성공 경로 줄이 `held` 인 생성에서만 생긴다), 행의 `incomplete:` 줄.
+   - 규칙(판정 규칙 8.14 의 6 (나)): 결과 종류가 found 인 사용에 그 종류·글의 열린 세대가 있으면 지금대로다(`met`, 또는 빈 자리 지우기 때문의 `undecided`). 열린 세대가 없으면 이름 상태는 `undecided` 다. 행의 생성자 site 가 완전하지 않으면(지금의 생성자 완전성이 거짓) 하위 사유는 `the row's creator sites are not complete` 이고, 아니면 `no create of the found id in the record` 다. 찾은 사용에는 `unmet` 을 쓰지 않는다. 그 앞의 갈래(키 글이 다 기록되지 않음, 종류 값이 없음, 수명 끝이 완전하지 않음, 겹침)는 지금대로 먼저 본다. 인스턴스 연결은 그 id 의 세대가 없으면 `unlinked` 이고, 사유는 지금대로 `link_unlinked(no create of the id in the record)` 다. 찾은 id 로 세대를 만들지 않는다.
+   - 출력: `uses[].name_state`, `uses[].instance_link`, `uses.tsv` 의 두 칸.
+   - 서식 검사(5절의 14 에 더함): 결과 종류가 found 인 사용 사건의 이름 상태는 `unmet` 이 아니다.
+   - fixture: 성공 경로 줄이 `missing` 인 생성과 그 id 를 찾은 사용(→ `undecided`, `unlinked`). 생성자 site 가 완전하고 그 id 의 생성이 기록에 없는 찾은 사용(→ `undecided(no create of the found id in the record)`, `unmet` 이 아님). 성공 경로 줄이 `held` 이고 열린 세대 위에서 찾은 사용(→ `met`, `linked`; 지금대로).
+
+5. **요소와 조건 (다)가 기대는 목록 항목 (26.0 (사); `rules-05`; 판정 부분. 고침: 3절 8 과 3절 3 의 (다)).**
+   - 입력: relations 행의 `layers:` 줄(그 행의 `P0-unverified(…)`·`sem-unverified(<api>:<칸>, …)` 목록), 요소마다의 출처 줄(기록의 `sources` 가 가리키는 줄), 버퍼 주소 쓰임 줄, 후보 목록, 평가 갈래.
+   - 규칙(판정 규칙 8.13 의 2번 끝 문장; 8.14 의 6 (다)): (c1), (c2), (c4), (c3)(i)마다, 그 요소의 출처 줄이 글로 이름 댄 함수 가운데 그 행의 `layers:` 목록에 든 (층, 함수, 칸)을 모은다. 그것을 후보 목록에서 찾아 `depends_on` 에 적는다. 없으면 빈 목록이고 그것이 '없음'이다. (c3)(iii)은 지금대로 대안 줄의 `rests on:` 에서 읽는다. 조건 (다)는 버퍼 주소 쓰임 가운데 기록이 미대조인 쓰임(`… unverified …`)의 호출을 후보 목록에서 찾아 `depends_on` 에 적는다. 항목이 없는 쓰임은 3 대로 다룬다. 그다음 갈래마다 `entry_state` 를 건다. `D1` 과 그 줄을 인정하지 않는 `D2[…]` 에서, 인정되지 않은 줄에 기댄 요소는 present 나 `held` 가 아니다. 하위 사유는 그 요소의 바탕 사유 아래 `rests on an unverified entry: <함수>:<칸>` 이다.
+   - 한계 [I]: 출처 줄이 이름 댄 함수와 행의 목록 항목은 글의 함수 이름으로 맞춘다. 그래서 요소가 실제로는 기대지 않는 항목을 이름으로 붙일 수 있다. 그 잘못은 `D1` 을 더 엄격하게 하는 쪽이다. relations 의 줄이 항목을 줄마다 '기댐'으로 적게 되면 그 줄로 바꾼다(다음 kz-static 빌드; 26.0 (하)와 같은 자리).
+   - 이 주기 [I]: 이 규칙으로 `use_cond.status` 와 `violation` 은 바뀌지 않으리라 본다(26.0 (사)). 요소 하나의 상태는 바뀔 수 있다. 예를 들어 읽기 `Rd` 에서 present 인 (c4)는, 그 출처 줄이 이름 댄 생성 함수의 `agreement` 항목이 그 행의 목록에 있으면 `D1-Rd` 에서 present 가 아니게 된다. 바뀌면 다시 쓰는 기대(12)에 규칙에서 적는다.
+   - 출력: `use_cond.callee_check.depends_on`, `use_cond.reach.depends_on`, `use_cond.writers.depends_on`, `use_cond.branch_i.depends_on`, `link.name_binding.pairs[].items.da_no_name_mapping.depends_on`.
+   - fixture(합성 행): 요소의 출처 줄이 행의 목록 항목을 이름 대는 행(`D1` 에서 present 가 아님, 그 종류를 인정한 `D2[…]` 에서 present). 이름 대지 않는 행(`depends_on` 이 빈 목록). 버퍼 쓰임의 기록이 미대조인 것과 항목이 없는 것.
+
+6. **서식 검사 16 의 넓힘 (26.0 (사); 판정 부분. 고침: 5절의 16).** 지금의 16 에 넷을 더한다.
+   - (a) 모든 기록에서 (c1), (c2), (c4), (c3)(i), 문맥마다의 (c3)(iii), 쌍마다의 조건 (다)에 `depends_on` 칸이 있다. 빈 목록도 칸이다.
+   - (b) `D1` 기록에서 `depends_on` 이 비지 않은 (c1), (c2), (c4)는 present 가 아니고, 그런 (c3)(i)과 조건 (다)는 `held` 가 아니다.
+   - (c) `D2[…]` 기록에서 present 나 `held` 인 것의 `depends_on` 줄은 모두 그 갈래의 인정 파일에 있다(검사 15 의 "미대조 항목에 기대어 선 항목은 인정 파일의 줄을 가리킨다").
+   - (d) 하위 사유가 `no entry: …` 인 항목과 요소는 어느 갈래에서도 present 나 `held` 가 아니다.
+   - 읽기가 받는 전제의 다룸(10.7-1)은 그대로다. 어긋난 기록은 `refused.txt` 에만 적고 rc 4 다.
+   - fixture: (a)–(d)를 하나씩 깨는 기록. 모두 물려야 한다.
+
+### 11.2 요약, 기대, 반증·평가, 실행
+
+7. **주·보조 표지 (26.0 (자); 요약).** 요약은 갈래마다 표의 머리에 `main (declared before the boot: D1/R0)` 또는 `auxiliary (data <자료 갈래>, readings <읽기들>)` 를 적는다. `D2/R0` 도 `auxiliary` 다. 갈래는 기록의 `eval_branch` 에서 읽는다. 주 결과의 갈래 id 는 상수 `D1-R0` 하나다(평가 절차 14.1; 행이나 키가 아니다). 판정 부분이 기록에 쓴 `eval_branch.tag`(읽기 갈래에만 "4.2 의 읽기 갈래(PI 결정 전)")는 그대로 옮기고 고치지 않는다. 형식 점검: 표마다 머리 줄이 하나 있고, `main` 은 `D1-R0` 의 표에만 있다.
+
+8. **사용 단위의 표 (요약).** 평가 절차 14.2 의 단위로 낸다.
+   - 입력: 기록의 `uses`, `uses_reached`, `uses_decided`(10.7-4), 갈래마다의 `uses.tsv`, 그리고 요약의 새 인자로 받는 미리 정한 사용의 목록(분모; `uses/uses_<빌드>.tsv`).
+   - 출력: 부팅마다 닿은 사용 / 정한 사용, 판정된 사용 / 닿은 사용(미확정은 같은 줄에 10.7-8 의 종류별로), 사용마다 부팅에 걸친 분포("N 부팅 가운데 observed k, not observed m, undetermined n"). 사용마다의 사건 수는 따로 둔 칸이다. 한 기록에 든 사용들이 판정 하나를 나눠 가짐을 표 아래에 적고, 그런 기록을 이름 댄다.
+   - 형식 점검: 사용 목록의 줄마다 표에 줄이 하나 있다. 닿지 않은 사용도 줄이 있다.
+
+9. **쌍의 표와 실패 징후 (요약).** 평가 절차 14.4 대로 낸다.
+   - `pair_kind` 의 여덟 값(`app-app`, `core-app`, `process-app`, `same-app-other`, `same-app-main-child`, `same_actor`, `core-core`, `unknown`)을 모두 따로 둔다. 3절 11 의 `creator-app` 은 10.5 대로 내지 않는다.
+   - `unknown` 은 행위자의 소속 상태(기록의 소비 행위자와 게시 행위자의 `app` 칸의 `status`·`class`)로 (a) 소유 미상, (b) 두 소유가 정해진 코어–프로세스 쌍, (c) 그 밖으로 나눈다.
+   - '앱 사이' 줄은 두 소유가 정해진 `app-app` 만이다. 한 앱 안의 쌍과 `same_actor` 는 '대조' 줄에 둔다. 코어와 프로세스, 소유 미상의 쌍은 제 줄에 둔다.
+   - `odf = failure_sign` 인 기록의 수를 그 기록의 `pair_kind` 집합마다, 그리고 소비 행위자의 소속(app, core, process, 미상)마다 나눈다.
+   - 범례: 정적 `unordered` 는 "이 개정이 간선을 찾지 못함"이다.
+   - 형식 점검: 여덟 값의 줄이 모두 있다(0 이어도 있다).
+
+10. **(ii).** 3절 8 의 "(i)·(iii)(또는 (ii))"는 판정 규칙 8.14 의 2 로 읽는다. (ii)는 (i)·(iii) 짝을 대신하는 따로의 근거다(lead 의 선택; PI 의 확인을 기다림). 이 개정은 (ii)의 입력 줄, 칸, 계산을 더하지 않는다.
+
+11. **요약의 때 (26.0 (자). 고침: 3절 13 과 8절 끝의 '부팅 뒤에 고치면').** 7–9 를 넣은 요약을 이번 동결에 함께 넣고, 그 sha256 을 새 동결 파일과 새 부팅 선언에 적는다. 지금의 `17c3a9eb…` 를 대신한다. 부팅 뒤에 요약을 고쳐 다시 내는 길(평가 절차 12절 6)은 이 주기에 쓰지 않는다. 요약은 판독지와 기대 파일을 읽지 않는다(평가 절차 9절). fixture: 7–9 의 형식 점검을 하나씩 깨는 합성 입력.
+
+12. **기대의 다시 씀과 줄마다의 가름 (26.0 (나)·(다)·(라)·(바); 기대 쪽. 고침: 10.6 의 꼴).**
+    - 기대 파일과 예측은 판정 규칙 8.13–8.14 에서 다시 쓴다. 예행의 출력에서 베끼지 않는다(26.0 (라)). 고친 판정 부분을 실제 두 계획 위의 합성 사용 사건(16)에 돌린 예행과 맞대어, 어긋나는 줄마다 판정 부분의 결함인지 기대의 잘못인지를 가려 결과 문서에 적는다.
+    - `kz-expect 1` 의 `expect` 줄(10.6)에 여덟째 칸 `class` 를 더한다. 값은 `boot`(부팅으로 틀릴 수 있음), `static`, `format` 가운데 하나다(평가 절차 14.6). 기대를 쓰는 스크립트가 칸마다 규칙으로 정한다. 동결한 판정 부분이 정적 입력만으로 내는 칸(정적 요소 표에서 오는 칸)은 `static` 이고, 사건에서 오는 칸은 `boot` 다. 머리에 `rule` 줄을 하나 더해 그 규칙을 적는다.
+    - `explain_expect.py` 는 줄마다 `match`·`mismatch`·`no_record` 를 `class` 와 함께 쓰고, 꼬리에 `class` 마다의 수를 낸다.
+    - 형식 점검: 줄마다 칸이 여덟이고 `class` 가 셋 가운데 하나다. 꼬리의 수가 맞다.
+    - fixture: `class` 가 없는 줄, 셋 밖의 값. 모두 물려야 한다.
+
+13. **반증·평가 스크립트 (26.0 (마); `rules-02`; 새 스크립트).** 이름은 `env/obs1/explain_eval.py` 로 한다. 표준 라이브러리만 쓰고 판정 부분과 읽는 부분을 가져오지 않는다.
+    - **입력**(명령줄에 이름 붙은 파일만 열고 연 파일마다 sha256 을 출력의 머리에 적는다): 한 부팅의 설명 출력 디렉터리(갈래마다 `records/*.json`, `index.tsv`, `uses.tsv`), 그 부팅의 문 결과(`gate.txt`), 쌍 파일, 계획 sidecar, relations 글, 미리 정한 사용의 목록, 판독지의 정적 부분과 부팅별 부분(없으면 `none`), 그리고 F1 에만 기대 파일이다. 이 가운데 relations 글과 문 결과 둘은 평가 절차 14.7 의 입력 목록에 이 절이 더하는 것이다. relations 글은 두 가지에만 읽는다. 하나는 F3 의 생성 성공 값이다(`callee-check (success path)` 줄이 적은 값; 줄이 `missing` 이어도 값을 적는다. 기록은 성공 경로 줄이 `held` 가 아닌 생성의 성공 값을 싣지 않는다). 다른 하나는 F5·F8 (a)의 영역과 `expect_discriminate` 가 요구하는 근거(대안 줄과 holder 줄)다. 요구를 판정 부분의 출력에서 읽으면 요구와 충족이 같은 것이 되기 때문이다. 문 결과는 F10 이 '문을 지난 부팅'을 가르는 데만 읽는다.
+    - **하지 않는 것.** 기록을 쓰거나 바꾸지 않는다. 입력 파일을 바꾸지 않는다. 그 출력은 Kairos 의 어느 부분의 입력도 아니다. 기대 파일은 F1 의 계산에서만 연다.
+    - **출력** `kz-eval 1`(부팅마다 한 파일): 머리(입력과 sha256), 그리고 줄마다 `check`, `class`(`boot`·`static`·`format`; 평가 절차 14.6), `branch`, `build`, `row_label`, `row_key`, `use`(또는 `*`), `result`, `ground`(기록 파일과 칸 경로, 쌍 파일의 줄, 판독지의 줄), `note`. `result` 는 점검이면 `pass`·`fail`·`not_evaluable`, `expect_discriminate` 면 `met`·`unmet`·`not_counted`, 수치면 값이나 `undefined` 다. 꼬리에는 점검 × `class` × `result` 의 수를 낸다. `expect_safe` 는 `boot` 인 점검의 지남 / `boot` 인 점검으로 내고, `static`·`format` 은 따로 낸다. `expect_discriminate` 는 충족 / 센 행, 정밀도와 계획 안의 재현율(14.3 의 꼴), 미확정의 분해도 꼬리에 낸다.
+    - **점검마다의 셈**(평가 절차 6–7절과 14.6–14.7; 행을 이름으로 고르지 않는다):
+      - F1: 기대 파일의 줄마다 기록의 칸을 대조한다(`explain_expect.py` 와 같은 규칙을 따로 구현). 결과를 줄의 `class` 와 함께 쓴다.
+      - F2: `D1` 갈래마다, (a) `bound` 인 쌍이 없음, (b) `depends_on` 이나 `premises` 를 가진 `held` 항목이 없고 인정되지 않은 `depends_on` 으로 present·`held` 인 요소가 없음.
+      - F3: 경로 A 기록의 부재 사용 사건마다, 같은 종류 값과 같은 완전한 키 글을 가진 생성 사건이 그 사용의 at-call 앞에 after-call 을 마쳤고, 그 상태 값이 relations 의 성공 값과 같으며, 그 사이에 그 이름·id·표 전체에 대한 수명 끝(기록의 `lifetime_ends`)이 없으면 `fail` 이다. 성공 값을 읽을 수 없는 생성의 쌍은 `not_evaluable` 이다.
+      - F4: 결과가 found 인 사용 사건마다, 기록의 생성 사건 가운데 기록된 out 값(`creates[].out` 의 값이나 `raw`)이 찾은 id 와 같고 사용보다 앞선 것이 있으면 `pass` 다.
+      - F5: 대조 행(아래)마다, relations 의 대안 줄이 `found: …` 인 문맥의 (c3)(iii)이 `held` 가 아니고, holder 줄이 다른 정의를 적으면 (c3)(i)이 `held` 가 아니다.
+      - F6: 대안 줄의 `decided calls:` 가 정한 문맥이 없으면 `static` 의 '점검할 것 없음'이다. 있으면, 정해진 결과가 들어가지 않을 분기 안의 site 를 계획이 이름 대지 않는 동안 `not_evaluable` 이다(한계).
+      - F7: `R0` 갈래마다, 미리 정한 사용의 목록의 모든 행에서 `use_cond.status` 가 `derived` 가 아니고 `violation` 이 `observed` 가 아니다. 목록은 설계 행을 담으므로 설계 행을 이름으로 고르지 않는다.
+      - F8: (a) 계획된 행마다, relations 행이 이름 댄 모든 생성자와 writer 의 위치에 쌍 파일의 줄이 있다. 글 출력(`order.txt`)과 값을 대는 쪽은 이 스크립트의 입력이 아니어서 셈하지 않고, 그렇게 적는다. (b) 기록의 `order_ground` 가 쌍 파일의 줄을 가리키면 그 줄이 쌍 파일에 같은 값으로 있다. 그런 줄이 없으면 `not_evaluable` 이다.
+      - F9: sidecar 에 `context` 줄이 둘 이상인 행의 사용 사건마다 문맥이 `unknown` 이 아니다.
+      - F10: `gate.txt` 가 PASS 인 부팅에서, 기록의 객체마다의 같은 빌드 줄이 모두 `confirmed` 다.
+      - s1: 대조 행의 `D1` 기록에 `bound` 쌍이 없다. s2: 대조 행에 `held` 인 (c3) 갈래((i)이나 어느 문맥의 (iii))가 없다. s3: `linked` 인 인스턴스 연결마다, 그 id 를 out 으로 적은 생성 사건이 사용 앞에 있고 그 사이에 수명 끝이 없다. s4: `refuted` 인 쌍마다 기초 1, 2, 4, 5 와 조건 (가)–(마)가 `held` 이고 두 키 글이 완전하며 다르다.
+      - 대조 행: 미리 정한 사용의 목록에서 `plan_state` 가 대조를 담는 행(`control`, `tier+control`)이다. s1–s4 는 모든 대조 행에서 센다. `expect_discriminate` 는 `plan_state = control` 인 행에서만 센다. `tier+control` 인 행의 줄은 `not_counted` 로 쓴다(평가 절차 14.7).
+      - `expect_discriminate`: 평가 절차 14.7 의 규칙 (1)–(3)으로 relations 와 사건에서 요구를 정하고, 기록에서 그 근거가 나왔는지 본다. 그 밖에 나온 근거(`refuted_link`, `not_observed_in_runs`)는 `note` 에 적는다.
+      - 정밀도와 계획 안의 재현율: 평가 절차 14.3 대로 셈한다. 판독은 판독지 부팅별 부분의 칸에서 읽는다. 그 칸의 꼴(사용마다 `T`·`F`·`U` 와 양성·음성·판독 불가)은 판독자를 정할 때 파일 목록과 함께 커밋한다(평가 절차 14.5). 그 전, 곧 정적 부분이 모두 'not filled: no reader' 이면 두 수치는 `undefined(no reader)` 다. 도구 양성이 없으면 정밀도는 `undefined(no tool positive)` 다.
+      - 미확정의 분해: 미리 정한 사용마다 그 기록이 `undetermined` 이면 바탕 사유를 10.7-8 의 종류로 나눠 센다. 명시적 음성과 섞지 않는다.
+    - **형식 점검**(스크립트 자신이 끝에 하고, 어긋나면 rc 0 이 아님): 위의 점검마다 적용할 단위에 줄이 하나씩 있다(조용히 빠지는 단위가 없다). `class` 와 `result` 의 값이 정한 집합 안에 있다. 꼬리의 수가 줄 수와 같다.
+    - **fixture**(합성 이름): F1–F10, s1–s4 마다 그것을 `fail` 로 만드는 입력 하나와 `pass` 하나. `expect_discriminate` 의 충족, 미달, `not_counted`. 정밀도의 `undefined`(N = 0), `undefined`(T + F = 0), `U` 가 있어 확정하지 않음, `T`·`F` 가 있는 값. 재현율의 0/k, `undefined`(k = 0), 미확정 옆 칸. 그리고 이 스크립트가 F1 밖에서 기대 파일을 열면 실패하는 시험(판정 부분의 열기 시험과 같은 꼴), 출력 밖의 파일을 쓰면 실패하는 시험.
+
+14. **부팅 전 다시 재기 (26.0 (아); `builds-04`; 실행 스크립트).** `run_cycle.sh verify <빌드> <N>` 단계를 더한다.
+    - 입력: 새 `boot/declaration.tsv`.
+    - 출력: `boot/<빌드>/boot<N>/verify.txt`, 꼴 `kz-verify 1`. 머리에 선언 목록의 경로와 sha256, 잰 시각을 적는다. 줄마다 (목록의 줄 번호, 종류, 경로, 선언의 값, 잰 값, `ok`|`differs`|`missing`)를 적는다. 꼬리는 `rows <n> ok <a> differs <b> missing <c>` 다.
+    - 규칙: sha256 줄은 파일을 다시 해시한다. build-id 줄은 선언을 쓸 때와 같은 방법으로 ELF 의 GNU build-id 를 다시 읽는다. rc 는 `differs` 와 `missing` 이 0 이면 0, 그 밖은 1, 인자 오류는 64 다.
+    - `boot` 단계는 같은 N 의 `verify.txt` 가 있고, 그 꼬리가 깨끗하며, 그 머리의 선언 sha256 이 지금 목록의 sha256 과 같을 때만 돈다. 아니면 rc 1 로 멈추고 부팅하지 않는다.
+    - 선언에 더하는 줄: 설명 단계가 읽는 어휘 파일 `kairos/tests/static/data/reason_vocabulary.txt`, 두 sidecar 의 `input namespace-data` 줄이 이름 댄 이름 공간 자료 다섯, 2 의 `named_calls.tsv` 와 그것을 만든 스크립트, 13 의 스크립트, 새 동결 파일.
+    - 시험: 선언의 줄 하나를 바꾼 복사본에서 `verify` 가 rc 1 과 `differs` 를 낸다. 파일 하나를 뺀 것에서 `missing` 을 낸다. 깨끗하지 않은 `verify.txt` 앞에서 `boot` 단계가 부팅 명령을 부르지 않고 멈춘다(부팅 명령을 대신하는 모의로 시험한다).
+
+15. **실행 스크립트의 단계와 명령 (26.0 (아)·(마); 실행 스크립트).**
+    - 빌드마다 부팅 N 의 단계는 `verify` → `boot` → `control` → `convert` → `kzt-text` → `chain` → `stop` → `gate` → `explain` → `eval`(13) → `expect` 다. 끝에 `summary`(11; 미리 정한 사용의 목록을 인자로 받음)를 둔다.
+    - `boot/commands.txt` 를 이 차례로 다시 쓴다. `verify` 가 빌드마다의 첫 명령이다.
+    - `eval` 단계의 출력은 `boot/<빌드>/boot<N>/eval.txt` 다. 작은 글이므로 기록 디렉터리에 둔다.
+    - 기대 파일이 어느 단계의 입력도 아님을 점검한 기록(`boot/no_expect_input_check.txt`)은 다시 만든다. 예외 둘(`expect` 단계, 그리고 `eval` 단계의 F1)을 이름 대어 적는다.
+    - `bash -n` 구문 점검을 한다.
+
+16. **fixture, 회귀, 예행, 동결 (26.0 (나)).**
+    - fixture: 지금의 127 과 위 항목들의 새 fixture 를 모두 돌린다. 수는 남긴 출력에서 센다.
+    - 회귀: 2026-11-16 의 입력에 고친 판을 돌리고, 동결한 판(`531a6b3e…`)의 출력과 견준다. 다른 칸은 위 항목이 바꾼 칸뿐이어야 하고, 그 차이를 칸마다 센다(7절의 꼴).
+    - 예행: 두 C1 빌드의 실제 정적 출력과 계획 위에 합성 사용 사건을 넣어 돌린다. 합성 사건은 계획의 site 와 결합 파일에서 만들고, 시작 스크립트의 차례와 그 반대의 두 경우를 둔다. 사례의 값(행, 키, 기대)을 생성기의 인자로 쓰지 않는다.
+    - 출력을 쓰는 실행은 모두 `space_guard.sh` 아래에서 돌리고 그 기록을 남긴다(평가 절차 14.9).
+    - 그 뒤 다시 동결한다. 읽는 부분, 판정 부분, 구동부, 갈래 생성, 요약, 기대 대조, 반증·평가 스크립트, fixture 파일의 sha256 을 새 동결 파일에 적는다. 그 동결 파일과 12 의 기대 파일이 새 부팅 선언에 든다(평가 절차 14.0).
+
+### 11.3 바뀌는 파일과 sha256
+
+| 파일 | 바꾸는 항목 | 결과 |
+|---|---|---|
+| `env/obs1/explain_judge.py` (판정 부분) | 1, 3, 4, 5, 6 | sha256 이 바뀐다(`531a6b3e…` 를 대신함). 다시 동결한다 |
+| `env/obs1/explain_read.py` (읽는 부분) | 2 | sha256 이 바뀐다(`ff0a0625…` 를 대신함) |
+| `env/obs1/explain.py` (구동부) | 2 의 인자를 넘김 | 바뀌면 다시 적는다(`af9d4395…`) |
+| `env/obs1/explain_summary.py` | 7–9, 11 | `17c3a9eb…` 를 대신한다 |
+| `env/obs1/explain_expect.py`, `records/closure-c1prep-20261119/scripts/expect_write.py` | 12 | 다시 적는다 |
+| `env/obs1/explain_eval.py` (새로) | 13 | 새로 적는다 |
+| `records/closure-c1prep-20261119/candidates/named_calls.tsv` 와 그것을 만든 스크립트 (새로) | 2 | 새로 적는다. 후보 목록과 인정 파일은 바이트가 같다 |
+| `records/closure-c1prep-20261119/boot/run_cycle.sh`, `commands.txt`, `declaration.tsv` | 14, 15 | 새 부팅 선언 |
+| `env/obs1/tests/test_explain4.py` 와 새 시험 파일 | 1–16 | 다시 적는다 |
+
+바뀌지 않는 것: `env/obs1/explain_branches.py`, 후보 목록, 인정 파일, 갈래 파일, 미리 정한 사용의 목록, 판독지, 계획, 파생 빌드, 판정 부분이 읽는 어휘 파일(26.0 (너)).

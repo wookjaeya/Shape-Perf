@@ -1,0 +1,29 @@
+# the review of the re-frozen explanation script and boot declaration 2 (results 26.4) and its verification, before any boot
+# (2026-11-19).  One line per finding: id, severity (the review's), real and before_boot (the verification's), and the claim
+# shortened in this record's own words.  The full texts of the review and of the verification are not copied here: some of
+# them quote documents this repository does not hold.  What was done with each line is results 26.5.
+id	severity	real	before_boot	claim
+pre-rules-01	blocking	yes	yes	expect_discriminate rule (3) asks an instance link on an open generation for every found use, also on rows whose section 7 evidence is a static line; the fixed build's control row then comes out unmet when its retry finds, and the line stays classed static although a record moves it
+pre-rules-02	major	yes	yes	the tail of the eval output pools the falsifier, expect_safe and expect_discriminate counts over the 16 branches; no D1-R0 (main) count is written and the auxiliary branches are not named
+pre-rules-05	minor	yes	yes	the fixtures of a named call with no entry use the design rows' call in its design role (memchr as length-call); no no-entry fixture on another field
+pre-rules-07	minor	yes	yes	F3 is classed boot-failable without saying how weak it is in this cycle: every recorded slot clear (planned site 264, osapi-idmap.c:640) excuses a create, and it fires on every OSAL allocation
+pre-builds-02	blocking	yes	yes	declaration 2 does not pin every file the boot reads: the 10 non-ELF installed files of each build (the startup script and the tables) and the two helper scripts the boot runner calls
+pre-builds-03	major	yes	yes	'expectation error 0' of results 26.4 (3) is not a test result: the classifier has no path that returns an expectation error, and its no-create branch of T4 does not look at the record
+pre-builds-05	major	yes	yes	named_calls.tsv was written before spec 11.4 and before its script was committed, while results 26.3 says every run came after the code commit (the content holds)
+pre-builds-07	minor	yes	yes	the boot step trusts an earlier verify.txt: a declared file may change after it, and nothing checks that the declaration and the run script are committed
+pre-builds-08	minor	yes	yes	the frozen summary script was never kept run on a 16-branch explanation output, only its fixtures
+pre-builds-09	minor	yes	no	record gaps in section 26: steps without a sub-section; a size in 26.3 in no kept file (the other two parts were judged already handled)
+pre-builds-10	minor	yes	no	the expectation script and its class rule differ from spec 11 without a spec note; the English records cite results 26.0 by Latin letters it does not use
+pre-semantics-01	major	yes	yes	the frozen judge counts the dump 1.5 bookkeeping kinds no-build-id and object-table as event loss, which makes every lifetime incomplete, and gives a found use the reason plan_missing whatever the cause; the gate does not name loss records
+pre-texts-01	blocking	yes	yes	protocol 14.6/14.7 and spec 11.4 item 5 class expect_discriminate static where a boot record moves it; the [I] that the fixed build's row is met by its retry line is likely to fail at a boot
+pre-texts-02	major	yes	yes	F3, F4 and F9 write pass (class boot) for records with no unit, against protocol 14.6 ('what cannot be counted is not counted as passed') and the F8 (b) precedent
+pre-texts-04	major	yes	yes	the level-1 target is wholly static under the committed classes, while the PI record says level 1 is written only after the boot and static and boot distinctions are not mixed; no text says what a boot adds
+pre-texts-06	minor	yes	no	PI decision 1 lists the P0 declaration data (from the installed C library headers) among the cFE and OSAL data it admits
+pre-texts-07	minor	yes	no	the [I] that use_cond would not change (JR 8.14 item 6 (다), spec 11 item 5) and protocol 14.3/14.11's '160 lines partial' were not annotated after A63 became not_derived in D1
+pre-texts-08	minor	yes	yes	spec 11 was not amended for what was implemented: the class rule of item 12, the declaration file verify reads (declaration2.tsv), and protocol 14.7's input list
+pre-texts-10	minor	yes	no	the PI record says all 45 raw explanation JSON of 2026-11-16 are local only; one of them is also in git
+pre-texts-11	minor	yes	no	the PI record carries a count of reviewer scenario packages that nothing in this repository backs
+pre-texts-12	minor	yes	no	PI record section 3 omits the re-reading of the HB-await count 284 as an analysis gain; by source only 60 of the 284 edges can hold (semantics-05)
+pre-texts-13	minor	yes	no	section 26 has no sub-section for the review record and the four text commits of the group (9288cc7, ac5b70a, b071f02, adfdb51, 3535b43)
+lines 22 blocking 3 major 6 minor 13 real 22 before_boot 14
+end

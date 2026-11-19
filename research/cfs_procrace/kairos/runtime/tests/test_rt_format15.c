@@ -3,9 +3,9 @@
  * TOK_RETURN and TOK_START in an actor's buffer, which this runtime never writes.  Malformed sizes are refused.
  *   test_rt_format15 <out.kzrt>     writes the well-formed synthetic dump for kz-rt-dump (rt_format15_dump)
  * Unit-test values, not research conditions. */
-#include <stdint.h>
+#include "rt_test.h" /* first: it defines _GNU_SOURCE */
 
-#include "rt_test.h"
+#include <stdint.h>
 
 static void le16(unsigned char *p, uint32_t v) {
   p[0] = (unsigned char)v;

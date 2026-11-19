@@ -1,0 +1,19 @@
+normal /home/user/work/redesign/obs1/c1cyc_post_explain4/normal.json inputs 23 checks refused 0 unparsed 0 mismatch 0 branches 16
+branch D1-R0 records 46 refused 0 uses 178
+branch D1-Ra records 46 refused 0 uses 178
+branch D1-Rb records 46 refused 0 uses 178
+branch D1-Rc records 46 refused 0 uses 178
+branch D1-Rd records 46 refused 0 uses 178
+branch D1-Re records 46 refused 0 uses 178
+branch D1-Rf records 46 refused 0 uses 178
+branch D1-all records 46 refused 0 uses 178
+branch D2-R0 records 46 refused 0 uses 178
+branch D2-Ra records 46 refused 0 uses 178
+branch D2-Rb records 46 refused 0 uses 178
+branch D2-Rc records 46 refused 0 uses 178
+branch D2-Rd records 46 refused 0 uses 178
+branch D2-Re records 46 refused 0 uses 178
+branch D2-Rf records 46 refused 0 uses 178
+branch D2-all records 46 refused 0 uses 178
+compat chain confirmed; same_build unconfirmed(object not in the build record)
+rc=0

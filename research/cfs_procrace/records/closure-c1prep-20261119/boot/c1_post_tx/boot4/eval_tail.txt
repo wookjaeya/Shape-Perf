@@ -1,0 +1,371 @@
+== /home/user/work/redesign/obs1/c1cyc_post_eval4/eval.txt (lines 7586, sha256 75e3fee8a34e706112857b809462165da5ea5667ede2b55a730d012ff841de90); the full output is kept under the work directory with a ledger row (the keep step; results 26.9)
+kz-eval 1
+script explain_eval.py revision 2 (2026-11-19) sha256 03b9c95da9a52ad4d220990b3a1e68c58d3fc1825cbcddcbdf9912c2fe513436
+boot boot4 build c1_post_tx gate PASS
+input uses 955890c2c0876c0b70610acf93baf064431857ed74a2010be8957b2002f5fe20 /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/uses/uses_c1_post_tx.tsv
+input sidecar 4ef73c918ac41cdc5e41be1dcc12b996557b0f954208ea80d06d1250dcfbd0e9 /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/plan.side
+input relations 46b7b353f3ab1192f1dcd1b42716ae29323d6c1104a8392e08023549710e076b /home/user/work/redesign/obs1/cz_final_order/c1_post_tx/relations.txt
+input pairs 0066cb92d511e998e9ef56463819c5b0e3b20ebe05d3d32c77d58dbd5c52cdde /home/user/work/redesign/obs1/cz_final_order/c1_post_tx/pairs.tsv
+input gate 126fc6fb8b6a7e4d28c0b2a631f241af06fc7404b00892b90ae54f0e9008bcdd /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/c1_post_tx/boot4/gate.txt
+input sheets_static e70c31f2cf4e285df00ff28489ab3952b4d3611e5e9ae7ec52e12ee251458a1f /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/sheets/sheets_static.tsv
+input index:D1-R0 7f4b16a5a49d92a877bacd987006f851344f7a24dafba8074bc1400bf317f31a /home/user/work/redesign/obs1/c1cyc_post_explain4/D1-R0/index.tsv
+input index:D1-Ra 1ac639055b9353281e507084aa5a874fb80fb0f6cf6a8c3ae56ecd4b7245ab74 /home/user/work/redesign/obs1/c1cyc_post_explain4/D1-Ra/index.tsv
+input index:D1-Rb 6ef8923e70683df6d7c8039fb8b62c1d40a7c5bb266bd3554cde44c2d9f7bdac /home/user/work/redesign/obs1/c1cyc_post_explain4/D1-Rb/index.tsv
+input index:D1-Rc 08bef6d58cb269bbb3fe39e095c216ef1d20a4a021e66b538775b7457b648f4b /home/user/work/redesign/obs1/c1cyc_post_explain4/D1-Rc/index.tsv
+input index:D1-Rd 147907b6ea51fc182f3e31ed3b94ea0d4e45f00391f7bbfbb64ff4d194a373d9 /home/user/work/redesign/obs1/c1cyc_post_explain4/D1-Rd/index.tsv
+input index:D1-Re 456a82fc16dd2879c61f23b8ed7ec9ee99d824b0aaaa92e9e4fc60e0addae414 /home/user/work/redesign/obs1/c1cyc_post_explain4/D1-Re/index.tsv
+input index:D1-Rf c566f214664662c5538f1f1894a2caafe118940469f8808fe96c6701483a49d2 /home/user/work/redesign/obs1/c1cyc_post_explain4/D1-Rf/index.tsv
+input index:D1-all c3f36dd6a42b806b48da812afbccb3c5ce6312e5bbcc7c77a46039fceaac8c4b /home/user/work/redesign/obs1/c1cyc_post_explain4/D1-all/index.tsv
+input index:D2-R0 b224136ef513bd9ff022f5e697bea688624d195be39dceb699fc191a6c34b77f /home/user/work/redesign/obs1/c1cyc_post_explain4/D2-R0/index.tsv
+input index:D2-Ra 5ace784faa4e279719b7ef7b2b924b9a77dbfee0296af4c4a8057e912216965c /home/user/work/redesign/obs1/c1cyc_post_explain4/D2-Ra/index.tsv
+input index:D2-Rb 0b9d012637a9251081644c365747608ec507ad1e405ffa42ef559771ef4f6da5 /home/user/work/redesign/obs1/c1cyc_post_explain4/D2-Rb/index.tsv
+input index:D2-Rc afb68c258ce8eae95a973b7abc0974004960f487404824d8142048c53002d4fa /home/user/work/redesign/obs1/c1cyc_post_explain4/D2-Rc/index.tsv
+input index:D2-Rd 1440ff60aba6e44768391c8b84b7a1dde917cf621bf7d3ac8a67c3236b36d07a /home/user/work/redesign/obs1/c1cyc_post_explain4/D2-Rd/index.tsv
+input index:D2-Re e33afa67434ea08946658d24b3a14c7a022292702b2c8f87fa77ca254a0608f5 /home/user/work/redesign/obs1/c1cyc_post_explain4/D2-Re/index.tsv
+input index:D2-Rf e980f12be5120bbba325cc9a4f4b7874aa4810d3b308131599d6818d1425a8ca /home/user/work/redesign/obs1/c1cyc_post_explain4/D2-Rf/index.tsv
+input index:D2-all f9b5890d5462dc8ab5b0d5d95d6a94f602f6a63c72118217e6c2497e0fb9cef7 /home/user/work/redesign/obs1/c1cyc_post_explain4/D2-all/index.tsv
+input expect 444f7615f7830f464e1f713244c558e263ffbee1c76d5b3a615fa2aa6d04f0ef /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/expect_c1_2.tsv
+records 736 (sha256 of every record: be58660fb44e4652cc5e43c22dc3992bc154f7a143782cfcd45df0d0d64abdc6)
+columns check	class	branch	build	row_label	row_key	use	result	ground	note
+branch D1-R0 main (declared before the boot: D1/R0): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 51 / 51 (fail 0, not evaluable 0)
+branch D1-R0 main (declared before the boot: D1/R0): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D1-R0 main (declared before the boot: D1/R0): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D1-Ra auxiliary (data D1, readings Ra): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 46 / 46 (fail 0, not evaluable 0)
+branch D1-Ra auxiliary (data D1, readings Ra): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D1-Ra auxiliary (data D1, readings Ra): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D1-Rb auxiliary (data D1, readings Rb): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 46 / 46 (fail 0, not evaluable 0)
+branch D1-Rb auxiliary (data D1, readings Rb): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D1-Rb auxiliary (data D1, readings Rb): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D1-Rc auxiliary (data D1, readings Rc): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 46 / 46 (fail 0, not evaluable 0)
+branch D1-Rc auxiliary (data D1, readings Rc): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D1-Rc auxiliary (data D1, readings Rc): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D1-Rd auxiliary (data D1, readings Rd): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 46 / 46 (fail 0, not evaluable 0)
+branch D1-Rd auxiliary (data D1, readings Rd): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D1-Rd auxiliary (data D1, readings Rd): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D1-Re auxiliary (data D1, readings Re): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 46 / 46 (fail 0, not evaluable 0)
+branch D1-Re auxiliary (data D1, readings Re): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D1-Re auxiliary (data D1, readings Re): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D1-Rf auxiliary (data D1, readings Rf): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 46 / 46 (fail 0, not evaluable 0)
+branch D1-Rf auxiliary (data D1, readings Rf): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D1-Rf auxiliary (data D1, readings Rf): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D1-all auxiliary (data D1, readings Ra,Rb,Rc,Rd,Re,Rf): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 46 / 46 (fail 0, not evaluable 0)
+branch D1-all auxiliary (data D1, readings Ra,Rb,Rc,Rd,Re,Rf): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D1-all auxiliary (data D1, readings Ra,Rb,Rc,Rd,Re,Rf): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D2-R0 auxiliary (data D2, readings R0): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 91 / 91 (fail 0, not evaluable 0); format: pass 5 / 5 (fail 0, not evaluable 0)
+branch D2-R0 auxiliary (data D2, readings R0): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 15 / 15 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-R0 auxiliary (data D2, readings R0): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D2-Ra auxiliary (data D2, readings Ra): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 91 / 91 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Ra auxiliary (data D2, readings Ra): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 15 / 15 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Ra auxiliary (data D2, readings Ra): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D2-Rb auxiliary (data D2, readings Rb): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 91 / 91 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Rb auxiliary (data D2, readings Rb): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 15 / 15 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Rb auxiliary (data D2, readings Rb): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D2-Rc auxiliary (data D2, readings Rc): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 91 / 91 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Rc auxiliary (data D2, readings Rc): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 15 / 15 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Rc auxiliary (data D2, readings Rc): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D2-Rd auxiliary (data D2, readings Rd): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 91 / 91 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Rd auxiliary (data D2, readings Rd): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 15 / 15 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Rd auxiliary (data D2, readings Rd): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D2-Re auxiliary (data D2, readings Re): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 91 / 91 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Re auxiliary (data D2, readings Re): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 15 / 15 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Re auxiliary (data D2, readings Re): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D2-Rf auxiliary (data D2, readings Rf): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 91 / 91 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Rf auxiliary (data D2, readings Rf): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 15 / 15 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-Rf auxiliary (data D2, readings Rf): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch D2-all auxiliary (data D2, readings Ra,Rb,Rc,Rd,Re,Rf): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 91 / 91 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-all auxiliary (data D2, readings Ra,Rb,Rc,Rd,Re,Rf): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 15 / 15 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D2-all auxiliary (data D2, readings Ra,Rb,Rc,Rd,Re,Rf): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+branch * no branch (the pair file against the relations rows, F8 (a)): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 5 / 5 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+precision D1-R0 main (declared before the boot: D1/R0): undefined(no reader)
+in_plan_recall D1-R0 main (declared before the boot: D1/R0): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D1-R0 main (declared before the boot: D1/R0): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D1-Ra auxiliary (data D1, readings Ra): undefined(no reader)
+in_plan_recall D1-Ra auxiliary (data D1, readings Ra): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D1-Ra auxiliary (data D1, readings Ra): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D1-Rb auxiliary (data D1, readings Rb): undefined(no reader)
+in_plan_recall D1-Rb auxiliary (data D1, readings Rb): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D1-Rb auxiliary (data D1, readings Rb): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D1-Rc auxiliary (data D1, readings Rc): undefined(no reader)
+in_plan_recall D1-Rc auxiliary (data D1, readings Rc): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D1-Rc auxiliary (data D1, readings Rc): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D1-Rd auxiliary (data D1, readings Rd): undefined(no reader)
+in_plan_recall D1-Rd auxiliary (data D1, readings Rd): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D1-Rd auxiliary (data D1, readings Rd): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D1-Re auxiliary (data D1, readings Re): undefined(no reader)
+in_plan_recall D1-Re auxiliary (data D1, readings Re): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D1-Re auxiliary (data D1, readings Re): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D1-Rf auxiliary (data D1, readings Rf): undefined(no reader)
+in_plan_recall D1-Rf auxiliary (data D1, readings Rf): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D1-Rf auxiliary (data D1, readings Rf): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D1-all auxiliary (data D1, readings Ra,Rb,Rc,Rd,Re,Rf): undefined(no reader)
+in_plan_recall D1-all auxiliary (data D1, readings Ra,Rb,Rc,Rd,Re,Rf): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D1-all auxiliary (data D1, readings Ra,Rb,Rc,Rd,Re,Rf): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D2-R0 auxiliary (data D2, readings R0): undefined(no reader)
+in_plan_recall D2-R0 auxiliary (data D2, readings R0): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D2-R0 auxiliary (data D2, readings R0): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D2-Ra auxiliary (data D2, readings Ra): undefined(no reader)
+in_plan_recall D2-Ra auxiliary (data D2, readings Ra): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D2-Ra auxiliary (data D2, readings Ra): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D2-Rb auxiliary (data D2, readings Rb): undefined(no reader)
+in_plan_recall D2-Rb auxiliary (data D2, readings Rb): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D2-Rb auxiliary (data D2, readings Rb): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D2-Rc auxiliary (data D2, readings Rc): undefined(no reader)
+in_plan_recall D2-Rc auxiliary (data D2, readings Rc): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D2-Rc auxiliary (data D2, readings Rc): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D2-Rd auxiliary (data D2, readings Rd): undefined(no reader)
+in_plan_recall D2-Rd auxiliary (data D2, readings Rd): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D2-Rd auxiliary (data D2, readings Rd): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D2-Re auxiliary (data D2, readings Re): undefined(no reader)
+in_plan_recall D2-Re auxiliary (data D2, readings Re): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D2-Re auxiliary (data D2, readings Re): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D2-Rf auxiliary (data D2, readings Rf): undefined(no reader)
+in_plan_recall D2-Rf auxiliary (data D2, readings Rf): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D2-Rf auxiliary (data D2, readings Rf): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+precision D2-all auxiliary (data D2, readings Ra,Rb,Rc,Rd,Re,Rf): undefined(no reader)
+in_plan_recall D2-all auxiliary (data D2, readings Ra,Rb,Rc,Rd,Re,Rf): undefined(no reader); beside: undetermined by kind run evidence 0, static input 0, resource 0, structure 0, contradiction 0, other 0; explicit negatives 0; not reached 0; out of plan positives 0; unreadable 0
+undetermined_split D2-all auxiliary (data D2, readings Ra,Rb,Rc,Rd,Re,Rf): uses undetermined 4: run evidence 2, static input 4, resource 0, structure 4, contradiction 0, other 0 (a use counts once in each kind its record's reasons have; explicit negatives apart)
+form ok
+lines 7111
+end
+== the expect_discriminate lines
+expect_discriminate	static	D1-R0	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D1-R0	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D1-R0	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-R0	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-R0	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D1-Ra	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D1-Ra	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D1-Ra	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Ra	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Ra	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D1-Rb	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D1-Rb	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778; given: (1) context 1 (iii) not_held on relations.txt:778
+expect_discriminate	static	D1-Rb	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Rb	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Rb	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D1-Rc	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D1-Rc	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D1-Rc	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Rc	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Rc	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D1-Rd	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D1-Rd	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D1-Rd	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Rd	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Rd	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D1-Re	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D1-Re	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D1-Re	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Re	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Re	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D1-Rf	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D1-Rf	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D1-Rf	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Rf	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-Rf	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D1-all	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D1-all	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778; given: (1) context 1 (iii) not_held on relations.txt:778
+expect_discriminate	static	D1-all	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-all	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D1-all	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D2-R0	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D2-R0	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D2-R0	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-R0	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-R0	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D2-Ra	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D2-Ra	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D2-Ra	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Ra	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Ra	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D2-Rb	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D2-Rb	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778; given: (1) context 1 (iii) not_held on relations.txt:778
+expect_discriminate	static	D2-Rb	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Rb	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Rb	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D2-Rc	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D2-Rc	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D2-Rc	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Rc	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Rc	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D2-Rd	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D2-Rd	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D2-Rd	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Rd	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Rd	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D2-Re	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D2-Re	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D2-Re	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Re	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Re	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D2-Rf	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D2-Rf	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732; given: (1) context 1 (iii) not_held on relations.txt:778 | (2) (i) not_held on relations.txt:732
+expect_discriminate	static	D2-Rf	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Rf	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-Rf	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+expect_discriminate	static	D2-all	c1_post_tx	A20	bb0951052e63f1bc	*	met	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673; given: (1) context 1 (iii) not_held on relations.txt:718 | (2) (i) not_held on relations.txt:673
+expect_discriminate	static	D2-all	c1_post_tx	A21	17975444d83f6589	*	met	c1_post_tx.A21.17975444d83f6589.actor-13.json	rules (1)-(2): required: (1) context 1 (iii) not_held on relations.txt:778; given: (1) context 1 (iii) not_held on relations.txt:778
+expect_discriminate	static	D2-all	c1_post_tx	A22	f371687b47120887	*	unmet	c1_post_tx.A22.f371687b47120887.actor-11.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-all	c1_post_tx	A26	ad9fc1058923aad9	*	unmet	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	rule (3): required: (3) use 0 instance-linked on an open generation; given: none
+expect_discriminate	static	D2-all	c1_post_tx	A63	b881269bea290f8b	*	unmet	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	rule (3): nothing to require from the static lines and the record
+== the F3, F4 and F9 lines of the main branch
+F3	boot	D1-R0	c1_post_tx	-	3c1a14a1e86af631	*	not_evaluable	c1_post_tx.B13.3c1a14a1e86af631.actor-static-none.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	3c1a14a1e86af631	*	not_evaluable	c1_post_tx.B13.3c1a14a1e86af631.actor-static-none.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-2.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-2.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-3.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	0	fail	c1_post_tx.B73.ba2543549ee828a2.actor-3.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	1	fail	c1_post_tx.B73.ba2543549ee828a2.actor-3.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	2	fail	c1_post_tx.B73.ba2543549ee828a2.actor-3.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	3	fail	c1_post_tx.B73.ba2543549ee828a2.actor-3.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	4	fail	c1_post_tx.B73.ba2543549ee828a2.actor-3.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	0	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	1	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	2	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	3	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	4	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	5	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	6	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	7	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	8	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	9	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	10	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	11	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	12	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	13	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	14	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	15	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	16	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	17	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	18	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	19	fail	c1_post_tx.B73.ba2543549ee828a2.actor-4.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-6.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	0	fail	c1_post_tx.B73.ba2543549ee828a2.actor-6.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	1	fail	c1_post_tx.B73.ba2543549ee828a2.actor-6.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	2	fail	c1_post_tx.B73.ba2543549ee828a2.actor-6.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	3	fail	c1_post_tx.B73.ba2543549ee828a2.actor-6.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	4	fail	c1_post_tx.B73.ba2543549ee828a2.actor-6.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	5	fail	c1_post_tx.B73.ba2543549ee828a2.actor-6.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	6	fail	c1_post_tx.B73.ba2543549ee828a2.actor-6.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	7	fail	c1_post_tx.B73.ba2543549ee828a2.actor-6.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-9.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	0	fail	c1_post_tx.B73.ba2543549ee828a2.actor-9.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	1	fail	c1_post_tx.B73.ba2543549ee828a2.actor-9.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	2	fail	c1_post_tx.B73.ba2543549ee828a2.actor-9.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	3	fail	c1_post_tx.B73.ba2543549ee828a2.actor-9.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-10.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	0	fail	c1_post_tx.B73.ba2543549ee828a2.actor-10.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	1	fail	c1_post_tx.B73.ba2543549ee828a2.actor-10.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	2	fail	c1_post_tx.B73.ba2543549ee828a2.actor-10.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	3	fail	c1_post_tx.B73.ba2543549ee828a2.actor-10.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-11.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	0	fail	c1_post_tx.B73.ba2543549ee828a2.actor-11.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	1	fail	c1_post_tx.B73.ba2543549ee828a2.actor-11.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	0	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	1	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	2	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	3	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	4	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	5	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	6	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	7	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	8	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	9	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	10	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	11	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	12	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	13	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	14	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	15	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	16	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	17	fail	c1_post_tx.B73.ba2543549ee828a2.actor-12.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-13.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	0	fail	c1_post_tx.B73.ba2543549ee828a2.actor-13.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	1	fail	c1_post_tx.B73.ba2543549ee828a2.actor-13.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	2	fail	c1_post_tx.B73.ba2543549ee828a2.actor-13.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	3	fail	c1_post_tx.B73.ba2543549ee828a2.actor-13.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	4	fail	c1_post_tx.B73.ba2543549ee828a2.actor-13.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	5	fail	c1_post_tx.B73.ba2543549ee828a2.actor-13.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	6	fail	c1_post_tx.B73.ba2543549ee828a2.actor-13.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	7	fail	c1_post_tx.B73.ba2543549ee828a2.actor-13.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-14.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	0	fail	c1_post_tx.B73.ba2543549ee828a2.actor-14.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	1	fail	c1_post_tx.B73.ba2543549ee828a2.actor-14.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	2	fail	c1_post_tx.B73.ba2543549ee828a2.actor-14.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	3	fail	c1_post_tx.B73.ba2543549ee828a2.actor-14.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	4	fail	c1_post_tx.B73.ba2543549ee828a2.actor-14.json	no recorded create whose out value is the found id None
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	5	fail	c1_post_tx.B73.ba2543549ee828a2.actor-14.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-16.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-16.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-15.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-15.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-5.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-5.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-8.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-8.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-7.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	ba2543549ee828a2	*	not_evaluable	c1_post_tx.B73.ba2543549ee828a2.actor-7.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-3.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-3.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-6.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-6.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-11.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-11.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-12.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-12.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-13.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-13.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-14.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-14.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-16.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-16.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-15.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-15.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-5.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-5.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-4.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-4.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-2.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-2.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-9.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-9.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-8.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-8.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-7.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-7.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-10.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	fb05e6e2f6b4cb48	*	not_evaluable	c1_post_tx.B81.fb05e6e2f6b4cb48.actor-10.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	*	not_evaluable	c1_post_tx.B99.299c8e07fe49d44b.actor-11.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	0	fail	c1_post_tx.B99.299c8e07fe49d44b.actor-11.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	*	not_evaluable	c1_post_tx.B99.299c8e07fe49d44b.actor-12.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	0	fail	c1_post_tx.B99.299c8e07fe49d44b.actor-12.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	*	not_evaluable	c1_post_tx.B99.299c8e07fe49d44b.actor-13.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	0	fail	c1_post_tx.B99.299c8e07fe49d44b.actor-13.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	*	not_evaluable	c1_post_tx.B99.299c8e07fe49d44b.actor-14.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	0	fail	c1_post_tx.B99.299c8e07fe49d44b.actor-14.json	no recorded create whose out value is the found id None
+F3	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	*	not_evaluable	c1_post_tx.B99.299c8e07fe49d44b.actor-5.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	*	not_evaluable	c1_post_tx.B99.299c8e07fe49d44b.actor-5.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	*	not_evaluable	c1_post_tx.B99.299c8e07fe49d44b.actor-9.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	299c8e07fe49d44b	*	not_evaluable	c1_post_tx.B99.299c8e07fe49d44b.actor-9.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	62696da28bd6b9b4	*	not_evaluable	c1_post_tx.B113.62696da28bd6b9b4.actor-9.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	62696da28bd6b9b4	*	not_evaluable	c1_post_tx.B113.62696da28bd6b9b4.actor-9.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	e74845731ffadce0	*	not_evaluable	c1_post_tx.B118.e74845731ffadce0.actor-9.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	e74845731ffadce0	*	not_evaluable	c1_post_tx.B118.e74845731ffadce0.actor-9.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	152f17981365b27d	*	not_evaluable	c1_post_tx.B119.152f17981365b27d.actor-9.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	152f17981365b27d	*	not_evaluable	c1_post_tx.B119.152f17981365b27d.actor-9.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	-	cc073460235b0623	*	not_evaluable	c1_post_tx.B125.cc073460235b0623.actor-9.json	not a path A record (judgement rules 8.2 applies to path A only)
+F4	boot	D1-R0	c1_post_tx	-	cc073460235b0623	*	not_evaluable	c1_post_tx.B125.cc073460235b0623.actor-9.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	A20	bb0951052e63f1bc	0	pass	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	no earlier finished successful create of the same kind and text
+F3	boot	D1-R0	c1_post_tx	A20	bb0951052e63f1bc	1	pass	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	no earlier finished successful create of the same kind and text
+F4	boot	D1-R0	c1_post_tx	A20	bb0951052e63f1bc	*	not_evaluable	c1_post_tx.A20.bb0951052e63f1bc.actor-14.json	no found use event in this record
+F3	boot	D1-R0	c1_post_tx	A21	17975444d83f6589	0	pass	c1_post_tx.A21.17975444d83f6589.actor-13.json	no earlier finished successful create of the same kind and text
+F4	boot	D1-R0	c1_post_tx	A21	17975444d83f6589	1	pass	c1_post_tx.A21.17975444d83f6589.actor-13.json	create of the id 0x30002 recorded: initialize_throttling -> OS_CountSemCreate line 132
+F4	boot	D1-R0	c1_post_tx	A21	17975444d83f6589	2	pass	c1_post_tx.A21.17975444d83f6589.actor-13.json	create of the id 0x30003 recorded: initialize_throttling -> OS_CountSemCreate line 132
+F3	boot	D1-R0	c1_post_tx	A22	f371687b47120887	*	not_evaluable	c1_post_tx.A22.f371687b47120887.actor-11.json	no absent use event in this record
+F4	boot	D1-R0	c1_post_tx	A22	f371687b47120887	0	pass	c1_post_tx.A22.f371687b47120887.actor-11.json	create of the id 0x80001 recorded: soft_timebase_Init -> OS_TimeBaseCreate line 53
+F3	boot	D1-R0	c1_post_tx	A26	ad9fc1058923aad9	*	not_evaluable	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	no absent use event in this record
+F4	boot	D1-R0	c1_post_tx	A26	ad9fc1058923aad9	0	pass	c1_post_tx.A26.ad9fc1058923aad9.actor-6.json	create of the id 0x80001 recorded: soft_timebase_Init -> OS_TimeBaseCreate line 53
+F3	boot	D1-R0	c1_post_tx	A63	b881269bea290f8b	*	not_evaluable	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	no absent use event in this record
+F4	boot	D1-R0	c1_post_tx	A63	b881269bea290f8b	*	not_evaluable	c1_post_tx.A63.b881269bea290f8b.actor-static-none.json	no found use event in this record

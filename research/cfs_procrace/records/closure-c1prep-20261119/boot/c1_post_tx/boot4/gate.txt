@@ -1,0 +1,3 @@
+gate PASS
+losses: fields none; records none
+inputs: control_check.txt 126b0b81fcd46eb6 chain.txt e20a6d55f6b313eb

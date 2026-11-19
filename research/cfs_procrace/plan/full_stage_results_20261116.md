@@ -3278,3 +3278,26 @@ MC `/home/user/work/merge-check/kz-llvm` 를 제자리에서 빌드한다. `make
 - **덧붙임 1**(`derived/declared_diff_2.tsv` = `declared_diff.tsv` 의 37 줄 + 5 줄): B 의 `source_tree` 항목(old), `count.type_names_outside_root`(두 쪽), `extract.units_from`(두 쪽, 정체성), facts 의 모든 절에서 `treetok`, `relations.txt` 의 규칙 줄(소스 트리 수만 다른 그 줄 전체). 다시 하는 비교는 `run2.sh compare <빌드> 2` → `obs1/c1p2_compare/compare_<빌드>_2.tsv` 다. 첫 비교 출력은 남긴다. c1_post_tx 의 비교도 이 목록으로 한다.
 
 **(라) 덧붙임 1 로 다시 한 비교와 덧붙임 2** [M][D]: `run2.sh compare c1_pre_tx 2`(`obs1/c1p2_compare/compare_c1_pre_tx_2.tsv`, 요약 `derived2/compare_c1_pre_tx_2_summary.txt`): rc 1, 선언 밖 89, 모두 `ARG_TYPES`. **다시 멈췄다.** 89 레코드는 모두 선언 없는 문자 배열 리터럴(`decl_object=""`, `type_class=char-array`)이고, 두 쪽이 `extent=`·`type=` 밖에서 같으며, 크기가 79 개는 9, 10 개는 13 만큼 크다. 그 두 수는 맵의 줄이 경로를 늘리는 길이다(`pre/src/` → 파생 `src/` 가 9, `bundle_1df262a/` 가 13). 소스 경로 리터럴(`__FILE__` 처럼)은 작업 공간의 경로만큼 길다: D1(작업 공간 경로 글)의 결과다. 비교기에 조건 `pathlen`(두 쪽이 `extent=`·`type=` 밖에서 같고, 형이 `[const ]char[<그 extent>]` 이며, 크기 차이가 맵의 한 줄의 길이 차이)을 더하고 단위 점검 11 에 (d) 를 더했다(`derived2/unit_tools_comparator_2.txt` 19/19). **덧붙임 2**(`derived/declared_diff_3.tsv` = 덧붙임 1 의 42 줄 + 1 줄): `ARG_TYPES` 의 문자 배열 리터럴에 `pathlen`. 다음 비교는 `run2.sh compare <빌드> 3` 이다.
+
+### 25.7 파생 빌드 둘, 결합, 파생 사실과 기준-파생 비교 [M]
+
+수는 `derived2/<pre|post>/` 와 `obs1/c1p2_compare/` 의 남긴 출력에서 왔다. 차례는 c1_pre_tx / c1_post_tx 다.
+
+| 점검 | c1_pre_tx | c1_post_tx |
+|---|---|---|
+| 런타임 트리 (`obs1/c1p2_<pre\|post>_rt/rt`, backend `kzgcc 0.5 (gcc-plugin)`, `kzrt 0.5.0`) | build-info `e4caad6c…` | 같은 꼴(manifest 가 다름) |
+| prepare: 복사본과 기준의 차이 | 0 / 0, 맵 `path_map.tsv` | 0 / 0 |
+| 기준 빌드(같은 자리), 계측 빌드 | `make rc=0`, `make rc=0`(경고 1) | `make rc=0`, `make rc=0` |
+| 객체 261 가운데 다른 것 | 33 = 계측 단위 33 (UNEXPECTED 0) | 32 = 계측 단위 32 (UNEXPECTED 0) |
+| 결합 (`bindings_report.tsv`, 실패 0) | site 305: bound 295, duplicated 2, inlined 7, unsupported 1 | site 302: bound 291, duplicated 2, inlined 7, unsupported 2 |
+| hookcheck (계획의 목록 일곱) | rc 0, ok 304, gap 1 | rc 0, ok 300, gap 2 |
+| 설치 파일 31 가운데 기준과 다른 것 | 16 (tx 일곱, rx 일곱, `cfe_assert.so` 둘) | 16 (같은 꼴) |
+| rx | ELF 9, hook 호출 310, 계획의 그룹과 같음 | ELF 9, 306, 같음 |
+| B′ (`one_build.sh --path-map`, 추출 옵션 모두) | PASS | PASS |
+| 기준-파생 비교 (덧붙임 2, `compare_<빌드>_3.tsv`) | rc 0, 선언 밖 0 | rc 0, 선언 밖 0 |
+
+- **묶이지 않은 site 와 그 까닭**(결합 보고의 플러그인 까닭 그대로): 두 빌드의 site 242 `s0242.use-call+writer`(`cfe_tbl_task_cmds.c` `CFE_TBL_GetTblRegData`, 층 행 B119·B125 의 after-call; `out0` 가 20 바이트 배열을 가리킴): `aggregate operand larger than 8 bytes`. c1_post_tx 의 site 297 `s0297.wait-exit`(`cf_cfdp.c` `CF_CFDP_InitEngine`, 대조 행 A21 의 대기 루프를 나가는 문): `no statement on line 1008 of the function`(§23.4 5 와 같음). 그 밖의 site 는 모두 bound·inlined·duplicated 다. 결합 파일: c1_pre_tx `obs1/c1p2_pre_derived/binds_instr.kzs`, c1_post_tx `obs1/c1p2_post_derived/binds_instr.kzs`(sha256 은 부팅 선언 25.12).
+- **build-id**(설치된 ELF 21 개의 sha256 과 GNU build-id, `derived2/<pre|post>/exe_buildids.tsv`; 부팅 기록의 `buildid` 줄이 이름 댈 객체는 25.3 의 목록): c1_pre_tx core-tx `619614002e6d4556fa731365d88ee7f0d49c00cf`, bp.so `01db56cf…`, cf.so `c55b464b…`, ci_lab.so `4074a88b…`, sch_lab.so `310dfddb…`, to_lab.so `1c6beaba…`(bplib.so `9540ee3b…`, 등록 없음 [I]); c1_post_tx core-tx `acee9edd432e2e987903efefe7fc0c19bdee41ac`, bp.so `f359e98b…`, cf.so `3eb1b8b3…`, ci_lab.so `8dc25470…`, sch_lab.so `14e71ebd…`, to_lab.so `a79dc818…`(bplib.so `ccea3094…`). rx 의 모듈은 tx 의 같은 이름 파일과 같은 바이트다(`rx_check.txt`).
+- **비교의 갈래**(c1_pre_tx, `compare_c1_pre_tx_3.tsv`): 선언 갈래는 첫 파생 빌드의 것(정체성, 플러그인 옵션, 링크된 런타임, D2·D4, 계측·링크된 파일, D1 의 bplib)에 덧붙임 1·2 의 셋(D2 소스 트리 없음, `treetok`; D1 의 소스 경로 리터럴, `pathlen`)이다. 요약은 그 파일의 꼬리에 갈래별 수로 있다. facts 의 47 절 가운데 35 절이 맵 뒤 레코드가 차례까지 같다.
+- **MC**: `out/post_mc.txt` 가 `out/pre_mc.txt` 와 도구 일곱·정체성·정의·`CMakeCache.txt` 에서 같다(HEAD 와 여유 줄만 다름). **누적**: 원장에 이 단계의 출력 행 15(`OBS_c1p_*`, `OBS_c1p2_*`; 목록 `lists/`) — `ledger_check` 193 행 실패 0(`out/ledger_check_after_builds.txt`), `tools_check --deep` 57 행 실패 0(`out/tools_check_deep_after_builds.txt`). 이름 점검 `--tree`: B′·비교 출력 깨끗. 파생 작업 공간은 첫 파생 빌드 §5.4 와 같이 upstream 소스 사본만 걸린다(따로 고치지 않음).
+- **공간**: 가장 큰 dip 은 prepare 27,291,648 B 와 계측 빌드 19,394,560 B, 가장 낮은 감시 값 494,067,712 B(`guard/2_*.log`). 지금 여유 466,509,824 B.

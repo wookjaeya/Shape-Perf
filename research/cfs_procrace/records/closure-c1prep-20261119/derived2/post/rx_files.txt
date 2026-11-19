@@ -1,0 +1,9 @@
+ws/exe/rx/cf/bp.so
+ws/exe/rx/cf/bplib.so
+ws/exe/rx/cf/cf.so
+ws/exe/rx/cf/cfe_assert.so
+ws/exe/rx/cf/ci_lab.so
+ws/exe/rx/cf/sch_lab.so
+ws/exe/rx/cf/tinycbor.so
+ws/exe/rx/cf/to_lab.so
+ws/exe/rx/core-rx

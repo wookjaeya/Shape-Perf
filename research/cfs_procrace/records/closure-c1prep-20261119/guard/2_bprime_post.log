@@ -1,0 +1,23 @@
+# space_guard.sh kind=extract need=60000000 floor=314572800 interval=2 cmd=/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static basis --no-profile --compile-db /home/user/work/redesign/obs1/c1p2_post_derived/ws/build/native/default/compile_commands.json --build-dir /home/user/work/redesign/obs1/c1p2_post_derived/ws/build --bundle-root /home/user/work/redesign/obs1/c1p2_post_derived/bundle_1df262a --recipe /home/user/work/redesign/extract_baseline/inputs/c1_post_tx.kzb --text -o /home/user/work/redesign/obs1/c1p2_post_bprime/c1_post_tx/NP/basis.kz.partial
+start 2026-11-19T09:20:32.825Z free=493834240 threshold=374572800
+sample 2026-11-19T09:20:32.830Z 493830144
+end 2026-11-19T09:20:34.836Z kind=extract verdict=completed rc=0 free=493641728 lowest=493641728 dip=192512 change=-192512
+# space_guard.sh kind=extract need=60000000 floor=314572800 interval=2 cmd=/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static extract --no-profile --basis /home/user/work/redesign/obs1/c1p2_post_bprime/c1_post_tx/NP/basis.kz.partial --targets-rule R-T1,R-T2 --object-access --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_cfe-6.4.1.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_cfe-6.4.2.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_cfe-6cccb3f.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_cfe-7.0.1.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_osal-4.1.1.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_osal-7.0.1.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_semantics_osal-f34759d.txt --semantics /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/p0_declarations_glibc-2.39-headers.txt --result-flow --loop-defs --lock-handles -o /home/user/work/redesign/obs1/c1p2_post_bprime/c1_post_tx/NP/facts.kz.partial
+start 2026-11-19T09:20:34.844Z free=493641728 threshold=374572800
+sample 2026-11-19T09:20:34.849Z 493641728
+sample 2026-11-19T09:20:36.855Z 493641728
+sample 2026-11-19T09:20:38.862Z 493641728
+sample 2026-11-19T09:20:40.869Z 493514752
+sample 2026-11-19T09:20:42.875Z 493514752
+sample 2026-11-19T09:20:44.882Z 493514752
+sample 2026-11-19T09:20:46.890Z 493502464
+sample 2026-11-19T09:20:48.897Z 493502464
+sample 2026-11-19T09:20:50.904Z 493502464
+sample 2026-11-19T09:20:52.911Z 493219840
+sample 2026-11-19T09:20:54.917Z 493219840
+sample 2026-11-19T09:20:56.932Z 493199360
+end 2026-11-19T09:20:58.943Z kind=extract verdict=completed rc=0 free=475037696 lowest=475037696 dip=18604032 change=-18604032
+# space_guard.sh kind=relations need=60000000 floor=314572800 interval=2 cmd=/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static relations /home/user/work/redesign/obs1/c1p2_post_bprime/c1_post_tx/NP/facts.kz.partial -o /home/user/work/redesign/obs1/c1p2_post_bprime/c1_post_tx/NP/relations.txt.partial
+start 2026-11-19T09:20:58.950Z free=475037696 threshold=374572800
+sample 2026-11-19T09:20:58.954Z 475037696
+end 2026-11-19T09:21:00.961Z kind=relations verdict=completed rc=0 free=472604672 lowest=472604672 dip=2433024 change=-2433024

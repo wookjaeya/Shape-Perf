@@ -61,3 +61,23 @@ block; `row_extract.py` stops at the row's last line).
 | pairs per build (sum of the `pairs:` lines) / listed pair lines | 24,796 / 1,988 (both C1 builds) | `out/p5_pairs.txt` |
 | pairs of the 13 planned rows / listed | 1,087 / 66 | `out/p5_pairs.txt` |
 | keys with an absolute position | 3, 3, 0, 0, 0 | `out/p6_keys.txt` |
+
+## Reading notes (2026-11-19, the same step, after its outputs were checked against the committed texts)
+
+- **`out/p7_items_*.txt`, the middle column ("data state: …").**  It is a classification written into
+  `scripts/p7_items.py` as constants before the committed rule texts, not a reading of the facts.  Where it differs from
+  judgement rules 8.13, the rules hold: no item rests on an unverified entry or a premise in data state 1 (item 2);
+  basis 4 holds only when the success-path line shows the stored value tied to the success path, which no present row
+  shows (item 8), so its expectation is `missing`; condition (da) needs a complete FIELD_STATUS of the stored-name buffer
+  field, and a line that discharges the `DISABLED` causes one by one is the reading `Rf`, not the rule (item 11).  The
+  texts use only the third column of these files (which static inputs exist).
+- **"probe P2", "probe P3"** in those lines name the scripts `p2_success_path.py` and `p3_buffer_writers.py` of this
+  directory.  "static line HELD" in `out/p2_success_path_*.txt` covers parts (a)-(c) of 8.13 item 8 only, with guards
+  compared as texts.
+- **What these outputs do not show.**  Lines a prototype cannot print are not shown by them: return-constant frames,
+  implication between guards, the stored value's definition on the success path, the context assignment of a use event,
+  the complete pair file.  They are shown only when the kz-static build that implements relations rules revision 14 and
+  order rules revision 8 prints them (`kairos/docs/static_facts.md` 5x).
+- The scripts and outputs were checked again on 2026-11-19 against the scratch copies of the 2026-11-18 run: every file
+  of `out/` and `out_trial1/` is byte-identical to the scratch output of the same run; the guard logs differ only by the
+  scratch path written `<scratch>`.  The scratch copies were then removed.

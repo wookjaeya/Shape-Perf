@@ -1,0 +1,16 @@
+-- LLVM 23.0.0git at /home/user/work/llvm-project/build/lib/cmake/llvm; Clang at /home/user/work/llvm-project/build/lib/cmake/clang
+-- libkz-core source identity 568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+-- Configuring done (0.1s)
+-- Generating done (0.2s)
+-- Build files have been written to: <scratch>/kzc4_build
+[ 42%] Built target kz-core
+[ 42%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/relations.cpp.o
+/home/user/Shape-Perf/research/cfs_procrace/kairos/lib/llvm/relations.cpp: In member function 'void kzs::{anonymous}::Rel::lifetime_lines(const Namespace&, std::ostream&, const std::function<std::__cxx11::basic_string<char>(unsigned int)>&, const std::set<unsigned int>&, std::map<unsigned int, std::set<unsigned int> >&)':
+/home/user/Shape-Perf/research/cfs_procrace/kairos/lib/llvm/relations.cpp:3854:63: error: unused parameter 'reach' [-Werror=unused-parameter]
+ 3854 |                       std::map<uint32_t, std::set<uint32_t>>& reach) {
+      |                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+cc1plus: all warnings being treated as errors
+make[3]: *** [lib/llvm/CMakeFiles/kz-llvm.dir/build.make:244: lib/llvm/CMakeFiles/kz-llvm.dir/relations.cpp.o] Error 1
+make[2]: *** [CMakeFiles/Makefile2:920: lib/llvm/CMakeFiles/kz-llvm.dir/all] Error 2
+make[1]: *** [CMakeFiles/Makefile2:1897: tools/kz-static/CMakeFiles/kz-static.dir/rule] Error 2
+make: *** [Makefile:694: kz-static] Error 2

@@ -46,6 +46,7 @@ kz::Status RelFacts::load() {
   if (!(s = read(KZ_SEC_LOCKSET, &lockset_)).ok()) return s;
   if (!(s = read(KZ_SEC_FIELD_STATUS, &fstatus_)).ok()) return s;
   if (c_.find_section(KZ_SEC_FACT_ATYPE) != nullptr && !(s = read(KZ_SEC_FACT_ATYPE, &atypes_)).ok()) return s;
+  if (c_.find_section(KZ_SEC_FIELD_TYPES) != nullptr && !(s = read(KZ_SEC_FIELD_TYPES, &ftypes_)).ok()) return s;
   if (!(s = read(KZ_SEC_AWAIT_L1, &awaits_)).ok()) return s;
   if (!(s = read(KZ_SEC_LOCK_PATHS, &lockpaths_)).ok()) return s;
   if (!(s = read(KZ_SEC_SEMANTICS, &sem_)).ok()) return s;
@@ -138,6 +139,7 @@ void RelFacts::index() {
   }
   for (size_t i = 0; i < fstatus_.size(); ++i) fstatus_of_[str(fstatus_[i].type) + "." + str(fstatus_[i].field)] = static_cast<uint32_t>(i);
   for (size_t i = 0; i < atypes_.size(); ++i) atypes_of_[str(atypes_[i].loc_type) + "." + str(atypes_[i].loc_field)].push_back(static_cast<uint32_t>(i));
+  for (size_t i = 0; i < ftypes_.size(); ++i) ftype_of_[str(ftypes_[i].type) + "." + str(ftypes_[i].field)] = static_cast<uint32_t>(i);
   for (size_t i = 0; i < writers_.size(); ++i) writers_of_[str(writers_[i].loc_type) + "." + str(writers_[i].loc_field)].push_back(static_cast<uint32_t>(i));
   for (size_t i = 0; i < inits_.size(); ++i) inits_of_[str(inits_[i].loc_type) + "." + str(inits_[i].loc_field)].push_back(static_cast<uint32_t>(i));
   for (size_t i = 0; i < fwrites_.size(); ++i)

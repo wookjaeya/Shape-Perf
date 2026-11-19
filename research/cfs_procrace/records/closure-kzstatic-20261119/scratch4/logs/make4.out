@@ -1,0 +1,33 @@
+-- LLVM 23.0.0git at /home/user/work/llvm-project/build/lib/cmake/llvm; Clang at /home/user/work/llvm-project/build/lib/cmake/clang
+-- libkz-core source identity 568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+-- Configuring done (0.1s)
+-- Generating done (0.2s)
+-- Build files have been written to: <scratch>/kzc4_build
+[ 42%] Built target kz-core
+[ 42%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/relations.cpp.o
+[ 42%] Linking CXX static library libkz-llvm.a
+[ 89%] Built target kz-llvm
+[ 94%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/main.cpp.o
+[ 94%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_basis.cpp.o
+[ 94%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_extract.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_show.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_plan.cpp.o
+[100%] Linking CXX executable kz-static
+[100%] Built target kz-static
+[ 40%] Built target kz-core
+[ 85%] Built target kz-llvm
+[ 95%] Built target kz-static
+[100%] Built target static_golden
+[100%] Building CXX object tests/lint/CMakeFiles/kz_lint.dir/kz_lint.cpp.o
+[100%] Linking CXX executable kz_lint
+[100%] Built target kz_lint
+[ 42%] Built target kz-core
+[ 42%] Building CXX object tests/unit/CMakeFiles/kz-testsupport.dir/support/fixtures.cpp.o
+[ 42%] Building CXX object tests/unit/CMakeFiles/kz-testsupport.dir/support/source_identity.cpp.o
+[ 47%] Building CXX object tests/unit/CMakeFiles/kz-testsupport.dir/support/fixtures_data.cpp.o
+[ 94%] Built target kz-llvm
+[ 94%] Linking CXX static library libkz-testsupport.a
+[ 94%] Built target kz-testsupport
+[100%] Building CXX object tests/static/CMakeFiles/test_static_reasons.dir/test_static_reasons.cpp.o
+[100%] Linking CXX executable test_static_reasons
+[100%] Built target test_static_reasons

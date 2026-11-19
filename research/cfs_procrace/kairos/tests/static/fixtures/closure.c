@@ -30,8 +30,10 @@
  *                is turned into another constant, and a store that the source puts after the exit is on a path from the
  *                status store to the call; a command thread calls the initialisation function too (a second context);
  *                a waiter looks a name up again until it is found (a retry);
+ *   stored names a common table of name pointers into kind tables (see the comment before names_main);
  *   threads      the main thread starts a looker (the lookups), a maker (the creations), a user, the two runners, the
- *                command thread and the waiter.
+ *                command thread, the waiter, a thread that makes, renames, reads, resets and deletes stored names, and a
+ *                thread that looks one up.
  * The values are the fixture's; they are no experiment results. */
 #include <pthread.h>
 #include <stdlib.h>
@@ -265,8 +267,142 @@ static void *waiter_main(void *arg) {
   return 0;
 }
 
+/* stored names (relations rules revision 14, the stored-name buffer and lifetime-end lines, 5x eighth addendum): a common
+ * table of records holding a pointer to the name and an active id; two kinds keep the name in an array field of their own
+ * table and store the array's address into the common record (the name store), and one kind's name is rewritten by a rename
+ * (another writer); the readers of the name pointer test it, pass it to a function that only reads it, to one that writes
+ * through it and to the comparison of the search, and copy it to a global; the free-slot search clears the name pointer
+ * under a test of its own local (the free-record condition is not shown), a reset clears it under a test of the active id
+ * (shown); a finishing step stores the active id read through its parameter and is called by a create (a rollback), by a
+ * delete and with a null pointer; a drop stores the empty value; the initialisation fills the common table. */
+#define NREC 4
+typedef struct {
+  const char *nm;
+  int act;
+} Com;
+typedef struct {
+  char label[NAMELEN];
+  int v;
+} KindA;
+typedef struct {
+  char tag[NAMELEN];
+  int w;
+} KindB;
+static Com coms[NREC];
+static KindA kas[NREC];
+static KindB kbs[NREC];
+static const char *last_nm;
+
+static void com_init(void) { memset(coms, 0, sizeof(coms)); }
+
+int com_find(int *out, const char *name) {
+  int i;
+  for (i = 0; i < NREC; i++) {
+    if (coms[i].act != 0 && coms[i].nm != 0 && strcmp(coms[i].nm, name) == 0) {
+      *out = coms[i].act;
+      return CL_OK;
+    }
+  }
+  return CL_ERR_NOT_FOUND;
+}
+
+static int com_free(void) {
+  int i, r = CL_ERR_FULL;
+  for (i = 0; i < NREC; i++) {
+    if (coms[i].act == 0) {
+      r = i;
+      break;
+    }
+  }
+  if (r >= 0) coms[r].nm = 0;
+  return r;
+}
+
+static void com_reset(int i) {
+  if (coms[i].act == 0) coms[i].nm = 0;
+}
+
+static void com_finish(int i, const int *fin) {
+  if (fin != 0) coms[i].act = *fin;
+}
+
+static void com_drop(int i) { coms[i].act = 0; }
+
+static int nm_len(const char *p) {
+  int n = 0;
+  while (p[n] != 0) n++;
+  return n;
+}
+
+static void nm_up(char *p) {
+  if (p[0] >= 'a') p[0] = (char)(p[0] - 32);
+}
+
+int ka_create(int *out, const char *name) {
+  int dummy, i, fin;
+  if (com_find(&dummy, name) == CL_OK) return CL_ERR_DUP;
+  i = com_free();
+  if (i < 0) return CL_ERR_FULL;
+  memset(&kas[i], 0, sizeof(kas[i]));
+  strncpy(kas[i].label, name, NAMELEN - 1);
+  coms[i].nm = kas[i].label;
+  fin = i + 1;
+  if (nm_len(coms[i].nm) == 0) fin = 0;
+  com_finish(i, &fin);
+  *out = fin;
+  return CL_OK;
+}
+
+int kb_create(int *out, const char *name) {
+  int dummy, i, fin;
+  if (com_find(&dummy, name) == CL_OK) return CL_ERR_DUP;
+  i = com_free();
+  if (i < 0) return CL_ERR_FULL;
+  memset(&kbs[i], 0, sizeof(kbs[i]));
+  strncpy(kbs[i].tag, name, NAMELEN - 1);
+  coms[i].nm = kbs[i].tag;
+  fin = i + 1;
+  com_finish(i, &fin);
+  *out = fin;
+  return CL_OK;
+}
+
+void ka_rename(int i, const char *name) { strncpy(kas[i].label, name, NAMELEN - 1); }
+
+int com_delete(int i) {
+  int fin = 0;
+  com_finish(i, &fin);
+  com_finish(i, 0);
+  return CL_OK;
+}
+
+static void *names_main(void *arg) {
+  int id, i;
+  (void)arg;
+  com_init();
+  (void)ka_create(&id, "one");
+  (void)kb_create(&id, "two");
+  ka_rename(0, "three");
+  for (i = 0; i < NREC; i++) {
+    if (coms[i].nm != 0) seen = seen + nm_len(coms[i].nm);
+  }
+  nm_up((char *)coms[1].nm);
+  last_nm = coms[2].nm;
+  com_reset(3);
+  com_drop(2);
+  (void)com_delete(0);
+  return 0;
+}
+
+static void *names_user_main(void *arg) {
+  int id;
+  (void)arg;
+  if (com_find(&id, "one") == CL_OK) seen = seen + id;
+  return 0;
+}
+
 int main(void) {
-  pthread_t a, b, c, d, e, f, g;
+  pthread_t a, b, c, d, e, f, g, h, k;
   (void)pthread_create(&a, 0, looker_main, 0);
   (void)pthread_create(&b, 0, maker_main, 0);
   (void)pthread_create(&c, 0, user_main, 0);
@@ -274,5 +410,7 @@ int main(void) {
   (void)pthread_create(&e, 0, runner2_main, 0);
   (void)pthread_create(&f, 0, cmd_main, 0);
   (void)pthread_create(&g, 0, waiter_main, 0);
+  (void)pthread_create(&h, 0, names_main, 0);
+  (void)pthread_create(&k, 0, names_user_main, 0);
   return 0;
 }

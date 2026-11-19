@@ -789,6 +789,8 @@ class Rel : public RelFacts {
       os << " (" << (ws.empty() ? std::string("none") : join(ws, "; ")) << ")\n";
       // relations rules revision 14 (5x item 4, seventh addendum): the stored-field rule over the program
       os << sf_header() << "\n";
+      // relations rules revision 14 (5x item 5, eighth addendum): the stored-name buffer and lifetime-end lines over the program
+      os << bl_header() << "\n";
     }
     // relations rules revision 6: the rows per incompleteness reason (the reason, then its sub-reasons)
     os << "summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m):";
@@ -3472,6 +3474,522 @@ class Rel : public RelFacts {
     }
   }
 
+  // ---- relations rules revision 14 (static_facts.md 5x item 5, eighth addendum): the stored-name buffer line and the
+  // lifetime-end lines of a namespace block.  The kind of a writer's function is the partition of the key-parameter
+  // functions it is, or else of those that reach it through direct calls; the name stores are the key's writers at whose
+  // position an array field decays into the key; every cause of the buffer's FIELD_STATUS state is decided one by one,
+  // and the uses of the escaped address (the reads of the key) are followed through bodies and library entries.
+  struct BufStats {
+    uint32_t name_stores = 0, buffers = 0, complete = 0, not_decided = 0, uses = 0, uses_ok = 0, groups = 0, shared = 0, none = 0;
+    uint32_t clear_table = 0, clear_slot = 0, slot_shown = 0, slot_not = 0, release = 0, release_param = 0, rollback = 0, del = 0;
+    std::map<std::string, uint32_t> why;
+  };
+  BufStats bl_;
+  std::map<std::tuple<std::string, uint32_t, uint32_t, uint32_t>, std::vector<uint32_t>> atype_at_;  // (file, line, col, fn) -> ATYPE rows
+  bool atype_at_built_ = false;
+  static constexpr const char* kDecayAssign = "the array decays to a pointer to its first element: assigned to";
+
+  // the out-behaviour entries of a function without a body for its parameter k: discharged (no store through an argument,
+  // in a state other than unverified), writes it, or no entry says it is not written
+  std::string library_use(const std::string& api, uint32_t k, bool* ok) const {
+    std::vector<std::string> ents;
+    std::string pure, writes;
+    for (const kz_fact_sem& r : sem_) {
+      if (r.column != KZ_SEM_COLUMN_OUT_BEHAVIOUR || base_name(str(r.api)) != api) continue;
+      const std::string item = str(r.item), st = enum_text("KZ_SEM_VERIFY", r.verify);
+      const std::string e = (r.pos == kN ? std::string() : "arg " + std::to_string(r.pos) + " ") + st + " [" + item + "]";
+      if (std::find(ents.begin(), ents.end(), e) == ents.end()) ents.push_back(e);
+      if (r.pos == kN && item.find("no store through an argument") != std::string::npos && r.verify != KZ_SEM_VERIFY_UNVERIFIED && pure.empty()) pure = st + " [" + item + "]";
+      if (r.pos == k && item.find("written") != std::string::npos && writes.empty()) writes = st;
+    }
+    const std::string head = "library: " + api + " parameter " + std::to_string(k) + ": ";
+    if (!pure.empty()) return head + "out-behaviour " + pure;
+    *ok = false;
+    if (!writes.empty()) return head + "writes it (" + writes + ")";
+    return head + "no entry says the parameter is not written (" + (ents.empty() ? std::string("none") : join(ents, "; ")) + ")";
+  }
+  // where the value of pointer parameter k of fn goes, through bodies (PARAM_FLOW depth 0): no write, or the first use that
+  // writes through it, stores it, returns it or is not followed
+  std::string param_use(uint32_t fn, uint32_t k, std::set<std::pair<uint32_t, uint32_t>>* seen, bool* ok) const {
+    if (!seen->insert({fn, k}).second) return fname(fn) + " parameter " + std::to_string(k) + ": followed already";
+    if (!defined(fn)) return library_use(base_name(fname(fn)), k, ok);
+    std::set<std::string> kinds;
+    auto it = pflow_of_.find({fn, k});
+    if (it != pflow_of_.end())
+      for (uint32_t i : it->second) {
+        const kz_fact_pflow& p = pflow_[i];
+        if (p.depth != 0) continue;
+        const std::string at = pos(str(p.file), p.line, p.col);
+        switch (p.kind) {
+          case KZ_PFLOW_KIND_OUT_STORE: *ok = false; return fname(fn) + " parameter " + std::to_string(k) + ": writes through it at " + at;
+          case KZ_PFLOW_KIND_STORE: *ok = false; return fname(fn) + " parameter " + std::to_string(k) + ": stores it at " + at;
+          case KZ_PFLOW_KIND_RETURN: *ok = false; return fname(fn) + " parameter " + std::to_string(k) + ": returns it at " + at;
+          case KZ_PFLOW_KIND_OPEN: *ok = false; return fname(fn) + " parameter " + std::to_string(k) + ": open (" + std::to_string(p.n) + " uses left out)";
+          case KZ_PFLOW_KIND_CALL_ARG: {
+            if (p.next_fn == kN || (p.flags & (KZ_PFLOW_FLAG_UNRESOLVED | KZ_PFLOW_FLAG_VARIADIC)) != 0) {
+              *ok = false;
+              return fname(fn) + " parameter " + std::to_string(k) + ": " + ((p.flags & KZ_PFLOW_FLAG_VARIADIC) != 0 ? "a variadic argument" : "an indirect call whose targets are not all resolved") + " at " + at;
+            }
+            const std::string sub = param_use(p.next_fn, p.next_param, seen, ok);
+            if (!*ok) return fname(fn) + " parameter " + std::to_string(k) + " -> " + sub;
+            kinds.insert("call-argument -> " + fname(p.next_fn) + "#" + std::to_string(p.next_param));
+            break;
+          }
+          default: kinds.insert(enum_text("KZ_PFLOW_KIND", p.kind)); break;
+        }
+      }
+    std::vector<std::string> ks(kinds.begin(), kinds.end());
+    return "body: " + fname(fn) + " parameter " + std::to_string(k) + ": followed, no write (" +
+           (ks.empty() ? std::string("no PARAM_FLOW row: reads through the pointer make no row") : join(ks, ", ")) + ")";
+  }
+  // the top-level conjuncts of a guard
+  void conjuncts(uint32_t root, std::vector<uint32_t>* out) const {
+    if (root == kN || root >= exprs_.size()) return;
+    const kz_fact_expr& e = exprs_[root];
+    if (e.op == KZ_EXPR_OP_AND && e.a < root && e.b < root) {
+      conjuncts(e.a, out);
+      conjuncts(e.b, out);
+      return;
+    }
+    out->push_back(root);
+  }
+  // a conjunct that tests field A against the constant c: (eq A c), (eq c A), (not (ne A c)), (not (ne c A))
+  bool tests_field_value(uint32_t root, const std::string& A, const std::set<int64_t>& vals) const {
+    if (root == kN || root >= exprs_.size()) return false;
+    const kz_fact_expr* e = &exprs_[root];
+    if (e->op == KZ_EXPR_OP_NOT && e->a < root && exprs_[e->a].op == KZ_EXPR_OP_NE) e = &exprs_[e->a];
+    else if (e->op != KZ_EXPR_OP_EQ) return false;
+    if (e->a == kN || e->b == kN || e->a >= exprs_.size() || e->b >= exprs_.size()) return false;
+    const kz_fact_expr& x = exprs_[e->a];
+    const kz_fact_expr& y = exprs_[e->b];
+    auto fld = [&](const kz_fact_expr& f) { return f.op == KZ_EXPR_OP_LOAD && f.flags == KZ_EXPR_REF_FIELD && str(f.name) == A; };
+    auto cst = [&](const kz_fact_expr& c) { return c.op == KZ_EXPR_OP_CONST && vals.count(c.value) != 0; };
+    return (fld(x) && cst(y)) || (fld(y) && cst(x));
+  }
+  std::string value_kind_of(const WriterRow& r) const {
+    if (r.known) return "const";
+    const size_t sp = r.value_text.find(" [");
+    return r.kind == "write" ? std::string("not extracted") : r.value_text.substr(0, sp);
+  }
+
+  void buffer_lifetime_lines(const Namespace& n, std::ostream& rows, const std::vector<Search>& all_searches, const std::set<uint32_t>& live_fns) {
+    NoNotes nn(this);  // the new lines add nothing to the row's layers or basis deviations (eighth addendum)
+    if (!atype_at_built_) {
+      for (size_t i = 0; i < atypes_.size(); ++i) atype_at_[{str(atypes_[i].file), atypes_[i].line, atypes_[i].col, atypes_[i].fn}].push_back(static_cast<uint32_t>(i));
+      atype_at_built_ = true;
+    }
+    // the partition of every key-parameter function, its direct reach, and whether it is a creator (reaches a live writer)
+    std::map<std::pair<uint32_t, uint32_t>, std::string> kpart;
+    std::map<uint32_t, std::set<uint32_t>> reach;
+    std::set<uint32_t> creator_fns;
+    for (const auto& kp : n.key_params) {
+      std::set<std::pair<uint32_t, uint32_t>> seen;
+      std::string desc, nonsel;
+      kpart[kp] = partition(kp.first, kp.second, &seen, n.key_params, all_searches, &desc, &nonsel);
+      if (reach.count(kp.first) == 0) reach[kp.first] = reach_direct(kp.first);
+      for (uint32_t f : reach[kp.first])
+        if (live_fns.count(f) != 0) creator_fns.insert(kp.first);
+    }
+    std::map<uint32_t, std::string> group_cache;
+    auto group_of = [&](uint32_t W) -> std::string {
+      auto gc = group_cache.find(W);
+      if (gc != group_cache.end()) return gc->second;
+      std::set<std::string> parts;
+      for (const auto& [kp, p] : kpart)
+        if (kp.first == W) parts.insert(p);
+      if (parts.empty())
+        for (const auto& [kp, p] : kpart)
+          if (reach[kp.first].count(W) != 0) parts.insert(p);
+      std::string g;
+      if (parts.empty()) g = "no key-parameter function reaches " + fname(W);
+      else if (parts.size() == 1) g = "partition {" + *parts.begin() + "}";
+      else {
+        g = "shared by partitions";
+        for (const std::string& p : parts) g += " {" + p + "}";
+      }
+      return group_cache[W] = g;
+    };
+    // (1) the key field's writers by the kind of their function
+    std::string ksrc;
+    const std::vector<WriterRow> kws = writers_of(n.key, &ksrc);
+    std::map<std::string, std::vector<const WriterRow*>> by_group;
+    for (const WriterRow& w : kws) by_group[group_of(w.fn)].push_back(&w);
+    for (const auto& [g, ws] : by_group) {
+      ++bl_.groups;
+      if (g.compare(0, 6, "shared") == 0) ++bl_.shared;
+      if (g.compare(0, 2, "no") == 0) ++bl_.none;
+      rows << "      writers [" << g << "] of " << n.key << ": " << ws.size() << ":";
+      bool first = true;
+      for (const WriterRow* w : ws) {
+        rows << (first ? " " : "; ") << w->kind << " at " << w->where << " value=" << w->value_text;
+        first = false;
+      }
+      rows << "\n";
+    }
+    // (2) the name stores and their buffer fields
+    struct Store {
+      std::string group, where, file;
+      uint32_t fn = kN, line = 0, col = 0;
+    };
+    std::map<std::pair<std::string, std::string>, std::vector<Store>> buffers;  // (group, X) -> its name stores
+    std::vector<std::pair<std::string, std::string>> undecided;                 // (group, line)
+    std::set<std::tuple<std::string, uint32_t, uint32_t, uint32_t>> store_pos;
+    // a name store is a store of an address into the key, so the key must be a pointer field (the name pointer field of 5x item 5)
+    auto kft = ftype_of_.find(n.key);
+    const bool key_is_pointer = kft != ftype_of_.end() && ftypes_[kft->second].elem_kind == KZ_FTYPE_ELEM_POINTER && ftypes_[kft->second].extent_kind == KZ_FTYPE_EXTENT_NONE;
+    for (const WriterRow& w : kws) {
+      if (!key_is_pointer || w.kind != "assign") continue;
+      auto at = atype_at_.find({w.file, w.line, w.col, w.fn});
+      if (at == atype_at_.end()) continue;
+      std::set<std::string> cand;
+      for (uint32_t i : at->second) {
+        const kz_fact_atype& a = atypes_[i];
+        if (a.kind != KZ_ATYPE_KIND_ADDRESS_ESCAPE || str(a.detail).compare(0, std::strlen(kDecayAssign), kDecayAssign) != 0) continue;
+        const std::string X = str(a.loc_type) + "." + str(a.loc_field);
+        auto ft = ftype_of_.find(X);
+        if (ft != ftype_of_.end() && ftypes_[ft->second].extent_kind != KZ_FTYPE_EXTENT_NONE) cand.insert(X);
+      }
+      if (cand.empty()) continue;
+      ++bl_.name_stores;
+      store_pos.insert({w.file, w.line, w.col, w.fn});
+      if (cand.size() > 1) {
+        std::set<std::string> copy;
+        for (const std::string& X : cand) {
+          std::string s;
+          for (const WriterRow& r : writers_of(X, &s))
+            if (r.fn == w.fn && r.file == w.file && r.line == w.line && r.kind == "memcpy") copy.insert(X);
+        }
+        if (copy.size() == 1) cand = copy;
+      }
+      const std::string g = group_of(w.fn);
+      if (cand.size() != 1) {
+        undecided.emplace_back(g, "stored-name buffer [" + g + "]: not decided (" + std::to_string(cand.size()) + " array fields decay at " + w.where + ": " +
+                                      join(std::vector<std::string>(cand.begin(), cand.end()), ", ") + ")");
+        continue;
+      }
+      Store s;
+      s.group = g;
+      s.where = w.where;
+      s.file = w.file;
+      s.fn = w.fn;
+      s.line = w.line;
+      s.col = w.col;
+      buffers[{g, *cand.begin()}].push_back(s);
+    }
+    if (store_pos.empty()) {
+      lifetime_lines(n, rows, group_of, creator_fns);
+      return;
+    }
+    // (3) the uses of the escaped address: the reads of the key field
+    uint32_t u_ok = 0, u_all = 0;
+    {
+      std::vector<std::string> us;
+      auto rit = reads_of_field_.find(n.key);
+      if (rit != reads_of_field_.end())
+        for (uint32_t ri : rit->second) {
+          const kz_fact_read& r = reads_[ri];
+          const uint16_t use = r.use;
+          const std::string where = fname(r.fn) + " at " + pos(str(r.file), r.line, r.col) + ": ";
+          bool ok = true;
+          std::string t;
+          if ((use & KZ_READ_USE_CALL_ARG) != 0 && r.site != kN) {
+            auto cit = call_by_site_.find(r.site);
+            const uint32_t callee = cit != call_by_site_.end() ? calls_[cit->second].callee_fn : kN;
+            if (callee == kN) {
+              ok = false;
+              t = "an indirect call (not followed)";
+            } else {
+              std::set<std::pair<uint32_t, uint32_t>> seen;
+              t = param_use(callee, r.arg_index, &seen, &ok);
+            }
+          } else if ((use & (KZ_READ_USE_STORE | KZ_READ_USE_OUT_STORE)) != 0) {
+            ok = false;
+            t = "copied to " + ex(r.ctx_root);
+          } else if ((use & KZ_READ_USE_BRANCH) != 0 && (use & ~(KZ_READ_USE_BRANCH | KZ_READ_USE_RETURN)) == 0) {
+            t = "test";
+          } else if (use == KZ_READ_USE_RETURN) {
+            ok = false;
+            t = "returned";
+          } else {
+            ok = false;
+            t = "other use (" + flags_text("KZ_READ_USE", use) + ")";
+          }
+          ++u_all;
+          if (ok) ++u_ok;
+          us.push_back(where + t);
+        }
+      bl_.uses += u_all;
+      bl_.uses_ok += u_ok;
+      rows << "      stored-name address uses (the reads of " << n.key << ", every partition): " << u_all << ": " << (us.empty() ? std::string("none") : join(us, "; "))
+           << "; discharged " << u_ok << ", not discharged " << (u_all - u_ok) << "\n";
+    }
+    // (4) one line per (group, buffer field)
+    for (const auto& [g, l] : undecided) {
+      ++bl_.not_decided;
+      rows << "      " << l << "\n";
+    }
+    for (const auto& [gx, stores] : buffers) {
+      const std::string& g = gx.first;
+      const std::string& X = gx.second;
+      ++bl_.buffers;
+      std::ostringstream o;
+      o << "stored-name buffer [" << g << "]: " << X;
+      auto ft = ftype_of_.find(X);
+      if (ft != ftype_of_.end()) {
+        const kz_fact_ftype& f = ftypes_[ft->second];
+        o << " extent " << (f.extent_kind == KZ_FTYPE_EXTENT_CONSTANT ? std::to_string(f.extent) : enum_text("KZ_FTYPE_EXTENT", f.extent_kind));
+        if (!str(f.extent_text).empty()) o << " [" << str(f.extent_text) << "]";
+      }
+      std::set<uint32_t> store_fns;
+      o << "; name stores " << stores.size() << ":";
+      for (size_t i = 0; i < stores.size(); ++i) {
+        o << (i == 0 ? " " : "; ") << stores[i].where;
+        store_fns.insert(stores[i].fn);
+      }
+      std::string src;
+      const std::vector<WriterRow> ws = writers_of(X, &src);
+      uint32_t n_other = 0;
+      o << "; writers " << ws.size() << " from " << (src.empty() ? std::string("nothing") : src) << ":";
+      for (size_t i = 0; i < ws.size(); ++i) {
+        const WriterRow& r = ws[i];
+        o << (i == 0 ? " " : "; ");
+        if ((r.kind == "memcpy" || r.kind == "out-pointer") && store_fns.count(r.fn) != 0) o << "create copy " << r.where << " [" << r.kind << "]";
+        else if (r.known) o << "clear " << r.where << " [" << (r.kind == "memset" ? "fill " : "assign ") << r.value << "]";
+        else {
+          ++n_other;
+          o << "other " << r.where << " value=" << value_kind_of(r) << " [" << r.kind << "]";
+        }
+      }
+      auto fsi = fstatus_of_.find(X);
+      std::vector<std::string> causes, open_causes;
+      bool fs_complete = false;
+      uint32_t fs_writers = 0;
+      if (fsi == fstatus_of_.end()) {
+        o << "; FIELD_STATUS: no row";
+      } else {
+        const kz_fact_fstatus& fs = fstatus_[fsi->second];
+        fs_writers = fs.n_writers;
+        fs_complete = fs.status_field == KZ_LOC_STATUS_COMPLETE && fs.status_type == KZ_LOC_STATUS_COMPLETE;
+        o << "; FIELD_STATUS per-field=" << enum_text("KZ_LOC_STATUS", fs.status_field) << " type-level=" << enum_text("KZ_LOC_STATUS", fs.status_type) << " (writers "
+          << fs.n_writers << "; hits escape " << fs.own_escape << ", cast " << fs.own_cast << ", union " << fs.own_union << ", unknown " << fs.own_unknown << ", other fields "
+          << fs.sibling_hits << "; untyped sites " << fs.untyped << ")";
+        if (fs.flags & KZ_FSTATUS_FLAG_ARRAY_ELEMENTS) {
+          if (has_objacc_)
+            causes.push_back("array-element-stores-not-collected: discharged (--object-access: a store to an element is a writer row of the field and the completeness pass counts it; every other use of the decayed array is an address-escape hit or an out-pointer call; BASIS count.array_decay: " +
+                             basis_map_.at_or("count.array_decay") + ")");
+          else {
+            causes.push_back("array-element-stores-not-collected: not discharged (the facts have no OBJECT_ACCESS)");
+            open_causes.push_back("array-element-stores-not-collected");
+          }
+        }
+        if (fs.own_escape != 0) {
+          std::vector<std::string> rs;
+          uint32_t n_rows = 0;
+          std::string first_other;
+          auto ai = atypes_of_.find(X);
+          if (ai != atypes_of_.end())
+            for (uint32_t i : ai->second) {
+              const kz_fact_atype& a = atypes_[i];
+              if (a.kind != KZ_ATYPE_KIND_ADDRESS_ESCAPE) continue;
+              ++n_rows;
+              const std::string at = pos(str(a.file), a.line, a.col);
+              const bool ns = store_pos.count({str(a.file), a.line, a.col, a.fn}) != 0 && str(a.detail).compare(0, std::strlen(kDecayAssign), kDecayAssign) == 0;
+              if (ns) rs.push_back("name store " + at);
+              else {
+                rs.push_back(at + " in " + fname(a.fn) + ": " + str(a.detail));
+                if (first_other.empty()) first_other = "a row that is no name store: " + at;
+              }
+            }
+          std::string why;
+          if (n_rows == 0) why = "no ATYPE row of the field";
+          else if (!first_other.empty()) why = first_other;
+          else if (n_rows != fs.own_escape) why = "ATYPE gives " + std::to_string(n_rows) + " rows and FIELD_STATUS counts " + std::to_string(fs.own_escape);
+          else if (u_ok != u_all) why = "address uses not discharged " + std::to_string(u_all - u_ok);
+          const std::string head = "address-escape " + std::to_string(fs.own_escape) + " (" + (rs.empty() ? std::string("no row") : join(rs, "; ")) + "): ";
+          if (why.empty()) causes.push_back(head + "discharged (every row is a name store and every address use is discharged)");
+          else {
+            causes.push_back(head + "not discharged (" + why + ")");
+            open_causes.push_back("address-escape");
+          }
+        }
+        const std::pair<uint32_t, const char*> own[] = {{fs.own_cast, "cast"}, {fs.own_union, "union"}, {fs.own_unknown, "unknown-effect"}};
+        for (const auto& [c, name] : own)
+          if (c != 0) {
+            causes.push_back(std::string(name) + " " + std::to_string(c) + ": not discharged (a write through a converted pointer, a union member or an unknown effect may reach the field)");
+            open_causes.push_back(name);
+          }
+        if (fs.status_type != KZ_LOC_STATUS_COMPLETE && fs.sibling_hits != 0 && fs.untyped != 0) {
+          causes.push_back("untyped writes " + std::to_string(fs.untyped) + " with hits on other fields " + std::to_string(fs.sibling_hits) +
+                           ": not discharged (these facts do not show that no untyped write reaches the field)");
+          open_causes.push_back("untyped writes with hits on other fields");
+        } else if (fs.flags & KZ_FSTATUS_FLAG_UNTYPED_IN_PROGRAM) {
+          causes.push_back("untyped-in-program: not a cause (no hit on another field of the type)");
+        }
+        const std::pair<uint16_t, const char*> once[] = {{KZ_FSTATUS_FLAG_WRITER_NOT_ONCE, "writer-function-not-once"},
+                                                         {KZ_FSTATUS_FLAG_SEVERAL_INSTANCES, "several-instances"},
+                                                         {KZ_FSTATUS_FLAG_WRITER_IN_LOOP, "writer-in-loop"}};
+        for (const auto& [f, name] : once)
+          if (fs.flags & f) causes.push_back(std::string(name) + ": not a cause (they are of the once rule, not of the writer set)");
+      }
+      o << "; causes: " << (causes.empty() ? std::string("none") : join(causes, "; "));
+      o << "; address uses " << u_all << ": discharged " << u_ok << ", not discharged " << (u_all - u_ok) << " (the stored-name address uses line)";
+      std::string why;
+      if (n_other != 0) why = "other writers " + std::to_string(n_other);
+      else if (ws.empty() && fs_writers != 0) why = "no writer rows of the field";
+      else if (fsi == fstatus_of_.end()) why = "no FIELD_STATUS row";
+      else if (!fs_complete && !open_causes.empty()) why = "FIELD_STATUS disabled; causes not discharged: " + join(open_causes, ", ");
+      else if (!fs_complete) why = "FIELD_STATUS disabled; every cause discharged";
+      else if (u_ok != u_all) why = "address uses not discharged " + std::to_string(u_all - u_ok);
+      if (why.empty()) {
+        ++bl_.complete;
+        o << "; complete";
+      } else {
+        const size_t cut = why.find_first_of(":0123456789");
+        std::string head = why.substr(0, cut == std::string::npos ? why.size() : cut);
+        while (!head.empty() && head.back() == ' ') head.pop_back();
+        ++bl_.why[head];
+        o << "; not complete (" << why << ")";
+      }
+      rows << "      " << o.str() << "\n";
+    }
+    lifetime_lines(n, rows, group_of, creator_fns);
+  }
+
+  void lifetime_lines(const Namespace& n, std::ostream& rows, const std::function<std::string(uint32_t)>& group_of, const std::set<uint32_t>& creator_fns) {
+    std::set<std::string> fields(n.active.begin(), n.active.end());
+    fields.insert(n.key);
+    std::map<std::string, std::vector<std::string>> table_lines;  // position -> fields (clear-table, one line per position)
+    std::map<std::string, std::string> table_text;
+    std::vector<std::string> out;
+    for (const std::string& f : fields) {
+      auto wit = writers_of_.find(f);
+      if (wit == writers_of_.end()) continue;
+      const bool is_key = f == n.key;
+      auto ev = empty_.find(f);
+      for (uint32_t i : wit->second) {
+        const kz_fact_writer& w = writers_[i];
+        const std::string at = pos(str(w.file), w.line, w.col);
+        const std::string where = at + " in " + fname(w.fn);
+        const bool cst = w.value_kind == KZ_ARG_KIND_CONST;
+        const std::string key = str(w.key);
+        if (w.kind == KZ_WRITER_KIND_MEMSET && (n.tables.count(key) != 0 || (w.flags & KZ_WRITER_FLAG_EARLY_INIT) != 0)) {
+          if (table_lines.count(where) == 0) table_text[where] = "clear-table " + where + ": names no id: every record of " + key + (cst ? " [fill " + std::to_string(w.value) + "]" : "");
+          table_lines[where].push_back(f);
+          continue;
+        }
+        if (is_key && cst && w.kind == KZ_WRITER_KIND_ASSIGN) {
+          ++bl_.clear_slot;
+          std::vector<uint32_t> cj;
+          conjuncts(w.guard_root, &cj);
+          std::string shown;
+          for (uint32_t c : cj)
+            for (const std::string& A : n.active) {
+              auto ea = empty_.find(A);
+              if (ea != empty_.end() && tests_field_value(c, A, ea->second)) shown = ex(c);
+            }
+          std::string l = "lifetime end [" + group_of(w.fn) + "]: clear-slot " + where + ": ";
+          if (!shown.empty()) {
+            ++bl_.slot_shown;
+            l += "free-record condition shown (" + shown + "; " + at + ")";
+          } else {
+            ++bl_.slot_not;
+            std::string act;
+            for (const std::string& A : n.active) {
+              auto ea = empty_.find(A);
+              if (ea == empty_.end()) continue;
+              for (int64_t v : ea->second) act += std::string(act.empty() ? "" : ", ") + A + " == " + std::to_string(v);
+            }
+            l += "not shown (the store's guard " + ex(w.guard_root) + " tests no active field of the record (" + (act.empty() ? std::string("no empty value of an active field is known") : act) + ")";
+            const std::string g = ex(w.guard_root);
+            for (const std::string& A : n.active) {
+              auto aw = writers_of_.find(A);
+              if (aw == writers_of_.end()) continue;
+              for (uint32_t j : aw->second) {
+                const kz_fact_writer& v = writers_[j];
+                if (v.fn == w.fn && v.value_kind != KZ_ARG_KIND_CONST && ex(v.guard_root) == g)
+                  l += "; the same function stores " + A + " := " + str(v.value_text) + " at " + pos(str(v.file), v.line, v.col) + " under the same guard (the record is allocated here)";
+              }
+            }
+            l += ")";
+          }
+          out.push_back(l);
+          continue;
+        }
+        if (is_key) continue;
+        if (cst && ev != empty_.end() && ev->second.count(w.value) != 0) {
+          ++bl_.release;
+          out.push_back("lifetime end [" + group_of(w.fn) + "]: release " + where + ": " + f + " := " + std::to_string(w.value) + " (the empty value); names the record " + key);
+          continue;
+        }
+        const std::string vt = str(w.value_text);
+        if (cst || vt.size() < 2 || vt[0] != '*') continue;
+        const std::string p = vt.substr(1);
+        const std::string g = ex(w.guard_root);
+        const size_t pp = g.find("param:" + p + "#");
+        if (pp == std::string::npos) continue;
+        const uint32_t k = static_cast<uint32_t>(std::strtoul(g.c_str() + pp + 7 + p.size(), nullptr, 10));
+        ++bl_.release_param;
+        std::vector<std::string> cs;
+        for (uint32_t ci : callers_[w.fn]) {
+          const kz_fact_call& c = calls_[ci];
+          auto af = argflow_at_.find({c.site, k});
+          std::string arg = af != argflow_at_.end() ? str(argflow_[af->second].text) : std::string("?");
+          std::string kind;
+          if (af != argflow_at_.end() && argflow_[af->second].src == KZ_ARGSRC_CONST && argflow_[af->second].value == 0) kind = "a null pointer (the store's guard needs the parameter non-null)";
+          else {
+            std::set<std::string> gs, fs;
+            for (uint32_t F : creator_fns) {
+              if (F == c.caller_fn) {
+                gs.insert(group_of(F));
+                fs.insert(fname(F) + " (the caller itself)");
+                continue;
+              }
+              auto cf = calls_of_.find(F);
+              if (cf == calls_of_.end()) continue;
+              for (uint32_t cj : cf->second)
+                if (calls_[cj].callee_fn == c.caller_fn) {
+                  gs.insert(group_of(F));
+                  fs.insert(fname(F));
+                }
+            }
+            if (!gs.empty()) {
+              ++bl_.rollback;
+              kind = "rollback: called directly by the creator callees " + join(std::vector<std::string>(fs.begin(), fs.end()), ", ") + " (" +
+                     join(std::vector<std::string>(gs.begin(), gs.end()), ", ") + ")";
+            } else {
+              ++bl_.del;
+              std::set<std::string> who;
+              for (uint32_t cj : callers_[c.caller_fn]) who.insert(fname(calls_[cj].caller_fn));
+              kind = "delete: no creator callee reaches it; " + fname(c.caller_fn) + " is called from " + std::to_string(who.size()) + " functions" +
+                     (who.empty() ? std::string() : " (" + join(std::vector<std::string>(who.begin(), who.end()), ", ") + ")");
+            }
+          }
+          cs.push_back(fname(c.caller_fn) + " at " + call_pos(ci) + " passes " + arg + " [" + kind + "]");
+        }
+        out.push_back("lifetime end [" + group_of(w.fn) + "]: release through parameter " + std::to_string(k) + " of " + fname(w.fn) + " at " + at + ": " + f + " := " + vt + "; callers " +
+                      std::to_string(cs.size()) + ": " + (cs.empty() ? std::string("none") : join(cs, "; ")) + "; names the record " + key +
+                      "; the value passed is not tied (these facts do not give the definitions of a local whose address is passed, as in the success path line)");
+      }
+    }
+    for (const auto& [where, fs] : table_lines) {
+      ++bl_.clear_table;
+      rows << "      lifetime end [all partitions]: " << table_text[where] << " (" << join(fs, ", ") << ")\n";
+    }
+    for (const std::string& l : out) rows << "      " << l << "\n";
+  }
+  std::string bl_header() const {
+    std::ostringstream o;
+    o << "summary stored-name buffer and lifetime end (relations rules revision 14): name stores " << bl_.name_stores << "; buffers " << bl_.buffers << ": complete "
+      << bl_.complete << ", not complete " << (bl_.buffers - bl_.complete);
+    std::vector<std::string> ws;
+    for (const auto& [w, c] : bl_.why) ws.push_back(w + " " + std::to_string(c));
+    o << " (" << (ws.empty() ? std::string("none") : join(ws, "; ")) << "), not decided " << bl_.not_decided << "; address uses " << bl_.uses << ": discharged " << bl_.uses_ok
+      << ", not discharged " << (bl_.uses - bl_.uses_ok) << "; writer groups " << bl_.groups << " (shared " << bl_.shared << ", none " << bl_.none << "); lifetime ends: clear-table "
+      << bl_.clear_table << ", clear-slot " << bl_.clear_slot << " (free-record condition shown " << bl_.slot_shown << ", not shown " << bl_.slot_not << "), release " << bl_.release
+      << ", release through a parameter " << bl_.release_param << " (callers: rollback " << bl_.rollback << ", delete " << bl_.del << ")";
+    return o.str();
+  }
+
   void path_a_uses(const Namespace& n, std::ostream& rows, std::vector<RelRow>* out) {
     // the functions that reach a write of the key (direct calls).  relations rules revision 12: a write whose stored
     // value WRITERS gives as a constant clears or initialises the key (a clearing store); a function is a live writer when
@@ -3625,6 +4143,8 @@ class Rel : public RelFacts {
       rows << "      success path of the creator callees of the namespace (relations rules revision 14): " << ls.size() << "\n";
       for (const auto& [f, t] : ls) rows << "        " << t << "\n";
     }
+    // relations rules revision 14 (5x item 5, eighth addendum): the key's writers by kind, the stored-name buffer and the lifetime ends
+    if (result_flow_ && has_objacc_) buffer_lifetime_lines(n, rows, all_searches, live_fns);
     rows << "      uses: lookups " << lookups << ", creators " << creators << " (calls from outside the key-parameter functions; a creator reaches a write of the key)";
     if (clearing != 0)
       rows << "; key-clearing calls " << clearing << " (every write of the key they reach stores a constant, WRITERS: no creator site and no lookup row)";

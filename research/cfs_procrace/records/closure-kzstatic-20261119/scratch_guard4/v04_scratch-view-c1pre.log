@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-view need=100000000 floor=314572800 interval=2 cmd=<scratch>/kzc4_build/tools/kz-static/kz-static show /home/user/work/redesign/obs1/rf2_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz --section atype --section writers --section fstatus --section ftypes --section sem
+start 2026-11-19T03:52:03.350Z free=1092071424 threshold=414572800
+sample 2026-11-19T03:52:03.355Z 1092067328
+end 2026-11-19T03:52:05.363Z kind=scratch-view verdict=completed rc=0 free=1083908096 lowest=1083908096 dip=8163328 change=-8163328

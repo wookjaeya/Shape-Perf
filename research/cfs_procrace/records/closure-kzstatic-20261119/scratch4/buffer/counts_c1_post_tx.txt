@@ -1,0 +1,29 @@
+# c1_post_tx.txt
+address uses: body followed, no write (discharged)	1
+address uses: library with an entry (discharged)	1
+address uses: library, no entry or writes (not discharged)	12
+address uses: passed on to a library call (not discharged)	1
+address uses: test (discharged)	4
+address uses: variadic or indirect (not discharged)	1
+buffers	16
+buffers with other writers	5
+buffers: not complete: FIELD_STATUS disabled	11
+buffers: not complete: other writers	5
+causes: address-escape: not discharged	16
+causes: array-element-stores-not-collected: discharged	16
+causes: several-instances: not a cause	16
+causes: untyped writes: not discharged	4
+causes: untyped-in-program: not a cause	12
+causes: writer-function-not-once: not a cause	16
+causes: writer-in-loop: not a cause	3
+lifetime ends: clear-slot	10
+lifetime ends: clear-slot: not shown	10
+lifetime ends: clear-table	5
+lifetime ends: release	1
+lifetime ends: release through a parameter	1
+release-through callers: delete	1
+release-through callers: null pointer	1
+release-through callers: rollback	1
+writer groups: none	30
+writer groups: one partition	11
+writer groups: shared	2

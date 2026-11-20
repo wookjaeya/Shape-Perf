@@ -1,0 +1,9 @@
+# space_guard.sh kind=scratch-cmp-extract_off need=200000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-20261119/scripts/scratch6_compare.sh extract_off
+start 2026-11-19T05:36:22.071Z free=698105856 threshold=514572800
+sample 2026-11-19T05:36:22.075Z 698101760
+sample 2026-11-19T05:36:24.081Z 671776768
+sample 2026-11-19T05:36:26.088Z 698044416
+sample 2026-11-19T05:36:28.095Z 645292032
+sample 2026-11-19T05:36:30.101Z 667246592
+sample 2026-11-19T05:36:32.107Z 697896960
+end 2026-11-19T05:36:34.115Z kind=scratch-cmp-extract_off verdict=completed rc=0 free=697847808 lowest=645292032 dip=52813824 change=-258048

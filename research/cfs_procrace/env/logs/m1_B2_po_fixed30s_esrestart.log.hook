@@ -1,0 +1,21 @@
+== hook S1 pid=11138 at 1638 ms since launch, mono=1518.547898
+snapshot /home/user/Shape-Perf/research/cfs_procrace/env/logs/m1_B2_po_fixed30s_esrestart.S1 written (6.1 ms)
+== hook S1 end mono=1518.603050
+== hook S2 pid=11138 at 30007 ms since launch, mono=1546.916072
+snapshot /home/user/Shape-Perf/research/cfs_procrace/env/logs/m1_B2_po_fixed30s_esrestart.S2 written (5.7 ms)
+pipe file before command: present size=1624 mtime=2026-10-08T06:25:29.708751640Z
+waiter: READY mono=1546.991430
+cmd_send at mono=1547.005061:
+  Using result from PassThrough encoder
+  0x000: 18 03 c0 00 00 41 07 62 00 00 00 00 00 00 00 00  .....A.b........    
+  0x010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................    
+  0x020: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................    
+  0x030: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................    
+  0x040: 00 00 00 00 00 00 00 00                          ........            
+  sending data to '127.0.0.1' (IP : 127.0.0.1); port 1234
+cmd_send exit=0
+waiter: CLOSE_WRITE cfe_sb_pipe.dat 1547.344076 (rc=0); command-to-close_ms=339.0
+copied: size=1624 sha256=b317ec2e330ee0e864d0d66694ceb033784c361ac3f7b37cac5cbfbd809d0262
+parsed 26 entries from /home/user/Shape-Perf/research/cfs_procrace/env/logs/m1_B2_po_fixed30s_esrestart.pipeinfo.dat
+snapshot /home/user/Shape-Perf/research/cfs_procrace/env/logs/m1_B2_po_fixed30s_esrestart.S2b written (4.8 ms)
+== hook S2 end mono=1547.446132

@@ -1,0 +1,4 @@
+# space_guard.sh kind=no-expect-check need=1000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/scripts/no_expect_check.sh /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/no_expect_input_check2.txt
+start 2026-11-19T15:26:21.257Z free=812113920 threshold=315572800
+sample 2026-11-19T15:26:21.262Z 812109824
+end 2026-11-19T15:26:23.268Z kind=no-expect-check verdict=completed rc=0 free=812101632 lowest=812101632 dip=12288 change=-12288

@@ -1,0 +1,5 @@
+# space_guard.sh kind=plans need=100000000 floor=314572800 interval=2 cmd=bash plans.sh /home/user/work/redesign/obs1/objacc_off_extract /home/user/work/redesign/obs1/objacc_plans_off
+start 2026-11-16T17:19:14.395Z free=2554175488 threshold=414572800
+sample 2026-11-16T17:19:14.399Z 2554171392
+sample 2026-11-16T17:19:16.405Z 2553327616
+end 2026-11-16T17:19:18.412Z kind=plans verdict=completed rc=0 free=2553188352 lowest=2553188352 dip=987136 change=-987136

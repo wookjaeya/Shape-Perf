@@ -1,0 +1,57 @@
+# boot declaration 3 of the C1 cycle (results 26.5; evaluation protocol 14.13 item 9; spec 11.5 item 4), written and
+# committed before any boot.  It supersedes boot/declaration2.tsv of 549dc94, which superseded boot/declaration.tsv of
+# 860c2cd (both kept unchanged; no boot runs against them).  run_cycle.sh verify re-measures every row below before every
+# boot (sha256 of the file; a build-id row also by readelf -n; a plan-id row against its plan.side; a count row: the
+# regular files under the directory), and the boot step runs only with a clean verify.txt of the same N naming this file's
+# sha256 as it is, with this file and run_cycle.sh in git and unchanged, and after a verify of the same N it runs again
+# itself (results 26.0 (아); evaluation protocol 14.8, 14.13 item 9).  The rows of declaration2.tsv come first, measured
+# again (records/closure-prebootfix-20261119/declaration/remeasure_declaration2.tsv; the changed ones in
+# declaration/changes_vs_declaration2.tsv, each with its commit); the rows it lacked follow: the third freeze, every
+# non-ELF installed file of both builds (the startup scripts and the tables), the file count of each build's ws/exe, the
+# two helper scripts of the boot runner, the install inventories, predictions3.tsv and no_expect_input_check3.txt.
+# Results 26.0 is cited by its own labels: (가)-(더).
+# frozen explanation script: records/closure-prebootfix-20261119/freeze.tsv (judge 644acc11, falsifier and evaluation
+#   script 03b9c95d (revision 2), fixtures e4a7dda6 and b050b238; reader ef20a760, summary 5e19b419, expectation
+#   comparison a9a9fc3f, driver af9d4395 and branch generator a722e4af unchanged); the expectations: expect/expect_c1_2.tsv
+#   (with the class column; unchanged), the predictions behind it expect/predictions3.tsv (the values of predictions2.tsv,
+#   with the no-event-loss precondition of protocol 14.13 item 8), read only by the expect step and by F1 of the eval step
+#   (boot/no_expect_input_check3.txt).
+# gate (evaluation protocol 3; run_cycle.sh gate): the control record check is clean; no pool overflow and every other
+#   loss named (the loss fields and, since results 26.5, the loss records of the dump by kind and count; no-build-id and
+#   object-table lose no event and are no loss marker of the judgement part); the chain is confirmed.  same_build is not
+#   in the gate (basis 1 of every pair; F10).
+# boot-number rule (protocol 2; results 12.10 item 4; results 26.0 (타), protocol 14.10): per build one first boot; if it
+#   passes the gate, exactly four more (2-5) whatever it showed; if it fails, the cause is committed in
+#   boot/<build>/addendum_1r.txt and one retry 1r runs; if 1r passes it counts as the first boot and exactly four more
+#   follow; if 1r fails, the build's boots end.  No number is raised or lowered after a record is seen; every boot counts
+#   and a boot that fails the gate is listed with its reason; c1_pre_tx first, then c1_post_tx.
+# the further boots are read for two things only: each pre-defined use's distribution over the boots (observed / not
+#   observed / undetermined) and whether another order of a pair was seen (other_order_seen_in_boots).  The startup
+#   script fixes the order (cf before bp), so the same order is expected in every boot [I]; that says nothing about
+#   another order.  Static elements and missing inputs do not change with more boots.
+# main result (judgement rules 8.14 item 4; protocol 14.1): D1/R0, the conservative criterion adopted for this cycle (not
+#   'the rules as written'); auxiliary: the other 15 branches of branches_16.txt at every boot and the 496
+#   partial-admission branches of branches_all.txt later on the same records; every auxiliary table names its data
+#   branch and reading; the eval step writes its counts per branch, D1-R0 first as main, and pools nothing (protocol
+#   14.13 item 3).  Level 1 (PI record decision 3; protocol 14.13 item 6): the element-level distinction of the three
+#   rows is static, fixed before the boot; what a boot adds is per use: reached, outcome, context, name state, link
+#   result, the fixed build's retry events, and their distribution over the boots.
+# expected [I] (expect_c1_2.tsv; predictions2.tsv): every planned path A row of both builds use_cond partial (A63
+#   not_derived in D1) and violation undetermined in all 16 branches.  No design row can reach observed: use_cond needs
+#   (c1), (c2), (c4) present and (c3) with (i) held and (iii) held in every context (R0); (c2) is flip static-undetermined
+#   or static-possible without the earlier value (present only under Rc), (c4) is not decided (feasibility undecidable;
+#   present only under Rd, and then not in D1 because the creators' agreement entries are unverified), (c3) (i) is never
+#   held and (iii) is not_held (found: retry or probe-create) or not_established in every context.  At the pair level
+#   basis 4 (no creator success path line held, 0 of 14 per build) and (da) (buffers complete 0 of 16; address uses with
+#   no entry) are missing in every branch, so no pair is bound or refuted and no generation opens (link unlinked).
+#   Precision and in-plan recall: undefined (no reader).  expect_discriminate (protocol 14.13 items 1-2): static on
+#   every control row, met by the fixed build's row and the probe row (rules (1)-(2)), unmet on the time-base rows (rule
+#   (3); no generation) and the file-name row; F3, F4 and F9 are not evaluable on records with no unit and F3 is weak in
+#   this cycle (protocol 14.13 items 4-5).  The expectation is neither positive nor negative.
+# space (results 26.2 need.txt [I]; records/closure-prebootfix-20261119/out/free_declaration.txt): per boot 51,810,304 B,
+#   12 boots 621,723,648 B and a margin of 100,000,000 B above the floor 314,572,800 B: 1,036,296,448 B free is needed
+#   before boot 1.  Measured 763,105,280 B at 2026-11-19T17:50:50Z: short by 273,191,168 B.  Under results 26.0 (카) the
+#   boots do not start until the need is met (a byte-preserving archive by a plan committed first; results 26.3 open
+#   point 1) or the PI decides; the boot step measures the space again when it starts (protocol 14.9).
+# commands: boot/commands.txt (verify first for each build and before each boot N, and again inside the boot step;
+#   written, not run).

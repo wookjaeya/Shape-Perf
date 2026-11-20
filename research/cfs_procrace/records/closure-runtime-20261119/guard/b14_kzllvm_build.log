@@ -1,0 +1,7 @@
+# space_guard.sh kind=plugin need=104857600 floor=314572800 interval=2 cmd=bash -c cmake -S /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm -B /home/user/work/instr/kzllvm-0.2/plugin-build && cmake --build /home/user/work/instr/kzllvm-0.2/plugin-build -j8
+start 2026-11-19T07:42:07.971Z free=754929664 threshold=419430400
+sample 2026-11-19T07:42:07.975Z 754925568
+sample 2026-11-19T07:42:09.986Z 750395392
+sample 2026-11-19T07:42:11.995Z 745807872
+sample 2026-11-19T07:42:14.002Z 745529344
+end 2026-11-19T07:42:16.009Z kind=plugin verdict=completed rc=0 free=741683200 lowest=741683200 dip=13246464 change=-13246464

@@ -1,0 +1,22 @@
+# kz-static show of the facts of one build (old facts and new facts read by the same tool), compared within each
+# section.  Four masks name the fields whose value moves with rows added before them or with the outcome rule; then a
+# line of one of the sections below that is still only in one side is counted per section (the record-level count of
+# each section is in the sections_cmp report).
+mask	row-index	resultflow	^  #[0-9]+ 	  # 
+mask	flow-row-reference	resulteffect	 flow [0-9]+ \{	 flow # {
+mask	outcome-class	resulteffect	^(  site [0-9]+ \S+ in \S+) (success|failure|absence|other|none) 	\1 OUTCOME 
+mask	condition-and-flags	resultflow	 cond \(.*\) \{[^}]*\}$	 cond (C) {F}
+del	section:basis	basis	.
+add	section:basis	basis	.
+del	section:semantics	semantics	.
+add	section:semantics	semantics	.
+del	section:resultflow	resultflow	.
+add	section:resultflow	resultflow	.
+del	section:resulteffect	resulteffect	.
+add	section:resulteffect	resulteffect	.
+del	section:atype	atype	.
+add	section:atype	atype	.
+del	section:lockhandles	lockhandles	.
+add	section:lockhandles	lockhandles	.
+del	section:loopdefs	loopdefs	.
+add	section:loopdefs	loopdefs	.

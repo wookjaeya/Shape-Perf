@@ -1,0 +1,31 @@
+# cf-281a941.kzm -- the CF main task at CF 281a941 (the parent of the fix) in the predict model of profile c1-bp-b051eb0.
+# Read after 00_common.kzm, with the profile directory cf-281a941/.
+#
+# CF_CFDP_InitEngine (cf_cfdp.c L991-L1001): for each channel in order (L967; CF_NUM_CHANNELS 2) one lookup; a result
+# other than OS_SUCCESS: event 30 and break out of the channel loop.  No retry exists at this revision.  CF_Init and
+# CF_AppMain as at 833fdbb (cf_app.c L250-L258, L330-L338, L366; the same lines at both revisions).
+kzp-predict 1
+
+program CF
+  event CF_Init call prov cf_app_init_status
+  event CF_CFDP_InitEngine call prov cf_app_init_engine_call
+  use OS_CountSemGetIdByName s0 role-site cf_lookup_call prov cf_cfdp_lookup_call, cf_cfdp_lookup, m_cf_channel_loop, m_cf_num_channels
+    hit osal.countsem_lookup.entry before caller cf.so name sem_name
+    hit cf_lookup_call after
+  unless-result OS_SUCCESS fail prov cf_cfdp_lookup
+  use OS_CountSemGetIdByName s1 role-site cf_lookup_call prov cf_cfdp_lookup_call, cf_cfdp_lookup, m_cf_channel_loop, m_cf_num_channels
+    hit osal.countsem_lookup.entry before caller cf.so name sem_name
+    hit cf_lookup_call after
+  unless-result OS_SUCCESS fail prov cf_cfdp_lookup
+  event CF_CFDP_InitEngine ret result=OS_SUCCESS prov cf_cfdp_initengine_return
+  event CF_Init ret result=OS_SUCCESS prov m_cf_init_success
+  mark "event 20 CF Initialized; CF enters its main loop (outside the cone)"
+  finish prov m_cf_init_success, m_cf_runloop
+  label fail
+  mark "event 30 failed to get sem id; break out of the channel loop"
+  event CF_CFDP_InitEngine ret result=OS_ERR_NAME_NOT_FOUND prov cf_cfdp_lookup, cf_cfdp_initengine_return
+  event CF_Init ret result=OS_ERR_NAME_NOT_FOUND prov m_cf_init_success
+  mark "run_status APP_ERROR; CFE_ES_RunLoop returns false"
+  exit CFE_ES_ExitApp CFE_ES_RunStatus_APP_ERROR prov cf_app_init_status, m_cf_runloop, m_es_runloop_false, cf_app_exit, es_exitapp_external
+    hit es.exit_app.entry before caller cf.so
+end

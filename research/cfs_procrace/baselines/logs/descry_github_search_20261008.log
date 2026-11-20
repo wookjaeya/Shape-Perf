@@ -1,0 +1,27 @@
+# descry: GitHub-side search for a public DESCRY implementation, 2026-10-08T01:28:16Z
+# MCP search_repositories 'descry in:name,description,readme concurrency' -> 19 hits: wcventure/ConcurrencyPaper (paper list), chosenoffset/descry (Go rules engine), fairbearlab/descry (Go uptime engine), lileeei/descry-tool (Rust LLM tools), others unrelated (word lists, profiles)
+# MCP search_repositories 'DESCRY failure reproduction' -> 0 hits
+# MCP search_code '"DESCRY" KLEE' -> 1238 hits, first 30 are word lists / descrypt hash lists / daily-info digests; none is a DESCRY implementation
+# MCP search_code '"Reproducing System-Level Concurrency Failures"' -> 32 hits: bibliography/index files (bibtex.github.io, biber-dist, CCF-Rec-Paper-DB, acmsigsoft opentoc, dblp dumps) plus morgen52/SE-artifact data/papers.csv and wcventure/ConcurrencyPaper README.md (inspected below)
+## git clone --depth 1 --filter=blob:none --no-checkout https://github.com/morgen52/SE-artifact /home/user/work/procrace/baselines/descry/sources/morgen52_SE-artifact
+exit=0
+HEAD 9eb9386a80a4e1fdce98e6d5648996904216f698 Fri Dec 26 23:30:38 2025 +0800
+## git clone --depth 1 --filter=blob:none --no-checkout https://github.com/wcventure/ConcurrencyPaper /home/user/work/procrace/baselines/descry/sources/wcventure_ConcurrencyPaper
+exit=0
+HEAD 43c76f5fcdd702ab8b03239b7bf56d67343d9746 Fri Jun 2 00:55:08 2023 +0800
+checkout papers.csv exit=0
+checkout README.md exit=0
+## morgen52/SE-artifact data/papers.csv: header + DESCRY row
+paper_id,title,artifact_url,artifact_url_valid,url_location,url_format
+1504:FSE-2017-63,DESCRY: reproducing system-level concurrency failures.,,,,
+## wcventure/ConcurrencyPaper README.md: DESCRY line(s)
+167-  - [D4: Fast Concurrency Debugging with Parallel Differential Analysis (PLDI 2018)](https://parasol.tamu.edu/people/jeff/academic/d4.pdf)
+168:  - [DESCRY: Reproducing System-Level Concurrency Failures (ESEC/FSE 2017)](https://par.nsf.gov/servlets/purl/10075449)
+169-  - [CONCURRIT: A Domain Specific Language for Reproducing Concurrency Bugs (PLDI 2013)](https://people.eecs.berkeley.edu/~ksen/papers/concurrit.pdf) -[[Source]](https://code.google.com/archive/p/concurrit/)
+## morgen52/SE-artifact README.md (HEAD 9eb9386a80a4e1fdce98e6d5648996904216f698), lines describing papers.csv:
+#   "#### 1.2 Manually download papers and check / We manually downloaded the papers according to the paper lists and mark them for the following:
+#    - paper_id - title - artifact_url - artifact_url_valid - URL_location - URL_format"
+#   (dataset of the JSS paper "Research Artifacts in Software Engineering Publications: Status and Trends"; ICSE/ASE/ISSTA/FSE 2017-2022)
+# => row 1504 'FSE-2017-63,DESCRY: reproducing system-level concurrency failures.,,,,' : the annotators found NO artifact URL in the DESCRY paper.
+#    Third-party annotation; it agrees with my own full read of the author PDF (no code/artifact URL anywhere in YuZW17.pdf; see descry_paper_requirements_20261008.log).
+## wcventure/ConcurrencyPaper README.md line 168 links only the paper (NSF PAR purl 10075449); no [Source] link, unlike neighbouring entries (e.g. line 169 CONCURRIT has [[Source]]).

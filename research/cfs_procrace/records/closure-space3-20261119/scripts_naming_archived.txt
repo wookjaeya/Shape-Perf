@@ -1,0 +1,8 @@
+research/cfs_procrace/records/closure-explain-fix-20261119/scripts/runs.sh:9:#   regress             revision 4 as revised on the 2026-11-16 inputs, the eight D1 branches -> obs1/xr5_regress_rev4fix
+research/cfs_procrace/records/closure-explain-fix-20261119/scripts/runs.sh:38:    OUT=$O/xr5_regress_rev4fix
+research/cfs_procrace/records/closure-prebootfix-20261119/scripts/runs.sh:11:#                                     with obs1/xr5_regress_rev4fix (../compare/regress.txt)
+research/cfs_procrace/records/closure-prebootfix-20261119/scripts/runs.sh:76:    python3 -I "$CMPR" "$O/xr5_regress_rev4fix" "$OUT" > "$HERE/compare/regress.txt" 2>&1; rc=$?
+research/cfs_procrace/records/closure-space2-20261119/need.py:29:    ('xr5_dry_static_c1_pre_tx', 'static dry run with the 16 branches, no run; compared in results 26.5'),
+research/cfs_procrace/records/closure-space2-20261119/need.py:30:    ('xr5_dry_static_c1_post_tx', 'static dry run with the 16 branches, no run; compared in results 26.5'),
+research/cfs_procrace/records/closure-space2-20261119/need.py:31:    ('xr5_regress_rev4fix', 'the regression on the 2026-11-16 inputs (8 D1 branches); compared in results 26.5'),
+research/cfs_procrace/records/closure-space2-20261119/need.py:32:    ('xr5_candidates_regen', 'candidates.py re-run: 64 files byte-identical to records/closure-c1prep-20261119/candidates'),

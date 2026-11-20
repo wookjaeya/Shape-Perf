@@ -1,0 +1,4 @@
+[ 88%] Built target kz-core
+[ 88%] Building CXX object tools/kz-phi/CMakeFiles/kz-phi.dir/main.cpp.o
+[100%] Linking CXX executable kz-phi
+[100%] Built target kz-phi

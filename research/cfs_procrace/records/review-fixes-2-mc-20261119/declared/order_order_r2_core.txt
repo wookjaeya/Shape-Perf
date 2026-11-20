@@ -1,0 +1,5 @@
+cdiff old_lines=6032 new_lines=6032 only_old=3 only_new=3 other=0
+class - tool-line-revision pairs=1
+class - relations-line-revision pairs=1
+class - row:awaited removed=1
+class - row:awaited added=1

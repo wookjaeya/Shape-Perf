@@ -1,0 +1,7 @@
+row A20 (relations line 552) use /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:126:13 -> OS_CountSemGetIdByName
+  id holder (relations line 558): &BP_GlobalData.Throttles[index].Sem field BP_Throttle_t.Sem base pointer-field object
+  writers of BP_Throttle_t.Sem: 2 rows [WRITERS]: the lookup's own out store 1 (view line [30127]); clearing or initial (constant 0) 0; other 1
+    other definition: view line 30128 at /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:132:18 in initialize_throttling through OS_CountSemCreate
+  FIELD_STATUS (view line 146942): per-field=writer-set-complete type-level=DISABLED hits escape 0, cast 0, union 0, unknown 0, other fields 6; address-type hits on the field other than untyped writes: 0 []
+  later readers of BP_Throttle_t.Sem: 3 rows [READS]: accumulate_throttling -> OS_ObjectIdDefined x1; check_throttling -> OS_ObjectIdDefined x1; disperse_throttling -> OS_CountSemGive x1
+  branch (i): NOT HELD: the holder has another definition (bp_flow.c:132:18 through OS_CountSemCreate)

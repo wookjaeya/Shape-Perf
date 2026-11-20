@@ -1,0 +1,247 @@
+PASS base rc 0
+PASS base D2: twelve items held
+PASS base D2: pair bound
+PASS base D2: link established, basis name_binding
+PASS base D2: use_cond derived
+PASS base D2: use name state unmet
+PASS base D2: order unmet_state_observed, violation observed
+PASS base D2: order_ground is the pair-file line (unordered)
+PASS base D2: pair_kind app-app
+PASS base D2: context 1 assigned to the use
+PASS base: uses.tsv written before aggregation
+PASS base D1: (na) semantics missing (unverified entries)
+PASS base D1: pair unlinked, record unlinked
+PASS base D1: (iii) not established (rests on an unverified entry)
+PASS base D1: use_cond partial, violation undetermined
+PASS base D1: eval_branch and sha256 fields
+PASS reading branch tag
+PASS judge opens only the normal form and the vocabulary
+PASS the open guard fails a judge that opens another file
+PASS basis1: missing alone
+PASS basis1: sub-reason same build not confirmed
+PASS basis1-refused: build_mismatch
+PASS basis1-dump14: no buildid line: basis 1 missing for the pair
+PASS basis2: missing alone
+PASS basis2: consumer creation tie reason
+PASS basis3-noorigins: missing alone
+PASS basis3-nullkey: null key pointer: an origin not excluded
+PASS basis3-otherorigin: an origin of another condition is not excluded
+PASS basis4-stored: missing alone
+PASS basis4-stored: sub-reason stored value
+PASS basis4-returns: sub-reason returns not followed
+PASS basis4-status: a failed create: out not read
+PASS basis5: cut key text: basis 5 missing
+PASS basis6-overlap: missing alone
+PASS basis6-overlap: name state undecided (overlap)
+PASS contradiction: basis 6 contradicted
+PASS contradiction: absence after a live create
+PASS contradiction: name state met
+PASS ga-noentry: (ga) missing
+PASS ga-nodata: missing alone
+PASS na-sem-nocall: missing alone
+PASS na-bound: missing alone
+PASS da-buffer: missing alone in R0
+PASS da-buffer-Rf: held under reading Rf
+PASS da-unassigned: missing alone
+PASS da-fieldstatus: missing alone
+PASS ra-kind: missing alone
+PASS ra-notplanned: missing alone
+PASS ma-incomplete: missing alone
+PASS ma-incomplete: name state undecided
+PASS ma-unbound: missing alone
+PASS ma-cleartable: (ma) seen: the table was cleared between
+PASS ma-rollback: (ma) seen: a rollback of the name between
+PASS ma-reentry: reentry=possible: a rollback of another name counts for every name of the kind
+PASS ma-slotclear: a slot clear not shown: (ma) not excluded
+PASS refuted: pair refuted
+PASS refuted: record refuted, violation refuted_link
+PASS refuted: refuted_scope
+PASS differs: D1: differs_from_use_key, not refuted
+PASS refuted-some: record unlinked: refuted for some creates only
+PASS refuted-incomplete: record not refuted when the creator set is incomplete
+PASS two-bound: more than one create bound: both unlinked
+PASS found-linked: a found use is instance-linked on an open generation
+PASS found-linked: record established by instance
+PASS found-linked: name state met on the open generation
+PASS found-deleted: the generation was deleted before the use: unlinked
+PASS found-incomplete: lifetime ends incomplete: plan_missing
+PASS process-app: pair kind process-app
+PASS process-app: basis 2 missing: the process initial thread has no creation tie (rule as written)
+PASS same-actor: the probe-create of the consumer's own actor is a pair of kind same_actor
+PASS same-actor: same_thread pair line read
+PASS core-app: pair kind core-app
+PASS same-app-other: pair kind same-app-other
+PASS pairs-otherfacts: pair file of other facts refused: order_basis_unknown
+PASS pairs-othertool: pair file of another tool refused
+PASS pairs-absent: no line of the pair: order_basis_unknown, no fallback
+PASS pairs-badtail: a pair file whose tail does not count its lines is refused
+PASS hard-before-unmet: hard_before with an unmet use flagged
+PASS context2: use in context 2
+PASS context2: (iii) not held: found retry
+PASS context-unknown: no bracketing frame: context unknown
+PASS context-unknown: (iii) not established (context unknown)
+PASS context-unknown: caller_dependence_unknown(context unknown)
+PASS i-clearing: (i) not held (a clearing definition)
+PASS i-clearing-Rb: (i) held under reading Rb
+PASS i-other: (i) not held (another definition)
+PASS i-incomplete: (i) not established (type-level DISABLED)
+PASS i-incomplete-Re: (i) held under reading Re, marked with its premise
+PASS i-local: (i) not established for a local holder
+PASS iii-premise: (iii) not established on a premise
+PASS iii-decided: (iii) held with the stored-field rule marked
+PASS iii-decided: counted apart in use_cond.stored_field_rule
+PASS iii-Re-premise: Re cannot close (iii): no call result under the premise
+PASS Ra: (iii) alone derives under reading Ra
+PASS Ra-R0: R0 needs (i): partial
+PASS Rc: (c2) present from the absence line under Rc
+PASS Rc-R0: (c2) missing in R0
+PASS Rd: (c4) present under Rd with its premise
+PASS Rd-R0: (c4) missing in R0
+PASS partial: (na) semantics still missing with the comparison kind only
+PASS adm-notincand: the run stops with rc 2 and writes no record
+PASS adm-partkind: the run stops with rc 2 and writes no record
+PASS adm-candsha: the run stops with rc 2 and writes no record
+PASS no candidate list: only D1 branches, (na) semantics missing
+PASS tok: tok lines counted only
+PASS norun: no run: static_only, rc 0
+PASS pathB: a path B row makes a record with no name-binding pair
+PASS absent-then-found: the uses of the record differ in basis
+PASS two-texts: two key texts: multi_state_unlinked
+PASS refuted-unplanned: record not refuted when a creator site is not bound
+PASS slot-shown: a slot clear shown to be no lifetime end plans no site: (ma) held
+PASS note-absent: an object without a build-id note: basis 1 missing
+PASS ctx1-found: no context line, one alternatives context: the use's context is that id
+PASS ctx1-found: (iii) not_held from the found line
+PASS ctx1-found: uses.tsv carries the context
+PASS ctx1-none: context 1
+PASS ctx1-none: (iii) held (D2: the entry it rests on admitted)
+PASS ctx1-none: use_cond derived
+PASS ctx1-none-D1: D1: (iii) not established on the unverified entry
+PASS ctx1-notest: context 1, (iii) not established from the line
+PASS ctx1-noat: no frame event and no at-call: the context is still the one id
+PASS ctx2-nolines: no context line, two alternatives contexts: unknown
+PASS ctx2-nolines: (iii) not established (context unknown)
+PASS ctx2-nolines: caller_dependence_unknown(context unknown)
+PASS ctx-none-lines: no context line and no alternatives line: unknown, no id made up
+PASS ctx-dash: an alternatives line of context '-': the use's context is '-'
+PASS named-head: the run stops with rc 2 and writes no record
+PASS named-tail: the run stops with rc 2 and writes no record
+PASS named-plan: the run stops with rc 2 and writes no record
+PASS named-drop: the run stops with rc 2 and writes no record
+PASS named-absent: the run stops with rc 2 and writes no record
+PASS noentry-D1-R0: (na) semantics missing, sub-reason no entry
+PASS noentry-D1-R0: the ground names the named-calls line
+PASS noentry-D2-R0: (na) semantics missing, sub-reason no entry
+PASS noentry-D2-R0: the ground names the named-calls line
+PASS noentry-D2_byte-string_comparison_data_function-R0: (na) semantics missing, sub-reason no entry
+PASS noentry-D2_byte-string_comparison_data_function-R0: the ground names the named-calls line
+PASS noentry-D2-all: (na) semantics missing, sub-reason no entry
+PASS noentry-D2-all: the ground names the named-calls line
+PASS named-not-unverified: a call with records none of them unverified: (na) held, the pair bound
+PASS noentry-cmp-D1-R0: a compare call with no entry: (na) semantics missing, sub-reason no entry: zcmp
+PASS noentry-cmp-D1-R0: its ground is the named-calls line
+PASS noentry-cmp-D2-R0: a compare call with no entry: (na) semantics missing, sub-reason no entry: zcmp
+PASS noentry-cmp-D2-R0: its ground is the named-calls line
+PASS noentry-list: a comma list with one call of no entry: (na) missing in D2, naming only that call
+PASS entry-not-read: a rests-on entry in neither file: (iii) not established, its state not read
+PASS addr-noentry-D2-R0: an address use with no entry: (da) missing in every branch, sub-reason no entry
+PASS addr-noentry-D2-Rf: an address use with no entry: (da) missing in every branch, sub-reason no entry
+PASS addr-unver-D2: an unverified address use: (da) held in D2, depends_on its candidate line
+PASS addr-unver-D1: D1: (da) missing, rests on an unverified entry
+PASS addr-unver-part: a partial admission without the kind: (da) missing
+PASS found-nogen: success path missing: no generation; name state undecided (no create of the found id)
+PASS found-nogen: instance link unlinked, no create of the id
+PASS found-nogen: record link unlinked
+PASS found-nogen-inc: creator sites not complete: undecided with that sub-reason
+PASS found-nocreate: no create event at all, complete creators: undecided, not unmet
+PASS dep-c4-D2: (c4) present in D2 with depends_on the candidate line
+PASS dep-c4-D2: (c1) depends_on none
+PASS dep-c4-D1: (c4) not present in D1, rests on an unverified entry
+PASS dep-c4-part: (c4) not present in a partial admission without the kind
+PASS dep-c1-D1: (c1) and (c2) rest on the flip line's listed entry: missing in D1
+PASS dep-c1-D2: (c1) present in D2 with its depends_on
+PASS dep-ci-D1: (c3)(i) not established in D1 on the holder line's listed entry
+PASS dep-ci-D2: (c3)(i) held in D2 with its depends_on
+PASS dep-none: no listed entry named: every element and (da) depends_on none
+FAIL loss-nobuildid: only the bookkeeping kinds: no loss marker, the use unmet as without them  [used 0 uses 1
+branch D2-Rb records 1 refused 0 uses 1
+branch D2-Rc records 1 refused 0 uses 1
+branch D2-Rd records 1 refused 0 uses 1
+branch D2-Re records 1 refused 0 uses 1
+branch D2-Rf records 1 refused 0 uses 1
+branch D2-all records 1 refused 0 uses 1
+compat chain confirmed; same_build confirmed
+]
+FAIL loss-nobuildid: (ma) held, the pair bound  [used 0 uses 1
+branch D2-Rb records 1 refused 0 uses 1
+branch D2-Rc records 1 refused 0 uses 1
+branch D2-Rd records 1 refused 0 uses 1
+branch D2-Re records 1 refused 0 uses 1
+branch D2-Rf records 1 refused 0 uses 1
+branch D2-all records 1 refused 0 uses 1
+compat chain confirmed; same_build confirmed
+]
+PASS loss-event: an event loss: the name state undecided on the loss markers
+PASS loss-event: needs not reached become unknown-loss
+PASS loss-event: (ma) missing
+FAIL found-loss: a found use under an event loss: unlinked, record_insufficient(loss marker)  [used 0 uses 1
+branch D2-Rb records 1 refused 0 uses 1
+branch D2-Rc records 1 refused 0 uses 1
+branch D2-Rd records 1 refused 0 uses 1
+branch D2-Re records 1 refused 0 uses 1
+branch D2-Rf records 1 refused 0 uses 1
+branch D2-all records 1 refused 0 uses 1
+compat chain confirmed; same_build confirmed
+]
+FAIL found-nobuildid: a found use with only a no-build-id loss line: linked on its open generation as without it  [used 0 uses 1
+branch D2-Rb records 1 refused 0 uses 1
+branch D2-Rc records 1 refused 0 uses 1
+branch D2-Rd records 1 refused 0 uses 1
+branch D2-Re records 1 refused 0 uses 1
+branch D2-Rf records 1 refused 0 uses 1
+branch D2-all records 1 refused 0 uses 1
+compat chain confirmed; same_build confirmed
+]
+FAIL found-unbound-end: a lifetime-end site not bound: unlinked, record_insufficient(site not bound in the build)  [used 0 uses 1
+branch D2-Rb records 1 refused 0 uses 1
+branch D2-Rc records 1 refused 0 uses 1
+branch D2-Rd records 1 refused 0 uses 1
+branch D2-Re records 1 refused 0 uses 1
+branch D2-Rf records 1 refused 0 uses 1
+branch D2-all records 1 refused 0 uses 1
+compat chain confirmed; same_build confirmed
+]
+PASS --check accepts the base record
+PASS format check 9 bound pair with an item not held: refused
+PASS format check 10 refuted without scope: refused
+PASS format check 11 basis without an established link: refused
+PASS format check 12 name-binding use not absent: refused
+PASS format check 13 derived without (iii) held: refused
+PASS format check 14 a use without its name state: refused
+PASS format check 14 uses_decided above uses_reached: refused
+PASS format check 15 a held item on a hand reading: refused
+PASS format check 16 D1 record with an item on an unverified entry: refused
+PASS format check 16 order_ground of another form: refused
+PASS format check 17 no eval_branch: refused
+PASS format check 17 a reading without its tag: refused
+PASS format check 14 a use with a context of no alternatives line: the record passes, the broken one is refused by it
+PASS format check 14 a found use whose name state is unmet: the record passes, the broken one is refused by it
+PASS format check 16 (a) (c1) without depends_on: the record passes, the broken one is refused by it
+PASS format check 16 (a) a pair's (da) without depends_on: the record passes, the broken one is refused by it
+PASS format check 16 (b) D1: (c4) present on a list entry: the record passes, the broken one is refused by it
+PASS format check 16 (c) D2[...]: (c4) present on a line of a kind not admitted: the record passes, the broken one is refused by it
+PASS format check 16 (d) (na) held with the sub-reason no entry: the record passes, the broken one is refused by it
+PASS summary rc 0, per-branch tables, no detection count
+PASS summary (spec 11 item 7): main head on D1-R0 only, auxiliary heads with data and readings, the reading tag copied
+PASS summary (spec 11 item 8): one row per pre-defined use, the unreached context included; per-boot reached / defined
+PASS summary (spec 11 item 9): the eight pair-kind lines, the between-app line
+PASS summary form check: two head lines in a table refused (rc 3), the written summary passes
+PASS summary form check: a main head on another branch refused (rc 3), the written summary passes
+PASS summary form check: a use row missing refused (rc 3), the written summary passes
+PASS summary form check: a pair-kind line missing refused (rc 3), the written summary passes
+PASS expectation comparison: 2 match, 1 mismatch
+PASS expectation comparison (spec 11 item 12): the class on every line and the counts per class
+PASS expectation file with no class column: refused (rc 2)
+PASS expectation file with a class outside the three: refused (rc 2)
+PASS summary and comparison changed no record
+fixtures: 206 checks, 201 passed, 5 failed

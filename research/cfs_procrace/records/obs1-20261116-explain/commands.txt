@@ -1,0 +1,18 @@
+# commands of the explanation step (plan/observation_path_results_20261116.md 7), in order, with their outcome
+env/tools/build_record.sh pre MC pre_mc.txt -> rc 0; equal to records/obs1-20261116-boot/post_mc.txt except the time and free lines
+env/tools/tests/run_unit.sh -> 15 of 15 (unit_tools_before.txt); env/redesign/step2a_tests_unit.sh -> 7 of 7 (unit_step2a_before.txt)
+run_explain.sh facts-view -> c1pre_explain/facts_view.txt (MC kz-dump 05623054; facts 0d7954fa)
+run_explain.sh explain explain -> 45 records, 0 refused, rc 0 (08:33Z; the declared script; its compat line cut at a space: fixed after this run)
+explain.py fixes after the first run: same_build regex; 32-bit status against the row's unsigned constant (fixture 17 added); run-loop entries after the use kept as a window fact, not an effect event; effect.events_scope
+run_explain.sh explain explain_r2 -> 45 records, 0 refused, rc 0 (08:35Z)
+explain.py: effect.events_scope text added -> fixtures 17 of 17
+run_explain.sh explain explain_r3 -> 45 records, 0 refused, rc 0 (08:36Z); the final records
+explain.py again into the scratchpad with the same inputs -> byte-identical to explain_r3 (48 files; determinism.txt); scratchpad copy removed
+run_explain.sh copy explain_r3 17975444d83f6589 -> index, inputs, refused, the relation-1 record, explain_explain_r3.sha256 (48)
+summary.py explain_r3 -> summary.txt
+run_explain.sh plan-checks -> plan_checks.txt; run_explain.sh hand -> hand_compare.txt
+LEDGER.tsv: OBS_c1pre_explain (145 files); ledger_check 43 rows 0 failing (before the bundle)
+run_explain.sh bundle -> VERIFIED_LOCAL obs1-20261116-cycle (4,554 files, tar.xz 9,341,660 B, 4d2a0325); LEDGER.tsv: B_obs1-20261116-cycle
+ledger_check 44 rows 0 failing; tools_check --deep 31 rows 0 failing; build_record.sh post MC post_mc.txt -> equal to pre_mc.txt except the HEAD and free lines
+plan/ovm_evidence_20261111/p_offline.md:27 correction note; SHA256SUMS line of p_offline.md replaced; sha256sum -c 29 OK; f0_exit_status.txt
+run_unit.sh 15 of 15 (unit_tools.txt); step2a_tests_unit.sh 7 of 7 (unit_step2a.txt)

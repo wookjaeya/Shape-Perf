@@ -1,0 +1,4 @@
+# space_guard.sh kind=expect-form need=5000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/env/obs1/explain_expect.py --expect /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/expect_c1_2.tsv --records <scratch>/empty --out /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/form_check2_no_records.txt
+start 2026-11-19T15:17:59.831Z free=818151424 threshold=319572800
+sample 2026-11-19T15:17:59.835Z 818147328
+end 2026-11-19T15:18:01.841Z kind=expect-form verdict=completed rc=0 free=817901568 lowest=817901568 dip=249856 change=-249856

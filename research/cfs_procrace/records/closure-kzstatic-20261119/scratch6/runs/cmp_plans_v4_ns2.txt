@@ -1,0 +1,35 @@
+OK plans_v4_ns2_plan_kzs_c1_pre_tx: diffkinds old_lines=1000 new_lines=1055 only_old=156 only_new=211 labels=7
+OK plans_v4_ns2_plan_side_c1_pre_tx: diffkinds old_lines=1130 new_lines=1175 only_old=82 only_new=127 labels=28
+OK plans_v4_ns2_plan_req_c1_pre_tx: diffkinds old_lines=41 new_lines=41 only_old=27 only_new=27 labels=2
+OK plans_v4_ns2_plan_mod_c1_pre_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_plan_exe_c1_pre_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_args_txt_c1_pre_tx: diffkinds old_lines=42 new_lines=42 only_old=12 only_new=12 labels=20
+OK c1_pre_tx plan.log the same bytes as the kept one
+OK plans_v4_ns2_plan_kzs_c1_post_tx: diffkinds old_lines=997 new_lines=1046 only_old=115 only_new=164 labels=7
+OK plans_v4_ns2_plan_side_c1_post_tx: diffkinds old_lines=1131 new_lines=1169 only_old=82 only_new=120 labels=27
+OK plans_v4_ns2_plan_req_c1_post_tx: diffkinds old_lines=35 new_lines=35 only_old=21 only_new=21 labels=2
+OK plans_v4_ns2_plan_mod_c1_post_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_plan_exe_c1_post_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_args_txt_c1_post_tx: diffkinds old_lines=42 new_lines=42 only_old=12 only_new=12 labels=20
+OK c1_post_tx plan.log the same bytes as the kept one
+OK plans_v4_ns2_plan_kzs_r2_core: diffkinds old_lines=208 new_lines=268 only_old=39 only_new=99 labels=7
+OK plans_v4_ns2_plan_side_r2_core: diffkinds old_lines=724 new_lines=765 only_old=39 only_new=80 labels=25
+OK plans_v4_ns2_plan_req_r2_core: diffkinds old_lines=11 new_lines=11 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_plan_mod_r2_core: diffkinds old_lines=3 new_lines=3 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_plan_exe_r2_core: diffkinds old_lines=3 new_lines=3 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_args_txt_r2_core: diffkinds old_lines=42 new_lines=42 only_old=12 only_new=12 labels=20
+OK r2_core plan.log the same bytes as the kept one
+OK plans_v4_ns2_plan_kzs_c5_641: diffkinds old_lines=553 new_lines=553 only_old=4 only_new=4 labels=4
+OK plans_v4_ns2_plan_side_c5_641: diffkinds old_lines=599 new_lines=601 only_old=18 only_new=20 labels=17
+OK plans_v4_ns2_plan_req_c5_641: diffkinds old_lines=23 new_lines=23 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_plan_mod_c5_641: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_plan_exe_c5_641: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_args_txt_c5_641: diffkinds old_lines=42 new_lines=42 only_old=12 only_new=12 labels=20
+OK c5_641 plan.log the same bytes as the kept one
+OK plans_v4_ns2_plan_kzs_c5_642: diffkinds old_lines=530 new_lines=530 only_old=4 only_new=4 labels=4
+OK plans_v4_ns2_plan_side_c5_642: diffkinds old_lines=582 new_lines=584 only_old=18 only_new=20 labels=17
+OK plans_v4_ns2_plan_req_c5_642: diffkinds old_lines=23 new_lines=23 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_plan_mod_c5_642: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_plan_exe_c5_642: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_v4_ns2_args_txt_c5_642: diffkinds old_lines=42 new_lines=42 only_old=12 only_new=12 labels=20
+OK c5_642 plan.log the same bytes as the kept one

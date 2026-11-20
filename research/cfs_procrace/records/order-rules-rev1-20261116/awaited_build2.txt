@@ -1,0 +1,27 @@
+== c1_pre_tx
+      awaited: BP_CLA_GlobalData_t.EgressServiceEnabled; writers in other threads 1; writer sets complete under the per-field rule: yes; the condition exit at the initial values: not decided
+      awaited: BP_CLA_GlobalData_t.IngressServiceEnabled; writers in other threads 1; writer sets complete under the per-field rule: yes; the condition exit at the initial values: not decided
+      awaited: CFE_ES_Global_t.SystemState; writers in other threads 5; write cfe/modules/es/fsw/src/cfe_es_start.c:181:5 in CFE_ES_Main [CFE_ES_Global_t.SystemState] main (process); write cfe/modules/es/fsw/src/cfe_es_start.c:192:5 in CFE_ES_Main [CFE_ES_Glob
+      awaited: CFE_ES_AppRecord_t.AppState, CFE_ES_Global_t.AppTable; writers in other threads 21; write cfe/modules/es/fsw/src/cfe_es_api.c:442:13 in CFE_ES_ExitApp [CFE_ES_AppRecord_t.AppState] CFE_ES_TaskMain (table-image-entry); write cfe/modules/es/fsw/sr
+      awaited: OS_common_record_t.active_id; writers in other threads 80; write osal/src/os/shared/src/osapi-idmap.c:432:21 in OS_ObjectIdConvertToken [OS_common_record_t.active_id] BP_CLA_InputTask (spawn-entry); write osal/src/os/shared/src/osapi-idmap.c:432
+== r2_core
+      awaited: CFE_ES_Global_t.SystemState; writers in other threads 5; write cfe/modules/es/fsw/src/cfe_es_start.c:183:5 in CFE_ES_Main [CFE_ES_Global_t.SystemState] main (process); write cfe/modules/es/fsw/src/cfe_es_start.c:194:5 in CFE_ES_Main [CFE_ES_Glob
+      awaited: CFE_ES_AppRecord_t.AppState, CFE_ES_Global_t.AppTable; writers in other threads 11; write cfe/modules/es/fsw/src/cfe_es_api.c:399:13 in CFE_ES_ExitApp [CFE_ES_AppRecord_t.AppState] CFE_EVS_TaskMain (table-walk-entry); write cfe/modules/es/fsw/sr
+      awaited: OS_common_record_t.active_id; writers in other threads 51; write osal/src/os/shared/src/osapi-idmap.c:438:21 in OS_ObjectIdConvertToken [OS_common_record_t.active_id] CFE_ES_TaskMain (table-walk-entry); write osal/src/os/shared/src/osapi-idmap.c
+== c5_642
+      awaited: CFE_ES_Global_t.AppReadyCount, CFE_ES_Global_t.AppStartedCount, CFE_ES_Global_t.SystemState; writers in other threads 4; write cfe/fsw/cfe-core/src/es/cfe_es_api.c:586:17 in CFE_ES_RunLoop [CFE_ES_Global_t.AppReadyCount] SAMPLE_AppMain (script-e
+# recognised waits: dependent uses by kind (read/call after the loop in the function; call of the function) and consequence
+c1_pre_tx /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_cla_bundle_io.c:84:5 {'read:inside': 1, 'call:inside': 2, 'caller-call:no-budget': 1}
+c1_pre_tx /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_cla_bundle_io.c:107:5 {'read:inside': 1, 'call:inside': 2, 'caller-call:no-budget': 1}
+c1_pre_tx cfe/modules/es/fsw/src/cfe_es_api.c:630:5 {'read:inside': 1, 'call:inside': 1, 'caller-call:continue': 6}
+c1_pre_tx cfe/modules/es/fsw/src/cfe_es_start.c:892:5 {'read:inside': 2, 'call:inside': 4, 'caller-call:unknown': 3}
+c1_pre_tx osal/src/os/shared/src/osapi-timebase.c:400:5 {'read:inside': 14, 'call:inside': 14, 'caller-call:no-budget': 1}
+c1_post_tx /home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_cla_bundle_io.c:84:5 {'read:inside': 1, 'call:inside': 2, 'caller-call:no-budget': 1}
+c1_post_tx /home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_cla_bundle_io.c:107:5 {'read:inside': 1, 'call:inside': 2, 'caller-call:no-budget': 1}
+c1_post_tx cfe/modules/es/fsw/src/cfe_es_api.c:630:5 {'read:inside': 1, 'call:inside': 1, 'caller-call:continue': 6}
+c1_post_tx cfe/modules/es/fsw/src/cfe_es_start.c:892:5 {'read:inside': 2, 'call:inside': 4, 'caller-call:unknown': 3}
+c1_post_tx osal/src/os/shared/src/osapi-timebase.c:400:5 {'read:inside': 14, 'call:inside': 14, 'caller-call:no-budget': 1}
+r2_core cfe/modules/es/fsw/src/cfe_es_api.c:585:5 {'read:inside': 1, 'call:inside': 1, 'caller-call:continue': 6}
+r2_core cfe/modules/es/fsw/src/cfe_es_start.c:871:5 {'read:inside': 2, 'call:inside': 4, 'caller-call:unknown': 3}
+r2_core osal/src/os/shared/src/osapi-timebase.c:400:5 {'read:inside': 14, 'call:inside': 14, 'caller-call:no-budget': 1}
+c5_642 cfe/fsw/cfe-core/src/es/cfe_es_start.c:1015:5 {'read:inside': 3, 'call:inside': 1, 'caller-call:continue': 1, 'caller-call:unknown': 2}

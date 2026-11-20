@@ -1,0 +1,4 @@
+run.kzt.txt: 3823 lines, 4 differing lines; with the tool hash lines masked: 0
+convert.log: 11 lines, 2 differing lines; with the tool hash lines masked: 0
+run.kzt: sizes 234528 / 234528; differing bytes 121-156 (36 bytes); convert rc 0, kz-dump rc 0
+convert_c1boot: only the tool hash lines differ

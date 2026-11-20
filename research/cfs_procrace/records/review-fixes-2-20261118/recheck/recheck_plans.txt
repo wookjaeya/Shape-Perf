@@ -1,0 +1,386 @@
+objacc_plans sem_plans c1_pre_tx OK plan.kzs: lines 836, allowed differences 1, other differences 0
+objacc_plans sem_plans c1_pre_tx OK plan.side: lines 1045, allowed differences 1, other differences 0
+objacc_plans sem_plans c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+objacc_plans sem_plans c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+objacc_plans sem_plans c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans sem_plans c1_pre_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+objacc_plans sem_plans c1_pre_tx compare_plans: only declared differences
+objacc_plans sem_plans c1_post_tx OK plan.kzs: lines 792, allowed differences 1, other differences 0
+objacc_plans sem_plans c1_post_tx OK plan.side: lines 1028, allowed differences 1, other differences 0
+objacc_plans sem_plans c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+objacc_plans sem_plans c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+objacc_plans sem_plans c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans sem_plans c1_post_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+objacc_plans sem_plans c1_post_tx compare_plans: only declared differences
+objacc_plans sem_plans r2_core OK plan.kzs: lines 111, allowed differences 1, other differences 0
+objacc_plans sem_plans r2_core OK plan.side: lines 661, allowed differences 1, other differences 0
+objacc_plans sem_plans r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+objacc_plans sem_plans r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+objacc_plans sem_plans r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans sem_plans r2_core OK args.txt: lines 25, allowed differences 0, other differences 0
+objacc_plans sem_plans r2_core compare_plans: only declared differences
+objacc_plans sem_plans c5_641 OK plan.kzs: lines 434, allowed differences 1, other differences 0
+objacc_plans sem_plans c5_641 OK plan.side: lines 553, allowed differences 1, other differences 0
+objacc_plans sem_plans c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+objacc_plans sem_plans c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+objacc_plans sem_plans c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans sem_plans c5_641 OK args.txt: lines 25, allowed differences 0, other differences 0
+objacc_plans sem_plans c5_641 compare_plans: only declared differences
+objacc_plans sem_plans c5_642 OK plan.kzs: lines 414, allowed differences 1, other differences 0
+objacc_plans sem_plans c5_642 OK plan.side: lines 537, allowed differences 1, other differences 0
+objacc_plans sem_plans c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+objacc_plans sem_plans c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+objacc_plans sem_plans c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans sem_plans c5_642 OK args.txt: lines 25, allowed differences 0, other differences 0
+objacc_plans sem_plans c5_642 compare_plans: only declared differences
+objacc_plans_off sem_plans_off c1_pre_tx OK plan.kzs: lines 836, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off c1_pre_tx OK plan.side: lines 1045, allowed differences 5, other differences 0
+objacc_plans_off sem_plans_off c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_off sem_plans_off c1_pre_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off c1_pre_tx compare_plans: only declared differences
+objacc_plans_off sem_plans_off c1_post_tx OK plan.kzs: lines 792, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off c1_post_tx OK plan.side: lines 1028, allowed differences 5, other differences 0
+objacc_plans_off sem_plans_off c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_off sem_plans_off c1_post_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off c1_post_tx compare_plans: only declared differences
+objacc_plans_off sem_plans_off r2_core OK plan.kzs: lines 111, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off r2_core OK plan.side: lines 661, allowed differences 5, other differences 0
+objacc_plans_off sem_plans_off r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_off sem_plans_off r2_core OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off r2_core compare_plans: only declared differences
+objacc_plans_off sem_plans_off c5_641 OK plan.kzs: lines 434, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off c5_641 OK plan.side: lines 553, allowed differences 5, other differences 0
+objacc_plans_off sem_plans_off c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_off sem_plans_off c5_641 OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off c5_641 compare_plans: only declared differences
+objacc_plans_off sem_plans_off c5_642 OK plan.kzs: lines 414, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off c5_642 OK plan.side: lines 537, allowed differences 5, other differences 0
+objacc_plans_off sem_plans_off c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+objacc_plans_off sem_plans_off c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_off sem_plans_off c5_642 OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_off sem_plans_off c5_642 compare_plans: only declared differences
+objacc_plans_on sem_plans_on c1_pre_tx OK plan.kzs: lines 861, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on c1_pre_tx OK plan.side: lines 1056, allowed differences 5, other differences 0
+objacc_plans_on sem_plans_on c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_on sem_plans_on c1_pre_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on c1_pre_tx compare_plans: only declared differences
+objacc_plans_on sem_plans_on c1_post_tx OK plan.kzs: lines 817, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on c1_post_tx OK plan.side: lines 1039, allowed differences 5, other differences 0
+objacc_plans_on sem_plans_on c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_on sem_plans_on c1_post_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on c1_post_tx compare_plans: only declared differences
+objacc_plans_on sem_plans_on r2_core OK plan.kzs: lines 111, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on r2_core OK plan.side: lines 662, allowed differences 5, other differences 0
+objacc_plans_on sem_plans_on r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_on sem_plans_on r2_core OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on r2_core compare_plans: only declared differences
+objacc_plans_on sem_plans_on c5_641 OK plan.kzs: lines 434, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on c5_641 OK plan.side: lines 542, allowed differences 5, other differences 0
+objacc_plans_on sem_plans_on c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_on sem_plans_on c5_641 OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on c5_641 compare_plans: only declared differences
+objacc_plans_on sem_plans_on c5_642 OK plan.kzs: lines 414, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on c5_642 OK plan.side: lines 526, allowed differences 5, other differences 0
+objacc_plans_on sem_plans_on c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+objacc_plans_on sem_plans_on c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+objacc_plans_on sem_plans_on c5_642 OK args.txt: lines 25, allowed differences 2, other differences 0
+objacc_plans_on sem_plans_on c5_642 compare_plans: only declared differences
+sem_plans rf_plans c1_pre_tx OK plan.kzs: lines 836, allowed differences 1, other differences 0
+sem_plans rf_plans c1_pre_tx OK plan.side: lines 1045, allowed differences 1, other differences 0
+sem_plans rf_plans c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+sem_plans rf_plans c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+sem_plans rf_plans c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans rf_plans c1_pre_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+sem_plans rf_plans c1_pre_tx compare_plans: only declared differences
+sem_plans rf_plans c1_post_tx OK plan.kzs: lines 792, allowed differences 1, other differences 0
+sem_plans rf_plans c1_post_tx OK plan.side: lines 1028, allowed differences 1, other differences 0
+sem_plans rf_plans c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+sem_plans rf_plans c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+sem_plans rf_plans c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans rf_plans c1_post_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+sem_plans rf_plans c1_post_tx compare_plans: only declared differences
+sem_plans rf_plans r2_core OK plan.kzs: lines 111, allowed differences 1, other differences 0
+sem_plans rf_plans r2_core OK plan.side: lines 661, allowed differences 1, other differences 0
+sem_plans rf_plans r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+sem_plans rf_plans r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+sem_plans rf_plans r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans rf_plans r2_core OK args.txt: lines 25, allowed differences 0, other differences 0
+sem_plans rf_plans r2_core compare_plans: only declared differences
+sem_plans rf_plans c5_641 OK plan.kzs: lines 434, allowed differences 1, other differences 0
+sem_plans rf_plans c5_641 OK plan.side: lines 553, allowed differences 1, other differences 0
+sem_plans rf_plans c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+sem_plans rf_plans c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+sem_plans rf_plans c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans rf_plans c5_641 OK args.txt: lines 25, allowed differences 0, other differences 0
+sem_plans rf_plans c5_641 compare_plans: only declared differences
+sem_plans rf_plans c5_642 OK plan.kzs: lines 414, allowed differences 1, other differences 0
+sem_plans rf_plans c5_642 OK plan.side: lines 537, allowed differences 1, other differences 0
+sem_plans rf_plans c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+sem_plans rf_plans c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+sem_plans rf_plans c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans rf_plans c5_642 OK args.txt: lines 25, allowed differences 0, other differences 0
+sem_plans rf_plans c5_642 compare_plans: only declared differences
+sem_plans_off rf_plans_off c1_pre_tx OK plan.kzs: lines 836, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off c1_pre_tx OK plan.side: lines 1045, allowed differences 5, other differences 0
+sem_plans_off rf_plans_off c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_off rf_plans_off c1_pre_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off c1_pre_tx compare_plans: only declared differences
+sem_plans_off rf_plans_off c1_post_tx OK plan.kzs: lines 792, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off c1_post_tx OK plan.side: lines 1028, allowed differences 5, other differences 0
+sem_plans_off rf_plans_off c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_off rf_plans_off c1_post_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off c1_post_tx compare_plans: only declared differences
+sem_plans_off rf_plans_off r2_core OK plan.kzs: lines 111, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off r2_core OK plan.side: lines 661, allowed differences 5, other differences 0
+sem_plans_off rf_plans_off r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_off rf_plans_off r2_core OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off r2_core compare_plans: only declared differences
+sem_plans_off rf_plans_off c5_641 OK plan.kzs: lines 434, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off c5_641 OK plan.side: lines 553, allowed differences 5, other differences 0
+sem_plans_off rf_plans_off c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_off rf_plans_off c5_641 OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off c5_641 compare_plans: only declared differences
+sem_plans_off rf_plans_off c5_642 OK plan.kzs: lines 414, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off c5_642 OK plan.side: lines 537, allowed differences 5, other differences 0
+sem_plans_off rf_plans_off c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+sem_plans_off rf_plans_off c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_off rf_plans_off c5_642 OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_off rf_plans_off c5_642 compare_plans: only declared differences
+sem_plans_on rf_plans_on c1_pre_tx OK plan.kzs: lines 861, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on c1_pre_tx OK plan.side: lines 1056, allowed differences 5, other differences 0
+sem_plans_on rf_plans_on c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_on rf_plans_on c1_pre_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on c1_pre_tx compare_plans: only declared differences
+sem_plans_on rf_plans_on c1_post_tx OK plan.kzs: lines 817, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on c1_post_tx OK plan.side: lines 1039, allowed differences 5, other differences 0
+sem_plans_on rf_plans_on c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_on rf_plans_on c1_post_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on c1_post_tx compare_plans: only declared differences
+sem_plans_on rf_plans_on r2_core OK plan.kzs: lines 111, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on r2_core OK plan.side: lines 662, allowed differences 5, other differences 0
+sem_plans_on rf_plans_on r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_on rf_plans_on r2_core OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on r2_core compare_plans: only declared differences
+sem_plans_on rf_plans_on c5_641 OK plan.kzs: lines 434, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on c5_641 OK plan.side: lines 542, allowed differences 5, other differences 0
+sem_plans_on rf_plans_on c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_on rf_plans_on c5_641 OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on c5_641 compare_plans: only declared differences
+sem_plans_on rf_plans_on c5_642 OK plan.kzs: lines 414, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on c5_642 OK plan.side: lines 526, allowed differences 5, other differences 0
+sem_plans_on rf_plans_on c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+sem_plans_on rf_plans_on c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+sem_plans_on rf_plans_on c5_642 OK args.txt: lines 25, allowed differences 2, other differences 0
+sem_plans_on rf_plans_on c5_642 compare_plans: only declared differences
+rf_plans ll_plans c1_pre_tx OK plan.kzs: lines 836, allowed differences 1, other differences 0
+rf_plans ll_plans c1_pre_tx OK plan.side: lines 1045, allowed differences 1, other differences 0
+rf_plans ll_plans c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+rf_plans ll_plans c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+rf_plans ll_plans c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans ll_plans c1_pre_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+rf_plans ll_plans c1_pre_tx compare_plans: only declared differences
+rf_plans ll_plans c1_post_tx OK plan.kzs: lines 792, allowed differences 1, other differences 0
+rf_plans ll_plans c1_post_tx OK plan.side: lines 1028, allowed differences 1, other differences 0
+rf_plans ll_plans c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+rf_plans ll_plans c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+rf_plans ll_plans c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans ll_plans c1_post_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+rf_plans ll_plans c1_post_tx compare_plans: only declared differences
+rf_plans ll_plans r2_core OK plan.kzs: lines 111, allowed differences 1, other differences 0
+rf_plans ll_plans r2_core OK plan.side: lines 661, allowed differences 1, other differences 0
+rf_plans ll_plans r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+rf_plans ll_plans r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+rf_plans ll_plans r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans ll_plans r2_core OK args.txt: lines 25, allowed differences 0, other differences 0
+rf_plans ll_plans r2_core compare_plans: only declared differences
+rf_plans ll_plans c5_641 OK plan.kzs: lines 434, allowed differences 1, other differences 0
+rf_plans ll_plans c5_641 OK plan.side: lines 553, allowed differences 1, other differences 0
+rf_plans ll_plans c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+rf_plans ll_plans c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+rf_plans ll_plans c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans ll_plans c5_641 OK args.txt: lines 25, allowed differences 0, other differences 0
+rf_plans ll_plans c5_641 compare_plans: only declared differences
+rf_plans ll_plans c5_642 OK plan.kzs: lines 414, allowed differences 1, other differences 0
+rf_plans ll_plans c5_642 OK plan.side: lines 537, allowed differences 1, other differences 0
+rf_plans ll_plans c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+rf_plans ll_plans c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+rf_plans ll_plans c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans ll_plans c5_642 OK args.txt: lines 25, allowed differences 0, other differences 0
+rf_plans ll_plans c5_642 compare_plans: only declared differences
+rf_plans_off ll_plans_off c1_pre_tx OK plan.kzs: lines 836, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off c1_pre_tx OK plan.side: lines 1045, allowed differences 5, other differences 0
+rf_plans_off ll_plans_off c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_off ll_plans_off c1_pre_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off c1_pre_tx compare_plans: only declared differences
+rf_plans_off ll_plans_off c1_post_tx OK plan.kzs: lines 792, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off c1_post_tx OK plan.side: lines 1028, allowed differences 5, other differences 0
+rf_plans_off ll_plans_off c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_off ll_plans_off c1_post_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off c1_post_tx compare_plans: only declared differences
+rf_plans_off ll_plans_off r2_core OK plan.kzs: lines 111, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off r2_core OK plan.side: lines 661, allowed differences 5, other differences 0
+rf_plans_off ll_plans_off r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_off ll_plans_off r2_core OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off r2_core compare_plans: only declared differences
+rf_plans_off ll_plans_off c5_641 OK plan.kzs: lines 434, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off c5_641 OK plan.side: lines 553, allowed differences 5, other differences 0
+rf_plans_off ll_plans_off c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_off ll_plans_off c5_641 OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off c5_641 compare_plans: only declared differences
+rf_plans_off ll_plans_off c5_642 OK plan.kzs: lines 414, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off c5_642 OK plan.side: lines 537, allowed differences 5, other differences 0
+rf_plans_off ll_plans_off c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+rf_plans_off ll_plans_off c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_off ll_plans_off c5_642 OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_off ll_plans_off c5_642 compare_plans: only declared differences
+rf_plans_on ll_plans_final c1_pre_tx OK plan.kzs: lines 861, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final c1_pre_tx OK plan.side: lines 1056, allowed differences 5, other differences 0
+rf_plans_on ll_plans_final c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_on ll_plans_final c1_pre_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final c1_pre_tx compare_plans: only declared differences
+rf_plans_on ll_plans_final c1_post_tx OK plan.kzs: lines 817, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final c1_post_tx OK plan.side: lines 1039, allowed differences 5, other differences 0
+rf_plans_on ll_plans_final c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_on ll_plans_final c1_post_tx OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final c1_post_tx compare_plans: only declared differences
+rf_plans_on ll_plans_final r2_core OK plan.kzs: lines 111, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final r2_core OK plan.side: lines 662, allowed differences 5, other differences 0
+rf_plans_on ll_plans_final r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_on ll_plans_final r2_core OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final r2_core compare_plans: only declared differences
+rf_plans_on ll_plans_final c5_641 OK plan.kzs: lines 434, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final c5_641 OK plan.side: lines 542, allowed differences 5, other differences 0
+rf_plans_on ll_plans_final c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_on ll_plans_final c5_641 OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final c5_641 compare_plans: only declared differences
+rf_plans_on ll_plans_final c5_642 OK plan.kzs: lines 414, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final c5_642 OK plan.side: lines 526, allowed differences 5, other differences 0
+rf_plans_on ll_plans_final c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+rf_plans_on ll_plans_final c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+rf_plans_on ll_plans_final c5_642 OK args.txt: lines 25, allowed differences 2, other differences 0
+rf_plans_on ll_plans_final c5_642 compare_plans: only declared differences
+ll_plans mv_plans_v3_t8cf c1_pre_tx OK plan.kzs: lines 836, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c1_pre_tx OK plan.side: lines 1045, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf c1_pre_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf c1_pre_tx compare_plans: only declared differences
+ll_plans mv_plans_v3_t8cf c1_post_tx OK plan.kzs: lines 792, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c1_post_tx OK plan.side: lines 1028, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf c1_post_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf c1_post_tx compare_plans: only declared differences
+ll_plans mv_plans_v3_t8cf r2_core OK plan.kzs: lines 111, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf r2_core OK plan.side: lines 661, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf r2_core OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf r2_core compare_plans: only declared differences
+ll_plans mv_plans_v3_t8cf c5_641 OK plan.kzs: lines 434, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c5_641 OK plan.side: lines 553, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf c5_641 OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf c5_641 compare_plans: only declared differences
+ll_plans mv_plans_v3_t8cf c5_642 OK plan.kzs: lines 414, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c5_642 OK plan.side: lines 537, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+ll_plans mv_plans_v3_t8cf c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf c5_642 OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans mv_plans_v3_t8cf c5_642 compare_plans: only declared differences
+ll_plans_final mv_plans_v3_final c1_pre_tx OK plan.kzs: lines 861, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c1_pre_tx OK plan.side: lines 1056, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c1_pre_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c1_pre_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c1_pre_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final c1_pre_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final c1_pre_tx compare_plans: only declared differences
+ll_plans_final mv_plans_v3_final c1_post_tx OK plan.kzs: lines 817, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c1_post_tx OK plan.side: lines 1039, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c1_post_tx OK plan.mod: lines 10, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c1_post_tx OK plan.exe: lines 10, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c1_post_tx OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final c1_post_tx OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final c1_post_tx compare_plans: only declared differences
+ll_plans_final mv_plans_v3_final r2_core OK plan.kzs: lines 111, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final r2_core OK plan.side: lines 662, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final r2_core OK plan.mod: lines 4, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final r2_core OK plan.exe: lines 4, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final r2_core OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final r2_core OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final r2_core compare_plans: only declared differences
+ll_plans_final mv_plans_v3_final c5_641 OK plan.kzs: lines 434, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c5_641 OK plan.side: lines 542, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c5_641 OK plan.mod: lines 9, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c5_641 OK plan.exe: lines 9, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c5_641 OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final c5_641 OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final c5_641 compare_plans: only declared differences
+ll_plans_final mv_plans_v3_final c5_642 OK plan.kzs: lines 414, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c5_642 OK plan.side: lines 526, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c5_642 OK plan.mod: lines 9, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c5_642 OK plan.exe: lines 9, allowed differences 1, other differences 0
+ll_plans_final mv_plans_v3_final c5_642 OK plan.log: lines 1, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final c5_642 OK args.txt: lines 25, allowed differences 0, other differences 0
+ll_plans_final mv_plans_v3_final c5_642 compare_plans: only declared differences
+recheck.sh plans rc=0

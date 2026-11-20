@@ -1,0 +1,135 @@
+# trace startup_ok.trace, predicate not supplied, cfe version 7.0.1
+replay profile "cfs-v7.0.1"
+events 49
+terminated no
+shutdown_request no
+
+event table
+  #0 T0 CFE_ES_Main call
+  #1 T0 CFE_ES_Main.reset_records pt
+  #2 T0 CFE_ES_Main.reset_states pt
+  #3 T0 CFE_ES_CreateObjects call
+  #4 T0 CFE_SB_EarlyInit call
+  #5 T0 CFE_SB_EarlyInit.clear_global pt
+  #6 T0 CFE_SB_EarlyInit ret
+  #7 T0 core_phase2_begin pt
+  #8 T0 CFE_ES_CreateObjects.reserve_core pt
+  #9 T0 CFE_ES_CreateObjects.type_core pt
+  #10 T0 OS_TaskCreate call
+  #11 T_EVS OS_TaskEntryPoint call
+  #12 T0 OS_TaskCreate ret
+  #13 T0 CFE_ES_CreateObjects.publish_core pt
+  #14 T_EVS CFE_EVS_Register call
+  #15 T_EVS CFE_EVS_Register.clear_slot pt
+  #16 T_EVS CFE_EVS_Register.register pt
+  #17 T_EVS CFE_EVS_Register ret
+  #18 T_EVS CFE_ES_RunLoop call
+  #19 T_EVS CFE_ES_RunLoop.raise_running pt
+  #20 T_EVS CFE_ES_RunLoop ret
+  #21 T0 core_sync_call pt
+  #22 T0 CFE_ES_MainTaskSyncDelay call
+  #23 T0 CFE_ES_MainTaskSyncDelay ret
+  #24 T0 CFE_ES_CreateObjects.reserve_core pt
+  #25 T0 CFE_ES_CreateObjects.type_core pt
+  #26 T0 OS_TaskCreate call
+  #27 T0 OS_TaskCreate ret
+  #28 T_SB OS_TaskEntryPoint call
+  #29 T0 CFE_ES_CreateObjects.publish_core pt
+  #30 T_SB CFE_EVS_Register call
+  #31 T_SB CFE_EVS_Register.clear_slot pt
+  #32 T_SB CFE_EVS_Register.register pt
+  #33 T_SB CFE_EVS_Register ret
+  #34 T_SB CFE_ES_GetAppID call
+  #35 T_SB CFE_ES_GetAppID.self_live pt
+  #36 T_SB CFE_ES_GetAppID.store_ok pt
+  #37 T_SB CFE_ES_GetAppID ret
+  #38 T_SB CFE_EVS_SendEventWithAppID.id_valid pt
+  #39 T_SB CFE_EVS_SendEventWithAppID call
+  #40 T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+  #41 T_SB CFE_EVS_SendEventWithAppID ret
+  #42 T_SB CFE_ES_RunLoop call
+  #43 T_SB CFE_ES_RunLoop.raise_running pt
+  #44 T_SB CFE_ES_RunLoop ret
+  #45 T0 core_sync_call pt
+  #46 T0 CFE_ES_MainTaskSyncDelay call
+  #47 T0 CFE_ES_MainTaskSyncDelay ret
+  #48 T0 CFE_ES_CreateObjects ret
+
+edges 50
+edge R1 S unconditional #0 -> #1
+edge R1 S unconditional #1 -> #2
+edge R1 S unconditional #2 -> #3
+edge R1 S unconditional #3 -> #4
+edge R1 S unconditional #4 -> #5
+edge R1 S unconditional #5 -> #6
+edge R1 S unconditional #6 -> #7
+edge R1 S unconditional #7 -> #8
+edge R1 S unconditional #8 -> #9
+edge R1 S unconditional #9 -> #10
+edge R18 S unconditional #7 -> #11
+edge R2-P-TASK S unconditional #10 -> #11
+edge R1 S unconditional #10 -> #12
+edge R1 S unconditional #12 -> #13
+edge R1 S unconditional #11 -> #14
+edge R1 S unconditional #14 -> #15
+edge R1 S unconditional #15 -> #16
+edge R1 S unconditional #16 -> #17
+edge R1 S unconditional #17 -> #18
+edge R1 S unconditional #18 -> #19
+edge R1 S unconditional #19 -> #20
+edge R1 S unconditional #13 -> #21
+edge R1 S unconditional #21 -> #22
+edge R1 S unconditional #22 -> #23
+edge R1 S unconditional #23 -> #24
+edge R1 S unconditional #24 -> #25
+edge R1 S unconditional #25 -> #26
+edge R1 S unconditional #26 -> #27
+edge R18 S unconditional #7 -> #28
+edge R2-P-TASK S unconditional #26 -> #28
+edge R1 S unconditional #27 -> #29
+edge R1 S unconditional #28 -> #30
+edge R1 S unconditional #30 -> #31
+edge R1 S unconditional #31 -> #32
+edge R1 S unconditional #32 -> #33
+edge R1 S unconditional #33 -> #34
+edge R1 S unconditional #34 -> #35
+edge R1 S unconditional #35 -> #36
+edge R1 S unconditional #36 -> #37
+edge R1 S unconditional #37 -> #38
+edge R1 S unconditional #38 -> #39
+edge R1 S unconditional #39 -> #40
+edge R1 S unconditional #40 -> #41
+edge R1 S unconditional #41 -> #42
+edge R1 S unconditional #42 -> #43
+edge R1 S unconditional #43 -> #44
+edge R1 S unconditional #29 -> #45
+edge R1 S unconditional #45 -> #46
+edge R1 S unconditional #46 -> #47
+edge R1 S unconditional #47 -> #48
+
+occurrences 1
+occurrence K-ID.send-with-appid actor T_SB ordinal 1 key [0x110002] call #39 return #41
+  status READY decided at point #40 scope default
+  conjunct id_valid capture #38 holds
+  conjunct slot_registered point #40 holds
+  result 0 outcome agrees
+
+findings 1
+finding #23: rule R19: the awaited predicate comes from the code and none was supplied, so no observation edge is derived
+
+guard failures 0
+
+final state
+  es.app[0] = FREE
+  es.app[1] = LIVE id 0x110001
+  es.app[2] = LIVE id 0x110002
+  es.app[3] = FREE
+  es.appstate[0] = UNDEFINED
+  es.appstate[1] = RUNNING
+  es.appstate[2] = RUNNING
+  es.appstate[3] = UNDEFINED
+  evs.reg[0x110001] = REG
+  evs.reg[0x110002] = REG
+  es.app[1] tag Type = CORE
+  es.app[2] tag Type = CORE
+  loc CFE_SB_Global.AppId = 0x110002

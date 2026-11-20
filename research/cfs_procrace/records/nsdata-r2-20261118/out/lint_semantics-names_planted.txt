@@ -1,0 +1,2 @@
+lib/planted_name.cpp:1: [semantics-names] API name 'OS_DoTimerAdd' of the framework-layer data (semantics/framework_namespaces2_osal-7.0.1.txt) in engine code: it belongs in semantics/ only
+lint semantics-names: 1 violation(s)

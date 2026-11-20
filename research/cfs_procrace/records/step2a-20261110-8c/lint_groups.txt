@@ -1,0 +1,41 @@
+# python3 -I lintgroups.py <dir>: case-ids hits of copies of probe/, instrument/, runtime/ (each copied as lib/ and read by kz_lint case-ids with tests/lint/data), before the 8c fixes (copies 08:37Z of a5d52a2, kz_lint of 8b fix) and after (copies 09:0xZ of e261861, kz_lint 191d0da0)
+## before
+instrument 1 stage-3 input: instrument site manifests                374 hits   6 files  
+runtime    2 framework knowledge: runtime OSAL adapter                75 hits   2 files  
+instrument 3a harmless: tests                                         32 hits  12 files  clang/tests/run_transform_test.sh clang/tests/tcase.c clang/tests/tcase.kzs gcc/tests/kzgcc_hold_seq.kzs gcc/tests/kzgcc_owner.c gcc/tests/kzgcc_owner.kzs gcc/tests/kzgcc_shapes.c gcc/tests/kzgcc_shapes.kzs gcc/tests/kzgcc_target.c gcc/tests/kzgcc_target.kzs gcc/tests/run_hold_test.sh llvm/tests/kzl
+runtime    3a harmless: tests                                         45 hits   6 files  tests/CMakeLists.txt tests/data/sites_example.kzs tests/test_rt_end.c tests/test_rt_holdsem.c tests/test_rt_manifest.cpp tests/test_rt_osal.c
+instrument 3b harmless: committed transform outputs                  763 hits  10 files  
+instrument 3c harmless: drivers (scripts)                            956 hits  43 files  
+probe      3c harmless: drivers (scripts)                            169 hits   3 files  
+instrument 3d code files outside tests (comments, names, strings)      2 hits   1 files  clang/kz_instr_clang.cpp
+probe      3d code files outside tests (comments, names, strings)      9 hits   2 files  hold/supervisor.hpp plan/profile.cpp
+runtime    3d code files outside tests (comments, names, strings)     25 hits   6 files  include/kz_rt.h include/kz_rt_posix.h src/kz_rt.c tools/kz-rt-dump/kz_rt_dump.cpp tools/manifest/kz_rt_manifest.cpp tools/manifest/kz_rt_manifest.hpp
+instrument 3e other: build files and tool sources                      1 hits   1 files  clang/CMakeLists.txt
+runtime    3e other: build files and tool sources                     11 hits   1 files  CMakeLists.txt
+total 2462
+group 1 stage-3 input: instrument site manifests                374
+group 2 framework knowledge: runtime OSAL adapter                75
+group 3a harmless: tests                                         77
+group 3b harmless: committed transform outputs                  763
+group 3c harmless: drivers (scripts)                           1125
+group 3d code files outside tests (comments, names, strings)     36
+group 3e other: build files and tool sources                     12
+## after
+instrument 1 stage-3 input: instrument site manifests                374 hits   6 files  
+runtime    2 framework knowledge: runtime OSAL adapter                75 hits   2 files  
+instrument 3a harmless: tests                                         32 hits  12 files  clang/tests/run_transform_test.sh clang/tests/tcase.c clang/tests/tcase.kzs gcc/tests/kzgcc_hold_seq.kzs gcc/tests/kzgcc_owner.c gcc/tests/kzgcc_owner.kzs gcc/tests/kzgcc_shapes.c gcc/tests/kzgcc_shapes.kzs gcc/tests/kzgcc_target.c gcc/tests/kzgcc_target.kzs gcc/tests/run_hold_test.sh llvm/tests/kzl
+runtime    3a harmless: tests                                         45 hits   6 files  tests/CMakeLists.txt tests/data/sites_example.kzs tests/test_rt_end.c tests/test_rt_holdsem.c tests/test_rt_manifest.cpp tests/test_rt_osal.c
+instrument 3b harmless: committed transform outputs                  763 hits  10 files  
+instrument 3c harmless: drivers (scripts)                            956 hits  43 files  
+probe      3c harmless: drivers (scripts)                            169 hits   3 files  
+runtime    3d code files outside tests (comments, names, strings)     25 hits   6 files  include/kz_rt.h include/kz_rt_posix.h src/kz_rt.c tools/kz-rt-dump/kz_rt_dump.cpp tools/manifest/kz_rt_manifest.cpp tools/manifest/kz_rt_manifest.hpp
+instrument 3e other: build files and tool sources                      1 hits   1 files  clang/CMakeLists.txt
+runtime    3e other: build files and tool sources                     11 hits   1 files  CMakeLists.txt
+total 2451
+group 1 stage-3 input: instrument site manifests                374
+group 2 framework knowledge: runtime OSAL adapter                75
+group 3a harmless: tests                                         77
+group 3b harmless: committed transform outputs                  763
+group 3c harmless: drivers (scripts)                           1125
+group 3d code files outside tests (comments, names, strings)     25
+group 3e other: build files and tool sources                     12

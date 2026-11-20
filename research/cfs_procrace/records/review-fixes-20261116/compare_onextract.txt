@@ -1,0 +1,25 @@
+OK c1_pre_tx two runs compared in the first run of this step (first/compare_onextract_first.txt), again/ removed then
+OK c1_pre_tx order against extfix_on_extract: compare_order: edge changed HB-spawn 69, edge only new HB-seq 43, edge only old HB-seq 214, head allowed 6, new listed hard/fixed pairs 242, old listed hard/fixed pairs 740, old listed hard/fixed pairs with a disallowed step 572, pair value changed fixed_early_proved -> unordered 8, pair value chang
+OK c1_pre_tx edges.tsv = revfix_order's
+OK c1_pre_tx relations.txt = the re-extraction's
+OK c1_pre_tx keys.txt = revfix_relcheck's apart from line 2
+OK c1_post_tx two runs compared in the first run of this step (first/compare_onextract_first.txt), again/ removed then
+OK c1_post_tx order against extfix_on_extract: compare_order: edge changed HB-spawn 69, edge only new HB-seq 43, edge only old HB-seq 214, head allowed 6, new listed hard/fixed pairs 242, old listed hard/fixed pairs 740, old listed hard/fixed pairs with a disallowed step 572, pair value changed fixed_early_proved -> unordered 8, pair value chang
+OK c1_post_tx edges.tsv = revfix_order's
+OK c1_post_tx relations.txt = the re-extraction's
+OK c1_post_tx keys.txt = revfix_relcheck's apart from line 2
+OK r2_core two runs compared in the first run of this step (first/compare_onextract_first.txt), again/ removed then
+OK r2_core order against extfix_on_extract: compare_order: edge changed HB-spawn 39, edge only new HB-seq 33, edge only old HB-seq 52, head allowed 6, new listed hard/fixed pairs 449, old listed hard/fixed pairs 485, old listed hard/fixed pairs with a disallowed step 154, pair value changed fixed_early_proved -> unordered 7, pair value change
+OK r2_core edges.tsv = revfix_order's
+OK r2_core relations.txt = the re-extraction's
+OK r2_core keys.txt = revfix_relcheck's apart from line 2
+OK c5_641 two runs compared in the first run of this step (first/compare_onextract_first.txt), again/ removed then
+OK c5_641 order against extfix_on_extract: compare_order: edge changed HB-lock 18, edge changed HB-spawn 14, head allowed 5, new listed hard/fixed pairs 90, old listed hard/fixed pairs 90, row lines changed 18, tsv HB-lock condition 18; undeclared 0
+OK c5_641 edges.tsv = revfix_order's
+OK c5_641 relations.txt = the re-extraction's
+OK c5_641 keys.txt = revfix_relcheck's apart from line 2
+OK c5_642 two runs compared in the first run of this step (first/compare_onextract_first.txt), again/ removed then
+OK c5_642 order against extfix_on_extract: compare_order: edge changed HB-lock 48, edge changed HB-spawn 14, head allowed 5, new listed hard/fixed pairs 162, old listed hard/fixed pairs 162, row lines changed 36, tsv HB-lock condition 48; undeclared 0
+OK c5_642 edges.tsv = revfix_order's
+OK c5_642 relations.txt = the re-extraction's
+OK c5_642 keys.txt = revfix_relcheck's apart from line 2

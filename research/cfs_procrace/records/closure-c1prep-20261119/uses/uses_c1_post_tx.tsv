@@ -1,0 +1,10 @@
+kz-uses 1
+rule evaluation protocol 5.1 (2026-11-18): planned path A rows x consumer roots x use calls x contexts
+columns build	row_label	row_key	path	consumer_root	use_tu	use_line	use_col	callee	at_site	after_site	context_id	frame_sites	plan_state
+c1_post_tx	A20	bb0951052e63f1bc	A	BP_AppMain (script-entry)	src/bp/fsw/src/bp_flow.c	126	13	OS_CountSemGetIdByName	285	280	-	-	control
+c1_post_tx	A21	17975444d83f6589	A	CF_AppMain (script-entry)	src/cf/fsw/src/cf_cfdp.c	1003	23	OS_CountSemGetIdByName	296	293	-	-	control
+c1_post_tx	A22	f371687b47120887	A	SCH_Lab_AppMain (script-entry)	apps/sch_lab/fsw/src/sch_lab_app.c	176	16	OS_TimeBaseGetIdByName	5	3	-	-	control
+c1_post_tx	A26	ad9fc1058923aad9	A	CFE_TIME_TaskMain (table-image-entry)	cfe/modules/time/fsw/src/cfe_time_task.c	286	16	OS_TimeBaseGetIdByName	249	248	-	-	control
+c1_post_tx	A63	b881269bea290f8b	A	none	src/cf/fsw/src/cf_cfdp_s.c	352	13	OS_FileOpenCheck	302	300	-	-	control
+lines 5 rows 5
+end

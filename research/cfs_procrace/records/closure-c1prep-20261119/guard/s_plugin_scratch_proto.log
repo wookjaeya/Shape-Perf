@@ -1,0 +1,5 @@
+# space_guard.sh kind=plugin-scratch need=40000000 floor=314572800 interval=2 cmd=bash -c cmake -S <scratch>/c1prep/kz/kairos/instrument/gcc -B <scratch>/c1prep/kzb -DKZGCC_KZ=/home/user/work/merge-check/kz-llvm/tools/kz/kz > <scratch>/c1prep/kzb.cfg.log 2>&1 && cmake --build <scratch>/c1prep/kzb -j4 > <scratch>/c1prep/kzb.build.log 2>&1
+start 2026-11-19T08:56:03.696Z free=656302080 threshold=354572800
+sample 2026-11-19T08:56:03.700Z 656297984
+sample 2026-11-19T08:56:05.718Z 649498624
+end 2026-11-19T08:56:07.728Z kind=plugin-scratch verdict=completed rc=0 free=645193728 lowest=645193728 dip=11108352 change=-11108352

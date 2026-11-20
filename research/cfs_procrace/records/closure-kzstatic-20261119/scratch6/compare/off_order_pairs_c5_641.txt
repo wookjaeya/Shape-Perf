@@ -1,0 +1,25 @@
+lines 5145 bytes 1261528 sha256 0dd1021aa8e211afbf94d3c095719838bf7c5828108a7317f3c80493e95e3cfc
+kz-order-pairs 1
+facts <masked>
+tool kz-static <masked>
+relations rules relations rules revision 12 (2026-11-18)
+order order rules revision 8 (2026-11-19): the complete pair file; order rules revision 5 (2026-11-18)
+domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B and C); a pair in one thread has the value same_thread
+columns row_key	path	use_pos	use_function	use_root	other_kind	other_pos	other_function	other_root	value	edges	premises	row_line
+rows 178 pairs 5064 hard_before 123 conditional_before 0 fixed_early_proved 1 fixed_early_candidate 0 unordered 3998 unknown 129 same_thread 813 no_pair 58 edges_not_in_tsv 14
+end
+value-counts:
+58	-	no_pair
+2	CI_Lab_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+2	SAMPLE_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+4	SCH_Lab_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+4	TO_Lab_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+4	creator	unknown
+18	creator-not-a-pair(same actor only)	same_thread
+2	main (process)	program order of one thread: the event is inside the call 
+1	other_kind	value
+1	writer	fixed_early_proved
+123	writer	hard_before
+795	writer	same_thread
+125	writer	unknown
+3998	writer	unordered

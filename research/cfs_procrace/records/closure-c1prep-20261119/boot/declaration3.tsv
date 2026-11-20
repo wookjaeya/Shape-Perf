@@ -1,0 +1,217 @@
+# boot declaration 3 of the C1 cycle (results 26.5; evaluation protocol 14.13 item 9; spec 11.5 item 4), written and
+# committed before any boot.  It supersedes boot/declaration2.tsv of 549dc94, which superseded boot/declaration.tsv of
+# 860c2cd (both kept unchanged; no boot runs against them).  run_cycle.sh verify re-measures every row below before every
+# boot (sha256 of the file; a build-id row also by readelf -n; a plan-id row against its plan.side; a count row: the
+# regular files under the directory), and the boot step runs only with a clean verify.txt of the same N naming this file's
+# sha256 as it is, with this file and run_cycle.sh in git and unchanged, and after a verify of the same N it runs again
+# itself (results 26.0 (아); evaluation protocol 14.8, 14.13 item 9).  The rows of declaration2.tsv come first, measured
+# again (records/closure-prebootfix-20261119/declaration/remeasure_declaration2.tsv; the changed ones in
+# declaration/changes_vs_declaration2.tsv, each with its commit); the rows it lacked follow: the third freeze, every
+# non-ELF installed file of both builds (the startup scripts and the tables), the file count of each build's ws/exe, the
+# two helper scripts of the boot runner, the install inventories, predictions3.tsv and no_expect_input_check3.txt.
+# Results 26.0 is cited by its own labels: (가)-(더).
+# frozen explanation script: records/closure-prebootfix-20261119/freeze.tsv (judge 644acc11, falsifier and evaluation
+#   script 03b9c95d (revision 2), fixtures e4a7dda6 and b050b238; reader ef20a760, summary 5e19b419, expectation
+#   comparison a9a9fc3f, driver af9d4395 and branch generator a722e4af unchanged); the expectations: expect/expect_c1_2.tsv
+#   (with the class column; unchanged), the predictions behind it expect/predictions3.tsv (the values of predictions2.tsv,
+#   with the no-event-loss precondition of protocol 14.13 item 8), read only by the expect step and by F1 of the eval step
+#   (boot/no_expect_input_check3.txt).
+# gate (evaluation protocol 3; run_cycle.sh gate): the control record check is clean; no pool overflow and every other
+#   loss named (the loss fields and, since results 26.5, the loss records of the dump by kind and count; no-build-id and
+#   object-table lose no event and are no loss marker of the judgement part); the chain is confirmed.  same_build is not
+#   in the gate (basis 1 of every pair; F10).
+# boot-number rule (protocol 2; results 12.10 item 4; results 26.0 (타), protocol 14.10): per build one first boot; if it
+#   passes the gate, exactly four more (2-5) whatever it showed; if it fails, the cause is committed in
+#   boot/<build>/addendum_1r.txt and one retry 1r runs; if 1r passes it counts as the first boot and exactly four more
+#   follow; if 1r fails, the build's boots end.  No number is raised or lowered after a record is seen; every boot counts
+#   and a boot that fails the gate is listed with its reason; c1_pre_tx first, then c1_post_tx.
+# the further boots are read for two things only: each pre-defined use's distribution over the boots (observed / not
+#   observed / undetermined) and whether another order of a pair was seen (other_order_seen_in_boots).  The startup
+#   script fixes the order (cf before bp), so the same order is expected in every boot [I]; that says nothing about
+#   another order.  Static elements and missing inputs do not change with more boots.
+# main result (judgement rules 8.14 item 4; protocol 14.1): D1/R0, the conservative criterion adopted for this cycle (not
+#   'the rules as written'); auxiliary: the other 15 branches of branches_16.txt at every boot and the 496
+#   partial-admission branches of branches_all.txt later on the same records; every auxiliary table names its data
+#   branch and reading; the eval step writes its counts per branch, D1-R0 first as main, and pools nothing (protocol
+#   14.13 item 3).  Level 1 (PI record decision 3; protocol 14.13 item 6): the element-level distinction of the three
+#   rows is static, fixed before the boot; what a boot adds is per use: reached, outcome, context, name state, link
+#   result, the fixed build's retry events, and their distribution over the boots.
+# expected [I] (expect_c1_2.tsv; predictions2.tsv): every planned path A row of both builds use_cond partial (A63
+#   not_derived in D1) and violation undetermined in all 16 branches.  No design row can reach observed: use_cond needs
+#   (c1), (c2), (c4) present and (c3) with (i) held and (iii) held in every context (R0); (c2) is flip static-undetermined
+#   or static-possible without the earlier value (present only under Rc), (c4) is not decided (feasibility undecidable;
+#   present only under Rd, and then not in D1 because the creators' agreement entries are unverified), (c3) (i) is never
+#   held and (iii) is not_held (found: retry or probe-create) or not_established in every context.  At the pair level
+#   basis 4 (no creator success path line held, 0 of 14 per build) and (da) (buffers complete 0 of 16; address uses with
+#   no entry) are missing in every branch, so no pair is bound or refuted and no generation opens (link unlinked).
+#   Precision and in-plan recall: undefined (no reader).  expect_discriminate (protocol 14.13 items 1-2): static on
+#   every control row, met by the fixed build's row and the probe row (rules (1)-(2)), unmet on the time-base rows (rule
+#   (3); no generation) and the file-name row; F3, F4 and F9 are not evaluable on records with no unit and F3 is weak in
+#   this cycle (protocol 14.13 items 4-5).  The expectation is neither positive nor negative.
+# space (results 26.2 need.txt [I]; records/closure-prebootfix-20261119/out/free_declaration.txt): per boot 51,810,304 B,
+#   12 boots 621,723,648 B and a margin of 100,000,000 B above the floor 314,572,800 B: 1,036,296,448 B free is needed
+#   before boot 1.  Measured 763,105,280 B at 2026-11-19T17:50:50Z: short by 273,191,168 B.  Under results 26.0 (카) the
+#   boots do not start until the need is met (a byte-preserving archive by a plan committed first; results 26.3 open
+#   point 1) or the PI decides; the boot step measures the space again when it starts (protocol 14.9).
+# commands: boot/commands.txt (verify first for each build and before each boot N, and again inside the boot step;
+#   written, not run).
+# kind	build	name	sha256 or value	path
+plan-id	c1_pre_tx	plan-id	943b8cc0d0e200e4	-
+plan	c1_pre_tx	plan.kzs	69a278b019281fd3015226b2ac188be0702613eb2a950fc12627c2603b53c9a0	cz_plans_v4_ns2/c1_pre_tx/plan.kzs
+plan	c1_pre_tx	plan.side	a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4	cz_plans_v4_ns2/c1_pre_tx/plan.side
+plan	c1_pre_tx	plan.mod	089e45001ba10988a2119886c58de6b54b6886ed4de9e69d9eb938916fb97949	cz_plans_v4_ns2/c1_pre_tx/plan.mod
+plan	c1_pre_tx	plan.exe	35497d8c373248f39ae432f77870e685c518c7fb891348b6e8fe881b1d6165a1	cz_plans_v4_ns2/c1_pre_tx/plan.exe
+plan	c1_pre_tx	plan.req	b79604d5f98d1e97d7df4ea8be78efb7dc1347063fb11bb87c87454a559b3dd3	cz_plans_v4_ns2/c1_pre_tx/plan.req
+plan	c1_pre_tx	args.txt	c9bd084e4cfa639187f875acb73251e841973ca907200d43d7227828697cc48d	cz_plans_v4_ns2/c1_pre_tx/args.txt
+plan-input	c1_pre_tx	facts.kz	7403a3775bb49f9f0e1e347236ac4b11ed655f5b8fbe69625f8743fe14c1f3f9	cz_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz
+plan-input	c1_pre_tx	basis.kz	09606e23af3902f0643f9c9c0646a969234b9d0fdea1d78425b08addbec9ba31	cz_final_extract/c1_pre_tx/c1_pre_tx/NP/basis.kz
+static	c1_pre_tx	relations.txt	a10fcf92a051bd3c84a7057032f1746eb565a02336e17c9a08a89f3c0df41b31	cz_final_order/c1_pre_tx/relations.txt
+static	c1_pre_tx	keys.txt	1aa7463260b16d4170eb78c707f74d897bda29df685f2c9c68fde720e61375c4	cz_final_order/c1_pre_tx/keys.txt
+static	c1_pre_tx	pairs.tsv	c91113d5c5d0ce4c62807938b9b3a42e859069857b5d3d5e7c2f82cd9e0b29dd	cz_final_order/c1_pre_tx/pairs.tsv
+static	c1_pre_tx	facts_view.txt	cf493527ec3356fbf6cfc9a80f17a7482a0cda60275bf7baacec96f5e4900fea	xr4_dry_inputs/c1_pre_tx/facts_view.txt
+derived	c1_pre_tx	binds_instr.kzs	5ed4ddb8b7344db4a445c5273d096d65a5a70bfbb81f670cdccb17eafab448eb	c1p2_pre_derived/binds_instr.kzs
+derived	c1_pre_tx	build_instr.record	f2e4ed0279ff030574a468845da0adba1593863cb3aa890b29e923bfade9c4b3	c1p2_pre_derived/build_instr.record
+derived	c1_pre_tx	path_map.tsv	6590dbe373745079b890cbdb47a4e71879171442ad6168001966bef8b4c189c4	c1p2_pre_derived/path_map.tsv
+bprime	c1_pre_tx	basis.kz	65c6b02eadec0209918b616ea2b5104fb98417542bc033fd1eb36c8400e3817d	c1p2_pre_bprime/c1_pre_tx/NP/basis.kz
+bprime	c1_pre_tx	facts.kz	7790820d4ba1a3473d647dd745276a3c00dd80e5930e8eb4757d069ca89debbe	c1p2_pre_bprime/c1_pre_tx/NP/facts.kz
+bprime	c1_pre_tx	basis.txt	ecf95e2ea4dcb198f5cadf0b7c78eaaec94e6a1a0f5f962b8efbbac86faedbea	c1p2_pre_bprime/c1_pre_tx/NP/basis.txt
+runtime	c1_pre_tx	kz-rt-dump	d55a90811929106d8298bcfef96c13cda2a651ce4994b274046c346f5f138db1	c1p2_pre_rt/rt/kz-rt-dump
+elf	c1_pre_tx	exe/host/cfe_ts_crc	6aa3cf7ac50cd466443aedbf3df012237637591c84e90e5e0c1021375f3d7bcf build-id 93975944db650923589e753322463e712b68004c	c1p2_pre_derived/ws/exe/host/cfe_ts_crc
+elf	c1_pre_tx	exe/host/cmdUtil	c7760cd0215fb081f26a06d2d74a8bc8573e3aba4cd01814f1123508dbf1257d build-id 1b652df7cae3f7bda60ecb59fad478a544bccb48	c1p2_pre_derived/ws/exe/host/cmdUtil
+elf	c1_pre_tx	exe/host/elf2cfetbl	83a99621614338bdb41c901bc4d82888411bdd245eb12300b50f57cc9613ff9b build-id d6cd389dea852a0b0fbfd29c824eaa3ee9a6f512	c1p2_pre_derived/ws/exe/host/elf2cfetbl
+elf	c1_pre_tx	exe/rx/cf/bp.so	bdd62c613a6f649208dc50d86d81f0dd27c9f9c8415b3fc7b72c424c3dd7fa79 build-id 01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	c1p2_pre_derived/ws/exe/rx/cf/bp.so
+elf	c1_pre_tx	exe/rx/cf/bplib.so	a512f58dbce2ab0839729325ecb20dc9d14f2ddc70e3b57b7b1b40a908d33931 build-id 9540ee3baa54c586aaeee667e56bc274cd12daaf	c1p2_pre_derived/ws/exe/rx/cf/bplib.so
+elf	c1_pre_tx	exe/rx/cf/cf.so	4b5ca8b7b6b214c3fb401942c1dbd1afb1d6b45917992ef928b6d41650c22180 build-id c55b464be7b96ec2d0001b1a5ea296740c13e5c0	c1p2_pre_derived/ws/exe/rx/cf/cf.so
+elf	c1_pre_tx	exe/rx/cf/cfe_assert.so	7334ca50d88332dbb49259d305f1144d01e61ac8de99bb86e57a6e4128a95760 build-id 55d9c97c5f56f99465500c55ec6621c73da6cae5	c1p2_pre_derived/ws/exe/rx/cf/cfe_assert.so
+elf	c1_pre_tx	exe/rx/cf/ci_lab.so	7176c66c7b0336950f13fe98a44f700532ef16befef1b0de6ab6c8fbc517b33f build-id 4074a88bb9a747f7729153fbb3444df21e668f39	c1p2_pre_derived/ws/exe/rx/cf/ci_lab.so
+elf	c1_pre_tx	exe/rx/cf/sch_lab.so	fe9750b58f80a7a1bcba58b644a978fb1d28ecc598e56d65c43e83289082f54f build-id 310dfddb52b7c0d5ca4db109fb866f14d6a7900d	c1p2_pre_derived/ws/exe/rx/cf/sch_lab.so
+elf	c1_pre_tx	exe/rx/cf/tinycbor.so	d5a45125af3bf53d906dda59974b77f952f7d1e54051d0bbcf96b618cbe58954 build-id 50d260bdd99d9f82b951904400ef4a5be6e7d3e8	c1p2_pre_derived/ws/exe/rx/cf/tinycbor.so
+elf	c1_pre_tx	exe/rx/cf/to_lab.so	300ddab48d995deee33c50364579a1127e3dceb170070d5e1c6f107fa8bb6fc4 build-id 1c6beabaaf271c405f3c9258340ecada8bf5b77d	c1p2_pre_derived/ws/exe/rx/cf/to_lab.so
+elf	c1_pre_tx	exe/rx/core-rx	f54ec4fa873444b4b5486845949f1d67cb6f808e999a51c5d4168196fd7de114 build-id 416eb6d3b8dfb9145354f4773376f527466e23e1	c1p2_pre_derived/ws/exe/rx/core-rx
+elf	c1_pre_tx	exe/tx/cf/bp.so	bdd62c613a6f649208dc50d86d81f0dd27c9f9c8415b3fc7b72c424c3dd7fa79 build-id 01db56cfd8f7a50b03665e022ca4c835f8f9fd8b	c1p2_pre_derived/ws/exe/tx/cf/bp.so
+elf	c1_pre_tx	exe/tx/cf/bplib.so	a512f58dbce2ab0839729325ecb20dc9d14f2ddc70e3b57b7b1b40a908d33931 build-id 9540ee3baa54c586aaeee667e56bc274cd12daaf	c1p2_pre_derived/ws/exe/tx/cf/bplib.so
+elf	c1_pre_tx	exe/tx/cf/cf.so	4b5ca8b7b6b214c3fb401942c1dbd1afb1d6b45917992ef928b6d41650c22180 build-id c55b464be7b96ec2d0001b1a5ea296740c13e5c0	c1p2_pre_derived/ws/exe/tx/cf/cf.so
+elf	c1_pre_tx	exe/tx/cf/cfe_assert.so	7334ca50d88332dbb49259d305f1144d01e61ac8de99bb86e57a6e4128a95760 build-id 55d9c97c5f56f99465500c55ec6621c73da6cae5	c1p2_pre_derived/ws/exe/tx/cf/cfe_assert.so
+elf	c1_pre_tx	exe/tx/cf/ci_lab.so	7176c66c7b0336950f13fe98a44f700532ef16befef1b0de6ab6c8fbc517b33f build-id 4074a88bb9a747f7729153fbb3444df21e668f39	c1p2_pre_derived/ws/exe/tx/cf/ci_lab.so
+elf	c1_pre_tx	exe/tx/cf/sch_lab.so	fe9750b58f80a7a1bcba58b644a978fb1d28ecc598e56d65c43e83289082f54f build-id 310dfddb52b7c0d5ca4db109fb866f14d6a7900d	c1p2_pre_derived/ws/exe/tx/cf/sch_lab.so
+elf	c1_pre_tx	exe/tx/cf/tinycbor.so	d5a45125af3bf53d906dda59974b77f952f7d1e54051d0bbcf96b618cbe58954 build-id 50d260bdd99d9f82b951904400ef4a5be6e7d3e8	c1p2_pre_derived/ws/exe/tx/cf/tinycbor.so
+elf	c1_pre_tx	exe/tx/cf/to_lab.so	300ddab48d995deee33c50364579a1127e3dceb170070d5e1c6f107fa8bb6fc4 build-id 1c6beabaaf271c405f3c9258340ecada8bf5b77d	c1p2_pre_derived/ws/exe/tx/cf/to_lab.so
+elf	c1_pre_tx	exe/tx/core-tx	bb80ce2833064dbfe8b5cba058ba59a6b44ae891e1a6518341cf23d18dd846d3 build-id 619614002e6d4556fa731365d88ee7f0d49c00cf	c1p2_pre_derived/ws/exe/tx/core-tx
+uses	c1_pre_tx	uses_c1_pre_tx.tsv	0ca47839d43db83c9821cab74445dff58cdfa9fb69e71ccf47e5fd4abd214e14	records/closure-c1prep-20261119/uses/uses_c1_pre_tx.tsv
+plan-id	c1_post_tx	plan-id	b99c203f12de1e24	-
+plan	c1_post_tx	plan.kzs	ef35173ee767be1afbfa5d786c8f473f7505e325cacad3884796adc864655593	cz_plans_v4_ns2/c1_post_tx/plan.kzs
+plan	c1_post_tx	plan.side	4ef73c918ac41cdc5e41be1dcc12b996557b0f954208ea80d06d1250dcfbd0e9	cz_plans_v4_ns2/c1_post_tx/plan.side
+plan	c1_post_tx	plan.mod	d225477d24ef538d21ee7cd30a72c2d820183eb0b49a8bb665e0644be627e768	cz_plans_v4_ns2/c1_post_tx/plan.mod
+plan	c1_post_tx	plan.exe	f793c400f56521422c6ac4ba4c5534af52c5f3e276087883fbc7c040f61b0e20	cz_plans_v4_ns2/c1_post_tx/plan.exe
+plan	c1_post_tx	plan.req	1b909f072a19ba3e5f871fa2f660d5015737e3521f2c5d13292831984006dddd	cz_plans_v4_ns2/c1_post_tx/plan.req
+plan	c1_post_tx	args.txt	8c147aa74061595d2836ec4a93d3a79b86466f8d4d100298d13910a0b191e292	cz_plans_v4_ns2/c1_post_tx/args.txt
+plan-input	c1_post_tx	facts.kz	77532840db27038edd009421060b5cdead8ebab6fe32ab9f317637cd470bd979	cz_final_extract/c1_post_tx/c1_post_tx/NP/facts.kz
+plan-input	c1_post_tx	basis.kz	9171ac7510c772d755d25707e2f01ab03fd57e671906df849de7a4eda94d6823	cz_final_extract/c1_post_tx/c1_post_tx/NP/basis.kz
+static	c1_post_tx	relations.txt	46b7b353f3ab1192f1dcd1b42716ae29323d6c1104a8392e08023549710e076b	cz_final_order/c1_post_tx/relations.txt
+static	c1_post_tx	keys.txt	911961dfeb2f3723278b1d64d4597e0855d6ad2d617db446ede67859be811b28	cz_final_order/c1_post_tx/keys.txt
+static	c1_post_tx	pairs.tsv	0066cb92d511e998e9ef56463819c5b0e3b20ebe05d3d32c77d58dbd5c52cdde	cz_final_order/c1_post_tx/pairs.tsv
+static	c1_post_tx	facts_view.txt	20a2b4f1bf35305a5bf8b1d7becda7d8c694b3adcf58809cadeb732dabb8a8e7	xr4_dry_inputs/c1_post_tx/facts_view.txt
+derived	c1_post_tx	binds_instr.kzs	b719efeea53fec55d5b852380d81b75ddfb105a3bbbe4511027f1318af627a2f	c1p2_post_derived/binds_instr.kzs
+derived	c1_post_tx	build_instr.record	234eab8ee6ecb376a7f311b63a88cd3db85f1bd830e280389b05d3df505a8e9d	c1p2_post_derived/build_instr.record
+derived	c1_post_tx	path_map.tsv	7b5663f49c3b9b56253f3797a18cac19f79135c3d3e547d21ed0848185467761	c1p2_post_derived/path_map.tsv
+bprime	c1_post_tx	basis.kz	324cf73ee0a48732ef92c45e291eb8c79f9fc649acd500fddc257d1703262957	c1p2_post_bprime/c1_post_tx/NP/basis.kz
+bprime	c1_post_tx	facts.kz	6ac784ca96621d677210c4f70d6b096b40ccfdaa15c37aae911fe7e86ab682c7	c1p2_post_bprime/c1_post_tx/NP/facts.kz
+bprime	c1_post_tx	basis.txt	20a5d54b83f4f769a148c22e09328a97b92915201704be20b919894f0212a995	c1p2_post_bprime/c1_post_tx/NP/basis.txt
+runtime	c1_post_tx	kz-rt-dump	d55a90811929106d8298bcfef96c13cda2a651ce4994b274046c346f5f138db1	c1p2_post_rt/rt/kz-rt-dump
+elf	c1_post_tx	exe/host/cfe_ts_crc	6aa3cf7ac50cd466443aedbf3df012237637591c84e90e5e0c1021375f3d7bcf build-id 93975944db650923589e753322463e712b68004c	c1p2_post_derived/ws/exe/host/cfe_ts_crc
+elf	c1_post_tx	exe/host/cmdUtil	c7760cd0215fb081f26a06d2d74a8bc8573e3aba4cd01814f1123508dbf1257d build-id 1b652df7cae3f7bda60ecb59fad478a544bccb48	c1p2_post_derived/ws/exe/host/cmdUtil
+elf	c1_post_tx	exe/host/elf2cfetbl	83a99621614338bdb41c901bc4d82888411bdd245eb12300b50f57cc9613ff9b build-id d6cd389dea852a0b0fbfd29c824eaa3ee9a6f512	c1p2_post_derived/ws/exe/host/elf2cfetbl
+elf	c1_post_tx	exe/rx/cf/bp.so	df92b9134f393b72ad40abb33ff6eeccd29e8e128586f501e55ea36ea93af429 build-id f359e98bd5420438130647946f80fd562e03edf7	c1p2_post_derived/ws/exe/rx/cf/bp.so
+elf	c1_post_tx	exe/rx/cf/bplib.so	f6ee63fc4e98c9f672c8559bce55cdad673b2a7e6832391a54935e43da95b7f4 build-id ccea3094b7a72d00f1cd259703bbbf0a9b0661c8	c1p2_post_derived/ws/exe/rx/cf/bplib.so
+elf	c1_post_tx	exe/rx/cf/cf.so	22adc9301c17c64d2369fd1c829699c9d5422cc20e2be9476b838cc3c496b640 build-id 3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	c1p2_post_derived/ws/exe/rx/cf/cf.so
+elf	c1_post_tx	exe/rx/cf/cfe_assert.so	c67cebedd62a53c14d2abac498da86b19ef9c53283f1464841cfd6e3ea53b6d7 build-id 373db693696d312f0f1a0d155d6dd485879d9b51	c1p2_post_derived/ws/exe/rx/cf/cfe_assert.so
+elf	c1_post_tx	exe/rx/cf/ci_lab.so	fdf7ffb7e674d6e58cb15d3c108ccdac29c0bc9977a864b1cd450edb7fa3f6d3 build-id 8dc25470e6749a4d0fd4ce53061b9601e21fe540	c1p2_post_derived/ws/exe/rx/cf/ci_lab.so
+elf	c1_post_tx	exe/rx/cf/sch_lab.so	95d99f36699dc7e55732343d5ff21bb194a82cc91b59c5c349c79470cc121293 build-id 14e71ebd93acc0d75f74c233ae07449f43685b18	c1p2_post_derived/ws/exe/rx/cf/sch_lab.so
+elf	c1_post_tx	exe/rx/cf/tinycbor.so	d5a45125af3bf53d906dda59974b77f952f7d1e54051d0bbcf96b618cbe58954 build-id 50d260bdd99d9f82b951904400ef4a5be6e7d3e8	c1p2_post_derived/ws/exe/rx/cf/tinycbor.so
+elf	c1_post_tx	exe/rx/cf/to_lab.so	1a74474a8a8836e841fff73246e982e6c369390e6e8ab8b9675f29732dc57659 build-id a79dc81815ccd1875206b916ddfd390f8afddbda	c1p2_post_derived/ws/exe/rx/cf/to_lab.so
+elf	c1_post_tx	exe/rx/core-rx	2bfd60c027ecdedfb7057aec576d0c38208174349f3132789c4f7a0935654186 build-id 4574e5b279f13b7c6d85ea30f5b37793377024c3	c1p2_post_derived/ws/exe/rx/core-rx
+elf	c1_post_tx	exe/tx/cf/bp.so	df92b9134f393b72ad40abb33ff6eeccd29e8e128586f501e55ea36ea93af429 build-id f359e98bd5420438130647946f80fd562e03edf7	c1p2_post_derived/ws/exe/tx/cf/bp.so
+elf	c1_post_tx	exe/tx/cf/bplib.so	f6ee63fc4e98c9f672c8559bce55cdad673b2a7e6832391a54935e43da95b7f4 build-id ccea3094b7a72d00f1cd259703bbbf0a9b0661c8	c1p2_post_derived/ws/exe/tx/cf/bplib.so
+elf	c1_post_tx	exe/tx/cf/cf.so	22adc9301c17c64d2369fd1c829699c9d5422cc20e2be9476b838cc3c496b640 build-id 3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7	c1p2_post_derived/ws/exe/tx/cf/cf.so
+elf	c1_post_tx	exe/tx/cf/cfe_assert.so	c67cebedd62a53c14d2abac498da86b19ef9c53283f1464841cfd6e3ea53b6d7 build-id 373db693696d312f0f1a0d155d6dd485879d9b51	c1p2_post_derived/ws/exe/tx/cf/cfe_assert.so
+elf	c1_post_tx	exe/tx/cf/ci_lab.so	fdf7ffb7e674d6e58cb15d3c108ccdac29c0bc9977a864b1cd450edb7fa3f6d3 build-id 8dc25470e6749a4d0fd4ce53061b9601e21fe540	c1p2_post_derived/ws/exe/tx/cf/ci_lab.so
+elf	c1_post_tx	exe/tx/cf/sch_lab.so	95d99f36699dc7e55732343d5ff21bb194a82cc91b59c5c349c79470cc121293 build-id 14e71ebd93acc0d75f74c233ae07449f43685b18	c1p2_post_derived/ws/exe/tx/cf/sch_lab.so
+elf	c1_post_tx	exe/tx/cf/tinycbor.so	d5a45125af3bf53d906dda59974b77f952f7d1e54051d0bbcf96b618cbe58954 build-id 50d260bdd99d9f82b951904400ef4a5be6e7d3e8	c1p2_post_derived/ws/exe/tx/cf/tinycbor.so
+elf	c1_post_tx	exe/tx/cf/to_lab.so	1a74474a8a8836e841fff73246e982e6c369390e6e8ab8b9675f29732dc57659 build-id a79dc81815ccd1875206b916ddfd390f8afddbda	c1p2_post_derived/ws/exe/tx/cf/to_lab.so
+elf	c1_post_tx	exe/tx/core-tx	770f215b68dec60bc11bb7948def69fc9f5abfaee1b841c012e7843c3a75fd22 build-id acee9edd432e2e987903efefe7fc0c19bdee41ac	c1p2_post_derived/ws/exe/tx/core-tx
+uses	c1_post_tx	uses_c1_post_tx.tsv	955890c2c0876c0b70610acf93baf064431857ed74a2010be8957b2002f5fe20	records/closure-c1prep-20261119/uses/uses_c1_post_tx.tsv
+cycle	*	candidates.tsv	6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73	records/closure-c1prep-20261119/candidates/candidates.tsv
+cycle	*	admitted_D2.tsv	d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4	records/closure-c1prep-20261119/candidates/admitted_D2.tsv
+cycle	*	admitted.sha256	8bdb755a7ffe87eb658fa837c1d156868eca1f76061706d17cd72121f5ed4bd4	records/closure-c1prep-20261119/candidates/admitted.sha256
+cycle	*	branches_16.txt	4d06783852faf48db766cfcb6f79265f2e1703679f3bd86871714176cc943234	records/closure-c1prep-20261119/candidates/branches_16.txt
+cycle	*	branches_all.txt	2b22b76af01932678ebbc1a9470a570b59128004c619249f7dffae13c10d1495	records/closure-c1prep-20261119/candidates/branches_all.txt
+cycle	*	sheets_static.tsv	e70c31f2cf4e285df00ff28489ab3952b4d3611e5e9ae7ec52e12ee251458a1f	records/closure-c1prep-20261119/sheets/sheets_static.tsv
+cycle	*	reader_files.tsv	80313f0419640ff1de221a6606da02219a7b98e7e6cbf13f9d5d9680f9b692bd	records/closure-c1prep-20261119/sheets/reader_files.tsv
+cycle	*	expect_c1.tsv	d5501bf61d7ebfdf185bbadc0d89ddd75543bf9b66a93e67f1e8f038fe7fe7a3	records/closure-c1prep-20261119/expect/expect_c1.tsv
+cycle	*	predictions.tsv	44011827a88a7b126394f5d9089c6e90e8132e96a3dd60749fca49928e1c0c42	records/closure-c1prep-20261119/expect/predictions.tsv
+cycle	*	run_cycle.sh	aa3d535ca21c9d0156af4b71b4ff97abcdd262155c0e1dcbd8ad4f373f69b8c2	records/closure-c1prep-20261119/boot/run_cycle.sh
+frozen	*	reader	ef20a760e7c5611acee768e17c22b7568ae8ab45819afdeca21757b7ad123c69	research/cfs_procrace/env/obs1/explain_read.py
+frozen	*	judge	644acc11fb29237099d783225f45ae138a11eb86c363f2365e03759713aa71f0	research/cfs_procrace/env/obs1/explain_judge.py
+frozen	*	driver	af9d4395cbc099d91b46e3608a4241ffe3601ab7084c323b0e2d73fb3a7d0dc2	research/cfs_procrace/env/obs1/explain.py
+frozen	*	branches	a722e4af36e1adb84606ecdc826cb3425a38fd4c145458417d22e814a795f07a	research/cfs_procrace/env/obs1/explain_branches.py
+frozen	*	summary	5e19b4192d80a9f3bd95cdc7ec881274cba7f0e17f677712f0e2dbd24c6c48e8	research/cfs_procrace/env/obs1/explain_summary.py
+frozen	*	expect	a9a9fc3f28cc2732771d3d0fe4c4efab0774f9aa4794279d29a6a26ac7964d40	research/cfs_procrace/env/obs1/explain_expect.py
+frozen	*	fixtures	e4a7dda691d1588ee86b33032ebae9c2d357e68a2e4a6326946864319f94a7ce	research/cfs_procrace/env/obs1/tests/test_explain4.py
+frozen	*	revision3	acfd427147d8a24f1314b4ba1c0187adf75bc1e977160638e8c6dff5ecd53a70	research/cfs_procrace/env/obs1/explain_rev3.py
+frozen	*	freeze.tsv	733feef72c75a134d40ac660e787944aca91a20d8895378786d48d16616abb3c	records/closure-explain-rev4-20261119/freeze.tsv
+tool	*	kz	94cba72b6da18361b50989893dd2c5a4c5146c17ccb982d5462a0426c59c60e8	/home/user/work/merge-check/kz-llvm/tools/kz/kz
+tool	*	kz-dump	32a96ae7138fd71c9efd63d0439021cae044c4045b6a9557b659e1e1911c0438	/home/user/work/merge-check/kz-llvm/tools/kz-dump/kz-dump
+tool	*	kzgcc.so	5e691ce73c59c95d323d4b332ee59e65d51945bc9ad7b86a90db716630ba1aa0	/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so
+tool	*	chain_check.py	48a434650680938c59cea27158b098335179fe81c464a1cc3092e72f55dd10c4	research/cfs_procrace/env/tools/chain_check.py
+tool	*	stop_eval.py	b8865e32f80a5452695057cdcb0c1bea04570c721233f30f2737f8ac5b0b047a	research/cfs_procrace/env/obs1/stop_eval.py
+tool	*	run_gi_c1.sh	effea1fbb388411516b10dcd4045fb82fa846d91a51bd5a1e7601750d6a939f0	research/cfs_procrace/kairos/instrument/gcc/scripts/run_gi_c1.sh
+tool	*	space_guard.sh	f67ac6ecc804c6d22ecc2b7169939a854a42fde8b63d49b28c504342ef44b9b8	research/cfs_procrace/env/tools/space_guard.sh
+frozen	*	eval	03b9c95da9a52ad4d220990b3a1e68c58d3fc1825cbcddcbdf9912c2fe513436	research/cfs_procrace/env/obs1/explain_eval.py
+frozen	*	eval_fixtures	b050b2385a205659b2f08706f54b4fa0e7b265df731be1dcd21a93b3ab84c9eb	research/cfs_procrace/env/obs1/tests/test_explain_eval.py
+frozen	*	freeze2.tsv	70bbf7f520212d894e207831aa9fb9af57274c1cf44286af316761589d4af2aa	records/closure-preboot-20261119/freeze.tsv
+explain-input	*	reason_vocabulary.txt	4b964d34812232886fbe906e00328be5d07a8978353cf1905a850a692f237678	research/cfs_procrace/kairos/tests/static/data/reason_vocabulary.txt
+explain-input	*	framework_namespaces2_cfe-6.4.1.txt	348ce515d9f37c221bd32e6c7414f87f36522999c548f3a284c0ca2247d02161	research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.1.txt
+explain-input	*	framework_namespaces2_cfe-6.4.2.txt	32c83db59b319a0652788e8626f9336cc8e80819773a6caa30034f46ee778c1b	research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.2.txt
+explain-input	*	framework_namespaces2_osal-4.1.1.txt	49028355f7abaac19ac5734b9b3331288180e4492068906e5ef05e9bb08e80f9	research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-4.1.1.txt
+explain-input	*	framework_namespaces2_osal-7.0.1.txt	8245eebbf77ad6c21a8c957f07b7ef49b64aba85f7454c0c6cce003a006fb806	research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-7.0.1.txt
+explain-input	*	framework_namespaces2_osal-f34759d.txt	e587cee040e0a70561d07d6b0d15719bd2dbfeb97b0792f4cadc18600ed975b1	research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-f34759d.txt
+plan-input	*	framework_api_roles.txt	e2a39203bac0b9a5c0016c71f076a898be8edeeb73e363a125768b92424696a0	research/cfs_procrace/kairos/semantics/framework_api_roles.txt
+cycle	*	named_calls.tsv	4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b	records/closure-c1prep-20261119/candidates/named_calls.tsv
+cycle	*	named_calls.py	a88066dd59dd0111ce848d9881633f9ee2222d8b922a8a0039db1510567df2ce	records/closure-c1prep-20261119/scripts/named_calls.py
+cycle	*	expect_c1_2.tsv	444f7615f7830f464e1f713244c558e263ffbee1c76d5b3a615fa2aa6d04f0ef	records/closure-c1prep-20261119/expect/expect_c1_2.tsv
+cycle	*	predictions2.tsv	4ed9a362bd096d28a69ca1b7ee79ce74f9ba9ad22fcab1e08a2135684fd982a8	records/closure-c1prep-20261119/expect/predictions2.tsv
+cycle	*	elements_by_rule_2.tsv	7ebc980343b67edc71e2d1428dce830df60774e7d7e20c609ddbe5455e1a9c70	records/closure-c1prep-20261119/expect/elements_by_rule_2.tsv
+cycle	*	expect_write2.py	6947e9cbf3502e9e7b2a63498f7250fa760800ccdda937c21b1257d6859c0dce	records/closure-c1prep-20261119/scripts/expect_write2.py
+cycle	*	static_elements_16.tsv	94e7421c5a38f59059aea849304c530de088cd28a8e5423776c7e78ca2a071e4	records/closure-c1prep-20261119/scratch/branches16/static_elements_16.tsv
+cycle	*	commands.txt	56ad9f0af1b8a132b5992aa2e0b48f1e3ac025ad2e0dd154457a3aaef21ae538	records/closure-c1prep-20261119/boot/commands.txt
+cycle	*	test_run_cycle.sh	7076095e96445330bcca82e3d11f24688095bb19a0be89cf201bbee220c00fcb	records/closure-c1prep-20261119/boot/test_run_cycle.sh
+cycle	*	no_expect_input_check2.txt	9b98d77710129958aba025b23fdd5b1bb31636de0f83779991a06b358f0af70c	records/closure-c1prep-20261119/boot/no_expect_input_check2.txt
+frozen	*	freeze3.tsv	253b2f286302193b2bf074ce49010235f5dcf87aed4e4174c5c8281183f975a7	records/closure-prebootfix-20261119/freeze.tsv
+installed	c1_pre_tx	exe/rx/cf/cfe_es_startup.scr	8ddb9359fd2e897b57b1c9c9f0b92f4d8efe36a8b5b290aafef62805657ba0ef	c1p2_pre_derived/ws/exe/rx/cf/cfe_es_startup.scr
+installed	c1_pre_tx	exe/rx/cf/bp_flowtable.tbl	e2dc66cf75712851022d0577bd16660000ea03e5302d339a985d40dec665ac95	c1p2_pre_derived/ws/exe/rx/cf/bp_flowtable.tbl
+installed	c1_pre_tx	exe/rx/cf/cf_def_config.tbl	b16ae225de620da35fe9b30261f00cdfa8623ef564846b9431c5a588b6544aed	c1p2_pre_derived/ws/exe/rx/cf/cf_def_config.tbl
+installed	c1_pre_tx	exe/rx/cf/sch_lab_table.tbl	7bd23e94a103583c894e9c1d7427907b0717ffd69774d007e6e7048fa11216f5	c1p2_pre_derived/ws/exe/rx/cf/sch_lab_table.tbl
+installed	c1_pre_tx	exe/rx/cf/to_lab_sub.tbl	507843c2c918ccdd0177ed6a27e474e2f5cd1a5cc4e9a811129e24c3c92babb1	c1p2_pre_derived/ws/exe/rx/cf/to_lab_sub.tbl
+installed	c1_pre_tx	exe/tx/cf/cfe_es_startup.scr	8ddb9359fd2e897b57b1c9c9f0b92f4d8efe36a8b5b290aafef62805657ba0ef	c1p2_pre_derived/ws/exe/tx/cf/cfe_es_startup.scr
+installed	c1_pre_tx	exe/tx/cf/bp_flowtable.tbl	480a5eba1be068e395e02101ca29516003ec39ded970b44dc4f84b966fd2c062	c1p2_pre_derived/ws/exe/tx/cf/bp_flowtable.tbl
+installed	c1_pre_tx	exe/tx/cf/cf_def_config.tbl	455d265e875c1cc332471214c466f4fdfa7717972ee99b6d7308c9eacebcaf0c	c1p2_pre_derived/ws/exe/tx/cf/cf_def_config.tbl
+installed	c1_pre_tx	exe/tx/cf/sch_lab_table.tbl	7bd23e94a103583c894e9c1d7427907b0717ffd69774d007e6e7048fa11216f5	c1p2_pre_derived/ws/exe/tx/cf/sch_lab_table.tbl
+installed	c1_pre_tx	exe/tx/cf/to_lab_sub.tbl	507843c2c918ccdd0177ed6a27e474e2f5cd1a5cc4e9a811129e24c3c92babb1	c1p2_pre_derived/ws/exe/tx/cf/to_lab_sub.tbl
+count	c1_pre_tx	ws/exe files	31	c1p2_pre_derived/ws/exe
+derived	c1_pre_tx	install_inventory.tsv	7b2ce9f9684325e24d54aefef054e26542ed42c2aeed1eb061f6868a81769bb3	c1p2_pre_derived/install_inventory.tsv
+installed	c1_post_tx	exe/rx/cf/cfe_es_startup.scr	8ddb9359fd2e897b57b1c9c9f0b92f4d8efe36a8b5b290aafef62805657ba0ef	c1p2_post_derived/ws/exe/rx/cf/cfe_es_startup.scr
+installed	c1_post_tx	exe/rx/cf/bp_flowtable.tbl	e2dc66cf75712851022d0577bd16660000ea03e5302d339a985d40dec665ac95	c1p2_post_derived/ws/exe/rx/cf/bp_flowtable.tbl
+installed	c1_post_tx	exe/rx/cf/cf_def_config.tbl	b16ae225de620da35fe9b30261f00cdfa8623ef564846b9431c5a588b6544aed	c1p2_post_derived/ws/exe/rx/cf/cf_def_config.tbl
+installed	c1_post_tx	exe/rx/cf/sch_lab_table.tbl	7bd23e94a103583c894e9c1d7427907b0717ffd69774d007e6e7048fa11216f5	c1p2_post_derived/ws/exe/rx/cf/sch_lab_table.tbl
+installed	c1_post_tx	exe/rx/cf/to_lab_sub.tbl	507843c2c918ccdd0177ed6a27e474e2f5cd1a5cc4e9a811129e24c3c92babb1	c1p2_post_derived/ws/exe/rx/cf/to_lab_sub.tbl
+installed	c1_post_tx	exe/tx/cf/cfe_es_startup.scr	8ddb9359fd2e897b57b1c9c9f0b92f4d8efe36a8b5b290aafef62805657ba0ef	c1p2_post_derived/ws/exe/tx/cf/cfe_es_startup.scr
+installed	c1_post_tx	exe/tx/cf/bp_flowtable.tbl	480a5eba1be068e395e02101ca29516003ec39ded970b44dc4f84b966fd2c062	c1p2_post_derived/ws/exe/tx/cf/bp_flowtable.tbl
+installed	c1_post_tx	exe/tx/cf/cf_def_config.tbl	455d265e875c1cc332471214c466f4fdfa7717972ee99b6d7308c9eacebcaf0c	c1p2_post_derived/ws/exe/tx/cf/cf_def_config.tbl
+installed	c1_post_tx	exe/tx/cf/sch_lab_table.tbl	7bd23e94a103583c894e9c1d7427907b0717ffd69774d007e6e7048fa11216f5	c1p2_post_derived/ws/exe/tx/cf/sch_lab_table.tbl
+installed	c1_post_tx	exe/tx/cf/to_lab_sub.tbl	507843c2c918ccdd0177ed6a27e474e2f5cd1a5cc4e9a811129e24c3c92babb1	c1p2_post_derived/ws/exe/tx/cf/to_lab_sub.tbl
+count	c1_post_tx	ws/exe files	31	c1p2_post_derived/ws/exe
+derived	c1_post_tx	install_inventory.tsv	81cd9a79195737511353c1e73dc2a451fecbcfb347046f0a7c4ed719ac393dd6	c1p2_post_derived/install_inventory.tsv
+tool	*	hash_instance.sh	004a72b02bf34cbe2607689dcac68a7e1001a3edfe61704426fc7b7711e53b8b	research/cfs_procrace/env/tools/hash_instance.sh
+tool	*	persist_snapshot.sh	9fe5314f31fa79a2a27e0657fe61c425f22ceff33f269d60d8d28f3ac71e935d	research/cfs_procrace/env/tools/persist_snapshot.sh
+cycle	*	predictions3.tsv	d8a83e6aa1d8aae891072853dda8acdc5a160c108cff31308257bcedb5ba9b88	records/closure-c1prep-20261119/expect/predictions3.tsv
+cycle	*	no_expect_input_check3.txt	f822582ee9c67ae068938b46dec28764333bdc4118f754252e9b08e9d75d3bf0	records/closure-c1prep-20261119/boot/no_expect_input_check3.txt

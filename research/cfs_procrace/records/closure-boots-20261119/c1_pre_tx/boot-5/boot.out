@@ -1,0 +1,5 @@
+stop=ci-es-restart-poweron (CI L196-L197)
+tx_exit=0 rx_exit=0
+dump tx.kzrt bytes=100268 sha256=c380931253f34492aa07d71d1971023af2d6a0988ec06fe5cd08bb4a2ed3087f
+kz-rt-dump exit=0
+rc=0

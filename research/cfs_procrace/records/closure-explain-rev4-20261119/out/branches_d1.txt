@@ -1,0 +1,13 @@
+kz-eval-branches 1
+rule judgement rules 8.13 item 5 (2026-11-18): data branches D1 and D2 (and D2[<kinds>] for each admission file given) x readings R0, each of Ra-Rf alone, all six
+candidates none
+branch D1-R0 data=D1 readings=R0 admitted=none admitted_sha256=none
+branch D1-Ra data=D1 readings=Ra admitted=none admitted_sha256=none
+branch D1-Rb data=D1 readings=Rb admitted=none admitted_sha256=none
+branch D1-Rc data=D1 readings=Rc admitted=none admitted_sha256=none
+branch D1-Rd data=D1 readings=Rd admitted=none admitted_sha256=none
+branch D1-Re data=D1 readings=Re admitted=none admitted_sha256=none
+branch D1-Rf data=D1 readings=Rf admitted=none admitted_sha256=none
+branch D1-all data=D1 readings=Ra,Rb,Rc,Rd,Re,Rf admitted=none admitted_sha256=none
+lines 8
+end

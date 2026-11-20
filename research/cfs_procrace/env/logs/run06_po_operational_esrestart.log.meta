@@ -1,0 +1,320 @@
+run_cfs.sh v2 metadata
+start_utc=2026-10-08T02:10:24.512Z
+mode=operational limit_msec=30000 stop=ci-es-restart-poweron grace_msec=5000
+ref.CFE_PLATFORM_CORE_MAX_STARTUP_MSEC=30000
+ref.CFE_PLATFORM_ES_APP_KILL_TIMEOUT=5 ref.CFE_PLATFORM_ES_APP_SCAN_RATE=1000
+cwd=/home/user/work/procrace/cfs_ref/cFS/build-native_std/exe/cpu1
+command=./core-cpu1
+launcher=setsid setpriv --reuid=ubuntu --regid=1000 --init-groups --
+run_user=ubuntu (uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev))
+bundle=088b2fa828db9ff7e00733f1908e0eeb59f66ce3
+core-cpu1 sha256=0edb1ae28780160ebee95adf8861fc76fe7119a30434e9cd8698cb505bc97799 mtime=2026-10-08T01:23:15Z
+uname=Linux vm 6.18.44-fc-v80 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+nproc=4
+mqueue.msg_max=10 mqueue.msgsize_max=8192 mqueue.queues_max=256
+kernel.sched_rt_runtime_us=950000
+kernel.sched_autogroup_enabled=1
+keyfiles_in_cwd_before=.cdskeyfile .reservedkeyfile .resetkeyfile 
+## host snapshot: before run (2026-10-08T02:10:24.538Z)
+loadavg: 0.27 0.43 0.46 1/106 8006
+ipcs:
+  
+  ------ Message Queues --------
+  key        msqid      owner      perms      used-bytes   messages    
+  
+  ------ Shared Memory Segments --------
+  key        shmid      owner      perms      bytes      nattch     status      
+  
+  ------ Semaphore Arrays --------
+  key        semid      owner      perms      nsems     
+  
+dev_shm:
+  total 0
+  drwxrwxrwt 7 root   root    140 2026-10-08 01:45:52.924455336 +0000 .
+  drwxr-xr-x 6 root   root   2260 2026-10-08 01:05:21.960817874 +0000 ..
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 02:08:16.633610085 +0000 osal:RAM
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.950596053 +0000 osal:RAM3
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.920962378 +0000 osal:RAM4
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.920962378 +0000 osal:RAM5
+  drwx------ 2 root   root     40 2026-10-08 01:05:21.960817874 +0000 rclone-vfscache
+dev_shm_osal_contents:
+  /dev/shm/osal:RAM: total 0
+  /dev/shm/osal:RAM: drwx------ 2 ubuntu ubuntu  40 2026-10-08 02:08:16.633610085 +0000 .
+  /dev/shm/osal:RAM: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM3: total 0
+  /dev/shm/osal:RAM3: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.950596053 +0000 .
+  /dev/shm/osal:RAM3: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM4: total 0
+  /dev/shm/osal:RAM4: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.920962378 +0000 .
+  /dev/shm/osal:RAM4: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM5: total 0
+  /dev/shm/osal:RAM5: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.920962378 +0000 .
+  /dev/shm/osal:RAM5: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+udp_sockets (lsof -nP -iUDP; empty = none):
+processes_of_ubuntu:
+    PID  PPID                  STARTED COMMAND         COMMAND
+isolation_check=passed (no other cFS instance, no process using /dev/shm/osal:* or an OSAL-style mqueue, no executable from this build tree, UDP 1234 1235 1236 3234 3235 3236 free, no attached SysV shm of ubuntu)
+pid=8889 pgid=8889 (setsid)
+stop_reason=operational_seen
+first_console_line_read_ms=4
+operational_line_read_ms=1625
+stop_initiated_ms=1626
+stop_actions=cmd_send@1626ms
+cmd_send_exit=0
+cmd_send_output:
+  Using result from PassThrough encoder
+  0x000: 18 06 c0 00 00 03 02 20 02 00                    ....... ..          
+  sending data to '127.0.0.1' (IP : 127.0.0.1); port 1234
+exit_status=0
+process_end_ms=2188
+leftover_processes_in_group=none
+console.reset_type_at_start=POWER ON reset
+console.exit_reset_status=POWERON
+event_detection=tail -n +1 -f (GNU coreutils 9.4); tail fds while following: /dev/null /tmp/tmp.cBLng2sNXB/console.fifo /dev/null /home/user/Shape-Perf/research/cfs_procrace/env/logs/run06_po_operational_esrestart.log anon_inode:inotify 
+harness_capture_static_ms=5-14 (raw /proc copies taken when the first console line was read)
+process.links (exe, cwd, fd0, fd1, fd2):
+  /home/user/work/procrace/cfs_ref/cFS/build-native_std/exe/cpu1/core-cpu1
+  /home/user/work/procrace/cfs_ref/cFS/build-native_std/exe/cpu1
+  /dev/null
+  /home/user/Shape-Perf/research/cfs_procrace/env/logs/run06_po_operational_esrestart.log
+  /home/user/Shape-Perf/research/cfs_procrace/env/logs/run06_po_operational_esrestart.log
+process.cmdline=./core-cpu1 
+process.credentials_and_capabilities (/proc/<pid>/status):
+  Uid:	1000	1000	1000	1000
+  Gid:	1000	1000	1000	1000
+  Groups:	4 20 24 25 27 29 30 44 46 1000 
+  CapInh:	0000000000000000
+  CapPrm:	0000000000000000
+  CapEff:	0000000000000000
+  CapBnd:	000001fffeffffff
+  CapAmb:	0000000000000000
+  NoNewPrivs:	0
+  Seccomp:	0
+  Cpus_allowed_list:	0-3
+process.limits (/proc/<pid>/limits):
+  Limit                     Soft Limit           Hard Limit           Units     
+  Max cpu time              unlimited            unlimited            seconds   
+  Max file size             unlimited            unlimited            bytes     
+  Max data size             unlimited            unlimited            bytes     
+  Max stack size            8388608              unlimited            bytes     
+  Max core file size        0                    unlimited            bytes     
+  Max resident set          unlimited            unlimited            bytes     
+  Max processes             64300                64300                processes 
+  Max open files            20000                20000                files     
+  Max locked memory         8388608              8388608              bytes     
+  Max address space         unlimited            unlimited            bytes     
+  Max file locks            unlimited            unlimited            locks     
+  Max pending signals       64300                64300                signals   
+  Max msgqueue size         819200               819200               bytes     
+  Max nice priority         0                    0                    
+  Max realtime priority     0                    0                    
+  Max realtime timeout      unlimited            unlimited            us        
+process.cgroup:
+  9:name=systemd:/
+  8:pids:/
+  7:blkio:/
+  6:freezer:/
+  5:devices:/
+  4:memory:/process_api/01a1190b-2205-72ff-b636-73db62ea3256/claude-code-bash
+  3:cpuset:/
+  2:cpuacct:/
+  1:cpu:/
+  0::/
+process.environment (lib_record.sh rules: values only for listed names; cFS reads TERM, TMPDIR, SHELL -- CONDITIONS.md E12):
+  AI_AGENT=<value not recorded>
+  ANTHROPIC_BASE_URL=<value not recorded>
+  ANT_IMAGE_REPOSITORY=<value not recorded>
+  ANT_IMAGE_TAG=<value not recorded>
+  AWS_ACCESS_KEY_ID=<value not recorded>
+  AWS_CA_BUNDLE=<value not recorded>
+  AWS_SECRET_ACCESS_KEY=<value not recorded>
+  BUN_FEATURE_FLAG_DISABLE_STANDALONE_MADVISE=<value not recorded>
+  BUN_INSTALL=<value not recorded>
+  BUN_OPTIONS=<value not recorded>
+  CARGO_HTTP_CAINFO=<value not recorded>
+  CCR_AGENT_PROXY_CA_WATCH_ENABLED=<value not recorded>
+  CCR_AGENT_PROXY_ENABLED=<value not recorded>
+  CCR_AUTO_MODE_USER_ENV_KEYS_FACT=<value not recorded>
+  CCR_EGRESS_GATEWAY_ENABLED=<value not recorded>
+  CCR_ENABLE_TRACING=<value not recorded>
+  CCR_OTLP_METRICS_INTERVAL_S=<value not recorded>
+  CCR_SESSION_PROFILE=<value not recorded>
+  CCR_SPAWN_TIMESTAMP_MS=<value not recorded>
+  CCR_UPSTREAM_PROXY_ENABLED=<value not recorded>
+  CFS_NORMAL_USER=ubuntu
+  CLAUDECODE=<value not recorded>
+  CLAUDE_ADDITIONAL_DIRECTORIES=<value not recorded>
+  CLAUDE_AFTER_LAST_COMPACT=<value not recorded>
+  CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=<value not recorded>
+  CLAUDE_AUTO_BACKGROUND_TASKS=<value not recorded>
+  CLAUDE_CODE_ACCOUNT_UUID=<value not recorded>
+  CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=<value not recorded>
+  CLAUDE_CODE_ARTIFACT_ASSETS=<value not recorded>
+  CLAUDE_CODE_ARTIFACT_DB=<value not recorded>
+  CLAUDE_CODE_ARTIFACT_MULTI_FILE=<value not recorded>
+  CLAUDE_CODE_ARTIFACT_TYPES=<value not recorded>
+  CLAUDE_CODE_ARTIFACT_TYPE_CATALOG=<value not recorded>
+  CLAUDE_CODE_ARTIFACT_TYPE_CLOUD_CREATE=<value not recorded>
+  CLAUDE_CODE_BG_TASKS_REPORT_RUNNING=<value not recorded>
+  CLAUDE_CODE_CHILD_SESSION=<value not recorded>
+  CLAUDE_CODE_CONTAINER_ID=<value not recorded>
+  CLAUDE_CODE_DEBUG=<value not recorded>
+  CLAUDE_CODE_DIAGNOSTICS_FILE=<value not recorded>
+  CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=<value not recorded>
+  CLAUDE_CODE_DISABLE_BUILTIN_ANTMCP=<value not recorded>
+  CLAUDE_CODE_DISABLE_TERMINAL_TITLE=<value not recorded>
+  CLAUDE_CODE_ENTRYPOINT=<value not recorded>
+  CLAUDE_CODE_ENVIRONMENT_RUNNER_VERSION=<value not recorded>
+  CLAUDE_CODE_EXECPATH=<value not recorded>
+  CLAUDE_CODE_GZIP_REQUEST_BODIES=<value not recorded>
+  CLAUDE_CODE_HOLD_UNANSWERED_PARKED_PERMISSION=<value not recorded>
+  CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=<value not recorded>
+  CLAUDE_CODE_MESSAGING_SOCKET=<value not recorded>
+  CLAUDE_CODE_MESSAGING_TOKEN=<value not recorded>
+  CLAUDE_CODE_MODEL_CAPABILITIES=<value not recorded>
+  CLAUDE_CODE_ORGANIZATION_UUID=<value not recorded>
+  CLAUDE_CODE_POST_FOR_SESSION_INGRESS_V2=<value not recorded>
+  CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=<value not recorded>
+  CLAUDE_CODE_PROXY_RESOLVES_HOSTS=<value not recorded>
+  CLAUDE_CODE_REMOTE=<value not recorded>
+  CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE=<value not recorded>
+  CLAUDE_CODE_REMOTE_HERMETIC_MODE=<value not recorded>
+  CLAUDE_CODE_REMOTE_SDK_URL=<value not recorded>
+  CLAUDE_CODE_REMOTE_SEND_KEEPALIVES=<value not recorded>
+  CLAUDE_CODE_REMOTE_SESSION_ID=<value not recorded>
+  CLAUDE_CODE_REMOTE_TOOLS_FORWARD=<value not recorded>
+  CLAUDE_CODE_SESSION_ATTENDED=<value not recorded>
+  CLAUDE_CODE_SESSION_ID=<value not recorded>
+  CLAUDE_CODE_SYNC_SESSION_REFS=<value not recorded>
+  CLAUDE_CODE_SYNC_SKILLS=<value not recorded>
+  CLAUDE_CODE_TEE_SDK_STDOUT=<value not recorded>
+  CLAUDE_CODE_USER_EMAIL=<value not recorded>
+  CLAUDE_CODE_USE_CCR_V2=<value not recorded>
+  CLAUDE_CODE_VERSION=<value not recorded>
+  CLAUDE_CODE_WORKER_EPOCH=<value not recorded>
+  CLAUDE_EFFORT=<value not recorded>
+  CLAUDE_ENABLE_STREAM_WATCHDOG=<value not recorded>
+  CLAUDE_PID=<value not recorded>
+  CLAUDE_SESSION_INGRESS_TOKEN_FILE=<value not recorded>
+  CLOUDSDK_AUTH_ACCESS_TOKEN=<value not recorded>
+  CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE=<value not recorded>
+  CLOUDSDK_PROXY_ADDRESS=<value not recorded>
+  CLOUDSDK_PROXY_PORT=<value not recorded>
+  CLOUDSDK_PROXY_TYPE=<value not recorded>
+  COREPACK_ENABLE_AUTO_PIN=<value not recorded>
+  CURL_CA_BUNDLE=/root/.ccr/ca-bundle.crt
+  DEBIAN_FRONTEND=<value not recorded>
+  DENO_CERT=<value not recorded>
+  DENO_TLS_CA_STORE=<value not recorded>
+  DISABLE_AUTOUPDATER=<value not recorded>
+  DOCKER_HTTPS_PROXY=<value not recorded>
+  DOCUMENTS_MCP_SCRATCH_ROOT=<value not recorded>
+  ELECTRON_GET_USE_PROXY=<value not recorded>
+  ENVRUNNER_SKIP_ACK=<value not recorded>
+  ENV_MANAGER_ENABLE_DIAG_LOGS=<value not recorded>
+  FSSPEC_GCS=<value not recorded>
+  GCM_INTERACTIVE=<value not recorded>
+  GH_TOKEN=<value not recorded>
+  GITHUB_TOKEN=<value not recorded>
+  GIT_ASKPASS=<value not recorded>
+  GIT_CONFIG_COUNT=<value not recorded>
+  GIT_CONFIG_KEY_0=<value not recorded>
+  GIT_CONFIG_KEY_1=<value not recorded>
+  GIT_CONFIG_KEY_2=<value not recorded>
+  GIT_CONFIG_VALUE_0=<value not recorded>
+  GIT_CONFIG_VALUE_1=<value not recorded>
+  GIT_CONFIG_VALUE_2=<value not recorded>
+  GIT_EDITOR=<value not recorded>
+  GIT_SSL_CAINFO=/root/.ccr/ca-bundle.crt
+  GIT_TERMINAL_PROMPT=<value not recorded>
+  GLOBAL_AGENT_HTTPS_PROXY=<value not recorded>
+  GLOBAL_AGENT_NO_PROXY=<value not recorded>
+  GRPC_DEFAULT_SSL_ROOTS_FILE_PATH=<value not recorded>
+  HEX_CACERTS_PATH=<value not recorded>
+  HOME=/root
+  HTTPLIB2_CA_CERTS=<value not recorded>
+  HTTPS_PROXY=http://127.0.0.1:38291
+  IS_SANDBOX=<value not recorded>
+  JAVA_HOME=<value not recorded>
+  JAVA_TOOL_OPTIONS=<value not recorded>
+  MAX_THINKING_TOKENS=<value not recorded>
+  MCP_CONNECTION_NONBLOCKING=<value not recorded>
+  MCP_TOOL_TIMEOUT=<value not recorded>
+  NIX_SSL_CERT_FILE=<value not recorded>
+  NODE_EXTRA_CA_CERTS=<value not recorded>
+  NODE_OPTIONS=<value not recorded>
+  NO_PROXY=localhost,127.0.0.1,::1,127.0.0.0/8,0.0.0.0/8,::,169.254.0.0/16,api.anthropic.com,api-staging.anthropic.com,api-pr-preview.anthropic.com,mcp-proxy.anthropic.com,mcp-proxy-staging.anthropic.com,registry.npmjs.org,jsr.io,npm.jsr.io,pypi.org,files.pythonhosted.org,index.crates.io,proxy.golang.org,host.docker.internal,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,.svc.cluster.local,*.svc.cluster.local
+  NoDefaultCurrentDirectoryInExePath=<value not recorded>
+  OLDPWD=<value not recorded>
+  PATH=/root/.local/bin:/root/.cargo/bin:/usr/local/go/bin:/opt/node22/bin:/opt/maven/bin:/opt/gradle/bin:/opt/rbenv/bin:/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.ccr/sessions/7b7083e42bb89b25be8f13d87364d72c/bin
+  PIP_CERT=<value not recorded>
+  PLAYWRIGHT_BROWSERS_PATH=<value not recorded>
+  PWD=/home/user/work/procrace/cfs_ref/cFS/build-native_std/exe/cpu1
+  PYTHONUNBUFFERED=<value not recorded>
+  RBENV_ROOT=<value not recorded>
+  REQUESTS_CA_BUNDLE=<value not recorded>
+  RUSTUP_HOME=<value not recorded>
+  RUST_BACKTRACE=<value not recorded>
+  SBX_TELEMETRY_SOCKET=<value not recorded>
+  SESSION_INGRESS_URL=<value not recorded>
+  SHELL=/bin/bash
+  SHLVL=<value not recorded>
+  SKIP_PLUGIN_MARKETPLACE=<value not recorded>
+  SSL_CERT_FILE=/root/.ccr/ca-bundle.crt
+  TERM=linux
+  TRACEPARENT=<value not recorded>
+  USE_BUILTIN_RIPGREP=<value not recorded>
+  USE_SHTTP_MCP=<value not recorded>
+  UV_NATIVE_TLS=<value not recorded>
+  YARN_HTTPS_PROXY=<value not recorded>
+  _=<value not recorded>
+  https_proxy=http://127.0.0.1:38291
+  no_proxy=localhost,127.0.0.1,::1,127.0.0.0/8,0.0.0.0/8,::,169.254.0.0/16,api.anthropic.com,api-staging.anthropic.com,api-pr-preview.anthropic.com,mcp-proxy.anthropic.com,mcp-proxy-staging.anthropic.com,registry.npmjs.org,jsr.io,npm.jsr.io,pypi.org,files.pythonhosted.org,index.crates.io,proxy.golang.org,host.docker.internal,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,.svc.cluster.local,*.svc.cluster.local
+  npm_config_https_proxy=<value not recorded>
+  npm_config_noproxy=<value not recorded>
+process.env.TERM=linux
+process.env.TMPDIR=<unset>
+process.env.SHELL=/bin/bash
+process.threads=not captured (operational mode: capturing would delay the stop)
+files_created_or_modified_under_cwd_during_run:
+  ./EEPROM.DAT
+keyfiles_in_cwd_after=.cdskeyfile .reservedkeyfile .resetkeyfile 
+## host snapshot: after run (2026-10-08T02:10:27.729Z)
+loadavg: 0.27 0.43 0.46 1/106 9311
+ipcs:
+  
+  ------ Message Queues --------
+  key        msqid      owner      perms      used-bytes   messages    
+  
+  ------ Shared Memory Segments --------
+  key        shmid      owner      perms      bytes      nattch     status      
+  
+  ------ Semaphore Arrays --------
+  key        semid      owner      perms      nsems     
+  
+dev_shm:
+  total 0
+  drwxrwxrwt 7 root   root    140 2026-10-08 01:45:52.924455336 +0000 .
+  drwxr-xr-x 6 root   root   2260 2026-10-08 01:05:21.960817874 +0000 ..
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 02:08:16.633610085 +0000 osal:RAM
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.950596053 +0000 osal:RAM3
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.920962378 +0000 osal:RAM4
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.920962378 +0000 osal:RAM5
+  drwx------ 2 root   root     40 2026-10-08 01:05:21.960817874 +0000 rclone-vfscache
+dev_shm_osal_contents:
+  /dev/shm/osal:RAM: total 0
+  /dev/shm/osal:RAM: drwx------ 2 ubuntu ubuntu  40 2026-10-08 02:08:16.633610085 +0000 .
+  /dev/shm/osal:RAM: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM3: total 0
+  /dev/shm/osal:RAM3: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.950596053 +0000 .
+  /dev/shm/osal:RAM3: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM4: total 0
+  /dev/shm/osal:RAM4: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.920962378 +0000 .
+  /dev/shm/osal:RAM4: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM5: total 0
+  /dev/shm/osal:RAM5: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.920962378 +0000 .
+  /dev/shm/osal:RAM5: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+udp_sockets (lsof -nP -iUDP; empty = none):
+processes_of_ubuntu:
+    PID  PPID                  STARTED COMMAND         COMMAND
+end_utc=2026-10-08T02:10:27.773Z

@@ -1,0 +1,6 @@
+- 0|facts-artifact H	facts-artifact 473236053e4ee6bfcda09568b127208f5ae8f543bf565c33da4f63dac4451fa4
++ 0|facts-artifact H	facts-artifact 7403a3775bb49f9f0e1e347236ac4b11ed655f5b8fbe69625f8743fe14c1f3f9
+- 0|request N	request 1 row=17975444d83f6589 id=A21 label=T? value=result state=planned site=282 slot=ret reason=- what="status of OS_CountSemGetIdByName at /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:993:19" note="label T?"
+- 0|request N	request 2 row=17975444d83f6589 id=A21 label=T? value=out0 state=planned site=282 slot=out0 reason=- what="out0 of OS_CountSemGetIdByName at /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:993:19" note="label T?"
++ 0|request N	request 1 row=17975444d83f6589 id=A21 label=T? value=result state=planned site=294 slot=ret reason=- what="status of OS_CountSemGetIdByName at /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:993:19" note="label T?"
++ 0|request N	request 2 row=17975444d83f6589 id=A21 label=T? value=out0 state=planned site=294 slot=out0 reason=- what="out0 of OS_CountSemGetIdByName at /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:993:19" note="label T?"

@@ -1,0 +1,45 @@
+== c1_pre_tx
+rows: port 431, probe 431, in both 431
+label        equal 431, differing 0 []
+order class  equal 431, differing 0 []
+reach        equal 431, differing 0 []
+disposition  equal 431, differing 0 []
+tier 1 (port) 12, D07 (probe) 12, same set True
+order class RELOC (port) 318, directed candidates (probe) 318, same set True
+PASS
+== c1_post_tx
+rows: port 431, probe 431, in both 431
+label        equal 431, differing 0 []
+order class  equal 431, differing 0 []
+reach        equal 431, differing 0 []
+disposition  equal 431, differing 0 []
+tier 1 (port) 11, D07 (probe) 11, same set True
+order class RELOC (port) 318, directed candidates (probe) 318, same set True
+PASS
+== r2_core
+rows: port 338, probe 338, in both 338
+label        equal 338, differing 0 []
+order class  equal 338, differing 0 []
+reach        equal 338, differing 0 []
+disposition  equal 338, differing 0 []
+tier 1 (port) 3, D07 (probe) 3, same set True
+order class RELOC (port) 199, directed candidates (probe) 199, same set True
+PASS
+== c5_641
+rows: port 178, probe 178, in both 178
+label        equal 178, differing 0 []
+order class  equal 178, differing 0 []
+reach        equal 178, differing 0 []
+disposition  equal 178, differing 0 []
+tier 1 (port) 8, D07 (probe) 8, same set True
+order class RELOC (port) 86, directed candidates (probe) 86, same set True
+PASS
+== c5_642
+rows: port 175, probe 175, in both 175
+label        equal 175, differing 0 []
+order class  equal 175, differing 0 []
+reach        equal 175, differing 0 []
+disposition  equal 175, differing 0 []
+tier 1 (port) 7, D07 (probe) 7, same set True
+order class RELOC (port) 73, directed candidates (probe) 73, same set True
+PASS

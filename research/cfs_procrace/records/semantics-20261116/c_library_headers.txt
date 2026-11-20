@@ -1,0 +1,21 @@
+# the C library headers the builds read and the C library they link (measured 2026-11-16T18:28:10Z)
+libc6 2.39-0ubuntu8.9 install ok installed
+libc6-dev 2.39-0ubuntu8.9 install ok installed
+libc6-i386 2.39-0ubuntu8.9 install ok installed
+libc6-dev-i386 2.39-0ubuntu8.9 install ok installed
+# the files the P0 declarations data pins, from the package lists
+string.h c64819b091b17d7fcf14a10da129793f2499879eacb1b361610cbec5162fc24b libc6-dev 
+strings.h 70b41dc65c2239cb814b5f5caa8b068b3854daedf8d6e1c0a05299cf57247536 libc6-dev 
+pthread.h 26eb5331384b27347c5d60d466c82e4fbbf91d920383ecddc479b29fd98dc22b libc6-dev 
+stdlib.h 21500d5cb6062df47d6507baef6111cc951ceece4e2df26289a420fcf05ebec4 libc6-dev 
+unistd.h b7c94e0f780fccf2fffd9b2888e698f5519a75be6113e97141b1c5a082433381 libc6-dev 
+dlfcn.h c2859cab5a982203bceee02fb305c6a36a994b2b22f4279326e945216f1729f0 libc6-dev 
+semaphore.h e2ebf541d24b932317d8add40fe92f3c572b4f0f7e9ee1b5c81217619e4fa8ca libc6-dev 
+time.h dba6d309d4b1ca0006342a7a1e08cfc6cb0a210610ff5ad1577d232ddaa10431 libc6-dev 
+threads.h f31974dc3df2a24191f6eec7757f4835d05ae75d7c0ac65391a05d064045a2ba libc6-dev 
+assert.h 538cc7466f2e7b6d34f716f4f4ef601fc6ce940098668c207b1a0d30c8e2341a libc6-dev 
+stdio.h b4f6709d12c8493e2a42f740845abe2994deb27fc78fb85fcaa6e27228a87d62 libc6-dev 
+# the linked C library (earlier record: plan/observation_path_results_20261116.md 1.7, c_library.txt): libc.so.6 of libc6 and libc6-i386
+# the distribution changelog lines that name pthread_create (the patches themselves are not local)
+1605:    - Fix a deadlock between pthread_create and ctors.  Closes: #903514,
+lines naming pthread_create: 1

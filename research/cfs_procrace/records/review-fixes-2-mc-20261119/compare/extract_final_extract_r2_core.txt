@@ -1,0 +1,8 @@
+cdiff old_lines=268 new_lines=268 only_old=4 only_new=4 other=0
+class - facts-hash pairs=1
+class - count:semantics removed=1
+class - count:semantics added=1
+class - count:result-flow removed=1
+class - count:result-flow added=1
+class - count:lock-handles removed=1
+class - count:lock-handles added=1

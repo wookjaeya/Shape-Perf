@@ -1,0 +1,7 @@
+# round trip of the tool copy before the declared kz-static closure build (results 21.0) (2026-11-19T06:01:29Z)
+copy: /home/user/work/preserve/tools-20261119-b/kz-static.bf2ec2ee.xz (47808316 B)
+xz -t: OK
+sha256 of the xz file: 698d4d06868f1d56f1c3744fc6159a9e8dcb2cfb5562f71207e5a19d6598f38d
+xz -dc | sha256sum: bf2ec2eedc756d72107a16532fa74f784cc7a1fd047d48edce62af20302fd460
+in place: bf2ec2eedc756d72107a16532fa74f784cc7a1fd047d48edce62af20302fd460
+xz -dc | cmp in place: SAME

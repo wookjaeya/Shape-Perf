@@ -1,0 +1,81 @@
+extract
+  translation units          1
+  functions                  10 (bodies read 9, in system headers skipped 0)
+  call sites                 6
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                0 (entry resolved 0)
+  loops                      0 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 3, escaping 1, unsummarized 1
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Slot.id   writers 6 (direct 0, data function 0, out-pointer 6, initial values 2), A-TYPE hits: untyped 0, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  hand-entered inputs        13 (built-in data-function table 12, command line 1)
+  declared assumptions       0 (static images of table-walk links that are not const)
+facts-view 1
+[files] 1
+  0 outptr.c 0f0d4a6b8eeb 1239
+[functions] 10
+  fn 0 fetch_external outptr.c:38 params=1 {}
+  fn 1 fetch_id outptr.c:14-21 params=1 {defined}
+  fn 2 fetch_nested outptr.c:24-24 params=1 {defined}
+  fn 3 fetch_twice outptr.c:27-31 params=1 {defined}
+  fn 4 keep_pointer outptr.c:35-35 params=1 {defined}
+  fn 5 publish outptr.c:40-40 params=0 {defined}
+  fn 6 publish_external outptr.c:44-44 params=0 {defined}
+  fn 7 publish_kept outptr.c:43-43 params=0 {defined}
+  fn 8 publish_nested outptr.c:41-41 params=0 {defined}
+  fn 9 publish_twice outptr.c:42-42 params=0 {defined}
+[calls] 6
+  site 0 outptr.c:24:37 fetch_nested -> fetch_id direct {intra-tu,result-used}
+      arg 0:top ~out
+  site 1 outptr.c:40:28 publish -> fetch_id direct {intra-tu}
+      arg 0:addr-of-field &g_slot.id of Slot.id
+  site 2 outptr.c:41:35 publish_nested -> fetch_nested direct {intra-tu}
+      arg 0:addr-of-field &g_slot.id of Slot.id
+  site 3 outptr.c:42:34 publish_twice -> fetch_twice direct {intra-tu}
+      arg 0:addr-of-field &g_slot.id of Slot.id
+  site 4 outptr.c:43:27 publish_kept -> keep_pointer direct {intra-tu}
+      arg 0:addr-of-field &g_other.id of Slot.id
+  site 6 outptr.c:44:37 publish_external -> fetch_external direct {}
+      arg 0:addr-of-field &g_other.id of Slot.id
+[derives] 0
+[loops] 0
+[iters] 0
+[order] 0
+[init] 2
+  Slot.id in g_other zero-initialized value=0 defined at outptr.c:10:6
+  Slot.id in g_slot zero-initialized value=0 defined at outptr.c:9:6
+[consts] 0
+[writers] 6
+  Slot.id out-pointer at outptr.c:40:28 in publish via fetch_id outptr.c:16 value=const 3 [3] key=*fetch_id argument 0 guard=(ne global:g_ready 0) {} n/a
+  Slot.id out-pointer at outptr.c:40:28 in publish via fetch_id outptr.c:19 value=const 0 [0] key=*fetch_id argument 0 guard=(not (ne global:g_ready 0)) {} n/a
+  Slot.id out-pointer at outptr.c:41:35 in publish_nested via fetch_id outptr.c:16 value=const 3 [3] key=*fetch_nested argument 0 guard=(ne global:g_ready 0) {} n/a
+  Slot.id out-pointer at outptr.c:41:35 in publish_nested via fetch_id outptr.c:19 value=const 0 [0] key=*fetch_nested argument 0 guard=(not (ne global:g_ready 0)) {} n/a
+  Slot.id out-pointer at outptr.c:42:34 in publish_twice via fetch_twice outptr.c:28 value=const 1 [1] key=*fetch_twice argument 0 {} n/a
+  Slot.id out-pointer at outptr.c:42:34 in publish_twice via fetch_twice outptr.c:29 value=const 2 [2] key=*fetch_twice argument 0 guard=(gt (deref param:out#0) 0) {} n/a
+[atype] 2
+  Slot.id address-escape at outptr.c:43:27 in publish_kept: the address is passed to keep_pointer: binary operator at outptr.c:35:40
+  Slot.id address-escape at outptr.c:44:37 in publish_external: the address is passed to fetch_external: the callee has no body in the closed program
+[locs] 2
+  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=0 unresolved-indirect=0
+  Slot.id DISABLED writers=6 (direct 0, data-fn 0, out-pointer 6) atype: untyped=0 escape=2 cast=0 union=0 unknown-effect=0 init=2 unresolved-indirect=0
+[targets] 0
+[spawnparams] 0
+[image] 0
+[terminals] 0
+[outcalls] 5
+  site 1 outptr.c:40:28 fetch_id arg 0 = &Slot.id store-only stores=2
+  site 2 outptr.c:41:35 fetch_nested arg 0 = &Slot.id store-only stores=2
+  site 3 outptr.c:42:34 fetch_twice arg 0 = &Slot.id store-only stores=2
+  site 4 outptr.c:43:27 keep_pointer arg 0 = &Slot.id escapes stores=0
+  site 6 outptr.c:44:37 fetch_external arg 0 = &Slot.id unsummarized stores=0
+[fwrites] 6
+  keep_pointer field <global>.g_kept at outptr.c:35
+  publish address-argument Slot.id at outptr.c:40
+  publish_external address-argument Slot.id at outptr.c:44
+  publish_kept address-argument Slot.id at outptr.c:43
+  publish_nested address-argument Slot.id at outptr.c:41
+  publish_twice address-argument Slot.id at outptr.c:42

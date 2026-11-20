@@ -1,0 +1,6 @@
+# archive.sh relrev7_extract records/relrules-rev7-20261116/extract.sha256 2026-11-19T13:51:43Z
+1. directory = list: 50 files, 46861749 bytes (apparent), 47046656 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/relrev7_extract/relrev7_extract.tar.xz 3386188 bytes sha256 49473f8a999a00c99fb7b30820df7f26cb3e035dfa344a241524ae8bd2cc54fa
+4. round trip: 50 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/relrev7_extract removed 2026-11-19T13:51:55Z
+PASS

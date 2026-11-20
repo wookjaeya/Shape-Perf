@@ -1,0 +1,4 @@
+# space_guard.sh kind=evalfx-dev need=20000000 floor=314572800 interval=2 cmd=timeout 600 python3 -I env/obs1/tests/test_explain_eval.py env/obs1 <scratch>/evfx_try1
+start 2026-11-19T14:35:53.209Z free=1211555840 threshold=334572800
+sample 2026-11-19T14:35:53.214Z 1211551744
+end 2026-11-19T14:35:55.221Z kind=evalfx-dev verdict=completed rc=1 free=1207603200 lowest=1207603200 dip=3952640 change=-3952640

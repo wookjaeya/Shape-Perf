@@ -1,0 +1,12 @@
+Test project /home/user/work/merge-check/kz-llvm
+    Start 98: golden_layout
+1/2 Test #98: golden_layout ....................   Passed    0.01 sec
+    Start 99: golden_records
+2/2 Test #99: golden_records ...................   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+golden    =   0.02 sec*proc (2 tests)
+
+Total Test time (real) =   0.03 sec

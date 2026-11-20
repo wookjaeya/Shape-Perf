@@ -1,0 +1,28 @@
+# commands of the name-space data step (coverage rule revision 2); <scratch> is one directory in this session's
+# scratchpad; times UTC; every command's rc was read before the next one
+## 0. before the declaration (2026-11-19T01:30Z)
+start state, sha256 of the data files, the scan, p0.cpp and the two component lists -> out/start_state.txt, out/data_sha256_before.txt
+semantics_scan.py check semantics_trees.tsv kairos/semantics (unchanged scan) rc=0 -> out/scan_check_before.txt (PASS, 13 files)
+scratch trials of the changed scan: generate -> <scratch>/trial1..3 (guard/guard_trial1..3.log, all rc 0); fixes during the
+  trials: the record type of the table found through a typedef of a tagged struct declared apart (trial 1 found no clear-table
+  line), the call position carried with each layer call, the argument text kept with each kind-unresolved call; report_ns2.py on
+  the trial outputs; trial outputs are scratch and no evidence; removed
+declaration.md, the scan change, semantics_trees_r2.tsv and report_ns2.py committed: 5d74967, before any revision-2 data file
+## generate (commit 5d74967), 2026-11-19T01:39:12Z
+/dev/vda       270553174016 40273002496 1049505792  98% /
+semantics_scan.py generate semantics_trees_r2.tsv -> <scratch>/gen_final rc=0 (out/scan_generate.txt)
+cp -n of the five framework_namespaces2_*.txt from <scratch>/gen_final to kairos/semantics rc=0
+semantics_scan.py check semantics_trees_r2.tsv kairos/semantics rc=0 (out/scan_check.txt)
+semantics_scan.py check fixture_trees.tsv semantics_fixture rc=0 (out/fixture_check.txt)
+semantics_scan.py check with the old list semantics_trees.tsv rc=1 (out/scan_check_old_list.txt; expected 1, declaration check 6)
+report_ns2.py -> out/report rc=0
+## 2. byte identity, pins, lints (2026-11-19T01:40Z)
+the 13 revision-1 files regenerated into <scratch>/gen_final against kairos/semantics: 13 identical (out/regenerated_rev1_vs_repo.txt)
+sha256 of the 14 present files of kairos/semantics after = before (out/data_sha256_after.txt, out/data_sha256_compare.txt); git diff --stat HEAD
+  -- kairos/semantics: empty; git status: the five new files untracked
+the five revision-1 name-space sha256 against the input namespace-data pins of the five kept revision-4 plans: 25 of 25 equal (out/plan_pins_check.txt)
+kz_lint built in <scratch> from the HEAD source (sha256 equal to the working tree, out/lint_source_sha256.txt) with g++ -std=c++17 -O1
+  (guard/guard_lint_build.log rc 0); git archive HEAD of kairos/{include,lib,tools,probe,instrument,semantics,tests/lint/data} into
+  <scratch>/lint/tree; case-ids-data and semantics-names with the five new files added: rc 0, rc 0 (out/lint_*_with_new.txt); without
+  them: rc 0, rc 0 (out/lint_*_head.txt); selftest 114 cases, 0 failed (out/lint_selftest.txt); a planted file naming one new API name
+  of the data in lib/ is found, rc 1 (out/lint_semantics-names_planted.txt: the lint reads the new files); <scratch>/lint removed

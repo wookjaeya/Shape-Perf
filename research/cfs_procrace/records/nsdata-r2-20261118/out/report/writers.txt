@@ -1,0 +1,100 @@
+== osal-f34759d (generation N): name field name_entry
+name-storing writers in function bodies: 17; in an entry: 17; in none: 0
+the same writers without the layer clear: 16; named by a stored-name or other-store line of the revision-1 file: 13
+  init-macro OS_BinSemCreate at=osal/src/os/shared/src/osapi-binsem.c:108 -> stored-name OS_OBJECT_TYPE_OS_BINSEM; revision 1: named
+  init-macro OS_CondVarCreate at=osal/src/os/shared/src/osapi-condvar.c:96 -> stored-name OS_OBJECT_TYPE_OS_CONDVAR; revision 1: not named
+  init-macro OS_ConsoleAPI_Init at=osal/src/os/shared/src/osapi-printf.c:101 -> stored-name OS_OBJECT_TYPE_OS_CONSOLE; revision 1: not named
+  init-macro OS_CountSemCreate at=osal/src/os/shared/src/osapi-countsem.c:100 -> stored-name OS_OBJECT_TYPE_OS_COUNTSEM; revision 1: named
+  init-macro OS_DirectoryOpen at=osal/src/os/shared/src/osapi-dir.c:125 -> stored-name OS_OBJECT_TYPE_OS_DIR; revision 1: named
+  init-macro OS_DoTimerAdd at=osal/src/os/shared/src/osapi-time.c:141 -> stored-name OS_OBJECT_TYPE_OS_TIMECB; revision 1: not named
+  init-macro OS_FileSysAddFixedMap at=osal/src/os/shared/src/osapi-filesys.c:280 -> stored-name OS_OBJECT_TYPE_OS_FILESYS; revision 1: named
+  init-macro OS_FileSys_Initialize at=osal/src/os/shared/src/osapi-filesys.c:159 -> stored-name OS_OBJECT_TYPE_OS_FILESYS; revision 1: named
+  init-macro OS_ModuleLoad at=osal/src/os/shared/src/osapi-module.c:209 -> stored-name OS_OBJECT_TYPE_OS_MODULE; revision 1: named
+  init-macro OS_MutSemCreate at=osal/src/os/shared/src/osapi-mutex.c:105 -> stored-name OS_OBJECT_TYPE_OS_MUTEX; revision 1: named
+  store OS_ObjectIdFindNextFree at=osal/src/os/shared/src/osapi-idmap.c:640 -> layer-op clear-slot; revision 1: not named
+  init-macro OS_OpenCreate at=osal/src/os/shared/src/osapi-file.c:142 -> stored-name OS_OBJECT_TYPE_OS_STREAM; revision 1: named
+  init-macro OS_QueueCreate at=osal/src/os/shared/src/osapi-queue.c:104 -> stored-name OS_OBJECT_TYPE_OS_QUEUE; revision 1: named
+  store OS_SocketAccept at=osal/src/os/shared/src/osapi-sockets.c:272 -> other-store OS_OBJECT_TYPE_OS_STREAM; revision 1: named
+  store OS_SocketBind at=osal/src/os/shared/src/osapi-sockets.c:188 -> other-store OS_OBJECT_TYPE_OS_STREAM; revision 1: named
+  init-macro OS_TaskCreate at=osal/src/os/shared/src/osapi-task.c:188 -> stored-name OS_OBJECT_TYPE_OS_TASK; revision 1: named
+  init-macro OS_TimeBaseCreate at=osal/src/os/shared/src/osapi-timebase.c:128 -> stored-name OS_OBJECT_TYPE_OS_TIMEBASE; revision 1: named
+== osal-7.0.1 (generation N): name field name_entry
+name-storing writers in function bodies: 18; in an entry: 18; in none: 0
+the same writers without the layer clear: 17; named by a stored-name or other-store line of the revision-1 file: 14
+  init-macro OS_BinSemCreate at=osal/src/os/shared/src/osapi-binsem.c:108 -> stored-name OS_OBJECT_TYPE_OS_BINSEM; revision 1: named
+  init-macro OS_CondVarCreate at=osal/src/os/shared/src/osapi-condvar.c:97 -> stored-name OS_OBJECT_TYPE_OS_CONDVAR; revision 1: not named
+  init-macro OS_ConsoleAPI_Init at=osal/src/os/shared/src/osapi-printf.c:101 -> stored-name OS_OBJECT_TYPE_OS_CONSOLE; revision 1: not named
+  init-macro OS_CountSemCreate at=osal/src/os/shared/src/osapi-countsem.c:100 -> stored-name OS_OBJECT_TYPE_OS_COUNTSEM; revision 1: named
+  init-macro OS_DirectoryOpen at=osal/src/os/shared/src/osapi-dir.c:125 -> stored-name OS_OBJECT_TYPE_OS_DIR; revision 1: named
+  init-macro OS_DoTimerAdd at=osal/src/os/shared/src/osapi-time.c:145 -> stored-name OS_OBJECT_TYPE_OS_TIMECB; revision 1: not named
+  init-macro OS_FileSysAddFixedMap at=osal/src/os/shared/src/osapi-filesys.c:267 -> stored-name OS_OBJECT_TYPE_OS_FILESYS; revision 1: named
+  init-macro OS_FileSys_Initialize at=osal/src/os/shared/src/osapi-filesys.c:163 -> stored-name OS_OBJECT_TYPE_OS_FILESYS; revision 1: named
+  init-macro OS_ModuleLoad at=osal/src/os/shared/src/osapi-module.c:220 -> stored-name OS_OBJECT_TYPE_OS_MODULE; revision 1: named
+  init-macro OS_MutSemCreate at=osal/src/os/shared/src/osapi-mutex.c:105 -> stored-name OS_OBJECT_TYPE_OS_MUTEX; revision 1: named
+  store OS_ObjectIdFindNextFree at=osal/src/os/shared/src/osapi-idmap.c:646 -> layer-op clear-slot; revision 1: not named
+  init-macro OS_OpenCreate at=osal/src/os/shared/src/osapi-file.c:142 -> stored-name OS_OBJECT_TYPE_OS_STREAM; revision 1: named
+  init-macro OS_QueueCreate at=osal/src/os/shared/src/osapi-queue.c:107 -> stored-name OS_OBJECT_TYPE_OS_QUEUE; revision 1: named
+  init-macro OS_RwLockCreate at=osal/src/os/shared/src/osapi-rwlock.c:105 -> stored-name OS_OBJECT_TYPE_OS_RWLOCK; revision 1: named
+  store OS_SocketAcceptAbs at=osal/src/os/shared/src/osapi-sockets.c:351 -> other-store OS_OBJECT_TYPE_OS_STREAM; revision 1: named
+  store OS_SocketBindAddress at=osal/src/os/shared/src/osapi-sockets.c:267 -> other-store OS_OBJECT_TYPE_OS_STREAM; revision 1: named
+  init-macro OS_TaskCreate at=osal/src/os/shared/src/osapi-task.c:193 -> stored-name OS_OBJECT_TYPE_OS_TASK; revision 1: named
+  init-macro OS_TimeBaseCreate at=osal/src/os/shared/src/osapi-timebase.c:128 -> stored-name OS_OBJECT_TYPE_OS_TIMEBASE; revision 1: named
+== osal-4.1.1 (generation T)
+table OS_FDTable[].Path: writing lines 8; named by a copy or clear line of the entry 3; not named 5
+  osal/src/os/posix/osfileapi.c:130 -> NONE
+  osal/src/os/posix/osfileapi.c:263 -> entry
+  osal/src/os/posix/osfileapi.c:384 -> entry
+  osal/src/os/posix/osfileapi.c:442 -> NONE
+  osal/src/os/posix/osfileapi.c:454 -> NONE
+  osal/src/os/posix/osfileapi.c:792 -> entry
+  osal/src/os/posix/osfileapi.c:1441 -> NONE
+  osal/src/os/posix/osfileapi.c:1496 -> NONE
+table OS_VolumeTable[].DeviceName: writing lines 0; named by a copy or clear line of the entry 0; not named 0
+table OS_VolumeTable[].MountPoint: writing lines 2; named by a copy or clear line of the entry 2; not named 0
+  osal/src/os/posix/osfilesys.c:342 -> entry
+  osal/src/os/posix/osfilesys.c:390 -> entry
+table OS_bin_sem_table[].name: writing lines 3; named by a copy or clear line of the entry 3; not named 0
+  osal/src/os/posix/osapi.c:301 -> entry
+  osal/src/os/posix/osapi.c:2123 -> entry
+  osal/src/os/posix/osapi.c:2204 -> entry
+table OS_count_sem_table[].name: writing lines 3; named by a copy or clear line of the entry 3; not named 0
+  osal/src/os/posix/osapi.c:309 -> entry
+  osal/src/os/posix/osapi.c:2671 -> entry
+  osal/src/os/posix/osapi.c:2752 -> entry
+table OS_module_table[].name: writing lines 2; named by a copy or clear line of the entry 2; not named 0
+  osal/src/os/posix/osloader.c:83 -> entry
+  osal/src/os/posix/osloader.c:274 -> entry
+table OS_mut_sem_table[].name: writing lines 3; named by a copy or clear line of the entry 3; not named 0
+  osal/src/os/posix/osapi.c:317 -> entry
+  osal/src/os/posix/osapi.c:3217 -> entry
+  osal/src/os/posix/osapi.c:3264 -> entry
+table OS_queue_table[].name: writing lines 5; named by a copy or clear line of the entry 5; not named 0
+  osal/src/os/posix/osapi.c:292 -> entry
+  osal/src/os/posix/osapi.c:1228 -> entry
+  osal/src/os/posix/osapi.c:1277 -> entry
+  osal/src/os/posix/osapi.c:1657 -> entry
+  osal/src/os/posix/osapi.c:1724 -> entry
+table OS_task_table[].name: writing lines 4; named by a copy or clear line of the entry 4; not named 0
+  osal/src/os/posix/osapi.c:282 -> entry
+  osal/src/os/posix/osapi.c:698 -> entry
+  osal/src/os/posix/osapi.c:762 -> entry
+  osal/src/os/posix/osapi.c:794 -> entry
+table OS_timer_table[].name: writing lines 2; named by a copy or clear line of the entry 2; not named 0
+  osal/src/os/posix/ostimer.c:118 -> entry
+  osal/src/os/posix/ostimer.c:311 -> entry
+== cfe-6.4.1 (generation T)
+table CFE_ES_Global.AppTable[].StartParams.Name: writing lines 4; named by a copy or clear line of the entry 1; not named 3
+  cfe/fsw/cfe-core/src/es/cfe_es_apps.c:582 -> entry
+  cfe/fsw/cfe-core/src/es/cfe_es_apps.c:583 -> NONE
+  cfe/fsw/cfe-core/src/es/cfe_es_start.c:850 -> NONE
+  cfe/fsw/cfe-core/src/es/cfe_es_start.c:851 -> NONE
+table CFE_ES_Global.CounterTable[].CounterName: writing lines 1; named by a copy or clear line of the entry 1; not named 0
+  cfe/fsw/cfe-core/src/es/cfe_es_api.c:1733 -> entry
+== cfe-6.4.2 (generation T)
+table CFE_ES_Global.AppTable[].StartParams.Name: writing lines 4; named by a copy or clear line of the entry 1; not named 3
+  cfe/fsw/cfe-core/src/es/cfe_es_apps.c:582 -> entry
+  cfe/fsw/cfe-core/src/es/cfe_es_apps.c:583 -> NONE
+  cfe/fsw/cfe-core/src/es/cfe_es_start.c:828 -> NONE
+  cfe/fsw/cfe-core/src/es/cfe_es_start.c:829 -> NONE
+table CFE_ES_Global.CounterTable[].CounterName: writing lines 1; named by a copy or clear line of the entry 1; not named 0
+  cfe/fsw/cfe-core/src/es/cfe_es_api.c:1672 -> entry

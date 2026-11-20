@@ -1,0 +1,1 @@
+rules with decided call results: relations rules revision 14 (the stored-field rule, judgement rules 8.13 item 17): open effects by reason: branch not decided by the value 4150; other 984; outcome not enumerated 1929; address-passing calls on stored-location paths 0 (call sites 0): decided 0; not decided: none; call sites decided by the stored-field rule 0 (rows 0)

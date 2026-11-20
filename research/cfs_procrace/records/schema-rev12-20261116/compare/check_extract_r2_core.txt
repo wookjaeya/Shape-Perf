@@ -1,0 +1,8 @@
+OK basis.kz: 419 dump lines, allowed {'STRINGS crc32': 1, 'build_identity': 1, 'header': 2}, other 0
+OK facts.kz: 105557 dump lines, allowed {'STRINGS crc32': 1, 'build_identity': 1, 'header': 4, 'units_from': 1}, other 0
+OK basis.txt: 68 lines, allowed {'basis line': 1, 'build_identity': 1}, other 0
+OK extract.txt: 263 lines, allowed {'line 1': 1}, other 0
+OK sha256.txt: 6 lines, allowed {'basis.kz': 1, 'facts.kz': 1, 'kz-static': 1}, other 0
+OK args.txt: 7 lines, allowed {}, other 0
+OK relations.log: 1 lines, allowed {}, other 0
+check_extract: only declared differences

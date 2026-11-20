@@ -1,0 +1,5 @@
+# space_guard.sh kind=regen need=250000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/env/tools/plan_regen.sh /home/user/work/preserve/tools-20261116-c/kz-static.de1315b3.xz /home/user/work/redesign/obs1/plangen/c1_pre_tx/args.txt <scratch>/m3/regen_c1_pre_tx
+start 2026-11-16T07:08:11.537Z free=3461013504 threshold=564572800
+sample 2026-11-16T07:08:11.541Z 3461009408
+sample 2026-11-16T07:08:13.548Z 3354484736
+end 2026-11-16T07:08:15.554Z kind=regen verdict=completed rc=0 free=3276591104 lowest=3276591104 dip=184422400 change=-184422400

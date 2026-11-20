@@ -1,0 +1,40 @@
+OK c1_pre_tx order.txt two runs the same bytes
+OK c1_pre_tx edges.tsv two runs the same bytes
+OK c1_pre_tx order.txt: cdiff old_lines=5745 new_lines=5745 only_old=4 only_new=4 other=0
+OK c1_pre_tx edges.tsv: cdiff old_lines=309 new_lines=309 only_old=0 only_new=0 other=0
+OK c1_pre_tx order.log empty
+OK c1_pre_tx relations.txt = the re-extraction's
+OK c1_pre_tx keys.txt: cdiff old_lines=739 new_lines=739 only_old=2 only_new=2 other=0
+OK c1_pre_tx relations.log empty
+OK c1_post_tx order.txt two runs the same bytes
+OK c1_post_tx edges.tsv two runs the same bytes
+OK c1_post_tx order.txt: cdiff old_lines=5768 new_lines=5768 only_old=4 only_new=4 other=0
+OK c1_post_tx edges.tsv: cdiff old_lines=309 new_lines=309 only_old=0 only_new=0 other=0
+OK c1_post_tx order.log empty
+OK c1_post_tx relations.txt = the re-extraction's
+OK c1_post_tx keys.txt: cdiff old_lines=739 new_lines=739 only_old=2 only_new=2 other=0
+OK c1_post_tx relations.log empty
+OK r2_core order.txt two runs the same bytes
+OK r2_core edges.tsv two runs the same bytes
+OK r2_core order.txt: cdiff old_lines=6032 new_lines=6032 only_old=4 only_new=4 other=0
+OK r2_core edges.tsv: cdiff old_lines=499 new_lines=499 only_old=0 only_new=0 other=0
+OK r2_core order.log empty
+OK r2_core relations.txt = the re-extraction's
+OK r2_core keys.txt: cdiff old_lines=593 new_lines=593 only_old=2 only_new=2 other=0
+OK r2_core relations.log empty
+OK c5_641 order.txt two runs the same bytes
+OK c5_641 edges.tsv two runs the same bytes
+OK c5_641 order.txt: cdiff old_lines=2120 new_lines=2094 only_old=56 only_new=30 other=0
+OK c5_641 edges.tsv: cdiff old_lines=92 new_lines=92 only_old=0 only_new=0 other=0
+OK c5_641 order.log empty
+OK c5_641 relations.txt = the re-extraction's
+OK c5_641 keys.txt: cdiff old_lines=346 new_lines=346 only_old=2 only_new=2 other=0
+OK c5_641 relations.log empty
+OK c5_642 order.txt two runs the same bytes
+OK c5_642 edges.tsv two runs the same bytes
+OK c5_642 order.txt: cdiff old_lines=2357 new_lines=2331 only_old=56 only_new=30 other=0
+OK c5_642 edges.tsv: cdiff old_lines=122 new_lines=122 only_old=0 only_new=0 other=0
+OK c5_642 order.log empty
+OK c5_642 relations.txt = the re-extraction's
+OK c5_642 keys.txt: cdiff old_lines=339 new_lines=339 only_old=2 only_new=2 other=0
+OK c5_642 relations.log empty

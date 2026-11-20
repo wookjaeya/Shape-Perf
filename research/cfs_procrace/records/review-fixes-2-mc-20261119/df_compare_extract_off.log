@@ -1,0 +1,9 @@
+# space_guard.sh kind=compare-extract_off need=150000000 floor=314572800 interval=2 cmd=bash -c bash '/home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/compare.sh' extract_off > '/home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/compare_extract_off.txt' 2>&1
+start 2026-11-19T02:03:28.376Z free=1063497728 threshold=464572800
+sample 2026-11-19T02:03:28.380Z 1063493632
+sample 2026-11-19T02:03:30.386Z 1037160448
+sample 2026-11-19T02:03:32.392Z 1063444480
+sample 2026-11-19T02:03:34.399Z 1063415808
+sample 2026-11-19T02:03:36.405Z 1063362560
+sample 2026-11-19T02:03:38.412Z 1063325696
+end 2026-11-19T02:03:40.420Z kind=compare-extract_off verdict=completed rc=0 free=1063301120 lowest=1037160448 dip=26337280 change=-196608

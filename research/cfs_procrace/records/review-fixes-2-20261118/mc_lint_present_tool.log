@@ -1,0 +1,90 @@
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+Test project /home/user/work/merge-check/kz-llvm
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 105
+    Start 105: lint_selftest
+
+105: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "--selftest" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+105: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+105: Test timeout computed to be: 10000000
+105: lint selftest: 114 cases, 0 failed
+1/8 Test #105: lint_selftest ....................   Passed    0.10 sec
+test 106
+    Start 106: lint_case-ids
+
+106: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "case-ids" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+106: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+106: Test timeout computed to be: 10000000
+106: lint case-ids: clean
+2/8 Test #106: lint_case-ids ....................   Passed    1.60 sec
+test 107
+    Start 107: lint_case-ids-data
+
+107: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "case-ids-data" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+107: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+107: Test timeout computed to be: 10000000
+107: lint case-ids-data: clean
+3/8 Test #107: lint_case-ids-data ...............   Passed    0.11 sec
+test 108
+    Start 108: lint_semantics-names
+
+108: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "semantics-names" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+108: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+108: Test timeout computed to be: 10000000
+108: lint semantics-names: clean
+4/8 Test #108: lint_semantics-names .............   Passed    0.05 sec
+test 109
+    Start 109: lint_retired-term
+
+109: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "retired-term" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+109: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+109: Test timeout computed to be: 10000000
+109: lint retired-term: clean
+5/8 Test #109: lint_retired-term ................   Passed    0.05 sec
+test 110
+    Start 110: lint_banned-files
+
+110: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "banned-files" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+110: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+110: Test timeout computed to be: 10000000
+110: lint banned-files: clean
+6/8 Test #110: lint_banned-files ................   Passed    0.02 sec
+test 111
+    Start 111: lint_no-llvm
+
+111: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "no-llvm" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+111: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+111: Test timeout computed to be: 10000000
+111: lint no-llvm: clean
+7/8 Test #111: lint_no-llvm .....................   Passed    0.04 sec
+test 112
+    Start 112: lint_no-generated
+
+112: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "no-generated" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+112: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+112: Test timeout computed to be: 10000000
+112: lint no-generated: clean
+8/8 Test #112: lint_no-generated ................   Passed    0.06 sec
+
+The following tests passed:
+	lint_selftest
+	lint_case-ids
+	lint_case-ids-data
+	lint_semantics-names
+	lint_retired-term
+	lint_banned-files
+	lint_no-llvm
+	lint_no-generated
+
+100% tests passed, 0 tests failed out of 8
+
+Label Time Summary:
+lint    =   2.03 sec*proc (8 tests)
+
+Total Test time (real) =   2.69 sec

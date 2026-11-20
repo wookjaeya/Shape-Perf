@@ -1,0 +1,8 @@
+# space_guard.sh kind=elements need=5000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-explain-fix-20261119/scripts/elements.py /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/scratch/branches16/static_elements_16.tsv /home/user/work/redesign/obs1/xr5_dry_static_c1_pre_tx /home/user/work/redesign/obs1/xr5_dry_static_c1_post_tx
+start 2026-11-19T14:49:13.332Z free=1130074112 threshold=319572800
+sample 2026-11-19T14:49:13.336Z 1130070016
+end 2026-11-19T14:49:15.343Z kind=elements verdict=completed rc=0 free=1129979904 lowest=1129979904 dip=94208 change=-94208
+# space_guard.sh kind=elements need=5000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-explain-fix-20261119/scripts/elements.py /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/scratch/branches16/static_elements_16.tsv /home/user/work/redesign/obs1/xr5_dry_static_c1_pre_tx /home/user/work/redesign/obs1/xr5_dry_static_c1_post_tx
+start 2026-11-19T14:49:25.200Z free=1129967616 threshold=319572800
+sample 2026-11-19T14:49:25.204Z 1129967616
+end 2026-11-19T14:49:27.211Z kind=elements verdict=completed rc=0 free=1129877504 lowest=1129877504 dip=90112 change=-90112

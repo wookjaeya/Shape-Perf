@@ -1,0 +1,72 @@
+UpdateCTestConfiguration  from :<scratch>/cb/DartConfiguration.tcl
+UpdateCTestConfiguration  from :<scratch>/cb/DartConfiguration.tcl
+Test project <scratch>/cb
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 127
+    Start 127: test_trace_static_closure
+
+127: Test command: <scratch>/cb/tests/cfs-free/test_trace_static_closure
+127: Working Directory: <scratch>/cb/tests/cfs-free
+127: Test timeout computed to be: 10000000
+127: test_trace_static_closure: 114 checks passed
+1/3 Test #127: test_trace_static_closure ........   Passed    0.01 sec
+test 267
+    Start 267: test_static_link
+
+267: Test command: <scratch>/cb/tests/static/test_static_link "<scratch>/cb/tests/static/CMakeFiles/kz_static_main_obj.dir/objects/main_obj.c.o" "<scratch>/cb/tests/static/CMakeFiles/kz_static_whole_member.dir/objects/whole_member.c.o" "<scratch>/cb/tests/static/CMakeFiles/kz_static_lazy_used.dir/objects/lazy_used.c.o" "<scratch>/cb/tests/static/CMakeFiles/kz_static_lazy_unused.dir/objects/lazy_unused.c.o"
+267: Working Directory: <scratch>/cb/tests/static
+267: Test timeout computed to be: 10000000
+267: test_static_link: 68 checks passed
+2/3 Test #267: test_static_link .................   Passed    0.01 sec
+test 268
+    Start 268: test_static_elf32
+
+268: Test command: <scratch>/cb/tests/static/test_static_elf32 "<scratch>/cb/tools/kz-static/kz-static" "/usr/bin/cc" "<scratch>/src/research/cfs_procrace/kairos/tests/static/objects" "<scratch>/src/research/cfs_procrace/kairos/tests/static/profile" "<scratch>/cb/tests/static/work_elf32"
+268: Working Directory: <scratch>/cb/tests/static
+268: Test timeout computed to be: 10000000
+268: closmix: kz-static basis exit 1:
+268: kz-static basis: Invalid: <scratch>/cb/tests/static/work_elf32/closmix/obj/app.o is ELF64 little-endian EM_X86_64 (62), but <scratch>/cb/tests/static/work_elf32/closmix/obj/core_main.o (the first file read for this program) is ELF32 little-endian EM_386 (3): one program's files must have one ELF class, byte order and machine
+268: fp_nounit: kz-static basis exit 1:
+268: kz-static basis: Invalid: recipe front_end_diagnostic `incompatible-function-pointer-types` names src/none.c, which is no unit of the program
+268: fp_blanket: kz-static basis exit 1:
+268: kz-static basis: Invalid: recipe line 16: front_end_diagnostic: `-Wno-error` is not a diagnostic name (letters, digits and '-', the <name> of -W<name>)
+268: fp_noref: kz-static basis exit 1:
+268: kz-static basis: Invalid: recipe line 15: expected `reference`
+268: fp_noat: kz-static basis exit 1:
+268: kz-static basis: Invalid: recipe line 15: front_end_diagnostic needs `at "file" <line>` for each line where the diagnostic is raised
+268: fp_group: kz-static basis exit 1:
+268: 1 error generated.
+268: 1 warning generated.
+268: kz-static basis: Invalid: recipe front_end_diagnostic for src/app.c: it lowers incompatible-function-pointer-types at src/app.c:12:41, which no statement of the unit names (a group name lowers its members; name the diagnostic itself)
+268: fp_unknown: kz-static basis exit 1:
+268: 1 error generated.
+268: 1 error generated.
+268: kz-static basis: Invalid: recipe front_end_diagnostic for src/app.c: the front end still rejects the unit: src/app.c:12:41: incompatible function pointer types passing 'void (void)' to parameter of type 'void (*)(int)'
+268: fp_uncited: kz-static basis exit 1:
+268: 2 errors generated.
+268: 2 warnings generated.
+268: kz-static basis: Invalid: recipe front_end_diagnostic for src/app.c: incompatible-function-pointer-types at src/app.c:13:42 is on a line the statement does not cite: incompatible function pointer types passing 'void (void)' to parameter of type 'void (*)(int)'
+268: fp_noocc: kz-static basis exit 1:
+268: 1 error generated.
+268: 1 warning generated.
+268: kz-static basis: Invalid: recipe front_end_diagnostic for src/app.c: the statement cites src/app.c:5, where the front end raises no incompatible-function-pointer-types as an error
+268: test_static_elf32: 233 checks passed
+3/3 Test #268: test_static_elf32 ................   Passed    2.24 sec
+
+The following tests passed:
+	test_trace_static_closure
+	test_static_link
+	test_static_elf32
+
+100% tests passed, 0 tests failed out of 3
+
+Label Time Summary:
+static    =   2.24 sec*proc (2 tests)
+unit      =   0.01 sec*proc (1 test)
+
+Total Test time (real) =   2.26 sec

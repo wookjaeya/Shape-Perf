@@ -1,0 +1,4 @@
+order_np: same bytes as scratch/golden_scratch/order_np.golden
+resultflow_order_np: same bytes as scratch/golden_scratch/resultflow_order_np.golden
+looplock_order_np: same bytes as scratch/golden_scratch/looplock_order_np.golden
+resultflow_np: same bytes as scratch3/golden_scratch/resultflow_np.golden

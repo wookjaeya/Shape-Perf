@@ -1,0 +1,18 @@
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static basis --no-profile --compile-db /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/compile_commands.json --build-dir /home/user/work/procrace/cfs_ref/cFS/build-native_std --bundle-root /home/user/work/procrace/cfs_ref/cFS --recipe /home/user/work/redesign/extract_baseline/inputs/r2_core_min.kzb --text -o <scratch>/o/s6_off_extract/r2_core/r2_core/NP/basis.kz.partial
+start 2026-11-19T05:29:00.393Z free=944041984 threshold=334572800
+sample 2026-11-19T05:29:00.397Z 944037888
+end 2026-11-19T05:29:02.405Z kind=extract verdict=completed rc=0 free=943943680 lowest=943943680 dip=98304 change=-98304
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static extract --no-profile --basis <scratch>/o/s6_off_extract/r2_core/r2_core/NP/basis.kz.partial --targets-rule R-T1,R-T2 -o <scratch>/o/s6_off_extract/r2_core/r2_core/NP/facts.kz.partial
+start 2026-11-19T05:29:02.412Z free=943943680 threshold=334572800
+sample 2026-11-19T05:29:02.418Z 943943680
+sample 2026-11-19T05:29:04.424Z 943943680
+sample 2026-11-19T05:29:06.430Z 943943680
+sample 2026-11-19T05:29:08.436Z 943943680
+sample 2026-11-19T05:29:10.443Z 943943680
+sample 2026-11-19T05:29:12.448Z 943943680
+sample 2026-11-19T05:29:14.455Z 943943680
+end 2026-11-19T05:29:16.461Z kind=extract verdict=completed rc=0 free=936693760 lowest=936693760 dip=7249920 change=-7249920
+# space_guard.sh kind=relations need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static relations <scratch>/o/s6_off_extract/r2_core/r2_core/NP/facts.kz.partial -o <scratch>/o/s6_off_extract/r2_core/r2_core/NP/relations.txt.partial
+start 2026-11-19T05:29:16.468Z free=936693760 threshold=334572800
+sample 2026-11-19T05:29:16.473Z 936693760
+end 2026-11-19T05:29:18.479Z kind=relations verdict=completed rc=0 free=935428096 lowest=935428096 dip=1265664 change=-1265664

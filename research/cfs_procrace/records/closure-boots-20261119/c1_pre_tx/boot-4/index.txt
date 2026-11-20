@@ -1,0 +1,117 @@
+kz-boot-extract 1 (records/closure-boots-20261119/scripts/extract.sh; results 27.1) 2026-11-19T20:03:39Z
+build c1_pre_tx boot 4; record directory records/closure-c1prep-20261119/boot/c1_pre_tx/boot4; work directories /home/user/work/redesign/obs1/c1cyc_pre_{boot,convert,explain,eval}4
+== verify.txt (head and last line)
+  declaration sha256=b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 path=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/declaration4.tsv
+  measured 2026-11-19T20:03:20Z
+  need rows (values, not measured; held by the declaration's sha256 above): floor=314572800; margin=100000000; per boot=54484992;
+  rows 162 ok 162 differs 0 missing 0
+== verify_at_boot.txt (head and last line)
+  rows 162 ok 162 differs 0 missing 0
+== verify_at_explain.txt (head and last line)
+  rows 162 ok 162 differs 0 missing 0
+== space_at_boot.txt
+  measured 2026-11-19T20:02:59Z free 925376512 (df -B1 /)
+  declared floor 314572800 margin 100000000 per_boot 54484992
+  measured per boot (the largest over the boots already run): 60444672 (c1_pre_tx/boot3)
+  per boot used 60444672; boots remaining in the cycle, this one included: 8
+  need 898130176
+  verdict met (free - need = 27246336)
+== boot.txt (last lines)
+  tx.operational_at_5s=yes
+  rx.operational_at_5s=yes
+  stop=ci-es-restart-poweron (CI L196-L197)
+  tx_exit=0 rx_exit=0
+  dump tx.kzrt bytes=100268 sha256=25c1710b216d30849f37f043ce01f88a2b4862e15fe78d733c25a2e2b8843952
+  kz-rt-dump exit=0
+  rc=0
+== run.meta (start, stop, exit, dump, instance files)
+  instance_files dir=/home/user/work/redesign/obs1/c1cyc_pre_boot4/tx/inst files=31 other=0 list=/home/user/work/redesign/obs1/c1cyc_pre_boot4/tx/inst_files.sha256 list_sha256=19f809a452350e41d10705e85e0e9636898d2386c15cc8d10dde8fb5beaab146
+  instances.start_utc=2026-11-19T20:02:59.589124761Z
+  tx.operational_at_5s=yes
+  rx.operational_at_5s=yes
+  udp1234_owner=pid=31601 udp1235_owner=pid=31602
+  stop=ci-es-restart-poweron (CI L196-L197)
+  tx_exit=0 rx_exit=0
+  instances.end_utc=2026-11-19T20:03:09.982974921Z
+  dump tx.kzrt bytes=100268 sha256=25c1710b216d30849f37f043ce01f88a2b4862e15fe78d733c25a2e2b8843952
+  kz-rt-dump exit=0
+== inst_files.sha256.other
+  lines 0
+== control_check.txt (summary and loss lines)
+  dump text sha256 fe00566969ffb5cfef63a873ba66287b68eb05fcd2795ecb740075f94409281a lines 1183
+  loss fields not 0 (kind=value, count): 
+  loss records by kind (lines, sum of count=; no-build-id and object-table lose no event, event_semantics 13.5): 
+  pool overflow fields not 0: 0
+  kz-rt-dump check summary: check ok (0 failures)
+== chain.txt (chain line)
+  chain	confirmed	16 links
+== stop_eval.tsv
+  lines 14 sha256 b9b2170cc156c8cdab9b22cf60c59b0d6bba2767b00389ec8f7a856f5164ec2a
+== gate.txt
+  gate PASS
+  losses: fields none; records none
+  inputs: control_check.txt cca566ed416208d2 chain.txt f259309862e4adc3
+== explain.txt (rc)
+  rc=0
+== judge.txt of the explanation output
+  # explain_judge.py revision 4, spec 11 fixes and spec 11.5 item 1 (2026-11-19) sha256 644acc11fb29237099d783225f45ae138a11eb86c363f2365e03759713aa71f0
+  compat	chain confirmed; same_build unconfirmed(object not in the build record)
+  branch D1-R0 records 46 refused 0 uses 181
+  branch D1-Ra records 46 refused 0 uses 181
+  branch D1-Rb records 46 refused 0 uses 181
+  branch D1-Rc records 46 refused 0 uses 181
+  branch D1-Rd records 46 refused 0 uses 181
+  branch D1-Re records 46 refused 0 uses 181
+  branch D1-Rf records 46 refused 0 uses 181
+  branch D1-all records 46 refused 0 uses 181
+  branch D2-R0 records 46 refused 0 uses 181
+  branch D2-Ra records 46 refused 0 uses 181
+  branch D2-Rb records 46 refused 0 uses 181
+  branch D2-Rc records 46 refused 0 uses 181
+  branch D2-Rd records 46 refused 0 uses 181
+  branch D2-Re records 46 refused 0 uses 181
+  branch D2-Rf records 46 refused 0 uses 181
+  branch D2-all records 46 refused 0 uses 181
+== eval_run.txt (rc)
+  rc=0
+== eval_tail.txt (head line and the main branch's lines)
+  == /home/user/work/redesign/obs1/c1cyc_pre_eval4/eval.txt (lines 7602, sha256 ad80d9455d12859b6822e63c1a48316d25daae3b0897ec268fc35d1de1b50e72); the full output is kept under the work directory with a ledger row (the keep step; results 26.9)
+  branch D1-R0 main (declared before the boot: D1/R0): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 31 / 160 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 51 / 51 (fail 0, not evaluable 0)
+  branch D1-R0 main (declared before the boot: D1/R0): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+  branch D1-R0 main (declared before the boot: D1/R0): expect_discriminate: met 1 / counted 4 (unmet 3; not_counted 1); by class: boot 0, static 5, format 0
+== F3 lines of eval.txt whose note (column 10) is exactly 600 characters (results 26.9, fix-judge-03)
+  all branches: 0 of 752 F3 lines
+  branch D1-R0: 0 of 47
+  branch D1-Ra: 0 of 47
+  branch D1-Rb: 0 of 47
+  branch D1-Rc: 0 of 47
+  branch D1-Rd: 0 of 47
+  branch D1-Re: 0 of 47
+  branch D1-Rf: 0 of 47
+  branch D1-all: 0 of 47
+  branch D2-R0: 0 of 47
+  branch D2-Ra: 0 of 47
+  branch D2-Rb: 0 of 47
+  branch D2-Rc: 0 of 47
+  branch D2-Rd: 0 of 47
+  branch D2-Re: 0 of 47
+  branch D2-Rf: 0 of 47
+  branch D2-all: 0 of 47
+== expect_compare.txt (totals)
+  # by class: boot: match 400, mismatch 64, no_record 464; static: match 640, mismatch 0, no_record 640; format: match 0, mismatch 0, no_record 0
+  # match 1040, mismatch 64, no_record 1104
+== keep.txt
+  kz-keep 1 (run_cycle.sh keep; results 26.9, evaluation protocol 14.14 item 1) 2026-11-19T20:03:28Z
+  boot /home/user/work/redesign/obs1/c1cyc_pre_boot4: 52 files, row OBS_c1cyc_pre_boot4, list records/closure-c1prep-20261119/boot/c1_pre_tx/boot4/c1cyc_pre_boot4.sha256
+  convert /home/user/work/redesign/obs1/c1cyc_pre_convert4: 4 files, row OBS_c1cyc_pre_convert4, list records/closure-c1prep-20261119/boot/c1_pre_tx/boot4/c1cyc_pre_convert4.sha256
+  explain /home/user/work/redesign/obs1/c1cyc_pre_explain4: 788 files, row OBS_c1cyc_pre_explain4, list records/closure-c1prep-20261119/boot/c1_pre_tx/boot4/c1cyc_pre_explain4.sha256
+  eval /home/user/work/redesign/obs1/c1cyc_pre_eval4: 1 files, row OBS_c1cyc_pre_eval4, list records/closure-c1prep-20261119/boot/c1_pre_tx/boot4/c1cyc_pre_eval4.sha256
+  keep: 4 ledger rows added; ledger_check: 221 rows, 0 failing
+== declaration sha256 named by every verify*.txt of the record directory and by the pin file
+  verify.20261119T200258.542717868Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23
+  verify.20261119T200320.741365265Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23
+  verify.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23
+  verify_at_boot.txt 
+  verify_at_explain.txt 
+  declaration_pin.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23
+  declaration4.tsv now b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23

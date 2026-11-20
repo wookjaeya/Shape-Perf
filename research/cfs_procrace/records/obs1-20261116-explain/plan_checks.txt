@@ -1,0 +1,5 @@
+manifest sites 301, without a rule name 0, without a ref 0
+sidecar site lines 301, without refs 0
+values 671; keys of the value lines: ['bound', 'from', 'ref', 'role', 'string', 'type']
+lines with words of expectation (expect, should, must return, normal) outside comments: 0 []
+rules: actor-create 2, actor-owner 2, actor-root 15, actor-start 1, creator-call 40, handling-chain 7, key-text 4, stop-event 2, use-call 194, writer 35

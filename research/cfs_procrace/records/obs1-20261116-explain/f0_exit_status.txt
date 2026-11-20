@@ -1,0 +1,10 @@
+== W/run/c1nat/f0tx/pre_1df262a/run.kzt sha256 d1e205171b7a8fa3297dc035fec2f9b2490d8daf9a88d9229bc3f38c8a5fdb32, MC kz-dump 05623054
+  SITES[8] site=8 kind=entry-probe insn_class=emulated decoder=generic phases={ENTRY} line=0 file_offset=0x17584 build_id=61357215181fcb22aba7615ab173cd994b0a9dd5 symbol="CFE_ES_ExitApp" path="/home/user/work/w6/run/c1nat/f0tx/pre_1df262a/inst/tx/core-tx" label="es.exit_app.entry" source=""
+  RAW_EVENTS[100] t_ns=14429508713071 tid=403 tseq=21 site=8 phase=ENTRY flags={} objseq=0x0 a=[0x3,0x0,0x0,0x7f96b4faf048]
+  SITE_SLOTS[21] site=8 slot=0 src=reg width=4 index=5 role="exit_status"
+run.kzt.record.txt lines with exit_status, RAW_EVENTS or a[0]: 0
+== W/run/c1nat/f0tx/pre_1b0b338/run.kzt sha256 c41adc9eab65e6d6f331ff5db06c1a502649ab733d890ec4da3baa81be93f79e, MC kz-dump 05623054
+  SITES[8] site=8 kind=entry-probe insn_class=emulated decoder=generic phases={ENTRY} line=0 file_offset=0x17584 build_id=4ae5883f793c8c11b465916e20ee7c4e67cdc3ef symbol="CFE_ES_ExitApp" path="/home/user/work/w6/run/c1nat/f0tx/pre_1b0b338/inst/tx/core-tx" label="es.exit_app.entry" source=""
+  RAW_EVENTS[100] t_ns=14503579568580 tid=3579 tseq=21 site=8 phase=ENTRY flags={} objseq=0x0 a=[0x3,0x0,0x0,0x7f7f88058048]
+  SITE_SLOTS[21] site=8 slot=0 src=reg width=4 index=5 role="exit_status"
+run.kzt.record.txt lines with exit_status, RAW_EVENTS or a[0]: 0

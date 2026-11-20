@@ -1,0 +1,254 @@
+# check.sh report
+repo_head 3535b43
+
+## A. guard logs per record directory: logs, end lines, verdict=completed, lowest 'lowest=', end values below the floor
+review-fixes-2-mc-20261119/df_*.log logs=38 end_lines=38 completed=38 lowest=974893056 end_below_floor=0
+review-fixes-2-mc-20261119/scratch_guard/001-016 logs=16 end_lines=16 completed=16 lowest=305602560 end_below_floor=1
+review-fixes-2-mc-20261119/scratch_guard/017-029 logs=13 end_lines=13 completed=13 lowest=948453376 end_below_floor=0
+closure-kzstatic-mc-20261119/guard logs=45 end_lines=45 completed=45 lowest=692862976 end_below_floor=0
+closure-runtime-20261119/guard logs=27 end_lines=27 completed=27 lowest=679084032 end_below_floor=0
+closure-c1prep-20261119/guard logs=44 end_lines=50 completed=50 lowest=393605120 end_below_floor=0
+end lines below the floor:
+  review-fixes-2-mc-20261119/scratch_guard/002_scratch-make.log:end 2026-11-18T10:34:54.401Z kind=scratch-make verdict=completed rc=0 free=305602560 lowest=305602560 dip=1235963904 change=-1235963904
+first line of that log: # space_guard.sh kind=scratch-make need=500000000 floor=314572800 interval=2 cmd
+
+## B. guarded actions that overlap in time (start of one before the end of an earlier one), per directory
+review-fixes-2-mc-20261119/df_*.log:
+  df_tools_check_after_build [2026-11-19T01:56:25.023Z .. 2026-11-19T01:58:21.400Z] overlaps df_run_relcheck [2026-11-19T01:56:35.186Z .. 2026-11-19T01:56:37.199Z]
+  df_tools_check_after_build [2026-11-19T01:56:25.023Z .. 2026-11-19T01:58:21.400Z] overlaps df_run_order [2026-11-19T01:56:37.206Z .. 2026-11-19T01:57:21.346Z]
+  df_tools_check_after_build [2026-11-19T01:56:25.023Z .. 2026-11-19T01:58:21.400Z] overlaps df_run_extract_off [2026-11-19T01:57:21.355Z .. 2026-11-19T01:58:55.690Z]
+  df_compare_plans_v4 [2026-11-19T02:04:08.609Z .. 2026-11-19T02:04:10.621Z] overlaps df_view_allocatenew [2026-11-19T02:04:09.295Z .. 2026-11-19T02:04:11.306Z]
+  df_view_allocatenew [2026-11-19T02:04:09.295Z .. 2026-11-19T02:04:11.306Z] overlaps df_compare_plans_v4_all [2026-11-19T02:04:10.633Z .. 2026-11-19T02:04:12.644Z]
+closure-kzstatic-mc-20261119/guard:
+  r_extract_final [2026-11-19T06:21:38.980Z .. 2026-11-19T06:23:15.285Z] overlaps k_relcheck [2026-11-19T06:22:04.384Z .. 2026-11-19T06:22:06.397Z]
+  r_extract_final [2026-11-19T06:21:38.980Z .. 2026-11-19T06:23:15.285Z] overlaps k_order [2026-11-19T06:22:06.408Z .. 2026-11-19T06:22:08.418Z]
+  r_extract_final [2026-11-19T06:21:38.980Z .. 2026-11-19T06:23:15.285Z] overlaps k_extract_off [2026-11-19T06:22:08.428Z .. 2026-11-19T06:22:20.475Z]
+closure-runtime-20261119/guard:
+closure-c1prep-20261119/guard:
+
+## C. review-fix build: measurement files against the comparisons (mtime UTC; compare lines as written)
+  2026-11-19 02:04:28 measure/c1_pre_tx_allocatenew_uses.txt
+  2026-11-19 02:04:10 measure/c1_pre_tx_calls_of_allocatenew.txt
+  2026-11-19 02:03:56 measure/measure_c1_post_tx.txt
+  2026-11-19 02:03:56 measure/measure_c1_pre_tx.txt
+  2026-11-19 02:03:56 measure/measure_c5_641.txt
+  2026-11-19 02:03:56 measure/measure_c5_642.txt
+  2026-11-19 02:03:56 measure/measure_r2_core.txt
+  compare_all: relations rc=0 OK=15 BAD=0 2026-11-19T02:03:26Z
+  compare_all: order rc=0 OK=25 BAD=0 2026-11-19T02:03:28Z
+  compare_all: extract_off rc=0 OK=50 BAD=0 2026-11-19T02:03:40Z
+  compare_all: extract_final rc=0 OK=50 BAD=0 2026-11-19T02:04:00Z
+  compare_all: off_order rc=0 OK=40 BAD=0 2026-11-19T02:04:02Z
+  compare_all: final_order rc=0 OK=50 BAD=0 2026-11-19T02:04:04Z
+  compare_all: plans_t8cf rc=0 OK=30 BAD=0 2026-11-19T02:04:06Z
+  compare_all: plans_final rc=0 OK=30 BAD=0 2026-11-19T02:04:08Z
+  compare_all: plans_v4 rc=0 OK=35 BAD=0 2026-11-19T02:04:10Z
+  compare_all: plans_v4_all rc=0 OK=35 BAD=0 2026-11-19T02:04:12Z
+  compare_all: plans_v4_kept rc=0 OK=35 BAD=0 2026-11-19T02:04:14Z
+  compare_all: twin rc=1 OK=0 BAD=1 2026-11-19T02:04:16Z
+  compare_rest: twin_2 rc=0 OK=1 BAD=0 2026-11-19T02:06:34Z
+  compare_rest: declared rc=0 OK=275 BAD=0 2026-11-19T02:06:38Z
+  run_all last: plans_v4_kept rc=0 2026-11-19T02:03:14Z
+  build_start: 2026-11-19T01:42:35Z
+  commit 44a45c7 2026-11-19T01:39:29+00:00
+  commit 090e280 2026-11-19T01:42:28+00:00
+  commit 5096d4a 2026-11-19T02:06:30+00:00
+
+## D. cycle preparation: ledger and registry checks around the kzgcc 0.5 build (mtime UTC, last line)
+  2026-11-19 09:23:51 out/ledger_check_after_builds.txt: ledger_check: 193 rows, 0 failing
+  2026-11-19 09:55:08 out/ledger_check_end.txt: ledger_check: 193 rows, 0 failing
+  2026-11-19 08:41:15 out/ledger_check_start.txt: rc=0
+  2026-11-19 09:26:05 out/tools_check_deep_after_builds.txt: tools_check: 57 rows, 0 failing (deep)
+  2026-11-19 09:57:12 out/tools_check_deep_end.txt: tools_check: 57 rows, 0 failing (deep)
+  2026-11-19 08:43:24 out/tools_check_deep_start.txt: rc=0
+  2026-11-19 09:10:12 plugin05/tools_check_after_build.txt: tools_check: 57 rows, 0 failing
+  2026-11-19 08:47:02 reclaim/ledger_check_after_archive.txt: ledger_check: 178 rows, 0 failing
+  plugin build guard: start 2026-11-19T09:07:31.501Z  / end 2026-11-19T09:07:35.540Z 
+  guard logs with ctest in the name: closure-c1prep 0, closure-runtime 4
+
+## E. the test tool_identity_schema_revision in the kept test lists and logs (matching lines)
+  review-fixes-2-mc-20261119/ctest_nonstatic_prebuild.log: 2
+  review-fixes-2-mc-20261119/scratch/ctest_first_scratch.log: 0
+  closure-runtime-20261119/prebuild/mc_tests_not_in_scratch_164.txt: 1
+  closure-runtime-20261119/scratch/checkbuild_tests_failed_10.txt: 1
+
+## F. alternatives lines 'none found' per build (line, row, rests on), with the row's terminal effects and P0-unverified layers
+c1_pre_tx: 3
+  line 856 row A23 rests on: none | absence effect terminal [CFE_PSP_Panic (terminal operation)] | layers P0-unverified(abort, strcmp) 
+  line 901 row A25 rests on: none | absence effect terminal [CFE_PSP_Panic (terminal operation)] | layers P0-unverified(abort, strcmp) 
+  line 1455 row A48 rests on: none | absence effect terminal [CFE_PSP_Panic (terminal operation)] | layers P0-unverified(abort, strncmp) 
+c1_post_tx: 3
+  line 855 row A23 rests on: none | absence effect terminal [CFE_PSP_Panic (terminal operation)] | layers P0-unverified(abort, strcmp) 
+  line 900 row A25 rests on: none | absence effect terminal [CFE_PSP_Panic (terminal operation)] | layers P0-unverified(abort, strcmp) 
+  line 1454 row A48 rests on: none | absence effect terminal [CFE_PSP_Panic (terminal operation)] | layers P0-unverified(abort, strncmp) 
+r2_core: 3
+  line 284 row A2 rests on: none | absence effect terminal [CFE_PSP_Panic (terminal operation)] | layers P0-unverified(abort, strcmp) 
+  line 331 row A4 rests on: none | absence effect terminal [CFE_PSP_Panic (terminal operation)] | layers P0-unverified(abort, strcmp) 
+  line 592 row A12 rests on: none | absence effect terminal [CFE_PSP_Panic (terminal operation)] | layers P0-unverified(abort, strncmp) 
+c5_641: 0
+c5_642: 0
+
+## G. lifetime-end clear-slot lines per build; positions in the two C1 builds
+c1_pre_tx: 10
+c1_post_tx: 10
+r2_core: 6
+c5_641: 18
+c5_642: 18
+c1_pre_tx positions:
+  207 <src>/bp/fsw/src/bp_storage.c:132:9 BP_StorageService_Register
+  256 psp/fsw/pc-linux/src/cfe_psp_start.c:251:17 OS_Application_Startup
+  329 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:442:33 CFE_TBL_Register
+  352 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:312:21 CFE_TBL_Register
+  353 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:637:13 CFE_TBL_Unregister
+  354 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:1267:17 CFE_TBL_CleanUpApp
+  627 osal/src/os/shared/src/osapi-idmap.c:640:9 OS_ObjectIdFindNextFree
+  980 osal/src/os/shared/src/osapi-filesys.c:462:13 OS_mount
+  1834 osal/src/os/shared/src/osapi-file.c:375:17 OS_rename
+  1835 osal/src/os/shared/src/osapi-sockets.c:97:9 OS_CreateSocketName
+c1_post_tx positions:
+  207 <src>/bp/fsw/src/bp_storage.c:132:9 BP_StorageService_Register
+  256 psp/fsw/pc-linux/src/cfe_psp_start.c:251:17 OS_Application_Startup
+  329 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:442:33 CFE_TBL_Register
+  352 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:312:21 CFE_TBL_Register
+  353 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:637:13 CFE_TBL_Unregister
+  354 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:1267:17 CFE_TBL_CleanUpApp
+  627 osal/src/os/shared/src/osapi-idmap.c:640:9 OS_ObjectIdFindNextFree
+  979 osal/src/os/shared/src/osapi-filesys.c:462:13 OS_mount
+  1833 osal/src/os/shared/src/osapi-file.c:375:17 OS_rename
+  1834 osal/src/os/shared/src/osapi-sockets.c:97:9 OS_CreateSocketName
+
+## H. HB-await edges of the last round (edges.tsv): by write, by writer actor, by writer x waiter pair
+c1_pre_tx: 284
+  from     284 write cfe/modules/es/fsw/src/cfe_es_apps.c:620:9 in CFE_ES_StartAppTask [CFE_ES_TaskRecord_t.EntryFunc]
+  writer      56 BP_AppMain
+  writer      56 CFE_ES_BackgroundTask
+  writer      56 CFE_ES_TaskMain
+  writer      56 CFE_TIME_TaskMain
+  writer      60 main
+  pairs: 71; edges per pair:
+         4 BP_AppMain -> BP_CLA_InputTask
+         4 BP_AppMain -> BP_CLA_OutputTask
+         4 BP_AppMain -> CFE_ES_BackgroundTask
+         4 BP_AppMain -> CFE_ES_TaskMain
+         4 BP_AppMain -> CFE_EVS_TaskMain
+         4 BP_AppMain -> CFE_SB_TaskMain
+         4 BP_AppMain -> CFE_TBL_TaskMain
+         4 BP_AppMain -> CFE_TIME_Local1HzTask
+         4 BP_AppMain -> CFE_TIME_TaskMain
+         4 BP_AppMain -> CFE_TIME_Tone1HzTask
+         4 BP_AppMain -> CF_AppMain
+         4 BP_AppMain -> CI_Lab_AppMain
+         4 BP_AppMain -> SCH_Lab_AppMain
+         4 BP_AppMain -> TO_LAB_AppMain
+         4 CFE_ES_BackgroundTask -> BP_AppMain
+         4 CFE_ES_BackgroundTask -> BP_CLA_InputTask
+         4 CFE_ES_BackgroundTask -> BP_CLA_OutputTask
+         4 CFE_ES_BackgroundTask -> CFE_ES_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_EVS_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_SB_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_TBL_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_TIME_Local1HzTask
+         4 CFE_ES_BackgroundTask -> CFE_TIME_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_TIME_Tone1HzTask
+         4 CFE_ES_BackgroundTask -> CF_AppMain
+         4 CFE_ES_BackgroundTask -> CI_Lab_AppMain
+         4 CFE_ES_BackgroundTask -> SCH_Lab_AppMain
+         4 CFE_ES_BackgroundTask -> TO_LAB_AppMain
+         4 CFE_ES_TaskMain -> BP_AppMain
+         4 CFE_ES_TaskMain -> BP_CLA_InputTask
+         4 CFE_ES_TaskMain -> BP_CLA_OutputTask
+         4 CFE_ES_TaskMain -> CFE_ES_BackgroundTask
+         4 CFE_ES_TaskMain -> CFE_EVS_TaskMain
+         4 CFE_ES_TaskMain -> CFE_SB_TaskMain
+         4 CFE_ES_TaskMain -> CFE_TBL_TaskMain
+         4 CFE_ES_TaskMain -> CFE_TIME_Local1HzTask
+         4 CFE_ES_TaskMain -> CFE_TIME_TaskMain
+         4 CFE_ES_TaskMain -> CFE_TIME_Tone1HzTask
+         4 CFE_ES_TaskMain -> CF_AppMain
+         4 CFE_ES_TaskMain -> CI_Lab_AppMain
+         4 CFE_ES_TaskMain -> SCH_Lab_AppMain
+         4 CFE_ES_TaskMain -> TO_LAB_AppMain
+         4 CFE_TIME_TaskMain -> BP_AppMain
+         4 CFE_TIME_TaskMain -> BP_CLA_InputTask
+         4 CFE_TIME_TaskMain -> BP_CLA_OutputTask
+         4 CFE_TIME_TaskMain -> CFE_ES_BackgroundTask
+         4 CFE_TIME_TaskMain -> CFE_ES_TaskMain
+         4 CFE_TIME_TaskMain -> CFE_EVS_TaskMain
+         4 CFE_TIME_TaskMain -> CFE_SB_TaskMain
+         4 CFE_TIME_TaskMain -> CFE_TBL_TaskMain
+         4 CFE_TIME_TaskMain -> CFE_TIME_Local1HzTask
+         4 CFE_TIME_TaskMain -> CFE_TIME_Tone1HzTask
+         4 CFE_TIME_TaskMain -> CF_AppMain
+         4 CFE_TIME_TaskMain -> CI_Lab_AppMain
+         4 CFE_TIME_TaskMain -> SCH_Lab_AppMain
+         4 CFE_TIME_TaskMain -> TO_LAB_AppMain
+         4 main -> BP_AppMain
+         4 main -> BP_CLA_InputTask
+         4 main -> BP_CLA_OutputTask
+         4 main -> CFE_ES_BackgroundTask
+         4 main -> CFE_ES_TaskMain
+         4 main -> CFE_EVS_TaskMain
+         4 main -> CFE_SB_TaskMain
+         4 main -> CFE_TBL_TaskMain
+         4 main -> CFE_TIME_Local1HzTask
+         4 main -> CFE_TIME_TaskMain
+         4 main -> CFE_TIME_Tone1HzTask
+         4 main -> CF_AppMain
+         4 main -> CI_Lab_AppMain
+         4 main -> SCH_Lab_AppMain
+         4 main -> TO_LAB_AppMain
+r2_core: 116
+  from     116 write cfe/modules/es/fsw/src/cfe_es_apps.c:697:9 in CFE_ES_StartAppTask [CFE_ES_TaskRecord_t.EntryFunc]
+  writer      28 CFE_ES_BackgroundTask
+  writer      28 CFE_ES_TaskMain
+  writer      28 CFE_TIME_TaskMain
+  writer      32 main
+  pairs: 29; edges per pair:
+         4 CFE_ES_BackgroundTask -> CFE_ES_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_EVS_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_SB_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_TBL_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_TIME_Local1HzTask
+         4 CFE_ES_BackgroundTask -> CFE_TIME_TaskMain
+         4 CFE_ES_BackgroundTask -> CFE_TIME_Tone1HzTask
+         4 CFE_ES_TaskMain -> CFE_ES_BackgroundTask
+         4 CFE_ES_TaskMain -> CFE_EVS_TaskMain
+         4 CFE_ES_TaskMain -> CFE_SB_TaskMain
+         4 CFE_ES_TaskMain -> CFE_TBL_TaskMain
+         4 CFE_ES_TaskMain -> CFE_TIME_Local1HzTask
+         4 CFE_ES_TaskMain -> CFE_TIME_TaskMain
+         4 CFE_ES_TaskMain -> CFE_TIME_Tone1HzTask
+         4 CFE_TIME_TaskMain -> CFE_ES_BackgroundTask
+         4 CFE_TIME_TaskMain -> CFE_ES_TaskMain
+         4 CFE_TIME_TaskMain -> CFE_EVS_TaskMain
+         4 CFE_TIME_TaskMain -> CFE_SB_TaskMain
+         4 CFE_TIME_TaskMain -> CFE_TBL_TaskMain
+         4 CFE_TIME_TaskMain -> CFE_TIME_Local1HzTask
+         4 CFE_TIME_TaskMain -> CFE_TIME_Tone1HzTask
+         4 main -> CFE_ES_BackgroundTask
+         4 main -> CFE_ES_TaskMain
+         4 main -> CFE_EVS_TaskMain
+         4 main -> CFE_SB_TaskMain
+         4 main -> CFE_TBL_TaskMain
+         4 main -> CFE_TIME_Local1HzTask
+         4 main -> CFE_TIME_TaskMain
+         4 main -> CFE_TIME_Tone1HzTask
+
+## I. framework semantics data: end lines of the seven version files, distinct api names
+  framework_semantics_cfe-6.4.1.txt: entries=73 declared=131 second-declarations=0
+  framework_semantics_cfe-6.4.2.txt: entries=73 declared=131 second-declarations=0
+  framework_semantics_cfe-6cccb3f.txt: entries=129 declared=182 second-declarations=0
+  framework_semantics_cfe-7.0.1.txt: entries=133 declared=196 second-declarations=0
+  framework_semantics_osal-4.1.1.txt: entries=55 declared=118 second-declarations=0
+  framework_semantics_osal-7.0.1.txt: entries=150 declared=178 second-declarations=0
+  framework_semantics_osal-f34759d.txt: entries=128 declared=153 second-declarations=0
+  sum entries=741 declared=1089
+  distinct api names: 310
+  agreement_c1_pre_tx.txt lines 158, by state (fourth word):
+        46 body-derived
+       112 unverified
+
+## J. P0 declaration data: lines naming strlen, and the api line of strcmp
+  strlen: 0
+  93:api strcmp decl=string.h:156 table=compare attrs=pure,nothrow,nonnull(1,2)
+# end

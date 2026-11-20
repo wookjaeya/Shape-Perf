@@ -1,0 +1,54 @@
+# step2a_tests.sh all 2026-11-10T07:16:44Z
+out /home/user/work/redesign/step2a/tests_8b
+kz-static /home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static sha256 7ef1a28c8fccc0e19553b55a5c7ad644777cf3866064ac4f6ea08cec84e44bf9
+kz-dump /home/user/work/merge-check/kz-llvm/tools/kz-dump/kz-dump sha256 05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43
+repo 114f33bf032350a2a34df5dbb9a8430ce4ce928a
+inputs EB=/home/user/work/redesign/extract_baseline S4=/home/user/work/redesign/step2a/s4 S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a/tests_fix1 FIX2=/home/user/work/redesign/step2a/tests_fix2 FIX3=/home/user/work/redesign/step2a/tests_fix3 C1=/home/user/work/procrace/c1_build REF=/home/user/work/procrace/cfs_ref/cFS CT=/home/user/work/c5tools/build
+allowance table: built-in
+step identity start 2026-11-10T07:16:44Z
+  output /home/user/work/redesign/step2a/tests_8b/identity/identity.txt 25555 bytes
+step identity PASS
+step npsame start 2026-11-10T07:17:16Z
+  output /home/user/work/redesign/step2a/tests_8b/npsame/c1_pre_tx/extract.txt 1719 bytes
+  output /home/user/work/redesign/step2a/tests_8b/npsame/c1_post_tx/extract.txt 1719 bytes
+  output /home/user/work/redesign/step2a/tests_8b/npsame/r2_core/extract.txt 1718 bytes
+  output /home/user/work/redesign/step2a/tests_8b/npsame/c5_641/extract.txt 1708 bytes
+  output /home/user/work/redesign/step2a/tests_8b/npsame/c5_642/extract.txt 1708 bytes
+  output /home/user/work/redesign/step2a/tests_8b/npsame/npsame.txt 34271 bytes
+step npsame PASS
+step run start 2026-11-10T07:18:34Z
+  output /home/user/work/redesign/step2a/tests_8b/run.log 2796 bytes
+step run PASS
+step s5same start 2026-11-10T07:19:52Z
+  output /home/user/work/redesign/step2a/tests_8b/s5same/s5same.txt 37076 bytes
+step s5same PASS
+step fixsame start 2026-11-10T07:19:59Z
+  output /home/user/work/redesign/step2a/tests_8b/fixsame/fixsame.txt 35272 bytes
+step fixsame PASS
+step fix2same start 2026-11-10T07:20:08Z
+  output /home/user/work/redesign/step2a/tests_8b/fix2same/fix2same.txt 31572 bytes
+step fix2same PASS
+step fix3same start 2026-11-10T07:20:17Z
+  output /home/user/work/redesign/step2a/tests_8b/fix3same/fix3same.txt 25156 bytes
+step fix3same PASS
+step twice start 2026-11-10T07:20:25Z
+  output /home/user/work/redesign/step2a/tests_8b/c1_pre_tx/NP2/extract.txt 71246 bytes
+  output /home/user/work/redesign/step2a/tests_8b/c1_pre_tx/NP2/relations.txt 1764902 bytes
+  output /home/user/work/redesign/step2a/tests_8b/c1_post_tx/NP2/extract.txt 71246 bytes
+  output /home/user/work/redesign/step2a/tests_8b/c1_post_tx/NP2/relations.txt 1765256 bytes
+  output /home/user/work/redesign/step2a/tests_8b/r2_core/NP2/extract.txt 51357 bytes
+  output /home/user/work/redesign/step2a/tests_8b/r2_core/NP2/relations.txt 987788 bytes
+  output /home/user/work/redesign/step2a/tests_8b/c5_641/NP2/extract.txt 53518 bytes
+  output /home/user/work/redesign/step2a/tests_8b/c5_641/NP2/relations.txt 594532 bytes
+  output /home/user/work/redesign/step2a/tests_8b/c5_642/NP2/extract.txt 53906 bytes
+  output /home/user/work/redesign/step2a/tests_8b/c5_642/NP2/relations.txt 616258 bytes
+  output /home/user/work/redesign/step2a/tests_8b/twice.txt 438 bytes
+  output /home/user/work/redesign/step2a/tests_8b/twice_detail.txt 1603 bytes
+step twice PASS
+step count start 2026-11-10T07:21:40Z
+  output /home/user/work/redesign/step2a/tests_8b/count/summary.txt 236579 bytes
+step count PASS
+step sha start 2026-11-10T07:21:42Z
+  output /home/user/work/redesign/step2a/tests_8b/sha256.txt 12898 bytes
+step sha PASS
+result all: PASS

@@ -1,0 +1,254 @@
+# kz plan written by kz-static plan (plan rules revision 5 (2026-11-19): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; with the name-space files of coverage rule revision 2: the namespace-entry and namespace-layer lines, the kind-value, rollback, clear and context-frame sites, the lifetime-end sites and the key text bound from the stored-name extent; relations rules revision 12 (2026-11-18))
+# sidecar sha256=<sha256>
+# every site: a label from the sorted site keys with its rule names, a ref to the facts it came from; the plan states what to record, never what to expect
+kzs-sites 4
+plan <plan-id> facts=<sha256> relrules="relations rules revision 12 (2026-11-18)" obsrules="plan rules revision 5 (2026-11-19): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; with the name-space files of coverage rule revision 2: the namespace-entry and namespace-layer lines, the kind-value, rollback, clear and context-frame sites, the lifetime-end sites and the key text bound from the stored-name extent" semantics="semantics join revision 1 (2026-11-16)" select=observation-set budget="all" control="all" ref="sidecar sha256 <sha256>"
+source build rev=facts-<sha256> ref="facts extracted without a basis: every source file read is hashed in their FILE_HASHES"
+module 1 name=program source=build
+site 1 label=s0001.stop-event op=entry.app_exit phase=before tu=planv4.c func=app_exit skey=f42260f57be6a7b9 ref="framework-layer data line 5: app-exit app_exit planv4.c:93 (fixture planv4.c)"
+value 1 0 role=param0 from=arg0 type=u64
+site 2 label=s0002.handling-chain+use-call op=call.reg_find phase=point tu=planv4.c func=one_init callee=reg_find line=133 place=after-call skey=4cf41f2c791cdb46 row=c38b3c7e2daa7772 col=16 nth=1 ref="row c38b3c7e2daa7772"
+value 2 0 role=status from=ret type=s64
+value 2 1 role=out0 from=out0 type=u64
+site 3 label=s0003.use-call op=call.reg_find phase=point tu=planv4.c func=one_init callee=reg_find line=133 place=at-call skey=9425b16681e94612 row=c38b3c7e2daa7772 col=16 nth=1 ref="row c38b3c7e2daa7772"
+value 3 0 role=key from=arg1 type=ptr string=pointer-only
+value 3 1 role=arg0 from=arg0 type=u64
+site 4 label=s0004.effect-call op=call.send_event phase=point tu=planv4.c func=one_init callee=send_event line=135 place=at-call skey=ea0889ea545103e3 row=c38b3c7e2daa7772 col=11 nth=1 ref="row c38b3c7e2daa7772 effect event-send planv4.c:135:11 on failure -17 of planv4.c:133:16; row c38b3c7e2daa7772 effect event-send planv4.c:135:11 on failure -2 of planv4.c:133:16"
+value 4 0 role=event-type from=arg1 type=u64
+value 4 1 role=arg0 from=arg0 type=u64
+site 5 label=s0005.actor-root+actor-start op=entry.one_main phase=before tu=planv4.c func=one_main skey=200549b03c7cde06 ref="actor one_main (spawn-entry); creation planv4.c:106:58 start routine one_main"
+value 5 0 role=param0 from=arg0 type=u64
+site 6 label=s0006.handling-chain op=store.one_main phase=effect tu=planv4.c func=one_main line=147 place=store skey=0850e6e121340103 row=0cab3eacd5372d0b,c38b3c7e2daa7772 ref="row 0cab3eacd5372d0b planv4.c:147:5; row c38b3c7e2daa7772 planv4.c:147:5"
+value 6 0 role=value from=operand0 type=u64
+value 6 1 role=address from=operand1 type=u64
+site 7 label=s0007.handling-chain op=call.one_init phase=point tu=planv4.c func=one_main callee=one_init line=145 place=after-call skey=2c8f67bfef4c8567 row=c38b3c7e2daa7772 col=12 nth=1 ref="row c38b3c7e2daa7772"
+value 7 0 role=status from=ret type=s64
+site 8 label=s0008.handling-chain+use-call+wait-cond op=call.reg_find phase=point tu=planv4.c func=one_main callee=reg_find line=151 place=after-call skey=2c587c9c2d5a6d23 row=0cab3eacd5372d0b col=11 nth=1 ref="row 0cab3eacd5372d0b; row 0cab3eacd5372d0b wait planv4.c:150:3 definition planv4.c:151:9"
+value 8 0 role=status from=ret type=s64
+value 8 1 role=out0 from=out0 type=u64
+site 9 label=s0009.handling-chain op=call.app_exit phase=point tu=planv4.c func=one_main callee=app_exit line=161 place=at-call skey=c30634964f820baa row=0cab3eacd5372d0b,c38b3c7e2daa7772 col=3 nth=1 ref="row 0cab3eacd5372d0b; row c38b3c7e2daa7772"
+value 9 0 role=arg0 from=arg0 type=u64
+site 10 label=s0010.use-call op=call.reg_find phase=point tu=planv4.c func=one_main callee=reg_find line=151 place=at-call skey=1f7c5ef4ad1beaf5 row=0cab3eacd5372d0b col=11 nth=1 ref="row 0cab3eacd5372d0b"
+value 10 0 role=key from=arg1 type=ptr string=pointer-only
+value 10 1 role=arg0 from=arg0 type=u64
+site 11 label=s0011.effect-call op=call.send_event phase=point tu=planv4.c func=one_main callee=send_event line=157 place=at-call skey=155c5ed12ede01a8 row=0cab3eacd5372d0b col=23 nth=1 ref="row 0cab3eacd5372d0b effect event-send planv4.c:157:23 on failure -17 of planv4.c:151:11 (open: on a path through a branch this value does not decide); row 0cab3eacd5372d0b effect event-send planv4.c:157:23 on failure -2 of planv4.c:151:11"
+value 11 0 role=event-type from=arg1 type=u64
+value 11 1 role=arg0 from=arg0 type=u64
+site 12 label=s0012.wait-exit op=line.one_main phase=point tu=planv4.c func=one_main line=153 place=line-start skey=efdd0b4a41fe07b8 row=0cab3eacd5372d0b ref="row 0cab3eacd5372d0b wait planv4.c:150:3 exit 1 break"
+site 13 label=s0013.lock-call op=call.pthread_mutex_lock phase=point tu=planv4.c func=own_owner callee=pthread_mutex_lock line=170 place=after-call skey=949c1651d1e7f9c4 row=8aab7be8c192de75 col=3 nth=1 ref="row 8aab7be8c192de75 lock acquire planv4.c:170:3"
+value 13 0 role=lock from=arg0 type=u64
+site 14 label=s0014.object-index op=call.task_index phase=point tu=planv4.c func=own_owner callee=task_index line=171 place=after-call skey=8b5068be49104d33 row=8aab7be8c192de75 col=13 nth=1 ref="row 8aab7be8c192de75 read planv4.c:171:27 subscript (OBJECT_ACCESS) task_index"
+value 14 0 role=status from=ret type=s64
+site 15 label=s0015.lock-call op=call.pthread_mutex_unlock phase=point tu=planv4.c func=own_owner callee=pthread_mutex_unlock line=172 place=at-call skey=a32c05ce44700e64 row=8aab7be8c192de75 col=3 nth=1 ref="row 8aab7be8c192de75 lock release planv4.c:172:3"
+value 15 0 role=lock from=arg0 type=u64
+site 16 label=s0016.read-load op=load.own_owner phase=point tu=planv4.c func=own_owner line=171 place=load skey=ec6e71e43736d433 row=8aab7be8c192de75 field=Task.owner ref="row 8aab7be8c192de75 read planv4.c:171:27"
+value 16 0 role=value from=operand0 type=u64
+value 16 1 role=address from=operand1 type=ptr
+site 17 label=s0017.key-text op=call.memchr phase=point tu=planv4.c func=reg_create callee=memchr line=62 place=at-call skey=159ae7bca5463e52 row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=7 nth=1 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 17 0 role=key_text from=arg0 type=ptr string=validated bound=16 ref="non-null test (not (eq param:name#1 0)) in the guard (not (or (eq param:out#0 0) (eq param:name#1 0))) of parameter 1 of reg_create before planv4.c:62:7; bound memchr of the parameter with the length 16 at planv4.c:62:7, its result tested; premise: the string is NUL-terminated within the bound or the cut is flagged"
+value 17 1 role=arg1 from=arg1 type=u64
+value 17 2 role=arg2 from=arg2 type=u64
+site 18 label=s0018.object-delete op=entry.reg_delete phase=before tu=planv4.c func=reg_delete skey=2a5b11b0e0ee18c8 ref="namespace data <data>/planv4_fixture/framework_namespaces_fixture-plan.txt line 14: FIXTURE_REG delete reg_delete"
+value 18 0 role=param0 from=arg0 type=u64
+site 19 label=s0019.object-delete op=call.reg_retire phase=point tu=planv4.c func=reg_delete callee=reg_retire line=86 place=after-call skey=ff33adc00f68dba6 col=12 nth=1 ref="namespace data <data>/planv4_fixture/framework_namespaces_fixture-plan.txt line 14: FIXTURE_REG delete reg_delete retire call planv4.c:86:12"
+value 19 0 role=status from=ret type=s64
+site 20 label=s0020.key-text op=call.reg_search phase=point tu=planv4.c func=reg_find callee=reg_search line=56 place=at-call skey=dc6cb7328bd7c2e2 row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=10 nth=1 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 20 0 role=key_text from=arg0 type=ptr string=validated bound=64 ref="non-null test (not (eq param:name#1 0)) in the guard (and (not (eq param:out#0 0)) (not (eq param:name#1 0))) of parameter 1 of reg_find before planv4.c:56:10; bound KZ_RT_STR_MAX 64 (runtime/include/kz_rt.h:82; the runtime copies up to the NUL or the bound and flags a cut); premise: the string is NUL-terminated within the bound or the cut is flagged"
+value 20 1 role=arg1 from=arg1 type=u64
+site 21 label=s0021.stop-event op=entry.run_loop phase=before tu=planv4.c func=run_loop skey=ece302c6a4b3ce06 ref="framework-layer data line 4: run-loop run_loop planv4.c:91 (fixture planv4.c)"
+value 21 0 role=param0 from=arg0 type=u64
+site 22 label=s0022.actor-create op=call.pthread_create phase=point tu=planv4.c func=spawn_task callee=pthread_create line=106 place=after-call skey=630b212ef1e2525b col=58 nth=1 ref="creation planv4.c:106:58"
+value 22 0 role=status from=ret type=s64
+value 22 1 role=out0 from=out0 type=u64
+site 23 label=s0023.actor-create op=call.pthread_create phase=point tu=planv4.c func=spawn_task callee=pthread_create line=106 place=at-call skey=0fbfd89101fa4bac col=58 nth=1 ref="creation planv4.c:106:58"
+value 23 0 role=start_routine from=arg2 type=u64
+value 23 1 role=creation_arg from=arg3 type=u64
+value 23 2 role=arg0 from=arg0 type=u64
+value 23 3 role=arg1 from=arg1 type=u64
+spawn 23 wrapper=kz_rt_posix_create start=arg2 arg=arg3 out=arg0 ref="P0 thread-creation entry pthread_create: start routine argument 2, creation argument 3, thread handle out argument 0 (P0_TABLE)"
+identity 23 decoder=spawn-token
+site 24 label=s0024.actor-owner+writer-after-spawn op=store.start_app phase=effect tu=planv4.c func=start_app line=112 place=store skey=d3385239c722c30f row=8aab7be8c192de75 ref="actor one_main (spawn-entry) parameter 2 of start_app stored at planv4.c:112:16 after the spawn planv4.c:111:8; actor three_main (spawn-entry) parameter 2 of start_app stored at planv4.c:112:16 after the spawn planv4.c:111:8; actor two_main (spawn-entry) parameter 2 of start_app stored at planv4.c:112:16 after the spawn planv4.c:111:8; row 8aab7be8c192de75 planv4.c:112:16"
+value 24 0 role=value from=operand0 type=u64
+value 24 1 role=address from=operand1 type=u64
+site 25 label=s0025.lock-call op=call.pthread_mutex_lock phase=point tu=planv4.c func=start_app callee=pthread_mutex_lock line=110 place=after-call skey=d7763c42ee423410 row=8aab7be8c192de75 col=3 nth=1 ref="row 8aab7be8c192de75 lock acquire planv4.c:110:3"
+value 25 0 role=lock from=arg0 type=u64
+site 26 label=s0026.spawn-call op=call.spawn_task phase=point tu=planv4.c func=start_app callee=spawn_task line=111 place=after-call skey=ee482bb4eaa9ef33 row=8aab7be8c192de75 col=8 nth=1 ref="row 8aab7be8c192de75"
+value 26 0 role=status from=ret type=s64
+site 27 label=s0027.lock-call op=call.pthread_mutex_unlock phase=point tu=planv4.c func=start_app callee=pthread_mutex_unlock line=113 place=at-call skey=49a352acefd36f77 row=8aab7be8c192de75 col=3 nth=1 ref="row 8aab7be8c192de75 lock release planv4.c:113:3"
+value 27 0 role=lock from=arg0 type=u64
+site 28 label=s0028.spawn-call op=call.spawn_task phase=point tu=planv4.c func=start_app callee=spawn_task line=111 place=at-call skey=ce1895736373225b row=8aab7be8c192de75 col=8 nth=1 ref="row 8aab7be8c192de75"
+value 28 0 role=arg0 from=arg0 type=u64
+value 28 1 role=arg1 from=arg1 type=u64
+site 29 label=s0029.actor-root+actor-start op=entry.three_main phase=before tu=planv4.c func=three_main skey=45c11d3b499277f6 ref="actor three_main (spawn-entry); creation planv4.c:106:58 start routine three_main"
+value 29 0 role=param0 from=arg0 type=u64
+site 30 label=s0030.creator-call op=call.reg_create phase=point tu=planv4.c func=three_main callee=reg_create line=202 place=after-call skey=7e790e07858c9838 row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=11 nth=1 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 30 0 role=status from=ret type=s64
+value 30 1 role=out0 from=out0 type=u64
+site 31 label=s0031.use-call op=call.reg_find phase=point tu=planv4.c func=three_main callee=reg_find line=201 place=after-call skey=f7abd9a7113cc1fa row=6a69c9e16dc94a34 col=7 nth=1 ref="row 6a69c9e16dc94a34"
+value 31 0 role=status from=ret type=s64
+value 31 1 role=out0 from=out0 type=u64
+site 32 label=s0032.creator-call op=call.reg_create phase=point tu=planv4.c func=three_main callee=reg_create line=202 place=at-call skey=d31af39b5b105b70 row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=11 nth=1 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 32 0 role=key from=arg1 type=ptr string=pointer-only
+value 32 1 role=arg0 from=arg0 type=u64
+site 33 label=s0033.use-call op=call.reg_find phase=point tu=planv4.c func=three_main callee=reg_find line=201 place=at-call skey=b54ae79b8a6b578a row=6a69c9e16dc94a34 col=7 nth=1 ref="row 6a69c9e16dc94a34"
+value 33 0 role=key from=arg1 type=ptr string=pointer-only
+value 33 1 role=arg0 from=arg0 type=u64
+site 34 label=s0034.actor-root+actor-start op=entry.two_main phase=before tu=planv4.c func=two_main skey=6b85c151492b3ba5 ref="actor two_main (spawn-entry); creation planv4.c:106:58 start routine two_main"
+value 34 0 role=param0 from=arg0 type=u64
+site 35 label=s0035.creator-call op=call.reg_create phase=point tu=planv4.c func=two_main callee=reg_create line=179 place=after-call skey=1f7b4767eae2b0c9 row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=9 nth=1 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 35 0 role=status from=ret type=s64
+value 35 1 role=out0 from=out0 type=u64
+site 36 label=s0036.creator-call op=call.reg_create phase=point tu=planv4.c func=two_main callee=reg_create line=180 place=after-call skey=9d70ba78dfe1899e row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=9 nth=2 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 36 0 role=status from=ret type=s64
+value 36 1 role=out0 from=out0 type=u64
+site 37 label=s0037.creator-call op=call.reg_create phase=point tu=planv4.c func=two_main callee=reg_create line=181 place=after-call skey=eea85e94e89195e9 row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=9 nth=3 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 37 0 role=status from=ret type=s64
+value 37 1 role=out0 from=out0 type=u64
+site 38 label=s0038.creator-call op=call.reg_create phase=point tu=planv4.c func=two_main callee=reg_create line=179 place=at-call skey=cecd3af8ade51587 row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=9 nth=1 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 38 0 role=key from=arg1 type=ptr string=pointer-only
+value 38 1 role=arg0 from=arg0 type=u64
+site 39 label=s0039.creator-call op=call.reg_create phase=point tu=planv4.c func=two_main callee=reg_create line=180 place=at-call skey=e962ed880b9ee029 row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=9 nth=2 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 39 0 role=key from=arg1 type=ptr string=pointer-only
+value 39 1 role=arg0 from=arg0 type=u64
+site 40 label=s0040.creator-call op=call.reg_create phase=point tu=planv4.c func=two_main callee=reg_create line=181 place=at-call skey=87eddb5bd27aa6c7 row=0cab3eacd5372d0b,6a69c9e16dc94a34,c38b3c7e2daa7772 col=9 nth=3 ref="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+value 40 0 role=key from=arg1 type=ptr string=pointer-only
+value 40 1 role=arg0 from=arg0 type=u64
+need 1 subject="row c38b3c7e2daa7772" what="use-result" state=planned sites=2
+need 2 subject="row c38b3c7e2daa7772" what="event-send" state=planned sites=4
+need 3 subject="row c38b3c7e2daa7772" what="wait-result" state=not-planned reason="plan_missing(need not planned)" note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need 4 subject="row c38b3c7e2daa7772" what="lock-result" state=not-planned reason="plan_missing(no rule of this revision)" note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need 5 subject="row 0cab3eacd5372d0b" what="use-result" state=planned sites=8
+need 6 subject="row 0cab3eacd5372d0b" what="event-send" state=planned sites=11
+need 7 subject="row 0cab3eacd5372d0b" what="wait-result planv4.c:150:3" state=planned sites=8,12 note="predicate LOOP_DEFS value"
+need 8 subject="row 0cab3eacd5372d0b" what="lock-result" state=not-planned reason="plan_missing(no rule of this revision)" note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need 9 subject="row 6a69c9e16dc94a34" what="use-result" state=planned sites=31
+need 10 subject="row 6a69c9e16dc94a34" what="event-send" state=not-planned reason="plan_missing(need not planned)" note="no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use"
+need 11 subject="row 6a69c9e16dc94a34" what="wait-result" state=not-planned reason="plan_missing(need not planned)" note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need 12 subject="row 6a69c9e16dc94a34" what="lock-result" state=not-planned reason="plan_missing(no rule of this revision)" note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need 13 subject="row 8aab7be8c192de75" what="read-value" state=planned sites=16
+need 14 subject="row 8aab7be8c192de75" what="read-subscript" state=planned sites=14
+need 15 subject="row 8aab7be8c192de75" what="wait-result" state=not-planned reason="plan_missing(need not planned)" note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need 16 subject="row 8aab7be8c192de75" what="lock-result" state=planned sites=13,15,25,27
+need 17 subject="row c38b3c7e2daa7772" what="object-delete" state=planned sites=18,19
+need 18 subject="row 0cab3eacd5372d0b" what="object-delete" state=planned sites=18,19
+need 19 subject="row 6a69c9e16dc94a34" what="object-delete" state=planned sites=18,19
+gap 1 subject="row 0cab3eacd5372d0b wait planv4.c:150:3" what="exit 0 (condition) at planv4.c:150:3" reason="record_insufficient(the exit is no statement)" rule="wait-exit"
+
+# sidecar
+kz-plan-sidecar 2
+generator tool=kz-static tool_sha256=<sha256> tool_source=<sha256> core_source=<sha256>
+input facts sha256=<sha256> path=<path>
+input framework-layer-data sha256=<sha256> path=<path>
+input namespace-data sha256=<sha256> path=<path>
+facts-artifact <sha256>
+rules plan rules revision 5 (2026-11-19): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; with the name-space files of coverage rule revision 2: the namespace-entry and namespace-layer lines, the kind-value, rollback, clear and context-frame sites, the lifetime-end sites and the key text bound from the stored-name extent; relations rules revision 12 (2026-11-18)
+manifest-revision 4 (kzs-sites 4)
+plan-id <plan-id>
+selection observation-set: every row of the relations (method document 3.1, the revised rule: no label and no proof of a row removes it)
+priority method-priority: method priority port revision 1 (2026-11-16): label, order class, reach mark and disposition of the method document's S1 rule over the row text; tier 1 = disposition D07 (label R or J, counterpart, order class RELOC), tier 2 = the other rows of order class RELOC, tier 3 = the rest; within a tier the order of the relations text
+classes rows 4 tier1 1 tier2 2 tier3 1
+budget value=all reason="the test budget" disclosure="none given" planned=4 truncation=0 rows cut (row lines with state cut) unresolved="none" sensitivity="not measured"
+control control selection rule revision 1 (2026-11-16): (a) path A rows with a probe-create handling line, (b) path A rows with a creator site (creator lines and not-a-pair lines of key constants), (a) then (b) in the order of the relations text; planned apart from the tier order (docs/plan_manifest.md section 7)
+control-budget value=all reason="the test control budget" rows=3 (a 1, b 2) planned=3 cut=0 complete=yes unresolved="whether the control rows fit the record pool (no event volume measured)" sensitivity="not measured"
+requests sha256=<sha256> file=plan.req rows=3 requests=13 planned=10
+namespace-data <data>/planv4_fixture/framework_namespaces_fixture-plan.txt entries=1
+bound string KZ_RT_STR_MAX=64 source=runtime/include/kz_rt.h:82 reason="the runtime's copy bound; a key text is bounded by the program's own constant length check where the facts show one" truncation="the runtime flags a cut string per value"
+bound string-extent source=ARG_TYPES reason="a key argument that is a character array read at a point that dominates the call is copied at the call within min(its extent, KZ_RT_STR_MAX)"
+bound slots=4 source=instrument/gcc/kzgcc.cpp build_obs reason="values per event bound by kzgcc 0.3"
+bound sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason="the binding id scheme" sites=40
+param tu-root - (units outside the bundle root are named relative to it)
+param bundle-root -
+row c38b3c7e2daa7772 A1 tier=1 position=1 label=R fact-label=T? class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned control=b control-state=planned why="label R, counterpart, no static order; reach REACH-FLIP"
+row 0cab3eacd5372d0b A2 tier=2 position=2 label=H fact-label=H class=decided order=RELOC reach=REACH-FLIP disposition=D04 state=planned control=b control-state=planned why="probe-create, or a delayed retry loop on a failure status"
+row 6a69c9e16dc94a34 A3 tier=2 position=3 label=H fact-label=H class=decided order=RELOC reach=REACH-STATED disposition=D04 state=planned control=a+b control-state=planned why="probe-create, or a delayed retry loop on a failure status"
+row 8aab7be8c192de75 C1 tier=3 position=4 label=E fact-label=- class=absence-undetermined order=ENF reach=UNEVALUATED disposition=D01 state=planned why="the row proves the opposite order impossible"
+site 1 s0001.stop-event key="planv4.c|app_exit|before|||0" refs="framework-layer data line 5: app-exit app_exit planv4.c:93 (fixture planv4.c)"
+site 2 s0002.handling-chain+use-call key="planv4.c|one_init|point|after-call|reg_find|133|col=16|nth=1" refs="row c38b3c7e2daa7772"
+site 3 s0003.use-call key="planv4.c|one_init|point|at-call|reg_find|133|col=16|nth=1" refs="row c38b3c7e2daa7772"
+site 4 s0004.effect-call key="planv4.c|one_init|point|at-call|send_event|135|col=11|nth=1" refs="row c38b3c7e2daa7772 effect event-send planv4.c:135:11 on failure -17 of planv4.c:133:16; row c38b3c7e2daa7772 effect event-send planv4.c:135:11 on failure -2 of planv4.c:133:16"
+site 5 s0005.actor-root+actor-start key="planv4.c|one_main|before|||0" refs="actor one_main (spawn-entry); creation planv4.c:106:58 start routine one_main"
+site 6 s0006.handling-chain key="planv4.c|one_main|effect|store||147" refs="row 0cab3eacd5372d0b planv4.c:147:5; row c38b3c7e2daa7772 planv4.c:147:5"
+site 7 s0007.handling-chain key="planv4.c|one_main|point|after-call|one_init|145|col=12|nth=1" refs="row c38b3c7e2daa7772"
+site 8 s0008.handling-chain+use-call+wait-cond key="planv4.c|one_main|point|after-call|reg_find|151|col=11|nth=1" refs="row 0cab3eacd5372d0b; row 0cab3eacd5372d0b wait planv4.c:150:3 definition planv4.c:151:9"
+site 9 s0009.handling-chain key="planv4.c|one_main|point|at-call|app_exit|161|col=3|nth=1" refs="row 0cab3eacd5372d0b; row c38b3c7e2daa7772"
+site 10 s0010.use-call key="planv4.c|one_main|point|at-call|reg_find|151|col=11|nth=1" refs="row 0cab3eacd5372d0b"
+site 11 s0011.effect-call key="planv4.c|one_main|point|at-call|send_event|157|col=23|nth=1" refs="row 0cab3eacd5372d0b effect event-send planv4.c:157:23 on failure -17 of planv4.c:151:11 (open: on a path through a branch this value does not decide); row 0cab3eacd5372d0b effect event-send planv4.c:157:23 on failure -2 of planv4.c:151:11"
+site 12 s0012.wait-exit key="planv4.c|one_main|point|line-start||153" refs="row 0cab3eacd5372d0b wait planv4.c:150:3 exit 1 break"
+site 13 s0013.lock-call key="planv4.c|own_owner|point|after-call|pthread_mutex_lock|170|col=3|nth=1" refs="row 8aab7be8c192de75 lock acquire planv4.c:170:3"
+site 14 s0014.object-index key="planv4.c|own_owner|point|after-call|task_index|171|col=13|nth=1" refs="row 8aab7be8c192de75 read planv4.c:171:27 subscript (OBJECT_ACCESS) task_index"
+site 15 s0015.lock-call key="planv4.c|own_owner|point|at-call|pthread_mutex_unlock|172|col=3|nth=1" refs="row 8aab7be8c192de75 lock release planv4.c:172:3"
+site 16 s0016.read-load key="planv4.c|own_owner|point|load||171|field=Task.owner" refs="row 8aab7be8c192de75 read planv4.c:171:27"
+site 17 s0017.key-text key="planv4.c|reg_create|point|at-call|memchr|62|col=7|nth=1" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+site 18 s0018.object-delete key="planv4.c|reg_delete|before|||0" refs="namespace data <data>/planv4_fixture/framework_namespaces_fixture-plan.txt line 14: FIXTURE_REG delete reg_delete"
+site 19 s0019.object-delete key="planv4.c|reg_delete|point|after-call|reg_retire|86|col=12|nth=1" refs="namespace data <data>/planv4_fixture/framework_namespaces_fixture-plan.txt line 14: FIXTURE_REG delete reg_delete retire call planv4.c:86:12"
+site 20 s0020.key-text key="planv4.c|reg_find|point|at-call|reg_search|56|col=10|nth=1" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+site 21 s0021.stop-event key="planv4.c|run_loop|before|||0" refs="framework-layer data line 4: run-loop run_loop planv4.c:91 (fixture planv4.c)"
+site 22 s0022.actor-create key="planv4.c|spawn_task|point|after-call|pthread_create|106|col=58|nth=1" refs="creation planv4.c:106:58"
+site 23 s0023.actor-create key="planv4.c|spawn_task|point|at-call|pthread_create|106|col=58|nth=1" refs="creation planv4.c:106:58"
+site 24 s0024.actor-owner+writer-after-spawn key="planv4.c|start_app|effect|store||112" refs="actor one_main (spawn-entry) parameter 2 of start_app stored at planv4.c:112:16 after the spawn planv4.c:111:8; actor three_main (spawn-entry) parameter 2 of start_app stored at planv4.c:112:16 after the spawn planv4.c:111:8; actor two_main (spawn-entry) parameter 2 of start_app stored at planv4.c:112:16 after the spawn planv4.c:111:8; row 8aab7be8c192de75 planv4.c:112:16"
+site 25 s0025.lock-call key="planv4.c|start_app|point|after-call|pthread_mutex_lock|110|col=3|nth=1" refs="row 8aab7be8c192de75 lock acquire planv4.c:110:3"
+site 26 s0026.spawn-call key="planv4.c|start_app|point|after-call|spawn_task|111|col=8|nth=1" refs="row 8aab7be8c192de75"
+site 27 s0027.lock-call key="planv4.c|start_app|point|at-call|pthread_mutex_unlock|113|col=3|nth=1" refs="row 8aab7be8c192de75 lock release planv4.c:113:3"
+site 28 s0028.spawn-call key="planv4.c|start_app|point|at-call|spawn_task|111|col=8|nth=1" refs="row 8aab7be8c192de75"
+site 29 s0029.actor-root+actor-start key="planv4.c|three_main|before|||0" refs="actor three_main (spawn-entry); creation planv4.c:106:58 start routine three_main"
+site 30 s0030.creator-call key="planv4.c|three_main|point|after-call|reg_create|202|col=11|nth=1" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+site 31 s0031.use-call key="planv4.c|three_main|point|after-call|reg_find|201|col=7|nth=1" refs="row 6a69c9e16dc94a34"
+site 32 s0032.creator-call key="planv4.c|three_main|point|at-call|reg_create|202|col=11|nth=1" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+site 33 s0033.use-call key="planv4.c|three_main|point|at-call|reg_find|201|col=7|nth=1" refs="row 6a69c9e16dc94a34"
+site 34 s0034.actor-root+actor-start key="planv4.c|two_main|before|||0" refs="actor two_main (spawn-entry); creation planv4.c:106:58 start routine two_main"
+site 35 s0035.creator-call key="planv4.c|two_main|point|after-call|reg_create|179|col=9|nth=1" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+site 36 s0036.creator-call key="planv4.c|two_main|point|after-call|reg_create|180|col=9|nth=2" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+site 37 s0037.creator-call key="planv4.c|two_main|point|after-call|reg_create|181|col=9|nth=3" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+site 38 s0038.creator-call key="planv4.c|two_main|point|at-call|reg_create|179|col=9|nth=1" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+site 39 s0039.creator-call key="planv4.c|two_main|point|at-call|reg_create|180|col=9|nth=2" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+site 40 s0040.creator-call key="planv4.c|two_main|point|at-call|reg_create|181|col=9|nth=3" refs="row 0cab3eacd5372d0b; row 6a69c9e16dc94a34; row c38b3c7e2daa7772"
+map 0cab3eacd5372d0b 6 8 9 10 11 12 17 20 30 32 35 36 37 38 39 40
+map 6a69c9e16dc94a34 17 20 30 31 32 33 35 36 37 38 39 40
+map 8aab7be8c192de75 13 14 15 16 24 25 26 27 28
+map c38b3c7e2daa7772 2 3 4 6 7 9 17 20 30 32 35 36 37 38 39 40
+need row c38b3c7e2daa7772 use-result planned reason=- note="" sites=2
+need row c38b3c7e2daa7772 event-send planned reason=- note="" sites=4
+need row c38b3c7e2daa7772 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row c38b3c7e2daa7772 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 0cab3eacd5372d0b use-result planned reason=- note="" sites=8
+need row 0cab3eacd5372d0b event-send planned reason=- note="" sites=11
+need row 0cab3eacd5372d0b wait-result planv4.c:150:3 planned reason=- note="predicate LOOP_DEFS value" sites=8,12
+need row 0cab3eacd5372d0b lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 6a69c9e16dc94a34 use-result planned reason=- note="" sites=31
+need row 6a69c9e16dc94a34 event-send not-planned reason=plan_missing(need not planned) note="no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use"
+need row 6a69c9e16dc94a34 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 6a69c9e16dc94a34 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 8aab7be8c192de75 read-value planned reason=- note="" sites=16
+need row 8aab7be8c192de75 read-subscript planned reason=- note="" sites=14
+need row 8aab7be8c192de75 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 8aab7be8c192de75 lock-result planned reason=- note="" sites=13,15,25,27
+need row c38b3c7e2daa7772 object-delete planned reason=- note="" sites=18,19
+need row 0cab3eacd5372d0b object-delete planned reason=- note="" sites=18,19
+need row 6a69c9e16dc94a34 object-delete planned reason=- note="" sites=18,19
+gap row 0cab3eacd5372d0b wait planv4.c:150:3 "exit 0 (condition) at planv4.c:150:3" reason=record_insufficient(the exit is no statement) rule=wait-exit
+creation planv4.c:106:58 roots one_main three_main two_main; start routines one_main three_main two_main; tie: creation argument = start routine parameter 0 (premise: the argument reaches the start routine unchanged; a repeated value makes the tie undetermined)
+stop-event run-loop run_loop planv4.c:91 decl planv4.c:91 version "fixture planv4.c" data line 4
+stop-event app-exit app_exit planv4.c:93 decl planv4.c:93 version "fixture planv4.c" data line 5
+lifetime FIXTURE_REG delete reg_delete planv4.c:83 data <data>/planv4_fixture/framework_namespaces_fixture-plan.txt line 14: applies
+spawn 23 wrapper=kz_rt_posix_create P0 thread-creation entry pthread_create: start routine argument 2, creation argument 3, thread handle out argument 0 (P0_TABLE)
+default-module 1 program
+
+# requests
+kz-plan-requests 1
+# value requests of the planned rows: what value of a record would decide a row the method cannot label from the facts, and which site of the plan records it
+rule value requests rule revision 1 (2026-11-16): rows of path A and B with the handling label T?, J? or F, or an open effect in their absence line; the result and out values at the use's after-call, the effect calls of RESULT_EFFECT with the argument a SEMANTICS arg-role row names, the branch taken (no site kind)
+facts-artifact <sha256>
+request 1 row=c38b3c7e2daa7772 id=A1 label=T? value=result state=planned site=2 slot=ret reason=- what="status of reg_find at planv4.c:133:16" note="label T?"
+request 2 row=c38b3c7e2daa7772 id=A1 label=T? value=out0 state=planned site=2 slot=out0 reason=- what="out0 of reg_find at planv4.c:133:16" note="label T?"
+request 3 row=c38b3c7e2daa7772 id=A1 label=T? value=effect state=planned site=4 slot=arg1 reason=- what="event-send send_event at planv4.c:135:11 on the outcome failure -17" note="complete; label T?"
+request 4 row=c38b3c7e2daa7772 id=A1 label=T? value=effect state=planned site=4 slot=arg1 reason=- what="event-send send_event at planv4.c:135:11 on the outcome failure -2" note="complete; label T?"
+request 5 row=c38b3c7e2daa7772 id=A1 label=T? value=branch state=not-planned site=- slot=- reason=plan_missing(no rule of this revision) what="the branch the result takes at planv4.c:133:16" note="a branch is no site kind of the manifest; the result and the effect calls reached stand for it; label T?"
+request 6 row=0cab3eacd5372d0b id=A2 label=H value=result state=planned site=8 slot=ret reason=- what="status of reg_find at planv4.c:151:11" note="label H, an open effect in its absence line"
+request 7 row=0cab3eacd5372d0b id=A2 label=H value=out0 state=planned site=8 slot=out0 reason=- what="out0 of reg_find at planv4.c:151:11" note="label H, an open effect in its absence line"
+request 8 row=0cab3eacd5372d0b id=A2 label=H value=effect state=planned site=11 slot=arg1 reason=- what="event-send send_event at planv4.c:157:23 on the outcome failure -17" note="open: on a path through a branch this value does not decide; label H, an open effect in its absence line"
+request 9 row=0cab3eacd5372d0b id=A2 label=H value=effect state=planned site=11 slot=arg1 reason=- what="event-send send_event at planv4.c:157:23 on the outcome failure -2" note="complete; label H, an open effect in its absence line"
+request 10 row=0cab3eacd5372d0b id=A2 label=H value=branch state=not-planned site=- slot=- reason=plan_missing(no rule of this revision) what="the branch the result takes at planv4.c:151:11" note="a branch is no site kind of the manifest; the result and the effect calls reached stand for it; label H, an open effect in its absence line"
+request 11 row=6a69c9e16dc94a34 id=A3 label=H value=result state=planned site=31 slot=ret reason=- what="status of reg_find at planv4.c:201:7" note="label H, an open effect in its absence line"
+request 12 row=6a69c9e16dc94a34 id=A3 label=H value=out0 state=planned site=31 slot=out0 reason=- what="out0 of reg_find at planv4.c:201:7" note="label H, an open effect in its absence line"
+request 13 row=6a69c9e16dc94a34 id=A3 label=H value=branch state=not-planned site=- slot=- reason=plan_missing(no rule of this revision) what="the branch the result takes at planv4.c:201:7" note="a branch is no site kind of the manifest; the result and the effect calls reached stand for it; label H, an open effect in its absence line"
+end rows=3 requests=13 planned=10

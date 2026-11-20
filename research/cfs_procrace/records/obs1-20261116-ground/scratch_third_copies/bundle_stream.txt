@@ -1,0 +1,6 @@
+# stream re-hash of the five local bundles, 2026-11-16 (cat parts | xz -dc | tar -x --to-command=member_sha256.sh in an empty dir; nothing written there)
+step2a-20261109-eb	members=383	stream_vs_MANIFEST.tsv=same	stream_list_sha256=1717d3e42d5b7880f7d84be17d112a684193da702c862d8a50acca99f907101d
+ck-20261109-rv3check	members=97	stream_vs_MANIFEST.tsv=same	stream_list_sha256=8035b5957c43287d9afda5090241f4d549bd7b5b40fe65be2840ff860103736f
+c5-20261109-regen-inputs	members=78	stream_vs_MANIFEST.tsv=same	stream_list_sha256=e18179a5e8a318c7739112eaa1ef9290056da067873f0ffeeab3e3651c7375f6
+step2a-20261109-stages	members=869	stream_vs_MANIFEST.tsv=same	stream_list_sha256=80b9f614c89c80091a571afce0982fccb58d024bd893f64e49e9fa0c8ee8f6da
+step2a-20261109-tests	members=665	stream_vs_MANIFEST.tsv=same	stream_list_sha256=74edd498ae424615eb8de313b3aad8756e91cfa0c5355234904deb05c2ebaa74

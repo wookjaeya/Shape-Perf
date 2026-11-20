@@ -1,0 +1,46 @@
+OK c1_pre_tx basis.kz: check_head whole: lines 519, allowed 2, other 0
+BAD c1_pre_tx facts.kz header (compare/on_facts_head_c1_pre_tx.txt)
+OK c1_pre_tx facts views: only declared differences: [semantics] 1773 rows, basis items 18 new, every other section the same
+OK c1_pre_tx extract.txt: apart from line 1 one new line semantics
+OK c1_pre_tx relations.txt: only declared differences: line 2, the header line, 268 tagged layers lines (rows 262, name-space blocks 6)
+OK c1_pre_tx args.txt: only the extract-only line (--semantics)
+OK c1_pre_tx basis.txt: only the basis hash line
+OK c1_pre_tx sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK c1_pre_tx relations.log empty
+OK c1_post_tx basis.kz: check_head whole: lines 519, allowed 2, other 0
+BAD c1_post_tx facts.kz header (compare/on_facts_head_c1_post_tx.txt)
+OK c1_post_tx facts views: only declared differences: [semantics] 1773 rows, basis items 18 new, every other section the same
+OK c1_post_tx extract.txt: apart from line 1 one new line semantics
+OK c1_post_tx relations.txt: only declared differences: line 2, the header line, 268 tagged layers lines (rows 262, name-space blocks 6)
+OK c1_post_tx args.txt: only the extract-only line (--semantics)
+OK c1_post_tx basis.txt: only the basis hash line
+OK c1_post_tx sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK c1_post_tx relations.log empty
+OK r2_core basis.kz: check_head whole: lines 420, allowed 2, other 0
+BAD r2_core facts.kz header (compare/on_facts_head_r2_core.txt)
+OK r2_core facts views: only declared differences: [semantics] 1476 rows, basis items 18 new, every other section the same
+OK r2_core extract.txt: apart from line 1 one new line semantics
+OK r2_core relations.txt: only declared differences: line 2, the header line, 186 tagged layers lines (rows 183, name-space blocks 3)
+OK r2_core args.txt: only the extract-only line (--semantics)
+OK r2_core basis.txt: only the basis hash line
+OK r2_core sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK r2_core relations.log empty
+OK c5_641 basis.kz: check_head whole: lines 272, allowed 2, other 0
+BAD c5_641 facts.kz header (compare/on_facts_head_c5_641.txt)
+OK c5_641 facts views: only declared differences: [semantics] 795 rows, basis items 18 new, every other section the same
+OK c5_641 extract.txt: apart from line 1 one new line semantics
+OK c5_641 relations.txt: only declared differences: line 2, the header line, 100 tagged layers lines (rows 86, name-space blocks 14)
+OK c5_641 args.txt: only the extract-only line (--semantics)
+OK c5_641 basis.txt: only the basis hash line
+OK c5_641 sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK c5_641 relations.log empty
+OK c5_642 basis.kz: check_head whole: lines 272, allowed 2, other 0
+BAD c5_642 facts.kz header (compare/on_facts_head_c5_642.txt)
+OK c5_642 facts views: only declared differences: [semantics] 786 rows, basis items 18 new, every other section the same
+OK c5_642 extract.txt: apart from line 1 one new line semantics
+OK c5_642 relations.txt: only declared differences: line 2, the header line, 95 tagged layers lines (rows 81, name-space blocks 14)
+OK c5_642 args.txt: only the extract-only line (--semantics)
+OK c5_642 basis.txt: only the basis hash line
+OK c5_642 sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK c5_642 relations.log empty
+BAD sections (compare/sections_on.txt)

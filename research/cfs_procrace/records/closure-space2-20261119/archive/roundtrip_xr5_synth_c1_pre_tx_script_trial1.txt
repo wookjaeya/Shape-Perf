@@ -1,0 +1,6 @@
+# archive.sh xr5_synth_c1_pre_tx_script_trial1 records/closure-explain-fix-20261119/xr5_synth_c1_pre_tx_script_trial1.sha256 2026-11-19T18:14:43Z
+1. directory = list: 888 files, 51332619 bytes (apparent), 53350400 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/xr5_synth_c1_pre_tx_script_trial1/xr5_synth_c1_pre_tx_script_trial1.tar.xz 367868 bytes sha256 63f5e9be5cafd179b16af6cbca8c3bcfd948ef5a86f68691960c857a599162c6
+4. round trip: 888 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script_trial1 removed 2026-11-19T18:14:49Z
+PASS

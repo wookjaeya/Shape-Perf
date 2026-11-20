@@ -1,0 +1,10 @@
+- 0|generator tool=kz-static	generator tool=kz-static tool_sha256=73c3491cead05ce1f4f6adb999970a41e680569182848a644646fca65613ecff tool_source=2b8834da4c83efe08b12d090bf2db4b269edf14d67fac0b8da25cc3ef012c13b core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
++ 0|generator tool=kz-static	generator tool=kz-static tool_sha256=36e0299521014b926b2f7d2bf6784b5b4ec97a929ff67799a34f72d610509eb5 tool_source=3b89477d1e4fe817d172d12fa839005f3f598e39143a21ff0fb3120279be972c core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+- 0|input facts	input facts sha256=c24516ae1966bbf7bbfcfd4c4b2e21335965cb0aed8793b83e1665498bc22ba6 path=/home/user/work/redesign/obs1/rf2_final_extract/r2_core/r2_core/NP/facts.kz
++ 0|input facts	input facts sha256=f79a4249ab278ce85fa5370e8cd7fa58894c04ef16ab1560b18ecbeea4184364 path=<scratch>/o/s6_final_extract/r2_core/r2_core/NP/facts.kz
+- 0|input basis	input basis sha256=502a5d5fba53c6d3576e9aaf3528a612aa52c33454a19ce9ef1b06d9d1fda7dd path=/home/user/work/redesign/obs1/rf2_final_extract/r2_core/r2_core/NP/basis.kz
++ 0|input basis	input basis sha256=e116e4f30815da889a67f5d03ce090601d3b4dbd8dc07f02368240286a8dc446 path=<scratch>/o/s6_final_extract/r2_core/r2_core/NP/basis.kz
+- 0|facts-artifact H	facts-artifact c24516ae1966bbf7bbfcfd4c4b2e21335965cb0aed8793b83e1665498bc22ba6
++ 0|facts-artifact H	facts-artifact f79a4249ab278ce85fa5370e8cd7fa58894c04ef16ab1560b18ecbeea4184364
+- 0|basis-artifact H	basis-artifact 502a5d5fba53c6d3576e9aaf3528a612aa52c33454a19ce9ef1b06d9d1fda7dd
++ 0|basis-artifact H	basis-artifact e116e4f30815da889a67f5d03ce090601d3b4dbd8dc07f02368240286a8dc446

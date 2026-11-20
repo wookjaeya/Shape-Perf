@@ -1,0 +1,37 @@
+# check counts and summaries from ctest_first.log (first run, before the golden) and ctest_full.log (after it); lines as the tests print them
+## ctest_first.log
+17: manifest: example accepted (4 sites, 5 bindings), 18 malformed inputs rejected; version 2: 8 identity reads accepted, 18 rejected; 5 placed sites accepted, 7 rejected; version 3: 4 identity reads accepted, 13 rejected; version 4: a plan with 4 sites, 2 needs, 1 gap and a spawn binding accepted, 38 rejected
+68: test_core_schema: 34017 checks passed
+105: lint selftest: 114 cases, 0 failed
+106: lint case-ids: clean
+107: lint case-ids-data: clean
+108: lint semantics-names: clean
+109: lint retired-term: clean
+110: lint banned-files: clean
+111: lint no-llvm: clean
+112: lint no-generated: clean
+266: test_static_reasons: 751 checks passed
+267: test_static_plan: 1 of 275 checks FAILED
+268: test_static_cli: 1151 checks passed
+99% tests passed, 1 tests failed out of 268
+The following tests did not run:
+	137 - test_probe_anchor_reached (Skipped)
+The following tests FAILED:
+	267 - test_static_plan (Failed)
+## ctest_full.log
+17: manifest: example accepted (4 sites, 5 bindings), 18 malformed inputs rejected; version 2: 8 identity reads accepted, 18 rejected; 5 placed sites accepted, 7 rejected; version 3: 4 identity reads accepted, 13 rejected; version 4: a plan with 4 sites, 2 needs, 1 gap and a spawn binding accepted, 38 rejected
+68: test_core_schema: 34017 checks passed
+105: lint selftest: 114 cases, 0 failed
+106: lint case-ids: clean
+107: lint case-ids-data: clean
+108: lint semantics-names: clean
+109: lint retired-term: clean
+110: lint banned-files: clean
+111: lint no-llvm: clean
+112: lint no-generated: clean
+266: test_static_reasons: 751 checks passed
+267: test_static_plan: 275 checks passed
+268: test_static_cli: 1151 checks passed
+100% tests passed, 0 tests failed out of 268
+The following tests did not run:
+	137 - test_probe_anchor_reached (Skipped)

@@ -1,0 +1,4 @@
+# space_guard.sh kind=compare need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/loop-lock-20261116/compare.sh onextract
+start 2026-11-16T22:37:54.236Z free=1678290944 threshold=414572800
+sample 2026-11-16T22:37:54.240Z 1678286848
+end 2026-11-16T22:37:56.246Z kind=compare verdict=completed rc=0 free=1685381120 lowest=1678286848 dip=4096 change=7090176

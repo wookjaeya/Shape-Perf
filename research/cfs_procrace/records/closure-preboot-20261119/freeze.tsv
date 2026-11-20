@@ -1,0 +1,27 @@
+# Explanation script revision 4 with the code of spec 11, frozen again before the first boot of the C1 cycle (2026-11-19;
+# plan/full_stage_results_20261116.md 26.0 (b)-(i), 26.3, 26.4; plan/c1_closure_explain_rev4_spec_20261118.md 11 item 16;
+# plan/c1_closure_evaluation_protocol_20261118.md 12 item 6 and 14.0).  It replaces records/closure-explain-rev4-20261119/
+# freeze.tsv (733feef7..., kept unchanged) for the boots of the cycle; the boot declaration boot/declaration2.tsv names it.
+# Source commit dc879c6 (the code of spec 11; nothing in these files changed after it).  Exit checks before this freeze,
+# on these bytes: fixtures test_explain4.py 193/193 and test_explain_eval.py 92/92, run again by this step
+# (out/fixtures.txt, out/eval_fixtures.txt; sha256 of every part the same before and after, out/freeze_sha_*.txt); the
+# regression on the 2026-11-16 inputs, the static dry runs with the 16 branches, the runtime test dumps and the
+# synthetic use events of results 26.3 (their records carry judge_sha256 1d0b4ae0... and reader_sha256 ef20a760...).
+# A change of the reader part only (the judge's sha256 the same, the diff kept) leaves a boot's standing; a change of the
+# judgement part after a boot makes that boot a record seen before the rules (evaluation protocol 12 item 6).  The
+# summary is not revised after a boot in this cycle (results 26.0 (i); protocol 14.0).  The falsifier and evaluation
+# script and the expectation comparison write no record and are no input of Kairos.
+# changed against 733feef7: reader (spec 11 item 2: --named-calls), judge (items 1, 3, 4, 5, 6), summary (7-9, 11),
+# expect (12: the class column), eval (13: new), fixtures (1-16: 66 new checks), eval_fixtures (13: new);
+# unchanged: driver, branches, revision3 (the regression's comparison base)
+# part	path	sha256
+reader	research/cfs_procrace/env/obs1/explain_read.py	ef20a760e7c5611acee768e17c22b7568ae8ab45819afdeca21757b7ad123c69
+judge	research/cfs_procrace/env/obs1/explain_judge.py	1d0b4ae0d82914648a77f2e93dad7f56670407818c115ef02dba09a7ba1420e3
+driver	research/cfs_procrace/env/obs1/explain.py	af9d4395cbc099d91b46e3608a4241ffe3601ab7084c323b0e2d73fb3a7d0dc2
+branches	research/cfs_procrace/env/obs1/explain_branches.py	a722e4af36e1adb84606ecdc826cb3425a38fd4c145458417d22e814a795f07a
+summary	research/cfs_procrace/env/obs1/explain_summary.py	5e19b4192d80a9f3bd95cdc7ec881274cba7f0e17f677712f0e2dbd24c6c48e8
+expect	research/cfs_procrace/env/obs1/explain_expect.py	a9a9fc3f28cc2732771d3d0fe4c4efab0774f9aa4794279d29a6a26ac7964d40
+eval	research/cfs_procrace/env/obs1/explain_eval.py	f6b72fc47c9f3147983dcb99b3c9cd76d6d17b261780407775ac4d7d4dc8a9a1
+fixtures	research/cfs_procrace/env/obs1/tests/test_explain4.py	804326bf48ed75c7b747a8eb03a21b0a124a0fc295d43ae91926f0be39550ffb
+eval_fixtures	research/cfs_procrace/env/obs1/tests/test_explain_eval.py	5e153435ceea74a64e8b188ebd7bba36b1773799938864ef5522aa2d9879eb26
+revision3	research/cfs_procrace/env/obs1/explain_rev3.py	acfd427147d8a24f1314b4ba1c0187adf75bc1e977160638e8c6dff5ecd53a70

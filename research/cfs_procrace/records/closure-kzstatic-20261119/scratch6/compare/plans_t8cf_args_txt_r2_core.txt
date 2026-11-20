@@ -1,0 +1,9 @@
+diffkinds old_lines=24 new_lines=24 only_old=4 only_new=4 labels=8
+label removed=0 added=1 0|<scratch>/o/sN_plans_tNcf/rN_core/plan.kzs
+label removed=0 added=1 0|<scratch>/o/sN_plans_tNcf/rN_core/plan.side
+label removed=0 added=1 0|<scratch>/o/sN_plans_tNcf/rN_core/plan.mod
+label removed=0 added=1 0|<scratch>/o/sN_plans_tNcf/rN_core/plan.exe
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_plans_tNcf/rN_core/plan.kzs
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_plans_tNcf/rN_core/plan.side
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_plans_tNcf/rN_core/plan.mod
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_plans_tNcf/rN_core/plan.exe

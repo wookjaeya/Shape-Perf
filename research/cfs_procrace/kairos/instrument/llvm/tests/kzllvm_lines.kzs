@@ -1,0 +1,10 @@
+# kzllvm_lines.kzs -- line= handling of the kzllvm plugin on the GCC candidate's test target (unit test;
+# generic names, not a cFS manifest, not research conditions).  Site 1 names the line of the call in
+# consumer_init (instrument/gcc/tests/kzgcc_target.c:64); site 2 names a wrong line for the same call.
+kzs-sites 1
+source unit rev=0000000000000000000000000000000000000000 ref="instrument/gcc/tests/kzgcc_target.c"
+module 1 name=kzgcc_target source=unit
+site 1 label=consumer.lookup.at64 op=obj.lookup phase=after tu=tests/kzgcc_target.c func=consumer_init callee=obj_lookup line=64
+value 1 0 role=status from=ret type=s32
+site 2 label=consumer.lookup.at65 op=obj.lookup phase=after tu=tests/kzgcc_target.c func=consumer_init callee=obj_lookup line=65
+value 2 0 role=status from=ret type=s32

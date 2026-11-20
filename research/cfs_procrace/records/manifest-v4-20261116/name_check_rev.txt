@@ -1,0 +1,2 @@
+# name_check.sh --rev over this step's commits after the lead's commit 3c7391a (a2c8dbc, 6474cd5, 9ff7b95, fb2c6c5), 2026-11-18
+name_check --rev 3c7391a fb2c6c5 rc=0

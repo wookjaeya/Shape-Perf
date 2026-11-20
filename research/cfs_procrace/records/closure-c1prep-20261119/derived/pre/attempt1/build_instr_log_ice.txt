@@ -1,0 +1,25 @@
+[ 21%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_task.c.o
+[ 21%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_util.c.o
+[ 21%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_task.c.o
+[ 21%] Linking C static library libsb.a
+[ 22%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_task_cmds.c.o
+[ 22%] Built target sb
+*** WARNING *** there are active plugins, do not report this as a bug unless you can reproduce it without enabling any plugins.
+Event                            | Plugins
+PLUGIN_FINISH_UNIT               | kzgcc
+PLUGIN_START_UNIT                | kzgcc
+during GIMPLE pass: kzgcc_instr
+/home/user/work/redesign/obs1/c1p_pre_derived/bundle_1df262a/cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c: In function 'CFE_TBL_GetTblRegData':
+/home/user/work/redesign/obs1/c1p_pre_derived/bundle_1df262a/cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c:1456:1: internal compiler error: in make_ssa_name_fn, at tree-ssanames.cc:357
+ 1456 | }
+      | ^
+[ 22%] Building C object time/CMakeFiles/time.dir/fsw/src/cfe_time_api.c.o
+[ 22%] Building C object time/CMakeFiles/time.dir/fsw/src/cfe_time_task.c.o
+[ 23%] Building C object time/CMakeFiles/time.dir/fsw/src/cfe_time_tone.c.o
+	../sysdeps/nptl/libc_start_call_main.h:58
+	../csu/libc-start.c:360
+Please submit a full bug report, with preprocessed source (by using -freport-bug).
+Please include the complete backtrace with any bug report.
+See <file:///usr/share/doc/gcc-13/README.Bugs> for instructions.
+make[6]: *** [tbl/CMakeFiles/tbl.dir/build.make:118: tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_task_cmds.c.o] Error 1
+make[5]: *** [CMakeFiles/Makefile2:1353: tbl/CMakeFiles/tbl.dir/all] Error 2

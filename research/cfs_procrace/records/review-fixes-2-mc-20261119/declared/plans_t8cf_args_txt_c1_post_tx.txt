@@ -1,0 +1,2 @@
+cdiff old_lines=24 new_lines=24 only_old=4 only_new=4 other=0
+class - args-output-path pairs=4

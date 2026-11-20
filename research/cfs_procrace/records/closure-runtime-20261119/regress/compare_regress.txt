@@ -1,0 +1,15 @@
+OK rc.txt: lines 13, allowed differences 1, added lines 0, other differences 0
+OK c1.dump.txt: lines 1082, allowed differences 0, added lines 0, other differences 0
+OK c1.convert.log: lines 12, allowed differences 1, added lines 1, other differences 0
+OK c1.run.kzt.txt: lines 3824, allowed differences 2, added lines 0, other differences 0
+OK c5.dump.txt: lines 1190, allowed differences 0, added lines 0, other differences 0
+OK c5.convert.log: lines 13, allowed differences 1, added lines 1, other differences 0
+OK c5.run.kzt.txt: lines 2722, allowed differences 2, added lines 0, other differences 0
+OK c1.plain.txt: lines 1080, allowed differences 0, added lines 0, other differences 0
+OK c5.plain.txt: lines 1189, allowed differences 0, added lines 0, other differences 0
+OK abi32.plain.txt: lines 928, allowed differences 0, added lines 0, other differences 0
+OK abi64.plain.txt: lines 928, allowed differences 0, added lines 0, other differences 0
+OK c1.run.kzt: size 234528, differing bytes 36 (offsets 120..155), outside tool_sha256 and header_crc 0
+OK c5.run.kzt: size 149872, differing bytes 36 (offsets 120..155), outside tool_sha256 and header_crc 0
+OK c1.chain.txt: other lines 18 the same: True; object lines 7; summary unconfirmed(no build-id in dump)
+compare_regress: only declared differences

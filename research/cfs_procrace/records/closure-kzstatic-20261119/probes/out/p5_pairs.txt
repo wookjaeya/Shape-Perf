@@ -1,0 +1,18 @@
+# kept boot record /home/user/work/redesign/obs1/c1pre_boot/tx/tx.dump.txt: actors 16, actors with a root event 15, roots: {'CFE_EVS_TaskMain': 1, 'CFE_SB_TaskMain': 1, 'CFE_ES_TaskMain': 1, 'CFE_ES_BackgroundTask': 1, 'CFE_TIME_TaskMain': 1, 'CFE_TIME_Tone1HzTask': 1, 'CFE_TIME_Local1HzTask': 1, 'CFE_TBL_TaskMain': 1, 'CI_Lab_AppMain': 1, 'TO_LAB_AppMain': 1, 'CF_AppMain': 1, 'BP_AppMain': 1, 'SCH_Lab_AppMain': 1, 'BP_CLA_OutputTask': 1, 'BP_CLA_InputTask': 1}
+# build | rows | pairs (sum of the `pairs:` lines) | listed pair lines | rows with pairs not all listed | mean bytes of a listed pair line | estimate of a complete pair text = pairs x mean | order.txt bytes
+c1_pre_tx | 367 | 24796 | 1988 | 220 | 357 | 8863073 | 2045370
+   planned rows 13 (rows of the sidecar with state=planned): order row found 13; all pairs listed 7, not all listed 6; pairs of the planned rows 1087, listed 66; row values {'unordered': 11, 'unknown': 2}
+   actors named in the listed pairs of planned rows without a root site in the plan: none
+   actors named in the listed pairs of planned rows with no actor of that root in the kept boot record: none
+c1_post_tx | 367 | 24796 | 1988 | 220 | 358 | 8864795 | 2050027
+   planned rows 13 (rows of the sidecar with state=planned): order row found 13; all pairs listed 7, not all listed 6; pairs of the planned rows 1087, listed 66; row values {'unordered': 11, 'unknown': 2}
+   actors named in the listed pairs of planned rows without a root site in the plan: none
+r2_core | 295 | 8739 | 1607 | 158 | 372 | 3247852 | 1561359
+   planned rows 7 (rows of the sidecar with state=planned): order row found 7; all pairs listed 6, not all listed 1; pairs of the planned rows 32, listed 16; row values {'unknown': 4, 'unordered': 2, 'hard_before': 1}
+   actors named in the listed pairs of planned rows without a root site in the plan: none
+c5_641 | 172 | 4393 | 618 | 57 | 414 | 1818674 | 568005
+   planned rows 10 (rows of the sidecar with state=planned): order row found 10; all pairs listed 4, not all listed 6; pairs of the planned rows 1531, listed 65; row values {'unknown': 4, 'unordered': 6}
+   actors named in the listed pairs of planned rows without a root site in the plan: {'CI_Lab_AppMain (script-entry)': 9, 'SAMPLE_AppMain (script-entry)': 9, 'SCH_Lab_AppMain (script-entry)': 6, 'TO_Lab_AppMain (script-entry)': 4, 'CFE_ES_PerfLogDump (spawn-entry)': 8, 'CFE_TIME_Local1HzTask (spawn-entry)': 2, 'CFE_TIME_Tone1HzTask (spawn-entry)': 2}
+c5_642 | 169 | 4382 | 607 | 57 | 531 | 2327427 | 709373
+   planned rows 9 (rows of the sidecar with state=planned): order row found 9; all pairs listed 3, not all listed 6; pairs of the planned rows 1525, listed 59; row values {'unknown': 4, 'unordered': 5}
+   actors named in the listed pairs of planned rows without a root site in the plan: {'CFE_ES_PerfLogDump (spawn-entry)': 8, 'CFE_TIME_Local1HzTask (spawn-entry)': 2, 'CFE_TIME_Tone1HzTask (spawn-entry)': 2, 'CI_Lab_AppMain (script-entry)': 8, 'SAMPLE_AppMain (script-entry)': 8, 'SCH_Lab_AppMain (script-entry)': 5, 'TO_Lab_AppMain (script-entry)': 3}

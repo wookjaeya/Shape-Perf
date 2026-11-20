@@ -1,0 +1,11 @@
+# allowance of compare_classes.py revision 2 for extract.txt of the re-extraction of the extractor-fix step against
+# schema12_extract: records/extract-fixes-20261116/extract_txt_allow.tsv unchanged and the declared fields of the pairs of
+# its FACT_LOCS summary lines (`location <loc>   writers ... -> <status>`, declaration 5.0: "(가)의 location 줄"), the same
+# fields as the [locs] pairs of facts_allow.tsv (plan/full_stage_results_20261116.md 6.0 (가-1))
+change	facts-hash	facts [0-9a-f]{64}	1
+change	rule-targets	  rule targets               \d+ \(R-T1 \d+, R-T2 \d+, both \d+; left out, reached only through an unshared base: R-T1 \d+, R-T2 \d+\)	1
+change	indirect	  indirect calls             \d+ \(resolved \d+, unresolved \d+\)	1
+change	untyped	  untyped write sites        \d+ in the program, \d+ of them count for a target	1
+change	unknown-effect	  unknown-effect passes      \d+ \(pointers that reach a target, passed to code without a body, an unresolved call or a variadic position\)	1
+change	outptr	  out-pointer summaries      store-only \d+, escaping \d+, unsummarized \d+	1
+pair	writers	head	writers \d+ \(direct \d+, data function \d+, out-pointer \d+, initial values \d+\), A-TYPE hits: untyped \d+, escape \d+, cast \d+, union \d+, unknown effect \d+  -> (writer-set-complete|writer-set-incomplete|DISABLED)$	writers <w>, A-TYPE hits: <hits>  -> <status>

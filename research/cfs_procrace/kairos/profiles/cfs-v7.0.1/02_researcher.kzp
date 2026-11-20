@@ -1,0 +1,85 @@
+# 02_researcher.kzp -- the hand-entered records (tier researcher).
+#
+# Each record stands for a claim that no cited text states by itself: a modelling choice, an axiom
+# of the model, a value taken from the SPEC instead of the code, or a limit of the pattern
+# language.  They are counted in the report (kz-phi stats) and are the first place to look when a
+# result depends on the profile.  The author field says who entered the claim, when, and which
+# design cases they had inspected for that API (SPEC 1.6 `authored`).
+phi 1;
+
+prov r_axiom_program_order {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 1.9 and 3.16 row R1; cases inspected: R2";
+  note "Program order inside one actor and inside one handler is an axiom of the model (A3, A4), not a cited text. The looper rule (no edge between two handlers of one actor) is SPEC 1.9.";
+}
+
+prov r_guard_core_serial {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 3.17 and cases/ledger.md (C3, F3); cases inspected: R2";
+  note "The guard cfe >= 6.4.2 is the one the SPEC gives for R19. Only v7.0.1 was read for this profile; the lower bound was NOT re-verified against the 6.4.x sources.";
+}
+
+prov r_phase_anchor {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5); cases inspected: R2";
+  note "The EarlyInit functions are called through the function pointer Entry->EarlyInit (cfe_es_start.c:762), which the pattern language cannot name. R18 is therefore anchored at the first CFE_ES_LockSharedData of the second loop (cfe_es_start.c:788): program order on the startup thread puts every EarlyInit call before it.";
+}
+
+prov r_lp_store_via_unlock {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5); cases inspected: R2";
+  note "The failure-branch store of CFE_ES_GetAppID (cfe_es_api.c:759) is a store through an out parameter, for which the pattern language has no pattern. Its linearization point is bound to the CFE_ES_UnlockSharedData call that follows it in the same critical section (cfe_es_api.c:763), which is later than the store. Both branches reach that call, so the guard of the effect is a filter (`filter`), not an assertion: a false guard there is the success branch, not a disagreement. The extractor's writer entry names the store itself.";
+}
+
+prov r_evs_reg_key_by_id {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5); cases inspected: R2";
+  note "evs.reg is keyed by the exact AppId value. The registry slot is chosen by the index of the AppId and EVS_AppDataIsMatch compares the whole stored AppId, so for an AppId whose slot holds another generation's id the state is UNREG as well. Generations (restarts) are not modelled in this subset; the first AppId written into a slot is the only one it holds.";
+}
+
+prov r_es_self_derived {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 1.3 row es.self; cases inspected: R2";
+  note "es.self(a) is LIVE iff the App record that owns the actor is LIVE. CFE_ES_GetAppRecordByContext also needs the task record of the actor to be a match; the task record is filled before the App record is published (cfe_es_apps.c:694-703 against cfe_es_start.c:818) and is not modelled here.";
+}
+
+prov r_cell_generic {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 1.3 row cell(loc); cases inspected: R2";
+  note "cell(loc) is the generic kind of a shared location whose value is a resource identity: VALID iff the value is a valid Id of the kind it holds. It names no framework object.";
+}
+
+prov r_a_fresh {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 4.2 step 8 and 6.1 (A-FRESH); cases inspected: R2";
+  note "Distinct reservation nodes allocate distinct records that were never used earlier in the run. Hand-entered; refutable by O9, not proved by it.";
+}
+
+prov r_a_owner {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 4.2 step 8 and 6.1 (A-OWNER); cases inspected: R2";
+  note "The App record that CFE_ES_GetAppRecordByContext returns for a task created by StartAppTask(..., ParentAppId) is the record of the reservation whose PendingAppId flowed to ParentAppId. The flow of PendingAppId is computed from the code; the step from the task record to the App record is trusted.";
+}
+
+prov r_cleanup_guard {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 3.6 and A.1 steps 4-5; cases inspected: R2";
+  note "CFE_ES_CleanUpApp retires (LIVE -> RESERVED, cfe_es_apps.c:1498) and later frees a record only for an external app whose AppState is above RUNNING. The caller of CleanUpApp (the background scan, cfe_es_apps.c:1112-1114) establishes this by a relational test on one record that the abstract domain cannot exclude, so the guard of the retire step is declared, not computed. A point event of the retire step whose guard is false in the replay is reported as a refutation (O3, O4).";
+}
+
+prov r_libc_abort {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 4.3 (terminal operations); cases inspected: R2";
+  note "abort(3) ends the process. The declaration belongs to the trusted entries of a certificate (T-TERM); its truth is not checked by the tool.";
+}

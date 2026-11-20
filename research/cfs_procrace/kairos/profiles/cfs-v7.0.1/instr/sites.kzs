@@ -1,0 +1,232 @@
+# sites.kzs -- logical sites of profile cfs-v7.0.1 (case R2) for the instrumented family (kzs-sites 2,
+# kairos/docs/event_semantics.md section 3).  Configuration: the ENV tree, cFS bundle v7.0.1 (088b2fa8,
+# env/build_cfs.sh), build native_std (-O0 -g).
+# Stage D: every site of the F0 plan observe/sites.kzp (35; 40 with the sites 42-46 at the end) has a counterpart here with the same label, and an
+# `equiv ... backends=f0,gcc-plugin status=unconfirmed` line that names the F0 site and how the two positions relate
+# (IR section 9.3: a common name is not an equivalence; it is confirmed only with evidence, stage E).  Exception
+# (stage D leftovers, 2026-10-26): the F0 pair es.start_task.entry/.ret (the entry and return of CFE_ES_StartAppTask,
+# whose requesting function F0 resolves from the return address, slot return_address) has one call-side pair per
+# caller here, labelled es.start_task.entry@<caller>/.ret@<caller>: the request is bound at the call, so the requesting
+# function is the site's func (identity_rule.hpp, request_func), as the return address names it for F0.
+#
+# Positions follow the profile's linearization points (20_ops.kzp `lp at`) at the source statement: call(X) is the
+# call of X (after-call where the profile's effect is done by X or reads its result, at-call where it reads the
+# arguments), store(T.f) is the store statement, memset(T) is that memset call.  F0 approximated some of them (a
+# return join it refuses, a store without a call on its line): the equiv refs say where.  Values are the operands the
+# original code uses (arguments, results, stored values, the enclosing function's parameter values) and an out
+# parameter read by the same thread right after a call (from=out<k>, event_semantics.md 8.1).  No string is copied.
+# The F0 slot `return_address` has no counterpart (entry and return are paired by `link`).
+#
+# Not kept from the stage C manifest (instrument/gcc/sites/r2_v701.kzs): the callee-side store CFE_ES_GetAppID.store,
+# which is not an F0 site and records every caller (selection plan section 4 item 6: narrowed to the caller side,
+# sb_publication).  The SB call sites and sb_publication are points here (F0 meaning), not calls of the send function
+# or of CFE_ES_GetAppID at the call site, so a call of the send function is not seen twice (once at its entry).
+# Line numbers are those of the files at the revisions below.  Nothing here is a research condition.
+kzs-sites 2
+source cfs-bundle rev=088b2fa828db9ff7e00733f1908e0eeb59f66ce3 ref="env/build_cfs.sh BUNDLE_COMMIT (tag v7.0.1)"
+source cfe rev=c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd ref="env/build_cfs.sh PINNED_SUBMODULES"
+source osal rev=d2d877a69cff47452bcca274b309147d48e6c16f ref="env/build_cfs.sh PINNED_SUBMODULES"
+module 1 name=core-cpu1 source=cfs-bundle
+
+# ---- creation-side identity (F0 sites 21-25 and 5-7; the stage C sites 1-8 and their D1 identity reads) ----------
+# The creation request CFE_ES_StartAppTask(TaskIdPtr, TaskName, EntryFunc, Params, ParentAppId), bound at each of its
+# three calls (grep of the pinned cFE: one call in each of these functions, so no line= is needed): the core start
+# CFE_ES_CreateObjects (cfe_es_start.c:810-814), the application start CFE_ES_AppCreate (cfe_es_apps.c:848-854) and the
+# child task creation CFE_ES_CreateChildTask (cfe_es_api.c:1290, nested in the child request of site 3, as in F0).  The
+# opening site of each call is its only phase=before site, so the return's link names it (kzgcc, event_semantics.md 3).
+site 1 label=es.start_task.entry@CFE_ES_CreateObjects op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_CreateObjects callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_start.c:810-814"
+value 1 0 role=name_ptr from=arg1 type=ptr
+value 1 1 role=entry_fn from=arg2 type=ptr
+value 1 2 role=owner_id from=arg4 type=u32 ref="the argument ParentAppId (cfe_es_apps.c:653; L696 TaskRecPtr->AppId = ParentAppId)"
+identity 1 decoder=owner-request owner=2 ref="es_startapptask_def: cfe_es_apps.c:649-670 (ParentAppId; L696 TaskRecPtr->AppId = ParentAppId); the core start: the requesting function names the core service (kz replay --core-request-caller CFE_ES_CreateObjects, from SPEC 3.3)"
+equiv 1 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:141 entry probe of CFE_ES_StartAppTask with return_address (the caller); GCC: the call in CFE_ES_CreateObjects (cfe/modules/es/fsw/src/cfe_es_start.c:810-814), the requesting function is the site's func"
+site 2 label=es.start_task.ret@CFE_ES_CreateObjects op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_CreateObjects callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_start.c:810-814"
+value 2 0 role=status from=ret type=s32
+identity 2 decoder=request-return ref="es_startapptask_def"
+equiv 2 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:142 return probe; GCC: right after the call in CFE_ES_CreateObjects"
+site 38 label=es.start_task.entry@CFE_ES_AppCreate op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_AppCreate callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_apps.c:848-854"
+value 38 0 role=name_ptr from=arg1 type=ptr
+value 38 1 role=entry_fn from=arg2 type=ptr
+value 38 2 role=owner_id from=arg4 type=u32 ref="the argument ParentAppId (cfe_es_apps.c:653; L696 TaskRecPtr->AppId = ParentAppId)"
+identity 38 decoder=owner-request owner=2 ref="es_startapptask_def: cfe_es_apps.c:649-670 (ParentAppId; L696 TaskRecPtr->AppId = ParentAppId); the start of an application from the startup script or a command"
+equiv 38 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:141 entry probe of CFE_ES_StartAppTask with return_address (the caller); GCC: the call in CFE_ES_AppCreate (cfe/modules/es/fsw/src/cfe_es_apps.c:848-854), the requesting function is the site's func"
+site 39 label=es.start_task.ret@CFE_ES_AppCreate op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_AppCreate callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_apps.c:848-854"
+value 39 0 role=status from=ret type=s32
+identity 39 decoder=request-return ref="es_startapptask_def"
+equiv 39 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:142 return probe; GCC: right after the call in CFE_ES_AppCreate"
+site 40 label=es.start_task.entry@CFE_ES_CreateChildTask op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_api.c:1290"
+value 40 0 role=name_ptr from=arg1 type=ptr
+value 40 1 role=entry_fn from=arg2 type=ptr
+value 40 2 role=owner_id from=arg4 type=u32 ref="the argument ParentAppId (cfe_es_apps.c:653; L696 TaskRecPtr->AppId = ParentAppId)"
+identity 40 decoder=owner-request owner=2 ref="es_startapptask_def: cfe_es_apps.c:649-670 (ParentAppId; L696 TaskRecPtr->AppId = ParentAppId); inside the child request of site 3 (es_childtask_owner: the owner is the caller's own application, this argument is not used)"
+equiv 40 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:141 entry probe of CFE_ES_StartAppTask with return_address (the caller); GCC: the call in CFE_ES_CreateChildTask (cfe/modules/es/fsw/src/cfe_es_api.c:1290), the requesting function is the site's func"
+site 41 label=es.start_task.ret@CFE_ES_CreateChildTask op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_api.c:1290"
+value 41 0 role=status from=ret type=s32
+identity 41 decoder=request-return ref="es_startapptask_def"
+equiv 41 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:142 return probe; GCC: right after the call in CFE_ES_CreateChildTask"
+site 3 label=es.child_task.entry op=es.child_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask line=1202 ref="cfe/modules/es/fsw/src/cfe_es_api.c:1202-1208, owner 1255-1290"
+value 3 0 role=name_ptr from=arg1 type=ptr
+value 3 1 role=entry_fn from=arg2 type=ptr
+identity 3 decoder=child-request ref="es_childtask_owner: cfe_es_api.c:1255-1290 (the parent application is the caller's own)"
+equiv 3 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:145 entry probe; same function entry"
+site 4 label=es.child_task.ret op=es.child_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask ref="cfe/modules/es/fsw/src/cfe_es_api.c:1202"
+value 4 0 role=status from=ret type=s32
+identity 4 decoder=request-return ref="es_childtask_sig"
+equiv 4 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:146 return probe; GCC: the joined return"
+site 5 label=osal.task_create.entry op=osal.task_create phase=before tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskCreate line=164 ref="osal/src/os/shared/src/osapi-task.c:164-170"
+value 5 0 role=name_ptr from=arg1 type=ptr
+value 5 1 role=entry_fn from=arg2 type=ptr
+value 5 2 role=priority from=arg5 type=u8 ref="osal/src/os/inc/osapi-task.h:44 typedef uint8_t osal_priority_t"
+identity 5 decoder=spawn-create ref="os_create_sig: osapi-task.c:164-170"
+equiv 5 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:85 entry probe; same function entry"
+site 6 label=osal.task_create.ret op=osal.task_create phase=after tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskCreate ref="osal/src/os/shared/src/osapi-task.c:164"
+value 6 0 role=status from=ret type=s32
+identity 6 decoder=spawn-return ref="os_create_sig"
+equiv 6 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:86 return probe; GCC: the joined return (every OS_CHECK_* return included)"
+site 7 label=osal.task_entry op=osal.task_entry phase=before tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskEntryPoint line=124 ref="osal/src/os/shared/src/osapi-task.c:124-138"
+value 7 0 role=task_id from=arg0 type=u32
+identity 7 decoder=thread-entry id=0 ref="os_entry_def: osapi-task.c:124-138"
+equiv 7 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:87 entry probe; same function entry"
+# In this OSAL revision entry_arg is the 6th argument (F0: r9).
+site 8 label=osal.task_create.id op=osal.task_create phase=before tu=osal/src/os/posix/src/os-impl-tasks.c func=OS_Posix_InternalTaskCreate_Impl line=457 ref="osal/src/os/posix/src/os-impl-tasks.c:457-462, 596-625"
+value 8 0 role=task_id from=arg5 type=u32 ref="osal/src/os/shared/inc/os-shared-globaldefs.h:77 OS_VoidPtrValueWrapper_t (osal_id_t id, low 4 bytes on this little-endian target)"
+value 8 1 role=entry_fn from=arg4 type=ptr
+identity 8 decoder=spawn-id id=0 ref="osal_taskcreate_impl_arg: os-impl-tasks.c:596-625 (arg.id passed as entry_arg, the 6th argument)"
+equiv 8 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:149 entry probe; same function entry"
+
+# ---- the send function, every caller, and the SB task's id (F0 sites 0-4) ------------------------------------------
+site 10 label=evs.send.entry op=evs.send phase=before tu=cfe/modules/evs/fsw/src/cfe_evs.c func=CFE_EVS_SendEventWithAppID line=169 ref="cfe/modules/evs/fsw/src/cfe_evs.c:169-214"
+value 10 0 role=event_id from=arg0 type=u16
+value 10 1 role=event_type from=arg1 type=u16 ref="cfe_evs.c:170 CFE_EVS_EventType_Enum_t (default_cfe_evs_extern_typedefs.h:107 uint16)"
+value 10 2 role=app_id from=arg2 type=u32
+equiv 10 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:74 entry probe; same function entry; F0 reads event_type as u32 of the register (the argument is a uint16)"
+site 11 label=evs.send.ret op=evs.send phase=after tu=cfe/modules/evs/fsw/src/cfe_evs.c func=CFE_EVS_SendEventWithAppID ref="cfe/modules/evs/fsw/src/cfe_evs.c:169-214"
+value 11 0 role=status from=ret type=s32
+equiv 11 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:75 return probe; GCC: the joined return"
+# Two labels at the one call of L138 (as F0): sb.appid.store (counts) and sb_publication (the profile's publication site).
+site 12 label=sb.appid.store op=sb.publish_id phase=point tu=cfe/modules/sb/fsw/src/cfe_sb_task.c func=CFE_SB_AppInit callee=CFE_ES_GetAppID line=138 place=after-call ref="cfe/modules/sb/fsw/src/cfe_sb_task.c:138"
+value 12 0 role=status from=ret type=s32
+equiv 12 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:78 after-call; same call"
+site 13 label=sb_publication op=sb.publish_id phase=point tu=cfe/modules/sb/fsw/src/cfe_sb_task.c func=CFE_SB_AppInit callee=CFE_ES_GetAppID line=138 place=after-call ref="cfe/modules/sb/fsw/src/cfe_sb_task.c:138"
+value 13 0 role=status from=ret type=s32
+value 13 1 role=out_app_id from=out0 type=u32 ref="CFE_SB_Global.AppId (cfe_sb_task.c:138), read by the SB task right after the call (not a value of the profile's point)"
+equiv 13 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:166 after-call; same call; slot out_app_id added (F0 does not read the stored value)"
+site 14 label=es.sync.entry op=es.sync phase=before tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_MainTaskSyncDelay line=860 ref="cfe/modules/es/fsw/src/cfe_es_start.c:860-918, call 833-835"
+value 14 0 role=app_state from=arg0 type=u32
+value 14 1 role=timeout_msec from=arg1 type=u32
+equiv 14 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:81 entry probe; same function entry"
+site 15 label=es.sync.ret op=es.sync phase=after tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_MainTaskSyncDelay ref="cfe/modules/es/fsw/src/cfe_es_start.c:860-918"
+value 15 0 role=status from=ret type=s32
+equiv 15 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:82 return probe; GCC: the joined return"
+
+# ---- registration and writer effects (F0 sites 8-20) ----------------------------------------------------------
+site 16 label=evs.register.entry op=evs.register phase=before tu=cfe/modules/evs/fsw/src/cfe_evs.c func=CFE_EVS_Register line=42 ref="cfe/modules/evs/fsw/src/cfe_evs.c:42-111"
+equiv 16 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:105 entry probe; same function entry"
+site 17 label=evs.register.ret op=evs.register phase=after tu=cfe/modules/evs/fsw/src/cfe_evs.c func=CFE_EVS_Register ref="cfe/modules/evs/fsw/src/cfe_evs.c:42-111"
+value 17 0 role=status from=ret type=s32
+equiv 17 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:106 return probe; GCC: the joined return"
+site 18 label=CFE_EVS_Register.clear_slot op=evs.register phase=effect tu=cfe/modules/evs/fsw/src/cfe_evs.c func=CFE_EVS_Register callee=memset line=56 place=after-call ref="cfe/modules/evs/fsw/src/cfe_evs.c:56"
+value 18 0 role=slot_ptr from=arg0 type=ptr ref="memset's first argument AppDataPtr (the value memset returns, F0's rax)"
+equiv 18 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:107 after-call memset; same call"
+# Profile: fn(CFE_EVS_Register).call(EVS_AppDataSetUsed): right after that call (the slot holds the AppID).  F0 took the
+# start of line 106, before the call, because the instruction after it is the join of the return paths.
+site 19 label=CFE_EVS_Register.register op=evs.register phase=effect tu=cfe/modules/evs/fsw/src/cfe_evs.c func=CFE_EVS_Register callee=EVS_AppDataSetUsed line=106 place=after-call ref="cfe/modules/evs/fsw/src/cfe_evs.c:106, cfe_evs_utils.h:134-137"
+value 19 0 role=app_id from=arg1 type=u32 ref="EVS_AppDataSetUsed(AppDataPtr, AppID): the AppID stored into the slot"
+equiv 19 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:110 line start of L106 (before the call); GCC: right after the call (the store done); slot app_id added"
+site 20 label=CFE_EVS_SendEventWithAppID.slot_registered op=evs.send phase=point tu=cfe/modules/evs/fsw/src/cfe_evs.c func=CFE_EVS_SendEventWithAppID callee=EVS_AppDataIsMatch line=190 place=after-call ref="cfe/modules/evs/fsw/src/cfe_evs.c:185-194"
+value 20 0 role=is_match from=ret type=u8 ref="bool EVS_AppDataIsMatch (cfe_evs_utils.h:164-167)"
+equiv 20 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:111 after-call; same call"
+site 21 label=es.wait.entry op=es.wait phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_WaitForSystemState line=514 ref="cfe/modules/es/fsw/src/cfe_es_api.c:514-576"
+value 21 0 role=min_system_state from=arg0 type=u32
+value 21 1 role=timeout_milliseconds from=arg1 type=u32
+equiv 21 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:112 entry probe; same function entry"
+site 22 label=es.wait.ret op=es.wait phase=after tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_WaitForSystemState ref="cfe/modules/es/fsw/src/cfe_es_api.c:514-576"
+value 22 0 role=status from=ret type=s32
+equiv 22 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:113 return probe; GCC: the joined return"
+# Profile: fn(CFE_ES_WaitForSystemState).store(CFE_ES_AppRecord_t.AppState) values required: the field store of L573
+# through the local pointer AppRecPtr, with the level it stores (lp.required, which F0 could not read).
+site 23 label=CFE_ES_WaitForSystemState.raise_state op=es.wait phase=effect tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_WaitForSystemState line=573 place=store ref="cfe/modules/es/fsw/src/cfe_es_api.c:571-574"
+value 23 0 role=required from=operand0 type=u32 ref="the stored value RequiredAppState (uint32)"
+value 23 1 role=app_state_ptr from=operand1 type=ptr ref="&AppRecPtr->AppState"
+equiv 23 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:116 line start of L573 (before the store); GCC: right after the store; slot required added"
+# One memset, two effects of the profile (records and states): two sites after the one call of L82 (as F0).
+site 24 label=CFE_ES_Main.reset_records op=es.main phase=effect tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_Main callee=memset line=82 place=after-call ref="cfe/modules/es/fsw/src/cfe_es_start.c:82"
+value 24 0 role=dest from=arg0 type=ptr ref="&CFE_ES_Global"
+equiv 24 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:118 after-call memset; same call"
+site 25 label=CFE_ES_Main.reset_states op=es.main phase=effect tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_Main callee=memset line=82 place=after-call ref="cfe/modules/es/fsw/src/cfe_es_start.c:82"
+value 25 0 role=dest from=arg0 type=ptr ref="&CFE_ES_Global"
+equiv 25 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:119 after-call memset; same call"
+site 26 label=CFE_ES_CreateObjects.reserve_core op=es.create_objects phase=effect tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_CreateObjects callee=CFE_ES_AppRecordSetUsed line=803 place=after-call ref="cfe/modules/es/fsw/src/cfe_es_start.c:803"
+equiv 26 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:120 after-call; same call"
+site 27 label=CFE_ES_CreateObjects.publish_core op=es.create_objects phase=effect tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_CreateObjects callee=CFE_ES_AppRecordSetUsed line=818 place=after-call ref="cfe/modules/es/fsw/src/cfe_es_start.c:816-818"
+value 27 0 role=pending_id from=arg1 type=u32 ref="CFE_ES_AppRecordSetUsed(AppRecPtr, PendingAppId): the id published (profile value pending_id)"
+equiv 27 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:121 after-call; same call; slot pending_id added"
+# The failure clear of the core start (L823 memset(AppRecPtr, 0, ...)): right after the memset.  F0 took the start of
+# line 823, before it.
+site 28 label=core_clear op=es.create_objects phase=effect tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_CreateObjects callee=memset line=823 place=after-call ref="cfe/modules/es/fsw/src/cfe_es_start.c:821-824"
+value 28 0 role=dest from=arg0 type=ptr ref="AppRecPtr"
+equiv 28 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:122 line start of L823 (before the memset); GCC: right after the memset"
+
+# ---- the AppID passed at the SB call sites (F0 sites 27-29, capture points at-call) ---------------------------------
+# The value the SB call sites pass as AppID is loaded from CFE_SB_Global.AppId in the same statement (static derives,
+# kairos/tests/static/data/core_cpu1.golden lines 503, 525, 532); slot 1 names that location for the replay (`cell`).
+site 30 label=CFE_EVS_SendEventWithAppID.id_valid@sb_api_275 op=evs.send phase=point tu=cfe/modules/sb/fsw/src/cfe_sb_api.c func=CFE_SB_CreatePipe callee=CFE_EVS_SendEventWithAppID line=275 place=at-call ref="cfe/modules/sb/fsw/src/cfe_sb_api.c:275-277"
+value 30 0 role=event_id from=arg0 type=u16
+value 30 1 role=value(CFE_SB_Global.AppId) from=arg2 type=u32 ref="the argument is CFE_SB_Global.AppId (cfe_sb_api.c:277), loaded in the same statement"
+value 30 2 role=app_id from=arg2 type=u32
+equiv 30 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:167 at-call; same call"
+site 31 label=CFE_EVS_SendEventWithAppID.id_valid@sb_api_1183 op=evs.send phase=point tu=cfe/modules/sb/fsw/src/cfe_sb_api.c func=CFE_SB_SubscribeFull callee=CFE_EVS_SendEventWithAppID line=1183 place=at-call ref="cfe/modules/sb/fsw/src/cfe_sb_api.c:1183-1185"
+value 31 0 role=event_id from=arg0 type=u16
+value 31 1 role=value(CFE_SB_Global.AppId) from=arg2 type=u32 ref="cfe_sb_api.c:1185 CFE_SB_Global.AppId"
+value 31 2 role=app_id from=arg2 type=u32
+equiv 31 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:168 at-call; same call"
+site 32 label=CFE_EVS_SendEventWithAppID.id_valid@sb_priv_786 op=evs.send phase=point tu=cfe/modules/sb/fsw/src/cfe_sb_priv.c func=CFE_SB_MessageTxn_ReportSingleEvent callee=CFE_EVS_SendEventWithAppID line=786 place=at-call ref="cfe/modules/sb/fsw/src/cfe_sb_priv.c:786"
+value 32 0 role=event_id from=arg0 type=u16
+value 32 1 role=value(CFE_SB_Global.AppId) from=arg2 type=u32 ref="cfe_sb_priv.c:786 CFE_SB_Global.AppId"
+value 32 2 role=app_id from=arg2 type=u32
+equiv 32 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:169 at-call; same call"
+
+# ---- the remaining writers of evs.reg and CFE_SB_Global.AppId (F0 sites 30-34) ---------------------------------------
+site 33 label=CFE_EVS_EarlyInit.clear_registry op=evs.early_init phase=effect tu=cfe/modules/evs/fsw/src/cfe_evs_task.c func=CFE_EVS_EarlyInit callee=memset line=63 place=after-call ref="cfe/modules/evs/fsw/src/cfe_evs_task.c:63"
+value 33 0 role=dest from=arg0 type=ptr ref="&CFE_EVS_Global"
+equiv 33 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:186 after-call memset; same call"
+site 34 label=CFE_SB_EarlyInit.clear_global op=sb.early_init phase=effect tu=cfe/modules/sb/fsw/src/cfe_sb_init.c func=CFE_SB_EarlyInit callee=memset line=50 place=after-call ref="cfe/modules/sb/fsw/src/cfe_sb_init.c:50"
+value 34 0 role=dest from=arg0 type=ptr ref="&CFE_SB_Global"
+equiv 34 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:187 after-call memset; same call"
+site 35 label=evs.cleanup.entry op=evs.cleanup phase=before tu=cfe/modules/evs/fsw/src/cfe_evs_task.c func=CFE_EVS_CleanUpApp line=178 ref="cfe/modules/evs/fsw/src/cfe_evs_task.c:178-198"
+value 35 0 role=id from=arg0 type=u32
+equiv 35 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:188 entry probe; same function entry"
+site 36 label=evs.cleanup.ret op=evs.cleanup phase=after tu=cfe/modules/evs/fsw/src/cfe_evs_task.c func=CFE_EVS_CleanUpApp ref="cfe/modules/evs/fsw/src/cfe_evs_task.c:178-198"
+value 36 0 role=status from=ret type=s32
+equiv 36 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:189 return probe; GCC: the joined return"
+# Profile: fn(CFE_EVS_CleanUpApp).call(EVS_AppDataSetFree): right after that call (the slot is free).  F0 took the call
+# instruction (at-call) because the instruction after it is the join of the return paths.
+site 37 label=CFE_EVS_CleanUpApp.free_slot op=evs.cleanup phase=effect tu=cfe/modules/evs/fsw/src/cfe_evs_task.c func=CFE_EVS_CleanUpApp callee=EVS_AppDataSetFree line=194 place=after-call ref="cfe/modules/evs/fsw/src/cfe_evs_task.c:192-194"
+equiv 37 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:190 at-call (before the call); GCC: right after the call"
+
+# ---- R2 interval boundaries (F0 sites 35-37, 2026-10-29, plan/r2_intervals_20261029.md) ---------------------------
+# The end of initialization (the OPERATIONAL line and state, cfe_es_start.c:233-234), the commanded restart in the ES
+# command path (cfe_es_task.c:651-664) and the setter of SB subscription reporting (cfe_sb_task.c:1224-1227, called at
+# L296 enable and L308 disable).  Not linearization points of the profile: the conversion keeps them as events of
+# sites the replay does not map.  Same positions as F0: after the same call, at the same call, the same function entry.
+site 42 label=es.main.operational op=es.main phase=point tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_Main callee=CFE_ES_WriteToSysLog line=233 place=after-call ref="cfe/modules/es/fsw/src/cfe_es_start.c:233-234"
+equiv 42 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:208 after-call of L233 (F0 binds the store instruction of L234, before the store); GCC: right after the call; same call, no value"
+site 43 label=es.restart_cmd.reset_cfe op=es.restart_cmd phase=point tu=cfe/modules/es/fsw/src/cfe_es_task.c func=CFE_ES_RestartCmd callee=CFE_ES_ResetCFE line=664 place=at-call ref="cfe/modules/es/fsw/src/cfe_es_task.c:651-664"
+value 43 0 role=reset_type from=arg0 type=u32 ref="the argument cmd->RestartType (cfe_es_task.c:664; CFE_ES_ResetCFE(uint32 ResetType), cfe_es_api.c:65)"
+equiv 43 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:210 at-call; same call; F0 reads the argument register edi"
+site 44 label=sb.sub_reporting.set op=sb.sub_reporting phase=before tu=cfe/modules/sb/fsw/src/cfe_sb_task.c func=CFE_SB_SetSubscriptionReporting line=1224 ref="cfe/modules/sb/fsw/src/cfe_sb_task.c:1224-1227"
+value 44 0 role=state from=arg0 type=u32 ref="the stored state (CFE_SB_ENABLE 1, CFE_SB_DISABLE 0; cfe_sb_priv.h:71-72)"
+equiv 44 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:212 entry probe; same function entry"
+
+# ---- the default scope's end (F0 sites 38-39, 2026-10-29, plan/r2_intervals_20261029.md section 6 item 1) -----------
+# The profile's scope (10_kinds.kzp L22-29) ends at CFE_PSP_Restart.request_shutdown (20_ops.kzp: store of
+# CFE_PSP_IdleTaskState_t.ShutdownReq) and enters teardown at OS_Application_Run.teardown (call of OS_DeleteAllObjects).
+# Labels are those points (OP.LABEL), so the conversion maps them and the replay applies the scope.
+source psp rev=c4b3b0b65b119e106481ad8e20976ae4d7f554e3 ref="env/build_cfs.sh PINNED_SUBMODULES"
+# Profile: fn(CFE_PSP_Restart).store(CFE_PSP_IdleTaskState_t.ShutdownReq): right after the store of L87.  F0 took the
+# start of line 87, before it (the line has no call).
+site 45 label=CFE_PSP_Restart.request_shutdown op=psp.restart phase=effect tu=psp/fsw/pc-linux/src/cfe_psp_support.c func=CFE_PSP_Restart line=87 place=store ref="psp/fsw/pc-linux/src/cfe_psp_support.c:87"
+equiv 45 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:225 line start of L87 (before the store); GCC: right after the store; the next statement (L88 pthread_kill) is not observed"
+# Profile: fn(OS_Application_Run).call(OS_DeleteAllObjects): right after that call (as F0).
+site 46 label=OS_Application_Run.teardown op=psp.app_run phase=effect tu=psp/fsw/pc-linux/src/cfe_psp_start.c func=OS_Application_Run callee=OS_DeleteAllObjects line=507 place=after-call ref="psp/fsw/pc-linux/src/cfe_psp_start.c:488-507"
+equiv 46 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:226 after-call; same call"

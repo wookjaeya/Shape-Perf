@@ -1,0 +1,30 @@
+# commands of the second group of review fixes (plan/full_stage_results_20261116.md section 12); <scratch> is this session's
+# scratchpad directory; times UTC, 2026-11-18.  NO build of the MC tree was made in this step: kz-static stays 1a47abd0.
+## 1. before any run
+declaration 12.0 (a) and prebuild/prebuild_regress.sh committed as fb1d9ff
+space_guard.sh --need 60000000 --log df_prebuild_regress.log -- prebuild/prebuild_regress.sh > prebuild/prebuild_regress.txt   rc=0 (71 OK, 0 BAD; dip 30969856)
+## 2. corrected copies of earlier comparison scripts
+addendum 12.0 (a-1) (STRINGS in the rounds comparison of declaration 10.0) and recheck/{rounds_cmp_2.py,compare_plans_2.py,recheck.sh} committed as 8bb5a81, before their runs
+space_guard.sh ... -- recheck/recheck.sh rounds   rc=0 (recheck/recheck_rounds.txt: 15 OK)
+space_guard.sh ... -- recheck/recheck.sh plans    rc=0 (recheck/recheck_plans.txt: 55 lines "only declared differences")
+space_guard.sh ... -- recheck/recheck.sh measure  rc=0 (recheck/recheck_measure.txt: five builds rc 0, the same bytes as the kept files; recheck/measure/)
+## 3. source changes and the scratch check build (no evidence; every cmake, make, ctest and run under space_guard.sh, logs scratch_guard/)
+kairos/lib/llvm: outcome.hpp (new), semantics.cpp, serialize.cpp, ast_fn.cpp, finalize.cpp, relations.cpp, order.cpp, plan_gen.{hpp,cpp}, result_flow.cpp
+kairos/tests/static: fixtures objaccess.c, resultflow.c, looplock.c, relcallback.c; data/looplock_fixture/framework_semantics_fixture-lock.txt; static_golden.cpp; test_static_cli.cpp; test_static_plan.cpp
+scratch check build <scratch>/rf2/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_BUILD_LLVM_TOOLS=ON (the pinned LLVM); targets kz-static, test_static_cli, test_static_reasons, test_static_plan, static_golden, kz_lint
+  scratch_guard/001 cmake rc 0; 002 make rc 2 (outcome.hpp included kz_facts.h directly; fixed to kz_schema.h); 003 make rc 0; 005, 007, 011, 014, 016, 018 the later makes, rc 0
+  scratch_guard/004 and 020: the scratch tool on kept facts (T8CF and ll_final_extract): relations --keys and order --edges into <scratch>; 020 summarised in scratch_measure.txt
+  scratch_guard/006, 008, 009, 017, 019: ctest -R 'static|lint' in scratch (009: the fixture objaccess.c failed to compile under -Werror, fixed); the last one kept as scratch_ctest_static.log
+  scratch_guard/010, 012, 013, 015: KZ_GOLDEN_UPDATE=1 ctest -R 'static_golden|test_static_plan' in scratch (the goldens were written into the working tree)
+  changes during the check: a guard that reads an address-taken local was first written not-computed as a whole; that removed every caller-side use under `f(&x) == OK && x != 0` (fixture HB-await 18 -> 0), so the local and a switch case became unknown terms of the guard (three-valued reading); the lock fixture's exit_like changed to a release-only function with a caller finish_with so that a LOCK_OPS row of the caller exists
+  MISTAKE: the command that should have copied the scratch goldens into golden_scratch/ used paths relative to the wrong directory (the copies failed), and the next commands restored the working tree's goldens (git checkout) and removed the scratch build: the scratch goldens were lost
+  scratch_guard/021-024: the scratch build made again (<scratch>/rf2/sbuild2: cmake, make, golden update, ctest -> scratch_ctest_static_2.log), the 17 goldens that differ from HEAD copied to golden_scratch/ (golden_scratch.sha256), the working tree's goldens restored to HEAD, the build removed
+  scratch ctest (both logs): test_static_cli 1184 checks, test_static_reasons 763, test_static_plan 277, lint selftest 114 cases 0 failed, 7 lint rules clean; 9 test programs not built in scratch did not run
+## 4. checks at the end (the MC tree and its tools unchanged)
+ledger_check.sh -> ledger_check_end.txt (135 rows, 0 failing); new rows OBS_rf2_pre_relcheck, OBS_rf2_pre_order, OBS_rf2_pre_final_order (lists rf2_pre_*.sha256); the notes of four rows corrected (STRINGS)
+tools_check.sh --deep -> tools_check_end.txt (49 rows, 0 failing); TOOLS.tsv not changed
+env/tools/tests/run_unit.sh -> unit_tools.txt (17 of 17); env/redesign/step2a_tests_unit.sh -> unit_step2a.txt (7 of 7)
+ctest -V -R '^lint' in the MC tree with the present kz_lint on the changed source tree -> mc_lint_present_tool.log (8 of 8 pass: selftest 114 cases, 7 rules clean)
+NOT done: the declaration of the kz-static build, the tool copy, the MC build, the full ctest, the five builds, their comparisons and measurements (results 12.8, 12.9)
+the scratchpad directory is written as <scratch> in the kept logs of this directory (its path was replaced in scratch_guard/*.log, the scratch ctest logs and the unit logs after the runs; nothing else in them was changed)
+name_check.sh --rev 36d61db d564a01 (the three commits of this step) -> name_check_rev.txt (rc 0); free at the end (df -B1 /): 1465200640

@@ -1,0 +1,56 @@
+# plan.kzs, plan.side, plan.req, plan.mod, plan.exe and args.txt of one plan: header fields that name the rules
+# revisions, the hashes of the facts, of the sidecar and of the tool, and the output and input paths; then the statement
+# kinds of the plan files, one class each (a statement that differs in any field is one line removed and one added).
+mask	kzs-header-revisions	.*	^(# kz plan written by kz-static plan \(plan rules revision )[0-9]+ \([0-9-]+\); relations rules revision [0-9]+ \([0-9-]+\)\)$	\1R; relations rules revision R)
+mask	sidecar-sha256	.*	^# sidecar sha256=[0-9a-f]{64}$	# sidecar sha256=H
+mask	table-header-path-and-sha256	.*	^(# kz (module table|executables to check); plan sidecar )\S+ sha256=[0-9a-f]{64}$	\1P sha256=H
+mask	args-output-path	.*	^\S+/(plan\.(kzs|side|mod|exe|req))$	DIR/\1
+mask	args-input-path	.*	^\S+/NP/((facts|basis)\.kz)$	DIR/NP/\1
+mask	hex64-field	.*	[0-9a-f]{64}	H
+mask	revision-field	.*	(rules revision )[0-9]+ \([0-9-]+\)	\1R
+del	statement:row	.*	^row( |$)
+add	statement:row	.*	^row( |$)
+del	statement:site	.*	^site( |$)
+add	statement:site	.*	^site( |$)
+del	statement:need	.*	^need( |$)
+add	statement:need	.*	^need( |$)
+del	statement:map	.*	^map( |$)
+add	statement:map	.*	^map( |$)
+del	statement:value	.*	^value( |$)
+add	statement:value	.*	^value( |$)
+del	statement:spawn	.*	^spawn( |$)
+add	statement:spawn	.*	^spawn( |$)
+del	statement:identity	.*	^identity( |$)
+add	statement:identity	.*	^identity( |$)
+del	statement:request	.*	^request( |$)
+add	statement:request	.*	^request( |$)
+del	statement:plan	.*	^plan( |$)
+add	statement:plan	.*	^plan( |$)
+del	statement:facts-artifact	.*	^facts-artifact( |$)
+add	statement:facts-artifact	.*	^facts-artifact( |$)
+del	statement:gap	.*	^gap( |$)
+add	statement:gap	.*	^gap( |$)
+del	statement:control-budget	.*	^control-budget( |$)
+add	statement:control-budget	.*	^control-budget( |$)
+del	statement:end-rows	.*	^end rows
+add	statement:end-rows	.*	^end rows
+del	args:control-budget-reason	.*	^the path A control selection 
+add	args:control-budget-reason	.*	^the path A control selection 
+del	statement:input	.*	^input( |$)
+add	statement:input	.*	^input( |$)
+del	statement:rules	.*	^rules( |$)
+add	statement:rules	.*	^rules( |$)
+del	statement:plan-id	.*	^plan-id( |$)
+add	statement:plan-id	.*	^plan-id( |$)
+del	statement:classes	.*	^classes( |$)
+add	statement:classes	.*	^classes( |$)
+del	statement:budget	.*	^budget( |$)
+add	statement:budget	.*	^budget( |$)
+del	statement:requests	.*	^requests( |$)
+add	statement:requests	.*	^requests( |$)
+del	statement:bound	.*	^bound( |$)
+add	statement:bound	.*	^bound( |$)
+del	header:kzs-generator-line	.*	^# kz plan written by kz-static plan 
+add	header:kzs-generator-line	.*	^# kz plan written by kz-static plan 
+del	args:budget-reason-of-the-measurement-plan	.*	^a measurement of the 
+add	args:budget-reason-of-the-measurement-plan	.*	^a measurement of the 

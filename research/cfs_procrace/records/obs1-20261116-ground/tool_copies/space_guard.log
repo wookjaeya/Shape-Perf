@@ -1,0 +1,95 @@
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'tools/kz-static/kz-static' > '/home/user/work/preserve/tools-20261116/kz-static.0024f192.xz'
+start 2026-11-16T05:07:42.395Z free=580042752 threshold=364572800
+sample 2026-11-16T05:07:42.400Z 580038656
+sample 2026-11-16T05:07:44.406Z 580038656
+sample 2026-11-16T05:07:46.413Z 580038656
+sample 2026-11-16T05:07:48.420Z 580038656
+sample 2026-11-16T05:07:50.428Z 580038656
+sample 2026-11-16T05:07:52.434Z 580038656
+sample 2026-11-16T05:07:54.440Z 580038656
+sample 2026-11-16T05:07:56.446Z 580038656
+sample 2026-11-16T05:07:58.451Z 580038656
+sample 2026-11-16T05:08:00.457Z 580038656
+sample 2026-11-16T05:08:02.463Z 580038656
+sample 2026-11-16T05:08:04.469Z 580038656
+sample 2026-11-16T05:08:06.475Z 580038656
+sample 2026-11-16T05:08:08.481Z 580038656
+sample 2026-11-16T05:08:10.503Z 580038656
+sample 2026-11-16T05:08:12.509Z 580038656
+sample 2026-11-16T05:08:14.522Z 580038656
+sample 2026-11-16T05:08:16.528Z 580038656
+sample 2026-11-16T05:08:18.535Z 580038656
+sample 2026-11-16T05:08:20.543Z 580038656
+sample 2026-11-16T05:08:22.550Z 580038656
+sample 2026-11-16T05:08:24.557Z 580038656
+sample 2026-11-16T05:08:26.563Z 580038656
+sample 2026-11-16T05:08:28.569Z 580038656
+sample 2026-11-16T05:08:30.575Z 580038656
+sample 2026-11-16T05:08:32.581Z 580038656
+sample 2026-11-16T05:08:34.587Z 580038656
+sample 2026-11-16T05:08:36.595Z 580038656
+sample 2026-11-16T05:08:38.602Z 580038656
+sample 2026-11-16T05:08:40.608Z 580038656
+sample 2026-11-16T05:08:42.614Z 580038656
+sample 2026-11-16T05:08:44.620Z 580038656
+sample 2026-11-16T05:08:46.628Z 580038656
+sample 2026-11-16T05:08:48.634Z 580038656
+sample 2026-11-16T05:08:50.641Z 580038656
+sample 2026-11-16T05:08:52.650Z 580038656
+sample 2026-11-16T05:08:54.656Z 580038656
+sample 2026-11-16T05:08:56.664Z 580038656
+sample 2026-11-16T05:08:58.670Z 580038656
+sample 2026-11-16T05:09:00.678Z 580038656
+sample 2026-11-16T05:09:02.685Z 580038656
+sample 2026-11-16T05:09:04.691Z 580038656
+sample 2026-11-16T05:09:06.697Z 580038656
+sample 2026-11-16T05:09:08.703Z 580038656
+sample 2026-11-16T05:09:10.709Z 580038656
+sample 2026-11-16T05:09:12.716Z 580038656
+sample 2026-11-16T05:09:14.723Z 580038656
+sample 2026-11-16T05:09:16.730Z 580038656
+sample 2026-11-16T05:09:18.737Z 580038656
+sample 2026-11-16T05:09:20.742Z 580038656
+sample 2026-11-16T05:09:22.751Z 580038656
+sample 2026-11-16T05:09:24.757Z 580038656
+sample 2026-11-16T05:09:26.762Z 580038656
+sample 2026-11-16T05:09:28.769Z 580038656
+sample 2026-11-16T05:09:30.775Z 580038656
+sample 2026-11-16T05:09:32.781Z 580038656
+end 2026-11-16T05:09:34.788Z kind=copy verdict=completed rc=0 free=540782592 lowest=540782592 dip=39260160 change=-39260160
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'tests/lint/kz_lint' > '/home/user/work/preserve/tools-20261116/kz_lint.b0f0d6a5.xz'
+start 2026-11-16T05:09:34.803Z free=540778496 threshold=364572800
+sample 2026-11-16T05:09:34.808Z 540778496
+end 2026-11-16T05:09:36.815Z kind=copy verdict=completed rc=0 free=539832320 lowest=539832320 dip=946176 change=-946176
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'CMakeCache.txt' > '/home/user/work/preserve/tools-20261116/mc.CMakeCache.txt.bc2f43b4.xz'
+start 2026-11-16T05:09:36.824Z free=539832320 threshold=364572800
+sample 2026-11-16T05:09:36.828Z 539832320
+end 2026-11-16T05:09:38.838Z kind=copy verdict=completed rc=0 free=539828224 lowest=539828224 dip=4096 change=-4096
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'instrument/clang/CMakeFiles/kz-instr-clang.dir/flags.make' > '/home/user/work/preserve/tools-20261116/mc.kz-instr-clang.flags.make.b830e17e.xz'
+start 2026-11-16T05:09:38.854Z free=539828224 threshold=364572800
+sample 2026-11-16T05:09:38.858Z 539828224
+end 2026-11-16T05:09:40.867Z kind=copy verdict=completed rc=0 free=539824128 lowest=539824128 dip=4096 change=-4096
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'runtime/CMakeFiles/kz-rt-dump.dir/flags.make' > '/home/user/work/preserve/tools-20261116/mc.kz-rt-dump.flags.make.8ca8b226.xz'
+start 2026-11-16T05:09:40.882Z free=539824128 threshold=364572800
+sample 2026-11-16T05:09:40.888Z 539820032
+end 2026-11-16T05:09:42.896Z kind=copy verdict=completed rc=0 free=539815936 lowest=539815936 dip=8192 change=-8192
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'tests/lint/CMakeFiles/kz_lint.dir/flags.make' > '/home/user/work/preserve/tools-20261116/mc.kz_lint.flags.make.d0789908.xz'
+start 2026-11-16T05:09:42.912Z free=539815936 threshold=364572800
+sample 2026-11-16T05:09:42.917Z 539815936
+end 2026-11-16T05:09:44.924Z kind=copy verdict=completed rc=0 free=539811840 lowest=539811840 dip=4096 change=-4096
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'tools/kz-dump/CMakeFiles/kz-dump.dir/flags.make' > '/home/user/work/preserve/tools-20261116/mc.kz-dump.flags.make.fb7a33e1.xz'
+start 2026-11-16T05:09:44.936Z free=539811840 threshold=364572800
+sample 2026-11-16T05:09:44.940Z 539811840
+end 2026-11-16T05:09:46.947Z kind=copy verdict=completed rc=0 free=539807744 lowest=539807744 dip=4096 change=-4096
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'tools/kz-phi/CMakeFiles/kz-phi.dir/flags.make' > '/home/user/work/preserve/tools-20261116/mc.kz-phi.flags.make.9000d373.xz'
+start 2026-11-16T05:09:46.962Z free=539807744 threshold=364572800
+sample 2026-11-16T05:09:46.967Z 539807744
+end 2026-11-16T05:09:48.974Z kind=copy verdict=completed rc=0 free=539803648 lowest=539803648 dip=4096 change=-4096
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'tools/kz-static/CMakeFiles/kz-static.dir/flags.make' > '/home/user/work/preserve/tools-20261116/mc.kz-static.flags.make.dd3744d4.xz'
+start 2026-11-16T05:09:48.987Z free=539803648 threshold=364572800
+sample 2026-11-16T05:09:48.992Z 539803648
+end 2026-11-16T05:09:50.998Z kind=copy verdict=completed rc=0 free=539799552 lowest=539799552 dip=4096 change=-4096
+# space_guard.sh kind=copy need=50000000 floor=314572800 interval=2 cmd=bash -c xz -9 -T4 -c 'tools/kz/CMakeFiles/kz.dir/flags.make' > '/home/user/work/preserve/tools-20261116/mc.kz.flags.make.ab3540b3.xz'
+start 2026-11-16T05:09:51.013Z free=539799552 threshold=364572800
+sample 2026-11-16T05:09:51.020Z 539799552
+end 2026-11-16T05:09:53.027Z kind=copy verdict=completed rc=0 free=539795456 lowest=539795456 dip=4096 change=-4096

@@ -1,0 +1,30 @@
+OK plans_final_plan_kzs_c1_pre_tx: diffkinds old_lines=860 new_lines=860 only_old=2 only_new=2 labels=2
+OK plans_final_plan_side_c1_pre_tx: diffkinds old_lines=1055 new_lines=1055 only_old=11 only_new=11 labels=7
+OK plans_final_plan_mod_c1_pre_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_final_plan_exe_c1_pre_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_final_args_txt_c1_pre_tx: diffkinds old_lines=24 new_lines=24 only_old=6 only_new=6 labels=12
+OK c1_pre_tx plan.log the same bytes as the kept one
+OK plans_final_plan_kzs_c1_post_tx: diffkinds old_lines=816 new_lines=816 only_old=2 only_new=2 labels=2
+OK plans_final_plan_side_c1_post_tx: diffkinds old_lines=1038 new_lines=1038 only_old=11 only_new=11 labels=7
+OK plans_final_plan_mod_c1_post_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_final_plan_exe_c1_post_tx: diffkinds old_lines=9 new_lines=9 only_old=1 only_new=1 labels=1
+OK plans_final_args_txt_c1_post_tx: diffkinds old_lines=24 new_lines=24 only_old=6 only_new=6 labels=12
+OK c1_post_tx plan.log the same bytes as the kept one
+OK plans_final_plan_kzs_r2_core: diffkinds old_lines=110 new_lines=110 only_old=2 only_new=2 labels=2
+OK plans_final_plan_side_r2_core: diffkinds old_lines=661 new_lines=661 only_old=5 only_new=5 labels=5
+OK plans_final_plan_mod_r2_core: diffkinds old_lines=3 new_lines=3 only_old=1 only_new=1 labels=1
+OK plans_final_plan_exe_r2_core: diffkinds old_lines=3 new_lines=3 only_old=1 only_new=1 labels=1
+OK plans_final_args_txt_r2_core: diffkinds old_lines=24 new_lines=24 only_old=6 only_new=6 labels=12
+OK r2_core plan.log the same bytes as the kept one
+OK plans_final_plan_kzs_c5_641: diffkinds old_lines=433 new_lines=433 only_old=2 only_new=2 labels=2
+OK plans_final_plan_side_c5_641: diffkinds old_lines=541 new_lines=541 only_old=5 only_new=5 labels=5
+OK plans_final_plan_mod_c5_641: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_final_plan_exe_c5_641: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_final_args_txt_c5_641: diffkinds old_lines=24 new_lines=24 only_old=6 only_new=6 labels=12
+OK c5_641 plan.log the same bytes as the kept one
+OK plans_final_plan_kzs_c5_642: diffkinds old_lines=413 new_lines=413 only_old=2 only_new=2 labels=2
+OK plans_final_plan_side_c5_642: diffkinds old_lines=525 new_lines=525 only_old=5 only_new=5 labels=5
+OK plans_final_plan_mod_c5_642: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_final_plan_exe_c5_642: diffkinds old_lines=8 new_lines=8 only_old=1 only_new=1 labels=1
+OK plans_final_args_txt_c5_642: diffkinds old_lines=24 new_lines=24 only_old=6 only_new=6 labels=12
+OK c5_642 plan.log the same bytes as the kept one

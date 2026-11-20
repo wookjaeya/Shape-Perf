@@ -1,0 +1,77 @@
+== P1 alternatives
+-- c1_post_tx A20
+  probe: alternatives [context initialize_throttling@/home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:121@<post>/bp/fsw/src/bp_flow.c:126:13]: found: retry (the call at <post>/bp/fsw/src/bp_flow.c:126:13 runs again; RESULT_EFFECT view line 200572, open); ...
+  tool:  alternatives [context 1: initialize_throttling@/home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:121@/home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:126:13]: found: creation in the same name space and partition by the same functio ...
+-- c1_post_tx A21
+  probe: alternatives [context CF_AppMain@<post>/cf/fsw/src/cf_app.c:330:14 <- CF_Init@<post>/cf/fsw/src/cf_app.c:252:18 <- CF_CFDP_InitEngine@<post>/cf/fsw/src/cf_cfdp.c:1003:23]: found: retry (the call at <post>/cf/fsw/src/cf_cfdp.c:1003:23 runs again; RESULT_EFFECT  ...
+  probe: alternatives [context CF_CmdEnableEngine@<post>/cf/fsw/src/cf_cmd.c:1119:13 <- CF_CFDP_InitEngine@<post>/cf/fsw/src/cf_cfdp.c:1003:23]: found: retry (the call at <post>/cf/fsw/src/cf_cfdp.c:1003:23 runs again; RESULT_EFFECT view line 206692, open) [not establi ...
+  tool:  alternatives [context 1: CF_CFDP_InitEngine@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c:1003:23]: found: retry (the call at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c:1003:23 runs again; open) [not established (open: re ...
+-- c1_pre_tx A20
+  probe: alternatives [context initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:121@<pre>/bp/fsw/src/bp_flow.c:126:13]: found: retry (the call at <pre>/bp/fsw/src/bp_flow.c:126:13 runs again; RESULT_EFFECT view line 200532, open); cr ...
+  tool:  alternatives [context 1: initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:121@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:126:13]: found: creation in the same name space and partition by the same function  ...
+-- c1_pre_tx A21
+  probe: alternatives [context CF_AppMain@<pre>/cf/fsw/src/cf_app.c:330:14 <- CF_Init@<pre>/cf/fsw/src/cf_app.c:252:18 <- CF_CFDP_InitEngine@<pre>/cf/fsw/src/cf_cfdp.c:993:19]: none found (exploration complete)
+  probe: alternatives [context CF_CmdEnableEngine@<pre>/cf/fsw/src/cf_cmd.c:1119:13 <- CF_CFDP_InitEngine@<pre>/cf/fsw/src/cf_cfdp.c:993:19]: not established (the value's effects end in CF_CmdEnableEngine and the function returns to its caller: direct callers 0, flags  ...
+  tool:  alternatives [context 1: CF_AppMain@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_app.c:330:14 <- CF_Init@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_app.c:252:18 <- CF_CFDP_InitEngine@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/ ...
+  tool:  alternatives [context 2: CF_CmdEnableEngine@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd.c:1119:13 <- CF_CFDP_InitEngine@/home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:993:19]: not established (the value's effects end in CF_CmdEn ...
+-- c1_pre_tx A22
+  probe: alternatives [context SCH_LAB_AppInit@apps/sch_lab/fsw/src/sch_lab_app.c:176:16]: not established (the value's effects end in SCH_LAB_AppInit and the function returns to its caller: direct callers 1, flags {defined})
+  tool:  alternatives [context 1: SCH_Lab_AppMain@apps/sch_lab/fsw/src/sch_lab_app.c:87:14 <- SCH_LAB_AppInit@apps/sch_lab/fsw/src/sch_lab_app.c:176:16]: not established (open: exit-app at apps/sch_lab/fsw/src/sch_lab_app.c:141:5: on a path through a branch this value  ...
+-- c1_pre_tx A26
+  probe: alternatives [context CFE_TIME_TaskInit@cfe/modules/time/fsw/src/cfe_time_task.c:286:16]: not established (the value's effects end in CFE_TIME_TaskInit and the function returns to its caller: direct callers 1, flags {defined})
+  tool:  alternatives [context 1: CFE_TIME_TaskMain@cfe/modules/time/fsw/src/cfe_time_task.c:71:14 <- CFE_TIME_TaskInit@cfe/modules/time/fsw/src/cfe_time_task.c:286:16]: not established (no RESULT_EFFECT row of the value 0 at cfe/modules/time/fsw/src/cfe_time_task.c:71 ...
+== P2 success path
+-- c1_pre_tx
+  OS_CountSemCreate: probe HELD | tool missing(the stored value is not tied to the success path)
+  OS_TimeBaseCreate: probe MISSING (the callee's returns are not all followed) | tool missing(an implication between conditions is not decided)
+  OS_mkfs: probe missing | tool missing(no out-id store on a carrying path)
+  OS_initfs: probe missing | tool missing(no out-id store on a carrying path)
+  OS_mv: probe MISSING (the callee's returns are not all followed) | tool missing(no out-id store on a carrying path)
+-- c1_post_tx
+  OS_CountSemCreate: probe HELD | tool missing(the stored value is not tied to the success path)
+  OS_TimeBaseCreate: probe MISSING (the callee's returns are not all followed) | tool missing(an implication between conditions is not decided)
+  OS_mkfs: probe missing | tool missing(no out-id store on a carrying path)
+  OS_initfs: probe missing | tool missing(no out-id store on a carrying path)
+  OS_mv: probe MISSING (the callee's returns are not all followed) | tool missing(no out-id store on a carrying path)
+== P4 holder
+-- c1_post_tx A20
+  probe: branch (i): NOT HELD: the holder has another definition (bp_flow.c:132:18 through OS_CountSemCreate)
+  tool:  holder: field BP_Throttle_t.Sem; writers 2: own out store /home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:126:13; other definition /home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:132:18 in initialize_throttling@/home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:121 value=symbolic [out-pointer, stored in OS_ObjectIdFinalizeNew]; FIELD_STATUS per-field=writer-set-complete type-level=DISABLED: flags sibling-exposed, untyped-in-program, writer-in-loop, several-instances; hits on other fields of the type 6; untyped write sites in the program 133; readers ...
+-- c1_post_tx A21
+  probe: branch (i): NOT ESTABLISHED: no other definition among the 2 listed writers and 2 later readers, but the writer set of the holder is not complete (per-field=DISABLED)
+  tool:  holder: field CF_Channel_t.sem_id; writers 2: clearing /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c:965:5 in CF_CFDP_InitEngine value=0 [fill]; own out store /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c:1003:23; FIELD_STATUS per-field=DISABLED type-level=DISABLED: flags sibling-exposed, untyped-in-program, writer-in-loop, writer-function-not-once, several-instances; address-escape /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c:1372:9; address-escape /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c:1372:13; cast /home/user/wo ...
+-- c1_pre_tx A20
+  probe: branch (i): NOT HELD: the holder has another definition (bp_flow.c:132:18 through OS_CountSemCreate)
+  tool:  holder: field BP_Throttle_t.Sem; writers 2: own out store /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:126:13; other definition /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:132:18 in initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:121 value=symbolic [out-pointer, stored in OS_ObjectIdFinalizeNew]; FIELD_STATUS per-field=writer-set-complete type-level=DISABLED: flags sibling-exposed, untyped-in-program, writer-in-loop, several-instances; hits on other fields of the type 6; untyped write sites in the program 133; readers 1: ...
+-- c1_pre_tx A21
+  probe: branch (i): NOT ESTABLISHED: no other definition among the 2 listed writers and 2 later readers, but the writer set of the holder is not complete (per-field=DISABLED)
+  tool:  holder: field CF_Channel_t.sem_id; writers 2: clearing /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:965:5 in CF_CFDP_InitEngine value=0 [fill]; own out store /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:993:19; FIELD_STATUS per-field=DISABLED type-level=DISABLED: flags sibling-exposed, untyped-in-program, writer-in-loop, writer-function-not-once, several-instances; address-escape /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:1353:9; address-escape /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:1353:13; cast /home/user/work/pr ...
+-- c1_pre_tx A22
+  probe: branch (i): not established by this probe (the holder is a local or has no field: id holder: the lookup's arg 0 [&TimeBaseId] address base local <- OS_TimeBaseGetIdByName stores through its pa)
+  tool:  holder: local TimeBaseId in SCH_LAB_AppInit; writers 1: own out store apps/sch_lab/fsw/src/sch_lab_app.c:176:16; local: definitions 0 (RESULT_FLOW); readers: not decided: the uses of a local are not READS rows
+-- c1_pre_tx A26
+  probe: branch (i): not established by this probe (the holder is a local or has no field: id holder: the lookup's arg 0 [&TimeBaseId] address base local <- OS_TimeBaseGetIdByName stores through its pa)
+  tool:  holder: local TimeBaseId in CFE_TIME_TaskInit; writers 1: own out store cfe/modules/time/fsw/src/cfe_time_task.c:286:16; local: definitions 0 (RESULT_FLOW); readers: not decided: the uses of a local are not READS rows
+== P6 keys (probe)
+  # build | rows | keys whose text holds an absolute position | by path A/B/C | of them with a source tree (.git above the file) | without | distinct absolute files
+  c1_pre_tx | 367 | 3 | A 3 B 0 C 0 | 3 | 0 | 3
+  c1_post_tx | 367 | 3 | A 3 B 0 C 0 | 3 | 0 | 3
+  r2_core | 295 | 0 | A 0 B 0 C 0 | 0 | 0 | 0
+  c5_641 | 172 | 0 | A 0 B 0 C 0 | 0 | 0 | 0
+  c5_642 | 169 | 0 | A 0 B 0 C 0 | 0 | 0 | 0
+  # c1_pre_tx against c1_post_tx: key texts equal today 364 of 367 / 367; with the source-tree token 367 of 367 / 367
+  # key texts still only in one build after the token: defect build 0, fixed build 0
+  # probe row c1_pre_tx A20 key 35f07539e7606e2e
+     today: A|OS_common_record_t.name_entry|initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+     token: A|OS_common_record_t.name_entry|initialize_throttling@<bp>/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+  # probe row c1_post_tx A20 key bdcc6978b9a41c8c
+     today: A|OS_common_record_t.name_entry|initialize_throttling@/home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+     token: A|OS_common_record_t.name_entry|initialize_throttling@<bp>/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+  # c1_pre_tx: new key texts that collide: 0
+== open-reason population (probe)
+  # build | rows whose text carries the reason | distinct call sites (callee, position, field) | the sites
+  c1_pre_tx | 2 | 1 | CFE_ES_RunLoop at /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_app.c:338:12 field:CF_AppData_t.run_status
+  c1_post_tx | 1 | 1 | CFE_ES_RunLoop at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_app.c:338:12 field:CF_AppData_t.run_status
+  r2_core | 0 | 0 | -
+  c5_641 | 0 | 0 | -
+  c5_642 | 0 | 0 | -

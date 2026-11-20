@@ -1,0 +1,36 @@
+UpdateCTestConfiguration  from :<scratch>/cb/DartConfiguration.tcl
+UpdateCTestConfiguration  from :<scratch>/cb/DartConfiguration.tcl
+Test project <scratch>/cb
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 71
+    Start 71: tool_identity_schema_revision
+
+71: Test command: /usr/bin/cmake "-DDUMP=<scratch>/cb/tools/kz-dump/kz-dump" "-DTOOLS=<scratch>/cb/tools/kz-dump/kz-dump|<scratch>/cb/tools/kz/kz|<scratch>/cb/tools/kz-phi/kz-phi|<scratch>/cb/tools/kz-static/kz-static" "-P" "<scratch>/src/research/cfs_procrace/kairos/tests/unit/check_tool_schema_revision.cmake"
+71: Working Directory: <scratch>/cb/tests/unit
+71: Test timeout computed to be: 10000000
+71: -- 4 tools report schema revision 12, fingerprint 6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd
+1/2 Test #71: tool_identity_schema_revision ....   Passed    0.04 sec
+test 72
+    Start 72: source_identity_cmake
+
+72: Test command: /usr/bin/cmake "-DKZ_MODULE=<scratch>/src/research/cfs_procrace/kairos/cmake/KzSourceIdentity.cmake" "-DWORK=<scratch>/cb/tests/unit/source_identity_work" "-P" "<scratch>/src/research/cfs_procrace/kairos/tests/unit/check_source_identity.cmake"
+72: Working Directory: <scratch>/cb/tests/unit
+72: Test timeout computed to be: 10000000
+72: -- source identity: all checks passed
+2/2 Test #72: source_identity_cmake ............   Passed    0.03 sec
+
+The following tests passed:
+	tool_identity_schema_revision
+	source_identity_cmake
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+unit    =   0.07 sec*proc (2 tests)
+
+Total Test time (real) =   0.08 sec

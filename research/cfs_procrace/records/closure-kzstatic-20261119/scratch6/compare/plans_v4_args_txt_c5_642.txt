@@ -1,0 +1,15 @@
+diffkinds old_lines=42 new_lines=42 only_old=7 only_new=7 labels=14
+label removed=0 added=1 0|<scratch>/o/sN_final_extract/cN_N/cN_N/NP/facts.kz
+label removed=0 added=1 0|<scratch>/o/sN_final_extract/cN_N/cN_N/NP/basis.kz
+label removed=0 added=1 0|<scratch>/o/sN_plans_vN/cN_N/plan.kzs
+label removed=0 added=1 0|<scratch>/o/sN_plans_vN/cN_N/plan.side
+label removed=0 added=1 0|<scratch>/o/sN_plans_vN/cN_N/plan.mod
+label removed=0 added=1 0|<scratch>/o/sN_plans_vN/cN_N/plan.exe
+label removed=0 added=1 0|<scratch>/o/sN_plans_vN/cN_N/plan.req
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_final_extract/cN_N/cN_N/NP/facts.kz
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_final_extract/cN_N/cN_N/NP/basis.kz
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_plans_vN/cN_N/plan.kzs
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_plans_vN/cN_N/plan.side
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_plans_vN/cN_N/plan.mod
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_plans_vN/cN_N/plan.exe
+label removed=1 added=0 0|/home/user/work/redesign/obsN/rfN_plans_vN/cN_N/plan.req

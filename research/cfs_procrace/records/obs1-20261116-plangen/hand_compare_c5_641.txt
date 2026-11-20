@@ -1,0 +1,36 @@
+hand sites-641.draft.kzs: 33 sites; generated: 147 sites
+MISS   hand   1 es.app_create.entry CFE_ES_AppCreate before line 426                                       
+MISS   hand   2 es.app_create.ret CFE_ES_AppCreate after                                                   
+MISS   hand   3 es.app_create.unlock CFE_ES_AppCreate at-call CFE_ES_UnlockSharedData line 610             
+MISS   hand   4 es.app_create.task_create CFE_ES_AppCreate at-call OS_TaskCreate line 614                  
+MISS   hand   5 es.app_create.task_create.ret CFE_ES_AppCreate after-call OS_TaskCreate line 614           
+MISS   hand   6 es.app_create.relock CFE_ES_AppCreate after-call CFE_ES_LockSharedData line 637            
+MISS   hand   7 es.app_create.pub_used CFE_ES_AppCreate store line 649                                     
+MISS   hand   8 es.app_create.pub_appid CFE_ES_AppCreate store line 651                                    
+MISS   hand   9 es.app_create.pub_taskid CFE_ES_AppCreate store line 652                                   
+MISS   hand  10 es.app_create.pub_unlock CFE_ES_AppCreate at-call CFE_ES_UnlockSharedData line 673         
+MISS   hand  33 es.app_create.owner_out CFE_ES_AppCreate store line 657                                    
+MISS   hand  11 es.lock.taken CFE_ES_LockSharedData after-call OS_MutSemTake                               
+MISS   hand  12 es.lock.give CFE_ES_UnlockSharedData at-call OS_MutSemGive                                 
+MISS   hand  13 osal.task_create.entry OS_TaskCreate before line 480                                       
+MATCH  hand  14 osal.task_create.pthread OS_TaskCreate at-call pthread_create line 645                     gen 147 same
+MATCH  hand  15 osal.task_create.pthread.ret OS_TaskCreate after-call pthread_create line 645              gen 146 same
+MISS   hand  16 osal.task_create.id OS_TaskCreate store line 690                                           
+MISS   hand  17 osal.task_create.ret OS_TaskCreate after                                                   
+MISS   hand  18 es.register_app.entry CFE_ES_RegisterApp before line 767                                   
+MISS   hand  19 osal.task_register.self OS_TaskRegister after-call pthread_self line 916                   
+MISS   hand  20 osal.task_register.announce OS_TaskRegister before pthread_setspecific                     
+MISS   hand  21 osal.task_register.ret OS_TaskRegister after                                               
+MISS   hand  22 es.register_app.ret CFE_ES_RegisterApp after                                               
+MISS   hand  23 es.get_app_id.entry CFE_ES_GetAppID before line 846                                        
+MISS   hand  24 es.get_app_id.task CFE_ES_GetAppID after-call OS_TaskGetId line 856                        
+MISS   hand  25 es.get_app_id.store_ok CFE_ES_GetAppID store line 863                                      
+MATCH  hand  26 es.get_app_id.ret CFE_ES_GetAppID after                                                    gen 132 after-call of it in CFE_SB_AppInit
+MISS   hand  27 es.get_app_id_int.task CFE_ES_GetAppIDInternal after-call OS_TaskGetId line 1881           
+MISS   hand  28 es.get_app_id_int.store_ok CFE_ES_GetAppIDInternal store line 1888                         
+MISS   hand  29 es.get_app_id_int.ret CFE_ES_GetAppIDInternal after                                        
+MISS   hand  30 sb.create_pipe.get_app_id CFE_SB_CreatePipe after-call CFE_ES_GetAppID line 224            
+MISS   hand  31 evs.get_app_id.ret EVS_GetAppID after                                                      
+MATCH  hand  32 app.sample.main.entry SAMPLE_AppMain before line 40                                        gen 2 same (entry)
+generated sites with no hand counterpart: 143
+  by rule: {'actor-owner': 2, 'actor-root': 7, 'actor-start': 7, 'stop-event': 2, 'use-call': 110, 'writer': 22}

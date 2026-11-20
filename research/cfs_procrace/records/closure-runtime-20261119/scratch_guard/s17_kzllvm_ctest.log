@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-plugin need=104857600 floor=314572800 interval=2 cmd=ctest -j4 --output-on-failure
+start 2026-11-19T07:13:02.879Z free=772042752 threshold=419430400
+sample 2026-11-19T07:13:02.885Z 772038656
+sample 2026-11-19T07:13:04.891Z 771436544
+end 2026-11-19T07:13:06.897Z kind=scratch-plugin verdict=completed rc=8 free=770883584 lowest=770883584 dip=1159168 change=-1159168

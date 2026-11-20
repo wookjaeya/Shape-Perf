@@ -1,0 +1,5 @@
+eval /home/user/work/redesign/obs1/c1cyc_post_eval2/eval.txt: lines 7111; form ok
+branch D1-R0 main (declared before the boot: D1/R0): falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 32 / 161 (fail 129, not evaluable 120); static: pass 137 / 137 (fail 0, not evaluable 0); format: pass 51 / 51 (fail 0, not evaluable 0)
+branch D1-R0 main (declared before the boot: D1/R0): expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 20 / 20 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+branch D1-R0 main (declared before the boot: D1/R0): expect_discriminate: met 2 / counted 5 (unmet 3; not_counted 0); by class: boot 0, static 5, format 0
+rc=0

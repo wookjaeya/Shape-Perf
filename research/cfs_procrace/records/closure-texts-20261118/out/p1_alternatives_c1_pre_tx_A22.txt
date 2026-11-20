@@ -1,0 +1,3 @@
+row A22 use apps/sch_lab/fsw/src/sch_lab_app.c:176:16 in SCH_LAB_AppInit -> OS_TimeBaseGetIdByName; absence value -17; use call site ['11281'] (view line 12015)
+    frame apps/sch_lab/fsw/src/sch_lab_app.c:176:16 in SCH_LAB_AppInit (call flags {result-used,result-tested}): effects of -17: return-const:complete 1
+  alternatives [context SCH_LAB_AppInit@apps/sch_lab/fsw/src/sch_lab_app.c:176:16]: not established (the value's effects end in SCH_LAB_AppInit and the function returns to its caller: direct callers 1, flags {defined})

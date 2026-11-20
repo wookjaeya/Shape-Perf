@@ -1,0 +1,6 @@
+# space_guard.sh kind=lint-scratch-build need=50000000 floor=314572800 interval=2 cmd=g++ -std=c++17 -O1 -o <scratch>/lint/kz_lint <scratch>/lint/kz_lint.cpp
+start 2026-11-19T01:40:33.606Z free=1348227072 threshold=364572800
+sample 2026-11-19T01:40:33.611Z 1348222976
+sample 2026-11-19T01:40:35.617Z 1348222976
+sample 2026-11-19T01:40:37.623Z 1347321856
+end 2026-11-19T01:40:39.629Z kind=lint-scratch-build verdict=completed rc=0 free=1347747840 lowest=1347321856 dip=905216 change=-479232

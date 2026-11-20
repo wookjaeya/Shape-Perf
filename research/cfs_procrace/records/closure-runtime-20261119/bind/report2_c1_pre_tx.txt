@@ -1,0 +1,87 @@
+# bind_check.py: plan /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs; rows with control-state=planned: 5 (A20 A21 A22 A26 A63)
+# units compiled: 13 (apps/sch_lab/fsw/src/sch_lab_app.c cfe/modules/time/fsw/src/cfe_time_task.c osal/src/os/shared/src/osapi-countsem.c osal/src/os/shared/src/osapi-file.c osal/src/os/shared/src/osapi-idmap.c osal/src/os/shared/src/osapi-timebase.c psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c src/bp/fsw/src/bp_flow.c src/cf/fsw/src/cf_app.c src/cf/fsw/src/cf_cfdp.c src/cf/fsw/src/cf_cfdp_r.c src/cf/fsw/src/cf_cfdp_s.c src/cf/fsw/src/cf_cmd.c); compile failures: 0
+site 2 row bound by=row label=s0002.creator-call tu=apps/sch_lab/fsw/src/sch_lab_app.c func=SCH_LAB_AppInit line=168 place=after-call col=16 nth=1 states=bound
+site 3 row bound by=row label=s0003.use-call tu=apps/sch_lab/fsw/src/sch_lab_app.c func=SCH_LAB_AppInit line=176 place=after-call col=16 nth=1 states=bound
+site 4 row bound by=row label=s0004.creator-call tu=apps/sch_lab/fsw/src/sch_lab_app.c func=SCH_LAB_AppInit line=168 place=at-call col=16 nth=1 states=bound
+site 5 row bound by=row label=s0005.use-call tu=apps/sch_lab/fsw/src/sch_lab_app.c func=SCH_LAB_AppInit line=176 place=at-call col=16 nth=1 states=bound
+site 6 other bound by=- label=s0006.actor-root tu=apps/sch_lab/fsw/src/sch_lab_app.c func=SCH_Lab_AppMain line= phase=before col=- nth=- states=bound
+site 248 row bound by=row label=s0248.use-call tu=cfe/modules/time/fsw/src/cfe_time_task.c func=CFE_TIME_TaskInit line=286 place=after-call col=16 nth=1 states=bound
+site 249 row bound by=row label=s0249.use-call tu=cfe/modules/time/fsw/src/cfe_time_task.c func=CFE_TIME_TaskInit line=286 place=at-call col=16 nth=1 states=bound
+site 250 other bound by=- label=s0250.actor-root tu=cfe/modules/time/fsw/src/cfe_time_task.c func=CFE_TIME_TaskMain line= phase=before col=- nth=- states=bound
+site 256 row bound by=need label=s0256.object-rollback tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemCreate line=106 place=after-call col=23 nth=1 states=bound
+site 257 row bound by=row label=s0257.kind-value tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemCreate line=94 place=at-call col=19 nth=1 states=bound
+site 258 row bound by=need label=s0258.object-rollback tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemCreate line=106 place=at-call col=23 nth=1 states=bound
+site 259 row bound by=row label=s0259.key-text tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemCreate line=91 place=at-call col=5 nth=1 states=bound
+site 260 row bound by=need label=s0260.object-delete tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemDelete line= phase=before col=- nth=- states=bound
+site 261 row bound by=need label=s0261.object-delete tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemDelete line=129 place=after-call col=23 nth=1 states=bound
+site 262 row bound by=row label=s0262.key-text+kind-value tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemGetIdByName line=212 place=at-call col=19 nth=1 states=bound
+site 263 row bound by=row label=s0263.key-text tu=osal/src/os/shared/src/osapi-file.c func=OS_FileOpenCheck line=532 place=at-call col=66 nth=1 states=bound
+site 264 row bound by=need label=s0264.object-clear tu=osal/src/os/shared/src/osapi-idmap.c func=OS_ObjectIdFindNextFree line=640 place=store col=- nth=- states=bound
+site 265 row bound by=need label=s0265.object-clear tu=osal/src/os/shared/src/osapi-idmap.c func=OS_ObjectIdInit line=120 place=at-call col=5 nth=1 states=bound
+site 266 row bound by=need label=s0266.object-rollback tu=osal/src/os/shared/src/osapi-timebase.c func=OS_TimeBaseCreate line=144 place=after-call col=23 nth=1 states=bound
+site 267 row bound by=row label=s0267.kind-value tu=osal/src/os/shared/src/osapi-timebase.c func=OS_TimeBaseCreate line=122 place=at-call col=19 nth=1 states=bound
+site 268 row bound by=need label=s0268.object-rollback tu=osal/src/os/shared/src/osapi-timebase.c func=OS_TimeBaseCreate line=144 place=at-call col=23 nth=1 states=bound
+site 269 row bound by=row label=s0269.key-text tu=osal/src/os/shared/src/osapi-timebase.c func=OS_TimeBaseCreate line=109 place=at-call col=5 nth=1 states=bound
+site 270 row bound by=need label=s0270.object-delete tu=osal/src/os/shared/src/osapi-timebase.c func=OS_TimeBaseDelete line= phase=before col=- nth=- states=bound
+site 271 row bound by=need label=s0271.object-delete tu=osal/src/os/shared/src/osapi-timebase.c func=OS_TimeBaseDelete line=237 place=after-call col=23 nth=1 states=bound
+site 272 row bound by=row label=s0272.kind-value tu=osal/src/os/shared/src/osapi-timebase.c func=OS_TimeBaseGetIdByName line=268 place=at-call col=19 nth=1 states=bound
+site 273 row bound by=row label=s0273.key-text tu=osal/src/os/shared/src/osapi-timebase.c func=OS_TimeBaseGetIdByName line=256 place=at-call col=5 nth=1 states=bound
+site 274 row bound by=row label=s0274.creator-call tu=psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c func=soft_timebase_Init line=53 place=after-call col=14 nth=1 states=bound
+site 275 row bound by=row label=s0275.creator-call tu=psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c func=soft_timebase_Init line=53 place=at-call col=14 nth=1 states=bound
+site 279 row bound by=row label=s0279.creator-call tu=src/bp/fsw/src/bp_flow.c func=initialize_throttling line=132 place=after-call col=18 nth=1 states=inlined
+site 280 row bound by=row label=s0280.use-call tu=src/bp/fsw/src/bp_flow.c func=initialize_throttling line=126 place=after-call col=13 nth=1 states=inlined
+site 281 row bound by=row label=s0281.effect-call tu=src/bp/fsw/src/bp_flow.c func=initialize_throttling line=129 place=at-call col=13 nth=1 states=inlined
+site 282 row bound by=row label=s0282.effect-call tu=src/bp/fsw/src/bp_flow.c func=initialize_throttling line=135 place=at-call col=13 nth=2 states=inlined
+site 283 row bound by=row label=s0283.effect-call tu=src/bp/fsw/src/bp_flow.c func=initialize_throttling line=140 place=at-call col=13 nth=3 states=inlined
+site 284 row bound by=row label=s0284.creator-call tu=src/bp/fsw/src/bp_flow.c func=initialize_throttling line=132 place=at-call col=18 nth=1 states=inlined
+site 285 row bound by=row label=s0285.use-call tu=src/bp/fsw/src/bp_flow.c func=initialize_throttling line=126 place=at-call col=13 nth=1 states=inlined
+site 286 other bound by=- label=s0286.actor-root tu=src/cf/fsw/src/cf_app.c func=CF_AppMain line= phase=before col=- nth=- states=bound
+site 287 row bound by=row label=s0287.handling-chain tu=src/cf/fsw/src/cf_app.c func=CF_AppMain line=333 place=store col=- nth=- states=bound
+site 288 row bound by=row label=s0288.handling-chain tu=src/cf/fsw/src/cf_app.c func=CF_AppMain line=357 place=store col=- nth=- states=bound
+site 289 row bound by=row label=s0289.handling-chain tu=src/cf/fsw/src/cf_app.c func=CF_AppMain line=338 place=after-call col=12 nth=1 states=bound
+site 290 row bound by=row label=s0290.handling-chain tu=src/cf/fsw/src/cf_app.c func=CF_AppMain line=330 place=after-call col=14 nth=1 states=bound
+site 291 row bound by=row label=s0291.handling-chain tu=src/cf/fsw/src/cf_app.c func=CF_AppMain line=366 place=at-call col=5 nth=1 states=bound
+site 292 row bound by=row label=s0292.context-frame+handling-chain tu=src/cf/fsw/src/cf_app.c func=CF_Init line=252 place=after-call col=18 nth=1 states=bound
+site 293 row bound by=row label=s0293.context-frame tu=src/cf/fsw/src/cf_app.c func=CF_Init line=252 place=at-call col=18 nth=1 states=bound
+site 294 row bound by=row label=s0294.handling-chain+use-call tu=src/cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine line=993 place=after-call col=19 nth=1 states=bound
+site 295 row bound by=row label=s0295.effect-call tu=src/cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine line=975 place=at-call col=13 nth=1 states=bound
+site 296 row bound by=row label=s0296.effect-call tu=src/cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine line=985 place=at-call col=13 nth=2 states=bound
+site 297 row bound by=row label=s0297.effect-call tu=src/cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine line=997 place=at-call col=17 nth=3 states=bound
+site 298 row bound by=row label=s0298.use-call tu=src/cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine line=993 place=at-call col=19 nth=1 states=bound
+site 299 row bound by=row label=s0299.creator-call tu=src/cf/fsw/src/cf_cfdp_r.c func=CF_CFDP_R2_RecvMd line=822 place=after-call col=26 nth=1 states=bound
+site 300 row bound by=row label=s0300.creator-call tu=src/cf/fsw/src/cf_cfdp_r.c func=CF_CFDP_R2_RecvMd line=822 place=at-call col=26 nth=1 states=bound
+site 301 row bound by=row label=s0301.use-call tu=src/cf/fsw/src/cf_cfdp_s.c func=CF_CFDP_S_SubstateSendMetadata line=352 place=after-call col=13 nth=1 states=bound
+site 302 row bound by=row label=s0302.effect-call tu=src/cf/fsw/src/cf_cfdp_s.c func=CF_CFDP_S_SubstateSendMetadata line=354 place=at-call col=13 nth=1 states=bound
+site 303 row bound by=row label=s0303.use-call tu=src/cf/fsw/src/cf_cfdp_s.c func=CF_CFDP_S_SubstateSendMetadata line=352 place=at-call col=13 nth=1 states=bound
+site 304 row bound by=row label=s0304.context-frame tu=src/cf/fsw/src/cf_cmd.c func=CF_CmdEnableEngine line=1119 place=after-call col=13 nth=1 states=bound
+site 305 row bound by=row label=s0305.context-frame tu=src/cf/fsw/src/cf_cmd.c func=CF_CmdEnableEngine line=1119 place=at-call col=13 nth=1 states=bound
+count other bound 3
+count row bound 52
+unit-head 1df262a_apps_sch_lab_fsw_src_sch_lab_app # plan 943b8cc0d0e200e4
+unit-head 1df262a_apps_sch_lab_fsw_src_sch_lab_app # v4 calls: sites=4 line-unique=4 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head a_cfe_modules_time_fsw_src_cfe_time_task # plan 943b8cc0d0e200e4
+unit-head a_cfe_modules_time_fsw_src_cfe_time_task # v4 calls: sites=2 line-unique=2 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head 2a_osal_src_os_shared_src_osapi-countsem # plan 943b8cc0d0e200e4
+unit-head 2a_osal_src_os_shared_src_osapi-countsem # v4 calls: sites=6 line-unique=6 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head df262a_osal_src_os_shared_src_osapi-file # plan 943b8cc0d0e200e4
+unit-head df262a_osal_src_os_shared_src_osapi-file # v4 calls: sites=1 line-unique=1 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head f262a_osal_src_os_shared_src_osapi-idmap # plan 943b8cc0d0e200e4
+unit-head f262a_osal_src_os_shared_src_osapi-idmap # v4 calls: sites=1 line-unique=1 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head 2a_osal_src_os_shared_src_osapi-timebase # plan 943b8cc0d0e200e4
+unit-head 2a_osal_src_os_shared_src_osapi-timebase # v4 calls: sites=7 line-unique=7 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head ules_soft_timebase_cfe_psp_soft_timebase # plan 943b8cc0d0e200e4
+unit-head ules_soft_timebase_cfe_psp_soft_timebase # v4 calls: sites=2 line-unique=2 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head race_c1_build_pre_src_bp_fsw_src_bp_flow # plan 943b8cc0d0e200e4
+unit-head race_c1_build_pre_src_bp_fsw_src_bp_flow # v4 calls: sites=7 line-unique=7 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head crace_c1_build_pre_src_cf_fsw_src_cf_app # plan 943b8cc0d0e200e4
+unit-head crace_c1_build_pre_src_cf_fsw_src_cf_app # v4 calls: sites=5 line-unique=5 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head race_c1_build_pre_src_cf_fsw_src_cf_cfdp # plan 943b8cc0d0e200e4
+unit-head race_c1_build_pre_src_cf_fsw_src_cf_cfdp # v4 calls: sites=5 line-unique=5 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head ce_c1_build_pre_src_cf_fsw_src_cf_cfdp_r # plan 943b8cc0d0e200e4
+unit-head ce_c1_build_pre_src_cf_fsw_src_cf_cfdp_r # v4 calls: sites=2 line-unique=2 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head ce_c1_build_pre_src_cf_fsw_src_cf_cfdp_s # plan 943b8cc0d0e200e4
+unit-head ce_c1_build_pre_src_cf_fsw_src_cf_cfdp_s # v4 calls: sites=3 line-unique=3 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+unit-head crace_c1_build_pre_src_cf_fsw_src_cf_cmd # plan 943b8cc0d0e200e4
+unit-head crace_c1_build_pre_src_cf_fsw_src_cf_cmd # v4 calls: sites=2 line-unique=2 by-col=0 unsupported=0 col-differs=0 nth-differs=0
+gap 1 row b881269bea290f8b what="key text of OS_mv parameter 0: no non-null test of it before a call in the facts; recorded as a pointer" reason="record_insufficient(key text)" rule="key-text"
+count gaps 1

@@ -1,0 +1,78 @@
+Internal ctest changing into directory: /home/user/work/instr/kzllvm-0.2/plugin-build
+UpdateCTestConfiguration  from :/home/user/work/instr/kzllvm-0.2/plugin-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/user/work/instr/kzllvm-0.2/plugin-build/DartConfiguration.tcl
+Test project /home/user/work/instr/kzllvm-0.2/plugin-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: kzllvm_O0
+
+1: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/run_target_test.sh" "O0" "/home/user/work/llvm-project/build/./bin/clang" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzllvm.so" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzrt" "/home/user/work/instr/kzllvm-0.2/plugin-build/kz-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/../../gcc/tests" "/home/user/work/instr/kzllvm-0.2/plugin-build/tests/O0"
+1: Working Directory: /home/user/work/instr/kzllvm-0.2/plugin-build/tests
+1: Test timeout computed to be: 10000000
+1: ok: O0
+1/8 Test #1: kzllvm_O0 ........................   Passed    0.13 sec
+test 2
+    Start 2: kzllvm_O2
+
+2: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/run_target_test.sh" "O2" "/home/user/work/llvm-project/build/./bin/clang" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzllvm.so" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzrt" "/home/user/work/instr/kzllvm-0.2/plugin-build/kz-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/../../gcc/tests" "/home/user/work/instr/kzllvm-0.2/plugin-build/tests/O2"
+2: Working Directory: /home/user/work/instr/kzllvm-0.2/plugin-build/tests
+2: Test timeout computed to be: 10000000
+2: ok: O2
+2/8 Test #2: kzllvm_O2 ........................   Passed    0.15 sec
+test 3
+    Start 3: kzllvm_O3
+
+3: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/run_target_test.sh" "O3" "/home/user/work/llvm-project/build/./bin/clang" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzllvm.so" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzrt" "/home/user/work/instr/kzllvm-0.2/plugin-build/kz-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/../../gcc/tests" "/home/user/work/instr/kzllvm-0.2/plugin-build/tests/O3"
+3: Working Directory: /home/user/work/instr/kzllvm-0.2/plugin-build/tests
+3: Test timeout computed to be: 10000000
+3: ok: O3
+3/8 Test #3: kzllvm_O3 ........................   Passed    0.14 sec
+test 4
+    Start 4: kzllvm_O0-g
+
+4: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/run_target_test.sh" "O0-g" "/home/user/work/llvm-project/build/./bin/clang" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzllvm.so" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzrt" "/home/user/work/instr/kzllvm-0.2/plugin-build/kz-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/../../gcc/tests" "/home/user/work/instr/kzllvm-0.2/plugin-build/tests/O0-g"
+4: Working Directory: /home/user/work/instr/kzllvm-0.2/plugin-build/tests
+4: Test timeout computed to be: 10000000
+4: ok: O0-g
+4/8 Test #4: kzllvm_O0-g ......................   Passed    0.12 sec
+test 5
+    Start 5: kzllvm_lines
+
+5: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/run_target_test.sh" "lines" "/home/user/work/llvm-project/build/./bin/clang" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzllvm.so" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzrt" "/home/user/work/instr/kzllvm-0.2/plugin-build/kz-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/../../gcc/tests" "/home/user/work/instr/kzllvm-0.2/plugin-build/tests/lines"
+5: Working Directory: /home/user/work/instr/kzllvm-0.2/plugin-build/tests
+5: Test timeout computed to be: 10000000
+5: ok: line= checked with debug locations; without them bound only as the unique call, marked unverified
+5/8 Test #5: kzllvm_lines .....................   Passed    0.10 sec
+test 6
+    Start 6: kzllvm_untouched
+
+6: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/run_target_test.sh" "untouched" "/home/user/work/llvm-project/build/./bin/clang" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzllvm.so" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzrt" "/home/user/work/instr/kzllvm-0.2/plugin-build/kz-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/../../gcc/tests" "/home/user/work/instr/kzllvm-0.2/plugin-build/tests/untouched"
+6: Working Directory: /home/user/work/instr/kzllvm-0.2/plugin-build/tests
+6: Test timeout computed to be: 10000000
+6: ok: unit without sites is byte-identical at -O2 and at -O0 -g
+6/8 Test #6: kzllvm_untouched .................   Passed    0.08 sec
+test 7
+    Start 7: kzllvm_refuse
+
+7: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/run_target_test.sh" "refuse" "/home/user/work/llvm-project/build/./bin/clang" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzllvm.so" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzrt" "/home/user/work/instr/kzllvm-0.2/plugin-build/kz-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/../../gcc/tests" "/home/user/work/instr/kzllvm-0.2/plugin-build/tests/refuse"
+7: Working Directory: /home/user/work/instr/kzllvm-0.2/plugin-build/tests
+7: Test timeout computed to be: 10000000
+7: ok: runtime unit refused and unchanged
+7/8 Test #7: kzllvm_refuse ....................   Passed    1.35 sec
+test 8
+    Start 8: kzllvm_v4
+
+8: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/run_target_test.sh" "v4" "/home/user/work/llvm-project/build/./bin/clang" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzllvm.so" "/home/user/work/instr/kzllvm-0.2/plugin-build/kzrt" "/home/user/work/instr/kzllvm-0.2/plugin-build/kz-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm/tests/../../gcc/tests" "/home/user/work/instr/kzllvm-0.2/plugin-build/tests/v4"
+8: Working Directory: /home/user/work/instr/kzllvm-0.2/plugin-build/tests
+8: Test timeout computed to be: 10000000
+8: ok: v4
+8/8 Test #8: kzllvm_v4 ........................   Passed    0.13 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =   2.20 sec

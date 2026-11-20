@@ -1,0 +1,6 @@
+# build | rows whose text carries the reason | distinct call sites (callee, position, field) | the sites
+c1_pre_tx | 2 | 1 | CFE_ES_RunLoop at /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_app.c:338:12 field:CF_AppData_t.run_status
+c1_post_tx | 1 | 1 | CFE_ES_RunLoop at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_app.c:338:12 field:CF_AppData_t.run_status
+r2_core | 0 | 0 | -
+c5_641 | 0 | 0 | -
+c5_642 | 0 | 0 | -

@@ -1,0 +1,4 @@
+# space_guard.sh kind=relations need=60000000 floor=314572800 interval=2 cmd=bash records/extract-fixes-20261116/rerun.sh
+start 2026-11-16T13:55:36.167Z free=3036901376 threshold=374572800
+sample 2026-11-16T13:55:36.171Z 3036897280
+end 2026-11-16T13:55:38.178Z kind=relations verdict=completed rc=0 free=3029291008 lowest=3029291008 dip=7610368 change=-7610368

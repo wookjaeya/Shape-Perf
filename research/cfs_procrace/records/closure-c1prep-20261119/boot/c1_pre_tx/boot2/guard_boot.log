@@ -1,0 +1,9 @@
+# space_guard.sh kind=boot need=60000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/scripts/run_gi_c1.sh /home/user/work/redesign/obs1/c1p2_pre_derived pre 1df262a tx /home/user/work/redesign/obs1/c1cyc_pre_boot2/tx /home/user/work/redesign/obs1/c1p2_pre_rt/rt/kz-rt-dump /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs
+start 2026-11-19T20:00:03.717Z free=1048109056 threshold=374572800
+sample 2026-11-19T20:00:03.722Z 1048104960
+sample 2026-11-19T20:00:05.728Z 1045639168
+sample 2026-11-19T20:00:07.735Z 1045639168
+sample 2026-11-19T20:00:09.741Z 1045536768
+sample 2026-11-19T20:00:11.748Z 1045536768
+sample 2026-11-19T20:00:13.755Z 1045536768
+end 2026-11-19T20:00:15.763Z kind=boot verdict=completed rc=0 free=1045340160 lowest=1045340160 dip=2768896 change=-2768896

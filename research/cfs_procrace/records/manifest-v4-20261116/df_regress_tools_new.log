@@ -1,0 +1,4 @@
+# space_guard.sh kind=run need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/manifest-v4-20261116/regress_tools.sh /home/user/work/redesign/obs1/mv_regress_tools_new
+start 2026-11-18T04:27:06.011Z free=1552920576 threshold=414572800
+sample 2026-11-18T04:27:06.015Z 1552916480
+end 2026-11-18T04:27:08.022Z kind=run verdict=completed rc=0 free=1551429632 lowest=1551429632 dip=1490944 change=-1490944

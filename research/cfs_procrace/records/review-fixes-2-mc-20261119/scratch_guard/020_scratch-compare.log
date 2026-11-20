@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-compare need=150000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/compare.sh order
+start 2026-11-19T01:28:17.415Z free=1037791232 threshold=464572800
+sample 2026-11-19T01:28:17.421Z 1037787136
+end 2026-11-19T01:28:19.428Z kind=scratch-compare verdict=completed rc=0 free=1044799488 lowest=1037787136 dip=4096 change=7008256

@@ -1,0 +1,3 @@
+# FACT_LOCS and FIELD_STATUS rows of record types without a file-scope name, before (schema12_extract) and after
+## old
+## new

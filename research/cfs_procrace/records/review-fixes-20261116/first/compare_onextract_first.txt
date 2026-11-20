@@ -1,0 +1,30 @@
+OK c1_pre_tx order.txt two runs same
+OK c1_pre_tx edges.tsv two runs same
+BAD c1_pre_tx order.txt differs from revfix_order's beyond line 2
+OK c1_pre_tx edges.tsv = revfix_order's
+OK c1_pre_tx relations.txt = the re-extraction's
+OK c1_pre_tx keys.txt = revfix_relcheck's apart from line 2
+OK c1_post_tx order.txt two runs same
+OK c1_post_tx edges.tsv two runs same
+BAD c1_post_tx order.txt differs from revfix_order's beyond line 2
+OK c1_post_tx edges.tsv = revfix_order's
+OK c1_post_tx relations.txt = the re-extraction's
+OK c1_post_tx keys.txt = revfix_relcheck's apart from line 2
+OK r2_core order.txt two runs same
+OK r2_core edges.tsv two runs same
+BAD r2_core order.txt differs from revfix_order's beyond line 2
+OK r2_core edges.tsv = revfix_order's
+OK r2_core relations.txt = the re-extraction's
+OK r2_core keys.txt = revfix_relcheck's apart from line 2
+OK c5_641 order.txt two runs same
+OK c5_641 edges.tsv two runs same
+OK c5_641 order.txt = revfix_order's apart from line 2
+OK c5_641 edges.tsv = revfix_order's
+OK c5_641 relations.txt = the re-extraction's
+OK c5_641 keys.txt = revfix_relcheck's apart from line 2
+OK c5_642 order.txt two runs same
+OK c5_642 edges.tsv two runs same
+OK c5_642 order.txt = revfix_order's apart from line 2
+OK c5_642 edges.tsv = revfix_order's
+OK c5_642 relations.txt = the re-extraction's
+OK c5_642 keys.txt = revfix_relcheck's apart from line 2

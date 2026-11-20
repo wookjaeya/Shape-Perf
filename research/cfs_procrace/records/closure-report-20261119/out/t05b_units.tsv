@@ -1,0 +1,109 @@
+# report27.py, results 27.3 table (5) D1-R0: fail and not_evaluable units per check, row and note, per boot
+# columns build check class result row_label row(from the record name) note boots units_per_boot (branch D1-R0)
+c1_pre_tx	F1	boot	fail	A20	A20	pair[src/bp/fsw/src/bp_flow.c:132:18].missing_items: expected basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics, found basis1_same_build,basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F1	boot	fail	A20	A20	pair[apps/sch_lab/fsw/src/sch_lab_app.c:168:16].missing_items: expected basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics, found basis1_same_build,basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F1	boot	fail	A21	A21	pair[src/bp/fsw/src/bp_flow.c:132:18].missing_items: expected basis4_creator_success,da_no_name_mapping,ma_no_lifetime_end,na_semantics, found basis1_same_build,basis4_creator_success,da_no_name_mapping,ma_no_lifetime_end,na_semantics	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F1	boot	fail	A21	A21	pair[apps/sch_lab/fsw/src/sch_lab_app.c:168:16].missing_items: expected basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics, found basis1_same_build,basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F4	boot	not_evaluable	A21	A21	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	A21	A21	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	A21	A21	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F3	boot	not_evaluable	-	B13	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F4	boot	not_evaluable	-	B13	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	-	B13	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	-	B13	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F3	boot	not_evaluable	-	B73	not a path A record (judgement rules 8.2 applies to path A only)	5	1:15,2:15,3:15,4:15,5:15
+c1_pre_tx	F4	boot	not_evaluable	-	B73	no found use event in this record	5	1:5,2:5,3:5,4:5,5:5
+c1_pre_tx	F8b	boot	not_evaluable	-	B73	no linked pair: the order ground is order_basis_unknown	5	1:15,2:15,3:15,4:15,5:15
+c1_pre_tx	F10	boot	fail	-	B73	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:15,2:15,3:15,4:15,5:15
+c1_pre_tx	F4	boot	fail	-	B73	no recorded create whose out value is the found id None	5	1:75,2:74,3:75,4:75,5:75
+c1_pre_tx	F3	boot	not_evaluable	-	B81	not a path A record (judgement rules 8.2 applies to path A only)	5	1:15,2:15,3:15,4:15,5:15
+c1_pre_tx	F4	boot	not_evaluable	-	B81	no found use event in this record	5	1:15,2:15,3:15,4:15,5:15
+c1_pre_tx	F8b	boot	not_evaluable	-	B81	no linked pair: the order ground is order_basis_unknown	5	1:15,2:15,3:15,4:15,5:15
+c1_pre_tx	F10	boot	fail	-	B81	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:15,2:15,3:15,4:15,5:15
+c1_pre_tx	F3	boot	not_evaluable	-	B99	not a path A record (judgement rules 8.2 applies to path A only)	5	1:6,2:6,3:6,4:6,5:6
+c1_pre_tx	F4	boot	fail	-	B99	no recorded create whose out value is the found id None	5	1:4,2:4,3:4,4:4,5:4
+c1_pre_tx	F8b	boot	not_evaluable	-	B99	no linked pair: the order ground is order_basis_unknown	5	1:6,2:6,3:6,4:6,5:6
+c1_pre_tx	F10	boot	fail	-	B99	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:6,2:6,3:6,4:6,5:6
+c1_pre_tx	F4	boot	not_evaluable	-	B99	no found use event in this record	5	1:2,2:2,3:2,4:2,5:2
+c1_pre_tx	F3	boot	not_evaluable	-	B113	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F4	boot	not_evaluable	-	B113	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	-	B113	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	-	B113	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F3	boot	not_evaluable	-	B118	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F4	boot	not_evaluable	-	B118	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	-	B118	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	-	B118	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F3	boot	not_evaluable	-	B119	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F4	boot	not_evaluable	-	B119	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	-	B119	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	-	B119	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F3	boot	not_evaluable	-	B125	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F4	boot	not_evaluable	-	B125	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	-	B125	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	-	B125	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F4	boot	not_evaluable	A20	A20	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	A20	A20	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	A20	A20	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F3	boot	not_evaluable	A22	A22	no absent use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	A22	A22	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	A22	A22	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F3	boot	not_evaluable	A26	A26	no absent use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	A26	A26	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	A26	A26	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F3	boot	not_evaluable	A63	A63	no absent use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F4	boot	not_evaluable	A63	A63	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F8b	boot	not_evaluable	A63	A63	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	F10	boot	fail	A63	A63	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F1	boot	fail	A20	A20	pair[src/bp/fsw/src/bp_flow.c:132:18].missing_items: expected basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics, found basis1_same_build,basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F1	boot	fail	A20	A20	pair[apps/sch_lab/fsw/src/sch_lab_app.c:168:16].missing_items: expected basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics, found basis1_same_build,basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F1	boot	fail	A21	A21	pair[src/bp/fsw/src/bp_flow.c:132:18].missing_items: expected basis4_creator_success,da_no_name_mapping,ma_no_lifetime_end,na_semantics, found basis1_same_build,basis4_creator_success,da_no_name_mapping,ma_no_lifetime_end,na_semantics	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F1	boot	fail	A21	A21	pair[apps/sch_lab/fsw/src/sch_lab_app.c:168:16].missing_items: expected basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics, found basis1_same_build,basis4_creator_success,basis6_create_after_use,da_no_name_mapping,ma_no_lifetime_end,na_semantics	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F3	boot	not_evaluable	-	B13	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F4	boot	not_evaluable	-	B13	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	-	B13	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	-	B13	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F3	boot	not_evaluable	-	B73	not a path A record (judgement rules 8.2 applies to path A only)	5	1:15,2:15,3:15,4:15,5:15
+c1_post_tx	F4	boot	not_evaluable	-	B73	no found use event in this record	5	1:6,2:6,3:6,4:6,5:6
+c1_post_tx	F8b	boot	not_evaluable	-	B73	no linked pair: the order ground is order_basis_unknown	5	1:15,2:15,3:15,4:15,5:15
+c1_post_tx	F10	boot	fail	-	B73	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:15,2:15,3:15,4:15,5:15
+c1_post_tx	F4	boot	fail	-	B73	no recorded create whose out value is the found id None	5	1:75,2:75,3:75,4:75,5:75
+c1_post_tx	F3	boot	not_evaluable	-	B81	not a path A record (judgement rules 8.2 applies to path A only)	5	1:15,2:15,3:15,4:15,5:15
+c1_post_tx	F4	boot	not_evaluable	-	B81	no found use event in this record	5	1:15,2:15,3:15,4:15,5:15
+c1_post_tx	F8b	boot	not_evaluable	-	B81	no linked pair: the order ground is order_basis_unknown	5	1:15,2:15,3:15,4:15,5:15
+c1_post_tx	F10	boot	fail	-	B81	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:15,2:15,3:15,4:15,5:15
+c1_post_tx	F3	boot	not_evaluable	-	B99	not a path A record (judgement rules 8.2 applies to path A only)	5	1:6,2:6,3:6,4:6,5:6
+c1_post_tx	F4	boot	fail	-	B99	no recorded create whose out value is the found id None	5	1:4,2:4,3:4,4:4,5:4
+c1_post_tx	F8b	boot	not_evaluable	-	B99	no linked pair: the order ground is order_basis_unknown	5	1:6,2:6,3:6,4:6,5:6
+c1_post_tx	F10	boot	fail	-	B99	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:6,2:6,3:6,4:6,5:6
+c1_post_tx	F4	boot	not_evaluable	-	B99	no found use event in this record	5	1:2,2:2,3:2,4:2,5:2
+c1_post_tx	F3	boot	not_evaluable	-	B113	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F4	boot	not_evaluable	-	B113	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	-	B113	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	-	B113	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F3	boot	not_evaluable	-	B118	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F4	boot	not_evaluable	-	B118	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	-	B118	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	-	B118	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F3	boot	not_evaluable	-	B119	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F4	boot	not_evaluable	-	B119	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	-	B119	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	-	B119	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F3	boot	not_evaluable	-	B125	not a path A record (judgement rules 8.2 applies to path A only)	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F4	boot	not_evaluable	-	B125	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	-	B125	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	-	B125	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F4	boot	not_evaluable	A20	A20	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	A20	A20	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	A20	A20	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	A21	A21	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	A21	A21	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F3	boot	not_evaluable	A22	A22	no absent use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	A22	A22	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	A22	A22	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F3	boot	not_evaluable	A26	A26	no absent use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	A26	A26	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	A26	A26	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F3	boot	not_evaluable	A63	A63	no absent use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F4	boot	not_evaluable	A63	A63	no found use event in this record	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F8b	boot	not_evaluable	A63	A63	no linked pair: the order ground is order_basis_unknown	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	F10	boot	fail	A63	A63	objects not confirmed: module:1, module:3, module:4, module:5, module:6, module:7	5	1:1,2:1,3:1,4:1,5:1

@@ -1,0 +1,152 @@
+== branch D1-R0: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  context: - -> None: 177
+differing field paths by class (path class, kind: records; one example: old -> new):
+  data_branch.admitted_kinds [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  data_branch.named_calls_sha256 [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "none")
+  order.use_events[].context [changed]: 177 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  tool_verdict.violation.undetermined_reasons[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.branch_i.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].context [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  use_cond.branch_iii[].depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].uses [added]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> 1)
+  use_cond.branch_iii[].why [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "no alternatives line of context -" -> "context unknown")
+  use_cond.callee_check.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.missing[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.reach.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.writers.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+script identity paths (counted apart): inputs.normal.path [changed] 45, inputs.normal.sha256 [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45, script.reader [changed] 45, script.reader_sha256 [changed] 45
+== branch D1-Ra: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  context: - -> None: 177
+differing field paths by class (path class, kind: records; one example: old -> new):
+  data_branch.admitted_kinds [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  data_branch.named_calls_sha256 [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "none")
+  order.use_events[].context [changed]: 177 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  tool_verdict.violation.undetermined_reasons[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.branch_i.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].context [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  use_cond.branch_iii[].depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].uses [added]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> 1)
+  use_cond.branch_iii[].why [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "no alternatives line of context -" -> "context unknown")
+  use_cond.callee_check.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.missing[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.reach.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.writers.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+script identity paths (counted apart): inputs.normal.path [changed] 45, inputs.normal.sha256 [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45, script.reader [changed] 45, script.reader_sha256 [changed] 45
+== branch D1-Rb: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  context: - -> None: 177
+differing field paths by class (path class, kind: records; one example: old -> new):
+  data_branch.admitted_kinds [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  data_branch.named_calls_sha256 [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "none")
+  order.use_events[].context [changed]: 177 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  tool_verdict.violation.undetermined_reasons[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.branch_i.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].context [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  use_cond.branch_iii[].depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].uses [added]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> 1)
+  use_cond.branch_iii[].why [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "no alternatives line of context -" -> "context unknown")
+  use_cond.callee_check.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.missing[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.reach.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.writers.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+script identity paths (counted apart): inputs.normal.path [changed] 45, inputs.normal.sha256 [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45, script.reader [changed] 45, script.reader_sha256 [changed] 45
+== branch D1-Rc: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  context: - -> None: 177
+differing field paths by class (path class, kind: records; one example: old -> new):
+  data_branch.admitted_kinds [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  data_branch.named_calls_sha256 [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "none")
+  order.use_events[].context [changed]: 177 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  tool_verdict.violation.undetermined_reasons[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.branch_i.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].context [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  use_cond.branch_iii[].depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].uses [added]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> 1)
+  use_cond.branch_iii[].why [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "no alternatives line of context -" -> "context unknown")
+  use_cond.callee_check.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.missing[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.reach.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.writers.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+script identity paths (counted apart): inputs.normal.path [changed] 45, inputs.normal.sha256 [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45, script.reader [changed] 45, script.reader_sha256 [changed] 45
+== branch D1-Rd: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  context: - -> None: 177
+differing field paths by class (path class, kind: records; one example: old -> new):
+  data_branch.admitted_kinds [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  data_branch.named_calls_sha256 [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "none")
+  order.use_events[].context [changed]: 177 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  tool_verdict.violation.undetermined_reasons[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.branch_i.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].context [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  use_cond.branch_iii[].depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].uses [added]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> 1)
+  use_cond.branch_iii[].why [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "no alternatives line of context -" -> "context unknown")
+  use_cond.callee_check.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.missing[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.reach.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.writers.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+script identity paths (counted apart): inputs.normal.path [changed] 45, inputs.normal.sha256 [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45, script.reader [changed] 45, script.reader_sha256 [changed] 45
+== branch D1-Re: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  context: - -> None: 177
+differing field paths by class (path class, kind: records; one example: old -> new):
+  data_branch.admitted_kinds [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  data_branch.named_calls_sha256 [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "none")
+  order.use_events[].context [changed]: 177 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  tool_verdict.violation.undetermined_reasons[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.branch_i.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].context [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  use_cond.branch_iii[].depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].uses [added]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> 1)
+  use_cond.branch_iii[].why [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "no alternatives line of context -" -> "context unknown")
+  use_cond.callee_check.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.missing[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.reach.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.writers.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+script identity paths (counted apart): inputs.normal.path [changed] 45, inputs.normal.sha256 [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45, script.reader [changed] 45, script.reader_sha256 [changed] 45
+== branch D1-Rf: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  context: - -> None: 177
+differing field paths by class (path class, kind: records; one example: old -> new):
+  data_branch.admitted_kinds [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  data_branch.named_calls_sha256 [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "none")
+  order.use_events[].context [changed]: 177 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  tool_verdict.violation.undetermined_reasons[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.branch_i.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].context [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  use_cond.branch_iii[].depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].uses [added]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> 1)
+  use_cond.branch_iii[].why [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "no alternatives line of context -" -> "context unknown")
+  use_cond.callee_check.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.missing[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.reach.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.writers.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+script identity paths (counted apart): inputs.normal.path [changed] 45, inputs.normal.sha256 [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45, script.reader [changed] 45, script.reader_sha256 [changed] 45
+== branch D1-all: records old 45 new 45 same names True
+axis statuses and verdict values equal: 45 of 45 records
+uses.tsv lines old 177 new 177; differing cells (column, old -> new: lines):
+  context: - -> None: 177
+differing field paths by class (path class, kind: records; one example: old -> new):
+  data_branch.admitted_kinds [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  data_branch.named_calls_sha256 [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "none")
+  order.use_events[].context [changed]: 177 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  tool_verdict.violation.undetermined_reasons[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.branch_i.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].context [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "-" -> null)
+  use_cond.branch_iii[].depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.branch_iii[].uses [added]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> 1)
+  use_cond.branch_iii[].why [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "no alternatives line of context -" -> "context unknown")
+  use_cond.callee_check.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.missing[] [changed]: 22 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "caller_dependence_unknown((i) not_established, (iii) not_established)" -> "caller_dependence_unknown(context unknown)")
+  use_cond.reach.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+  use_cond.writers.depends_on [added]: 45 (c1_pre_tx.A21.17975444d83f6589.actor-12.json: "<absent>" -> "[]")
+script identity paths (counted apart): inputs.normal.path [changed] 45, inputs.normal.sha256 [changed] 45, script.judge [changed] 45, script.judge_sha256 [changed] 45, script.reader [changed] 45, script.reader_sha256 [changed] 45

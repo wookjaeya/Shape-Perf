@@ -1,0 +1,13 @@
+# round trip of the tool copies before the build of the semantics step (2026-11-16T18:43:33Z)
+copy: /home/user/work/preserve/tools-20261116-i/kz-static.88f529b1.xz (43696080 B)
+xz -t: OK
+sha256 of the xz file: efe260615c28c6bbc310c19d11183ecba1b042b951f4c9a0f59451e6c4c9654c
+xz -dc | sha256sum: 88f529b1acd7091571fe4a391022f12ebd663a277762c14e07bd0af9084e5477
+in place: 88f529b1acd7091571fe4a391022f12ebd663a277762c14e07bd0af9084e5477
+xz -dc | cmp in place: SAME
+copy: /home/user/work/preserve/tools-20261116-i/kz_lint.5f62ec20.xz (956516 B)
+xz -t: OK
+sha256 of the xz file: 077584ac0d5b726e73cbc2e479a6e100022d78538c6f970c083f9a80d5eceba1
+xz -dc | sha256sum: 5f62ec20d2d26e74501cf7469649761df662d673659835ec9bb0902ed6acd018
+in place: 5f62ec20d2d26e74501cf7469649761df662d673659835ec9bb0902ed6acd018
+xz -dc | cmp in place: SAME

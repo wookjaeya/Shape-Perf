@@ -1,0 +1,4 @@
+# space_guard.sh kind=identity need=5000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/reclaim-20261118/identity_listing.py /home/user/work/redesign/obs1 reclaim/pairs.tsv reclaim before
+start 2026-11-19T13:43:08.836Z free=378798080 threshold=319572800
+sample 2026-11-19T13:43:08.840Z 378793984
+end 2026-11-19T13:43:10.846Z kind=identity verdict=completed rc=0 free=378773504 lowest=378773504 dip=24576 change=-24576

@@ -1,0 +1,1 @@
+selftest: case 1 (matches, archived and removed) rc=0; case 2 (differs, kept) rc=1; 2 of 2 pass

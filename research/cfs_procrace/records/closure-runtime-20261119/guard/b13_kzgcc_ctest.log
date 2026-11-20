@@ -1,0 +1,6 @@
+# space_guard.sh kind=plugin need=52428800 floor=314572800 interval=2 cmd=ctest --test-dir /home/user/work/instr/kzgcc-0.4/plugin-build -V
+start 2026-11-19T07:41:55.316Z free=757186560 threshold=367001600
+sample 2026-11-19T07:41:55.320Z 757182464
+sample 2026-11-19T07:41:57.325Z 756461568
+sample 2026-11-19T07:41:59.332Z 755441664
+end 2026-11-19T07:42:01.340Z kind=plugin verdict=completed rc=0 free=755191808 lowest=755191808 dip=1994752 change=-1994752

@@ -1,0 +1,92 @@
+-- LLVM 23.0.0git at /home/user/work/llvm-project/build/lib/cmake/llvm; Clang at /home/user/work/llvm-project/build/lib/cmake/clang
+-- libkz-core source identity f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+-- Configuring done (0.4s)
+-- Generating done (0.5s)
+-- Build files have been written to: /home/user/work/merge-check/kz-llvm
+[ 50%] Built target kz-core
+[ 50%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/finalize.cpp.o
+[ 50%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/ast_tu.cpp.o
+[ 50%] Linking CXX static library libkz-llvm.a
+[ 93%] Built target kz-llvm
+[ 93%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/main.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_extract.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_basis.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_show.cpp.o
+[100%] Linking CXX executable kz-static
+[100%] Built target kz-static
+[ 47%] Built target kz-core
+[ 88%] Built target kz-llvm
+[ 94%] Built target kz-static
+[ 94%] Building CXX object tests/static/CMakeFiles/static_golden.dir/static_golden.cpp.o
+[100%] Linking CXX executable static_golden
+[100%] Built target static_golden
+[ 42%] Built target kz-core
+[ 52%] Built target kz-testsupport
+[ 89%] Built target kz-llvm
+[ 94%] Built target kz-static
+[100%] Building CXX object tests/static/CMakeFiles/test_static_cli.dir/test_static_cli.cpp.o
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_cli.cpp: In function 'int main(int, char**)':
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_cli.cpp:55:5: note: variable tracking size limit exceeded with '-fvar-tracking-assignments', retrying without
+   55 | int main(int argc, char** argv) {
+      |     ^~~~
+[100%] Linking CXX executable test_static_cli
+[100%] Built target test_static_cli
+[ 47%] Built target kz-core
+[ 58%] Built target kz-testsupport
+[100%] Built target kz-llvm
+[100%] Linking CXX executable test_static_expr
+[100%] Built target test_static_expr
+[ 44%] Built target kz-core
+[ 55%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[100%] Building CXX object tests/static/CMakeFiles/test_static_flow.dir/test_static_flow.cpp.o
+[100%] Linking CXX executable test_static_flow
+[100%] Built target test_static_flow
+[ 44%] Built target kz-core
+[ 55%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[100%] Linking CXX executable test_static_recipe
+[100%] Built target test_static_recipe
+[ 44%] Built target kz-core
+[ 55%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[100%] Linking CXX executable test_static_gitrev
+[100%] Built target test_static_gitrev
+[ 47%] Built target kz-core
+[ 58%] Built target kz-testsupport
+[100%] Built target kz-llvm
+[100%] Linking CXX executable test_static_unroll
+[100%] Built target test_static_unroll
+[ 44%] Built target kz-core
+[ 55%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[ 94%] Linking CXX executable test_static_wrappers
+[100%] Built target test_static_wrappers
+[  0%] Built target kz_static_lazy_unused
+[  0%] Built target kz_static_main_obj
+[  0%] Built target kz_static_whole_member
+[ 44%] Built target kz-core
+[ 50%] Built target kz_static_lazy_used
+[ 61%] Built target kz-testsupport
+[100%] Built target kz-llvm
+[100%] Linking CXX executable test_static_link
+[100%] Built target test_static_link
+[ 42%] Built target kz-core
+[ 52%] Built target kz-testsupport
+[ 89%] Built target kz-llvm
+[ 94%] Built target kz-static
+[100%] Linking CXX executable test_static_elf32
+[100%] Built target test_static_elf32
+[100%] Built target kz_lint
+# make test_static_cli after the expectation fix (08:04Z)
+[ 42%] Built target kz-core
+[ 52%] Built target kz-testsupport
+[ 89%] Built target kz-llvm
+[ 94%] Built target kz-static
+[100%] Building CXX object tests/static/CMakeFiles/test_static_cli.dir/test_static_cli.cpp.o
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_cli.cpp: In function 'int main(int, char**)':
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_cli.cpp:55:5: note: variable tracking size limit exceeded with '-fvar-tracking-assignments', retrying without
+   55 | int main(int argc, char** argv) {
+      |     ^~~~
+[100%] Linking CXX executable test_static_cli
+[100%] Built target test_static_cli

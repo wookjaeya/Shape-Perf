@@ -1,0 +1,6 @@
+# space_guard.sh kind=kz-phi need=392463680 floor=314572800 interval=2 cmd=bash -c make -j4 kz-phi > /home/user/Shape-Perf/research/cfs_procrace/records/schema-rev12-20261116/make_kz-phi.log 2>&1
+start 2026-11-16T12:41:37.451Z free=3202416640 threshold=707036480
+sample 2026-11-16T12:41:37.455Z 3202412544
+sample 2026-11-16T12:41:39.462Z 3202232320
+sample 2026-11-16T12:41:41.468Z 3200860160
+end 2026-11-16T12:41:43.475Z kind=kz-phi verdict=completed rc=0 free=3202269184 lowest=3200860160 dip=1556480 change=-147456

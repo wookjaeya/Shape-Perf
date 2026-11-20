@@ -1,0 +1,60 @@
+OK c1_pre_tx order.txt two runs the same bytes
+OK c1_pre_tx edges.tsv two runs the same bytes
+OK c1_pre_tx pairs.tsv two runs the same bytes
+OK c1_pre_tx cdr.txt two runs the same bytes
+OK final_order_order_c1_pre_tx: diffkinds old_lines=8927 new_lines=8928 only_old=3 only_new=4 labels=2
+OK final_order_edges_c1_pre_tx: diffkinds old_lines=594 new_lines=594 only_old=0 only_new=0 labels=0
+OK final_order_pairs_c1_pre_tx written
+OK final_order_cdr_c1_pre_tx: diffkinds old_lines=10 new_lines=10 only_old=0 only_new=0 labels=0
+OK c1_pre_tx order.log empty
+OK c1_pre_tx relations.txt = the re-extraction's
+OK final_order_keys_c1_pre_tx: diffkinds old_lines=739 new_lines=740 only_old=3 only_new=4 labels=2
+OK c1_pre_tx relations.log empty
+OK c1_post_tx order.txt two runs the same bytes
+OK c1_post_tx edges.tsv two runs the same bytes
+OK c1_post_tx pairs.tsv two runs the same bytes
+OK c1_post_tx cdr.txt two runs the same bytes
+OK final_order_order_c1_post_tx: diffkinds old_lines=8950 new_lines=8951 only_old=3 only_new=4 labels=2
+OK final_order_edges_c1_post_tx: diffkinds old_lines=594 new_lines=594 only_old=0 only_new=0 labels=0
+OK final_order_pairs_c1_post_tx written
+OK final_order_cdr_c1_post_tx: diffkinds old_lines=10 new_lines=10 only_old=0 only_new=0 labels=0
+OK c1_post_tx order.log empty
+OK c1_post_tx relations.txt = the re-extraction's
+OK final_order_keys_c1_post_tx: diffkinds old_lines=739 new_lines=740 only_old=3 only_new=4 labels=2
+OK c1_post_tx relations.log empty
+OK r2_core order.txt two runs the same bytes
+OK r2_core edges.tsv two runs the same bytes
+OK r2_core pairs.tsv two runs the same bytes
+OK r2_core cdr.txt two runs the same bytes
+OK final_order_order_r2_core: diffkinds old_lines=7337 new_lines=7338 only_old=0 only_new=1 labels=1
+OK final_order_edges_r2_core: diffkinds old_lines=616 new_lines=616 only_old=0 only_new=0 labels=0
+OK final_order_pairs_r2_core written
+OK final_order_cdr_r2_core: diffkinds old_lines=472 new_lines=472 only_old=0 only_new=0 labels=0
+OK r2_core order.log empty
+OK r2_core relations.txt = the re-extraction's
+OK final_order_keys_r2_core: diffkinds old_lines=593 new_lines=594 only_old=0 only_new=1 labels=1
+OK r2_core relations.log empty
+OK c5_641 order.txt two runs the same bytes
+OK c5_641 edges.tsv two runs the same bytes
+OK c5_641 pairs.tsv two runs the same bytes
+OK c5_641 cdr.txt two runs the same bytes
+OK final_order_order_c5_641: diffkinds old_lines=2085 new_lines=2086 only_old=0 only_new=1 labels=1
+OK final_order_edges_c5_641: diffkinds old_lines=92 new_lines=92 only_old=0 only_new=0 labels=0
+OK final_order_pairs_c5_641 written
+OK final_order_cdr_c5_641: diffkinds old_lines=9 new_lines=9 only_old=0 only_new=0 labels=0
+OK c5_641 order.log empty
+OK c5_641 relations.txt = the re-extraction's
+OK final_order_keys_c5_641: diffkinds old_lines=338 new_lines=339 only_old=0 only_new=1 labels=1
+OK c5_641 relations.log empty
+OK c5_642 order.txt two runs the same bytes
+OK c5_642 edges.tsv two runs the same bytes
+OK c5_642 pairs.tsv two runs the same bytes
+OK c5_642 cdr.txt two runs the same bytes
+OK final_order_order_c5_642: diffkinds old_lines=2352 new_lines=2353 only_old=0 only_new=1 labels=1
+OK final_order_edges_c5_642: diffkinds old_lines=122 new_lines=122 only_old=0 only_new=0 labels=0
+OK final_order_pairs_c5_642 written
+OK final_order_cdr_c5_642: diffkinds old_lines=9 new_lines=9 only_old=0 only_new=0 labels=0
+OK c5_642 order.log empty
+OK c5_642 relations.txt = the re-extraction's
+OK final_order_keys_c5_642: diffkinds old_lines=331 new_lines=332 only_old=0 only_new=1 labels=1
+OK c5_642 relations.log empty

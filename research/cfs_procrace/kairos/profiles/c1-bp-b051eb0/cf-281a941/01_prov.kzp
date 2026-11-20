@@ -1,0 +1,31 @@
+# 01_prov.kzp -- the CF 281a941 citations (the pre-fix side of the D22 pair).  Same names as in
+# cf-833fdbb/, other lines: the common declarations cite them by name.
+phi 1;
+
+prov cf_cfdp_lookup {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 991 1001;
+  sha256 "04c26a4b1f1a402f15ecc1072b0d1d7c35045cbb7afa27d5957210553170431a";
+  note "the dependent lookup at 281a941: a non-empty configured name, one OS_CountSemGetIdByName, on failure event 30 and break";
+}
+
+prov cf_cfdp_lookup_call {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 993 994;
+  sha256 "d7239ca41f6f6bcc05179554fcd4edad993edda32a8cfb9d804ac7031dafdc9e";
+  note "the call OS_CountSemGetIdByName(&channels[i].sem_id, config_table->chan[i].sem_name) in CF_CFDP_InitEngine";
+}
+
+prov cf_cfdp_initengine_return {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 1029 1034;
+  sha256 "a4e3fd0e9cc9645cbfcf9792669d2159e8b8fa3fe7027037dc8fd75fd3e1f3d3";
+  note "CF_CFDP_InitEngine enables the engine only if ret is CFE_SUCCESS and returns ret";
+}
+

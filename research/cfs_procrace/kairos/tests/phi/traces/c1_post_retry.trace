@@ -1,0 +1,30 @@
+# C1 at CF 833fdbb, a synthetic model trace (unit-test values): CF's first lookup of BP0_tsem finds
+# nothing and CF delays; BP checks (existence probe) and creates the name; CF's second lookup succeeds.
+# The first attempt is judged by retry_until_ready: its horizon monitor ACCEPTs at the second attempt of
+# the same actor, key and call context, which is READY within the bound (TOLERATED); the second is READY.
+# A lookup by a third actor at a call site with no declared role stays an instance (no context); the trace
+# ends after its first not-ready attempt, so its monitor is OPEN and it stays PENDING.
+const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
+CF CF_CFDP_InitEngine call
+CF OS_CountSemGetIdByName call arg.sem_name=@BP0_tsem
+CF OS_CountSemGetIdByName.exists pt
+CF OS_CountSemGetIdByName ret result=-17
+CF cf_lookup_call pt
+CF cf_retry_delay pt
+BP BP_FlowInit call
+BP OS_CountSemGetIdByName call arg.sem_name=@BP0_tsem
+BP OS_CountSemGetIdByName.exists pt
+BP OS_CountSemGetIdByName ret result=-17
+BP bp_existence_probe_call pt
+BP OS_CountSemCreate call arg.sem_name=@BP0_tsem arg.sem_initial_value=10 arg.options=0
+BP OS_CountSemCreate.publish pt lp.operation_status=0
+BP OS_CountSemCreate ret result=0
+BP bp_create_call pt
+CF OS_CountSemGetIdByName call arg.sem_name=@BP0_tsem
+CF OS_CountSemGetIdByName.exists pt
+CF OS_CountSemGetIdByName ret result=0
+CF cf_lookup_call pt
+CF CF_CFDP_InitEngine ret result=0
+X OS_CountSemGetIdByName call arg.sem_name=@BP1_tsem
+X OS_CountSemGetIdByName.exists pt
+X OS_CountSemGetIdByName ret result=-17

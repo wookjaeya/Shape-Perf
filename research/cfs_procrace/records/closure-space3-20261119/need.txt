@@ -1,0 +1,18 @@
+# kz-space3-need 1 (records/closure-space3-20261119/need3.py); the parts are [M] in the kept files named, their sum per boot is [I] until boots have run (protocol 14.14 item 4)
+floor 314572800 (boot declaration 3)
+margin 100000000 (boot declaration 3)
+per_boot.boot 2736128 (records/closure-space-20261119/need.txt per_boot.boot)
+per_boot.convert 864256 (records/closure-space-20261119/need.txt per_boot.convert)
+per_boot.explain16 48807936 (records/closure-prebootfix-20261119/out/xr5_sizes.txt du -sB1 xr5_synth_c1_pre_tx_script (largest of xr5_synth_c1_post_tx_reverse 48775168, xr5_synth_c1_post_tx_script 48771072, xr5_synth_c1_pre_tx_reverse 48758784, xr5_synth_c1_pre_tx_script 48807936))
+per_boot.eval 1122304 (records/closure-prebootfix-20261119/guard/eval-dry_static_c1_post_tx.log dip (largest of 6 eval logs))
+per_boot.expect 253952 (records/closure-prebootfix-20261119/compare/loss_afterstop_expect.txt blocks (largest of 6))
+per_boot.records 409600 (records/closure-space-20261119/need.txt per_boot.records)
+per_boot.verify 110592 (3 x blocks of records/closure-c1prep-20261119/boot/c1_pre_tx/boot0/verify.txt (36864))
+per_boot.eval_tail 61440 (records/closure-prebootfix-20261119/out/eval_synth_c1_post_tx_script_tail.txt blocks (largest of 6))
+per_boot.lists 118784 (blocks of /home/user/work/preserve/archives-20261119/xr5_synth_c1_post_tx_reverse/MEMBERS.sha256 (106496, largest of 4) + 3 x 4096)
+per_boot 54484992
+per_boot_declared3 51810304 (boot declaration 3; difference 2674688)
+need_free 1068392704 (before c1_pre_tx boot 1: floor + margin + 12 x per_boot)
+need_post1 741482752 (before c1_post_tx boot 1: floor + margin + 6 x per_boot)
+free_now 1035739136
+short_now 32653568

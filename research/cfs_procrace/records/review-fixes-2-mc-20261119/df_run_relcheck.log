@@ -1,0 +1,4 @@
+# space_guard.sh kind=run-relcheck need=120000000 floor=314572800 interval=2 cmd=bash -c bash '/home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/run.sh' relcheck > '/home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/run_relcheck.txt' 2>&1
+start 2026-11-19T01:56:35.186Z free=1258684416 threshold=434572800
+sample 2026-11-19T01:56:35.192Z 1258680320
+end 2026-11-19T01:56:37.199Z kind=run-relcheck verdict=completed rc=0 free=1251016704 lowest=1251016704 dip=7667712 change=-7667712

@@ -1,0 +1,4 @@
+# space_guard.sh kind=regress need=52428800 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-runtime-20261119/scripts/regress.sh /home/user/work/redesign/obs1/rtb_regress_old /home/user/Shape-Perf/research/cfs_procrace/records/closure-runtime-20261119/regress/chain_check_old.py
+start 2026-11-19T07:35:37.315Z free=777347072 threshold=367001600
+sample 2026-11-19T07:35:37.320Z 777342976
+end 2026-11-19T07:35:39.326Z kind=regress verdict=completed rc=0 free=775327744 lowest=775327744 dip=2019328 change=-2019328

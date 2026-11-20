@@ -1,0 +1,495 @@
+Test project /home/user/work/merge-check/kz-llvm
+        Start  53: rt_plan_write
+        Start  65: rt_end_normal
+        Start  61: rt_end_segv
+        Start  60: rt_end_kill
+  1/238 Test  #53: rt_plan_write .................................   Passed    0.17 sec
+        Start  39: rt_mode_bogus
+  2/238 Test  #39: rt_mode_bogus .................................   Passed    0.20 sec
+        Start  22: rt_auto_bi
+  3/238 Test  #61: rt_end_segv ...................................   Passed    0.31 sec
+        Start  24: rt_auto_bad
+  4/238 Test  #60: rt_end_kill ...................................   Passed    0.51 sec
+        Start  31: rt_mode_off
+  5/238 Test  #65: rt_end_normal .................................   Passed    0.62 sec
+        Start  41: rt_mode_api_latch
+  6/238 Test  #22: rt_auto_bi ....................................   Passed    0.31 sec
+        Start  37: rt_mode_unset
+  7/238 Test  #24: rt_auto_bad ...................................   Passed    0.20 sec
+        Start  42: rt_mode_api_late
+  8/238 Test  #31: rt_mode_off ...................................   Passed    0.01 sec
+        Start  33: rt_mode_record
+  9/238 Test  #41: rt_mode_api_latch .............................   Passed    0.01 sec
+        Start  54: rt_auto_plan_control
+ 10/238 Test  #37: rt_mode_unset .................................   Passed    0.00 sec
+        Start   5: rt_serial
+ 11/238 Test  #42: rt_mode_api_late ..............................   Passed    0.01 sec
+        Start  56: rt_auto_plan_none
+ 12/238 Test  #33: rt_mode_record ................................   Passed    0.01 sec
+        Start  20: rt_auto
+ 13/238 Test  #54: rt_auto_plan_control ..........................   Passed    0.01 sec
+        Start  35: rt_mode_control
+ 14/238 Test   #5: rt_serial .....................................   Passed    0.01 sec
+        Start  29: rt_pool_empty
+ 15/238 Test  #56: rt_auto_plan_none .............................   Passed    0.01 sec
+        Start  55: rt_auto_plan_record
+ 16/238 Test  #20: rt_auto .......................................   Passed    0.01 sec
+        Start 137: test_probe_observe
+ 17/238 Test  #35: rt_mode_control ...............................   Passed    0.17 sec
+        Start 237: test_static_elf32
+ 18/238 Test  #29: rt_pool_empty .................................   Passed    0.17 sec
+        Start 133: test_probe_anchor_reached
+ 19/238 Test  #55: rt_auto_plan_record ...........................   Passed    0.26 sec
+        Start 229: static_golden_core_cpu1
+ 20/238 Test #133: test_probe_anchor_reached .....................***Skipped   0.78 sec
+        Start 194: test_property_eval_agreement
+ 21/238 Test #194: test_property_eval_agreement ..................   Passed    2.87 sec
+        Start  90: schema_bpf_compile
+ 22/238 Test  #90: schema_bpf_compile ............................   Passed    2.92 sec
+        Start   1: instr_clang_transform
+ 23/238 Test   #1: instr_clang_transform .........................   Passed    3.60 sec
+        Start 142: test_hold_sequence
+ 24/238 Test #237: test_static_elf32 .............................   Passed   10.68 sec
+        Start 126: test_realrecord_derived
+ 25/238 Test #142: test_hold_sequence ............................   Passed    0.74 sec
+        Start 207: static_fixture_compile_relsound
+ 26/238 Test #207: static_fixture_compile_relsound ...............   Passed    0.08 sec
+        Start  64: rt_end_term-kill
+ 27/238 Test #126: test_realrecord_derived .......................   Passed    0.69 sec
+        Start 206: static_fixture_compile_relpaths
+ 28/238 Test #206: static_fixture_compile_relpaths ...............   Passed    0.04 sec
+        Start 208: static_fixture_compile_deepcond
+ 29/238 Test #208: static_fixture_compile_deepcond ...............   Passed    0.03 sec
+        Start 234: test_static_unroll
+ 30/238 Test #234: test_static_unroll ............................   Passed    0.01 sec
+        Start 231: test_static_flow
+ 31/238 Test #231: test_static_flow ..............................   Passed    0.01 sec
+        Start 205: static_fixture_compile_relations
+ 32/238 Test #205: static_fixture_compile_relations ..............   Passed    0.03 sec
+        Start 233: test_static_gitrev
+ 33/238 Test #233: test_static_gitrev ............................   Passed    0.01 sec
+        Start 164: test_phi_cli
+ 34/238 Test  #64: rt_end_term-kill ..............................   Passed    0.71 sec
+        Start  95: schema_probe_2_cxx
+ 35/238 Test  #95: schema_probe_2_cxx ............................   Passed    0.09 sec
+        Start 140: probe_anchor_xcheck_script
+ 36/238 Test #164: test_phi_cli ..................................   Passed    0.30 sec
+        Start 236: test_static_link
+ 37/238 Test #236: test_static_link ..............................   Passed    0.01 sec
+        Start 105: lint_case-ids
+ 38/238 Test #140: probe_anchor_xcheck_script ....................   Passed    0.28 sec
+        Start 141: test_hold_ptrace
+ 39/238 Test #141: test_hold_ptrace ..............................   Passed    0.23 sec
+        Start  67: rt_no_library_symbols
+ 40/238 Test  #67: rt_no_library_symbols .........................   Passed    0.04 sec
+        Start 228: static_golden_relsound_np
+ 41/238 Test #228: static_golden_relsound_np .....................   Passed    0.28 sec
+        Start 232: test_static_recipe
+ 42/238 Test #232: test_static_recipe ............................   Passed    0.01 sec
+        Start 230: test_static_expr
+ 43/238 Test #230: test_static_expr ..............................   Passed    0.01 sec
+        Start  91: schema_probe_0_cxx
+ 44/238 Test  #91: schema_probe_0_cxx ............................   Passed    0.09 sec
+        Start  93: schema_probe_1_cxx
+ 45/238 Test  #93: schema_probe_1_cxx ............................   Passed    0.08 sec
+        Start  92: schema_probe_0_c99
+ 46/238 Test  #92: schema_probe_0_c99 ............................   Passed    0.10 sec
+        Start  94: schema_probe_1_c99
+ 47/238 Test  #94: schema_probe_1_c99 ............................   Passed    0.10 sec
+        Start  96: schema_probe_2_c99
+ 48/238 Test  #96: schema_probe_2_c99 ............................   Passed    0.10 sec
+        Start 170: phi_c1_provenance_281a941_1df262a-altP3
+ 49/238 Test #105: lint_case-ids .................................   Passed    2.02 sec
+        Start  70: test_core_kzdump
+ 50/238 Test  #70: test_core_kzdump ..............................   Passed    0.82 sec
+        Start 185: phi_c1_provenance_833fdbb_1b0b338
+ 51/238 Test #170: phi_c1_provenance_281a941_1df262a-altP3 .......   Passed    3.04 sec
+        Start 127: test_trace_neutral_real
+ 52/238 Test #185: phi_c1_provenance_833fdbb_1b0b338 .............   Passed    2.28 sec
+        Start  80: test_core_phi_check
+ 53/238 Test #127: test_trace_neutral_real .......................   Passed    0.96 sec
+        Start  84: test_core_replay
+ 54/238 Test  #84: test_core_replay ..............................   Passed    0.37 sec
+        Start 226: static_golden_lockpaths_np
+ 55/238 Test  #80: test_core_phi_check ...........................   Passed    0.58 sec
+        Start 131: test_kzrt_recovered
+ 56/238 Test #131: test_kzrt_recovered ...........................   Passed    0.27 sec
+        Start 227: static_golden_relpaths_np
+ 57/238 Test #226: static_golden_lockpaths_np ....................   Passed    0.32 sec
+        Start  73: test_core_container_corrupt
+ 58/238 Test  #73: test_core_container_corrupt ...................   Passed    0.25 sec
+        Start 176: phi_c1_provenance_281a941_1b0b338-altP3
+ 59/238 Test #176: phi_c1_provenance_281a941_1b0b338-altP3 .......   Passed    0.01 sec
+        Start 130: test_kzrt_app_request
+ 60/238 Test #227: static_golden_relpaths_np .....................   Passed    0.84 sec
+        Start 115: test_trace_hold_nctl
+ 61/238 Test #130: test_kzrt_app_request .........................   Passed    0.88 sec
+        Start 188: phi_c1_provenance_833fdbb_1b0b338-altP3
+ 62/238 Test #115: test_trace_hold_nctl ..........................   Passed    0.34 sec
+        Start  71: source_identity_cmake
+ 63/238 Test #188: phi_c1_provenance_833fdbb_1b0b338-altP3 .......   Passed    0.01 sec
+        Start 123: test_trace_static_closure
+ 64/238 Test #123: test_trace_static_closure .....................   Passed    0.24 sec
+        Start 129: test_kzrt_identity
+ 65/238 Test  #71: source_identity_cmake .........................   Passed    0.60 sec
+        Start 134: test_probe_basis
+ 66/238 Test #129: test_kzrt_identity ............................   Passed    0.54 sec
+        Start 225: static_golden_relations_np
+ 67/238 Test #134: test_probe_basis ..............................   Passed    0.21 sec
+        Start  83: test_core_realrecord
+ 68/238 Test  #83: test_core_realrecord ..........................   Passed    0.30 sec
+        Start 122: test_trace_replay_out
+ 69/238 Test #225: static_golden_relations_np ....................   Passed    0.52 sec
+        Start 125: test_trace_occ_basis_cli
+ 70/238 Test #229: static_golden_core_cpu1 .......................   Passed   20.46 sec
+        Start 128: test_neutral_kzrt
+ 71/238 Test #122: test_trace_replay_out .........................   Passed    0.96 sec
+        Start 118: test_trace_merge_order
+ 72/238 Test #128: test_neutral_kzrt .............................   Passed    0.69 sec
+        Start 238: test_static_cli
+ 73/238 Test #125: test_trace_occ_basis_cli ......................   Passed    0.99 sec
+        Start 132: test_probe_anchor_compilers
+ 74/238 Test #118: test_trace_merge_order ........................   Passed    0.23 sec
+        Start  11: rt_gate_timeout
+ 75/238 Test #132: test_probe_anchor_compilers ...................   Passed    0.27 sec
+        Start  77: test_core_monitor
+ 76/238 Test  #11: rt_gate_timeout ...............................   Passed    0.60 sec
+        Start  62: rt_end_abort
+ 77/238 Test #137: test_probe_observe ............................   Passed   22.02 sec
+        Start 224: static_golden_lockset_np
+ 78/238 Test  #77: test_core_monitor .............................   Passed    0.34 sec
+        Start 202: static_fixture_compile_flowfacts
+ 79/238 Test  #62: rt_end_abort ..................................   Passed    0.03 sec
+        Start  82: test_core_phi_provenance
+ 80/238 Test #202: static_fixture_compile_flowfacts ..............   Passed    0.16 sec
+        Start  28: rt_pool_dumps
+ 81/238 Test  #82: test_core_phi_provenance ......................   Passed    0.16 sec
+        Start 198: static_fixture_compile_loops
+ 82/238 Test  #28: rt_pool_dumps .................................   Passed    0.05 sec
+        Start 220: static_golden_relations
+ 83/238 Test #198: static_fixture_compile_loops ..................   Passed    0.03 sec
+        Start 135: test_probe_elf_dwarf
+ 84/238 Test #224: static_golden_lockset_np ......................   Passed    0.38 sec
+        Start 204: static_fixture_compile_lockset
+ 85/238 Test #135: test_probe_elf_dwarf ..........................   Passed    0.18 sec
+        Start  63: rt_end_term
+ 86/238 Test #204: static_fixture_compile_lockset ................   Passed    0.03 sec
+        Start  78: test_core_phi_allowed
+ 87/238 Test  #63: rt_end_term ...................................   Passed    0.13 sec
+        Start  86: test_core_state_order
+ 88/238 Test #220: static_golden_relations .......................   Passed    0.60 sec
+        Start 193: test_predict_model
+ 89/238 Test  #78: test_core_phi_allowed .........................   Passed    0.66 sec
+        Start  79: test_core_phi_canonical
+ 90/238 Test #193: test_predict_model ............................   Passed    0.78 sec
+        Start  72: test_core_container
+ 91/238 Test  #86: test_core_state_order .........................   Passed    1.24 sec
+        Start 222: static_golden_flowfacts_np
+ 92/238 Test  #79: test_core_phi_canonical .......................   Passed    0.70 sec
+        Start 219: static_golden_lockset
+ 93/238 Test  #72: test_core_container ...........................   Passed    0.20 sec
+        Start 218: static_golden_argflow
+ 94/238 Test #219: static_golden_lockset .........................   Passed    0.05 sec
+        Start  69: test_core_identity
+ 95/238 Test #222: static_golden_flowfacts_np ....................   Passed    0.06 sec
+        Start 223: static_golden_argflow_np
+ 96/238 Test #218: static_golden_argflow .........................   Passed    0.05 sec
+        Start 200: static_fixture_compile_atype
+ 97/238 Test  #69: test_core_identity ............................   Passed    0.02 sec
+        Start 235: test_static_wrappers
+ 98/238 Test #235: test_static_wrappers ..........................   Passed    0.01 sec
+        Start 203: static_fixture_compile_argflow
+ 99/238 Test #200: static_fixture_compile_atype ..................   Passed    0.02 sec
+        Start 197: static_fixture_compile_derives
+100/238 Test #203: static_fixture_compile_argflow ................   Passed    0.03 sec
+        Start 196: static_fixture_compile_outptr
+101/238 Test #197: static_fixture_compile_derives ................   Passed    0.02 sec
+        Start  76: test_core_eval
+102/238 Test #223: static_golden_argflow_np ......................   Passed    0.34 sec
+        Start 216: static_golden_wrappers
+103/238 Test #196: static_fixture_compile_outptr .................   Passed    0.29 sec
+        Start 113: test_trace_decode_real
+104/238 Test #113: test_trace_decode_real ........................   Passed    0.13 sec
+        Start 104: lint_selftest
+105/238 Test  #76: test_core_eval ................................   Passed    0.42 sec
+        Start 217: static_golden_flowfacts
+106/238 Test #216: static_golden_wrappers ........................   Passed    0.19 sec
+        Start 139: test_probe_record
+107/238 Test #139: test_probe_record .............................   Passed    0.02 sec
+        Start 109: lint_no-generated
+108/238 Test #217: static_golden_flowfacts .......................   Passed    0.07 sec
+        Start 213: static_golden_loops
+109/238 Test #104: lint_selftest .................................   Passed    0.08 sec
+        Start 117: test_trace_key_separation
+110/238 Test #117: test_trace_key_separation .....................   Passed    0.39 sec
+        Start 136: test_probe_golden
+111/238 Test #213: static_golden_loops ...........................   Passed    0.56 sec
+        Start  87: test_core_verdict
+112/238 Test  #87: test_core_verdict .............................   Passed    0.23 sec
+        Start 195: static_fixture_compile_writers
+113/238 Test #136: test_probe_golden .............................   Passed    0.40 sec
+        Start 215: static_golden_atype
+114/238 Test #195: static_fixture_compile_writers ................   Passed    0.02 sec
+        Start 214: static_golden_spawn
+115/238 Test #215: static_golden_atype ...........................   Passed    0.04 sec
+        Start 201: static_fixture_compile_wrappers
+116/238 Test #214: static_golden_spawn ...........................   Passed    0.04 sec
+        Start 211: static_golden_outptr
+117/238 Test #201: static_fixture_compile_wrappers ...............   Passed    0.03 sec
+        Start  88: test_core_verify
+118/238 Test #109: lint_no-generated .............................   Passed    1.05 sec
+        Start 210: static_golden_writers
+119/238 Test #211: static_golden_outptr ..........................   Passed    0.20 sec
+        Start 182: phi_c1_provenance_833fdbb_1df262a-altP3
+120/238 Test  #88: test_core_verify ..............................   Passed    0.19 sec
+        Start 221: static_golden_clobber
+121/238 Test #182: phi_c1_provenance_833fdbb_1df262a-altP3 .......   Passed    0.01 sec
+        Start 175: phi_c1_check_281a941_1b0b338-altP3
+122/238 Test #175: phi_c1_check_281a941_1b0b338-altP3 ............   Passed    0.00 sec
+        Start 166: phi_c1_provenance_281a941_1df262a
+123/238 Test #166: phi_c1_provenance_281a941_1df262a .............   Passed    0.01 sec
+        Start 112: test_trace_decode_perf
+124/238 Test #112: test_trace_decode_perf ........................   Passed    0.17 sec
+        Start 114: test_trace_decode_sites
+125/238 Test #210: static_golden_writers .........................   Passed    0.25 sec
+        Start 199: static_fixture_compile_spawn
+126/238 Test #221: static_golden_clobber .........................   Passed    0.25 sec
+        Start  68: test_core_schema
+127/238 Test #114: test_trace_decode_sites .......................   Passed    0.07 sec
+        Start 158: phi_golden_replay_kid_outcomes
+128/238 Test  #68: test_core_schema ..............................   Passed    0.01 sec
+        Start  75: test_core_dump
+129/238 Test #199: static_fixture_compile_spawn ..................   Passed    0.13 sec
+        Start 120: test_trace_occ_basis
+130/238 Test  #75: test_core_dump ................................   Passed    0.12 sec
+        Start 212: static_golden_derives
+131/238 Test #120: test_trace_occ_basis ..........................   Passed    0.01 sec
+        Start  23: rt_auto_bi_dump
+132/238 Test #158: phi_golden_replay_kid_outcomes ................   Passed    0.13 sec
+        Start 124: test_trace_symbols
+133/238 Test  #23: rt_auto_bi_dump ...............................   Passed    0.12 sec
+        Start   6: rt_gate_separation
+134/238 Test #124: test_trace_symbols ............................   Passed    0.12 sec
+        Start  57: rt_auto_plan_control_dump
+135/238 Test  #57: rt_auto_plan_control_dump .....................   Passed    0.00 sec
+        Start 173: phi_c1_provenance_281a941_1b0b338
+136/238 Test #173: phi_c1_provenance_281a941_1b0b338 .............   Passed    0.01 sec
+        Start 163: phi_profile_provenance
+137/238 Test #212: static_golden_derives .........................   Passed    0.14 sec
+        Start 146: phi_golden_profile_summary
+138/238 Test #163: phi_profile_provenance ........................   Passed    0.01 sec
+        Start   3: rt_order
+139/238 Test   #6: rt_gate_separation ............................   Passed    0.03 sec
+        Start  46: rt_plan_mismatch
+140/238 Test #146: phi_golden_profile_summary ....................   Passed    0.01 sec
+        Start 106: lint_retired-term
+141/238 Test  #46: rt_plan_mismatch ..............................   Passed    0.00 sec
+        Start 143: test_hold_plan
+142/238 Test   #3: rt_order ......................................   Passed    0.01 sec
+        Start 102: golden_render
+143/238 Test #143: test_hold_plan ................................   Passed    0.23 sec
+        Start  81: test_core_phi_parser
+144/238 Test  #81: test_core_phi_parser ..........................   Passed    0.25 sec
+        Start 178: phi_c1_provenance_833fdbb_1df262a
+145/238 Test #102: golden_render .................................   Passed    0.48 sec
+        Start 169: phi_c1_check_281a941_1df262a-altP3
+146/238 Test #169: phi_c1_check_281a941_1df262a-altP3 ............   Passed    0.00 sec
+        Start  17: rt_manifest
+147/238 Test #106: lint_retired-term .............................   Passed    0.71 sec
+        Start 153: phi_golden_replay_kid_ordinals
+148/238 Test #178: phi_c1_provenance_833fdbb_1df262a .............   Passed    0.23 sec
+        Start 160: phi_golden_replay_effects_external
+149/238 Test  #17: rt_manifest ...................................   Passed    0.22 sec
+        Start 116: test_trace_identity
+150/238 Test #238: test_static_cli ...............................   Passed    5.71 sec
+        Start  30: rt_pool_empty_dump
+151/238 Test #153: phi_golden_replay_kid_ordinals ................   Passed    0.43 sec
+        Start 144: test_rt_plan_convert
+152/238 Test #160: phi_golden_replay_effects_external ............   Passed    0.50 sec
+        Start  21: rt_auto_dump
+153/238 Test #116: test_trace_identity ...........................   Passed    0.50 sec
+        Start  52: rt_plan_nobuild
+154/238 Test  #30: rt_pool_empty_dump ............................   Passed    0.18 sec
+        Start 110: test_trace_decode_fetch
+155/238 Test #144: test_rt_plan_convert ..........................   Passed    0.32 sec
+        Start  44: rt_mode_api_late_dump
+156/238 Test  #21: rt_auto_dump ..................................   Passed    0.25 sec
+        Start 172: phi_c1_check_281a941_1b0b338
+157/238 Test  #52: rt_plan_nobuild ...............................   Passed    0.25 sec
+        Start 155: phi_golden_replay_shutdown_scope
+158/238 Test #110: test_trace_decode_fetch .......................   Passed    0.15 sec
+        Start 119: test_trace_neutral
+159/238 Test  #44: rt_mode_api_late_dump .........................   Passed    0.01 sec
+        Start 138: test_probe_profile
+160/238 Test #172: phi_c1_check_281a941_1b0b338 ..................   Passed    0.05 sec
+        Start  27: rt_pool_quota
+161/238 Test #155: phi_golden_replay_shutdown_scope ..............   Passed    0.05 sec
+        Start 186: phi_c1_golden_summary_833fdbb_1b0b338
+162/238 Test #119: test_trace_neutral ............................   Passed    0.05 sec
+        Start 181: phi_c1_check_833fdbb_1df262a-altP3
+163/238 Test #138: test_probe_profile ............................   Passed    0.05 sec
+        Start 108: lint_no-llvm
+164/238 Test  #27: rt_pool_quota .................................   Passed    0.01 sec
+        Start  49: rt_plan_size
+165/238 Test #181: phi_c1_check_833fdbb_1df262a-altP3 ............   Passed    0.00 sec
+        Start 107: lint_banned-files
+166/238 Test #186: phi_c1_golden_summary_833fdbb_1b0b338 .........   Passed    0.01 sec
+        Start 103: golden_tool_hash
+167/238 Test  #49: rt_plan_size ..................................   Passed    0.00 sec
+        Start 121: test_trace_occ_match
+168/238 Test #103: golden_tool_hash ..............................   Passed    0.06 sec
+        Start  10: rt_gate_nowait
+169/238 Test  #10: rt_gate_nowait ................................   Passed    0.01 sec
+        Start  12: rt_gate_preattach
+170/238 Test  #12: rt_gate_preattach .............................   Passed    0.00 sec
+        Start   7: rt_gate_record
+171/238 Test   #7: rt_gate_record ................................   Passed    0.00 sec
+        Start 148: phi_golden_replay_startup_old_version
+172/238 Test #148: phi_golden_replay_startup_old_version .........   Passed    0.13 sec
+        Start 149: phi_golden_replay_startup_no_version
+173/238 Test #121: test_trace_occ_match ..........................   Passed    0.20 sec
+        Start  89: test_core_vocab
+174/238 Test #149: phi_golden_replay_startup_no_version ..........   Passed    0.01 sec
+        Start  85: test_core_sha256
+175/238 Test  #89: test_core_vocab ...............................   Passed    0.01 sec
+        Start 159: phi_golden_replay_effects_core
+176/238 Test #159: phi_golden_replay_effects_core ................   Passed    0.01 sec
+        Start  38: rt_mode_unset_dump
+177/238 Test  #85: test_core_sha256 ..............................   Passed    0.01 sec
+        Start  16: rt_holdsem_busy
+178/238 Test  #38: rt_mode_unset_dump ............................   Passed    0.00 sec
+        Start  15: rt_holdsem_defer
+179/238 Test  #16: rt_holdsem_busy ...............................   Passed    0.00 sec
+        Start 174: phi_c1_golden_summary_281a941_1b0b338
+180/238 Test  #15: rt_holdsem_defer ..............................   Passed    0.00 sec
+        Start  26: rt_pool_big
+181/238 Test #108: lint_no-llvm ..................................   Passed    0.23 sec
+        Start 165: phi_c1_check_281a941_1df262a
+182/238 Test #174: phi_c1_golden_summary_281a941_1b0b338 .........   Passed    0.01 sec
+        Start 184: phi_c1_check_833fdbb_1b0b338
+183/238 Test  #26: rt_pool_big ...................................   Passed    0.01 sec
+        Start  97: golden_layout
+184/238 Test #165: phi_c1_check_281a941_1df262a ..................   Passed    0.01 sec
+        Start 147: phi_golden_replay_startup_ok
+185/238 Test #184: phi_c1_check_833fdbb_1b0b338 ..................   Passed    0.00 sec
+        Start  19: rt_dump_tool_strict
+186/238 Test #107: lint_banned-files .............................   Passed    0.24 sec
+        Start  98: golden_records
+187/238 Test #147: phi_golden_replay_startup_ok ..................   Passed    0.01 sec
+        Start  18: rt_dump_tool
+188/238 Test  #19: rt_dump_tool_strict ...........................   Passed    0.01 sec
+        Start 191: phi_golden_replay_c1_post_retry_altP3
+189/238 Test  #97: golden_layout .................................   Passed    0.01 sec
+        Start  58: rt_auto_plan_record_dump
+190/238 Test  #18: rt_dump_tool ..................................   Passed    0.00 sec
+        Start  34: rt_mode_record_dump
+191/238 Test  #98: golden_records ................................   Passed    0.01 sec
+        Start  66: rt_end_notstore
+192/238 Test #191: phi_golden_replay_c1_post_retry_altP3 .........   Passed    0.01 sec
+        Start  59: rt_auto_plan_none_dump
+193/238 Test  #58: rt_auto_plan_record_dump ......................   Passed    0.01 sec
+        Start  99: golden_container_facts
+194/238 Test  #34: rt_mode_record_dump ...........................   Passed    0.01 sec
+        Start   8: rt_gate_context
+195/238 Test  #66: rt_end_notstore ...............................   Passed    0.01 sec
+        Start  74: test_core_crc32
+196/238 Test  #59: rt_auto_plan_none_dump ........................   Passed    0.01 sec
+        Start 179: phi_c1_golden_summary_833fdbb_1df262a
+197/238 Test  #99: golden_container_facts ........................   Passed    0.01 sec
+        Start 101: golden_container_verdicts
+198/238 Test   #8: rt_gate_context ...............................   Passed    0.01 sec
+        Start  36: rt_mode_control_dump
+199/238 Test  #74: test_core_crc32 ...............................   Passed    0.01 sec
+        Start   2: rt_bootstrap
+200/238 Test #179: phi_c1_golden_summary_833fdbb_1df262a .........   Passed    0.01 sec
+        Start 180: phi_c1_golden_canonical_833fdbb_1df262a
+201/238 Test #101: golden_container_verdicts .....................   Passed    0.01 sec
+        Start 145: phi_golden_profile_canonical
+202/238 Test  #36: rt_mode_control_dump ..........................   Passed    0.01 sec
+        Start 100: golden_container_run
+203/238 Test   #2: rt_bootstrap ..................................   Passed    0.01 sec
+        Start   4: rt_loss
+204/238 Test #180: phi_c1_golden_canonical_833fdbb_1df262a .......   Passed    0.01 sec
+        Start 187: phi_c1_check_833fdbb_1b0b338-altP3
+205/238 Test #100: golden_container_run ..........................   Passed    0.00 sec
+        Start  47: rt_plan_crc
+206/238 Test #145: phi_golden_profile_canonical ..................   Passed    0.01 sec
+        Start 162: phi_profile_check
+207/238 Test   #4: rt_loss .......................................   Passed    0.01 sec
+        Start  13: rt_holdsem_rearm
+208/238 Test  #47: rt_plan_crc ...................................   Passed    0.00 sec
+        Start 150: phi_golden_replay_startup_no_predicate
+209/238 Test #187: phi_c1_check_833fdbb_1b0b338-altP3 ............   Passed    0.01 sec
+        Start 151: phi_golden_replay_kid_illegal
+210/238 Test #162: phi_profile_check .............................   Passed    0.01 sec
+        Start 177: phi_c1_check_833fdbb_1df262a
+211/238 Test  #13: rt_holdsem_rearm ..............................   Passed    0.01 sec
+        Start  50: rt_plan_points
+212/238 Test #150: phi_golden_replay_startup_no_predicate ........   Passed    0.01 sec
+        Start 111: test_trace_decode_merge
+213/238 Test #177: phi_c1_check_833fdbb_1df262a ..................   Passed    0.01 sec
+        Start 183: phi_c1_golden_summary_833fdbb_1df262a-altP3
+214/238 Test #151: phi_golden_replay_kid_illegal .................   Passed    0.02 sec
+        Start 157: phi_golden_replay_poll_timeout_wrong
+215/238 Test  #50: rt_plan_points ................................   Passed    0.01 sec
+        Start 168: phi_c1_golden_canonical_281a941_1df262a
+216/238 Test #111: test_trace_decode_merge .......................   Passed    0.01 sec
+        Start 190: phi_golden_replay_c1_post_retry
+217/238 Test #183: phi_c1_golden_summary_833fdbb_1df262a-altP3 ...   Passed    0.01 sec
+        Start 171: phi_c1_golden_summary_281a941_1df262a-altP3
+218/238 Test #157: phi_golden_replay_poll_timeout_wrong ..........   Passed    0.01 sec
+        Start  43: rt_mode_api_latch_dump
+219/238 Test #168: phi_c1_golden_canonical_281a941_1df262a .......   Passed    0.01 sec
+        Start  32: rt_mode_off_dump
+220/238 Test #190: phi_golden_replay_c1_post_retry ...............   Passed    0.01 sec
+        Start 189: phi_golden_replay_c1_pre_fail
+221/238 Test  #43: rt_mode_api_latch_dump ........................   Passed    0.00 sec
+        Start 152: phi_golden_replay_kid_unregistered
+222/238 Test #171: phi_c1_golden_summary_281a941_1df262a-altP3 ...   Passed    0.01 sec
+        Start 161: phi_golden_replay_cleanup_window
+223/238 Test  #32: rt_mode_off_dump ..............................   Passed    0.01 sec
+        Start 154: phi_golden_replay_kid_disagree
+224/238 Test #189: phi_golden_replay_c1_pre_fail .................   Passed    0.01 sec
+        Start 192: phi_golden_replay_c1_role_unbound
+225/238 Test #152: phi_golden_replay_kid_unregistered ............   Passed    0.01 sec
+        Start 156: phi_golden_replay_poll_timeout
+226/238 Test #161: phi_golden_replay_cleanup_window ..............   Passed    0.01 sec
+        Start  48: rt_plan_format
+227/238 Test #154: phi_golden_replay_kid_disagree ................   Passed    0.01 sec
+        Start 167: phi_c1_golden_summary_281a941_1df262a
+228/238 Test #192: phi_golden_replay_c1_role_unbound .............   Passed    0.01 sec
+        Start  45: rt_plan_ok
+229/238 Test #156: phi_golden_replay_poll_timeout ................   Passed    0.01 sec
+        Start  25: rt_auto_bad_dump
+230/238 Test  #48: rt_plan_format ................................   Passed    0.01 sec
+        Start  51: rt_plan_twice
+231/238 Test #167: phi_c1_golden_summary_281a941_1df262a .........   Passed    0.01 sec
+        Start  40: rt_mode_bogus_dump
+232/238 Test  #45: rt_plan_ok ....................................   Passed    0.01 sec
+        Start  14: rt_holdsem_nth
+233/238 Test  #25: rt_auto_bad_dump ..............................   Passed    0.01 sec
+        Start   9: rt_gate_isr
+234/238 Test  #51: rt_plan_twice .................................   Passed    0.01 sec
+        Start 209: static_fixture_compile_imgbudget
+235/238 Test  #40: rt_mode_bogus_dump ............................   Passed    0.01 sec
+236/238 Test  #14: rt_holdsem_nth ................................   Passed    0.00 sec
+237/238 Test   #9: rt_gate_isr ...................................   Passed    0.00 sec
+238/238 Test #209: static_fixture_compile_imgbudget ..............   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 238
+
+Label Time Summary:
+golden         =  28.03 sec*proc (57 tests)
+instr          =   3.60 sec*proc (1 test)
+integration    =  43.45 sec*proc (4 tests)
+lint           =   4.32 sec*proc (6 tests)
+property       =   2.87 sec*proc (1 test)
+runtime        =   5.78 sec*proc (66 tests)
+static         =  43.03 sec*proc (44 tests)
+unit           =  52.07 sec*proc (84 tests)
+
+Total Test time (real) =  28.55 sec
+
+The following tests did not run:
+	133 - test_probe_anchor_reached (Skipped)
+rc=0

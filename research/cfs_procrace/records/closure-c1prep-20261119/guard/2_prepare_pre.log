@@ -1,0 +1,4 @@
+# space_guard.sh kind=prepare need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/scripts/derive_c1.sh prepare pre 1df262a /home/user/work/redesign/obs1/c1p2_pre_derived
+start 2026-11-19T09:10:25.315Z free=628183040 threshold=414572800
+sample 2026-11-19T09:10:25.319Z 628178944
+end 2026-11-19T09:10:27.326Z kind=prepare verdict=completed rc=0 free=600899584 lowest=600899584 dip=27283456 change=-27283456

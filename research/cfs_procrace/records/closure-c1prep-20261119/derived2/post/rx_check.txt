@@ -1,0 +1,11 @@
+rx ELF files: 9; hook calls: 306; plan group (basis): 306
+same (function, hook, id) lists as the plan's group: yes
+rx files equal to the tx file of the same name (sha256):
+  exe/rx/cf/bp.so same exe/tx/cf/bp.so
+  exe/rx/cf/bplib.so same exe/tx/cf/bplib.so
+  exe/rx/cf/cf.so same exe/tx/cf/cf.so
+  exe/rx/cf/cfe_assert.so same exe/tx/cf/cfe_assert.so
+  exe/rx/cf/ci_lab.so same exe/tx/cf/ci_lab.so
+  exe/rx/cf/sch_lab.so same exe/tx/cf/sch_lab.so
+  exe/rx/cf/tinycbor.so same exe/tx/cf/tinycbor.so
+  exe/rx/cf/to_lab.so same exe/tx/cf/to_lab.so

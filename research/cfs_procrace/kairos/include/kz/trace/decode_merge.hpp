@@ -1,0 +1,120 @@
+// decode_merge.hpp -- from the per-CPU byte streams of a session to the typed records of a run.
+//
+// The per-CPU rings are merged into one order, (kernel timestamp, CPU, arrival).  The kernel
+// timestamp is the clock named in the run record (CLOCK_MONOTONIC: one clock for all CPUs).
+// That order is the program order of each thread under the clock assumption A-CLK-PO (SPEC
+// 5.4) and nothing more: it is never used as an ordering between threads (SPEC 5.8).
+//
+// What is kept:
+//   - every sample becomes a raw event of its site, with the per-thread sequence number the
+//     merged order gives it;
+//   - FORK, EXIT and COMM records of the traced processes become side events;
+//   - the executable mappings of the traced file become map events (of every traced file, for a plan
+//     over several files: the executable and the shared objects it loads, each with its own bias);
+//   - LOST and THROTTLE records become loss records (SPEC 5.6: loss is never read as the
+//     absence of events);
+//   - the text of a string slot (a fetch argument of the probe event) is kept beside its event;
+//   - a sample of a site reached from a named function (SiteSpec::via_symbol: a probe at a function entry
+//     that other callers reach too) is kept only where it is attributed to an open call of that function on
+//     the same thread: that call is the innermost open call, among the calls of the plan's reached-from
+//     functions, whose entry was seen and whose return was not, and the callee was entered as the call path
+//     says: where a hop is a call, the return address at the top of the stack is the one the last call leaves
+//     (the site's link-time address plus the file's load bias); where every hop is a jump (a tail jump of the
+//     function itself), the stack pointer at the callee's entry is the one at the open call's entry (the
+//     return address word is not compared there: a return probe of the function replaces it with the
+//     kernel's trampoline).  Both entry samples carry the stack pointer (their return-address slot reads the
+//     stack, so the user registers include it).  Other samples of the site are counted
+//     (DecodeStats::via_unattributed), not kept: they are calls from elsewhere.
+// A process is traced if it maps the traced file or produced a sample.  The side-band stream is
+// system-wide (the kernel reports every fork and rename on the CPU), so everything about other
+// processes is dropped and counted.
+#pragma once
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include "kz/core/status.hpp"
+#include "kz/schema/kz_schema.h"
+#include "kz/trace/decode_perf.hpp"
+#include "kz/trace/decode_sites.hpp"
+
+namespace kz::trace {
+
+struct SideEvent {
+  kz_side_ev rec;    // rec.comm is not set: the string is written when the container is built
+  std::string comm;
+};
+
+struct MapEvent {
+  kz_map_ev rec;     // rec.path is not set, as above
+  std::string path;
+};
+
+// The text of a string slot of events[event] (a STR fetch slot).
+struct EventString {
+  uint32_t event = 0;
+  uint8_t slot = 0;
+  std::string text;
+};
+
+struct CpuStream {
+  uint16_t cpu = 0;
+  std::vector<uint8_t> bytes;  // the records copied out of the ring of this CPU, in order
+};
+
+struct TracedFile {
+  bool known = false;
+  uint64_t ino = 0;
+  uint32_t dev_major = 0;
+  uint32_t dev_minor = 0;
+};
+
+struct DecodeInput {
+  std::vector<CpuStream> streams;
+  LayoutTable layouts;
+  std::vector<SiteSpec> sites;  // the plan; a site's id is its index
+  TracedFile traced;            // the primary file (SiteSpec::binary 0)
+  std::vector<TracedFile> also; // further files of a plan over several files (SiteSpec::binary 1, 2, ...)
+};
+
+struct DecodeStats {
+  ParseStats parse;
+  uint64_t samples_without_site = 0;   // a sample of an event that feeds no plan site
+  uint64_t slot_failures = 0;          // samples whose slots could not be applied
+  uint64_t slots_truncated = 0;        // events with a slot the kernel did not supply (flag TRUNC)
+  uint64_t side_dropped = 0;           // FORK/EXIT/COMM of other processes
+  uint64_t maps_dropped = 0;           // executable mappings that are not the traced file
+  uint64_t lost_reports = 0;           // PERF_RECORD_LOST records (the kernel's reports)
+  uint64_t dropped_records = 0;        // the sum of their counts: records of ANY kind the kernel dropped from a shared ring
+                                       // (probe samples and the side-band records of every process), so an upper bound
+                                       // of the probe hits that were lost
+  uint64_t throttle_intervals = 0;
+  uint64_t stream_errors = 0;          // streams that ended in a malformed record
+  uint64_t bias_mismatches = 0;        // entry/point samples whose address disagrees with the first
+  std::vector<uint64_t> site_hits;     // per site: every sample (each one is a trap, kept or not)
+  std::vector<uint64_t> via_unattributed;  // per site reached from a function: samples not attributed to an open call of it
+};
+
+struct DecodedRun {
+  std::vector<kz_raw_ev> events;
+  std::vector<SideEvent> side;
+  std::vector<MapEvent> maps;
+  std::vector<kz_loss> loss;
+  std::vector<EventString> strings;    // the texts of string slots, by event index
+  std::vector<uint32_t> traced_pids;   // sorted
+  bool bias_known = false;
+  uint64_t load_bias = 0;              // runtime address - link-time address of the traced file (the primary)
+  // Per file of the plan (index = SiteSpec::binary): the load bias from its entry/point samples.
+  std::vector<bool> file_bias_known;
+  std::vector<uint64_t> file_bias;
+  DecodeStats stats;
+  std::vector<Status> stream_status;   // per input stream: ok, or the parse error
+};
+
+// Decodes and merges.  A malformed stream does not stop the others: its records up to the
+// error are kept, the error is in stream_status and counted, and the function returns the
+// first such error (callers that must not accept a damaged trace test the return value).
+Status decode_run(const DecodeInput& in, DecodedRun* out);
+
+}  // namespace kz::trace

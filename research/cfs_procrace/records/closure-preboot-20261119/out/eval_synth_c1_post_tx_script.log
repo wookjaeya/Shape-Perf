@@ -1,0 +1,4 @@
+eval <scratch>/eval/eval_c1_post_tx_script.txt: lines 6023; form ok
+falsifiers F1-F10 by class (only the boot class is a falsifier result): boot: pass 1744 / 1936 (fail 192, not evaluable 1472); static: pass 1829 / 1829 (fail 0, not evaluable 0); format: pass 378 / 378 (fail 0, not evaluable 0)
+expect_safe s1-s4 by class (only the boot class is a safety result): boot: pass 0 / 0 (fail 0, not evaluable 0); static: pass 280 / 280 (fail 0, not evaluable 0); format: pass 0 / 0 (fail 0, not evaluable 0)
+expect_discriminate: met 16 / counted 80 (unmet 64; not_counted 0); by class: boot 0, static 80, format 0

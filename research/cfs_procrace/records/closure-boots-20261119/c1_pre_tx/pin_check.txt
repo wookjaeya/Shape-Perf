@@ -1,0 +1,34 @@
+kz-pin-check 1 (results 27.1; results 26.9 fix-decl-09) 2026-11-19T20:07:25Z
+pin: b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 (2026-11-19T19:57:38Z by the boot step of c1_pre_tx 1 (boot command rc 0))
+declaration4.tsv now: b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23
+every verify*.txt of c1_pre_tx boot1-boot5 with a declaration line (file, declaration sha256, same as the pin):
+  c1_pre_tx/boot1/verify.20261119T195725.600611486Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot1/verify.20261119T195816.434758683Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot1/verify.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot1/verify_at_boot.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  c1_pre_tx/boot1/verify_at_explain.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  c1_pre_tx/boot2/verify.20261119T200002.873192448Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot2/verify.20261119T200034.644114319Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot2/verify.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot2/verify_at_boot.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  c1_pre_tx/boot2/verify_at_explain.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  c1_pre_tx/boot3/verify.20261119T200139.572068410Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot3/verify.20261119T200201.087209569Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot3/verify.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot3/verify_at_boot.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  c1_pre_tx/boot3/verify_at_explain.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  c1_pre_tx/boot4/verify.20261119T200258.542717868Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot4/verify.20261119T200320.741365265Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot4/verify.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot4/verify_at_boot.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  c1_pre_tx/boot4/verify_at_explain.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  c1_pre_tx/boot5/verify.20261119T200455.146007233Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot5/verify.20261119T200532.736450556Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot5/verify.20261119T200646.331211208Z.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot5/verify.txt b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 same
+  c1_pre_tx/boot5/verify_at_boot.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  c1_pre_tx/boot5/verify_at_explain.txt (no declaration line: the stdout of a verify run again, 'rows 162 ok 162 differs 0 missing 0')
+  verify_at_summary.txt (no declaration line: 'rows 162 ok 162 differs 0 missing 0')
+files with a declaration line: 16, same as the pin: 16
+commits of declaration4.tsv or run_cycle.sh after the first boot's preceding commit 99f43ee: 0
+uncommitted changes of the two: 0

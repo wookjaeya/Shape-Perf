@@ -1,0 +1,8 @@
+PASS the stand-in ELF has a GNU build-id (/usr/bin/true)
+PASS clean declaration: verify rc 0, the boot step runs (verify rc 0, boot rc 0, rows 6 ok 6 differs 0 missing 0)
+PASS a changed declared value: differs, rc 1; the boot step stops before the boot command (verify rc 1, boot rc 1, rows 6 ok 5 differs 1 missing 0)
+PASS a missing file: missing, rc 1; no boot (verify rc 1, boot rc 1, rows 6 ok 5 differs 0 missing 1)
+PASS the declaration changed after a clean verify: no boot (verify rc 0, boot rc 1)
+PASS no verify.txt: no boot (boot rc 1)
+PASS a second verify keeps the first output under a new name (rc 0)
+run_cycle tests: 7 of 7 pass

@@ -1,0 +1,32 @@
+# the two counters of the static image budget (param.image_budget 4096), kz-static 7ef1a28c, 2026-11-10
+## BASIS count.walk_bounds_hit of T_8B/<build>/NP/facts.txt (profile-free mode, --targets-rule R-T1,R-T2; the facts of the second reading)
+c1_pre_tx: count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting 0 initializers cut, expression depth 0 subexpressions cut, DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut, static images (param.image_budget): image_budget_exhausted 0 objects (the walk ended with the budget used up, an exact fit included), image_leaves_omitted 0 marker leaves <image truncated> (parts with a leaf not read)  (unset)
+c1_post_tx: count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting 0 initializers cut, expression depth 0 subexpressions cut, DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut, static images (param.image_budget): image_budget_exhausted 0 objects (the walk ended with the budget used up, an exact fit included), image_leaves_omitted 0 marker leaves <image truncated> (parts with a leaf not read)  (unset)
+r2_core: count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting 0 initializers cut, expression depth 0 subexpressions cut, DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut, static images (param.image_budget): image_budget_exhausted 0 objects (the walk ended with the budget used up, an exact fit included), image_leaves_omitted 0 marker leaves <image truncated> (parts with a leaf not read)  (unset)
+c5_641: count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting 0 initializers cut, expression depth 0 subexpressions cut, DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut, static images (param.image_budget): image_budget_exhausted 0 objects (the walk ended with the budget used up, an exact fit included), image_leaves_omitted 0 marker leaves <image truncated> (parts with a leaf not read)  (unset)
+c5_642: count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting 0 initializers cut, expression depth 0 subexpressions cut, DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut, static images (param.image_budget): image_budget_exhausted 0 objects (the walk ended with the budget used up, an exact fit included), image_leaves_omitted 0 marker leaves <image truncated> (parts with a leaf not read)  (unset)
+## marker rows in GLOBAL_IMAGES / STATIC_IMAGE of the NP and identity facts (show text; 'image-truncated' flag or a path ending in '...')
+c1_post_tx/NP/facts.txt: 0
+c1_pre_tx/NP/facts.txt: 0
+c5_641/NP/facts.txt: 0
+c5_642/NP/facts.txt: 0
+r2_core/NP/facts.txt: 0
+identity/c1_pre_tx/V0/facts.txt: 0
+identity/c1_pre_tx/V2/facts.txt: 0
+identity/c5_641/V0/facts.txt: 0
+identity/c5_641/V2/facts.txt: 0
+identity/r2_core/V0/facts.txt: 0
+identity/r2_core/V2/facts.txt: 0
+## per object: extract --verbose again from the T_8B basis with the same arguments (one line per object whose image used up the budget); facts compared with T_8B (cmp)
+c1_pre_tx NP: 'kz-static: read' lines 531 (three readings), 'static image of' lines 0, facts same as T_8B
+c1_post_tx NP: 'kz-static: read' lines 531 (three readings), 'static image of' lines 0, facts same as T_8B
+r2_core NP: 'kz-static: read' lines 504 (three readings), 'static image of' lines 0, facts same as T_8B
+c5_641 NP: 'kz-static: read' lines 174 (three readings), 'static image of' lines 0, facts same as T_8B
+c5_642 NP: 'kz-static: read' lines 174 (three readings), 'static image of' lines 0, facts same as T_8B
+identity c1_pre_tx V0 (profile-driven, EB arguments): 'kz-static: read' lines 177, 'static image of' lines 0, facts same as T_8B
+identity c1_pre_tx V2 (profile-driven, EB arguments): 'kz-static: read' lines 177, 'static image of' lines 0, facts same as T_8B
+identity r2_core V0 (profile-driven, EB arguments): 'kz-static: read' lines 168, 'static image of' lines 0, facts same as T_8B
+identity r2_core V2 (profile-driven, EB arguments): 'kz-static: read' lines 168, 'static image of' lines 0, facts same as T_8B
+identity c5_641 V0 (profile-driven, EB arguments): 'kz-static: read' lines 58, 'static image of' lines 0, facts same as T_8B
+identity c5_641 V2 (profile-driven, EB arguments): 'kz-static: read' lines 58, 'static image of' lines 0, facts same as T_8B
+## result: no object of the five builds or of the six identity cases used up 4096 leaves; no exact fit; no marker leaf (the per-object list is empty)

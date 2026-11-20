@@ -1,0 +1,29 @@
+# declaration: sha256 of declared_before_boot.txt (= the lines of section 6 of plan/observation_path_results_20261116.md up to the end of 6.0, before the boot) = 6d67e4692b75080169603206bd8e1ae6b993f4e96eae0f2b5aaef26d5020178c (2026-11-16T08:02:57Z; committed before the boot)
+# obs1-20261116-boot: commands, rc and free space (df -B1 /, bytes available)
+
+## 0. before the declaration (no tool of MC changed, nothing built, nothing booted)
+space_guard.sh --need 250000000 --kind regen -- bash env/tools/plan_regen.sh /home/user/work/preserve/tools-20261116-c/kz-static.de1315b3.xz /home/user/work/redesign/obs1/plangen/c1_pre_tx/args.txt <scratch>/m5/regen -> regen_c1_pre_tx.txt: PASS (07:58:34Z; dip 184422400); the scratch directory (decompressed copy, 184,395,429 B) removed after
+env/tools/build_record.sh pre MC pre_mc.txt -> rc 0; equal to records/obs1-20261116-derived/post_mc.txt except the HEAD line
+TMPDIR=<scratch> bash env/tools/tests/run_unit.sh -> unit_tools.txt: 14 of 14 pass (checks 13 and 14 new)
+bash env/redesign/step2a_tests_unit.sh -> unit_step2a.txt: 7 of 7 pass
+cmp <W>/ws/bpxfer_defs/default_platform_cfg.h /home/user/work/procrace/c1_build/pre/1df262a/bpxfer_defs/default_platform_cfg.h -> same
+free before the commit of the declaration: 3751612416 (2026-11-16T08:02:57Z)
+## 1. declaration committed before the boot: c9a680f (2026-11-16T08:03Z)
+
+## 2. steps (run_boot.sh STEP; boot and convert under env/tools/space_guard.sh --need 50000000, logs df_<kind>.log)
+boot        08:03:26Z-08:03:38Z rc 0 -> boot.txt (run_gi_c1.sh <W> pre 1df262a tx /home/user/work/redesign/obs1/c1pre_boot/tx <rt>/kz-rt-dump eb12d09e <plan.kzs>); dip 2736128; tx.operational_at_5s=yes rx.operational_at_5s=yes stop=ci-es-restart-poweron tx_exit=0 rx_exit=0; dump tx.kzrt 91416 B fd05e211; kz-rt-dump exit=0
+control     rc 0 -> control_check.txt: control records (ctl, plan, point) 0; runx window_mode=record mode_source=early; kz-rt-dump "check ok (0 failures)"  (the step was edited once after its first run to print the check summary line instead of a crude count; it reads only)
+rtdump-mc   rc 0 -> rtdump_compare.txt: MC kz-rt-dump 4390d4f1 text byte-identical to the harness's (runtime tree eb12d09e)
+convert     rc 0 -> convert.log (MC kz 931dd39c convert --kzrt ... --basis <B'>/basis.kz); run.kzt faa410e1; events 1008, actors 16, losses 0, control records 0; dip in df_convert.log
+kzt-text    rc 0 -> convert.sha256 (MC kz-dump 05623054 of run.kzt; head of the B' facts)
+chain       rc 0 -> chain.txt: 16 links confirmed, chain confirmed; same_build unconfirmed(no build-id in dump), build-id ca1ed0b1 read from the tree
+stop        rc 0 -> stop_eval.tsv: applications 5, reached inside the window 5, libraries 2
+conditions  -> conditions_compare.txt: conditions.txt differs from the W6 pre_1df262a_tx one only in the cfs.build line; host line: kernel differs, nproc, run_user, mqueue.msg_max same
+
+## 3. after
+lists c1pre_boot.sha256 (52 files), c1pre_convert.sha256 (5 files); ledger rows OBS_c1pre_boot, OBS_c1pre_convert
+env/tools/ledger_check.sh -> ledger_check.txt: 42 rows, 0 failing
+env/tools/tools_check.sh --deep -> tools_check.txt: 31 rows, 0 failing
+env/tools/build_record.sh post MC post_mc.txt -> equal to pre_mc.txt except the time and free lines
+name_check.sh --tree c1pre_boot c1pre_convert records/obs1-20261116-boot env/obs1 -> rc 0
+copies of small records: run_meta_excerpt.txt (run.meta without the environment-names line and the host line), conditions.txt, cf_console.txt, dump_nonevent_lines.txt (every non-event line of tx.dump.txt)

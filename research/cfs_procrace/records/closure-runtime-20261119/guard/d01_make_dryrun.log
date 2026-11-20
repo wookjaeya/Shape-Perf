@@ -1,0 +1,4 @@
+# space_guard.sh kind=dryrun need=10485760 floor=314572800 interval=2 cmd=make -n all
+start 2026-11-19T07:14:20.635Z free=770658304 threshold=325058560
+sample 2026-11-19T07:14:20.639Z 770654208
+end 2026-11-19T07:14:22.646Z kind=dryrun verdict=completed rc=0 free=770510848 lowest=770510848 dip=147456 change=-147456

@@ -1,0 +1,15 @@
+# build | rows | keys whose text holds an absolute position | by path A/B/C | of them with a source tree (.git above the file) | without | distinct absolute files
+c1_pre_tx | 367 | 3 | A 3 B 0 C 0 | 3 | 0 | 3
+c1_post_tx | 367 | 3 | A 3 B 0 C 0 | 3 | 0 | 3
+r2_core | 295 | 0 | A 0 B 0 C 0 | 0 | 0 | 0
+c5_641 | 172 | 0 | A 0 B 0 C 0 | 0 | 0 | 0
+c5_642 | 169 | 0 | A 0 B 0 C 0 | 0 | 0 | 0
+# c1_pre_tx against c1_post_tx: key texts equal today 364 of 367 / 367; with the source-tree token 367 of 367 / 367
+# key texts still only in one build after the token: defect build 0, fixed build 0
+# probe row c1_pre_tx A20 key 35f07539e7606e2e
+   today: A|OS_common_record_t.name_entry|initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+   token: A|OS_common_record_t.name_entry|initialize_throttling@<bp>/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+# probe row c1_post_tx A20 key bdcc6978b9a41c8c
+   today: A|OS_common_record_t.name_entry|initialize_throttling@/home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+   token: A|OS_common_record_t.name_entry|initialize_throttling@<bp>/fsw/src/bp_flow.c|OS_CountSemGetIdByName#1|1
+# c1_pre_tx: new key texts that collide: 0

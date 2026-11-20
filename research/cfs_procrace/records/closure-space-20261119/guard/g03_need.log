@@ -1,0 +1,4 @@
+# space_guard.sh kind=need need=5000000 floor=314572800 interval=2 cmd=python3 -I need.py --research /home/user/Shape-Perf/research/cfs_procrace --listing listing.tsv --free 379064320 --out need.txt --chosen chosen.tsv
+start 2026-11-19T13:40:44.766Z free=379064320 threshold=319572800
+sample 2026-11-19T13:40:44.771Z 379060224
+end 2026-11-19T13:40:46.777Z kind=need verdict=completed rc=0 free=379052032 lowest=379052032 dip=12288 change=-12288

@@ -1,0 +1,506 @@
+Test project <scratch>/build
+      Start 105: lint_selftest
+      Start 106: lint_case-ids
+      Start 107: lint_case-ids-data
+      Start 108: lint_semantics-names
+ 1/82 Test #105: lint_selftest ..........................   Passed    0.05 sec
+      Start 109: lint_retired-term
+ 2/82 Test #108: lint_semantics-names ...................   Passed    0.07 sec
+      Start 110: lint_banned-files
+ 3/82 Test #110: lint_banned-files ......................   Passed    0.05 sec
+      Start 111: lint_no-llvm
+ 4/82 Test #109: lint_retired-term ......................   Passed    0.08 sec
+      Start 112: lint_no-generated
+ 5/82 Test #111: lint_no-llvm ...........................   Passed    0.05 sec
+      Start 127: test_trace_static_closure
+Could not find executable <scratch>/build/tests/cfs-free/test_trace_static_closure
+Looked in the following places:
+<scratch>/build/tests/cfs-free/test_trace_static_closure
+<scratch>/build/tests/cfs-free/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Release/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Release/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Debug/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Debug/test_trace_static_closure
+<scratch>/build/tests/cfs-free/MinSizeRel/test_trace_static_closure
+<scratch>/build/tests/cfs-free/MinSizeRel/test_trace_static_closure
+<scratch>/build/tests/cfs-free/RelWithDebInfo/test_trace_static_closure
+<scratch>/build/tests/cfs-free/RelWithDebInfo/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Deployment/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Deployment/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Development/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Development/test_trace_static_closure
+<scratch>/build/tests/cfs-free/test_trace_static_closure
+<scratch>/build/tests/cfs-free/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Release/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Release/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Debug/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Debug/test_trace_static_closure
+<scratch>/build/tests/cfs-free/MinSizeRel/test_trace_static_closure
+<scratch>/build/tests/cfs-free/MinSizeRel/test_trace_static_closure
+<scratch>/build/tests/cfs-free/RelWithDebInfo/test_trace_static_closure
+<scratch>/build/tests/cfs-free/RelWithDebInfo/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Deployment/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Deployment/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Development/test_trace_static_closure
+<scratch>/build/tests/cfs-free/Development/test_trace_static_closure
+Unable to find executable: <scratch>/build/tests/cfs-free/test_trace_static_closure
+ 6/82 Test #127: test_trace_static_closure ..............***Not Run   0.00 sec
+      Start 199: static_fixture_compile_writers
+ 7/82 Test #107: lint_case-ids-data .....................   Passed    0.18 sec
+      Start 200: static_fixture_compile_outptr
+ 8/82 Test #199: static_fixture_compile_writers .........   Passed    0.02 sec
+      Start 201: static_fixture_compile_derives
+ 9/82 Test #200: static_fixture_compile_outptr ..........   Passed    0.02 sec
+      Start 202: static_fixture_compile_loops
+10/82 Test #112: lint_no-generated ......................   Passed    0.07 sec
+      Start 203: static_fixture_compile_spawn
+11/82 Test #201: static_fixture_compile_derives .........   Passed    0.02 sec
+      Start 204: static_fixture_compile_atype
+12/82 Test #203: static_fixture_compile_spawn ...........   Passed    0.02 sec
+      Start 205: static_fixture_compile_wrappers
+13/82 Test #202: static_fixture_compile_loops ...........   Passed    0.03 sec
+      Start 206: static_fixture_compile_flowfacts
+14/82 Test #204: static_fixture_compile_atype ...........   Passed    0.02 sec
+      Start 207: static_fixture_compile_argflow
+15/82 Test #205: static_fixture_compile_wrappers ........   Passed    0.02 sec
+      Start 208: static_fixture_compile_lockset
+16/82 Test #206: static_fixture_compile_flowfacts .......   Passed    0.02 sec
+      Start 209: static_fixture_compile_relations
+17/82 Test #207: static_fixture_compile_argflow .........   Passed    0.02 sec
+      Start 210: static_fixture_compile_relpaths
+18/82 Test #208: static_fixture_compile_lockset .........   Passed    0.02 sec
+      Start 211: static_fixture_compile_relsound
+19/82 Test #209: static_fixture_compile_relations .......   Passed    0.03 sec
+      Start 212: static_fixture_compile_deepcond
+20/82 Test #210: static_fixture_compile_relpaths ........   Passed    0.04 sec
+      Start 213: static_fixture_compile_imgbudget
+21/82 Test #212: static_fixture_compile_deepcond ........   Passed    0.02 sec
+      Start 214: static_fixture_compile_relincomplete
+22/82 Test #213: static_fixture_compile_imgbudget .......   Passed    0.02 sec
+      Start 215: static_fixture_compile_relcallback
+23/82 Test #214: static_fixture_compile_relincomplete ...   Passed    0.03 sec
+      Start 216: static_fixture_compile_plangen
+24/82 Test #215: static_fixture_compile_relcallback .....   Passed    0.03 sec
+      Start 217: static_fixture_compile_order
+25/82 Test #211: static_fixture_compile_relsound ........   Passed    0.07 sec
+      Start 218: static_fixture_compile_anonrec
+26/82 Test #216: static_fixture_compile_plangen .........   Passed    0.02 sec
+      Start 219: static_fixture_compile_objaccess
+27/82 Test #218: static_fixture_compile_anonrec .........   Passed    0.02 sec
+      Start 220: static_fixture_compile_plankey
+28/82 Test #219: static_fixture_compile_objaccess .......   Passed    0.02 sec
+      Start 221: static_fixture_compile_semantics
+29/82 Test #217: static_fixture_compile_order ...........   Passed    0.03 sec
+      Start 222: static_fixture_compile_resultflow
+30/82 Test #220: static_fixture_compile_plankey .........   Passed    0.02 sec
+      Start 223: static_fixture_compile_looplock
+31/82 Test #221: static_fixture_compile_semantics .......   Passed    0.02 sec
+      Start 224: static_fixture_compile_planv4
+32/82 Test #222: static_fixture_compile_resultflow ......   Passed    0.03 sec
+      Start 225: static_fixture_compile_closure
+33/82 Test #223: static_fixture_compile_looplock ........   Passed    0.03 sec
+      Start 226: static_fixture_compile_planv5
+34/82 Test #224: static_fixture_compile_planv4 ..........   Passed    0.03 sec
+      Start 227: static_golden_writers
+35/82 Test #225: static_fixture_compile_closure .........   Passed    0.04 sec
+      Start 228: static_golden_outptr
+36/82 Test #226: static_fixture_compile_planv5 ..........   Passed    0.03 sec
+      Start 229: static_golden_derives
+37/82 Test #227: static_golden_writers ..................   Passed    0.03 sec
+      Start 230: static_golden_loops
+38/82 Test #228: static_golden_outptr ...................   Passed    0.03 sec
+      Start 231: static_golden_spawn
+39/82 Test #229: static_golden_derives ..................   Passed    0.03 sec
+      Start 232: static_golden_atype
+40/82 Test #230: static_golden_loops ....................   Passed    0.03 sec
+      Start 233: static_golden_wrappers
+41/82 Test #231: static_golden_spawn ....................   Passed    0.03 sec
+      Start 234: static_golden_flowfacts
+42/82 Test #232: static_golden_atype ....................   Passed    0.03 sec
+      Start 235: static_golden_argflow
+43/82 Test #233: static_golden_wrappers .................   Passed    0.05 sec
+      Start 236: static_golden_lockset
+44/82 Test #234: static_golden_flowfacts ................   Passed    0.04 sec
+      Start 237: static_golden_relations
+45/82 Test #235: static_golden_argflow ..................   Passed    0.04 sec
+      Start 238: static_golden_clobber
+46/82 Test #236: static_golden_lockset ..................   Passed    0.04 sec
+      Start 239: static_golden_flowfacts_np
+47/82 Test #238: static_golden_clobber ..................   Passed    0.03 sec
+      Start 240: static_golden_argflow_np
+48/82 Test #237: static_golden_relations ................   Passed    0.07 sec
+      Start 241: static_golden_lockset_np
+49/82 Test #239: static_golden_flowfacts_np .............   Passed    0.04 sec
+      Start 242: static_golden_relations_np
+50/82 Test #240: static_golden_argflow_np ...............   Passed    0.06 sec
+      Start 243: static_golden_lockpaths_np
+51/82 Test #241: static_golden_lockset_np ...............   Passed    0.06 sec
+      Start 244: static_golden_relpaths_np
+52/82 Test #242: static_golden_relations_np .............   Passed    0.09 sec
+      Start 245: static_golden_relsound_np
+53/82 Test #243: static_golden_lockpaths_np .............   Passed    0.12 sec
+      Start 246: static_golden_imgbudget_np
+54/82 Test #244: static_golden_relpaths_np ..............   Passed    0.12 sec
+      Start 247: static_golden_relincomplete_np
+55/82 Test #246: static_golden_imgbudget_np .............   Passed    0.05 sec
+      Start 248: static_golden_relincomplete_cut_np
+56/82 Test #248: static_golden_relincomplete_cut_np .....   Passed    0.08 sec
+      Start 249: static_golden_relcallback_np
+57/82 Test #245: static_golden_relsound_np ..............   Passed    0.20 sec
+      Start 250: static_golden_order_np
+58/82 Test #247: static_golden_relincomplete_np .........   Passed    0.10 sec
+      Start 251: static_golden_anonrec_np
+59/82 Test #251: static_golden_anonrec_np ...............   Passed    0.06 sec
+      Start 252: static_golden_objaccess
+60/82 Test #249: static_golden_relcallback_np ...........   Passed    0.09 sec
+      Start 253: static_golden_objaccess_off
+61/82 Test #252: static_golden_objaccess ................   Passed    0.05 sec
+      Start 254: static_golden_semantics_np
+62/82 Test #253: static_golden_objaccess_off ............   Passed    0.04 sec
+      Start 255: static_golden_resultflow_np
+63/82 Test #250: static_golden_order_np .................***Failed    0.15 sec
+order_np: differs from /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/order_np.golden
+  line 619
+    golden: (end)
+    got   : 
+  full output written to order_np.actual
+
+      Start 256: static_golden_resultflow_order_np
+64/82 Test #255: static_golden_resultflow_np ............***Failed    0.10 sec
+resultflow_np: differs from /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/resultflow_np.golden
+  line 260
+    golden:       chain: call obj_find at 170:8 -> def st at 170:6 -> value -17 -> branches decided by it at 171:7 -> 175:3 (the store at 171:20 of global:run_state := 3 is its argument)
+    got   :       chain: call obj_find at 170:8 -> def st at 170:6 -> value -17 -> branches decided by it at 171:7 -> 175:3 (the store at 171:20 of global:run_state := 3 is its argument) [path from the store at 171:20: value constant 3; to run_loop at 172:10 argument 0: other calls 0, stores of global:run_state 0; to the effect at 175:3: branches 172:10 reads the result of the call at 172:10 toward false]
+  full output written to resultflow_np.actual
+
+      Start 257: static_golden_looplock_np
+65/82 Test #254: static_golden_semantics_np .............   Passed    0.12 sec
+      Start 258: static_golden_looplock_order_np
+66/82 Test #256: static_golden_resultflow_order_np ......***Failed    0.19 sec
+resultflow_order_np: differs from /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/resultflow_order_np.golden
+  line 270
+    golden: (end)
+    got   : 
+  full output written to resultflow_order_np.actual
+
+      Start 259: static_golden_closure_np
+67/82 Test #257: static_golden_looplock_np ..............   Passed    0.15 sec
+      Start 260: static_golden_core_cpu1
+68/82 Test #258: static_golden_looplock_order_np ........***Failed    0.17 sec
+looplock_order_np: differs from /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/looplock_order_np.golden
+  line 547
+    golden: (end)
+    got   : 
+  full output written to looplock_order_np.actual
+
+      Start 261: test_static_expr
+Could not find executable <scratch>/build/tests/static/test_static_expr
+Looked in the following places:
+<scratch>/build/tests/static/test_static_expr
+<scratch>/build/tests/static/test_static_expr
+<scratch>/build/tests/static/Release/test_static_expr
+<scratch>/build/tests/static/Release/test_static_expr
+<scratch>/build/tests/static/Debug/test_static_expr
+<scratch>/build/tests/static/Debug/test_static_expr
+<scratch>/build/tests/static/MinSizeRel/test_static_expr
+<scratch>/build/tests/static/MinSizeRel/test_static_expr
+<scratch>/build/tests/static/RelWithDebInfo/test_static_expr
+<scratch>/build/tests/static/RelWithDebInfo/test_static_expr
+<scratch>/build/tests/static/Deployment/test_static_expr
+<scratch>/build/tests/static/Deployment/test_static_expr
+<scratch>/build/tests/static/Development/test_static_expr
+<scratch>/build/tests/static/Development/test_static_expr
+<scratch>/build/tests/static/test_static_expr
+<scratch>/build/tests/static/test_static_expr
+<scratch>/build/tests/static/Release/test_static_expr
+<scratch>/build/tests/static/Release/test_static_expr
+<scratch>/build/tests/static/Debug/test_static_expr
+<scratch>/build/tests/static/Debug/test_static_expr
+<scratch>/build/tests/static/MinSizeRel/test_static_expr
+<scratch>/build/tests/static/MinSizeRel/test_static_expr
+<scratch>/build/tests/static/RelWithDebInfo/test_static_expr
+<scratch>/build/tests/static/RelWithDebInfo/test_static_expr
+<scratch>/build/tests/static/Deployment/test_static_expr
+<scratch>/build/tests/static/Deployment/test_static_expr
+<scratch>/build/tests/static/Development/test_static_expr
+<scratch>/build/tests/static/Development/test_static_expr
+Unable to find executable: <scratch>/build/tests/static/test_static_expr
+69/82 Test #261: test_static_expr .......................***Not Run   0.00 sec
+      Start 262: test_static_flow
+Could not find executable <scratch>/build/tests/static/test_static_flow
+Looked in the following places:
+<scratch>/build/tests/static/test_static_flow
+<scratch>/build/tests/static/test_static_flow
+<scratch>/build/tests/static/Release/test_static_flow
+<scratch>/build/tests/static/Release/test_static_flow
+<scratch>/build/tests/static/Debug/test_static_flow
+<scratch>/build/tests/static/Debug/test_static_flow
+<scratch>/build/tests/static/MinSizeRel/test_static_flow
+<scratch>/build/tests/static/MinSizeRel/test_static_flow
+<scratch>/build/tests/static/RelWithDebInfo/test_static_flow
+<scratch>/build/tests/static/RelWithDebInfo/test_static_flow
+<scratch>/build/tests/static/Deployment/test_static_flow
+<scratch>/build/tests/static/Deployment/test_static_flow
+<scratch>/build/tests/static/Development/test_static_flow
+<scratch>/build/tests/static/Development/test_static_flow
+<scratch>/build/tests/static/test_static_flow
+<scratch>/build/tests/static/test_static_flow
+<scratch>/build/tests/static/Release/test_static_flow
+<scratch>/build/tests/static/Release/test_static_flow
+<scratch>/build/tests/static/Debug/test_static_flow
+<scratch>/build/tests/static/Debug/test_static_flow
+<scratch>/build/tests/static/MinSizeRel/test_static_flow
+<scratch>/build/tests/static/MinSizeRel/test_static_flow
+<scratch>/build/tests/static/RelWithDebInfo/test_static_flow
+<scratch>/build/tests/static/RelWithDebInfo/test_static_flow
+<scratch>/build/tests/static/Deployment/test_static_flow
+<scratch>/build/tests/static/Deployment/test_static_flow
+<scratch>/build/tests/static/Development/test_static_flow
+<scratch>/build/tests/static/Development/test_static_flow
+Unable to find executable: <scratch>/build/tests/static/test_static_flow
+70/82 Test #262: test_static_flow .......................***Not Run   0.00 sec
+      Start 263: test_static_recipe
+Could not find executable <scratch>/build/tests/static/test_static_recipe
+Looked in the following places:
+<scratch>/build/tests/static/test_static_recipe
+<scratch>/build/tests/static/test_static_recipe
+<scratch>/build/tests/static/Release/test_static_recipe
+<scratch>/build/tests/static/Release/test_static_recipe
+<scratch>/build/tests/static/Debug/test_static_recipe
+<scratch>/build/tests/static/Debug/test_static_recipe
+<scratch>/build/tests/static/MinSizeRel/test_static_recipe
+<scratch>/build/tests/static/MinSizeRel/test_static_recipe
+<scratch>/build/tests/static/RelWithDebInfo/test_static_recipe
+<scratch>/build/tests/static/RelWithDebInfo/test_static_recipe
+<scratch>/build/tests/static/Deployment/test_static_recipe
+<scratch>/build/tests/static/Deployment/test_static_recipe
+<scratch>/build/tests/static/Development/test_static_recipe
+<scratch>/build/tests/static/Development/test_static_recipe
+<scratch>/build/tests/static/test_static_recipe
+<scratch>/build/tests/static/test_static_recipe
+<scratch>/build/tests/static/Release/test_static_recipe
+<scratch>/build/tests/static/Release/test_static_recipe
+<scratch>/build/tests/static/Debug/test_static_recipe
+<scratch>/build/tests/static/Debug/test_static_recipe
+<scratch>/build/tests/static/MinSizeRel/test_static_recipe
+<scratch>/build/tests/static/MinSizeRel/test_static_recipe
+<scratch>/build/tests/static/RelWithDebInfo/test_static_recipe
+<scratch>/build/tests/static/RelWithDebInfo/test_static_recipe
+<scratch>/build/tests/static/Deployment/test_static_recipe
+<scratch>/build/tests/static/Deployment/test_static_recipe
+<scratch>/build/tests/static/Development/test_static_recipe
+<scratch>/build/tests/static/Development/test_static_recipe
+Unable to find executable: <scratch>/build/tests/static/test_static_recipe
+71/82 Test #263: test_static_recipe .....................***Not Run   0.00 sec
+      Start 264: test_static_gitrev
+Could not find executable <scratch>/build/tests/static/test_static_gitrev
+Looked in the following places:
+<scratch>/build/tests/static/test_static_gitrev
+<scratch>/build/tests/static/test_static_gitrev
+<scratch>/build/tests/static/Release/test_static_gitrev
+<scratch>/build/tests/static/Release/test_static_gitrev
+<scratch>/build/tests/static/Debug/test_static_gitrev
+<scratch>/build/tests/static/Debug/test_static_gitrev
+<scratch>/build/tests/static/MinSizeRel/test_static_gitrev
+<scratch>/build/tests/static/MinSizeRel/test_static_gitrev
+<scratch>/build/tests/static/RelWithDebInfo/test_static_gitrev
+<scratch>/build/tests/static/RelWithDebInfo/test_static_gitrev
+<scratch>/build/tests/static/Deployment/test_static_gitrev
+<scratch>/build/tests/static/Deployment/test_static_gitrev
+<scratch>/build/tests/static/Development/test_static_gitrev
+<scratch>/build/tests/static/Development/test_static_gitrev
+<scratch>/build/tests/static/test_static_gitrev
+<scratch>/build/tests/static/test_static_gitrev
+<scratch>/build/tests/static/Release/test_static_gitrev
+<scratch>/build/tests/static/Release/test_static_gitrev
+<scratch>/build/tests/static/Debug/test_static_gitrev
+<scratch>/build/tests/static/Debug/test_static_gitrev
+<scratch>/build/tests/static/MinSizeRel/test_static_gitrev
+<scratch>/build/tests/static/MinSizeRel/test_static_gitrev
+<scratch>/build/tests/static/RelWithDebInfo/test_static_gitrev
+<scratch>/build/tests/static/RelWithDebInfo/test_static_gitrev
+<scratch>/build/tests/static/Deployment/test_static_gitrev
+<scratch>/build/tests/static/Deployment/test_static_gitrev
+<scratch>/build/tests/static/Development/test_static_gitrev
+<scratch>/build/tests/static/Development/test_static_gitrev
+Unable to find executable: <scratch>/build/tests/static/test_static_gitrev
+72/82 Test #264: test_static_gitrev .....................***Not Run   0.00 sec
+      Start 265: test_static_unroll
+Could not find executable <scratch>/build/tests/static/test_static_unroll
+Looked in the following places:
+<scratch>/build/tests/static/test_static_unroll
+<scratch>/build/tests/static/test_static_unroll
+<scratch>/build/tests/static/Release/test_static_unroll
+<scratch>/build/tests/static/Release/test_static_unroll
+<scratch>/build/tests/static/Debug/test_static_unroll
+<scratch>/build/tests/static/Debug/test_static_unroll
+<scratch>/build/tests/static/MinSizeRel/test_static_unroll
+<scratch>/build/tests/static/MinSizeRel/test_static_unroll
+<scratch>/build/tests/static/RelWithDebInfo/test_static_unroll
+<scratch>/build/tests/static/RelWithDebInfo/test_static_unroll
+<scratch>/build/tests/static/Deployment/test_static_unroll
+<scratch>/build/tests/static/Deployment/test_static_unroll
+<scratch>/build/tests/static/Development/test_static_unroll
+<scratch>/build/tests/static/Development/test_static_unroll
+<scratch>/build/tests/static/test_static_unroll
+<scratch>/build/tests/static/test_static_unroll
+<scratch>/build/tests/static/Release/test_static_unroll
+<scratch>/build/tests/static/Release/test_static_unroll
+<scratch>/build/tests/static/Debug/test_static_unroll
+<scratch>/build/tests/static/Debug/test_static_unroll
+<scratch>/build/tests/static/MinSizeRel/test_static_unroll
+<scratch>/build/tests/static/MinSizeRel/test_static_unroll
+<scratch>/build/tests/static/RelWithDebInfo/test_static_unroll
+<scratch>/build/tests/static/RelWithDebInfo/test_static_unroll
+<scratch>/build/tests/static/Deployment/test_static_unroll
+<scratch>/build/tests/static/Deployment/test_static_unroll
+<scratch>/build/tests/static/Development/test_static_unroll
+<scratch>/build/tests/static/Development/test_static_unroll
+Unable to find executable: <scratch>/build/tests/static/test_static_unroll
+73/82 Test #265: test_static_unroll .....................***Not Run   0.00 sec
+      Start 266: test_static_wrappers
+Could not find executable <scratch>/build/tests/static/test_static_wrappers
+Looked in the following places:
+<scratch>/build/tests/static/test_static_wrappers
+<scratch>/build/tests/static/test_static_wrappers
+<scratch>/build/tests/static/Release/test_static_wrappers
+<scratch>/build/tests/static/Release/test_static_wrappers
+<scratch>/build/tests/static/Debug/test_static_wrappers
+<scratch>/build/tests/static/Debug/test_static_wrappers
+<scratch>/build/tests/static/MinSizeRel/test_static_wrappers
+<scratch>/build/tests/static/MinSizeRel/test_static_wrappers
+<scratch>/build/tests/static/RelWithDebInfo/test_static_wrappers
+<scratch>/build/tests/static/RelWithDebInfo/test_static_wrappers
+<scratch>/build/tests/static/Deployment/test_static_wrappers
+<scratch>/build/tests/static/Deployment/test_static_wrappers
+<scratch>/build/tests/static/Development/test_static_wrappers
+<scratch>/build/tests/static/Development/test_static_wrappers
+<scratch>/build/tests/static/test_static_wrappers
+<scratch>/build/tests/static/test_static_wrappers
+<scratch>/build/tests/static/Release/test_static_wrappers
+<scratch>/build/tests/static/Release/test_static_wrappers
+<scratch>/build/tests/static/Debug/test_static_wrappers
+<scratch>/build/tests/static/Debug/test_static_wrappers
+<scratch>/build/tests/static/MinSizeRel/test_static_wrappers
+<scratch>/build/tests/static/MinSizeRel/test_static_wrappers
+<scratch>/build/tests/static/RelWithDebInfo/test_static_wrappers
+<scratch>/build/tests/static/RelWithDebInfo/test_static_wrappers
+<scratch>/build/tests/static/Deployment/test_static_wrappers
+<scratch>/build/tests/static/Deployment/test_static_wrappers
+<scratch>/build/tests/static/Development/test_static_wrappers
+<scratch>/build/tests/static/Development/test_static_wrappers
+Unable to find executable: <scratch>/build/tests/static/test_static_wrappers
+74/82 Test #266: test_static_wrappers ...................***Not Run   0.00 sec
+      Start 267: test_static_link
+Could not find executable <scratch>/build/tests/static/test_static_link
+Looked in the following places:
+<scratch>/build/tests/static/test_static_link
+<scratch>/build/tests/static/test_static_link
+<scratch>/build/tests/static/Release/test_static_link
+<scratch>/build/tests/static/Release/test_static_link
+<scratch>/build/tests/static/Debug/test_static_link
+<scratch>/build/tests/static/Debug/test_static_link
+<scratch>/build/tests/static/MinSizeRel/test_static_link
+<scratch>/build/tests/static/MinSizeRel/test_static_link
+<scratch>/build/tests/static/RelWithDebInfo/test_static_link
+<scratch>/build/tests/static/RelWithDebInfo/test_static_link
+<scratch>/build/tests/static/Deployment/test_static_link
+<scratch>/build/tests/static/Deployment/test_static_link
+<scratch>/build/tests/static/Development/test_static_link
+<scratch>/build/tests/static/Development/test_static_link
+<scratch>/build/tests/static/test_static_link
+<scratch>/build/tests/static/test_static_link
+<scratch>/build/tests/static/Release/test_static_link
+<scratch>/build/tests/static/Release/test_static_link
+<scratch>/build/tests/static/Debug/test_static_link
+<scratch>/build/tests/static/Debug/test_static_link
+<scratch>/build/tests/static/MinSizeRel/test_static_link
+<scratch>/build/tests/static/MinSizeRel/test_static_link
+<scratch>/build/tests/static/RelWithDebInfo/test_static_link
+<scratch>/build/tests/static/RelWithDebInfo/test_static_link
+<scratch>/build/tests/static/Deployment/test_static_link
+<scratch>/build/tests/static/Deployment/test_static_link
+<scratch>/build/tests/static/Development/test_static_link
+<scratch>/build/tests/static/Development/test_static_link
+Unable to find executable: <scratch>/build/tests/static/test_static_link
+75/82 Test #267: test_static_link .......................***Not Run   0.00 sec
+      Start 268: test_static_elf32
+Could not find executable <scratch>/build/tests/static/test_static_elf32
+Looked in the following places:
+<scratch>/build/tests/static/test_static_elf32
+<scratch>/build/tests/static/test_static_elf32
+<scratch>/build/tests/static/Release/test_static_elf32
+<scratch>/build/tests/static/Release/test_static_elf32
+<scratch>/build/tests/static/Debug/test_static_elf32
+<scratch>/build/tests/static/Debug/test_static_elf32
+<scratch>/build/tests/static/MinSizeRel/test_static_elf32
+<scratch>/build/tests/static/MinSizeRel/test_static_elf32
+<scratch>/build/tests/static/RelWithDebInfo/test_static_elf32
+<scratch>/build/tests/static/RelWithDebInfo/test_static_elf32
+<scratch>/build/tests/static/Deployment/test_static_elf32
+<scratch>/build/tests/static/Deployment/test_static_elf32
+<scratch>/build/tests/static/Development/test_static_elf32
+<scratch>/build/tests/static/Development/test_static_elf32
+<scratch>/build/tests/static/test_static_elf32
+<scratch>/build/tests/static/test_static_elf32
+<scratch>/build/tests/static/Release/test_static_elf32
+<scratch>/build/tests/static/Release/test_static_elf32
+<scratch>/build/tests/static/Debug/test_static_elf32
+<scratch>/build/tests/static/Debug/test_static_elf32
+<scratch>/build/tests/static/MinSizeRel/test_static_elf32
+<scratch>/build/tests/static/MinSizeRel/test_static_elf32
+<scratch>/build/tests/static/RelWithDebInfo/test_static_elf32
+<scratch>/build/tests/static/RelWithDebInfo/test_static_elf32
+<scratch>/build/tests/static/Deployment/test_static_elf32
+<scratch>/build/tests/static/Deployment/test_static_elf32
+<scratch>/build/tests/static/Development/test_static_elf32
+<scratch>/build/tests/static/Development/test_static_elf32
+Unable to find executable: <scratch>/build/tests/static/test_static_elf32
+76/82 Test #268: test_static_elf32 ......................***Not Run   0.00 sec
+      Start 269: test_static_reasons
+77/82 Test #269: test_static_reasons ....................   Passed    0.01 sec
+      Start 270: test_static_plan
+78/82 Test #259: static_golden_closure_np ...............***Failed    0.19 sec
+missing golden file /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/closure_np.golden (KZ_GOLDEN_UPDATE=1 writes it)
+
+      Start 271: test_static_cli
+79/82 Test #106: lint_case-ids ..........................   Passed    1.64 sec
+80/82 Test #270: test_static_plan .......................***Failed    0.66 sec
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_plan.cpp:416: FAILED: has(v.sidecar, "kz-plan-sidecar 2\n") && has(v.sidecar, "\nmanifest-revision 4 (kzs-sites 4)\n") && has(v.sidecar, "plan rules revision 4 (2026-11-18)")
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_plan.cpp:430: FAILED: mv.has_plan && mv.plan.obsrules.find("plan rules revision 4") == 0 && mv.plan.control == "all" && mv.plan.budget == "all"
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_plan.cpp:559: FAILED: the plan differs from /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv4_np.plan.golden (actual in <scratch>/build/tests/static/work_plan/planv4_np.plan.actual)
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_plan.cpp:695: FAILED: the plan differs from /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_np.plan.golden (actual in <scratch>/build/tests/static/work_plan/planv5_np.plan.actual)
+test_static_plan: 4 of 389 checks FAILED
+
+81/82 Test #271: test_static_cli ........................   Passed    4.34 sec
+82/82 Test #260: static_golden_core_cpu1 ................   Passed    7.71 sec
+
+82% tests passed, 15 tests failed out of 82
+
+Label Time Summary:
+golden         =  10.40 sec*proc (34 tests)
+integration    =   7.71 sec*proc (1 test)
+legacy-case    =   7.71 sec*proc (1 test)
+lint           =   2.20 sec*proc (8 tests)
+static         =  16.15 sec*proc (73 tests)
+unit           =   0.00 sec*proc (1 test)
+
+Total Test time (real) =   9.00 sec
+
+The following tests FAILED:
+	127 - test_trace_static_closure (Not Run)
+	250 - static_golden_order_np (Failed)
+	255 - static_golden_resultflow_np (Failed)
+	256 - static_golden_resultflow_order_np (Failed)
+	258 - static_golden_looplock_order_np (Failed)
+	259 - static_golden_closure_np (Failed)
+	261 - test_static_expr (Not Run)
+	262 - test_static_flow (Not Run)
+	263 - test_static_recipe (Not Run)
+	264 - test_static_gitrev (Not Run)
+	265 - test_static_unroll (Not Run)
+	266 - test_static_wrappers (Not Run)
+	267 - test_static_link (Not Run)
+	268 - test_static_elf32 (Not Run)
+	270 - test_static_plan (Failed)
+Errors while running CTest

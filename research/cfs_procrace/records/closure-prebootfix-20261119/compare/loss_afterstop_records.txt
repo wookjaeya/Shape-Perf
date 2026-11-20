@@ -1,0 +1,448 @@
+== branch D1-R0: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Ra: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Rb: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Rc: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 16 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Rd: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 16 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Re: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-Rf: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D1-all: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 14 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-R0: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Ra: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Rb: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Rc: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 16 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Rd: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 15 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Re: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-Rf: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 18 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46
+== branch D2-all: records old 46 new 46 same names True
+axis statuses and verdict values equal: 46 of 46 records
+uses.tsv lines old 523 new 523; differing cells (column, old -> new: lines):
+  link_reasons: link_unlinked(name binding: key text not validated against the namespace bound);link_unlinked(name b -> link_unlinked(name binding: a delete or retire of the name between the use and the create is not exc: 1
+  link_reasons: link_unlinked(no create of the id in the record) -> record_insufficient(loss marker): 3
+  name_state: undecided(the row's creator sites are not complete) -> undecided(lifetime ends not complete: loss markers in the record): 4
+differing field paths by class (path class, kind: records; one example: old -> new):
+  incompleteness.needs[].reason [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  incompleteness.needs[].state [changed]: 1216 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "not-reached" -> "unknown-loss")
+  link.missing[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  link.missing[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "lifetime-complete yes; 6 lifetime-end sites bound" -> "loss markers in the record")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.grounds[] [removed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "no lifetime end of the name in the interval" -> "<absent>")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.reason [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: null -> "link_unlinked(name binding: a delete or retire of the name between the use and the create is not excluded)")
+  link.name_binding.pairs[].items.ma_no_lifetime_end.status [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "held" -> "missing")
+  link.name_binding.pairs[].missing_count [changed]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: 4 -> 5)
+  link.name_binding.pairs[].missing_items[] [added]: 4 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "ma_no_lifetime_end")
+  order.missing[] [changed]: 2 (c1_pre_tx.A63.b881269bea290f8b.actor-static-none.json: "target_not_reached" -> "record_insufficient(loss marker)")
+  order.run_id.dump_text_sha256 [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "3e9e75a92f30df304d3cc24b400483962325dc97e465819fc8b88c03007f7bde" -> "a9c1dd1c5be8f71b3b08256b3d486765d053462423b2c8228629f123b3705520")
+  order.use_events[].instance_link.reason [changed]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].instance_link.why [added]: 3 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "<absent>" -> "loss markers in the record")
+  order.use_events[].link_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "record_insufficient(no success constant of the creator: the stored value is not tied to the success path)")
+  order.use_events[].link_reasons[] [changed]: 9 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+  order.use_events[].name_state [changed]: 4 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "undecided(the row's creator sites are not complete)" -> "undecided(lifetime ends not complete: loss markers in the record)")
+  record_label [changed]: 46 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "SYNTHETIC use events (test input, never evidence; results 26.3)" -> "SYNTHETIC use events with a loss line added (test input, never evidence; results 26.5)")
+  tool_verdict.violation.undetermined_reasons[] [added]: 1 (c1_pre_tx.A21.17975444d83f6589.actor-10.json: "<absent>" -> "absent_result_unevaluated(the predicate is not derived: use_cond partial)")
+  tool_verdict.violation.undetermined_reasons[] [changed]: 13 (c1_pre_tx.A20.bb0951052e63f1bc.actor-11.json: "link_unlinked(no create of the id in the record)" -> "record_insufficient(loss marker)")
+script identity paths (counted apart): inputs.chain.path [changed] 46, inputs.dump_text.path [changed] 46, inputs.dump_text.sha256 [changed] 46, inputs.normal.path [changed] 46, inputs.normal.sha256 [changed] 46, inputs.run_meta.path [changed] 46, inputs.startup_script.path [changed] 46, script.judge [changed] 46, script.judge_sha256 [changed] 46

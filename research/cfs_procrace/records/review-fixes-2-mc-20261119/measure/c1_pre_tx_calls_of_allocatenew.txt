@@ -1,0 +1,16 @@
+  site 36673 osal/src/os/shared/src/osapi-binsem.c:102:19 OS_BinSemCreate -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 36775 osal/src/os/shared/src/osapi-condvar.c:90:19 OS_CondVarCreate -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 36818 osal/src/os/shared/src/osapi-countsem.c:94:19 OS_CountSemCreate -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 36864 osal/src/os/shared/src/osapi-dir.c:119:23 OS_DirectoryOpen -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 36898 osal/src/os/shared/src/osapi-file.c:136:23 OS_OpenCreate -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 37001 osal/src/os/shared/src/osapi-filesys.c:153:19 OS_FileSys_Initialize -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 37038 osal/src/os/shared/src/osapi-filesys.c:274:19 OS_FileSysAddFixedMap -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 39100 osal/src/os/shared/src/osapi-module.c:203:19 OS_ModuleLoad -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 39152 osal/src/os/shared/src/osapi-mutex.c:99:19 OS_MutSemCreate -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 39458 osal/src/os/shared/src/osapi-printf.c:95:19 OS_ConsoleAPI_Init -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 39750 osal/src/os/shared/src/osapi-queue.c:98:19 OS_QueueCreate -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 39813 osal/src/os/shared/src/osapi-sockets.c:129:19 OS_SocketOpen -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 39837 osal/src/os/shared/src/osapi-sockets.c:252:27 OS_SocketAccept -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 39911 osal/src/os/shared/src/osapi-task.c:182:19 OS_TaskCreate -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 39980 osal/src/os/shared/src/osapi-time.c:134:19 OS_DoTimerAdd@osal/src/os/shared/src/osapi-time.c:90 -> OS_ObjectIdAllocateNew direct {result-used,result-tested}
+  site 40102 osal/src/os/shared/src/osapi-timebase.c:122:19 OS_TimeBaseCreate -> OS_ObjectIdAllocateNew direct {result-used,result-tested}

@@ -1,0 +1,46 @@
+# descry: reachability probes for a DESCRY implementation/artifact, 2026-10-08T01:27:42Z
+# lead: SCMiner preprint (Zaman, Han, Yu 2019) ref [45] = '2016, http://cs.uky.edu/ tyu/research/descry' (pdftotext dropped the '~')
+http://cs.uky.edu/~tyu/research/descry -> 403 http://cs.uky.edu/~tyu/research/descry
+https://cs.uky.edu/~tyu/research/descry -> curl: (56) CONNECT tunnel failed, response 403
+000 https://cs.uky.edu/~tyu/research/descry
+http://www.cs.uky.edu/~tyu/research/descry -> 403 http://www.cs.uky.edu/~tyu/research/descry
+https://www.cs.uky.edu/~tyu/research/descry/ -> curl: (56) CONNECT tunnel failed, response 403
+000 https://www.cs.uky.edu/~tyu/research/descry/
+http://cs.uky.edu/~tyu/ -> 403 http://cs.uky.edu/~tyu/
+https://homepages.uc.edu/~tyu/ -> curl: (56) CONNECT tunnel failed, response 403
+000 https://homepages.uc.edu/~tyu/
+https://chaowang-vt.github.io/ -> curl: (56) CONNECT tunnel failed, response 403
+000 https://chaowang-vt.github.io/
+https://chaowang-vt.github.io/pubDOC/YuZW17.pdf -> curl: (56) CONNECT tunnel failed, response 403
+000 https://chaowang-vt.github.io/pubDOC/YuZW17.pdf
+https://dl.acm.org/doi/10.1145/3106237.3106266 -> curl: (56) CONNECT tunnel failed, response 403
+000 https://dl.acm.org/doi/10.1145/3106237.3106266
+https://doi.org/10.1145/3106237.3106266 -> curl: (56) CONNECT tunnel failed, response 403
+000 https://doi.org/10.1145/3106237.3106266
+http://web.archive.org/web/2017/http://cs.uky.edu/~tyu/research/descry -> 403 http://web.archive.org/web/2017/http://cs.uky.edu/~tyu/research/descry
+https://web.archive.org/web/2017*/cs.uky.edu/~tyu/research/descry* -> curl: (56) CONNECT tunnel failed, response 403
+000 https://web.archive.org/web/2017*/cs.uky.edu/~tyu/research/descry*
+https://zenodo.org/search?q=DESCRY -> curl: (56) CONNECT tunnel failed, response 403
+000 https://zenodo.org/search?q=DESCRY
+https://klee-se.org/ -> curl: (56) CONNECT tunnel failed, response 403
+000 https://klee-se.org/
+https://github.com/klee/klee -> 403 https://github.com/klee/klee
+## git ls-remote for public KLEE (reference [5] implementation base) -- tags around 2016-2017
+5e70d1513641a315f981f409044d881cfd0f8ce6	refs/tags/v1.0.0
+15337ffc2558348356fefccde5bfa9e80db0d38b	refs/tags/v1.1.0
+f5cc1a11f890ddc76c4ff5e62585bcadc4dc69f6	refs/tags/v1.2.0
+3cc70a08f2f09034d781555175a9ab1b62ab8f64	refs/tags/v1.3.0
+9fb2f5666d5f8c7c2f335fc8408883a0cf958964	refs/tags/v1.4.0
+## git ls-remote probes for plausibly named author repos (no hits expected unless public)
+tarannumzaman/DESCRY: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+tarannumzaman/descry: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+Tarannum-Zaman/DESCRY: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+Tarannum-Zaman/Descry: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+chaowang-vt/DESCRY: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+tingtingyu/DESCRY: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+## 2026-10-08T01:33:52Z KLEE tag dates (context only; the paper does not name a KLEE tag/commit, p8 r8.txt:114 'We used the most recent version of KLEE built from LLVM 3.4.')
+v1.2.0 f5cc1a11f890ddc76c4ff5e62585bcadc4dc69f6 committer-date=Thu Mar 31 17:59:29 2016 +0100
+v1.3.0 3cc70a08f2f09034d781555175a9ab1b62ab8f64 committer-date=Wed Nov 30 17:51:42 2016 +0000
+v1.4.0 9fb2f5666d5f8c7c2f335fc8408883a0cf958964 committer-date=Fri Jul 21 16:37:32 2017 +0100
+176K	/home/user/work/procrace/baselines/descry/sources/klee_tags
+# The ESEC/FSE 2017 paper PDF metadata CreationDate is 2017-07-17 (camera-ready); the experiment date is not stated, so which tag/commit was 'most recent' cannot be determined from the reference -> unspecified_by_reference. No tag was chosen or built.

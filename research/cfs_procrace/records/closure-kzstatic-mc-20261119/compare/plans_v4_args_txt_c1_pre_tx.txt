@@ -1,0 +1,8 @@
+diffkinds old_lines=42 new_lines=42 only_old=7 only_new=7 labels=7
+label removed=1 added=1 0|path .../facts.kz
+label removed=1 added=1 0|path .../basis.kz
+label removed=1 added=1 0|path .../plan.kzs
+label removed=1 added=1 0|path .../plan.side
+label removed=1 added=1 0|path .../plan.mod
+label removed=1 added=1 0|path .../plan.exe
+label removed=1 added=1 0|path .../plan.req

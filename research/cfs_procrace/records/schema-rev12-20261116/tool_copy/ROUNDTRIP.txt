@@ -1,0 +1,24 @@
+# round trips of the tool copies before the schema revision 12 build (2026-11-16T12:36:34Z)
+copy: /home/user/work/preserve/tools-20261116-e/kz.931dd39c.xz (17478556 B)
+xz -t: OK
+sha256 of the xz file: d60871bb9c2bb38ad0948b8ed0ae82c26c7bb8dc64897490d304f86f5f1ca974
+xz -dc | sha256sum: 931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248
+in place: 931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248
+xz -dc | cmp in place: SAME
+copy: /home/user/work/preserve/tools-20261116-e/kz-phi.7d34e6e2.xz (6666968 B)
+xz -t: OK
+sha256 of the xz file: 76024c585799d75c407479df34f6e49d89533fe681e80d5f86829c4ddfc4ca14
+xz -dc | sha256sum: 7d34e6e20934c62b91f006c20712b7a096692b231d318257b096eb22dc68075f
+in place: 7d34e6e20934c62b91f006c20712b7a096692b231d318257b096eb22dc68075f
+xz -dc | cmp in place: SAME
+copy: /home/user/work/preserve/tools-20261116-e/kz-static.b52db538.xz (42449724 B)
+xz -t: OK
+sha256 of the xz file: 1854e6d8695187786b736b1273b17a7df96f44d821ebc198c3f3cb7ce90a3b09
+xz -dc | sha256sum: b52db538769e6bc8fecd9a7e3daec63fd785885c1873629c0dac244afa50b2f9
+in place: b52db538769e6bc8fecd9a7e3daec63fd785885c1873629c0dac244afa50b2f9
+xz -dc | cmp in place: SAME
+existing copy: /home/user/work/preserve/tools-20261109/kz-dump.05623054.xz (608596 B; not copied again)
+xz -t: OK
+xz -dc | sha256sum: 05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43
+in place: 05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43
+xz -dc | cmp in place: SAME

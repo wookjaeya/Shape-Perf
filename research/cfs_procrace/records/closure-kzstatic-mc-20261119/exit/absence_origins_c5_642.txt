@@ -1,0 +1,5 @@
+lines 23
+# by number of origins:
+     23 : 1 origin(s)
+# origins by class:
+     23 [search no-match]

@@ -1,0 +1,30 @@
+OK c1_pre_tx order.txt two runs same
+OK c1_pre_tx edges.tsv two runs same
+OK c1_pre_tx order.txt: compare_classes: only declared classes
+OK c1_pre_tx edges.tsv same as schema12_on_extract
+OK c1_pre_tx relations.txt same as the re-extraction's
+OK c1_pre_tx key map: rows old 367 new 367: same 367, renamed 0 (old key -> new key), only-old 0, only-new 0; keys that change 0
+OK c1_post_tx order.txt two runs same
+OK c1_post_tx edges.tsv two runs same
+OK c1_post_tx order.txt: compare_classes: only declared classes
+OK c1_post_tx edges.tsv same as schema12_on_extract
+OK c1_post_tx relations.txt same as the re-extraction's
+OK c1_post_tx key map: rows old 367 new 367: same 367, renamed 0 (old key -> new key), only-old 0, only-new 0; keys that change 0
+OK r2_core order.txt two runs same
+OK r2_core edges.tsv two runs same
+OK r2_core order.txt: compare_classes: only declared classes
+OK r2_core edges.tsv same as schema12_on_extract
+OK r2_core relations.txt same as the re-extraction's
+OK r2_core key map: rows old 295 new 295: same 295, renamed 0 (old key -> new key), only-old 0, only-new 0; keys that change 0
+OK c5_641 order.txt two runs same
+OK c5_641 edges.tsv two runs same
+OK c5_641 order.txt: compare_classes: only declared classes
+OK c5_641 edges.tsv same as schema12_on_extract
+OK c5_641 relations.txt same as the re-extraction's
+OK c5_641 key map: rows old 178 new 178: same 178, renamed 0 (old key -> new key), only-old 0, only-new 0; keys that change 0
+OK c5_642 order.txt two runs same
+OK c5_642 edges.tsv two runs same
+OK c5_642 order.txt: compare_classes: only declared classes
+OK c5_642 edges.tsv same as schema12_on_extract
+OK c5_642 relations.txt same as the re-extraction's
+OK c5_642 key map: rows old 175 new 175: same 175, renamed 0 (old key -> new key), only-old 0, only-new 0; keys that change 0

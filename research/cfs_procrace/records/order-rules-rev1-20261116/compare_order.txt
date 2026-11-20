@@ -1,0 +1,15 @@
+OK c1_pre_tx order.txt two runs same
+OK c1_pre_tx edges.tsv two runs same
+OK c1_pre_tx order.log empty
+OK c1_post_tx order.txt two runs same
+OK c1_post_tx edges.tsv two runs same
+OK c1_post_tx order.log empty
+OK r2_core order.txt two runs same
+OK r2_core edges.tsv two runs same
+OK r2_core order.log empty
+OK c5_641 order.txt two runs same
+OK c5_641 edges.tsv two runs same
+OK c5_641 order.log empty
+OK c5_642 order.txt two runs same
+OK c5_642 edges.tsv two runs same
+OK c5_642 order.log empty

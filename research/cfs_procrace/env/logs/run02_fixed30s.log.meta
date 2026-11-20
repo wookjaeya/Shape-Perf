@@ -1,0 +1,70 @@
+run_cfs.sh metadata
+start_utc=2026-10-08T01:30:22.248Z
+mode=fixed limit_msec=30000 grace_msec=5000
+ref.CFE_PLATFORM_CORE_MAX_STARTUP_MSEC=30000
+ref.CFE_PLATFORM_ES_APP_KILL_TIMEOUT=5 ref.CFE_PLATFORM_ES_APP_SCAN_RATE=1000
+cwd=/home/user/work/procrace/cfs_ref/cFS/build-native_std/exe/cpu1
+command=./core-cpu1
+run_user=ubuntu (uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev))
+bundle=088b2fa828db9ff7e00733f1908e0eeb59f66ce3
+uname=Linux vm 6.18.44-fc-v80 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+nproc=4
+mqueue.msg_max=10 mqueue.msgsize_max=8192 mqueue.queues_max=256
+kernel.sched_rt_runtime_us=950000
+rlimits_of_run_user:
+  real-time non-blocking time  (microseconds, -R) unlimited
+  core file size              (blocks, -c) 0
+  data seg size               (kbytes, -d) unlimited
+  scheduling priority                 (-e) 0
+  file size                   (blocks, -f) unlimited
+  pending signals                     (-i) 64300
+  max locked memory           (kbytes, -l) 8192
+  max memory size             (kbytes, -m) unlimited
+  open files                          (-n) 20000
+  pipe size                (512 bytes, -p) 8
+  POSIX message queues         (bytes, -q) 819200
+  real-time priority                  (-r) 0
+  stack size                  (kbytes, -s) 8192
+  cpu time                   (seconds, -t) unlimited
+  max user processes                  (-u) 64300
+  virtual memory              (kbytes, -v) unlimited
+  file locks                          (-x) unlimited
+ipcs_before:
+  
+  ------ Shared Memory Segments --------
+  key        shmid      owner      perms      bytes      nattch     status      
+  0x5200e5c5 0          ubuntu     644        131072     0                       
+  0x5200e5c6 1          ubuntu     644        135168     0                       
+  0x5200e5c7 2          ubuntu     644        1048576    0                       
+  
+dev_shm_before:
+  total 0
+  drwxrwxrwt 4 root   root     80 Oct  8 01:29 .
+  drwxr-xr-x 6 root   root   2260 Oct  8 01:05 ..
+  drwx------ 2 ubuntu ubuntu   40 Oct  8 01:29 osal:RAM
+  drwx------ 2 root   root     40 Oct  8 01:05 rclone-vfscache
+pid=8553 pgid=8553
+stop_reason=duration_elapsed
+operational_seen_ms=1654
+stop_initiated_ms=30021
+signals_sent=INT@30023ms
+exit_status=0
+process_end_ms=30186
+leftover_processes_in_group=none
+ipcs_after:
+  
+  ------ Shared Memory Segments --------
+  key        shmid      owner      perms      bytes      nattch     status      
+  0x5200e5c5 0          ubuntu     644        131072     0                       
+  0x5200e5c6 1          ubuntu     644        135168     0                       
+  0x5200e5c7 2          ubuntu     644        1048576    0                       
+  
+dev_shm_after:
+  total 0
+  drwxrwxrwt 4 root   root     80 Oct  8 01:29 .
+  drwxr-xr-x 6 root   root   2260 Oct  8 01:05 ..
+  drwx------ 2 ubuntu ubuntu   40 Oct  8 01:29 osal:RAM
+  drwx------ 2 root   root     40 Oct  8 01:05 rclone-vfscache
+files_created_or_modified_under_cwd_during_run:
+  ./EEPROM.DAT
+end_utc=2026-10-08T01:30:52.471Z

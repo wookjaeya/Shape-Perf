@@ -1,0 +1,11 @@
+# chain_check.py --plan /home/user/Shape-Perf/research/cfs_procrace/kairos/profiles/c1-bp-b051eb0/instr/sites-cf281a941.kzs --build-record /home/user/work/instr/gcc/f1/c1/pre_1df262a/build_instr.record --run-meta /home/user/work/w6/run/c1nat/gi/pre_1df262a_tx/run.meta --build-root /home/user/work/instr/gcc/f1/c1/pre_1df262a/ws --dump-text /home/user/work/w6/run/c1nat/gi/pre_1df262a_tx/tx.dump.txt --basis-text None --main exe/tx/core-tx
+manifest	confirmed	plan=1f37f87cf0a0eb50 build_record=1f37f87cf0a0eb50 run.meta=1f37f87cf0a0eb50 dump=1f37f87cf0a0eb50
+exe exe/tx/core-tx	confirmed	record=5390d150285522f4 tree=5390d150285522f4 run.meta[tx/core-tx]=5390d150285522f4
+exe exe/rx/core-rx	confirmed	record=eaba099b808968df tree=eaba099b808968df run.meta[rx/core-rx]=eaba099b808968df
+exe exe/tx/cf/cf.so	confirmed	record=9b4cbff337580cf0 tree=9b4cbff337580cf0 run.meta[tx/cf/cf.so]=9b4cbff337580cf0
+exe exe/tx/cf/bp.so	confirmed	record=228672748fa85f9d tree=228672748fa85f9d run.meta[tx/cf/bp.so]=228672748fa85f9d
+exe exe/rx/cf/cf.so	confirmed	record=9b4cbff337580cf0 tree=9b4cbff337580cf0 run.meta[rx/cf/cf.so]=9b4cbff337580cf0
+exe exe/rx/cf/bp.so	confirmed	record=228672748fa85f9d tree=228672748fa85f9d run.meta[rx/cf/bp.so]=228672748fa85f9d
+facts_build	unconfirmed	no basis of the facts given (main exe/tx/core-tx run=5390d150285522f4)
+same_build	unconfirmed(no build-id in dump)	build-id of exe/tx/core-tx in the tree=ff7119f40ef9528f768674466170aae89d87a4c2 dump=none
+chain	unconfirmed	8 links

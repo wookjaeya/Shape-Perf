@@ -1,0 +1,6 @@
+c1_pre_tx measure rc=0 18 lines; same bytes as the kept file
+c1_post_tx measure rc=0 18 lines; same bytes as the kept file
+r2_core measure rc=0 18 lines; same bytes as the kept file
+c5_641 measure rc=0 17 lines; same bytes as the kept file
+c5_642 measure rc=0 17 lines; same bytes as the kept file
+recheck.sh measure rc=0

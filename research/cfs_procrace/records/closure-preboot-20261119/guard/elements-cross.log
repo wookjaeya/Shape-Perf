@@ -1,0 +1,4 @@
+# space_guard.sh kind=elements-cross need=1000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/scripts/elements_cross.py /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/elements_by_rule_2.tsv /home/user/Shape-Perf/research/cfs_procrace/records/closure-explain-fix-20261119/out/static_elements_16_fixed.tsv /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/compare/elements_vs_fixed_static.txt
+start 2026-11-19T15:24:16.151Z free=812699648 threshold=315572800
+sample 2026-11-19T15:24:16.156Z 812695552
+end 2026-11-19T15:24:18.163Z kind=elements-cross verdict=completed rc=0 free=812687360 lowest=812687360 dip=12288 change=-12288

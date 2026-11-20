@@ -1,0 +1,4 @@
+# space_guard.sh kind=compare-off_order need=30000000 floor=314572800 interval=2 cmd=bash -c SCRATCH=<scratch>/czviews bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/compare.sh off_order > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/compare_off_order.txt 2>&1
+start 2026-11-19T06:26:08.119Z free=737275904 threshold=344572800
+sample 2026-11-19T06:26:08.124Z 737271808
+end 2026-11-19T06:26:10.131Z kind=compare-off_order verdict=completed rc=0 free=737165312 lowest=737165312 dip=110592 change=-110592

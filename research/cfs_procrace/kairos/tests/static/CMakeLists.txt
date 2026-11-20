@@ -1,0 +1,201 @@
+# Tests of the static analysis layer (lib/llvm and tools/kz-static).  They exist only in a tree
+# configured with -DKZ_BUILD_LLVM_TOOLS=ON, like the code they test.
+#
+#   fixtures/        small self-contained C programs, one for each kind of fact; each is compiled by the
+#                    C compiler of the build with -std=c99 -pedantic -Wall -Wextra -Werror, and read by
+#                    kz-static with -std=c99 -pedantic (static_fixture_compile_*, static_golden_*);
+#                    clobber.c is read only (see below); wrappers.c is read in the profile-free mode
+#                    (extract --no-profile, no fixture profile); flowfacts.c is read twice for the extended
+#                    facts F1-F3, with the fixture profile and --extended-facts (flowfacts) and in the
+#                    profile-free mode (flowfacts_np); argflow.c is read the same two ways for the extended
+#                    facts F4 and F6 (argflow, argflow_np), lockset.c for F5 and the target-independent rules
+#                    (lockset, lockset_np), relations.c for `kz-static relations` (relations: the fixture profile
+#                    and --extended-facts; relations_np: --no-profile --targets-rule R-T1,R-T2), relpaths.c for the
+#                    order and entry-path facts LOCK_PATHS and the relations rules that read them (lockpaths_np,
+#                    relpaths_np: --no-profile --targets-rule R-T1,R-T2); relsound.c for the soundness rules of
+#                    relations path C (relsound_np: the read run as the spawned entry, indirect callers, record-wide
+#                    writes, a lock taken again around a loop, a lock that is no static instance, an unresolved call,
+#                    the creator's caller's write, and the control; revisions 4 and 5 add their cases: the creator run
+#                    again, hooks whose targets are not complete, a callback of a function without a body, unresolved
+#                    calls of the child, an entry from a union member of a static table, hooks set through a cast lvalue
+#                    of the variable, a copy of the pointer to it or the pointer an array decays to); deepcond.c (a condition more than 200
+#                    levels deep) is read by test_static_cli only; imgbudget.c (the budget of the static image: marker leaves,
+#                    exact fit, the two counts) is read by test_static_cli (the counts, one case at a time) and by
+#                    imgbudget_np (--no-profile --image-budget 4: the leaves and flags of the five cases together);
+#                    relincomplete.c for the incompleteness line of relations (relations rules revision 6):
+#                    relincomplete_np at the default image budget, relincomplete_cut_np at --image-budget 3, where its
+#                    name table and its table of thread entries are cut; relcallback.c for relations rules revision 7
+#                    (relcallback_np: one search loop with the comparison as a callback, two comparisons over two
+#                    fields, a callback from a function without a body, a table selector beside a lock mode, a key from a
+#                    static table, a creator whose callee returns its constants through a helper); order.c for `kz-static order` (order rules
+#                    revision 1; order_np: names created and looked up before and after the spawns of each other's threads, a
+#                    write under a lock held across the spawn and in a lock window, a spawn operation that reports a failure
+#                    after its thread started, a field written before the spawn of its reader, a polled flag whose budget exit
+#                    returns or goes on, a table of entries started in a loop); plangen.c for `kz-static plan` (plan rules
+#                    revision 1): read by test_static_plan only (two apps started through a spawn operation, a name
+#                    registry with a lookup and a create API, a failure that reaches the app exit, two calls of one
+#                    callee on one line, a lookup in a loop, and with -DPLANGEN_SECOND_CALLER a second caller)
+#                    anonrec.c for the names of record types without a file-scope tag or typedef name (anonrec_np:
+#                    --no-profile --targets-rule R-T1,R-T2; an unnamed union type made by a macro for a member of two
+#                    records, a file-scope object of an unnamed struct type cleared by memset, a tag inside a record, a
+#                    tag and an unnamed union in a function body, an unnamed struct as the type of an array member)
+#                    objaccess.c for types and object access (extract --object-access, static_facts.md 5s; objaccess with
+#                    the option, objaccess_off without it: target array fields whose pointer goes to calls, to a global
+#                    and to an integer, a store to an element, a character array tested before a call, reads and writes
+#                    of globals, a local and a parameter's pointee); plankey.c (plan rules revision 2): plangen.c with
+#                    the key of the lookup in a character array tested before the call, read by test_static_plan only;
+#                    semantics.c for semantics with a verification state (extract --semantics, static_facts.md 5t;
+#                    semantics_np with data/semantics_fixture/, the data file the coverage scan of
+#                    docs/semantics_coverage.md generates for the fixture: documented returns, one the body cannot return,
+#                    an undocumented function, an event-type and a run-status parameter, and relations rows that name them);
+#                    resultflow.c for result flow and effects (extract --result-flow, static_facts.md 5u; resultflow_np with
+#                    the relations rows of revision 10, resultflow_order_np with the order of revision 3: two definitions
+#                    of one local, a parameter returned unchanged, a failure returned up to a terminal, a retry, an exit
+#                    after a call that may change the stored status, child without success from the creation's value, a
+#                    caller-side use of a wait);
+#                    looplock.c for loop flag predicates and lock identity by handle (extract --loop-defs, --lock-handles,
+#                    static_facts.md 5v; looplock_np with data/looplock_fixture/, a hand-written semantics data file that
+#                    names the argument role lock-object, and the relations rows of revision 11, looplock_order_np with the
+#                    order of revision 4: a flag wait under a guard that reads a call result and a field read into a local,
+#                    a retry on a call result, a flag defined twice and one whose address is taken, a lock taken by a handle
+#                    created once, by a handle passed as a parameter and by a handle created twice);
+#                    closure.c for the lines of relations rules revision 14 (static_facts.md 5x and its addenda; closure_np
+#                    with --result-flow and --object-access): five create APIs of one name table whose success path line
+#                    holds (a constant return after the name store and the out-id store; a finishing step that gives its
+#                    status back and stores the id) or is missing (the id through a local, an early success return, a name
+#                    store on another branch); the alternatives line and the stored-field rule (5x seventh addendum): a
+#                    status stored on a lookup's failure, a second store that the line order puts between it and a loop on
+#                    a call taking its address but no path does, a store that the line order puts after the exit but a path
+#                    reaches before the call, a failure turned into another constant, a second caller context, a retry;
+#                    the stored-name buffer and lifetime-end lines (5x eighth addendum): a common table of name pointers
+#                    into two kind tables (a rename as another writer; uses that test, read, write through and copy the
+#                    pointer), a free-slot clear with and without the free-record condition, a finishing step called by
+#                    the creates, by a delete and with a null pointer, a constant release and the table's fill; a lookup
+#                    through a wrapper that returns the no-match constant itself for a null pointer (the absence origins
+#                    line with the no-match origin and another one);
+#                    planv4.c for plan rules revision 3 (kz-static plan --manifest 4, docs/plan_manifest.md 7-8), read by
+#                    test_static_plan only with data/planv4_fixture/ (a hand-written semantics data file that names the
+#                    event-type argument of its event send, a hand-written namespace data file with its lookup, create and
+#                    delete functions): a probe-create row, rows with creators excluded by key constants, a retry wait on a
+#                    call result, a path C read subscripted by a call result under a mutex, a delete through a retire call;
+#                    planv5.c for plan rules revision 5 (docs/plan_manifest.md section 10), read by test_static_plan only with
+#                    data/planv5_fixture/ (two hand-written namespace data files of coverage rule revision 2: an object
+#                    layer with its layer functions and operations, two kinds, a table): a lookup and an allocation with a
+#                    kind parameter, a finishing step that rolls a failed create back, a delete, a fill, a slot clear with
+#                    and without the free-record condition, a kind without a delete, a table searched by strncmp, an
+#                    initialisation function with two caller contexts
+#   data/reason_vocabulary.txt  the reason vocabulary of the judgement rules (JUDGEMENT_RULES_REV1.md 3.5);
+#                    test_static_reasons compares every reason `kz-static relations` can write with it, and every
+#                    `incomplete:` line of the relations goldens with the reasons the tool can write
+#   data/*.golden    the text view of the facts of each fixture and of the core executable; plangen_np.plan.golden
+#                    the plan of plangen.c (manifest, sidecar, module table, executables; sha256 values and paths masked);
+#                    planv4_np.plan.golden the revision-3 plan of planv4.c (manifest, sidecar, value requests; masked);
+#                    planv5_np.plan.golden the revision-5 plan of planv5.c (the same parts; masked)
+#   data/plangen_framework.txt  the framework-layer data of plangen.c (its run loop and app exit); plankey_framework.txt
+#                    that of plankey.c; planv4_framework.txt that of planv4.c
+#   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table
+#                    walks, recipe, commit reader, link set, command line, basis -> extract on a
+#                    synthetic program, the P0 table and the wrapper derivation of the profile-free mode)
+#   static_golden    the golden driver; `core` runs on the pinned bundle and is skipped (exit 77) where
+#                    the bundle or its build is not there
+#
+# Accept a deliberate change of a golden with KZ_GOLDEN_UPDATE=1 ctest -R static_golden, then review
+# the diff of data/.  The values in the goldens are those of the programs under analysis; they are
+# not experiment results.
+if(NOT KZ_BUILD_LLVM_TOOLS)
+  return()
+endif()
+
+include_directories("${CMAKE_SOURCE_DIR}/tests/unit" "${CMAKE_SOURCE_DIR}/lib/llvm")
+
+set(KZ_PROFILE_DIR "${CMAKE_SOURCE_DIR}/profiles/cfs-v7.0.1" CACHE PATH "The profile directory the tests use")
+set(KZ_BUNDLE_ROOT "/home/user/work/procrace/cfs_ref/cFS" CACHE PATH "The pinned bundle the real run reads")
+set(kz_fixture_dir "${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
+set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
+
+# ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
+# clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
+# compilers reject that at -Werror, so it is read by kz-static but not compiled here.
+set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget relincomplete relcallback plangen order anonrec objaccess plankey semantics resultflow looplock planv4 closure planv5)
+set(kz_golden_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations clobber flowfacts_np argflow_np lockset_np
+    relations_np lockpaths_np relpaths_np relsound_np imgbudget_np relincomplete_np relincomplete_cut_np relcallback_np order_np anonrec_np objaccess objaccess_off semantics_np
+    resultflow_np resultflow_order_np looplock_np looplock_order_np closure_np)
+foreach(kz_name IN LISTS kz_fixtures)
+  add_test(NAME static_fixture_compile_${kz_name}
+    COMMAND ${CMAKE_C_COMPILER} -std=c99 -pedantic -Wall -Wextra -Werror -c ${kz_fixture_dir}/${kz_name}.c -o ${CMAKE_CURRENT_BINARY_DIR}/${kz_name}.fixture.o)
+  set_tests_properties(static_fixture_compile_${kz_name} PROPERTIES LABELS static)
+endforeach()
+
+# ---- golden files ---------------------------------------------------------------------------------------
+add_executable(static_golden static_golden.cpp)
+target_link_libraries(static_golden PRIVATE kz-core)
+kz_apply_settings(static_golden)
+add_dependencies(static_golden kz-static)
+foreach(kz_name IN LISTS kz_golden_fixtures)
+  add_test(NAME static_golden_${kz_name}
+    COMMAND static_golden fixture ${kz_name} $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${kz_fixture_profile}
+            ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/work_${kz_name})
+  set_tests_properties(static_golden_${kz_name} PROPERTIES LABELS "static;golden")
+endforeach()
+
+# The core executable of the pinned bundle: basis, extract, numbers.
+# Three lines of data/core_cpu1.golden come from the bundle build the golden was made from, not from the
+# tool: binary.sha256, binary.build_id and generated.build_env_table.sha256.  The generated table holds the
+# build date (BUILDDATE), and the date also changes the executable and its GNU ld build id, so a rebuild of
+# the bundle from the same pinned sources changes these three lines and no other.  Regenerated on 2026-10-29
+# from the rebuilt bundle (env/REBUILD_20261029.md sections 2.2 and 5.2); only these three lines changed:
+#   binary.sha256                     0edb1ae28780160ebee95adf8861fc76fe7119a30434e9cd8698cb505bc97799 (BUILDDATE 202610080115)
+#                                  -> c10d7dd1ad0b83106d3e0ebdb90a13a617c34ab2ea073f3bd360f0358b04be44 (BUILDDATE 202610290151)
+#   binary.build_id                   be6d04f1f80d421efea50cc9f47db848b2a52941 -> 7b87b2a417ca18b8cf874ed4bb1a6972e851585e
+#   generated.build_env_table.sha256  ebac47dd2849b67c... -> 126f83723941c3eb...
+# The rebuilt build with only the date string set back to 202610080115 gives the old table hash and, relinked,
+# the old executable (REBUILD section 2.2); the other 563 lines are the same for both builds.
+add_test(NAME static_golden_core_cpu1
+  COMMAND static_golden core $<TARGET_FILE:kz-static> ${KZ_PROFILE_DIR} ${KZ_PROFILE_DIR}/basis/core-cpu1.kzb ${KZ_BUNDLE_ROOT}
+          ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/work_core)
+set_tests_properties(static_golden_core_cpu1 PROPERTIES LABELS "static;golden;integration" SKIP_RETURN_CODE 77 TIMEOUT 600)
+# legacy-case (RV3A 6.3 O8): the profile-driven facts of the pinned core build with the case profile
+set_property(TEST static_golden_core_cpu1 APPEND PROPERTY LABELS legacy-case)
+
+# ---- unit tests ---------------------------------------------------------------------------------------------
+foreach(kz_name test_static_expr test_static_flow test_static_recipe test_static_gitrev test_static_unroll test_static_wrappers)
+  kz_add_unit_test(${kz_name} SOURCES ${kz_name}.cpp LIBS kz-llvm kz-testsupport LABEL static)
+endforeach()
+
+# Object files for the link-set test, built with the C compiler of the build.
+# They are data for the link-set reader, not code under test: a sanitizer build must not add its
+# runtime symbols to them (the test checks their symbol tables).
+foreach(kz_obj main_obj whole_member lazy_used lazy_unused)
+  add_library(kz_static_${kz_obj} OBJECT objects/${kz_obj}.c)
+  target_compile_options(kz_static_${kz_obj} PRIVATE -std=c99 -fno-sanitize=all)
+endforeach()
+kz_add_unit_test(test_static_link SOURCES test_static_link.cpp LIBS kz-llvm kz-testsupport LABEL static
+  ARGS $<TARGET_OBJECTS:kz_static_main_obj> $<TARGET_OBJECTS:kz_static_whole_member> $<TARGET_OBJECTS:kz_static_lazy_used> $<TARGET_OBJECTS:kz_static_lazy_unused>)
+# the objects are arguments, not sources: building the test must build them too
+add_dependencies(test_static_link kz_static_main_obj kz_static_whole_member kz_static_lazy_used kz_static_lazy_unused)
+
+# ELF32 little-endian i386 (E-ST, the reading part): objects, a shared object and an executable built at test time with
+# -m32, damaged headers, one ELF identity per program, and the basis of a small 32-bit closure.  Skipped (77) where the
+# compiler cannot build -m32 programs.
+kz_add_unit_test(test_static_elf32 SOURCES test_static_elf32.cpp LIBS kz-llvm kz-testsupport LABEL static
+  ARGS $<TARGET_FILE:kz-static> ${CMAKE_C_COMPILER} ${CMAKE_CURRENT_SOURCE_DIR}/objects ${kz_fixture_profile} ${CMAKE_CURRENT_BINARY_DIR}/work_elf32)
+set_tests_properties(test_static_elf32 PROPERTIES SKIP_RETURN_CODE 77)
+add_dependencies(test_static_elf32 kz-static)
+
+# The incompleteness reasons of relations (relations rules revision 6) against the reason vocabulary of the judgement rules
+# (data/reason_vocabulary.txt), and the `incomplete:` lines of the relations goldens against the reasons the tool can write.
+kz_add_unit_test(test_static_reasons SOURCES test_static_reasons.cpp LIBS kz-llvm kz-testsupport LABEL static
+  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/data/reason_vocabulary.txt ${CMAKE_CURRENT_SOURCE_DIR}/data)
+
+# `kz-static plan` on plangen.c (plan rules revision 2, docs/plan_manifest.md): determinism, the runtime's host parser on the
+# manifest (kzrt-manifest; a test links it, no tool does), the observation rules, the priority port, the refusals, a second
+# caller, the golden text; on plankey.c the key argument of a character array (facts with and without --object-access); on
+# planv4.c plan rules revision 3 (--manifest 4: kzs-sites 4, the control selection, value requests, wait and object rules); on
+# planv5.c plan rules revision 5 (namespace data of coverage rule revision 2)
+kz_add_unit_test(test_static_plan SOURCES test_static_plan.cpp LIBS kz-llvm kzrt-manifest kz-testsupport LABEL static
+  ARGS $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/work_plan)
+add_dependencies(test_static_plan kz-static)
+
+kz_add_unit_test(test_static_cli SOURCES test_static_cli.cpp LIBS kz-core kz-testsupport LABEL static
+  ARGS $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${CMAKE_CURRENT_SOURCE_DIR}/objects ${kz_fixture_profile} ${CMAKE_C_COMPILER} ${CMAKE_CURRENT_BINARY_DIR})
+add_dependencies(test_static_cli kz-static)

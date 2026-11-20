@@ -1,0 +1,87 @@
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+Test project /home/user/work/merge-check/kz-llvm
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 68
+    Start  68: test_core_schema
+
+68: Test command: /home/user/work/merge-check/kz-llvm/tests/unit/test_core_schema
+68: Working Directory: /home/user/work/merge-check/kz-llvm/tests/unit
+68: Test timeout computed to be: 10000000
+68: test_core_schema: 34017 checks passed
+1/5 Test  #68: test_core_schema .................   Passed    0.00 sec
+test 105
+    Start 105: lint_selftest
+
+105: Test command: /home/user/work/merge-check/kz-llvm/tests/lint/kz_lint "--selftest" "--data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/lint/data"
+105: Working Directory: /home/user/work/merge-check/kz-llvm/tests/lint
+105: Test timeout computed to be: 10000000
+105: lint selftest: 109 cases, 0 failed
+2/5 Test #105: lint_selftest ....................   Passed    0.07 sec
+test 256
+    Start 256: test_static_reasons
+
+256: Test command: /home/user/work/merge-check/kz-llvm/tests/static/test_static_reasons "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/reason_vocabulary.txt" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data"
+256: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+256: Test timeout computed to be: 10000000
+256: test_static_reasons: 660 checks passed
+3/5 Test #256: test_static_reasons ..............   Passed    0.01 sec
+test 257
+    Start 257: test_static_plan
+
+257: Test command: /home/user/work/merge-check/kz-llvm/tests/static/test_static_plan "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data" "/home/user/work/merge-check/kz-llvm/tests/static/work_plan"
+257: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+257: Test timeout computed to be: 10000000
+257: test_static_plan: 195 checks passed
+4/5 Test #257: test_static_plan .................   Passed    0.32 sec
+test 258
+    Start 258: test_static_cli
+
+258: Test command: /home/user/work/merge-check/kz-llvm/tests/static/test_static_cli "/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/fixtures" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/objects" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/profile" "/usr/bin/gcc" "/home/user/work/merge-check/kz-llvm/tests/static"
+258: Working Directory: /home/user/work/merge-check/kz-llvm/tests/static
+258: Test timeout computed to be: 10000000
+258: test_static_cli: 1014 checks passed
+5/5 Test #258: test_static_cli ..................   Passed    3.76 sec
+
+The following tests passed:
+	test_core_schema
+	lint_selftest
+	test_static_reasons
+	test_static_plan
+	test_static_cli
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+lint      =   0.07 sec*proc (1 test)
+static    =   4.08 sec*proc (3 tests)
+unit      =   0.00 sec*proc (1 test)
+
+Total Test time (real) =   4.16 sec
+Test project /home/user/work/merge-check/kz-llvm
+    Start 105: lint_selftest
+1/7 Test #105: lint_selftest ....................   Passed    0.06 sec
+    Start 106: lint_case-ids
+2/7 Test #106: lint_case-ids ....................   Passed    1.83 sec
+    Start 107: lint_case-ids-data
+3/7 Test #107: lint_case-ids-data ...............   Passed    0.00 sec
+    Start 108: lint_retired-term
+4/7 Test #108: lint_retired-term ................   Passed    0.06 sec
+    Start 109: lint_banned-files
+5/7 Test #109: lint_banned-files ................   Passed    0.02 sec
+    Start 110: lint_no-llvm
+6/7 Test #110: lint_no-llvm .....................   Passed    0.06 sec
+    Start 111: lint_no-generated
+7/7 Test #111: lint_no-generated ................   Passed    0.07 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Label Time Summary:
+lint    =   2.09 sec*proc (7 tests)
+
+Total Test time (real) =   2.10 sec

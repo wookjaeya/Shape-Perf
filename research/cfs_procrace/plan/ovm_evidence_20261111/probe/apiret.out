@@ -1,0 +1,65 @@
+cFE prototypes 204
+  status(CFE_Status_t)             120
+  void                             18
+  status(int32)                    13
+  bool                             8
+  other(uint32)                    8
+  other(CFE_TIME_SysTime_t)        8
+  pointer                          7
+  other(CFE_SB_MsgId_Atom_t)       7
+  other(unsigned long)             2
+  other(CFE_ResourceId_t)          2
+  other(size_t)                    1
+  other(CFE_SB_MsgId_t)            1
+  other(CFE_TBL_HandleId_t)        1
+  other(CFE_TBL_Handle_t)          1
+  other(int16)                     1
+  other(CFE_TIME_ClockState_Enum_t) 1
+  other(uint16)                    1
+  other(CFE_TIME_Compare_t)        1
+  other(CFE_MSG_SequenceCount_t)   1
+  other(CFE_Config_ArrayValue_t)   1
+  other(CFE_ConfigId_t)            1
+   bool : CFE_ES_RunLoop CFE_FS_BackgroundFileDumpIsPending CFE_ResourceId_Equal CFE_ResourceId_IsDefined CFE_SB_IsValidMsgId CFE_SB_MsgId_Equal CFE_TBL_HandleID_IsDefined CFE_TBL_HandleID_IsEqual
+   other(uint32) : CFE_Config_GetValue CFE_ES_CalculateCRC CFE_ResourceId_GetBase CFE_ResourceId_GetSerial CFE_TIME_GetMETseconds CFE_TIME_GetMETsubsecs CFE_TIME_Micro2SubSecs CFE_TIME_Sub2MicroSecs
+   pointer : CFE_Config_GetName CFE_Config_GetObjPointer CFE_Config_GetString CFE_FS_GetDefaultExtension CFE_FS_GetDefaultMountPoint CFE_SB_AllocateMessageBuffer CFE_SB_GetUserData
+   other(size_t) : CFE_SB_GetUserDataLength
+   other(CFE_SB_MsgId_Atom_t) : CFE_SB_CmdTopicIdToMsgId CFE_SB_GlobalCmdTopicIdToMsgId CFE_SB_GlobalTlmTopicIdToMsgId CFE_SB_LocalCmdTopicIdToMsgId CFE_SB_LocalTlmTopicIdToMsgId CFE_SB_MsgIdToValue CFE_SB_TlmTopicIdToMsgId
+   other(CFE_SB_MsgId_t) : CFE_SB_ValueToMsgId
+   other(unsigned long) : CFE_ResourceId_ToInteger CFE_TBL_HandleID_AsInt
+   other(CFE_TBL_HandleId_t) : CFE_TBL_HandleToID
+   other(CFE_TBL_Handle_t) : CFE_TBL_HandleFromID
+   other(CFE_TIME_SysTime_t) : CFE_TIME_Add CFE_TIME_GetMET CFE_TIME_GetSTCF CFE_TIME_GetTAI CFE_TIME_GetTime CFE_TIME_GetUTC CFE_TIME_MET2SCTime CFE_TIME_Subtract
+   other(int16) : CFE_TIME_GetLeapSeconds
+   other(CFE_TIME_ClockState_Enum_t) : CFE_TIME_GetClockState
+   other(uint16) : CFE_TIME_GetClockInfo
+   other(CFE_TIME_Compare_t) : CFE_TIME_Compare
+   other(CFE_MSG_SequenceCount_t) : CFE_MSG_GetNextSequenceCount
+   other(CFE_ResourceId_t) : CFE_ResourceId_FindNextEx CFE_ResourceId_FromInteger
+   other(CFE_Config_ArrayValue_t) : CFE_Config_GetArrayValue
+   other(CFE_ConfigId_t) : CFE_Config_GetIdByName
+OSAL prototypes 205
+  status(int32)                    151
+  void                             16
+  other(OS_time_t)                 11
+  other(uint32)                    7
+  other(int64)                     5
+  bool                             4
+  pointer                          3
+  other(int8_t)                    2
+  other(osal_id_t)                 2
+  other(size_t)                    1
+  other(long)                      1
+  other(unsigned long)             1
+  other(osal_objtype_t)            1
+   other(uint32) : OS_BSP_GetArgC OS_BSP_GetResourceTypeConfig OS_GetBuildNumber OS_TimeGetMicrosecondsPart OS_TimeGetMillisecondsPart OS_TimeGetNanosecondsPart OS_TimeGetSubsecondsPart
+   other(OS_time_t) : OS_TimeAdd OS_TimeAssembleFromMicroseconds OS_TimeAssembleFromMilliseconds OS_TimeAssembleFromNanoseconds OS_TimeAssembleFromSubseconds OS_TimeFromRelativeMilliseconds OS_TimeFromTotalMicroseconds OS_TimeFromTotalMilliseconds OS_TimeFromTotalNanoseconds OS_TimeFromTotalSeconds OS_TimeSubtract
+   other(int64) : OS_TimeGetFractionalPart OS_TimeGetTotalMicroseconds OS_TimeGetTotalMilliseconds OS_TimeGetTotalNanoseconds OS_TimeGetTotalSeconds
+   bool : OS_ObjectIdDefined OS_ObjectIdEqual OS_SelectFdIsSet OS_TimeEqual
+   other(int8_t) : OS_TimeCompare OS_TimeGetSign
+   other(size_t) : OS_strnlen
+   other(long) : OS_StatusToInteger
+   pointer : OS_GetVersionCodeName OS_GetVersionString OS_StatusToString
+   other(unsigned long) : OS_ObjectIdToInteger
+   other(osal_id_t) : OS_ObjectIdFromInteger OS_TaskGetId
+   other(osal_objtype_t) : OS_IdentifyObject

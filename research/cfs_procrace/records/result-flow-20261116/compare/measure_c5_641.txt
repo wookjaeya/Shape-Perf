@@ -1,0 +1,12 @@
+rows: result flow 5568 rows (uses: branch 995, return 229, argument 590, store 140, other 233, none 1494; guard rows 1887); calls with a result 2681; result effect 6864 rows (open 4660; event send 589, application exit 0, terminal 169; calls on the paths that are none of these, no row: 4600); calls explored 901, outcomes 2496
+handling labels: {'H': 4, 'J': 8, 'J?': 16, 'R': 14, 'T': 3, 'T?': 42, 'none': 46}; path A {'H': 2, 'J?': 16, 'R': 12, 'T?': 33, 'none': 3}; path B {'H': 2, 'J': 8, 'R': 2, 'T': 3, 'T?': 9, 'none': 43}
+relations header: handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: H 4 J 8 J? 16 R 14 T 3 T? 42 none 46
+first path: key 17975444d83f6589 not in the keys listing or the relations
+order old: summary spawn calls with resolved threads 6; child without success: possible 0, not found 1, unknown 5 (position-based 5)
+order old: HB-await edges listed 0; caller-side uses 0; use the call of: {'continue': 1, 'no-budget': 34}
+order new: summary spawn calls with resolved threads 6; child without success: possible 5, not found 1, unknown 0 (position-based 0)
+order new: HB-await edges listed 0; caller-side uses 0; use the call of: {'continue': 1, 'no-budget': 34}
+order new: rules with result flow: order rules revision 3 (2026-11-16), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects 8; caller-side uses of waits 0, HB-await edges to them 0
+T? (D11 rows of the offline probe): earlier count's input (s1 rev 1, the relations kept with the tests_8c_fix facts) 47; the same facts, today's relations rules (s1 rev 1, rf_relcheck) 47; before (s1 rev 1, the earlier option-on round) 46; after (s1 rev 2, this round) 44
+  s1 rev 2: [개정 2] 사실에서 온 처리 표시가 있는 행 87 / 경로 A·B 행 133 (handling_label 줄이 있으나 none 인 행 46)
+  s1 rev 2: T? 행: 글에서 46 -> 이 개정(사실이 있으면 사실) 44

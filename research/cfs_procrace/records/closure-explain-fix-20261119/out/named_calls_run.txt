@@ -1,0 +1,1 @@
+named calls: 4, no entry 1: memchr length-call 0 0 -; memset copy-call,fill-call 4 2 P0; strcmp compare-call 3 1 P0; strncpy copy-call 4 2 P0

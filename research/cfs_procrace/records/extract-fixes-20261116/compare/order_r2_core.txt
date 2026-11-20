@@ -1,0 +1,6 @@
+new names: 0
+class head           change:facts-hash                  1
+class head           change:relations-rules             1
+class rows           mask:record-write                  5
+undeclared other: 0
+compare_classes: only declared classes

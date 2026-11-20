@@ -1,0 +1,5 @@
+# space_guard.sh kind=named-calls-rerun need=20000000 floor=314572800 interval=2 cmd=bash -c cd '/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119' && python3 -I scripts/named_calls.py --out '/home/user/Shape-Perf/research/cfs_procrace/records/closure-prebootfix-20261119/out/named_calls_rerun_after_commit.tsv' --kzdump '/home/user/work/merge-check/kz-llvm/tools/kz-dump/kz-dump'       '/home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx:/home/user/work/redesign/obs1/cz_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz' '/home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx:/home/user/work/redesign/obs1/cz_final_extract/c1_post_tx/c1_post_tx/NP/facts.kz'
+start 2026-11-19T17:46:56.450Z free=764616704 threshold=334572800
+sample 2026-11-19T17:46:56.454Z 764612608
+sample 2026-11-19T17:46:58.460Z 764612608
+end 2026-11-19T17:47:00.466Z kind=named-calls-rerun verdict=completed rc=0 free=764608512 lowest=764608512 dip=8192 change=-8192

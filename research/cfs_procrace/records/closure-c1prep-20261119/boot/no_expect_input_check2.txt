@@ -1,0 +1,15 @@
+check (results 26.4; spec 11 item 15): the expectation files (expect_c1.tsv, expect_c1_2.tsv) and the hand predictions (predictions.tsv, predictions2.tsv) are no input of any step but the two named exceptions
+run_cycle.sh sha256 38e7b52504a1fd54ba860f7adb10736edfd91b3a5b5a75c3a730fe47a43d1d4a
+lines of run_cycle.sh that name an expectation file or the predictions:
+  6:# 860c2cd, kept unchanged), and the eval and expect steps read expect/expect_c1_2.tsv (the expectations rewritten from
+  7:# the rules; expect_c1.tsv is kept unchanged and read by no step).  BUILD c1_pre_tx | c1_post_tx; N is the boot's number: 1, then 2-5 only
+  183:      --sheets-boot "$SB" --expect "$D/expect/expect_c1_2.tsv" --out "$L/eval.txt" > "$L/eval_run.txt" 2>&1; rc=$?
+  186:    python3 -I "$EX/explain_expect.py" --expect "$D/expect/expect_c1_2.tsv" --records "$XO" --out "$L/expect_compare.txt"; rc=$?
+steps whose command names one (by case label):
+  eval)
+  expect)
+the explain step's explain.py arguments naming an expect or prediction file: 0
+plan generation (args.txt of the two plans) naming one: /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/args.txt:0 /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/args.txt:0 
+explain_eval.py lines that open the expectation file (the F1 branch):
+  328:        ex = read("expect", o.expect).splitlines()
+the eval fixtures' open and write watches: 4 lines naming them in test_explain_eval.py (92/92 pass: out/eval_fixtures.txt)

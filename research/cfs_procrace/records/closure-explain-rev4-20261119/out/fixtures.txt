@@ -1,0 +1,128 @@
+PASS base rc 0
+PASS base D2: twelve items held
+PASS base D2: pair bound
+PASS base D2: link established, basis name_binding
+PASS base D2: use_cond derived
+PASS base D2: use name state unmet
+PASS base D2: order unmet_state_observed, violation observed
+PASS base D2: order_ground is the pair-file line (unordered)
+PASS base D2: pair_kind app-app
+PASS base D2: context 1 assigned to the use
+PASS base: uses.tsv written before aggregation
+PASS base D1: (na) semantics missing (unverified entries)
+PASS base D1: pair unlinked, record unlinked
+PASS base D1: (iii) not established (rests on an unverified entry)
+PASS base D1: use_cond partial, violation undetermined
+PASS base D1: eval_branch and sha256 fields
+PASS reading branch tag
+PASS judge opens only the normal form and the vocabulary
+PASS the open guard fails a judge that opens another file
+PASS basis1: missing alone
+PASS basis1: sub-reason same build not confirmed
+PASS basis1-refused: build_mismatch
+PASS basis1-dump14: no buildid line: basis 1 missing for the pair
+PASS basis2: missing alone
+PASS basis2: consumer creation tie reason
+PASS basis3-noorigins: missing alone
+PASS basis3-nullkey: null key pointer: an origin not excluded
+PASS basis3-otherorigin: an origin of another condition is not excluded
+PASS basis4-stored: missing alone
+PASS basis4-stored: sub-reason stored value
+PASS basis4-returns: sub-reason returns not followed
+PASS basis4-status: a failed create: out not read
+PASS basis5: cut key text: basis 5 missing
+PASS basis6-overlap: missing alone
+PASS basis6-overlap: name state undecided (overlap)
+PASS contradiction: basis 6 contradicted
+PASS contradiction: absence after a live create
+PASS contradiction: name state met
+PASS ga-noentry: (ga) missing
+PASS ga-nodata: missing alone
+PASS na-sem-nocall: missing alone
+PASS na-bound: missing alone
+PASS da-buffer: missing alone in R0
+PASS da-buffer-Rf: held under reading Rf
+PASS da-unassigned: missing alone
+PASS da-fieldstatus: missing alone
+PASS ra-kind: missing alone
+PASS ra-notplanned: missing alone
+PASS ma-incomplete: missing alone
+PASS ma-incomplete: name state undecided
+PASS ma-unbound: missing alone
+PASS ma-cleartable: (ma) seen: the table was cleared between
+PASS ma-rollback: (ma) seen: a rollback of the name between
+PASS ma-reentry: reentry=possible: a rollback of another name counts for every name of the kind
+PASS ma-slotclear: a slot clear not shown: (ma) not excluded
+PASS refuted: pair refuted
+PASS refuted: record refuted, violation refuted_link
+PASS refuted: refuted_scope
+PASS differs: D1: differs_from_use_key, not refuted
+PASS refuted-some: record unlinked: refuted for some creates only
+PASS refuted-incomplete: record not refuted when the creator set is incomplete
+PASS two-bound: more than one create bound: both unlinked
+PASS found-linked: a found use is instance-linked on an open generation
+PASS found-linked: record established by instance
+PASS found-deleted: the generation was deleted before the use: unlinked
+PASS found-incomplete: lifetime ends incomplete: plan_missing
+PASS process-app: pair kind process-app
+PASS process-app: basis 2 missing: the process initial thread has no creation tie (rule as written)
+PASS same-actor: the probe-create of the consumer's own actor is a pair of kind same_actor
+PASS same-actor: same_thread pair line read
+PASS core-app: pair kind core-app
+PASS same-app-other: pair kind same-app-other
+PASS pairs-otherfacts: pair file of other facts refused: order_basis_unknown
+PASS pairs-othertool: pair file of another tool refused
+PASS pairs-absent: no line of the pair: order_basis_unknown, no fallback
+PASS pairs-badtail: a pair file whose tail does not count its lines is refused
+PASS hard-before-unmet: hard_before with an unmet use flagged
+PASS context2: use in context 2
+PASS context2: (iii) not held: found retry
+PASS context-unknown: no bracketing frame: context unknown
+PASS context-unknown: (iii) not established (context unknown)
+PASS context-unknown: caller_dependence_unknown(context unknown)
+PASS i-clearing: (i) not held (a clearing definition)
+PASS i-clearing-Rb: (i) held under reading Rb
+PASS i-other: (i) not held (another definition)
+PASS i-incomplete: (i) not established (type-level DISABLED)
+PASS i-incomplete-Re: (i) held under reading Re, marked with its premise
+PASS i-local: (i) not established for a local holder
+PASS iii-premise: (iii) not established on a premise
+PASS iii-decided: (iii) held with the stored-field rule marked
+PASS iii-decided: counted apart in use_cond.stored_field_rule
+PASS iii-Re-premise: Re cannot close (iii): no call result under the premise
+PASS Ra: (iii) alone derives under reading Ra
+PASS Ra-R0: R0 needs (i): partial
+PASS Rc: (c2) present from the absence line under Rc
+PASS Rc-R0: (c2) missing in R0
+PASS Rd: (c4) present under Rd with its premise
+PASS Rd-R0: (c4) missing in R0
+PASS partial: (na) semantics still missing with the comparison kind only
+PASS adm-notincand: the run stops with rc 2 and writes no record
+PASS adm-partkind: the run stops with rc 2 and writes no record
+PASS adm-candsha: the run stops with rc 2 and writes no record
+PASS no candidate list: only D1 branches, (na) semantics missing
+PASS tok: tok lines counted only
+PASS norun: no run: static_only, rc 0
+PASS pathB: a path B row makes a record with no name-binding pair
+PASS absent-then-found: the uses of the record differ in basis
+PASS two-texts: two key texts: multi_state_unlinked
+PASS refuted-unplanned: record not refuted when a creator site is not bound
+PASS slot-shown: a slot clear shown to be no lifetime end plans no site: (ma) held
+PASS note-absent: an object without a build-id note: basis 1 missing
+PASS --check accepts the base record
+PASS format check 9 bound pair with an item not held: refused
+PASS format check 10 refuted without scope: refused
+PASS format check 11 basis without an established link: refused
+PASS format check 12 name-binding use not absent: refused
+PASS format check 13 derived without (iii) held: refused
+PASS format check 14 a use without its name state: refused
+PASS format check 14 uses_decided above uses_reached: refused
+PASS format check 15 a held item on a hand reading: refused
+PASS format check 16 D1 record with an item on an unverified entry: refused
+PASS format check 16 order_ground of another form: refused
+PASS format check 17 no eval_branch: refused
+PASS format check 17 a reading without its tag: refused
+PASS summary rc 0, per-branch tables, no detection count
+PASS expectation comparison: 2 match, 1 mismatch
+PASS summary and comparison changed no record
+fixtures: 127 checks, 127 passed, 0 failed

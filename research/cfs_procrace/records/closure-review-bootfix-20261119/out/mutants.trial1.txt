@@ -1,0 +1,15 @@
+git_check_declaration_only: test rc 1; run_cycle tests: 24 of 25 pass; failing: run_cycle.sh with an uncommitted change: no boot|
+count_missing_as_zero: test rc 1; run_cycle tests: 24 of 25 pass; failing: a counted directory missing: missing, rc 1|
+count_regular_files_only: test rc 1; run_cycle tests: 24 of 25 pass; failing: a symbolic link added under a counted directory: differs|
+gate_no_refusal: test rc 1; run_cycle tests: 24 of 25 pass; failing: a second control, gate, chain, stop, kzt-text: rc 2, the first output unchanged|
+control_no_refusal: test rc 1; run_cycle tests: 24 of 25 pass; failing: a second control, gate, chain, stop, kzt-text: rc 2, the first output unchanged|
+no_space_check: test rc 1; run_cycle tests: 23 of 25 pass; failing: space: c1_pre_tx 1 needs floor + margin + 12 x per boot, c1_post_tx 1 6 x; below: no boot; at the need: boot|a measured per-boot value larger than the declared one: used for the boots after it|
+no_pin_check: test rc 1; run_cycle tests: 23 of 25 pass; failing: space: c1_pre_tx 1 needs floor + margin + 12 x per boot, c1_post_tx 1 6 x; below: no boot; at the need: boot|a measured per-boot value larger than the declared one: used for the boots after it|
+not_booted_rule_off: test rc 1; run_cycle tests: 24 of 25 pass; failing: not booted: work directory removed, boot.notbooted kept, no pin; the same N runs again|
+eval_into_record_dir: test rc 1; run_cycle tests: 24 of 25 pass; failing: eval: full output under the work directory, head and main tail in the record directory; a second eval and a sheet_boot.tsv refused|
+eval_sheet_accepted: test rc 1; run_cycle tests: 24 of 25 pass; failing: eval: full output under the work directory, head and main tail in the record directory; a second eval and a sheet_boot.tsv refused|
+explain_no_reverify: test rc 1; run_cycle tests: 24 of 25 pass; failing: explain: a declared file changed after the boot: the verify again is not clean, no explanation output|
+verify_at_boot_overwritten: test rc 1; run_cycle tests: 24 of 25 pass; failing: a boot refused by its own verify and run again: two verify_at_boot records, the first kept|
+convert_refusal_keeps_dir: test rc 1; run_cycle tests: 24 of 25 pass; failing: a convert refused at start by the space guard: no directory left, the refused log kept, the step can run again|
+keep_no_ledger_check: test rc 0; run_cycle tests: 25 of 25 pass; failing: 
+mutants done: 13 of 14 fail the test

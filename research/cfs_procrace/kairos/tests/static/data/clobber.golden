@@ -1,0 +1,63 @@
+extract
+  translation units          1
+  functions                  4 (bodies read 3, in system headers skipped 0)
+  call sites                 1
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                0 (entry resolved 0)
+  loops                      0 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Any.id   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 2  -> DISABLED
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 2  -> DISABLED
+  location Far.id   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 2  -> DISABLED
+  hand-entered inputs        14 (built-in data-function table 12, command line 2)
+  declared assumptions       0 (static images of table-walk links that are not const)
+facts-view 1
+[files] 1
+  0 clobber.c b7ffd4090098 801
+[functions] 4
+  fn 0 barrier clobber.c:17-17 params=0 {defined}
+  fn 1 memset clobber.c:6 params=3 {builtin}
+  fn 2 overrun clobber.c:20-20 params=0 {defined}
+  fn 3 plain clobber.c:14-14 params=0 {defined}
+[calls] 1
+  site 4 clobber.c:20:22 overrun -> memset direct {data-fn}
+      arg 0:addr-of-field &g_far.id of Far.id
+      arg 1:const 0 0
+      arg 2:const 8 sizeof g_far
+[derives] 0
+[loops] 0
+[iters] 0
+[order] 0
+[init] 2
+  Any.id in g_any zero-initialized value=0 defined at clobber.c:11:5
+  Far.id in g_far zero-initialized value=0 defined at clobber.c:12:5
+[consts] 0
+[writers] 2
+  Any.id assign at clobber.c:14:20 in plain value=const 1 [1] key=g_any {} n/a
+  Far.id memset at clobber.c:20:22 in overrun value=const 0 [fill 0] key=&g_far.id {} n/a
+[atype] 6
+  Any.id unknown-effect at clobber.c:17:22 in barrier: inline assembly that clobbers memory
+  Any.id unknown-effect at clobber.c:20:22 in overrun: memset writes past the end of g_far: &g_far.id
+  Cell.id unknown-effect at clobber.c:17:22 in barrier: inline assembly that clobbers memory
+  Cell.id unknown-effect at clobber.c:20:22 in overrun: memset writes past the end of g_far: &g_far.id
+  Far.id unknown-effect at clobber.c:17:22 in barrier: inline assembly that clobbers memory
+  Far.id unknown-effect at clobber.c:20:22 in overrun: memset writes past the end of g_far: &g_far.id
+[locs] 3
+  Any.id DISABLED writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=2 init=1 unresolved-indirect=0
+  Cell.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=2 init=0 unresolved-indirect=0
+  Far.id DISABLED writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=2 init=1 unresolved-indirect=0
+[targets] 0
+[spawnparams] 0
+[image] 0
+[terminals] 0
+[outcalls] 1
+  site 4 clobber.c:20:22 memset arg 0 = &Far.id data-function stores=0
+[fwrites] 4
+  overrun record Far.* at clobber.c:20
+  overrun field Far.id at clobber.c:20
+  overrun address-argument Far.id at clobber.c:20
+  plain field Any.id at clobber.c:14

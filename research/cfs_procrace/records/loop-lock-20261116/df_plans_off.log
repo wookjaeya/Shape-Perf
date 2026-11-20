@@ -1,0 +1,4 @@
+# space_guard.sh kind=plans need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/loop-lock-20261116/plans.sh /home/user/work/redesign/obs1/ll_off_extract /home/user/work/redesign/obs1/ll_plans_off
+start 2026-11-16T22:34:16.488Z free=1769566208 threshold=414572800
+sample 2026-11-16T22:34:16.492Z 1769562112
+end 2026-11-16T22:34:18.498Z kind=plans verdict=completed rc=0 free=1768579072 lowest=1768579072 dip=987136 change=-987136

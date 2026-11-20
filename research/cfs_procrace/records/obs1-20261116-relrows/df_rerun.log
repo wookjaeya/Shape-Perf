@@ -1,0 +1,5 @@
+# space_guard.sh kind=relations need=20000000 floor=314572800 interval=2 cmd=bash <scratch>/rerun.sh
+start 2026-11-16T05:45:00.340Z free=516407296 threshold=334572800
+sample 2026-11-16T05:45:00.349Z 516403200
+sample 2026-11-16T05:45:02.357Z 509124608
+end 2026-11-16T05:45:04.363Z kind=relations verdict=completed rc=0 free=504549376 lowest=504549376 dip=11857920 change=-11857920

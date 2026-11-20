@@ -1,0 +1,173 @@
+UpdateCTestConfiguration  from :/home/user/work/instr/kzgcc-0.5/plugin-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/user/work/instr/kzgcc-0.5/plugin-build/DartConfiguration.tcl
+Test project /home/user/work/instr/kzgcc-0.5/plugin-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+      Start  1: kzgcc_target_O0
+
+1: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "O0" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/O0"
+1: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+1: Test timeout computed to be: 10000000
+1: ok: O0
+ 1/20 Test  #1: kzgcc_target_O0 ..................   Passed    0.13 sec
+test 2
+      Start  2: kzgcc_target_O2
+
+2: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "O2" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/O2"
+2: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+2: Test timeout computed to be: 10000000
+2: ok: O2
+ 2/20 Test  #2: kzgcc_target_O2 ..................   Passed    0.16 sec
+test 3
+      Start  3: kzgcc_target_O3
+
+3: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "O3" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/O3"
+3: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+3: Test timeout computed to be: 10000000
+3: ok: O3
+ 3/20 Test  #3: kzgcc_target_O3 ..................   Passed    0.15 sec
+test 4
+      Start  4: kzgcc_target_O2-lto
+
+4: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "O2-lto" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/O2-lto"
+4: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+4: Test timeout computed to be: 10000000
+4: ok: O2-lto
+ 4/20 Test  #4: kzgcc_target_O2-lto ..............   Passed    0.20 sec
+test 5
+      Start  5: kzgcc_untouched_unit
+
+5: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "untouched" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/untouched"
+5: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+5: Test timeout computed to be: 10000000
+5: ok: unit without sites is byte-identical at -O2; at -O0 -g it differs only in the DWARF producer string
+ 5/20 Test  #5: kzgcc_untouched_unit .............   Passed    0.11 sec
+test 6
+      Start  6: kzgcc_refuses_runtime
+
+6: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "refuse" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/refuse"
+6: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+6: Test timeout computed to be: 10000000
+6: ok: runtime unit refused and unchanged
+ 6/20 Test  #6: kzgcc_refuses_runtime ............   Passed    1.32 sec
+test 7
+      Start  7: kzgcc_shapes_O0
+
+7: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "shapes-O0" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/shapes_O0"
+7: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+7: Test timeout computed to be: 10000000
+7: ok: shapes-O0
+ 7/20 Test  #7: kzgcc_shapes_O0 ..................   Passed    0.11 sec
+test 8
+      Start  8: kzgcc_shapes_O2
+
+8: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "shapes-O2" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/shapes_O2"
+8: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+8: Test timeout computed to be: 10000000
+8: ok: shapes-O2
+ 8/20 Test  #8: kzgcc_shapes_O2 ..................   Passed    0.13 sec
+test 9
+      Start  9: kzgcc_shapes_O3
+
+9: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "shapes-O3" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/shapes_O3"
+9: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+9: Test timeout computed to be: 10000000
+9: ok: shapes-O3
+ 9/20 Test  #9: kzgcc_shapes_O3 ..................   Passed    0.12 sec
+test 10
+      Start 10: kzgcc_owner_O0
+
+10: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "owner-O0" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/owner_O0"
+10: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+10: Test timeout computed to be: 10000000
+10: ok: owner-O0
+10/20 Test #10: kzgcc_owner_O0 ...................   Passed    0.07 sec
+test 11
+      Start 11: kzgcc_owner_O2
+
+11: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "owner-O2" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/owner_O2"
+11: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+11: Test timeout computed to be: 10000000
+11: ok: owner-O2
+11/20 Test #11: kzgcc_owner_O2 ...................   Passed    0.08 sec
+test 12
+      Start 12: kzgcc_v4_O0
+
+12: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "v4-O0" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/v4_O0"
+12: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+12: Test timeout computed to be: 10000000
+12: ok: v4-O0
+12/20 Test #12: kzgcc_v4_O0 ......................   Passed    0.10 sec
+test 13
+      Start 13: kzgcc_v4_O2
+
+13: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "v4-O2" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/v4_O2"
+13: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+13: Test timeout computed to be: 10000000
+13: ok: v4-O2
+13/20 Test #13: kzgcc_v4_O2 ......................   Passed    0.11 sec
+test 14
+      Start 14: kzgcc_outagg_O0
+
+14: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "outagg-O0" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/outagg_O0"
+14: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+14: Test timeout computed to be: 10000000
+14: ok: outagg-O0
+14/20 Test #14: kzgcc_outagg_O0 ..................   Passed    0.07 sec
+test 15
+      Start 15: kzgcc_outagg_O2
+
+15: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_target_test.sh" "outagg-O2" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc-events" "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/outagg_O2"
+15: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+15: Test timeout computed to be: 10000000
+15: ok: outagg-O2
+15/20 Test #15: kzgcc_outagg_O2 ..................   Passed    0.09 sec
+test 16
+      Start 16: kzgcc_hold_rearm
+
+16: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_hold_test.sh" "rearm" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/merge-check/kz-llvm/tools/kz/kz" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/hold_rearm"
+16: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+16: Test timeout computed to be: 120
+16: ok: rearm (6 control records)
+16/20 Test #16: kzgcc_hold_rearm .................   Passed    0.31 sec
+test 17
+      Start 17: kzgcc_hold_nth
+
+17: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_hold_test.sh" "nth" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/merge-check/kz-llvm/tools/kz/kz" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/hold_nth"
+17: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+17: Test timeout computed to be: 120
+17: ok: nth (6 control records)
+17/20 Test #17: kzgcc_hold_nth ...................   Passed    0.70 sec
+test 18
+      Start 18: kzgcc_hold_defer
+
+18: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_hold_test.sh" "defer" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/merge-check/kz-llvm/tools/kz/kz" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/hold_defer"
+18: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+18: Test timeout computed to be: 120
+18: ok: defer (4 control records)
+18/20 Test #18: kzgcc_hold_defer .................   Passed    0.20 sec
+test 19
+      Start 19: kzgcc_hold_caller
+
+19: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_hold_test.sh" "caller" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/merge-check/kz-llvm/tools/kz/kz" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/hold_caller"
+19: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+19: Test timeout computed to be: 120
+19: ok: caller (3 control records)
+19/20 Test #19: kzgcc_hold_caller ................   Passed    0.30 sec
+test 20
+      Start 20: kzgcc_hold_refuse
+
+20: Test command: /usr/bin/bash "/home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/tests/run_hold_test.sh" "refuse" "/usr/bin/gcc" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so" "/home/user/work/instr/kzgcc-0.5/plugin-build/kzrt" "/home/user/work/merge-check/kz-llvm/tools/kz/kz" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "/home/user/work/instr/kzgcc-0.5/plugin-build/tests/hold_refuse"
+20: Working Directory: /home/user/work/instr/kzgcc-0.5/plugin-build/tests
+20: Test timeout computed to be: 120
+20: ok: refuse (2 control records)
+20/20 Test #20: kzgcc_hold_refuse ................   Passed    0.22 sec
+
+100% tests passed, 0 tests failed out of 20
+
+Total Test time (real) =   4.68 sec

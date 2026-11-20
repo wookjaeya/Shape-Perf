@@ -1,0 +1,15 @@
+facts-view 1
+[loopdefs] 13
+  loop 13 cfe/modules/es/fsw/src/cfe_es_apps.c:573:5 in CFE_ES_GetTaskFunction recognised form flag+value {under-lock,call-result} predicate (and (ne (call-result CFE_ES_GetTaskRecordByContext) 0) (and (call-result CFE_ResourceId_IsDefined (seq field:CFE_ES_TaskRecord_t.AppId)) (ne field:CFE_ES_TaskRecord_t.EntryFunc 0)))
+    ReturnCode@563:31 before-loop at cfe/modules/es/fsw/src/cfe_es_apps.c:569:16 recognised flag {under-lock} value 3288334359
+    ReturnCode@563:31 in-body at cfe/modules/es/fsw/src/cfe_es_apps.c:584:28 recognised flag {under-lock} value 0 guard (and (ne local:TaskRecPtr 0) (and (call-result CFE_ResourceId_IsDefined (seq field:CFE_ES_TaskRecord_t.AppId)) (ne local:EntryFunc 0)))
+    EntryFunc@562:31 before-loop at cfe/modules/es/fsw/src/cfe_es_apps.c:571:16 recognised value {under-lock} value 0
+    EntryFunc@562:31 in-body at cfe/modules/es/fsw/src/cfe_es_apps.c:581:23 recognised value {under-lock} value field:CFE_ES_TaskRecord_t.EntryFunc guard (ne local:TaskRecPtr 0)
+    TaskRecPtr@561:31 in-body at cfe/modules/es/fsw/src/cfe_es_apps.c:578:20 recognised value {under-lock,call-result} value (call-result CFE_ES_GetTaskRecordByContext)
+  loop 185 osal/src/os/posix/src/os-impl-tasks.c:759:5 in OS_TaskDelay_Impl refused-unresolved {}
+    status@747:21 in-body at osal/src/os/posix/src/os-impl-tasks.c:761:16 refused-unresolved {} value (call-result clock_nanosleep (seq 1 (seq 1 (seq (addr local:sleep_end) (seq 0)))))
+  loop 194 osal/src/os/shared/src/osapi-common.c:367:5 in OS_DeleteAllObjects refused-address-taken {}
+    ObjectCount@359:12 in-body at osal/src/os/shared/src/osapi-common.c:369:21 refused-address-taken {} value 0
+  loop 246 psp/fsw/modules/linux_sysmon/linux_sysmon.c:341:17 in linux_sysmon_Start@psp/fsw/modules/linux_sysmon/linux_sysmon.c:304 refused-unresolved {}
+    DelayCount@307:13 before-loop at psp/fsw/modules/linux_sysmon/linux_sysmon.c:309:16 refused-unresolved {} value 0
+    DelayCount@307:13 in-body at psp/fsw/modules/linux_sysmon/linux_sysmon.c:343:21 refused-unresolved {}

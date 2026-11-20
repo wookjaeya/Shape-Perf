@@ -1,0 +1,15 @@
+compare_on c1_pre_tx: only declared classes
+renamed absolute positions of type names (OFF -> the option's spelling): 99 occurrences of 1 paths
+  /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cmd_c -> <cf>/fsw/src/cf_cmd_c (99)
+atype-added	atype	8646
+basis-added	basis	6
+basis-changed	basis	1
+file-added	files	118
+fstatus-changed	fstatus	673
+locs-changed	locs	112
+loop-note	loops	0
+new-section	argtypes	17715
+new-section	ftypes	1817
+new-section	objaccess	6712
+outcall-added	outcalls	147
+writer-added	writers	60

@@ -1,0 +1,14 @@
+# The C library the C1 and C5 builds link (read 2026-11-16: readelf -d / -l of the executables, the loader cache, the package database)
+executable	ELF	NEEDED	interpreter
+c1_build/pre/1df262a/exe/tx/core-tx (reference C1)	64-bit x86-64 PIE	libc.so.6	/lib64/ld-linux-x86-64.so.2
+instr/gcc/f1/c1/pre_1df262a/ws/exe/tx/core-tx (W6 derived C1)	64-bit x86-64 PIE	libc.so.6	/lib64/ld-linux-x86-64.so.2
+c5tools/build/641/keep/.../exe/core-linux.bin (reference C5 6.4.1)	32-bit i386 PIE	libc.so.6	/lib/ld-linux.so.2
+c5tools/build/641/b/.../exe/core-linux.bin (derived C5 6.4.1)	32-bit i386 PIE	libc.so.6	/lib/ld-linux.so.2
+# loader cache (ldconfig -p): libc.so.6 (libc6,x86-64) => /lib/x86_64-linux-gnu/libc.so.6; libc.so.6 (libc6) => /lib32/libc.so.6
+library	sha256	version string	package
+/usr/lib/x86_64-linux-gnu/libc.so.6	3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf	GNU C Library (Ubuntu GLIBC 2.39-0ubuntu8.9) stable release version 2.39.	libc6:amd64 2.39-0ubuntu8.9
+/usr/lib32/libc.so.6 (= /lib32/libc.so.6)	50deb7759edba42249e5e9b426f7944d003825a758aa1727802508ba3ed10211	GNU C Library (Ubuntu GLIBC 2.39-0ubuntu8.9) stable release version 2.39.	libc6-i386 2.39-0ubuntu8.9
+# Both targets link glibc 2.39 of the distribution package 2.39-0ubuntu8.9 (64-bit for C1, 32-bit for C5).  The local C library copy
+# W/c5/ref/glibc holds upstream pthread_create.c of 2.12, 2.17 and 2.39 (sha256.txt there); the distribution patches of 2.39-0ubuntu8.9
+# are not in that copy [unverified whether they touch pthread_create].  The C1 basis does not read system libraries
+# (T8CF/c1_pre_tx/NP/basis.txt:71 closure.binding_model).

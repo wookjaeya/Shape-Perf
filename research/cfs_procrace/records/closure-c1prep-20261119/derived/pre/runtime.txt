@@ -1,0 +1,12 @@
+# build_runtime.sh 2026-11-19T08:51:16Z: kairos/runtime at /home/user/Shape-Perf/research/cfs_procrace/kairos/runtime, standalone, /usr/bin/gcc
+build identity: backend="kzgcc 0.4 (gcc-plugin)" compiler="gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0" target="x86_64-linux-gnu" manifest=/home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs sha256 69a278b019281fd3015226b2ac188be0702613eb2a950fc12627c2603b53c9a0
+tool capacities: the runtime defaults (KZ_RT_DEFINES empty; recorded in the dump's RUN/RUNX records)
+cache CMAKE_BUILD_TYPE:STRING=
+cache CMAKE_C_COMPILER:STRING=/usr/bin/gcc
+cache CMAKE_C_FLAGS:STRING=
+libkzrt.a sha256 7e1f2c47b25ed89f9aafe5de5ef43ede8cc8331455813b8b212727f3a5623465
+libkzrt-posix.a sha256 70b8853651ab9c12115fb731a5b50e83b79ca564d37369e0ce7136729091cd6d
+CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o sha256 813b529cdb56c2757898fc30760cd4ae43eec7e2458cd9b5916f9a5b034ba667
+CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o sha256 be4edb60911604b67dae060c312f3de0f963a0fd91db5dbb85479c7f08afd265
+kz-rt-dump sha256 d55a90811929106d8298bcfef96c13cda2a651ce4994b274046c346f5f138db1
+rc=0

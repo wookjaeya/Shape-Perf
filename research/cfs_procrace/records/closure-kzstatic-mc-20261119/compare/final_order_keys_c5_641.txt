@@ -1,0 +1,2 @@
+diffkinds old_lines=338 new_lines=339 only_old=0 only_new=1 labels=1
+label removed=0 added=1 0|rules with object access

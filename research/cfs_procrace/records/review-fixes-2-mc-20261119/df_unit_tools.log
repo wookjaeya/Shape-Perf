@@ -1,0 +1,7 @@
+# space_guard.sh kind=unit-tools need=30000000 floor=314572800 interval=2 cmd=bash -c bash /home/user/Shape-Perf/research/cfs_procrace/env/tools/tests/run_unit.sh > /home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/unit_tools.txt 2>&1
+start 2026-11-19T01:55:56.300Z free=1258950656 threshold=344572800
+sample 2026-11-19T01:55:56.304Z 1258946560
+sample 2026-11-19T01:55:58.310Z 1258909696
+sample 2026-11-19T01:56:00.321Z 1257926656
+sample 2026-11-19T01:56:02.327Z 1255792640
+end 2026-11-19T01:56:04.335Z kind=unit-tools verdict=completed rc=0 free=1258905600 lowest=1255792640 dip=3158016 change=-45056

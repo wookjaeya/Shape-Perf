@@ -1,0 +1,157 @@
+rm -f "build-native_std/stamp.runtest"
+env  make --no-print-directory -f /home/user/work/procrace/cfs_ref/cFS/target-rules.mk \
+	CFG=native_std GOAL=native_std.runtest STAMPFILE=build-native_std/stamp.runtest all
+(cd build-native_std/native/default_cpu1 && ctest --show-only=json-v1) > "build-native_std/test-list.json.tmp1"
+jq '[.tests[] | { "name":.name, "command":.command[0], "workdir":(.properties[] | if .name == "WORKING_DIRECTORY" then .value else empty end) } ]' \
+	"build-native_std/test-list.json.tmp1" > "build-native_std/test-list.json.tmp2"
+rm -f "build-native_std/test-list.json.tmp1"
+mv -v "build-native_std/test-list.json.tmp2" "build-native_std/test-list.json"
+renamed 'build-native_std/test-list.json.tmp2' -> 'build-native_std/test-list.json'
+touch "build-native_std/stamp.checktest"
+mkdir -p "build-native_std/test-results"
+jq -r '.[] | if .workdir then "build-native_std/test-results/" + .name + ".log: WORKDIR=" + .workdir else empty end' "build-native_std/test-list.json" > "build-native_std/test-deps.mk.tmp"
+jq -r '.[] | if .command then "build-native_std/test-results/" + .name + ".log: " + .command else empty end' "build-native_std/test-list.json" >> "build-native_std/test-deps.mk.tmp"
+jq -r '.[] | "TEST_OUTPUT_FILES += build-native_std/test-results/" + .name + ".log"' "build-native_std/test-list.json" >> "build-native_std/test-deps.mk.tmp"
+mv -v "build-native_std/test-deps.mk.tmp" "build-native_std/test-deps.mk"
+renamed 'build-native_std/test-deps.mk.tmp' -> 'build-native_std/test-deps.mk'
+make --no-print-directory -f /home/user/work/procrace/cfs_ref/cFS/native_std-test.mk all_tests
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-binsem-testrunner) > "build-native_std/test-results/coverage-vxworks-binsem.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-binsem.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-binsem.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-common-testrunner) > "build-native_std/test-results/coverage-vxworks-common.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-common.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-common.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-console-testrunner) > "build-native_std/test-results/coverage-vxworks-console.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-console.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-console.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-countsem-testrunner) > "build-native_std/test-results/coverage-vxworks-countsem.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-countsem.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-countsem.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-dirs-globals-testrunner) > "build-native_std/test-results/coverage-vxworks-dirs-globals.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-dirs-globals.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-dirs-globals.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-files-testrunner) > "build-native_std/test-results/coverage-vxworks-files.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-files.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-files.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-filesys-testrunner) > "build-native_std/test-results/coverage-vxworks-filesys.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-filesys.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-filesys.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-idmap-testrunner) > "build-native_std/test-results/coverage-vxworks-idmap.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-idmap.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-idmap.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-heap-testrunner) > "build-native_std/test-results/coverage-vxworks-heap.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-heap.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-heap.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-loader-testrunner) > "build-native_std/test-results/coverage-vxworks-loader.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-loader.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-loader.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-mutex-testrunner) > "build-native_std/test-results/coverage-vxworks-mutex.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-mutex.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-mutex.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-network-testrunner) > "build-native_std/test-results/coverage-vxworks-network.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-network.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-network.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-queues-testrunner) > "build-native_std/test-results/coverage-vxworks-queues.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-queues.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-queues.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-shell-testrunner) > "build-native_std/test-results/coverage-vxworks-shell.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-shell.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-shell.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-sockets-testrunner) > "build-native_std/test-results/coverage-vxworks-sockets.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-sockets.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-sockets.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-symtab-testrunner) > "build-native_std/test-results/coverage-vxworks-symtab.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-symtab.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-symtab.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-tasks-testrunner) > "build-native_std/test-results/coverage-vxworks-tasks.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-tasks.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-tasks.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-timebase-testrunner) > "build-native_std/test-results/coverage-vxworks-timebase.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-timebase.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-timebase.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-posix-gettime-testrunner) > "build-native_std/test-results/coverage-vxworks-posix-gettime.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-posix-gettime.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-posix-gettime.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-posix-io-testrunner) > "build-native_std/test-results/coverage-vxworks-posix-io.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-posix-io.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-posix-io.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-posix-files-testrunner) > "build-native_std/test-results/coverage-vxworks-posix-files.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-posix-files.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-posix-files.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-posix-file-allocate-testrunner) > "build-native_std/test-results/coverage-vxworks-posix-file-allocate.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-posix-file-allocate.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-posix-file-allocate.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-posix-dirs-testrunner) > "build-native_std/test-results/coverage-vxworks-posix-dirs.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-posix-dirs.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-posix-dirs.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-console-bsp-testrunner) > "build-native_std/test-results/coverage-vxworks-console-bsp.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-console-bsp.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-console-bsp.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-bsd-select-testrunner) > "build-native_std/test-results/coverage-vxworks-bsd-select.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-bsd-select.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-bsd-select.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-bsd-sockets-testrunner) > "build-native_std/test-results/coverage-vxworks-bsd-sockets.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-bsd-sockets.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-bsd-sockets.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-bsd-sockets-dns-testrunner) > "build-native_std/test-results/coverage-vxworks-bsd-sockets-dns.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-bsd-sockets-dns.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-bsd-sockets-dns.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-bsd-sockets-no-dns-testrunner) > "build-native_std/test-results/coverage-vxworks-bsd-sockets-no-dns.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-bsd-sockets-no-dns.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-bsd-sockets-no-dns.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-no-loader-testrunner) > "build-native_std/test-results/coverage-vxworks-no-loader.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-no-loader.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-no-loader.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-no-shell-testrunner) > "build-native_std/test-results/coverage-vxworks-no-shell.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-no-shell.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-no-shell.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-no-symtab-testrunner) > "build-native_std/test-results/coverage-vxworks-no-symtab.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-no-symtab.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-no-symtab.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-no-network-gethostname-testrunner) > "build-native_std/test-results/coverage-vxworks-no-network-gethostname.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-no-network-gethostname.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-no-network-gethostname.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-no-network-gethostid-testrunner) > "build-native_std/test-results/coverage-vxworks-no-network-gethostid.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-no-network-gethostid.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-no-network-gethostid.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-no-sockets-testrunner) > "build-native_std/test-results/coverage-vxworks-no-sockets.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-no-sockets.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-no-sockets.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-no-condvar-testrunner) > "build-native_std/test-results/coverage-vxworks-no-condvar.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-no-condvar.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-no-condvar.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/vxworks/ && ./coverage-vxworks-no-file-allocate-testrunner) > "build-native_std/test-results/coverage-vxworks-no-file-allocate.log.tmp"
+renamed 'build-native_std/test-results/coverage-vxworks-no-file-allocate.log.tmp' -> 'build-native_std/test-results/coverage-vxworks-no-file-allocate.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-binsem-testrunner) > "build-native_std/test-results/coverage-shared-binsem.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-binsem.log.tmp' -> 'build-native_std/test-results/coverage-shared-binsem.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-clock-testrunner) > "build-native_std/test-results/coverage-shared-clock.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-clock.log.tmp' -> 'build-native_std/test-results/coverage-shared-clock.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-common-testrunner) > "build-native_std/test-results/coverage-shared-common.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-common.log.tmp' -> 'build-native_std/test-results/coverage-shared-common.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-condvar-testrunner) > "build-native_std/test-results/coverage-shared-condvar.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-condvar.log.tmp' -> 'build-native_std/test-results/coverage-shared-condvar.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-countsem-testrunner) > "build-native_std/test-results/coverage-shared-countsem.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-countsem.log.tmp' -> 'build-native_std/test-results/coverage-shared-countsem.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-dir-testrunner) > "build-native_std/test-results/coverage-shared-dir.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-dir.log.tmp' -> 'build-native_std/test-results/coverage-shared-dir.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-errors-testrunner) > "build-native_std/test-results/coverage-shared-errors.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-errors.log.tmp' -> 'build-native_std/test-results/coverage-shared-errors.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-file-testrunner) > "build-native_std/test-results/coverage-shared-file.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-file.log.tmp' -> 'build-native_std/test-results/coverage-shared-file.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-filesys-testrunner) > "build-native_std/test-results/coverage-shared-filesys.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-filesys.log.tmp' -> 'build-native_std/test-results/coverage-shared-filesys.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-heap-testrunner) > "build-native_std/test-results/coverage-shared-heap.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-heap.log.tmp' -> 'build-native_std/test-results/coverage-shared-heap.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-idmap-testrunner) > "build-native_std/test-results/coverage-shared-idmap.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-idmap.log.tmp' -> 'build-native_std/test-results/coverage-shared-idmap.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-module-testrunner) > "build-native_std/test-results/coverage-shared-module.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-module.log.tmp' -> 'build-native_std/test-results/coverage-shared-module.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-mutex-testrunner) > "build-native_std/test-results/coverage-shared-mutex.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-mutex.log.tmp' -> 'build-native_std/test-results/coverage-shared-mutex.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-network-testrunner) > "build-native_std/test-results/coverage-shared-network.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-network.log.tmp' -> 'build-native_std/test-results/coverage-shared-network.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-printf-testrunner) > "build-native_std/test-results/coverage-shared-printf.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-printf.log.tmp' -> 'build-native_std/test-results/coverage-shared-printf.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-queue-testrunner) > "build-native_std/test-results/coverage-shared-queue.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-queue.log.tmp' -> 'build-native_std/test-results/coverage-shared-queue.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-rwlock-testrunner) > "build-native_std/test-results/coverage-shared-rwlock.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-rwlock.log.tmp' -> 'build-native_std/test-results/coverage-shared-rwlock.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-select-testrunner) > "build-native_std/test-results/coverage-shared-select.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-select.log.tmp' -> 'build-native_std/test-results/coverage-shared-select.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-sockets-testrunner) > "build-native_std/test-results/coverage-shared-sockets.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-sockets.log.tmp' -> 'build-native_std/test-results/coverage-shared-sockets.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-task-testrunner) > "build-native_std/test-results/coverage-shared-task.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-task.log.tmp' -> 'build-native_std/test-results/coverage-shared-task.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-timebase-testrunner) > "build-native_std/test-results/coverage-shared-timebase.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-timebase.log.tmp' -> 'build-native_std/test-results/coverage-shared-timebase.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-time-testrunner) > "build-native_std/test-results/coverage-shared-time.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-time.log.tmp' -> 'build-native_std/test-results/coverage-shared-time.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/unit-test-coverage/shared/ && ./coverage-shared-version-testrunner) > "build-native_std/test-results/coverage-shared-version.log.tmp"
+renamed 'build-native_std/test-results/coverage-shared-version.log.tmp' -> 'build-native_std/test-results/coverage-shared-version.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./bin-sem-test) > "build-native_std/test-results/bin-sem-test.log.tmp"
+renamed 'build-native_std/test-results/bin-sem-test.log.tmp' -> 'build-native_std/test-results/bin-sem-test.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./bin-sem-timeout-test) > "build-native_std/test-results/bin-sem-timeout-test.log.tmp"
+renamed 'build-native_std/test-results/bin-sem-timeout-test.log.tmp' -> 'build-native_std/test-results/bin-sem-timeout-test.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./condvar-test) > "build-native_std/test-results/condvar-test.log.tmp"
+renamed 'build-native_std/test-results/condvar-test.log.tmp' -> 'build-native_std/test-results/condvar-test.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./count-sem-test) > "build-native_std/test-results/count-sem-test.log.tmp"
+renamed 'build-native_std/test-results/count-sem-test.log.tmp' -> 'build-native_std/test-results/count-sem-test.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./count-sem-timeout-test) > "build-native_std/test-results/count-sem-timeout-test.log.tmp"
+renamed 'build-native_std/test-results/count-sem-timeout-test.log.tmp' -> 'build-native_std/test-results/count-sem-timeout-test.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./file-api-test) > "build-native_std/test-results/file-api-test.log.tmp"
+renamed 'build-native_std/test-results/file-api-test.log.tmp' -> 'build-native_std/test-results/file-api-test.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./file-sys-add-fixed-map-api-test) > "build-native_std/test-results/file-sys-add-fixed-map-api-test.log.tmp"
+renamed 'build-native_std/test-results/file-sys-add-fixed-map-api-test.log.tmp' -> 'build-native_std/test-results/file-sys-add-fixed-map-api-test.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./idmap-api-test) > "build-native_std/test-results/idmap-api-test.log.tmp"
+renamed 'build-native_std/test-results/idmap-api-test.log.tmp' -> 'build-native_std/test-results/idmap-api-test.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./mutex-test) > "build-native_std/test-results/mutex-test.log.tmp"
+renamed 'build-native_std/test-results/mutex-test.log.tmp' -> 'build-native_std/test-results/mutex-test.log'
+(cd /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal/tests/ && ./network-api-test) > "build-native_std/test-results/network-api-test.log.tmp"
+make[2]: *** [local-test.mk:30: build-native_std/test-results/network-api-test.log] Error 1
+make[1]: *** [/home/user/work/procrace/cfs_ref/cFS/target-rules.mk:83: build-native_std/stamp.runtest] Error 2
+make: *** [Makefile:64: native_std.runtest] Error 2

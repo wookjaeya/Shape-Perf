@@ -1,0 +1,226 @@
+# sites.kzp -- the probe plan of the perf-sample observer for profile cfs-v7.0.1 (sub-gate S1-R2,
+# Architecture/spec/SPEC_FINAL.md section 9.3).
+#
+# This file is DATA for `kz anchor` and `kz observe`.  The observer contains no knowledge of the
+# framework; everything it knows about the framework is here, each entry with the lines it was read
+# from.  The format is the observer's own ("kzp-observe 1", probe/plan/profile.hpp); it is not the
+# profile language of the readiness specification (the phi files next to this directory), and it
+# does not replace it: the same facts are stated there for the checker, here for the probes.
+#
+# Source roots: `kz anchor ... --source-root <the pinned bundle>`.  The paths below are relative to
+# the bundle's root, as in ../01_prov.kzp, and the sha256 values are those of the cited lines (each
+# followed by LF), the value of  sed -n 'A,Bp' FILE | sha256sum.  `kz anchor` recomputes them and
+# refuses to build a basis when the text differs.
+#
+# What each site yields (the four raw slots a0..a3 of an event; kz_raw.h):
+#   entry sites   argument registers of the System V x86-64 call at the probed address, which is the
+#                 instruction after `endbr64`: the arguments are intact and the word at the top of the
+#                 stack is the return address (a3).
+#   return sites  the return value (rax) and the instruction pointer, which is the return address.
+# The probes sit at function entry (+4): the same address for the entry and the return site.
+#
+# Nothing here selects a condition of the experiment.  Which sites exist is the plan; the number of
+# runs, the stop method and the user are the caller's (docs/observer.md).
+#
+# Sites 0-7 are the plan of the S1-R2 development run s1r2_p1 (unchanged, so that their ids stay).
+# Sites 8-20 (X-03, REV13 change table C-24, W2 2026-10-24) observe the R2 registration and writer
+# effects: EVS registration (clear and publish of the slot), the registry linearization point of
+# the send function, the AppState raise, and the App-record writers of the core start (memset of
+# the ES global, reserve, publish, failure clear).  Sites 21-25 carry the creation-side evidence of
+# app_owner (SPEC 1.2 "Creating application", 5.7 items 2 and 4, ADR-056): the start-task request
+# with the application it names, the child-task request, and the id the spawn call assigns where it
+# passes it to the new thread.  Sites 26-29 (R2 remainder, 2026-10-24) give the location the AppID of the
+# send function was read from and the actor that wrote that location: the SB task's store of its own id at
+# cfe_sb_task.c:138 as the profile's publication site `sb_publication` (the same instruction as site 2, which
+# stays for the counts), and the capture point of the send's value condition at the three SB call sites that
+# pass CFE_SB_Global.AppId and that ES and EVS reach before that store (cases/R2.md section 5;
+# plan/proof_status_R2.md section 12).  Sites 30-34 (R2 state-based round, 2026-10-24) observe the remaining writers
+# of the EVS registry slots and of the SB identity cell that the static closure counts: the memsets of the EVS and
+# SB global objects in their EarlyInit (called through the core module table's function pointers, so the point is
+# the memset itself) and the free of a slot in CFE_EVS_CleanUpApp, with its call and return for the AppId it is
+# given.  The point sites are named after the linearization points of the
+# phi profile (OP.LABEL, or the shared site), so that `kz replay` maps them; plan/proof_status_R2.md
+# section 12 is the trace table (site -> source line -> effect -> conjunct).  Every line below was
+# re-read in the tree the R2 binary was built from (cFS 088b2fa8, build-native_std; the hashes are
+# those of 01_prov.kzp where both cite the same lines).
+kzp-observe 1
+binary core-cpu1
+
+# ---- cited text ---------------------------------------------------------------------------------
+
+# The event-send API: what the arguments mean (caller side) and the signature.
+prov evs_h_appid_note tier=contract-backed kind=api_doc side=caller file="cfe/modules/core_api/fsw/inc/cfe_evs.h" lines=168-172 cite="the AppId passed to the send function must be a registered application or core service" sha256=acb3967b445672203af748f7bc65f2f3a91187ef107a607b1645420e1570f1ed
+prov evs_h_proto tier=contract-backed kind=api_doc side=supplier file="cfe/modules/core_api/fsw/inc/cfe_evs.h" lines=205-209 cite="prototype: (uint16 EventID, enum EventType, AppId AppID, const char *Spec, ...) returns a status" sha256=a8ed318d106c639ac3a7300a63e73d45912fe97ea2a6a4907cc0485b50630ebd
+prov evs_c_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=169-214 cite="the definition: looks the AppId up and returns CFE_EVS_APP_ILLEGAL_APP_ID / CFE_EVS_APP_NOT_REGISTERED / CFE_EVS_APP_SQUELCHED or CFE_SUCCESS" sha256=422b8b94579a037d29e42f7a463aa06fb81617654aa755543912b1704a7bdb40
+
+# The SB task stores its own application id.
+prov sb_task_138 tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_task.c" lines=138-138 cite="CFE_ES_GetAppID(&CFE_SB_Global.AppId): the store of the SB task's id; the status of the call is ignored" sha256=71651783668ec441e89a38086dd8ae4fd8e27ceee108596a421c2f6d7675773b
+
+# The main task's wait for the started applications.
+prov es_sync_call tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=833-835 cite="the core application start waits with CFE_ES_MainTaskSyncDelay(CFE_ES_AppState_RUNNING, ...)" sha256=5fa85fe9c94982e9a761ce74878418437eb441a3ed8409e72eb90c723317386b
+prov es_sync_def tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=860-918 cite="the definition: (uint32 AppStateId, uint32 TimeOutMilliseconds) polls the application table and returns a status" sha256=f60f77b3ca1d27093d055e021fda88f108fb902d18b908fe152d282ac706cf12
+
+# Task creation and the first function a new task runs.
+prov os_create_sig tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-task.c" lines=164-170 cite="OS_TaskCreate(task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags)" sha256=087fd9452b5371ea83d7c093a05b31b7ed91f248a2c91ce262a788e253097756
+prov os_entry_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-task.c" lines=124-138 cite="OS_TaskEntryPoint(task_id) runs first in the new task, then calls the task's entry function" sha256=d5a27a7b41d28db45fac53fa108761c7b9073e78162ca354a58b49e9f975d2cb
+
+# The membership of these sites in sub-gate S1-R2.  The SPEC is under revision: the line is cited
+# but not hashed (the root `spec` is not given to `kz anchor`).
+prov spec_s1r2 tier=researcher kind=researcher file="Architecture/spec/SPEC_FINAL.md" lines=2818-2818 root=spec cite="S1-R2: probes at the send function's entry and return, at the SB task's id store, at the main task's sync-delay exits and at the core task spawns" authored="Kairos K2, from SPEC_FINAL 9.3 as read on 2026-10-15"
+
+# ---- sites --------------------------------------------------------------------------------------
+
+# The event-send function: which event, of which type, for which application id (a2); the status it returns.
+site evs.send.entry entry func=CFE_EVS_SendEventWithAppID prov=evs_h_proto s0=rdi:u16:event_id s1=rsi:u32:event_type s2=rdx:u32:app_id s3=stack+0:u64:return_address
+site evs.send.ret   ret   func=CFE_EVS_SendEventWithAppID prov=evs_c_def   s0=rax:u32:status s3=ip:u64:return_address
+
+# The line after the call that stores the SB task's id.
+site sb.appid.store point at=cfe_sb_task.c:138 after-call=CFE_ES_GetAppID prov=sb_task_138 s0=rax:u32:status
+
+# The main task's wait for the applications to reach a state.
+site es.sync.entry entry func=CFE_ES_MainTaskSyncDelay prov=es_sync_def s0=rdi:u32:app_state s1=rsi:u32:timeout_msec s3=stack+0:u64:return_address
+site es.sync.ret   ret   func=CFE_ES_MainTaskSyncDelay prov=es_sync_def s0=rax:u32:status s3=ip:u64:return_address
+
+# Task creation (creator side) and the first function of the new task (child side): the identity join.
+site osal.task_create.entry entry func=OS_TaskCreate decoder=spawn-create prov=os_create_sig s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=r9:u32:priority s3=stack+0:u64:return_address
+site osal.task_create.ret   ret   func=OS_TaskCreate decoder=spawn-return prov=os_create_sig s0=rax:u32:status s3=ip:u64:return_address
+site osal.task_entry        entry func=OS_TaskEntryPoint decoder=thread-entry prov=os_entry_def s0=rdi:u32:task_id s3=stack+0:u64:return_address
+
+# ---- X-03: registration and writer effects (W2) --------------------------------------------------
+
+prov evs_register_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=42-111 cite="CFE_EVS_Register: the caller's slot is found by its own AppID, cleared (memset), filled, then published by EVS_AppDataSetUsed; returns a status" sha256=fd114a9c99e4c494f344ce1556a7793c24cbc486acf5d807768989a255851ba4
+prov evs_reg_memset tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=56-56 cite="memset(AppDataPtr, 0, sizeof(EVS_AppData_t)): the slot's AppID becomes 0 (unregistered)" sha256=530ae464148c9cf04d9a7e768afe38132d5e458e3f0d922c0043cefdd1b459d5
+prov evs_reg_publish tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=106-106 cite="EVS_AppDataSetUsed(AppDataPtr, AppID): the slot is published (registered)" sha256=1ac5045232ef7f06b036927192dcbcd63efc5aca5045474d1ea54f2c3b34a256
+prov evs_setused_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_utils.h" lines=134-137 cite="EVS_AppDataSetUsed stores the AppID into the slot" sha256=c8082b6d41956219e84f94b0db94dff2a5cafab4da68b284d30b0ca58f58aeba
+prov evs_send_ismatch tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=185-194 cite="the send function looks the slot up by AppID and, if the AppID is legal, tests EVS_AppDataIsMatch: the registry check" sha256=8cdf5d5177a0cb2cf4bcd29916ebe0ca7d60e360ee51e3034247a2a67028f15c
+prov evs_ismatch_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_utils.h" lines=164-167 cite="EVS_AppDataIsMatch reads the slot's AppID and compares it with the given one; the result is a bool" sha256=3c44baf17a538b4cc2d94a8e5d891e4ea4c8d8166e2282f9b4b4a90db0be361d
+prov es_wait_def tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=514-576 cite="CFE_ES_WaitForSystemState(MinSystemState, TimeOutMilliseconds): under the ES lock the caller's AppState is raised to the level of its type and the requested state" sha256=0b5c87b0b606b003740a6c7221eae54475469548d4c1055b7df966078a077052
+prov es_wait_raise tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=571-574 cite="if (AppRecPtr->AppState < RequiredAppState) AppRecPtr->AppState = RequiredAppState: the store of line 573 has no call on its line" sha256=14f9399df11b2fbc9de57f3ab748c944f7d647a5af467d1368f0471516ff56a6
+prov es_main_memset tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=82-82 cite="memset(&CFE_ES_Global, 0, ...): every App record free, every AppState undefined" sha256=a99fd434cae6051efd0cec4ff53b5898f5b918bc448f6ab03e0f96e8dd1e269f
+prov es_core_reserve tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=803-803 cite="CFE_ES_AppRecordSetUsed(AppRecPtr, CFE_RESOURCEID_RESERVED): the core App record is reserved" sha256=a71084d65ee3a47f72d884e4524fc475ff14bad3a08d9187777984029566cd7f
+prov es_core_publish tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=816-818 cite="on success the record is published with CFE_ES_AppRecordSetUsed(AppRecPtr, PendingAppId)" sha256=d4fccccadf82f13ca421dfa045d656e61e054bcabc584caa2d1c94286defe771
+prov es_core_clear tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=821-824 cite="on failure the record is cleared with memset(AppRecPtr, 0, ...)" sha256=6903d7db9935050fc65d64c2cfb7d77a7e296fd0ea0851a50ff86bda8603705a
+
+# The send function's call and return are sites 0 and 1; the registry check lies between them.
+site evs.register.entry entry func=CFE_EVS_Register prov=evs_register_def s3=stack+0:u64:return_address
+site evs.register.ret   ret   func=CFE_EVS_Register prov=evs_register_def s0=rax:u32:status s3=ip:u64:return_address
+site CFE_EVS_Register.clear_slot point at=cfe_evs.c:56 after-call=memset prov=evs_reg_memset s0=rax:u64:slot_ptr
+# The return site after EVS_AppDataSetUsed is the join of the function's return paths (kz anchor
+# refuses it): the point is the start of the line, before the call.
+site CFE_EVS_Register.register   point at=cfe_evs.c:106 line-start prov=evs_reg_publish
+site CFE_EVS_SendEventWithAppID.slot_registered point at=cfe_evs.c:190 after-call=EVS_AppDataIsMatch prov=evs_send_ismatch s0=rax:u8:is_match
+site es.wait.entry entry func=CFE_ES_WaitForSystemState prov=es_wait_def s0=rdi:u32:min_system_state s1=rsi:u32:timeout_milliseconds s3=stack+0:u64:return_address
+site es.wait.ret   ret   func=CFE_ES_WaitForSystemState prov=es_wait_def s0=rax:u32:status s3=ip:u64:return_address
+# Before the store of line 573 (the branch that raises is taken).  The raised level is a register at
+# the store, not an argument: this backend does not read it.
+site CFE_ES_WaitForSystemState.raise_state point at=cfe_es_api.c:573 line-start prov=es_wait_raise
+# One memset, two effects of the phi profile (records and states): two sites at one address.
+site CFE_ES_Main.reset_records point at=cfe_es_start.c:82 after-call=memset prov=es_main_memset s0=rax:u64:dest
+site CFE_ES_Main.reset_states  point at=cfe_es_start.c:82 after-call=memset prov=es_main_memset s0=rax:u64:dest
+site CFE_ES_CreateObjects.reserve_core point at=cfe_es_start.c:803 after-call=CFE_ES_AppRecordSetUsed prov=es_core_reserve
+site CFE_ES_CreateObjects.publish_core point at=cfe_es_start.c:818 after-call=CFE_ES_AppRecordSetUsed prov=es_core_publish
+site core_clear point at=cfe_es_start.c:823 line-start prov=es_core_clear
+
+# ---- creation-side evidence of app_owner (W2) ----------------------------------------------------
+
+prov es_startapptask_def tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=649-670 cite="CFE_ES_StartAppTask(TaskIdPtr, TaskName, EntryFunc, Params, ParentAppId) makes the one OS_TaskCreate call of the task" sha256=0a0feec4798f1c0c2a65acc62e61d36cf5767edf059797128c9aaa63b981b5a5
+prov es_taskrecord_owner tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=694-694 cite="TaskRecPtr->AppId = ParentAppId: the task belongs to the application the request named" sha256=4d52e89ba819471d63cbe981b034d113262933379e15b77a2a32a2591f0cf85f
+prov es_core_starttask tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=810-814 cite="the core start passes the AppId it reserved (PendingAppId) as ParentAppId" sha256=eba07006985ab60b0e7ddb73c23e25f5f7c716ae1a3e976e35a59efa6d5ae1b7
+prov es_appcreate_starttask tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=849-854 cite="CFE_ES_AppCreate passes the AppId it reserved (PendingResourceId) as ParentAppId" sha256=9f2aa6ba6dae3501cf857465b06c621514f1a12d19f5f6ee15651dfaf259c750
+prov es_childtask_sig tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=1202-1208 cite="CFE_ES_CreateChildTask(TaskIdPtr, TaskName, FunctionPtr, StackPtr, StackSize, Priority, Flags): no application argument" sha256=23239ec1f7fb685aaf7271041021df084eb07837d96a0604b183737870402769
+prov es_childtask_owner tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=1255-1290 cite="the parent application is the caller's own (an App-record lookup by context, refused from a child task); it is passed to CFE_ES_StartAppTask as ParentAppId" sha256=01f1c6088bb55beb4bf0f0842c2da639941680b9558a838abcd25b9c70806904
+prov osal_taskcreate_calls_impl tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-task.c" lines=187-208 cite="OS_TaskCreate allocates the id (token), calls OS_TaskCreate_Impl, then writes the out-parameter with OS_ObjectIdFinalizeNew" sha256=020caf4d766afa1306653da53e4eeba72aac20df2cb4dda667cacaa1cf081161
+prov osal_finalize_new tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-idmap.c" lines=838-873 cite="on success the out-parameter receives token->obj_id" sha256=66f78878acd5a44ed44215c8626b515195b78fb81ff100e2afab0c1fc7546b1b
+prov osal_fromtoken tier=code-derived kind=code_pattern file="osal/src/os/shared/inc/os-shared-idmap.h" lines=335-338 cite="OS_ObjectIdFromToken returns token->obj_id" sha256=7dd953e33c9ec911ab87f5c5bd7d8b67c37899ada8f8f270358e03712f3cc4a3
+prov osal_taskcreate_impl_arg tier=code-derived kind=code_pattern file="osal/src/os/posix/src/os-impl-tasks.c" lines=596-625 cite="OS_TaskCreate_Impl zeroes the argument wrapper, sets arg.id = OS_ObjectIdFromToken(token) and passes it as entry_arg (the 6th argument) to OS_Posix_InternalTaskCreate_Impl" sha256=e4207c03e0d02fe196445eac43c994d12563b849fd71a2e871ee2085b287183b
+prov osal_internal_create_sig tier=code-derived kind=code_pattern file="osal/src/os/posix/src/os-impl-tasks.c" lines=457-462 cite="OS_Posix_InternalTaskCreate_Impl(pthr, priority, stackptr, stacksz, entry, entry_arg)" sha256=ff4bf2daa09886fb9c8cda76fff3a610c54288b5835c53048b31b490d37b3a1c
+prov osal_wrapper tier=code-derived kind=code_pattern file="osal/src/os/shared/inc/os-shared-globaldefs.h" lines=71-77 cite="OS_VoidPtrValueWrapper_t: a union of a pointer and the osal_id_t (the id is the low 4 bytes of the zeroed pointer)" sha256=86e9edbb8c8f6795f7a9326d85419259e3b4350b0f1285dda0bc7fd7c4658534
+prov osal_pthread_entry tier=code-derived kind=code_pattern file="osal/src/os/posix/src/os-impl-tasks.c" lines=131-140 cite="the new thread receives the same argument and calls OS_TaskEntryPoint(local_arg.id): the id site 7 reads" sha256=884ef27008c1905e4fabdd0059603124ecf33b796331c0a1ebef6b14edd8305a
+
+# The request names the application (core start and AppCreate pass the AppId they reserved).
+site es.start_task.entry entry func=CFE_ES_StartAppTask decoder=owner-request prov=es_startapptask_def s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=r8:u32:owner_id s3=stack+0:u64:return_address
+site es.start_task.ret   ret   func=CFE_ES_StartAppTask decoder=request-return prov=es_startapptask_def s0=rax:u32:status s3=ip:u64:return_address
+# A child task belongs to the caller's application: the join takes the creating task's own app_owner,
+# not the ParentAppId of the start-task request nested in it (that is a lookup in the App table).
+site es.child_task.entry entry func=CFE_ES_CreateChildTask decoder=child-request prov=es_childtask_owner s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s3=stack+0:u64:return_address
+site es.child_task.ret   ret   func=CFE_ES_CreateChildTask decoder=request-return prov=es_childtask_sig s0=rax:u32:status s3=ip:u64:return_address
+# The id OS_TaskCreate assigns (the value of its out-parameter), read where the spawn passes it to the
+# new thread: entry_arg is the 6th argument (r9); its low 4 bytes are the id.
+site osal.task_create.id entry func=OS_Posix_InternalTaskCreate_Impl decoder=spawn-id prov=osal_taskcreate_impl_arg s0=r9:u32:task_id s1=r8:u64:entry_fn s3=stack+0:u64:return_address
+
+# ---- R2 remainder: the location the passed AppID was read from, and its writer (2026-10-24) -------------
+#
+# The value the SB call sites pass as AppID is loaded from CFE_SB_Global.AppId in the same statement (the static
+# derives of the pinned bundle: the AppID argument at cfe_sb_api.c:277:50, :1185:50 and cfe_sb_priv.c:786:70 is
+# CFE_SB_Global_t.AppId with hops 0, kairos/tests/static/data/core_cpu1.golden lines 503, 525, 532).  At the
+# call instruction (at-call) rdx holds that argument (System V x86-64, third argument); the slot role
+# value(CFE_SB_Global.AppId) names the location for the replay (`cell`).  The labels are the capture point of
+# the profile, CFE_EVS_SendEventWithAppID.id_valid, with '@' and the call site (a plan label is unique).
+prov sb_api_pipe_event tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_api.c" lines=275-277 cite="CFE_SB_CreatePipe's debug event: CFE_EVS_SendEventWithAppID(CFE_SB_PIPE_ADDED_EID, CFE_EVS_EventType_DEBUG, CFE_SB_Global.AppId, ...)" sha256=e6e4f79f9ed774e777bc817259d86cbffcf2903f7d625d4a935c76da329874b3
+prov sb_api_sub_event tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_api.c" lines=1183-1185 cite="CFE_SB_SubscribeFull's debug event: CFE_EVS_SendEventWithAppID(CFE_SB_SUBSCRIPTION_RCVD_EID, CFE_EVS_EventType_DEBUG, CFE_SB_Global.AppId, ...)" sha256=4c888b7ea9a929d63d26c9ef7dbc463d8dcf4696a7142179242d9045c38f0a10
+prov sb_priv_report_event tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_priv.c" lines=786-786 cite="CFE_SB_MessageTxn_ReportSingleEvent: CFE_EVS_SendEventWithAppID(EventId, EventType, CFE_SB_Global.AppId, \"%s\", Message)" sha256=fae9472a7b6b3bf2d9038868a4af1de25005457200cc798e67da9a6634935f4b
+
+# The SB task's store of its own id through CFE_ES_GetAppID's out parameter (the profile's site sb_publication:
+# fn("CFE_SB_AppInit").call("CFE_ES_GetAppID", arg[0] is addr(CFE_SB_Global_t.AppId))).  After the call: the
+# store has happened on either branch of CFE_ES_GetAppID; the stored value is not read here.
+site sb_publication point at=cfe_sb_task.c:138 after-call=CFE_ES_GetAppID prov=sb_task_138 s0=rax:u32:status
+site CFE_EVS_SendEventWithAppID.id_valid@sb_api_275 point at=cfe_sb_api.c:275 at-call=CFE_EVS_SendEventWithAppID prov=sb_api_pipe_event s0=rdi:u16:event_id s1=rdx:u32:value(CFE_SB_Global.AppId) s2=rdx:u32:app_id
+site CFE_EVS_SendEventWithAppID.id_valid@sb_api_1183 point at=cfe_sb_api.c:1183 at-call=CFE_EVS_SendEventWithAppID prov=sb_api_sub_event s0=rdi:u16:event_id s1=rdx:u32:value(CFE_SB_Global.AppId) s2=rdx:u32:app_id
+site CFE_EVS_SendEventWithAppID.id_valid@sb_priv_786 point at=cfe_sb_priv.c:786 at-call=CFE_EVS_SendEventWithAppID prov=sb_priv_report_event s0=rdi:u16:event_id s1=rdx:u32:value(CFE_SB_Global.AppId) s2=rdx:u32:app_id
+
+# ---- R2 state-based round: the remaining writers of evs.reg and CFE_SB_Global.AppId (2026-10-24) ----------------
+#
+# The static closure counts four writers of EVS_AppData_t.AppID and three of CFE_SB_Global_t.AppId
+# (kairos/tests/static/data/core_cpu1.golden:161-162); sites 10, 11 and 26 observe four of them.  The three left:
+# the memset of CFE_EVS_Global in CFE_EVS_EarlyInit (every slot's AppID becomes 0), the memset of CFE_SB_Global in
+# CFE_SB_EarlyInit (the identity cell becomes 0, CFE_ES_APPID_UNDEFINED), and EVS_AppDataSetFree reached from
+# CFE_EVS_CleanUpApp (the slot's AppID becomes CFE_ES_APPID_UNDEFINED, only where it matches the given AppId).  Both
+# EarlyInit functions run on the startup thread through Entry->EarlyInit (cfe_es_start.c:762).  At -O0 the static
+# inline EVS_AppDataSetFree is a call; the instruction after it is the join of the function's return paths, so the
+# point is the call instruction itself (at-call), before the store in the callee.
+prov evs_earlyinit_memset tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_task.c" lines=63-63 cite="memset(&CFE_EVS_Global, 0, sizeof(CFE_EVS_Global)): every EVS registry slot's AppID becomes 0 (no AppId registered)" sha256=938c5eb47b03716e2441cceb327664df4230ed356eea7f29482a7cb1d4a169dc
+prov sb_earlyinit_memset tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_init.c" lines=50-50 cite="memset(&CFE_SB_Global, 0, sizeof(CFE_SB_Global)): the SB identity cell CFE_SB_Global.AppId becomes 0 (CFE_ES_APPID_UNDEFINED)" sha256=33b812a6e3f104b018a0a69aab9d332982e3443fc4677f5d24fbe4c9accd6d8f
+prov evs_cleanup_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_task.c" lines=178-198 cite="CFE_EVS_CleanUpApp(uint32 Id): the AppId of the application to clean up (its integer value); returns a status" sha256=1f59bd8b6a454723ab88130210b1da4fab8e674694b0d55664f158ab6b7161d6
+prov evs_cleanup_setfree tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_task.c" lines=192-194 cite="else if (EVS_AppDataIsMatch(AppDataPtr, AppID)) EVS_AppDataSetFree(AppDataPtr): the slot is freed only where it matches" sha256=a96319a8ed76ee46333541fe83085cbf88b2bbff0e17008fba0895e69a4a0cc2
+
+site CFE_EVS_EarlyInit.clear_registry point at=cfe_evs_task.c:63 after-call=memset prov=evs_earlyinit_memset s0=rax:u64:dest
+site CFE_SB_EarlyInit.clear_global point at=cfe_sb_init.c:50 after-call=memset prov=sb_earlyinit_memset s0=rax:u64:dest
+site evs.cleanup.entry entry func=CFE_EVS_CleanUpApp prov=evs_cleanup_def s0=rdi:u32:id s3=stack+0:u64:return_address
+site evs.cleanup.ret   ret   func=CFE_EVS_CleanUpApp prov=evs_cleanup_def s0=rax:u32:status s3=ip:u64:return_address
+site CFE_EVS_CleanUpApp.free_slot point at=cfe_evs_task.c:194 at-call=EVS_AppDataSetFree prov=evs_cleanup_setfree
+
+# ---- R2 interval boundaries (2026-10-29, plan/r2_intervals_20261029.md) ----------------------------------------------
+#
+# The initialization of the R2 question ends where the ES main task enters OPERATIONAL (cfe_es_start.c:233-234, after
+# the RUNNING startup sync of L225); the shutdown begins where the ES task acts on the commanded restart
+# (cfe_es_task.c:664, the call of CFE_ES_ResetCFE, which does not return); subscription reporting, which decides
+# whether a subscription emits EID 22 (cfe_sb_task.c:659), is set by one function only (cfe_sb_task.c:1224-1227,
+# called by the enable and disable commands at L296 and L308).  The process exit is the end of the record; it needs
+# no site.  Sites 35-37 are not linearization points of the phi profile (their labels are not OP.LABEL): `kz replay`
+# leaves them unmapped and its judgements do not change.  The lines above this block keep their numbers, which the
+# equiv refs of instr/sites.kzs cite.
+prov es_main_operational tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=233-234 cite="CFE_ES_WriteToSysLog(\"%s: CFE_ES_Main entering OPERATIONAL state\") then CFE_ES_Global.SystemState = CFE_ES_SystemState_OPERATIONAL: the console line, then the only store of OPERATIONAL" sha256=69e78ab4e87a60bb0c91adb9ebd24d323ce0bf2282e1166755565e420c305390
+prov es_restartcmd_reset tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_task.c" lines=651-664 cite="CFE_ES_RestartCmd: a RestartType that is PROCESSOR or POWERON is passed to CFE_ES_ResetCFE, which does not return; any other is counted as a command error" sha256=782826d705b445116b24b86940dbb6ebd3743b9d3074dd994b3ae53f26713302
+prov sb_set_subreporting tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_task.c" lines=1224-1227 cite="CFE_SB_SetSubscriptionReporting(uint32 state): CFE_SB_Global.SubscriptionReporting = state, the one store of the flag after its EarlyInit value" sha256=09e5ade503ba377b5d364037950e71af78b11cc89e85e9c21018aa58648cb1de
+
+# Right after the call of L233 (the OPERATIONAL line has been written to the system log and handed to OS_printf); the
+# store of L234 is the next statement, with no call between.
+site es.main.operational point at=cfe_es_start.c:233 after-call=CFE_ES_WriteToSysLog prov=es_main_operational
+# At the call of L664: the restart type the command passes (rdi).
+site es.restart_cmd.reset_cfe point at=cfe_es_task.c:664 at-call=CFE_ES_ResetCFE prov=es_restartcmd_reset s0=rdi:u32:reset_type
+# Entry of the setter: the state it stores (CFE_SB_ENABLE 1, CFE_SB_DISABLE 0; cfe_sb_priv.h:71-72).
+site sb.sub_reporting.set entry func=CFE_SB_SetSubscriptionReporting prov=sb_set_subreporting s0=rdi:u32:state s3=stack+0:u64:return_address
+
+# ---- the default scope's end (2026-10-29, plan/r2_intervals_20261029.md section 6 item 1) ---------------------------
+#
+# The profile ends every default scope at the shutdown request (../10_kinds.kzp L22-29, scope { kind es.shutdown;
+# request SHUTDOWN_REQ; teardown TEARDOWN; }); its two linearization points are CFE_PSP_Restart.request_shutdown, the
+# store of ShutdownReq (cfe_psp_support.c:87; ../20_ops.kzp op CFE_PSP_Restart), and OS_Application_Run.teardown, the
+# call of OS_DeleteAllObjects after the main thread's signal loop ends (cfe_psp_start.c:488-507; op OS_Application_Run).
+# Named after them (OP.LABEL), so `kz replay` maps them and applies the scope.  The hashes are those of ../01_prov.kzp.
+prov psp_restart_req tier=code-derived kind=code_pattern file="psp/fsw/pc-linux/src/cfe_psp_support.c" lines=87-87 cite="CFE_PSP_Restart: CFE_PSP_IdleTaskState.ShutdownReq = true, the request that wakes the main thread to shut down" sha256=94bc76fe35425fda05924a0e43d6dcfd4c7fd154172011bfd944c2ec7b5aa7b4
+prov psp_teardown tier=code-derived kind=code_pattern file="psp/fsw/pc-linux/src/cfe_psp_start.c" lines=488-507 cite="OS_Application_Run: the signal loop ends when ShutdownReq is set, then the main thread prints the shutdown line and calls OS_DeleteAllObjects" sha256=5005392f89e34ed750249d0ca88450f97467563f07a6e34c9fb4a21e95655e13
+
+# The store of L87 has no call on its line: the start of the line, before the store (as the raise of cfe_es_api.c:573).
+site CFE_PSP_Restart.request_shutdown point at=cfe_psp_support.c:87 line-start prov=psp_restart_req
+site OS_Application_Run.teardown point at=cfe_psp_start.c:507 after-call=OS_DeleteAllObjects prov=psp_teardown

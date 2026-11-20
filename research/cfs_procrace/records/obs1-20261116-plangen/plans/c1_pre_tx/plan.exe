@@ -1,0 +1,9 @@
+# kz executables to check; plan sidecar /home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.side sha256=8f5f200cbe436f587e3ef1e3ee2ec0782675ba3c2860aa8d0ec4f7cdba29c721
+# the reference build's paths (basis); a derived build maps them to its install tree
+basis	/home/user/work/procrace/c1_build/pre/1df262a/exe/tx/core-tx
+basis	/home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/bp.so
+basis	/home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/bplib.so
+basis	/home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/cf.so
+basis	/home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/ci_lab.so
+basis	/home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/sch_lab.so
+basis	/home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/to_lab.so

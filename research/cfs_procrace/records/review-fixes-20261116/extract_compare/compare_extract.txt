@@ -1,0 +1,46 @@
+OK kz-static c6aa4811612f13bd79b826e53e1f104e3e759d4d97123029c232558a98c73507 (the tool of extfix_extract)
+OK c1_pre_tx basis.kz: check_head whole: lines 519, allowed 2, other 0
+OK c1_pre_tx facts.kz: check_head header: lines 8, allowed 4, other 0
+OK c1_pre_tx facts view: compare_classes: only declared classes
+OK c1_pre_tx extract.txt: compare_classes: only declared classes
+OK c1_pre_tx relations.txt: compare_classes: only declared classes
+OK c1_pre_tx basis.txt: only the basis hash line
+OK c1_pre_tx sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK c1_pre_tx args.txt same
+OK c1_pre_tx relations.log same
+OK c1_post_tx basis.kz: check_head whole: lines 519, allowed 2, other 0
+OK c1_post_tx facts.kz: check_head header: lines 8, allowed 4, other 0
+OK c1_post_tx facts view: compare_classes: only declared classes
+OK c1_post_tx extract.txt: compare_classes: only declared classes
+OK c1_post_tx relations.txt: compare_classes: only declared classes
+OK c1_post_tx basis.txt: only the basis hash line
+OK c1_post_tx sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK c1_post_tx args.txt same
+OK c1_post_tx relations.log same
+OK r2_core basis.kz: check_head whole: lines 420, allowed 2, other 0
+OK r2_core facts.kz: check_head header: lines 8, allowed 4, other 0
+OK r2_core facts view: compare_classes: only declared classes
+OK r2_core extract.txt: compare_classes: only declared classes
+OK r2_core relations.txt: compare_classes: only declared classes
+OK r2_core basis.txt: only the basis hash line
+OK r2_core sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK r2_core args.txt same
+OK r2_core relations.log same
+OK c5_641 basis.kz: check_head whole: lines 272, allowed 2, other 0
+OK c5_641 facts.kz: check_head header: lines 8, allowed 4, other 0
+OK c5_641 facts view: compare_classes: only declared classes
+OK c5_641 extract.txt: compare_classes: only declared classes
+OK c5_641 relations.txt: compare_classes: only declared classes
+OK c5_641 basis.txt: only the basis hash line
+OK c5_641 sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK c5_641 args.txt same
+OK c5_641 relations.log same
+OK c5_642 basis.kz: check_head whole: lines 272, allowed 2, other 0
+OK c5_642 facts.kz: check_head header: lines 8, allowed 4, other 0
+OK c5_642 facts view: compare_classes: only declared classes
+OK c5_642 extract.txt: compare_classes: only declared classes
+OK c5_642 relations.txt: compare_classes: only declared classes
+OK c5_642 basis.txt: only the basis hash line
+OK c5_642 sha256.txt: only the basis.kz, facts.kz, kz-static hashes
+OK c5_642 args.txt same
+OK c5_642 relations.log same

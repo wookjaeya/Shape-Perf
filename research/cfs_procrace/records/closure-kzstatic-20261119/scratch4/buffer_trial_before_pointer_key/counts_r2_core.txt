@@ -1,0 +1,29 @@
+# r2_core.txt
+address uses: body followed, no write (discharged)	1
+address uses: copied (not discharged)	4
+address uses: library with an entry (discharged)	5
+address uses: library, no entry or writes (not discharged)	18
+address uses: passed on to a library call (not discharged)	6
+address uses: test (discharged)	4
+address uses: variadic or indirect (not discharged)	1
+buffers	20
+buffers with other writers	8
+buffers: not complete: FIELD_STATUS disabled	12
+buffers: not complete: other writers	8
+causes: address-escape: not discharged	20
+causes: array-element-stores-not-collected: discharged	20
+causes: several-instances: not a cause	20
+causes: untyped writes: not discharged	6
+causes: untyped-in-program: not a cause	14
+causes: writer-function-not-once: not a cause	19
+causes: writer-in-loop: not a cause	4
+lifetime ends: clear-slot	6
+lifetime ends: clear-slot: not shown	6
+lifetime ends: clear-table	6
+lifetime ends: release through a parameter	1
+release-through callers: delete	1
+release-through callers: null pointer	1
+release-through callers: rollback	1
+writer groups: none	14
+writer groups: one partition	12
+writer groups: shared	2

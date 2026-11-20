@@ -1,0 +1,4 @@
+# space_guard.sh kind=tools-check need=2000000 floor=314572800 interval=2 cmd=bash env/tools_check.sh
+start 2026-11-19T17:52:11.795Z free=762662912 threshold=316572800
+sample 2026-11-19T17:52:11.800Z 762658816
+end 2026-11-19T17:52:13.808Z kind=tools-check verdict=completed rc=127 free=762654720 lowest=762654720 dip=8192 change=-8192

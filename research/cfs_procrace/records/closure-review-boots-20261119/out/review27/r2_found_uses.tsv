@@ -1,0 +1,21 @@
+# review27.py (review of results 27, 2026-11-19): D1-R0 use events with outcome found: out, field_value, out0, instance-link reason, creates of the id
+# columns build row path out_read out_value_null field_value_set after_call_out0 instance_link_reason creates_of_the_id(publish_events: call; out.read; why) boots per_boot (branch D1-R0)
+c1_pre_tx	A22	A	True	no	no	yes	link_unlinked(no create of the id in the record)	soft_timebase_Init -> OS_TimeBaseCreate line 53; read=False; not read: the success path line of OS_TimeBaseCreate is missing(an implication between conditions is not decided)	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	A26	A	True	no	no	yes	link_unlinked(no create of the id in the record)	soft_timebase_Init -> OS_TimeBaseCreate line 53; read=False; not read: the success path line of OS_TimeBaseCreate is missing(an implication between conditions is not decided)	5	1:1,2:1,3:1,4:1,5:1
+c1_pre_tx	B73	B	True	yes	yes	no	plan_missing(need not planned)	-	5	1:75,2:74,3:75,4:75,5:75
+c1_pre_tx	B99	B	True	yes	yes	no	plan_missing(need not planned)	-	5	1:4,2:4,3:4,4:4,5:4
+# count c1_pre_tx boot 1: path A value_null no field_value no: 2, path B value_null yes field_value yes: 79
+# count c1_pre_tx boot 2: path A value_null no field_value no: 2, path B value_null yes field_value yes: 78
+# count c1_pre_tx boot 3: path A value_null no field_value no: 2, path B value_null yes field_value yes: 79
+# count c1_pre_tx boot 4: path A value_null no field_value no: 2, path B value_null yes field_value yes: 79
+# count c1_pre_tx boot 5: path A value_null no field_value no: 2, path B value_null yes field_value yes: 79
+c1_post_tx	A21	A	True	no	no	yes	link_unlinked(no create of the id in the record)	initialize_throttling -> OS_CountSemCreate line 132; read=False; not read: the success path line of OS_CountSemCreate is missing(the stored value is not tied to the success path)	5	1:2,2:2,3:2,4:2,5:2
+c1_post_tx	A22	A	True	no	no	yes	link_unlinked(no create of the id in the record)	soft_timebase_Init -> OS_TimeBaseCreate line 53; read=False; not read: the success path line of OS_TimeBaseCreate is missing(an implication between conditions is not decided)	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	A26	A	True	no	no	yes	link_unlinked(no create of the id in the record)	soft_timebase_Init -> OS_TimeBaseCreate line 53; read=False; not read: the success path line of OS_TimeBaseCreate is missing(an implication between conditions is not decided)	5	1:1,2:1,3:1,4:1,5:1
+c1_post_tx	B73	B	True	yes	yes	no	plan_missing(need not planned)	-	5	1:75,2:75,3:75,4:75,5:75
+c1_post_tx	B99	B	True	yes	yes	no	plan_missing(need not planned)	-	5	1:4,2:4,3:4,4:4,5:4
+# count c1_post_tx boot 1: path A value_null no field_value no: 4, path B value_null yes field_value yes: 79
+# count c1_post_tx boot 2: path A value_null no field_value no: 4, path B value_null yes field_value yes: 79
+# count c1_post_tx boot 3: path A value_null no field_value no: 4, path B value_null yes field_value yes: 79
+# count c1_post_tx boot 4: path A value_null no field_value no: 4, path B value_null yes field_value yes: 79
+# count c1_post_tx boot 5: path A value_null no field_value no: 4, path B value_null yes field_value yes: 79

@@ -1,0 +1,119 @@
+# plan_diff: /home/user/work/redesign/obs1/plangen/c1_post_tx/plan.side -> /home/user/work/redesign/obs1/relrev7_plans/c1_post_tx/plan.side
+rows: old 431, new 367; only old 64, only new 0
+planned rows: old 11 (A22 A23 A50 A51 B113 B118 B119 B13 B73 B81 B99), new 7 (B113 B118 B119 B13 B73 B81 B99)
+  planned before only: 07c71974e959fbc6 A23 -> no row (left out)
+  planned before only: 5a9acfc186eb25ed A50 -> A31 tier=3 disposition=D06 label=J order=NOPAIR reach=CALLEE-ONLY state=cut why="label J, no creator in another actor"
+  planned before only: 8d4cf4782b58cce9 A22 -> no row (left out)
+  planned before only: ad0b0b74b319721e A51 -> A32 tier=3 disposition=D06 label=J order=NOPAIR reach=CALLEE-ONLY state=cut why="label J, no creator in another actor"
+kept rows whose fields changed (field old -> new: rows):
+  disposition D07 -> D06: 2
+  order RELOC -> NOPAIR: 25
+  tier 1 -> 3: 2
+  tier 2 -> 3: 23
+old tiers {'1': 11, '2': 307, '3': 113}; dispositions {'D04': 3, 'D05': 12, 'D06': 7, 'D07': 11, 'D08': 6, 'D11': 125, 'D12': 267}
+new tiers {'1': 7, '2': 279, '3': 81}; dispositions {'D04': 2, 'D05': 12, 'D06': 4, 'D07': 7, 'D08': 6, 'D11': 69, 'D12': 267}
+sites: old 287, new 245; only old 42, only new 0, same key 245
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_apps.c|CFE_ES_LoadModule|point|after-call|OS_ModuleLoad|438 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_apps.c|CFE_ES_LoadModule|point|at-call|OS_ModuleLoad|438 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_apps.c|CFE_ES_StartApplications|point|after-call|OS_OpenCreate|100 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_apps.c|CFE_ES_StartApplications|point|after-call|OS_OpenCreate|133 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_apps.c|CFE_ES_StartApplications|point|at-call|OS_OpenCreate|100 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_apps.c|CFE_ES_StartApplications|point|at-call|OS_OpenCreate|133 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_perf.c|CFE_ES_RunPerfLogDump|point|after-call|OS_OpenCreate|314 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_perf.c|CFE_ES_RunPerfLogDump|point|at-call|OS_OpenCreate|314 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_start.c|CFE_ES_InitializeFileSystems|point|after-call|OS_mount|553 refs=row 5a9acfc186eb25ed; row ad0b0b74b319721e
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_start.c|CFE_ES_InitializeFileSystems|point|after-call|OS_mount|615 refs=row 5a9acfc186eb25ed; row ad0b0b74b319721e
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_start.c|CFE_ES_InitializeFileSystems|point|at-call|OS_mount|553 refs=row 5a9acfc186eb25ed; row ad0b0b74b319721e
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_start.c|CFE_ES_InitializeFileSystems|point|at-call|OS_mount|615 refs=row 5a9acfc186eb25ed; row ad0b0b74b319721e
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_task.c|CFE_ES_DumpCDSRegistryCmd|point|after-call|OS_OpenCreate|1906 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_task.c|CFE_ES_DumpCDSRegistryCmd|point|at-call|OS_OpenCreate|1906 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_task.c|CFE_ES_QueryAllCmd|point|after-call|OS_OpenCreate|1224 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_task.c|CFE_ES_QueryAllCmd|point|at-call|OS_OpenCreate|1224 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_task.c|CFE_ES_QueryAllTasksCmd|point|after-call|OS_OpenCreate|1375 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/es/fsw/src/cfe_es_task.c|CFE_ES_QueryAllTasksCmd|point|at-call|OS_OpenCreate|1375 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/evs/fsw/src/cfe_evs_log.c|CFE_EVS_WriteLogDataFileCmd|point|after-call|OS_OpenCreate|143 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/evs/fsw/src/cfe_evs_log.c|CFE_EVS_WriteLogDataFileCmd|point|at-call|OS_OpenCreate|143 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/evs/fsw/src/cfe_evs_task.c|CFE_EVS_WriteAppDataFileCmd|point|after-call|OS_OpenCreate|1523 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/evs/fsw/src/cfe_evs_task.c|CFE_EVS_WriteAppDataFileCmd|point|at-call|OS_OpenCreate|1523 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/fs/fsw/src/cfe_fs_api.c|CFE_FS_RunBackgroundFileDump|point|after-call|OS_OpenCreate|723 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/fs/fsw/src/cfe_fs_api.c|CFE_FS_RunBackgroundFileDump|point|at-call|OS_OpenCreate|723 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c|CFE_TBL_HousekeepingCmd|point|after-call|OS_OpenCreate|101 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c|CFE_TBL_HousekeepingCmd|point|at-call|OS_OpenCreate|101 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c|CFE_TBL_LoadCmd|point|after-call|OS_OpenCreate|365 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c|CFE_TBL_LoadCmd|point|at-call|OS_OpenCreate|365 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: key-text osal/src/os/shared/src/osapi-filesys.c|OS_mount|point|at-call|memchr|424 refs=row 5a9acfc186eb25ed; row ad0b0b74b319721e
+  site only old: key-text osal/src/os/shared/src/osapi-module.c|OS_ModuleLoad|point|at-call|memchr|189 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: use-call src/cf/fsw/src/cf_cfdp.c|CF_CFDP_ResetTransaction|point|after-call|OS_remove|1619 refs=row 5a9acfc186eb25ed; row 8d4cf4782b58cce9
+  site only old: use-call src/cf/fsw/src/cf_cfdp.c|CF_CFDP_ResetTransaction|point|after-call|OS_remove|1623 refs=row 07c71974e959fbc6; row ad0b0b74b319721e
+  site only old: use-call src/cf/fsw/src/cf_cfdp.c|CF_CFDP_ResetTransaction|point|at-call|OS_remove|1619 refs=row 5a9acfc186eb25ed; row 8d4cf4782b58cce9
+  site only old: use-call src/cf/fsw/src/cf_cfdp.c|CF_CFDP_ResetTransaction|point|at-call|OS_remove|1623 refs=row 07c71974e959fbc6; row ad0b0b74b319721e
+  site only old: creator-call src/cf/fsw/src/cf_cfdp_r.c|CF_CFDP_R2_RecvMd|point|after-call|CF_WrappedOpenCreate|839 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call src/cf/fsw/src/cf_cfdp_r.c|CF_CFDP_R2_RecvMd|point|after-call|OS_mv|822 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call src/cf/fsw/src/cf_cfdp_r.c|CF_CFDP_R2_RecvMd|point|at-call|CF_WrappedOpenCreate|839 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call src/cf/fsw/src/cf_cfdp_r.c|CF_CFDP_R2_RecvMd|point|at-call|OS_mv|822 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call src/cf/fsw/src/cf_cfdp_r.c|CF_CFDP_R_Init|point|after-call|CF_WrappedOpenCreate|588 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call src/cf/fsw/src/cf_cfdp_r.c|CF_CFDP_R_Init|point|at-call|CF_WrappedOpenCreate|588 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call src/cf/fsw/src/cf_cfdp_s.c|CF_CFDP_S_SubstateSendMetadata|point|after-call|CF_WrappedOpenCreate|364 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+  site only old: creator-call src/cf/fsw/src/cf_cfdp_s.c|CF_CFDP_S_SubstateSendMetadata|point|at-call|CF_WrappedOpenCreate|364 refs=row 07c71974e959fbc6; row 8d4cf4782b58cce9
+sites per rule: actor-create 2 -> 2, actor-owner 2 -> 2, actor-root 15 -> 15, actor-start 1 -> 1, creator-call 36 -> 0, key-text 2 -> 0, stop-event 2 -> 2, use-call 192 -> 188, writer 35 -> 35
+need lines per (kind, reason): event-send plan_missing(need not planned) 4 -> 0; lock-result plan_missing(need not planned) 11 -> 7; observation budget_not_run(row outside the budget) 420 -> 360; wait-result plan_missing(need not planned) 11 -> 7
+gap lines per reason: record_insufficient(key text) 10 -> 0
+header lines that differ: 29 (of 45 / 41)
+  - generator tool=kz-static tool_sha256=c3677e76e8b01b55dd4c1e5b1778d6f61e3391942a83a4eba25c34ffb9304f7b tool_source=5640d5d65ad3310115ca5616f96a9d794d07e5e3f1681bff010765b127f77cb1 core_source=f6e3c7b4c3def727444c25ee7071f
+  + generator tool=kz-static tool_sha256=a3a6cb31da61e6edce2193d02700d95dad3f702da921ca46fcf3ef3be8fe4f6c tool_source=e8778114cc825ea7328f25a423df9540707dafdabf7f0590fb47c14c1fdce691 core_source=f6e3c7b4c3def727444c25ee7071f
+  - rules plan rules revision 1 (2026-11-16); relations rules revision 6 (2026-11-16)
+  + rules plan rules revision 1 (2026-11-16); relations rules revision 7 (2026-11-16)
+  - classes rows 431 tier1 11 tier2 307 tier3 113
+  + classes rows 367 tier1 7 tier2 279 tier3 81
+  - budget value=tier:D07 reason="the record pool is fixed (KZ_RT_POOL_BYTES = KZ_RT_MAX_ACTORS x 65536, kairos/runtime/include/kz_rt.h:61-64) and no event volume of a generated plan is measured yet: the priority tier is pla
+  + budget value=tier:D07 reason="the record pool is fixed (KZ_RT_POOL_BYTES = KZ_RT_MAX_ACTORS x 65536, kairos/runtime/include/kz_rt.h:61-64) and no event volume of a generated plan is measured yet: the priority tier is pla
+  - bound sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason="the binding id scheme" sites=287
+  + bound sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason="the binding id scheme" sites=245
+  - map 07c71974e959fbc6 6 7 10 11 12 13 20 21 28 29 30 31 32 33 35 36 38 39 40 41 260 261 262 263 271 277 279 280 281 282 283 284 285 286 287
+  + map 152f17981365b27d 155 156 157 158 159 168 185 186 187 188 189 190 230 233
+  - map 152f17981365b27d 179 180 181 182 183 192 209 210 211 212 213 214 254 257
+  + map 299c8e07fe49d44b 131 132 133 134 135 136 137 138 139 140 141 143 144 145 146 147 148 149 150 151 152 153 160 163 166 167 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 186 187 191 192 193 194 195 196
+  - map 299c8e07fe49d44b 155 156 157 158 159 160 161 162 163 164 165 167 168 169 170 171 172 173 174 175 176 177 184 187 190 191 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 210 211 215 216 217 218 219 220
+  + map 3c1a14a1e86af631 8 9 10 11 12 14 15
+  - map 3c1a14a1e86af631 14 15 16 17 18 26 27
+  + map 62696da28bd6b9b4 142 154 155 156 157 158 162 165 186 187 189 190 211 212 213 214 232 235
+  - map 5a9acfc186eb25ed 22 23 24 25 270 276 278
+  + map ba2543549ee828a2 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 8
+  - map 62696da28bd6b9b4 166 178 179 180 181 182 186 189 210 211 213 214 235 236 237 238 256 259
+  + map e74845731ffadce0 155 156 157 158 161 164 186 187 189 190 228 229 231 234
+  - map 8d4cf4782b58cce9 6 7 10 11 12 13 20 21 28 29 30 31 32 33 35 36 38 39 40 41 260 261 262 263 271 276 278 280 281 282 283 284 285 286 287
+  + map fb05e6e2f6b4cb48 110 111 112 113 114 115 116 117 119 121
+  - map ad0b0b74b319721e 22 23 24 25 270 277 279
+  + creation osal/src/os/posix/src/os-impl-tasks.c:543:19 roots BP_AppMain BP_CLA_InputTask BP_CLA_OutputTask CFE_ES_BackgroundTask CFE_ES_TaskMain CFE_EVS_TaskMain CFE_SB_TaskMain CFE_TBL_TaskMain CFE_TIME_Local1HzTask CFE_
+  - map ba2543549ee828a2 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 1
+  + stop-event run-loop CFE_ES_RunLoop cfe/modules/es/fsw/src/cfe_es_api.c:470 decl cfe/modules/core_api/fsw/inc/cfe_es.h:397 version "cFE 6.7.99 (baseline v7.0.0-rc4, build 205)" data line 15
+  - map e74845731ffadce0 179 180 181 182 185 188 210 211 213 214 252 253 255 258
+  + stop-event app-exit CFE_ES_ExitApp cfe/modules/es/fsw/src/cfe_es_api.c:340 decl cfe/modules/core_api/fsw/inc/cfe_es.h:355 version "cFE 6.7.99 (baseline v7.0.0-rc4, build 205)" data line 16
+  - map fb05e6e2f6b4cb48 134 135 136 137 138 139 140 141 143 145
+  + module 1	bp	/home/user/work/procrace/c1_build/post/src/bp/fsw/
+  - creation osal/src/os/posix/src/os-impl-tasks.c:543:19 roots BP_AppMain BP_CLA_InputTask BP_CLA_OutputTask CFE_ES_BackgroundTask CFE_ES_TaskMain CFE_EVS_TaskMain CFE_SB_TaskMain CFE_TBL_TaskMain CFE_TIME_Local1HzTask CFE_
+  + module 2	bplib	/home/user/work/procrace/c1_build/post/src/bplib/
+  - stop-event run-loop CFE_ES_RunLoop cfe/modules/es/fsw/src/cfe_es_api.c:470 decl cfe/modules/core_api/fsw/inc/cfe_es.h:397 version "cFE 6.7.99 (baseline v7.0.0-rc4, build 205)" data line 15
+  + module 3	cf	/home/user/work/procrace/c1_build/post/src/cf/fsw/src/
+  - stop-event app-exit CFE_ES_ExitApp cfe/modules/es/fsw/src/cfe_es_api.c:340 decl cfe/modules/core_api/fsw/inc/cfe_es.h:355 version "cFE 6.7.99 (baseline v7.0.0-rc4, build 205)" data line 16
+  + module 4	ci_lab	/home/user/work/procrace/c1_build/bundle_1df262a/apps/ci_lab/fsw/src/
+  - module 1	bp	/home/user/work/procrace/c1_build/post/src/bp/fsw/
+  + module 6	sch_lab	/home/user/work/procrace/c1_build/bundle_1df262a/apps/sch_lab/fsw/src/
+  - module 2	bplib	/home/user/work/procrace/c1_build/post/src/bplib/
+  + module 7	to_lab	/home/user/work/procrace/c1_build/bundle_1df262a/apps/to_lab/fsw/src/
+  - module 3	cf	/home/user/work/procrace/c1_build/post/src/cf/fsw/src/
+  + default-module 5 core-tx
+  - module 4	ci_lab	/home/user/work/procrace/c1_build/bundle_1df262a/apps/ci_lab/fsw/src/
+  + exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/core-tx
+  - module 6	sch_lab	/home/user/work/procrace/c1_build/bundle_1df262a/apps/sch_lab/fsw/src/
+  + exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/cf/bp.so
+  - module 7	to_lab	/home/user/work/procrace/c1_build/bundle_1df262a/apps/to_lab/fsw/src/
+  + exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/cf/bplib.so
+  - default-module 5 core-tx
+  + exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/cf/cf.so
+  - exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/core-tx
+  + exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/cf/ci_lab.so
+  - exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/cf/bp.so
+  + exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/cf/sch_lab.so
+  - exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/cf/bplib.so
+  + exe basis	/home/user/work/procrace/c1_build/post/1df262a/exe/tx/cf/to_lab.so

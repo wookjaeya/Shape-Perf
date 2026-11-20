@@ -1,0 +1,86 @@
+# summary of compare_run1.tsv (the full output, 3389314 B, sha256 24e3befe12dad6c78d9f6abb44ec4082e238d585a976cbde0ac56f07aaaf9c57, is re-created by run_derived.sh compare with env/redesign/compare_derived.py at commit a79aa6d and declared_diff.tsv)
+# compare_derived.py: B /home/user/work/redesign/obs1/plangen_bref/c1_pre_tx/NP, B' /home/user/work/redesign/obs1/c1pre_bprime/c1_pre_tx/NP, path map /home/user/work/redesign/obs1/c1pre_derived/path_map.tsv (inverted), declared list /home/user/Shape-Perf/research/cfs_procrace/records/obs1-20261116-derived/declared_diff.tsv
+# basis.kz FILE_HASHES: same order after the map: no; same entries: no
+# basis.kz: sections 6, equal in order 2, findings 232
+# path map by content: FILE_HASHES B 194, B' 195; same path after the map 194, of them same sha256 178, other sha256 16 (/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/bp/CMakeFiles/bp.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/bplib/CMakeFiles/bplib.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/cf/CMakeFiles/cf.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/ci_lab/CMakeFiles/ci_lab.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/sch_lab/CMakeFiles/sch_lab.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/to_lab/CMakeFiles/to_lab.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/compile_commands.json, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/CMakeFiles/core-tx.dir/link.txt, /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/cfe_build_env_table.c, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/bp.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/bplib.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/cf.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/ci_lab.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/sch_lab.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/cf/to_lab.so, /home/user/work/procrace/c1_build/pre/1df262a/exe/tx/core-tx); only in B 0; only in B' 1; derived paths left unmapped 0
+# facts.kz FILE_HASHES: same order after the map: no; same entries: no
+# facts.kz: sections 39, equal in order 33, findings 3664
+# basis.txt: lines 130 vs 140, findings 40
+# extract.txt: lines 363 vs 363, findings 1
+# relations.txt: lines 7595 vs 7595, findings 2
+# relations.log: lines 1 vs 1, findings 0
+# args.txt: lines 7 vs 8, findings 1
+# sha256.txt: lines 6 vs 6, findings 3
+# NOT-DECLARED 3650
+# declared:D4 build environment table 2
+# declared:D4 build environment table (records of facts read from that unit) 2
+# declared:identity 12
+# declared:identity (a section's crc32 follows its records, which are compared one by one) 35
+# declared:identity (records added by the categories below; the string pool follows the path strings) 6
+# declared:identity (the basis artifact hash) 1
+# declared:identity (the derived-workspace mode names its map) 1
+# declared:plugin options 180
+# declared:plugin options (the plugin file is hashed, basis.cpp:1091-1094) 1
+# declared:runtime linked 37
+# declared:runtime linked (calls into the runtime at bound sites; the module files are rebuilt) 16
+# not declared 3650
+## findings per file, part and verdict
+      1 args.txt	line	declared:identity (the derived-workspace mode names its map)
+      1 basis.kz	BASIS	NOT-DECLARED
+      4 basis.kz	BASIS	declared:plugin options
+      8 basis.kz	BASIS	declared:runtime linked
+     16 basis.kz	BASIS	declared:runtime linked (calls into the runtime at bound sites; the module files are rebuilt)
+      1 basis.kz	DEVIATIONS	declared:plugin options
+     13 basis.kz	FILE_HASHES	NOT-DECLARED
+      1 basis.kz	FILE_HASHES	declared:D4 build environment table
+      1 basis.kz	FILE_HASHES	declared:plugin options
+      1 basis.kz	FILE_HASHES	declared:plugin options (the plugin file is hashed, basis.cpp:1091-1094)
+      1 basis.kz	FILE_HASHES	declared:runtime linked
+      6 basis.kz	TUS	NOT-DECLARED
+      1 basis.kz	TUS	declared:D4 build environment table (records of facts read from that unit)
+    170 basis.kz	TUS	declared:plugin options
+      2 basis.kz	header	declared:identity
+      2 basis.kz	section-line	declared:identity (a section's crc32 follows its records, which are compared one by one)
+      4 basis.kz	section-line	declared:identity (records added by the categories below; the string pool follows the path strings)
+      7 basis.txt	line	NOT-DECLARED
+      1 basis.txt	line	declared:identity
+      4 basis.txt	line	declared:plugin options
+     28 basis.txt	line	declared:runtime linked
+      1 extract.txt	line	declared:identity
+      4 facts.kz	BASIS	NOT-DECLARED
+      1 facts.kz	BASIS	declared:identity (the basis artifact hash)
+   2721 facts.kz	FACTS	NOT-DECLARED
+     37 facts.kz	FACT_CONSTS	NOT-DECLARED
+      1 facts.kz	FILE_HASHES	declared:D4 build environment table
+    860 facts.kz	FUNCS	NOT-DECLARED
+      1 facts.kz	GLOBAL_IMAGES	declared:D4 build environment table (records of facts read from that unit)
+      4 facts.kz	header	declared:identity
+     33 facts.kz	section-line	declared:identity (a section's crc32 follows its records, which are compared one by one)
+      2 facts.kz	section-line	declared:identity (records added by the categories below; the string pool follows the path strings)
+      1 relations.txt	line	NOT-DECLARED
+      1 relations.txt	line	declared:identity
+      3 sha256.txt	line	declared:identity
+## three findings not declared per file and part (first 400 characters)
+basis.kz	BASIS	changed B[113] B'[113]: name="closure.name_binding" value="the loader's binding: each of the 195 references across units goes to the one unit that defines the name" policy=unset prov=none deviation=none  ->  name="closure.name_binding" value="the loader's binding: each of the 205 references across units goes to the one unit that defines the name" policy=unset prov=none deviation=non
+basis.kz	FILE_HASHES	changed B[1] B'[2]: path="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/bp/CMakeFiles/bp.dir/link.txt" sha256=1794916aff7e176136a6a403073684963dc31b474b1d66f8973171498eb3406a size=404 prov=none  ->  path="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/bp/CMakeFiles/bp.dir/link.txt" sha256=653a239bd3367f9354ae056bc27b20b670533d
+basis.kz	FILE_HASHES	changed B[2] B'[3]: path="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/bplib/CMakeFiles/bplib.dir/link.txt" sha256=ab8fe0a0dc1088b2655cd967a268dfe54cf6a2fe8257a5791f853d3c96f173e0 size=1136 prov=none  ->  path="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/bplib/CMakeFiles/bplib.dir/link.txt" sha256=bbe747b26e222a7b08572c0b3
+basis.kz	FILE_HASHES	changed B[3] B'[4]: path="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/cf/CMakeFiles/cf.dir/link.txt" sha256=7efd76e88337608ba912b37a9042e139bbfac1f6ebbd00a32ea0abe721eb15a1 size=586 prov=none  ->  path="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/apps/cf/CMakeFiles/cf.dir/link.txt" sha256=e6b5019b8b2521cc21f1294c49e7b02fb0fd43
+basis.kz	TUS	changed B[2] B'[2]: tu=2 fh=</home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/cfe_module_version_table.c> source="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/cfe_module_version_table.c" object="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/CMakeFiles/core-tx.dir/cfe_module_version_table.c.o" flags="-DCFE_CPU_ID_VAL
+basis.kz	TUS	changed B[3] B'[3]: tu=3 fh=</home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/cfe_psp_module_list.c> source="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/cfe_psp_module_list.c" object="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/CMakeFiles/core-tx.dir/cfe_psp_module_list.c.o" flags="-DCFE_CPU_ID_VALUE=1 '-DCFE_CPU
+basis.kz	TUS	changed B[4] B'[4]: tu=4 fh=</home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/cfe_static_module_list.c> source="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/cfe_static_module_list.c" object="/home/user/work/procrace/c1_build/pre/1df262a/build/native/default/tx/CMakeFiles/core-tx.dir/cfe_static_module_list.c.o" flags="-DCFE_CPU_ID_VALUE=1 '
+facts.kz	BASIS	added B'[479]: name="extract.basis_deviation[instrumentation.units_with_compiler_plugin]" value="177 of 177 units, 1 distinct option set(s)" policy=unset prov=none deviation=none	NOT-DECLARED
+facts.kz	BASIS	added B'[480]: name="extract.basis_deviation[instrumentation.compiler_plugin_options[0]]" value="-fplugin=/home/user/work/c5tools/plugin-build/kzgcc.so -fplugin-arg-kzgcc-manifest=/home/user/work/redesign/obs1/plangen/c1_pre_tx/plan.kzs -fplugin-arg-kzgcc-out=/home/user/work/redesign/obs1/c1pre_derived/binds_instr -fplugin-arg-kzgcc-module=1:/home/user/work/procrace/c1_build/pre/src
+facts.kz	BASIS	added B'[481]: name="extract.basis_deviation[instrumentation.plugin_file]" value="/home/user/work/c5tools/plugin-build/kzgcc.so sha256 27a49a6a7d7a561727bb4deeb3ff57026ec4e4dc13177645525e43f74aaf2e20" policy=unset prov=none deviation=none	NOT-DECLARED
+facts.kz	FACTS	changed B[0] B'[0]: site=0 tu=11 file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c" caller="BP_SendStatsMsgPerFlow" callee="BP_FlowIsEnabled" line=62 col=31 first_arg=0 nargs=1 flags={result-used,result-tested} loop_depth=0 caller_fn=61 callee_fn=32 fh=</home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c> loop=none kind=direct  ->  site=0 tu=3 file="/home
+facts.kz	FACTS	changed B[1] B'[1]: site=1 tu=11 file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c" caller="BP_SendStatsMsgPerFlow" callee="BP_FlowGetStats" line=64 col=9 first_arg=1 nargs=2 flags={} loop_depth=0 caller_fn=61 callee_fn=29 fh=</home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c> loop=none kind=direct  ->  site=1 tu=3 file="/home/user/work/procrace/c1_buil
+facts.kz	FACTS	changed B[2] B'[2]: site=2 tu=11 file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c" caller="BP_SendStatsMsgPerFlow" callee="CFE_SB_TimeStampMsg" line=65 col=9 first_arg=3 nargs=1 flags={} loop_depth=0 caller_fn=61 callee_fn=587 fh=</home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c> loop=none kind=direct  ->  site=2 tu=3 file="/home/user/work/procrace/c1
+facts.kz	FACT_CONSTS	changed B[0] B'[0]: name="BP_NUM_SEM_THROTTLES" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c" value=2 line=124 tu=13 prov=none text="" fh=</home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c> kind=int  ->  name="BP_NUM_SEM_THROTTLES" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c" value=2 line=124 tu=5 prov=none text="" 
+facts.kz	FACT_CONSTS	changed B[1] B'[1]: name="BP_NUM_SEM_THROTTLES" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c" value=2 line=153 tu=13 prov=none text="" fh=</home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c> kind=int  ->  name="BP_NUM_SEM_THROTTLES" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c" value=2 line=153 tu=5 prov=none text="" 
+facts.kz	FACT_CONSTS	changed B[2] B'[2]: name="BP_NUM_SEM_THROTTLES" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c" value=2 line=179 tu=13 prov=none text="" fh=</home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c> kind=int  ->  name="BP_NUM_SEM_THROTTLES" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c" value=2 line=179 tu=5 prov=none text="" 
+facts.kz	FUNCS	changed B[0] B'[0]: fn=0 tu=11 name="AppInit" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c" line=132 col=21 end_line=230 fh=</home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c> flags={defined,static} nparams=0  ->  fn=0 tu=3 name="AppInit" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c" line=132 col=21 end_line=230 fh=</home/use
+facts.kz	FUNCS	changed B[1] B'[1]: fn=1 tu=11 name="BP_AppMain" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c" line=804 col=6 end_line=845 fh=</home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c> flags={defined} nparams=0  ->  fn=1 tu=3 name="BP_AppMain" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_app.c" line=804 col=6 end_line=845 fh=</home/user/w
+facts.kz	FUNCS	changed B[2] B'[2]: fn=2 tu=12 name="BP_CLA_DebugPrint" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_cla_bundle_io.c" line=285 col=6 end_line=323 fh=</home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_cla_bundle_io.c> flags={defined} nparams=3  ->  fn=2 tu=4 name="BP_CLA_DebugPrint" file="/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_cla_bundle_io.c" 
+basis.txt	line	changed 5/5:   translation units          177 (objects without a compile command: 0)  ->    translation units          177 (objects without a compile command: 5)	NOT-DECLARED
+basis.txt	line	added 14:   warning: no compile command produces /home/user/work/redesign/obs1/c1pre_rt/rt/CMakeFiles/kzrt-posix.dir/src/kz_rt_posix.c.o (member of libkzrt-posix.a (whole archive))	NOT-DECLARED
+basis.txt	line	added 15:   warning: no compile command produces /home/user/work/redesign/obs1/c1pre_rt/rt/CMakeFiles/kzrt.dir/src/kz_rt.c.o (member of libkzrt.a (whole archive))	NOT-DECLARED
+relations.txt	line	changed 13/13: basis deviations copied into these facts: 2 [front_end.arguments_added] [front_end] (a row that names a position in a unit with its own deviation says so in its layers column)  ->  basis deviations copied into these facts: 6 [front_end.arguments_added] [front_end.arguments_removed] [front_end] [instrumentation.compiler_plugin_options[0]] [instrumentation.plugin_fi

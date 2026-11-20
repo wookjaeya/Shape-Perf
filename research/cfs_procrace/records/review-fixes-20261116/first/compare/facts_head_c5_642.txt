@@ -1,0 +1,3 @@
+check_head whole: lines 72201, allowed 4, other 2
+  line 9: section STRINGS type=1 version=1 record=kz_byte record_size=1 count=377890 crc32=0x599ea570 | section STRINGS type=1 version=1 record=kz_byte record_size=1 count=377890 crc32=0x7cb17ee5
+  line 391:   BASIS[380] name="extract.units_from" value="basis 299aa36d168f0ee6" policy=unset prov=none deviation=none |   BASIS[380] name="extract.units_from" value="basis 91792182f524ea7a" policy=unset prov=none deviation=none

@@ -1,0 +1,7 @@
+# round trip of the tool copies before the build of the result flow step (2026-11-16T20:42:04Z)
+copy: /home/user/work/preserve/tools-20261116-j/kz-static.12a3970f.xz (44334596 B)
+xz -t: OK
+sha256 of the xz file: 606bb44f15b97117fb50f5f230e94cefd147c1415af5ef4f1f95e2c2a0040889
+xz -dc | sha256sum: 12a3970f91ce8b9dde10aac22978629d9786623f07b2e2c1b0fa8afb69339b1b
+in place: 12a3970f91ce8b9dde10aac22978629d9786623f07b2e2c1b0fa8afb69339b1b
+xz -dc | cmp in place: SAME

@@ -1,0 +1,16 @@
+# the key value of the use call of the path A row in the plans of c1_pre_tx (grep of plan.kzs): without the option (objacc_plans_off) and with it (objacc_plans_on)
+== off
+value 258 1 role=out0 from=out0 type=u64
+site 259 label=s0259.use-call op=call.OS_CountSemGetIdByName phase=point tu=src/cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_CountSemGetIdByName line=993 place=at-call ref="row 17975444d83f6589"
+value 259 0 role=key from=arg1 type=ptr string=pointer-only
+value 259 1 role=arg0 from=arg0 type=u64
+== on
+value 266 1 role=out0 from=out0 type=u64
+site 267 label=s0267.use-call op=call.OS_CountSemGetIdByName phase=point tu=src/cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_CountSemGetIdByName line=993 place=at-call ref="row 17975444d83f6589"
+value 267 0 role=key from=arg1 type=ptr string=validated bound=20 ref="argument 1 is the character array CF_ChannelConfig_t.sem_name of extent 20 (declared at /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_tbldefs.h:74), the read at /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:991:46 dominates the call (ARG_TYPES); bound min(extent 20, KZ_RT_STR_MAX 64); premise: the string is NUL-terminated within the array or the cut is flagged"
+value 267 1 role=arg0 from=arg0 type=u64
+== sidecar string-extent line (on)
+bound string-extent source=ARG_TYPES reason="a key argument that is a character array read at a point that dominates the call is copied at the call within min(its extent, KZ_RT_STR_MAX)"
+== sidecar rules line (off, on)
+/home/user/work/redesign/obs1/objacc_plans_off/c1_pre_tx/plan.side:rules plan rules revision 2 (2026-11-16); relations rules revision 9 (2026-11-16)
+/home/user/work/redesign/obs1/objacc_plans_on/c1_pre_tx/plan.side:rules plan rules revision 2 (2026-11-16); relations rules revision 9 (2026-11-16)

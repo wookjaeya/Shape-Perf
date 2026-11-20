@@ -1,0 +1,6 @@
+# space_guard.sh kind=scratch-plugin need=104857600 floor=314572800 interval=2 cmd=cmake --build <scratch>/kzgcc -j8
+start 2026-11-19T07:11:07.706Z free=796880896 threshold=419430400
+sample 2026-11-19T07:11:07.710Z 796876800
+sample 2026-11-19T07:11:09.720Z 793235456
+sample 2026-11-19T07:11:11.729Z 786407424
+end 2026-11-19T07:11:13.736Z kind=scratch-plugin verdict=completed rc=0 free=786472960 lowest=786407424 dip=10473472 change=-10407936

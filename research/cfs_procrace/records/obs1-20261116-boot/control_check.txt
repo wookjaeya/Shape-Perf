@@ -1,0 +1,21 @@
+dump text /home/user/work/redesign/obs1/c1pre_boot/tx/tx.dump.txt sha256 1290a5f6edd6598a3ba32723a447695aa32fc0dbeee9a0b9d2cbc1e823e88b6d lines 1081
+record kinds (first word, count):
+       16 actor
+       17 buf
+        1 caps
+       22 check
+        1 end
+     1008 ev
+        1 format
+        6 module
+        2 resource
+        3 run
+        4 runx
+control records (ctl, plan, point): 0
+  run abi=1 mode=stopped run_id=1 instance=1 phase=0xb adapter="posix" adapter_caps=0x3f clock=1 runtime="kzrt 0.4.0"
+  caps max_actors=64 actor_buf_bytes=4194304 boot_buf_bytes=65536 max_points=32 max_vals=8 str_max=64 holdable=task,lock-held,osal-internal
+  runx window_mode=record mode_source=early flags=build-info
+  runx pool_bytes=4194304 chunk_bytes=4096 chunks_used=32 pool_dropped=0 actor_quota=0 boot_bytes_used=0 boot_bytes_dropped=0 max_modules=32 max_notes=32
+  runx end=in-process end_flags=- end_value=0 store=memory
+kz-rt-dump check summary: check ok (0 failures)
+kz-rt-dump check lines (count): 22

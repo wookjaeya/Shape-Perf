@@ -1,0 +1,17 @@
+cdiff old_lines=700 new_lines=530 only_old=570 only_new=400 other=0
+class - sidecar-sha256 pairs=1
+class - hex64-field pairs=1
+class - statement:site removed=192
+class - statement:site added=156
+class - statement:need removed=82
+class - statement:need added=19
+class - statement:value removed=290
+class - statement:value added=219
+class - statement:spawn removed=1
+class - statement:spawn added=1
+class - statement:identity removed=1
+class - statement:identity added=1
+class - statement:plan removed=1
+class - statement:plan added=1
+class - header:kzs-generator-line removed=1
+class - header:kzs-generator-line added=1

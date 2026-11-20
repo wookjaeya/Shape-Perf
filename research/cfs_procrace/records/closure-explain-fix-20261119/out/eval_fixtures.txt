@@ -1,0 +1,93 @@
+PASS base: rc 0 and form ok
+PASS base: no line fails
+PASS base: F1 lines carry the expectation's class
+PASS base: F2a static (no success path line held: no generation can form)
+PASS base: F2b format, F7 format, F5 static, F6 static pass (nothing to check)
+PASS base: F3, F4, F8b, F9, F10 boot
+PASS base: F9 only on the row with two context lines
+PASS base: F8b not evaluable without a linked pair
+PASS base: s1 on D1 control records only; s2-s4 on every branch
+PASS base: expect_discriminate: the control row met ((1) found line and (2) second definition), the tier+control row not counted
+PASS base: precision and recall undefined (no reader)
+PASS base: undetermined split by kind
+PASS base: tail: falsifiers and expect_safe by class, expect_discriminate met / counted
+PASS F1: rc 0 and form ok
+PASS F1: F1 fails on the changed line
+PASS F1-norecord: rc 0 and form ok
+PASS F1-norecord: F1 not evaluable without a record
+PASS F2a: rc 0 and form ok
+PASS F2a: F2a fails (a bound pair in D1)
+PASS F2a-class: rc 0 and form ok
+PASS F2a-class: a held success path line: F2a, s1, s3, s4 are boot
+PASS F2b: rc 0 and form ok
+PASS F2b: F2b fails (present on a list entry in D1)
+PASS F3: rc 0 and form ok
+PASS F3: F3 fails (absence after a finished create)
+PASS F3-end: rc 0 and form ok
+PASS F3-end: a lifetime end between: F3 passes
+PASS F3-novalue: rc 0 and form ok
+PASS F3-novalue: no success path line: F3 not evaluable
+PASS F4: rc 0 and form ok
+PASS F4: F4 fails (a found id with no recorded create)
+PASS F4-pass: rc 0 and form ok
+PASS F4-pass: a recorded create with the id: F4 passes
+PASS F5: rc 0 and form ok
+PASS F5: F5 fails ((iii) held on a found line)
+PASS F5: s2 fails with it
+PASS F5-i: rc 0 and form ok
+PASS F5-i: F5 fails ((i) held against a second definition)
+PASS F6: rc 0 and form ok
+PASS F6: F6 not evaluable with a decided context (the limit of spec 11 item 13; F6 has no failing input)
+PASS F7: rc 0 and form ok
+PASS F7: F7 fails (derived in R0)
+PASS records: rc 0 and form ok
+PASS records: a pre-defined row without a record: a format failure
+PASS F8a: rc 0 and form ok
+PASS F8a: F8a fails (a creator location without a pair-file line)
+PASS F8b: rc 0 and form ok
+PASS F8b: F8b fails (the pair-file line has another value)
+PASS F8b-pass: rc 0 and form ok
+PASS F8b-pass: the same value: F8b passes
+PASS F9: rc 0 and form ok
+PASS F9: F9 fails (context unknown)
+PASS F10: rc 0 and form ok
+PASS F10: F10 fails
+PASS F10-gate: rc 0 and form ok
+PASS F10-gate: F10 not evaluable on a boot that did not pass the gate
+PASS s1: rc 0 and form ok
+PASS s1: s1 fails (a bound pair on a D1 control row)
+PASS s2: rc 0 and form ok
+PASS s2: s2 fails ((iii) held on a control row)
+PASS s3: rc 0 and form ok
+PASS s3: s3 fails (an instance link across a lifetime end of its id)
+PASS s4: rc 0 and form ok
+PASS s4: s4 fails (refuted without its conditions)
+PASS ED-unmet: rc 0 and form ok
+PASS ED-unmet: unmet when the found line's (iii) is not given
+PASS ED-nothing: rc 0 and form ok
+PASS ED-nothing: a row with nothing to require: unmet
+PASS ED-found: rc 0 and form ok
+PASS ED-found: a found use without an instance link: unmet
+PASS ED-found: its class static (no generation can form)
+PASS ED-found-boot: rc 0 and form ok
+PASS ED-found-boot: with a held success path line its class is boot
+PASS prec-noread: rc 0 and form ok
+PASS prec-noread: a tool positive without a reader: undefined(no reader)
+PASS prec-N0: rc 0 and form ok
+PASS prec-N0: a reader and no tool positive: undefined(no tool positive)
+PASS prec-N0: recall with k = 0: undefined(k = 0)
+PASS prec-U: rc 0 and form ok
+PASS prec-U: only U: undefined(T + F = 0)
+PASS prec-U: recall 1/1
+PASS prec-TU: rc 0 and form ok
+PASS prec-TU: T and U: a value, not final
+PASS prec-TF: rc 0 and form ok
+PASS prec-TF: T and F: conditional 1/2
+PASS recall-0k: rc 0 and form ok
+PASS recall-0k: a positive the tool did not find: 0/1
+PASS recall-0k: beside: the undetermined positive by kind, one out of plan
+PASS the script opens the expectation file only in F1 and writes only its output
+PASS negative control: a copy that opens the expectation file outside F1 is caught
+PASS negative control: a copy that writes beside its output is caught
+PASS form: the written file says form ok and its tail counts equal its lines
+eval fixtures: 92 checks, 92 passed, 0 failed

@@ -1,0 +1,1 @@
+kz-static.a763e255.xz tools/kz-static/kz-static

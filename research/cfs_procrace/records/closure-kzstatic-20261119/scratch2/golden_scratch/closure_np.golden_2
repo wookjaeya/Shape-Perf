@@ -1,0 +1,635 @@
+extract
+  translation units          1
+  functions                  18 (bodies read 14, in system headers skipped 0)
+  call sites                 32
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                3 (entry resolved 3)
+  loops                      2 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 2, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 1, escaping 0, unsummarized 1
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Chan.sem   writers 2 (direct 0, data function 1, out-pointer 1, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Ent.id   writers 5 (direct 5, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Ent.name   writers 5 (direct 0, data function 5, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 1, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Ent.used   writers 5 (direct 5, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 14, control-flow graphs 14, call-graph components 14 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 1 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               4 (R-T1 2, R-T2 3, both 1; left out, reached only through an unshared base: R-T1 0, R-T2 0)
+result flow                  41 rows (uses: branch 15, return 2, argument 6, store 2, other 0, none 9; guard rows 7); calls with a result 32
+result effect                117 rows (open 63; event send 0, application exit 0, terminal 0; calls on the paths that are none of these, no row: 26); calls explored 16, outcomes 49
+facts-view 1
+[functions] 18
+  fn 0 chan_use closure.c:153-153 params=1 {defined,static}
+  fn 1 ent_create closure.c:74-84 params=3 {defined}
+  fn 2 ent_create_any closure.c:100-111 params=3 {defined}
+  fn 3 ent_create_cnt closure.c:113-125 params=4 {defined}
+  fn 4 ent_create_fin closure.c:139-151 params=3 {defined}
+  fn 5 ent_create_tmp closure.c:86-98 params=3 {defined}
+  fn 6 ent_find closure.c:54-64 params=2 {defined}
+  fn 7 ent_finish closure.c:128-131 params=3 {defined,static}
+  fn 8 ent_reserve closure.c:133-137 params=1 {defined,static}
+  fn 9 ent_slot closure.c:66-72 params=0 {defined,static}
+  fn 10 looker_main closure.c:155-163 params=1 {defined,static,address-taken}
+  fn 11 main closure.c:182-188 params=0 {defined}
+  fn 12 maker_main closure.c:172-180 params=1 {defined,static,address-taken}
+  fn 13 memset /usr/include/string.h:61 params=3 {builtin}
+  fn 14 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 15 strcmp /usr/include/string.h:156 params=2 {builtin}
+  fn 16 strncpy /usr/include/string.h:144 params=3 {builtin}
+  fn 17 user_main closure.c:165-170 params=1 {defined,static,address-taken}
+[returns] 35
+  ent_find returns at closure.c:56:17 alt 0/1 const -2 [CL_ERR_PTR] {}
+      guard=(eq param:out#0 0) when=(eq param:out#0 0)
+  ent_find returns at closure.c:60:7 alt 0/1 const 0 [CL_OK] {in-loop} loop=0
+      guard=(and (and (not (eq param:out#0 0)) (lt local:i 4)) (and (eq field:Ent.used 1) (eq (call-result strcmp (seq field:Ent.name (seq param:name#1))) 0))) when=(and (and (and (not (eq param:out#0 0)) (lt local:i 4)) (eq field:Ent.used 1)) (eq (call-result strcmp (seq field:Ent.name (seq param:name#1))) 0))
+  ent_find returns at closure.c:63:3 alt 0/1 const -17 [CL_ERR_NOT_FOUND] {}
+      guard=(not (eq param:out#0 0)) when=(not (eq param:out#0 0))
+  ent_slot@closure.c:66 returns at closure.c:69:28 alt 0/2 const 0 [0] {from-definition,redefined-later,in-loop} loop=1
+      definition of i at closure.c:68:10 guard=-
+      guard=(and (lt local:i 4) (eq field:Ent.used 0)) when=(and (and (lt local:i 4) (eq field:Ent.used 0)) (not (lt local:i 4)))
+  ent_slot@closure.c:66 returns at closure.c:69:28 alt 1/2 expression (top not a copy) [i++] {from-definition,in-loop} loop=1
+      definition of i at closure.c:68:28 guard=(lt local:i 4)
+      guard=(and (lt local:i 4) (eq field:Ent.used 0)) when=(and (lt local:i 4) (eq field:Ent.used 0))
+  ent_slot@closure.c:66 returns at closure.c:71:3 alt 0/1 const -1 [-1] {}
+      guard=- when=-
+  ent_create returns at closure.c:76:17 alt 0/1 const -2 [CL_ERR_PTR] {}
+      guard=(eq param:out#0 0) when=(eq param:out#0 0)
+  ent_create returns at closure.c:77:40 alt 0/1 const -15 [CL_ERR_DUP] {}
+      guard=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0)) when=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+  ent_create returns at closure.c:78:17 alt 0/1 const -14 [CL_ERR_FULL] {}
+      guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0)) when=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0))
+  ent_create returns at closure.c:83:3 alt 0/1 const 0 [CL_OK] {}
+      guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) when=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0)))
+  ent_create_tmp returns at closure.c:89:17 alt 0/1 const -2 [CL_ERR_PTR] {}
+      guard=(eq param:out#0 0) when=(eq param:out#0 0)
+  ent_create_tmp returns at closure.c:90:40 alt 0/1 const -15 [CL_ERR_DUP] {}
+      guard=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0)) when=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+  ent_create_tmp returns at closure.c:91:17 alt 0/1 const -14 [CL_ERR_FULL] {}
+      guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0)) when=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0))
+  ent_create_tmp returns at closure.c:97:3 alt 0/1 const 0 [CL_OK] {}
+      guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) when=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0)))
+  ent_create_any returns at closure.c:102:17 alt 0/1 const -2 [CL_ERR_PTR] {}
+      guard=(eq param:out#0 0) when=(eq param:out#0 0)
+  ent_create_any returns at closure.c:103:40 alt 0/1 const -15 [CL_ERR_DUP] {}
+      guard=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0)) when=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+  ent_create_any returns at closure.c:104:21 alt 0/1 const 0 [CL_OK] {}
+      guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq (index param:name#1 0) 0)) when=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq (index param:name#1 0) 0))
+  ent_create_any returns at closure.c:105:17 alt 0/1 const -14 [CL_ERR_FULL] {}
+      guard=(and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (lt param:slot#2 0)) when=(and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (lt param:slot#2 0))
+  ent_create_any returns at closure.c:110:3 alt 0/1 const 0 [CL_OK] {}
+      guard=(and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))) when=(and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0)))
+  ent_create_cnt returns at closure.c:115:17 alt 0/1 const -2 [CL_ERR_PTR] {}
+      guard=(eq param:out#0 0) when=(eq param:out#0 0)
+  ent_create_cnt returns at closure.c:116:40 alt 0/1 const -15 [CL_ERR_DUP] {}
+      guard=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0)) when=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+  ent_create_cnt returns at closure.c:117:17 alt 0/1 const -14 [CL_ERR_FULL] {}
+      guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0)) when=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0))
+  ent_create_cnt returns at closure.c:124:3 alt 0/1 const 0 [CL_OK] {}
+      guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) when=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0)))
+  ent_finish@closure.c:128 returns at closure.c:130:3 alt 0/1 param param:status#0 [status] {}
+      guard=- when=-
+  ent_reserve@closure.c:133 returns at closure.c:134:17 alt 0/1 const -14 [CL_ERR_FULL] {}
+      guard=(lt param:slot#0 0) when=(lt param:slot#0 0)
+  ent_reserve@closure.c:133 returns at closure.c:136:3 alt 0/1 const 0 [CL_OK] {}
+      guard=(not (lt param:slot#0 0)) when=(not (lt param:slot#0 0))
+  ent_create_fin returns at closure.c:142:17 alt 0/1 const -2 [CL_ERR_PTR] {}
+      guard=(eq param:out#0 0) when=(eq param:out#0 0)
+  ent_create_fin returns at closure.c:143:40 alt 0/1 const -15 [CL_ERR_DUP] {}
+      guard=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0)) when=(and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+  ent_create_fin returns at closure.c:150:3 alt 0/2 call-result (call-result ent_reserve (seq param:slot#2)) [ent_reserve(slot)] {from-definition,redefined-later} call site 26 closure.c:144:8
+      definition of rc at closure.c:144:6 guard=(and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0)))
+      guard=(and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) when=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0))))
+  ent_create_fin returns at closure.c:150:3 alt 1/2 call-result (call-result ent_finish (seq local:rc (seq param:slot#2 (seq param:out#0)))) [ent_finish(rc, slot, out)] {from-definition} call site 30 closure.c:148:10
+      definition of rc at closure.c:148:8 guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0))
+      guard=(and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) when=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0))
+  chan_use@closure.c:153 returns at closure.c:153:31 alt 0/1 expression (add param:id#0 1) [id + 1] {}
+      guard=- when=-
+  looker_main@closure.c:155 returns at closure.c:162:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+  user_main@closure.c:165 returns at closure.c:169:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+  maker_main@closure.c:172 returns at closure.c:179:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+  main returns at closure.c:187:3 alt 0/1 const 0 [0] {}
+      guard=- when=-
+[resultflow] 41
+  #0 site 1 closure.c:58:30 in ent_find direct -> branch at 58:30 unique cond (and (eq field:Ent.used 1) (eq (call-result strcmp (seq field:Ent.name (seq param:name#1))) 0)) {in-loop}
+  #1 site 4 closure.c:77:7 in ent_create direct -> branch at 77:7 unique cond (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0) {}
+  #2 site 5 closure.c:79:3 in ent_create discarded -> none at 79:3 not-computed {}
+  #3 site 5 closure.c:79:3 in ent_create guard [strncpy] unique cond (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) {addr-taken-local}
+  #4 site 9 closure.c:90:7 in ent_create_tmp direct -> branch at 90:7 unique cond (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0) {}
+  #5 site 10 closure.c:92:3 in ent_create_tmp discarded -> none at 92:3 not-computed {}
+  #6 site 10 closure.c:92:3 in ent_create_tmp guard [strncpy] unique cond (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) {addr-taken-local}
+  #7 site 14 closure.c:103:7 in ent_create_any direct -> branch at 103:7 unique cond (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0) {}
+  #8 site 15 closure.c:106:3 in ent_create_any discarded -> none at 106:3 not-computed {}
+  #9 site 15 closure.c:106:3 in ent_create_any guard [strncpy] unique cond (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))) {addr-taken-local}
+  #10 site 19 closure.c:116:7 in ent_create_cnt direct -> branch at 116:7 unique cond (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0) {}
+  #11 site 20 closure.c:119:5 in ent_create_cnt discarded -> none at 119:5 not-computed {}
+  #12 site 20 closure.c:119:5 in ent_create_cnt guard [strncpy] unique cond (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) (ne param:copy#3 0)) {addr-taken-local}
+  #13 site 25 closure.c:143:7 in ent_create_fin direct -> branch at 143:7 unique cond (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0) {}
+  #14 site 26 closure.c:144:8 in ent_create_fin local-def rc@144:6 -> branch at 145:7 unique cond (eq local:rc@def:144:6 0) {}
+  #15 site 26 closure.c:144:8 in ent_create_fin local-def rc@144:6 -> arg at 148:21 of site 30 closure.c:148:10 arg 0 [ent_finish] unique cond (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) (eq local:rc@def:144:6 0)) {}
+  #16 site 26 closure.c:144:8 in ent_create_fin local-def rc@144:6 -> return at 150:10 shared (others 1: 148:8) cond (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) {}
+  #17 site 26 closure.c:144:8 in ent_create_fin guard [ent_reserve] unique cond (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) {addr-taken-local}
+  #18 site 27 closure.c:146:5 in ent_create_fin discarded -> none at 146:5 not-computed {}
+  #19 site 27 closure.c:146:5 in ent_create_fin guard [strncpy] unique cond (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) (eq local:rc@def:144:6 0)) {addr-taken-local}
+  #20 site 30 closure.c:148:10 in ent_create_fin local-def rc@148:8 -> return at 150:10 shared (others 1: 144:6) cond (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) {}
+  #21 site 30 closure.c:148:10 in ent_create_fin guard [ent_finish] unique cond (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found@addr-taken) (seq param:name#1))) 0))) (eq local:rc@def:144:6 0)) {addr-taken-local}
+  #22 site 31 closure.c:158:3 in looker_main@closure.c:155 discarded -> none at 158:3 not-computed {}
+  #23 site 33 closure.c:159:7 in looker_main@closure.c:155 direct -> branch at 159:7 unique cond (ne (call-result ent_find (seq (addr field:Chan.sem) (seq string:alpha))) 0) {}
+  #24 site 34 closure.c:160:7 in looker_main@closure.c:155 direct -> branch at 160:7 unique cond (ne (call-result ent_find (seq (addr (index global:ids 1)) (seq string:beta))) 0) {}
+  #25 site 35 closure.c:161:7 in looker_main@closure.c:155 direct -> branch at 161:7 unique cond (eq (call-result ent_find (seq (addr local:mine@addr-taken) (seq string:alpha))) 0) {}
+  #26 site 36 closure.c:167:33 in user_main@closure.c:165 field-store -> store at 167:33 [global:seen] unique {}
+  #27 site 37 closure.c:168:17 in user_main@closure.c:165 field-store -> store at 168:17 [global:seen] unique {}
+  #28 site 38 closure.c:174:7 in maker_main@closure.c:172 direct -> branch at 174:7 unique cond (ne (call-result ent_create (seq (addr (index global:ids 2)) (seq string:alpha (seq (call-result ent_slot))))) 0) {}
+  #29 site 39 closure.c:174:36 in maker_main@closure.c:172 direct -> arg at 174:36 of site 38 closure.c:174:7 arg 2 [ent_create] unique {}
+  #30 site 40 closure.c:175:7 in maker_main@closure.c:172 direct -> branch at 175:7 unique cond (ne (call-result ent_create_tmp (seq (addr (index global:ids 3)) (seq string:beta (seq (call-result ent_slot))))) 0) {}
+  #31 site 41 closure.c:175:39 in maker_main@closure.c:172 direct -> arg at 175:39 of site 40 closure.c:175:7 arg 2 [ent_create_tmp] unique {}
+  #32 site 42 closure.c:176:7 in maker_main@closure.c:172 direct -> branch at 176:7 unique cond (ne (call-result ent_create_any (seq (addr (index global:ids 4)) (seq string:alpha (seq (call-result ent_slot))))) 0) {}
+  #33 site 43 closure.c:176:40 in maker_main@closure.c:172 direct -> arg at 176:40 of site 42 closure.c:176:7 arg 2 [ent_create_any] unique {}
+  #34 site 44 closure.c:177:7 in maker_main@closure.c:172 direct -> branch at 177:7 unique cond (ne (call-result ent_create_cnt (seq (addr (index global:ids 5)) (seq string:beta (seq (call-result ent_slot) (seq global:seen))))) 0) {}
+  #35 site 45 closure.c:177:39 in maker_main@closure.c:172 direct -> arg at 177:39 of site 44 closure.c:177:7 arg 2 [ent_create_cnt] unique {}
+  #36 site 46 closure.c:178:7 in maker_main@closure.c:172 direct -> branch at 178:7 unique cond (ne (call-result ent_create_fin (seq (addr (index global:ids 6)) (seq string:alpha (seq (call-result ent_slot))))) 0) {}
+  #37 site 47 closure.c:178:40 in maker_main@closure.c:172 direct -> arg at 178:40 of site 46 closure.c:178:7 arg 2 [ent_create_fin] unique {}
+  #38 site 48 closure.c:184:9 in main cast-void -> none at 184:9 not-computed {}
+  #39 site 49 closure.c:185:9 in main cast-void -> none at 185:9 not-computed {}
+  #40 site 50 closure.c:186:9 in main cast-void -> none at 186:9 not-computed {}
+[resulteffect] 117
+  site 1 closure.c:58:30 in ent_find other 0 none -> return-const at closure.c:60 [CL_OK] open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: strcmp has no body in these facts)) flow 0 {}
+      chain: call strcmp at 58:30 -> value (other) -> no branch decided by it -> 60:7
+  site 1 closure.c:58:30 in ent_find other 0 none -> return-const at closure.c:63 value -17 [CL_ERR_NOT_FOUND] open (on a path through a branch this value does not decide; the outcome is a value other than those listed (none) (the returns not followed: strcmp has no body in these facts)) flow 0 {}
+      chain: call strcmp at 58:30 -> value (other) -> no branch decided by it -> 63:3
+  site 1 closure.c:58:30 in ent_find other 0 none -> retry [the call runs again] open (on a path through a branch this value does not decide) flow 0 {}
+      chain: call strcmp at 58:30 -> value (other) -> no branch decided by it -> call strcmp at 58:30
+  site 4 closure.c:77:7 in ent_create failure -17 reached -> return-const at closure.c:78 value -14 [CL_ERR_FULL] open (on a path through a branch this value does not decide) flow 1 {}
+      chain: call ent_find at 77:7 -> value -17 -> branches decided by it at 77:7 -> 78:17
+  site 4 closure.c:77:7 in ent_create failure -17 reached -> return-const at closure.c:83 [CL_OK] open (on a path through a branch this value does not decide) flow 1 {}
+      chain: call ent_find at 77:7 -> value -17 -> branches decided by it at 77:7 -> 83:3
+  site 4 closure.c:77:7 in ent_create failure -17 reached -> store at closure.c:80 value 1 [field:Ent.used := 1] open (on a path through a branch this value does not decide) flow 1 {}
+      chain: call ent_find at 77:7 -> value -17 -> branches decided by it at 77:7 -> 80:3
+  site 4 closure.c:77:7 in ent_create failure -17 reached -> store at closure.c:81 [field:Ent.id := slot + 100] open (on a path through a branch this value does not decide) flow 1 {}
+      chain: call ent_find at 77:7 -> value -17 -> branches decided by it at 77:7 -> 81:3
+  site 4 closure.c:77:7 in ent_create failure -2 reached -> return-const at closure.c:78 value -14 [CL_ERR_FULL] open (on a path through a branch this value does not decide) flow 1 {}
+      chain: call ent_find at 77:7 -> value -2 -> branches decided by it at 77:7 -> 78:17
+  site 4 closure.c:77:7 in ent_create failure -2 reached -> return-const at closure.c:83 [CL_OK] open (on a path through a branch this value does not decide) flow 1 {}
+      chain: call ent_find at 77:7 -> value -2 -> branches decided by it at 77:7 -> 83:3
+  site 4 closure.c:77:7 in ent_create failure -2 reached -> store at closure.c:80 value 1 [field:Ent.used := 1] open (on a path through a branch this value does not decide) flow 1 {}
+      chain: call ent_find at 77:7 -> value -2 -> branches decided by it at 77:7 -> 80:3
+  site 4 closure.c:77:7 in ent_create failure -2 reached -> store at closure.c:81 [field:Ent.id := slot + 100] open (on a path through a branch this value does not decide) flow 1 {}
+      chain: call ent_find at 77:7 -> value -2 -> branches decided by it at 77:7 -> 81:3
+  site 4 closure.c:77:7 in ent_create success 0 reached -> return-const at closure.c:77 value -15 [CL_ERR_DUP] complete flow 1 {}
+      chain: call ent_find at 77:7 -> value 0 -> branches decided by it at 77:7 -> 77:40
+  site 4 closure.c:77:7 in ent_create success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 1 {}
+      chain: call ent_find at 77:7 -> value 0 -> branches decided by it at 77:7
+  site 9 closure.c:90:7 in ent_create_tmp failure -17 reached -> return-const at closure.c:91 value -14 [CL_ERR_FULL] open (on a path through a branch this value does not decide) flow 4 {}
+      chain: call ent_find at 90:7 -> value -17 -> branches decided by it at 90:7 -> 91:17
+  site 9 closure.c:90:7 in ent_create_tmp failure -17 reached -> return-const at closure.c:97 [CL_OK] open (on a path through a branch this value does not decide) flow 4 {}
+      chain: call ent_find at 90:7 -> value -17 -> branches decided by it at 90:7 -> 97:3
+  site 9 closure.c:90:7 in ent_create_tmp failure -17 reached -> store at closure.c:93 value 1 [field:Ent.used := 1] open (on a path through a branch this value does not decide) flow 4 {}
+      chain: call ent_find at 90:7 -> value -17 -> branches decided by it at 90:7 -> 93:3
+  site 9 closure.c:90:7 in ent_create_tmp failure -17 reached -> store at closure.c:95 [field:Ent.id := id] open (on a path through a branch this value does not decide) flow 4 {}
+      chain: call ent_find at 90:7 -> value -17 -> branches decided by it at 90:7 -> 95:3
+  site 9 closure.c:90:7 in ent_create_tmp failure -2 reached -> return-const at closure.c:91 value -14 [CL_ERR_FULL] open (on a path through a branch this value does not decide) flow 4 {}
+      chain: call ent_find at 90:7 -> value -2 -> branches decided by it at 90:7 -> 91:17
+  site 9 closure.c:90:7 in ent_create_tmp failure -2 reached -> return-const at closure.c:97 [CL_OK] open (on a path through a branch this value does not decide) flow 4 {}
+      chain: call ent_find at 90:7 -> value -2 -> branches decided by it at 90:7 -> 97:3
+  site 9 closure.c:90:7 in ent_create_tmp failure -2 reached -> store at closure.c:93 value 1 [field:Ent.used := 1] open (on a path through a branch this value does not decide) flow 4 {}
+      chain: call ent_find at 90:7 -> value -2 -> branches decided by it at 90:7 -> 93:3
+  site 9 closure.c:90:7 in ent_create_tmp failure -2 reached -> store at closure.c:95 [field:Ent.id := id] open (on a path through a branch this value does not decide) flow 4 {}
+      chain: call ent_find at 90:7 -> value -2 -> branches decided by it at 90:7 -> 95:3
+  site 9 closure.c:90:7 in ent_create_tmp success 0 reached -> return-const at closure.c:90 value -15 [CL_ERR_DUP] complete flow 4 {}
+      chain: call ent_find at 90:7 -> value 0 -> branches decided by it at 90:7 -> 90:40
+  site 9 closure.c:90:7 in ent_create_tmp success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 4 {}
+      chain: call ent_find at 90:7 -> value 0 -> branches decided by it at 90:7
+  site 14 closure.c:103:7 in ent_create_any failure -17 reached -> return-const at closure.c:104 [CL_OK] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -17 -> branches decided by it at 103:7 -> 104:21
+  site 14 closure.c:103:7 in ent_create_any failure -17 reached -> return-const at closure.c:105 value -14 [CL_ERR_FULL] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -17 -> branches decided by it at 103:7 -> 105:17
+  site 14 closure.c:103:7 in ent_create_any failure -17 reached -> return-const at closure.c:110 [CL_OK] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -17 -> branches decided by it at 103:7 -> 110:3
+  site 14 closure.c:103:7 in ent_create_any failure -17 reached -> store at closure.c:107 value 1 [field:Ent.used := 1] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -17 -> branches decided by it at 103:7 -> 107:3
+  site 14 closure.c:103:7 in ent_create_any failure -17 reached -> store at closure.c:108 [field:Ent.id := slot + 300] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -17 -> branches decided by it at 103:7 -> 108:3
+  site 14 closure.c:103:7 in ent_create_any failure -2 reached -> return-const at closure.c:104 [CL_OK] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -2 -> branches decided by it at 103:7 -> 104:21
+  site 14 closure.c:103:7 in ent_create_any failure -2 reached -> return-const at closure.c:105 value -14 [CL_ERR_FULL] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -2 -> branches decided by it at 103:7 -> 105:17
+  site 14 closure.c:103:7 in ent_create_any failure -2 reached -> return-const at closure.c:110 [CL_OK] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -2 -> branches decided by it at 103:7 -> 110:3
+  site 14 closure.c:103:7 in ent_create_any failure -2 reached -> store at closure.c:107 value 1 [field:Ent.used := 1] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -2 -> branches decided by it at 103:7 -> 107:3
+  site 14 closure.c:103:7 in ent_create_any failure -2 reached -> store at closure.c:108 [field:Ent.id := slot + 300] open (on a path through a branch this value does not decide) flow 7 {}
+      chain: call ent_find at 103:7 -> value -2 -> branches decided by it at 103:7 -> 108:3
+  site 14 closure.c:103:7 in ent_create_any success 0 reached -> return-const at closure.c:103 value -15 [CL_ERR_DUP] complete flow 7 {}
+      chain: call ent_find at 103:7 -> value 0 -> branches decided by it at 103:7 -> 103:40
+  site 14 closure.c:103:7 in ent_create_any success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 7 {}
+      chain: call ent_find at 103:7 -> value 0 -> branches decided by it at 103:7
+  site 19 closure.c:116:7 in ent_create_cnt failure -17 reached -> return-const at closure.c:117 value -14 [CL_ERR_FULL] open (on a path through a branch this value does not decide) flow 10 {}
+      chain: call ent_find at 116:7 -> value -17 -> branches decided by it at 116:7 -> 117:17
+  site 19 closure.c:116:7 in ent_create_cnt failure -17 reached -> return-const at closure.c:124 [CL_OK] open (on a path through a branch this value does not decide) flow 10 {}
+      chain: call ent_find at 116:7 -> value -17 -> branches decided by it at 116:7 -> 124:3
+  site 19 closure.c:116:7 in ent_create_cnt failure -17 reached -> store at closure.c:121 value 1 [field:Ent.used := 1] open (on a path through a branch this value does not decide) flow 10 {}
+      chain: call ent_find at 116:7 -> value -17 -> branches decided by it at 116:7 -> 121:3
+  site 19 closure.c:116:7 in ent_create_cnt failure -17 reached -> store at closure.c:122 [field:Ent.id := slot + 400] open (on a path through a branch this value does not decide) flow 10 {}
+      chain: call ent_find at 116:7 -> value -17 -> branches decided by it at 116:7 -> 122:3
+  site 19 closure.c:116:7 in ent_create_cnt failure -2 reached -> return-const at closure.c:117 value -14 [CL_ERR_FULL] open (on a path through a branch this value does not decide) flow 10 {}
+      chain: call ent_find at 116:7 -> value -2 -> branches decided by it at 116:7 -> 117:17
+  site 19 closure.c:116:7 in ent_create_cnt failure -2 reached -> return-const at closure.c:124 [CL_OK] open (on a path through a branch this value does not decide) flow 10 {}
+      chain: call ent_find at 116:7 -> value -2 -> branches decided by it at 116:7 -> 124:3
+  site 19 closure.c:116:7 in ent_create_cnt failure -2 reached -> store at closure.c:121 value 1 [field:Ent.used := 1] open (on a path through a branch this value does not decide) flow 10 {}
+      chain: call ent_find at 116:7 -> value -2 -> branches decided by it at 116:7 -> 121:3
+  site 19 closure.c:116:7 in ent_create_cnt failure -2 reached -> store at closure.c:122 [field:Ent.id := slot + 400] open (on a path through a branch this value does not decide) flow 10 {}
+      chain: call ent_find at 116:7 -> value -2 -> branches decided by it at 116:7 -> 122:3
+  site 19 closure.c:116:7 in ent_create_cnt success 0 reached -> return-const at closure.c:116 value -15 [CL_ERR_DUP] complete flow 10 {}
+      chain: call ent_find at 116:7 -> value 0 -> branches decided by it at 116:7 -> 116:40
+  site 19 closure.c:116:7 in ent_create_cnt success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 10 {}
+      chain: call ent_find at 116:7 -> value 0 -> branches decided by it at 116:7
+  site 25 closure.c:143:7 in ent_create_fin failure -17 reached -> none at closure.c:150 [CL_ERR_NOT_FOUND] open (on a path through a branch this value does not decide; returns rc, neither a constant nor this result (assigned a value that is not a constant on this path)) flow 13 {}
+      chain: call ent_find at 143:7 -> value -17 -> branches decided by it at 143:7 -> 150:3
+  site 25 closure.c:143:7 in ent_create_fin failure -17 reached -> store at closure.c:147 [field:Ent.id := slot + 500] open (on a path through a branch this value does not decide) flow 13 {}
+      chain: call ent_find at 143:7 -> value -17 -> branches decided by it at 143:7 -> 147:5
+  site 25 closure.c:143:7 in ent_create_fin failure -2 reached -> none at closure.c:150 [CL_ERR_PTR] open (on a path through a branch this value does not decide; returns rc, neither a constant nor this result (assigned a value that is not a constant on this path)) flow 13 {}
+      chain: call ent_find at 143:7 -> value -2 -> branches decided by it at 143:7 -> 150:3
+  site 25 closure.c:143:7 in ent_create_fin failure -2 reached -> store at closure.c:147 [field:Ent.id := slot + 500] open (on a path through a branch this value does not decide) flow 13 {}
+      chain: call ent_find at 143:7 -> value -2 -> branches decided by it at 143:7 -> 147:5
+  site 25 closure.c:143:7 in ent_create_fin success 0 reached -> return-const at closure.c:143 value -15 [CL_ERR_DUP] complete flow 13 {}
+      chain: call ent_find at 143:7 -> value 0 -> branches decided by it at 143:7 -> 143:40
+  site 25 closure.c:143:7 in ent_create_fin success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 13 {}
+      chain: call ent_find at 143:7 -> value 0 -> branches decided by it at 143:7
+  site 26 closure.c:144:8 in ent_create_fin failure -14 reached -> return-result at closure.c:150 [CL_ERR_FULL] complete flow 14 {}
+      chain: call ent_reserve at 144:8 -> def rc at 144:6 -> value -14 -> branches decided by it at 145:7 -> 150:3
+  site 26 closure.c:144:8 in ent_create_fin failure -14 reached -> fallthrough [nothing before the paths of the values join] complete flow 14 {}
+      chain: call ent_reserve at 144:8 -> def rc at 144:6 -> value -14 -> branches decided by it at 145:7
+  site 26 closure.c:144:8 in ent_create_fin success 0 reached -> return-result at closure.c:150 [CL_OK] complete flow 14 {}
+      chain: call ent_reserve at 144:8 -> def rc at 144:6 -> value 0 -> branches decided by it at 145:7 -> 150:3 (ent_finish at 148:10 returns its parameter 0 unchanged)
+  site 26 closure.c:144:8 in ent_create_fin success 0 reached -> store at closure.c:147 [field:Ent.id := slot + 500] complete flow 14 {}
+      chain: call ent_reserve at 144:8 -> def rc at 144:6 -> value 0 -> branches decided by it at 145:7 -> 147:5
+  site 30 closure.c:148:10 in ent_create_fin failure -14 reached -> return-result at closure.c:150 [CL_ERR_FULL (ent_finish returns its parameter 0 unchanged (the argument is the result of ent_reserve at 144:8))] complete flow - {}
+      chain: call ent_finish at 148:10 -> def rc at 148:8 -> value -14 -> no branch decided by it -> 150:3
+  site 30 closure.c:148:10 in ent_create_fin failure -14 reached -> fallthrough [nothing before the paths of the values join] complete flow - {}
+      chain: call ent_finish at 148:10 -> def rc at 148:8 -> value -14 -> no branch decided by it
+  site 30 closure.c:148:10 in ent_create_fin success 0 reached -> return-result at closure.c:150 [CL_OK (ent_finish returns its parameter 0 unchanged (the argument is the result of ent_reserve at 144:8))] complete flow - {}
+      chain: call ent_finish at 148:10 -> def rc at 148:8 -> value 0 -> no branch decided by it -> 150:3
+  site 30 closure.c:148:10 in ent_create_fin success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow - {}
+      chain: call ent_finish at 148:10 -> def rc at 148:8 -> value 0 -> no branch decided by it
+  site 33 closure.c:159:7 in looker_main@closure.c:155 failure -17 reached -> return-const at closure.c:162 [0] open (on a path through a branch this value does not decide) flow 23 {}
+      chain: call ent_find at 159:7 -> value -17 -> branches decided by it at 159:7 -> 162:3
+  site 33 closure.c:159:7 in looker_main@closure.c:155 failure -17 reached -> store at closure.c:159 [global:seen := seen + 1] complete flow 23 {}
+      chain: call ent_find at 159:7 -> value -17 -> branches decided by it at 159:7 -> 159:50
+  site 33 closure.c:159:7 in looker_main@closure.c:155 failure -2 reached -> return-const at closure.c:162 [0] open (on a path through a branch this value does not decide) flow 23 {}
+      chain: call ent_find at 159:7 -> value -2 -> branches decided by it at 159:7 -> 162:3
+  site 33 closure.c:159:7 in looker_main@closure.c:155 failure -2 reached -> store at closure.c:159 [global:seen := seen + 1] complete flow 23 {}
+      chain: call ent_find at 159:7 -> value -2 -> branches decided by it at 159:7 -> 159:50
+  site 33 closure.c:159:7 in looker_main@closure.c:155 success 0 reached -> return-const at closure.c:162 [0] open (on a path through a branch this value does not decide) flow 23 {}
+      chain: call ent_find at 159:7 -> value 0 -> branches decided by it at 159:7 -> 162:3
+  site 33 closure.c:159:7 in looker_main@closure.c:155 success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 23 {}
+      chain: call ent_find at 159:7 -> value 0 -> branches decided by it at 159:7
+  site 34 closure.c:160:7 in looker_main@closure.c:155 failure -17 reached -> return-const at closure.c:162 [0] open (on a path through a branch this value does not decide) flow 24 {}
+      chain: call ent_find at 160:7 -> value -17 -> branches decided by it at 160:7 -> 162:3
+  site 34 closure.c:160:7 in looker_main@closure.c:155 failure -17 reached -> store at closure.c:160 [global:seen := seen + 2] complete flow 24 {}
+      chain: call ent_find at 160:7 -> value -17 -> branches decided by it at 160:7 -> 160:43
+  site 34 closure.c:160:7 in looker_main@closure.c:155 failure -2 reached -> return-const at closure.c:162 [0] open (on a path through a branch this value does not decide) flow 24 {}
+      chain: call ent_find at 160:7 -> value -2 -> branches decided by it at 160:7 -> 162:3
+  site 34 closure.c:160:7 in looker_main@closure.c:155 failure -2 reached -> store at closure.c:160 [global:seen := seen + 2] complete flow 24 {}
+      chain: call ent_find at 160:7 -> value -2 -> branches decided by it at 160:7 -> 160:43
+  site 34 closure.c:160:7 in looker_main@closure.c:155 success 0 reached -> return-const at closure.c:162 [0] open (on a path through a branch this value does not decide) flow 24 {}
+      chain: call ent_find at 160:7 -> value 0 -> branches decided by it at 160:7 -> 162:3
+  site 34 closure.c:160:7 in looker_main@closure.c:155 success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 24 {}
+      chain: call ent_find at 160:7 -> value 0 -> branches decided by it at 160:7
+  site 35 closure.c:161:7 in looker_main@closure.c:155 failure -17 reached -> return-const at closure.c:162 [0] complete flow 25 {}
+      chain: call ent_find at 161:7 -> value -17 -> branches decided by it at 161:7 -> 162:3
+  site 35 closure.c:161:7 in looker_main@closure.c:155 failure -17 reached -> fallthrough [nothing before the paths of the values join] complete flow 25 {}
+      chain: call ent_find at 161:7 -> value -17 -> branches decided by it at 161:7
+  site 35 closure.c:161:7 in looker_main@closure.c:155 failure -2 reached -> return-const at closure.c:162 [0] complete flow 25 {}
+      chain: call ent_find at 161:7 -> value -2 -> branches decided by it at 161:7 -> 162:3
+  site 35 closure.c:161:7 in looker_main@closure.c:155 failure -2 reached -> fallthrough [nothing before the paths of the values join] complete flow 25 {}
+      chain: call ent_find at 161:7 -> value -2 -> branches decided by it at 161:7
+  site 35 closure.c:161:7 in looker_main@closure.c:155 success 0 reached -> return-const at closure.c:162 [0] complete flow 25 {}
+      chain: call ent_find at 161:7 -> value 0 -> branches decided by it at 161:7 -> 162:3
+  site 35 closure.c:161:7 in looker_main@closure.c:155 success 0 reached -> store at closure.c:161 [global:seen := seen + mine] complete flow 25 {}
+      chain: call ent_find at 161:7 -> value 0 -> branches decided by it at 161:7 -> 161:42
+  site 38 closure.c:174:7 in maker_main@closure.c:172 failure -15 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 28 {}
+      chain: call ent_create at 174:7 -> value -15 -> branches decided by it at 174:7 -> 179:3
+  site 38 closure.c:174:7 in maker_main@closure.c:172 failure -15 reached -> store at closure.c:174 [global:seen := seen + 4] complete flow 28 {}
+      chain: call ent_create at 174:7 -> value -15 -> branches decided by it at 174:7 -> 174:58
+  site 38 closure.c:174:7 in maker_main@closure.c:172 failure -14 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 28 {}
+      chain: call ent_create at 174:7 -> value -14 -> branches decided by it at 174:7 -> 179:3
+  site 38 closure.c:174:7 in maker_main@closure.c:172 failure -14 reached -> store at closure.c:174 [global:seen := seen + 4] complete flow 28 {}
+      chain: call ent_create at 174:7 -> value -14 -> branches decided by it at 174:7 -> 174:58
+  site 38 closure.c:174:7 in maker_main@closure.c:172 failure -2 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 28 {}
+      chain: call ent_create at 174:7 -> value -2 -> branches decided by it at 174:7 -> 179:3
+  site 38 closure.c:174:7 in maker_main@closure.c:172 failure -2 reached -> store at closure.c:174 [global:seen := seen + 4] complete flow 28 {}
+      chain: call ent_create at 174:7 -> value -2 -> branches decided by it at 174:7 -> 174:58
+  site 38 closure.c:174:7 in maker_main@closure.c:172 success 0 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 28 {}
+      chain: call ent_create at 174:7 -> value 0 -> branches decided by it at 174:7 -> 179:3
+  site 38 closure.c:174:7 in maker_main@closure.c:172 success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 28 {}
+      chain: call ent_create at 174:7 -> value 0 -> branches decided by it at 174:7
+  site 40 closure.c:175:7 in maker_main@closure.c:172 failure -15 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 30 {}
+      chain: call ent_create_tmp at 175:7 -> value -15 -> branches decided by it at 175:7 -> 179:3
+  site 40 closure.c:175:7 in maker_main@closure.c:172 failure -15 reached -> store at closure.c:175 [global:seen := seen + 8] complete flow 30 {}
+      chain: call ent_create_tmp at 175:7 -> value -15 -> branches decided by it at 175:7 -> 175:61
+  site 40 closure.c:175:7 in maker_main@closure.c:172 failure -14 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 30 {}
+      chain: call ent_create_tmp at 175:7 -> value -14 -> branches decided by it at 175:7 -> 179:3
+  site 40 closure.c:175:7 in maker_main@closure.c:172 failure -14 reached -> store at closure.c:175 [global:seen := seen + 8] complete flow 30 {}
+      chain: call ent_create_tmp at 175:7 -> value -14 -> branches decided by it at 175:7 -> 175:61
+  site 40 closure.c:175:7 in maker_main@closure.c:172 failure -2 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 30 {}
+      chain: call ent_create_tmp at 175:7 -> value -2 -> branches decided by it at 175:7 -> 179:3
+  site 40 closure.c:175:7 in maker_main@closure.c:172 failure -2 reached -> store at closure.c:175 [global:seen := seen + 8] complete flow 30 {}
+      chain: call ent_create_tmp at 175:7 -> value -2 -> branches decided by it at 175:7 -> 175:61
+  site 40 closure.c:175:7 in maker_main@closure.c:172 success 0 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 30 {}
+      chain: call ent_create_tmp at 175:7 -> value 0 -> branches decided by it at 175:7 -> 179:3
+  site 40 closure.c:175:7 in maker_main@closure.c:172 success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 30 {}
+      chain: call ent_create_tmp at 175:7 -> value 0 -> branches decided by it at 175:7
+  site 42 closure.c:176:7 in maker_main@closure.c:172 failure -15 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 32 {}
+      chain: call ent_create_any at 176:7 -> value -15 -> branches decided by it at 176:7 -> 179:3
+  site 42 closure.c:176:7 in maker_main@closure.c:172 failure -15 reached -> store at closure.c:176 [global:seen := seen + 16] complete flow 32 {}
+      chain: call ent_create_any at 176:7 -> value -15 -> branches decided by it at 176:7 -> 176:62
+  site 42 closure.c:176:7 in maker_main@closure.c:172 failure -14 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 32 {}
+      chain: call ent_create_any at 176:7 -> value -14 -> branches decided by it at 176:7 -> 179:3
+  site 42 closure.c:176:7 in maker_main@closure.c:172 failure -14 reached -> store at closure.c:176 [global:seen := seen + 16] complete flow 32 {}
+      chain: call ent_create_any at 176:7 -> value -14 -> branches decided by it at 176:7 -> 176:62
+  site 42 closure.c:176:7 in maker_main@closure.c:172 failure -2 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 32 {}
+      chain: call ent_create_any at 176:7 -> value -2 -> branches decided by it at 176:7 -> 179:3
+  site 42 closure.c:176:7 in maker_main@closure.c:172 failure -2 reached -> store at closure.c:176 [global:seen := seen + 16] complete flow 32 {}
+      chain: call ent_create_any at 176:7 -> value -2 -> branches decided by it at 176:7 -> 176:62
+  site 42 closure.c:176:7 in maker_main@closure.c:172 success 0 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 32 {}
+      chain: call ent_create_any at 176:7 -> value 0 -> branches decided by it at 176:7 -> 179:3
+  site 42 closure.c:176:7 in maker_main@closure.c:172 success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 32 {}
+      chain: call ent_create_any at 176:7 -> value 0 -> branches decided by it at 176:7
+  site 44 closure.c:177:7 in maker_main@closure.c:172 failure -15 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 34 {}
+      chain: call ent_create_cnt at 177:7 -> value -15 -> branches decided by it at 177:7 -> 179:3
+  site 44 closure.c:177:7 in maker_main@closure.c:172 failure -15 reached -> store at closure.c:177 [global:seen := seen + 32] complete flow 34 {}
+      chain: call ent_create_cnt at 177:7 -> value -15 -> branches decided by it at 177:7 -> 177:67
+  site 44 closure.c:177:7 in maker_main@closure.c:172 failure -14 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 34 {}
+      chain: call ent_create_cnt at 177:7 -> value -14 -> branches decided by it at 177:7 -> 179:3
+  site 44 closure.c:177:7 in maker_main@closure.c:172 failure -14 reached -> store at closure.c:177 [global:seen := seen + 32] complete flow 34 {}
+      chain: call ent_create_cnt at 177:7 -> value -14 -> branches decided by it at 177:7 -> 177:67
+  site 44 closure.c:177:7 in maker_main@closure.c:172 failure -2 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 34 {}
+      chain: call ent_create_cnt at 177:7 -> value -2 -> branches decided by it at 177:7 -> 179:3
+  site 44 closure.c:177:7 in maker_main@closure.c:172 failure -2 reached -> store at closure.c:177 [global:seen := seen + 32] complete flow 34 {}
+      chain: call ent_create_cnt at 177:7 -> value -2 -> branches decided by it at 177:7 -> 177:67
+  site 44 closure.c:177:7 in maker_main@closure.c:172 success 0 reached -> return-const at closure.c:179 [0] open (on a path through a branch this value does not decide) flow 34 {}
+      chain: call ent_create_cnt at 177:7 -> value 0 -> branches decided by it at 177:7 -> 179:3
+  site 44 closure.c:177:7 in maker_main@closure.c:172 success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 34 {}
+      chain: call ent_create_cnt at 177:7 -> value 0 -> branches decided by it at 177:7
+  site 46 closure.c:178:7 in maker_main@closure.c:172 failure -15 reached -> return-const at closure.c:179 [0] complete flow 36 {}
+      chain: call ent_create_fin at 178:7 -> value -15 -> branches decided by it at 178:7 -> 179:3
+  site 46 closure.c:178:7 in maker_main@closure.c:172 failure -15 reached -> store at closure.c:178 [global:seen := seen + 64] complete flow 36 {}
+      chain: call ent_create_fin at 178:7 -> value -15 -> branches decided by it at 178:7 -> 178:62
+  site 46 closure.c:178:7 in maker_main@closure.c:172 failure -14 reached -> return-const at closure.c:179 [0] complete flow 36 {}
+      chain: call ent_create_fin at 178:7 -> value -14 -> branches decided by it at 178:7 -> 179:3
+  site 46 closure.c:178:7 in maker_main@closure.c:172 failure -14 reached -> store at closure.c:178 [global:seen := seen + 64] complete flow 36 {}
+      chain: call ent_create_fin at 178:7 -> value -14 -> branches decided by it at 178:7 -> 178:62
+  site 46 closure.c:178:7 in maker_main@closure.c:172 failure -2 reached -> return-const at closure.c:179 [0] complete flow 36 {}
+      chain: call ent_create_fin at 178:7 -> value -2 -> branches decided by it at 178:7 -> 179:3
+  site 46 closure.c:178:7 in maker_main@closure.c:172 failure -2 reached -> store at closure.c:178 [global:seen := seen + 64] complete flow 36 {}
+      chain: call ent_create_fin at 178:7 -> value -2 -> branches decided by it at 178:7 -> 178:62
+  site 46 closure.c:178:7 in maker_main@closure.c:172 success 0 reached -> return-const at closure.c:179 [0] complete flow 36 {}
+      chain: call ent_create_fin at 178:7 -> value 0 -> branches decided by it at 178:7 -> 179:3
+  site 46 closure.c:178:7 in maker_main@closure.c:172 success 0 reached -> fallthrough [nothing before the paths of the values join] complete flow 36 {}
+      chain: call ent_create_fin at 178:7 -> value 0 -> branches decided by it at 178:7
+
+# relations
+kz-relations 1
+rules relations rules revision 12 (2026-11-18)
+mode profile-free
+  extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
+  extract.profile = kz-static-builtin-minimal / 
+  extract.p0_table = P0 table revision 3 (2026-10-30), 72 entries
+  extract.p0_table_scope = families of this revision: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread or process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Of a family the members that take, release, wait, signal, sleep, end, name a thread, bind or create a key, push or pop a handler, load or look up, or store memory are entries; a family is not listed whole where this list names members left out.  Not in this revision: read-write locks (pthread_rwlock_*; their shared acquisitions are not read by the lock-set analysis, so the family is left out whole and its acquisitions are no lock operations), barriers (pthread_barrier_*), one-time initialization (pthread_once, call_once), thread cancellation of another thread (pthread_cancel and the cancellation state functions), signals (kill, raise, pthread_kill, sigwait), dlclose, dlerror and dladdr, functions a compiler or a fortify wrapper calls without a call in the source (__stack_chk_fail, __chk_fail and the *_chk functions); thread join and detach (pthread_join, pthread_tryjoin_np, pthread_timedjoin_np, pthread_detach, thrd_join, thrd_detach); POSIX timers (timer_create, timer_settime, timer_gettime, timer_getoverrun, timer_delete; a timer with SIGEV_THREAD notification starts its function on a new thread, which is no actor here); I/O multiplexing (select, pselect, poll, ppoll); the initialization, destruction, attribute and query members of the mutex, spin lock, semaphore and condition variable families and of thread creation (pthread_mutex_init, pthread_mutex_destroy, pthread_mutexattr_*, pthread_spin_init, pthread_spin_destroy, sem_init, sem_destroy, sem_open, sem_close, sem_unlink, sem_getvalue, pthread_cond_init, pthread_cond_destroy, pthread_condattr_*, mtx_init, mtx_destroy, cnd_init, cnd_destroy, pthread_attr_*); scheduling (sched_*, pthread_setschedparam, pthread_getschedparam, pthread_setschedprio); data functions not in this revision (stpcpy, stpncpy, strlcpy and strlcat (glibc 2.38 and later), mempcpy, memccpy, explicit_bzero, and the wide-character members); formatted input, which stores through its arguments (sscanf, vsscanf, fscanf, vfscanf, scanf, vscanf); handlers registered for process exit (atexit, at_quick_exit, on_exit)
+  extract.derivation_rules = wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  extract.targets_rule = R-T1,R-T2 (target rules revision 1): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)
+  extract.reading_options_vs_basis = not compared: no basis (--source)
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
+rules with result flow: relations rules revision 13 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): 41 rows (uses: branch 15, return 2, argument 6, store 2, other 0, none 9; guard rows 7); calls with a result 32; 117 rows (open 63; event send 0, application exit 0, terminal 0; calls on the paths that are none of these, no row: 26); calls explored 16, outcomes 49
+handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: T 1 T? 2 none 1
+run order: no record given (this revision reads no run record; the column says so in every row)
+functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
+actors: roots 4 (process 1, spawn-entry 3, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 0
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
+summary A 3 (namespaces 1, lookup uses 3, with a creator of the same partition in another actor 3, key-matched 3) B 1 (with a callee check 0) C 0 (self-identity reads 0); flip static-possible 3, static-undetermined 0, none 1; feasibility proven-impossible 0, possible 0, undecidable 4, not graded 0
+summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 0, creators 0; lookup rows with the membership unresolved 0; lookup rows without a creator of their partition 0 []
+summary success path: creator callees 5: held 2; missing 3 (a second origin can carry the value 1; the stored value is not tied to the success path 1; an implication between conditions is not decided 1)
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 4 [no run record read 4]; writer_set_incomplete 3 [FIELD_STATUS not complete 3]; fixed_proof_open 4 [no static order between the actors 4]; reasons of the whole facts on every row: none
+[A] 3 (namespaces 1, key comparisons 1; left out: searches over no global table 0)
+  namespace Ent.name (record type Ent; tables ents)
+      search: A1 search loop closure.c:57:3 in ent_find: key Ent.name strcmp at closure.c:58:30 compared with parameter 1 [name] (search parameter 1)
+      active fields: Ent.used 
+      active test: Ent.used == 1 is in use (a search with the key comparison requires it)
+      lifecycle Ent.name: writers 5 from WRITERS (the field is an extraction target)
+        memcpy at closure.c:79:3 in ent_create value=top [copy of name] guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0)))
+        memcpy at closure.c:92:3 in ent_create_tmp value=top [copy of name] guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0)))
+        memcpy at closure.c:106:3 in ent_create_any value=top [copy of name] guard=(and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0)))
+        memcpy at closure.c:119:5 in ent_create_cnt value=top [copy of name] guard=(and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) (ne param:copy#3 0))
+        memcpy at closure.c:146:5 in ent_create_fin value=top [copy of name] guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0))
+      lifecycle Ent.used: writers 5 from WRITERS (the field is an extraction target)
+        assign at closure.c:80:3 in ent_create value=1 [1] guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) class=reservation or activation (writes the in-use value)
+        assign at closure.c:93:3 in ent_create_tmp value=1 [1] guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) class=reservation or activation (writes the in-use value)
+        assign at closure.c:107:3 in ent_create_any value=1 [1] guard=(and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))) class=reservation or activation (writes the in-use value)
+        assign at closure.c:121:3 in ent_create_cnt value=1 [1] guard=(and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) class=reservation or activation (writes the in-use value)
+        assign at closure.c:135:3 in ent_reserve@closure.c:133 value=1 [1] guard=(not (lt param:slot#0 0)) class=reservation or activation (writes the in-use value)
+      publication writes of the creator ent_create#1: Ent.name memcpy closure.c:79:3 in ent_create; Ent.used assign closure.c:80:3 in ent_create := 1
+      publication writes of the creator ent_create_any#1: Ent.name memcpy closure.c:106:3 in ent_create_any; Ent.used assign closure.c:107:3 in ent_create_any := 1
+      publication writes of the creator ent_create_cnt#1: Ent.name memcpy closure.c:119:5 in ent_create_cnt; Ent.used assign closure.c:121:3 in ent_create_cnt := 1
+      publication writes of the creator ent_create_fin#1: Ent.name memcpy closure.c:146:5 in ent_create_fin; Ent.used assign closure.c:135:3 in ent_reserve@closure.c:133 := 1
+      publication writes of the creator ent_create_tmp#1: Ent.name memcpy closure.c:92:3 in ent_create_tmp; Ent.used assign closure.c:93:3 in ent_create_tmp := 1
+      key-parameter functions: lookups ent_find#1; creators ent_create#1 ent_create_any#1 ent_create_cnt#1 ent_create_fin#1 ent_create_tmp#1
+      success path of the creator callees of the namespace (relations rules revision 14): 5
+        callee-check (success path): ent_create: held: success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:83:3 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))); excluded: closure.c:76:17 alt 0/1 constant -2; closure.c:77:40 alt 0/1 constant -15; closure.c:78:17 alt 0/1 constant -14; for alt 0/1 at closure.c:83:3: name store closure.c:79:3 [Ent.name] implied by the carrying condition; out-id store closure.c:82:3 in ent_create through parameter 0 (PARAM_FLOW out-store) under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:82:3, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+        callee-check (success path): ent_create_any: missing(a second origin can carry the value): success value 0 [outcome class rule]; carried by 2 alternative(s): closure.c:104:21 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq (index param:name#1 0) 0)); closure.c:110:3 alt 0/1 = constant 0 under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))); excluded: closure.c:102:17 alt 0/1 constant -2; closure.c:103:40 alt 0/1 constant -15; closure.c:105:17 alt 0/1 constant -14; for alt 0/1 at closure.c:104:21: name store closure.c:106:3 [Ent.name] under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))): not shown to be implied by the carrying condition; out-id store closure.c:109:3 in ent_create_any through parameter 0 (PARAM_FLOW out-store) under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))): not shown to be implied by the carrying condition; for alt 0/1 at closure.c:110:3: name store closure.c:106:3 [Ent.name] implied by the carrying condition; out-id store closure.c:109:3 in ent_create_any through parameter 0 (PARAM_FLOW out-store) under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:109:3, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+        callee-check (success path): ent_create_cnt: missing(an implication between conditions is not decided): success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:124:3 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))); excluded: closure.c:115:17 alt 0/1 constant -2; closure.c:116:40 alt 0/1 constant -15; closure.c:117:17 alt 0/1 constant -14; for alt 0/1 at closure.c:124:3: name store closure.c:119:5 [Ent.name] under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) (ne param:copy#3 0)): not shown to be implied by the carrying condition; out-id store closure.c:123:3 in ent_create_cnt through parameter 0 (PARAM_FLOW out-store) under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:123:3, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+        callee-check (success path): ent_create_fin: held: success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:150:3 alt 1/2 = result of ent_finish at closure.c:148:10 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0)); excluded: closure.c:142:17 alt 0/1 constant -2; closure.c:143:40 alt 0/1 constant -15; closure.c:150:3 alt 0/2 its own branch (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0)))) (false with rc = 0); for alt 1/2 at closure.c:150:3: name store closure.c:146:5 [Ent.name] implied by the carrying condition; out-id store closure.c:129:36 in ent_finish@closure.c:128 through parameter 0 (PARAM_FLOW out-store) under the call's guard (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0)) and (and (eq param:status#0 0) (ne param:out#2 0)), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:129:36, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+        callee-check (success path): ent_create_tmp: missing(the stored value is not tied to the success path): success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:97:3 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))); excluded: closure.c:89:17 alt 0/1 constant -2; closure.c:90:40 alt 0/1 constant -15; closure.c:91:17 alt 0/1 constant -14; for alt 0/1 at closure.c:97:3: name store closure.c:92:3 [Ent.name] implied by the carrying condition; out-id store closure.c:96:3 in ent_create_tmp through parameter 0 (PARAM_FLOW out-store) under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: [id] at closure.c:96:3 (the out-store row gives it as written, with no value tree); a name these facts do not resolve to a definition
+      uses: lookups 3, creators 5 (calls from outside the key-parameter functions; a creator reaches a write of the key); left out, another callback passed to the search: lookups 0, creators 0
+      namespace layers: B P0 R
+  A1 lookup closure.c:159:7 in looker_main@closure.c:155 -> ent_find#1 namespace Ent.name partition {} key known
+      membership: reaches the comparison strcmp at closure.c:58:30 in its own search loop
+      key: string literal "alpha"
+      actors: {looker_main@closure.c:155 (spawn-entry)}; result=tested
+      id holder: the lookup's arg 0 [&chans[0].sem] address Chan.sem base global-array-element object chans@closure.c:50 <- ent_find stores through its parameter 0 in ent_find at closure.c:59:7 [ents[i].id]
+      holder: field Chan.sem; writers 2: clearing closure.c:158:3 in looker_main@closure.c:155 value=0 [fill]; own out store closure.c:159:7; FIELD_STATUS per-field=writer-set-complete type-level=writer-set-complete: flags writer-function-not-once, several-instances; readers 2: user_main@closure.c:165 at closure.c:167:51: tests the cleared value before the dependent use at closure.c:167:51; user_main@closure.c:165 at closure.c:168:35: uses the value without such a test (branch-condition reads, the tests themselves: 1; the cleared value 0)
+      creator: same key: closure.c:174:7 in maker_main@closure.c:172 -> ent_create key string literal "alpha" actors {maker_main@closure.c:172 (spawn-entry)}
+      creator: same key: closure.c:176:7 in maker_main@closure.c:172 -> ent_create_any key string literal "alpha" actors {maker_main@closure.c:172 (spawn-entry)}
+      creator: same key: closure.c:178:7 in maker_main@closure.c:172 -> ent_create_fin key string literal "alpha" actors {maker_main@closure.c:172 (spawn-entry)}
+      not a pair: key constants differ: closure.c:175:7 in maker_main@closure.c:172 -> ent_create_tmp key string literal "beta" actors {maker_main@closure.c:172 (spawn-entry)}
+      not a pair: key constants differ: closure.c:177:7 in maker_main@closure.c:172 -> ent_create_cnt key string literal "beta" actors {maker_main@closure.c:172 (spawn-entry)}
+      id holder: the creator closure.c:174:7 -> ent_create: arg 0 [&ids[2]] address <global>.ids base global-array-element object ids@closure.c:51 <- ent_create stores through its parameter 0 in ent_create at closure.c:82:3 [ents[slot].id]
+      id holder: the creator closure.c:176:7 -> ent_create_any: arg 0 [&ids[4]] address <global>.ids base global-array-element object ids@closure.c:51 <- ent_create_any stores through its parameter 0 in ent_create_any at closure.c:109:3 [ents[slot].id]
+      id holder: the creator closure.c:178:7 -> ent_create_fin: arg 0 [&ids[6]] address <global>.ids base global-array-element object ids@closure.c:51 <- ent_create_fin stores through its parameter 0 in ent_finish@closure.c:128 at closure.c:129:36 [ents[slot].id]
+      callee-check: ent_create returns -15 [CL_ERR_DUP] when (and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+      callee-check: ent_create returns -14 [CL_ERR_FULL] when (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0))
+      callee-check: ent_create returns -2 [CL_ERR_PTR] when (eq param:out#0 0)
+      callee-check: ent_create returns 0 [CL_OK] when (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0)))
+      callee-check (set): ent_create: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
+      callee-check (result flow): ent_create returns -15: CL_ERR_DUP (a constant returned at closure.c:77)
+      callee-check (result flow): ent_create returns -14: CL_ERR_FULL (a constant returned at closure.c:78) (open)
+      callee-check (result flow): ent_create returns 0: CL_OK (a constant returned at closure.c:83) (open)
+      callee-check (result flow, success): ent_create: no value of success class is shown to reach the return (the values RESULT_EFFECT shows to reach a return of ent_create, not all it returns: callee-check (set) says whether that set is complete)
+      callee-check (success path): ent_create: held: success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:83:3 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))); excluded: closure.c:76:17 alt 0/1 constant -2; closure.c:77:40 alt 0/1 constant -15; closure.c:78:17 alt 0/1 constant -14; for alt 0/1 at closure.c:83:3: name store closure.c:79:3 [Ent.name] implied by the carrying condition; out-id store closure.c:82:3 in ent_create through parameter 0 (PARAM_FLOW out-store) under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:82:3, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+      callee-check: ent_create_any returns -15 [CL_ERR_DUP] when (and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+      callee-check: ent_create_any returns -14 [CL_ERR_FULL] when (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (lt param:slot#2 0))
+      callee-check: ent_create_any returns -2 [CL_ERR_PTR] when (eq param:out#0 0)
+      callee-check: ent_create_any returns 0 [CL_OK] when (or (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq (index param:name#1 0) 0)) (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))))
+      callee-check (set): ent_create_any: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
+      callee-check (result flow): ent_create_any returns -15: CL_ERR_DUP (a constant returned at closure.c:103)
+      callee-check (result flow): ent_create_any returns -14: CL_ERR_FULL (a constant returned at closure.c:105) (open)
+      callee-check (result flow): ent_create_any returns 0: CL_OK (a constant returned at closure.c:104) (open)
+      callee-check (result flow, success): ent_create_any: no value of success class is shown to reach the return (the values RESULT_EFFECT shows to reach a return of ent_create_any, not all it returns: callee-check (set) says whether that set is complete)
+      callee-check (success path): ent_create_any: missing(a second origin can carry the value): success value 0 [outcome class rule]; carried by 2 alternative(s): closure.c:104:21 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq (index param:name#1 0) 0)); closure.c:110:3 alt 0/1 = constant 0 under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))); excluded: closure.c:102:17 alt 0/1 constant -2; closure.c:103:40 alt 0/1 constant -15; closure.c:105:17 alt 0/1 constant -14; for alt 0/1 at closure.c:104:21: name store closure.c:106:3 [Ent.name] under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))): not shown to be implied by the carrying condition; out-id store closure.c:109:3 in ent_create_any through parameter 0 (PARAM_FLOW out-store) under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))): not shown to be implied by the carrying condition; for alt 0/1 at closure.c:110:3: name store closure.c:106:3 [Ent.name] implied by the carrying condition; out-id store closure.c:109:3 in ent_create_any through parameter 0 (PARAM_FLOW out-store) under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:109:3, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+      callee-check: ent_create_fin returns -15 [CL_ERR_DUP] when (and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+      callee-check: ent_create_fin returns -2 [CL_ERR_PTR] when (eq param:out#0 0)
+      callee-check: ent_create_fin returns -14 [CL_ERR_FULL] through ent_create_fin -> ent_reserve@closure.c:133 when (lt param:slot#0 0); not shown to reach the return: ent_create_fin returns the result of ent_reserve at closure.c:150:3 from the definition at closure.c:144:6, redefined later on a path to the return
+      callee-check: ent_create_fin returns 0 [CL_OK] through ent_create_fin -> ent_reserve@closure.c:133 when (not (lt param:slot#0 0)); not shown to reach the return: ent_create_fin returns the result of ent_reserve at closure.c:150:3 from the definition at closure.c:144:6, redefined later on a path to the return
+      callee-check (returns not followed): ent_create_fin: ent_finish@closure.c:128 returns param [status] at closure.c:130:3
+      callee-check (set): ent_create_fin: not established (1 returns not followed, 2 constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them
+      callee-check (result flow): ent_create_fin returns -15: CL_ERR_DUP (a constant returned at closure.c:143)
+      callee-check (result flow): ent_create_fin returns -14: the value of ent_reserve at closure.c:144:8 reaches the return at closure.c:150 [CL_ERR_FULL]
+      callee-check (result flow): ent_create_fin returns 0: the value of ent_reserve at closure.c:144:8 reaches the return at closure.c:150 [CL_OK]
+      callee-check (result flow, success): ent_create_fin: shown to reach the return: 0 (the values RESULT_EFFECT shows to reach a return of ent_create_fin, not all it returns: callee-check (set) says whether that set is complete)
+      callee-check (success path): ent_create_fin: held: success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:150:3 alt 1/2 = result of ent_finish at closure.c:148:10 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0)); excluded: closure.c:142:17 alt 0/1 constant -2; closure.c:143:40 alt 0/1 constant -15; closure.c:150:3 alt 0/2 its own branch (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0)))) (false with rc = 0); for alt 1/2 at closure.c:150:3: name store closure.c:146:5 [Ent.name] implied by the carrying condition; out-id store closure.c:129:36 in ent_finish@closure.c:128 through parameter 0 (PARAM_FLOW out-store) under the call's guard (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0)) and (and (eq param:status#0 0) (ne param:out#2 0)), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:129:36, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+      writers: Ent.name: 5 (memcpy 5) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 5: direct 0, data-function 5, out-pointer 0, initial values 1; instances 5); hits on the field: escape 1, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Ent.used: 5 (assign 5) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 5: direct 5, data-function 0, out-pointer 0, initial values 1; instances 5); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 1; untyped write sites in the program 0; flags sibling-exposed, writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result tested; no return of it and no terminal operation under it found
+      absence: unevaluated (the lookup's no-match value is not established in these facts)
+      handling_label: T? (over the failure values (the absence value is not evaluated) -17, -2) T?: the return at closure.c:162 is on a path that is open: on a path through a branch this value does not decide; T?: the return at closure.c:162 is on a path that is open: on a path through a branch this value does not decide
+      dependency: path A: 3 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: ent_find returns -17 [CL_ERR_NOT_FOUND], ent_find returns -2 [CL_ERR_PTR], ent_find returns 0 [CL_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+  A2 lookup closure.c:160:7 in looker_main@closure.c:155 -> ent_find#1 namespace Ent.name partition {} key known
+      membership: reaches the comparison strcmp at closure.c:58:30 in its own search loop
+      key: string literal "beta"
+      actors: {looker_main@closure.c:155 (spawn-entry)}; result=tested
+      id holder: the lookup's arg 0 [&ids[1]] address <global>.ids base global-array-element object ids@closure.c:51 <- ent_find stores through its parameter 0 in ent_find at closure.c:59:7 [ents[i].id]
+      holder: [&ids[1]] address base global-array-element <global>.ids; writers: not decided: the holder is no record field (WRITERS names the stores of fields)
+      creator: same key: closure.c:175:7 in maker_main@closure.c:172 -> ent_create_tmp key string literal "beta" actors {maker_main@closure.c:172 (spawn-entry)}
+      creator: same key: closure.c:177:7 in maker_main@closure.c:172 -> ent_create_cnt key string literal "beta" actors {maker_main@closure.c:172 (spawn-entry)}
+      not a pair: key constants differ: closure.c:174:7 in maker_main@closure.c:172 -> ent_create key string literal "alpha" actors {maker_main@closure.c:172 (spawn-entry)}
+      not a pair: key constants differ: closure.c:176:7 in maker_main@closure.c:172 -> ent_create_any key string literal "alpha" actors {maker_main@closure.c:172 (spawn-entry)}
+      not a pair: key constants differ: closure.c:178:7 in maker_main@closure.c:172 -> ent_create_fin key string literal "alpha" actors {maker_main@closure.c:172 (spawn-entry)}
+      id holder: the creator closure.c:175:7 -> ent_create_tmp: arg 0 [&ids[3]] address <global>.ids base global-array-element object ids@closure.c:51 <- ent_create_tmp stores through its parameter 0 in ent_create_tmp at closure.c:96:3 [id]
+      id holder: the creator closure.c:177:7 -> ent_create_cnt: arg 0 [&ids[5]] address <global>.ids base global-array-element object ids@closure.c:51 <- ent_create_cnt stores through its parameter 0 in ent_create_cnt at closure.c:123:3 [ents[slot].id]
+      callee-check: ent_create_cnt returns -15 [CL_ERR_DUP] when (and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+      callee-check: ent_create_cnt returns -14 [CL_ERR_FULL] when (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0))
+      callee-check: ent_create_cnt returns -2 [CL_ERR_PTR] when (eq param:out#0 0)
+      callee-check: ent_create_cnt returns 0 [CL_OK] when (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0)))
+      callee-check (set): ent_create_cnt: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
+      callee-check (result flow): ent_create_cnt returns -15: CL_ERR_DUP (a constant returned at closure.c:116)
+      callee-check (result flow): ent_create_cnt returns -14: CL_ERR_FULL (a constant returned at closure.c:117) (open)
+      callee-check (result flow): ent_create_cnt returns 0: CL_OK (a constant returned at closure.c:124) (open)
+      callee-check (result flow, success): ent_create_cnt: no value of success class is shown to reach the return (the values RESULT_EFFECT shows to reach a return of ent_create_cnt, not all it returns: callee-check (set) says whether that set is complete)
+      callee-check (success path): ent_create_cnt: missing(an implication between conditions is not decided): success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:124:3 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))); excluded: closure.c:115:17 alt 0/1 constant -2; closure.c:116:40 alt 0/1 constant -15; closure.c:117:17 alt 0/1 constant -14; for alt 0/1 at closure.c:124:3: name store closure.c:119:5 [Ent.name] under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))) (ne param:copy#3 0)): not shown to be implied by the carrying condition; out-id store closure.c:123:3 in ent_create_cnt through parameter 0 (PARAM_FLOW out-store) under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:123:3, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+      callee-check: ent_create_tmp returns -15 [CL_ERR_DUP] when (and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+      callee-check: ent_create_tmp returns -14 [CL_ERR_FULL] when (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0))
+      callee-check: ent_create_tmp returns -2 [CL_ERR_PTR] when (eq param:out#0 0)
+      callee-check: ent_create_tmp returns 0 [CL_OK] when (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0)))
+      callee-check (set): ent_create_tmp: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
+      callee-check (result flow): ent_create_tmp returns -15: CL_ERR_DUP (a constant returned at closure.c:90)
+      callee-check (result flow): ent_create_tmp returns -14: CL_ERR_FULL (a constant returned at closure.c:91) (open)
+      callee-check (result flow): ent_create_tmp returns 0: CL_OK (a constant returned at closure.c:97) (open)
+      callee-check (result flow, success): ent_create_tmp: no value of success class is shown to reach the return (the values RESULT_EFFECT shows to reach a return of ent_create_tmp, not all it returns: callee-check (set) says whether that set is complete)
+      callee-check (success path): ent_create_tmp: missing(the stored value is not tied to the success path): success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:97:3 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))); excluded: closure.c:89:17 alt 0/1 constant -2; closure.c:90:40 alt 0/1 constant -15; closure.c:91:17 alt 0/1 constant -14; for alt 0/1 at closure.c:97:3: name store closure.c:92:3 [Ent.name] implied by the carrying condition; out-id store closure.c:96:3 in ent_create_tmp through parameter 0 (PARAM_FLOW out-store) under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: [id] at closure.c:96:3 (the out-store row gives it as written, with no value tree); a name these facts do not resolve to a definition
+      writers: Ent.name: 5 (memcpy 5) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 5: direct 0, data-function 5, out-pointer 0, initial values 1; instances 5); hits on the field: escape 1, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Ent.used: 5 (assign 5) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 5: direct 5, data-function 0, out-pointer 0, initial values 1; instances 5); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 1; untyped write sites in the program 0; flags sibling-exposed, writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result tested; no return of it and no terminal operation under it found
+      absence: unevaluated (the lookup's no-match value is not established in these facts)
+      handling_label: T? (over the failure values (the absence value is not evaluated) -17, -2) T?: the return at closure.c:162 is on a path that is open: on a path through a branch this value does not decide; T?: the return at closure.c:162 is on a path that is open: on a path through a branch this value does not decide
+      dependency: path A: 2 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: ent_find returns -17 [CL_ERR_NOT_FOUND], ent_find returns -2 [CL_ERR_PTR], ent_find returns 0 [CL_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+  A3 lookup closure.c:161:7 in looker_main@closure.c:155 -> ent_find#1 namespace Ent.name partition {} key known
+      membership: reaches the comparison strcmp at closure.c:58:30 in its own search loop
+      key: string literal "alpha"
+      actors: {looker_main@closure.c:155 (spawn-entry)}; result=tested
+      id holder: the lookup's arg 0 [&mine] address base local <- ent_find stores through its parameter 0 in ent_find at closure.c:59:7 [ents[i].id]
+      holder: local mine in looker_main@closure.c:155; writers 1: own out store closure.c:161:7; local: definitions 0 (RESULT_FLOW); readers: not decided: the uses of a local are not READS rows
+      creator: same key: closure.c:174:7 in maker_main@closure.c:172 -> ent_create key string literal "alpha" actors {maker_main@closure.c:172 (spawn-entry)}
+      creator: same key: closure.c:176:7 in maker_main@closure.c:172 -> ent_create_any key string literal "alpha" actors {maker_main@closure.c:172 (spawn-entry)}
+      creator: same key: closure.c:178:7 in maker_main@closure.c:172 -> ent_create_fin key string literal "alpha" actors {maker_main@closure.c:172 (spawn-entry)}
+      not a pair: key constants differ: closure.c:175:7 in maker_main@closure.c:172 -> ent_create_tmp key string literal "beta" actors {maker_main@closure.c:172 (spawn-entry)}
+      not a pair: key constants differ: closure.c:177:7 in maker_main@closure.c:172 -> ent_create_cnt key string literal "beta" actors {maker_main@closure.c:172 (spawn-entry)}
+      id holder: the creator closure.c:174:7 -> ent_create: arg 0 [&ids[2]] address <global>.ids base global-array-element object ids@closure.c:51 <- ent_create stores through its parameter 0 in ent_create at closure.c:82:3 [ents[slot].id]
+      id holder: the creator closure.c:176:7 -> ent_create_any: arg 0 [&ids[4]] address <global>.ids base global-array-element object ids@closure.c:51 <- ent_create_any stores through its parameter 0 in ent_create_any at closure.c:109:3 [ents[slot].id]
+      id holder: the creator closure.c:178:7 -> ent_create_fin: arg 0 [&ids[6]] address <global>.ids base global-array-element object ids@closure.c:51 <- ent_create_fin stores through its parameter 0 in ent_finish@closure.c:128 at closure.c:129:36 [ents[slot].id]
+      callee-check: ent_create returns -15 [CL_ERR_DUP] when (and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+      callee-check: ent_create returns -14 [CL_ERR_FULL] when (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (lt param:slot#2 0))
+      callee-check: ent_create returns -2 [CL_ERR_PTR] when (eq param:out#0 0)
+      callee-check: ent_create returns 0 [CL_OK] when (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0)))
+      callee-check (set): ent_create: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
+      callee-check (result flow): ent_create returns -15: CL_ERR_DUP (a constant returned at closure.c:77)
+      callee-check (result flow): ent_create returns -14: CL_ERR_FULL (a constant returned at closure.c:78) (open)
+      callee-check (result flow): ent_create returns 0: CL_OK (a constant returned at closure.c:83) (open)
+      callee-check (result flow, success): ent_create: no value of success class is shown to reach the return (the values RESULT_EFFECT shows to reach a return of ent_create, not all it returns: callee-check (set) says whether that set is complete)
+      callee-check (success path): ent_create: held: success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:83:3 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))); excluded: closure.c:76:17 alt 0/1 constant -2; closure.c:77:40 alt 0/1 constant -15; closure.c:78:17 alt 0/1 constant -14; for alt 0/1 at closure.c:83:3: name store closure.c:79:3 [Ent.name] implied by the carrying condition; out-id store closure.c:82:3 in ent_create through parameter 0 (PARAM_FLOW out-store) under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:82:3, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+      callee-check: ent_create_any returns -15 [CL_ERR_DUP] when (and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+      callee-check: ent_create_any returns -14 [CL_ERR_FULL] when (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (lt param:slot#2 0))
+      callee-check: ent_create_any returns -2 [CL_ERR_PTR] when (eq param:out#0 0)
+      callee-check: ent_create_any returns 0 [CL_OK] when (or (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq (index param:name#1 0) 0)) (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))))
+      callee-check (set): ent_create_any: complete under these facts (every return is a constant or the result of a followed call, none through a definition redefined later)
+      callee-check (result flow): ent_create_any returns -15: CL_ERR_DUP (a constant returned at closure.c:103)
+      callee-check (result flow): ent_create_any returns -14: CL_ERR_FULL (a constant returned at closure.c:105) (open)
+      callee-check (result flow): ent_create_any returns 0: CL_OK (a constant returned at closure.c:104) (open)
+      callee-check (result flow, success): ent_create_any: no value of success class is shown to reach the return (the values RESULT_EFFECT shows to reach a return of ent_create_any, not all it returns: callee-check (set) says whether that set is complete)
+      callee-check (success path): ent_create_any: missing(a second origin can carry the value): success value 0 [outcome class rule]; carried by 2 alternative(s): closure.c:104:21 alt 0/1 = constant 0 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq (index param:name#1 0) 0)); closure.c:110:3 alt 0/1 = constant 0 under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))); excluded: closure.c:102:17 alt 0/1 constant -2; closure.c:103:40 alt 0/1 constant -15; closure.c:105:17 alt 0/1 constant -14; for alt 0/1 at closure.c:104:21: name store closure.c:106:3 [Ent.name] under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))): not shown to be implied by the carrying condition; out-id store closure.c:109:3 in ent_create_any through parameter 0 (PARAM_FLOW out-store) under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))): not shown to be implied by the carrying condition; for alt 0/1 at closure.c:110:3: name store closure.c:106:3 [Ent.name] implied by the carrying condition; out-id store closure.c:109:3 in ent_create_any through parameter 0 (PARAM_FLOW out-store) under (and (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (eq (index param:name#1 0) 0))) (not (lt param:slot#2 0))), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:109:3, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+      callee-check: ent_create_fin returns -15 [CL_ERR_DUP] when (and (not (eq param:out#0 0)) (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))
+      callee-check: ent_create_fin returns -2 [CL_ERR_PTR] when (eq param:out#0 0)
+      callee-check: ent_create_fin returns -14 [CL_ERR_FULL] through ent_create_fin -> ent_reserve@closure.c:133 when (lt param:slot#0 0); not shown to reach the return: ent_create_fin returns the result of ent_reserve at closure.c:150:3 from the definition at closure.c:144:6, redefined later on a path to the return
+      callee-check: ent_create_fin returns 0 [CL_OK] through ent_create_fin -> ent_reserve@closure.c:133 when (not (lt param:slot#0 0)); not shown to reach the return: ent_create_fin returns the result of ent_reserve at closure.c:150:3 from the definition at closure.c:144:6, redefined later on a path to the return
+      callee-check (returns not followed): ent_create_fin: ent_finish@closure.c:128 returns param [status] at closure.c:130:3
+      callee-check (set): ent_create_fin: not established (1 returns not followed, 2 constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them
+      callee-check (result flow): ent_create_fin returns -15: CL_ERR_DUP (a constant returned at closure.c:143)
+      callee-check (result flow): ent_create_fin returns -14: the value of ent_reserve at closure.c:144:8 reaches the return at closure.c:150 [CL_ERR_FULL]
+      callee-check (result flow): ent_create_fin returns 0: the value of ent_reserve at closure.c:144:8 reaches the return at closure.c:150 [CL_OK]
+      callee-check (result flow, success): ent_create_fin: shown to reach the return: 0 (the values RESULT_EFFECT shows to reach a return of ent_create_fin, not all it returns: callee-check (set) says whether that set is complete)
+      callee-check (success path): ent_create_fin: held: success value 0 [outcome class rule]; carried by 1 alternative(s): closure.c:150:3 alt 1/2 = result of ent_finish at closure.c:148:10 under (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0)); excluded: closure.c:142:17 alt 0/1 constant -2; closure.c:143:40 alt 0/1 constant -15; closure.c:150:3 alt 0/2 its own branch (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (not (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0)))) (false with rc = 0); for alt 1/2 at closure.c:150:3: name store closure.c:146:5 [Ent.name] implied by the carrying condition; out-id store closure.c:129:36 in ent_finish@closure.c:128 through parameter 0 (PARAM_FLOW out-store) under the call's guard (and (and (not (eq param:out#0 0)) (not (eq (call-result ent_find (seq (addr local:found) (seq param:name#1))) 0))) (eq local:rc 0)) and (and (eq param:status#0 0) (ne param:out#2 0)), implied by the carrying condition (the parameter non-null on the path); stored value: ents[slot].id at closure.c:129:36, the value expression of the store itself (as written in the out-store row), the only definition that reaches the store under its guard
+      writers: Ent.name: 5 (memcpy 5) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 5: direct 0, data-function 5, out-pointer 0, initial values 1; instances 5); hits on the field: escape 1, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances, array-element-stores-not-collected; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Ent.used: 5 (assign 5) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 5: direct 5, data-function 0, out-pointer 0, initial values 1; instances 5); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 1; untyped write sites in the program 0; flags sibling-exposed, writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result tested; no return of it and no terminal operation under it found
+      absence: unevaluated (the lookup's no-match value is not established in these facts)
+      handling_label: T (over the failure values (the absence value is not evaluated) -17, -2) T: looker_main@closure.c:155 returns 0 at closure.c:162 (not of failure class); T: fallthrough [nothing before the paths of the values join] at -; T: looker_main@closure.c:155 returns 0 at closure.c:162 (not of failure class); and 1 more
+      dependency: path A: 3 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: ent_find returns -17 [CL_ERR_NOT_FOUND], ent_find returns -2 [CL_ERR_PTR], ent_find returns 0 [CL_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); fixed_proof_open(no static order between the actors)
+[B] 1 (field-argument groups 1; left out: no writer 0, one actor only 0)
+  B1 Chan.sem -> chan_use@closure.c:153#0 sites=2 callee-check=none
+      site closure.c:167:33 in user_main@closure.c:165 [chans[0].sem] base=global-array-element hops=0 result=used
+      site closure.c:168:17 in user_main@closure.c:165 [chans[1].sem] base=global-array-element hops=0 result=used
+      field: INIT 0 (chans); writers 2 from WRITERS (the field is an extraction target)
+        memset at closure.c:158:3 in looker_main@closure.c:155 value=0 [fill 0]
+        out-pointer at closure.c:159:7 in looker_main@closure.c:155 via ent_find value=symbolic [ents[i].id] guard=(and (and (not (eq param:out#0 0)) (lt local:i 4)) (and (eq field:Ent.used 1) (eq (call-result strcmp (seq field:Ent.name (seq param:name#1))) 0)))
+      writers: Chan.sem: 2 (memset 1, out-pointer 1) from WRITERS (the field is an extraction target); of them covers-more-than-the-field 1, early-init 0, init-tree 0, partial-write 0; premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 0, data-function 1, out-pointer 1, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (0 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      actors: readers {user_main@closure.c:165 (spawn-entry)}; writers {looker_main@closure.c:155 (spawn-entry)} (inter-actor)
+      handling: discarded 0, used 2, tested 0
+      handling_label: none (no callee check)
+      dependency: path B: the shared field Chan.sem is read as argument 0 of chan_use@closure.c:153 at 2 sites; its writers run in another actor
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no callee check depends on the argument
+      layers: B P0 R (writers: rule targets)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
+[C] 0 (spawn calls 3, with no resolved entry 0, with no event after them on their control-flow graph 1; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 0, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)

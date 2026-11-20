@@ -1,0 +1,11 @@
+# space_guard.sh kind=fixtures need=100000000 floor=314572800 interval=2 cmd=python3 -I env/obs1/tests/test_explain4.py env/obs1 kairos/tests/static/data/reason_vocabulary.txt <scratch>/xr4/fx_final
+start 2026-11-19T08:29:45.714Z free=551288832 threshold=414572800
+sample 2026-11-19T08:29:45.718Z 551284736
+sample 2026-11-19T08:29:47.727Z 540655616
+sample 2026-11-19T08:29:49.732Z 529969152
+sample 2026-11-19T08:29:51.738Z 519000064
+sample 2026-11-19T08:29:53.745Z 508534784
+sample 2026-11-19T08:29:55.751Z 497655808
+sample 2026-11-19T08:29:57.757Z 486817792
+sample 2026-11-19T08:29:59.764Z 478707712
+end 2026-11-19T08:30:01.772Z kind=fixtures verdict=completed rc=0 free=478576640 lowest=478576640 dip=72712192 change=-72712192

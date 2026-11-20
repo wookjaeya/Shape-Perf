@@ -1,0 +1,6 @@
+# archive.sh order_rev1_on_extract records/order-rules-rev1-20261116/order_rev1_on_extract.sha256 2026-11-19T13:52:47Z
+1. directory = list: 15 files, 7729151 bytes (apparent), 7770112 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/order_rev1_on_extract/order_rev1_on_extract.tar.xz 113744 bytes sha256 63273826d997f7e868da9877cda8fb99da3ea806c4ca8584659b02a22b4bc956
+4. round trip: 15 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/order_rev1_on_extract removed 2026-11-19T13:52:48Z
+PASS

@@ -1,0 +1,15 @@
+facts-view 1
+[loopdefs] 13
+  loop 177 cfe/modules/es/fsw/src/cfe_es_apps.c:508:5 in CFE_ES_GetTaskFunction recognised form flag+value {under-lock,call-result} predicate (and (ne (call-result CFE_ES_GetTaskRecordByContext) 0) (and (call-result CFE_ResourceId_IsDefined (seq field:CFE_ES_TaskRecord_t.AppId)) (ne field:CFE_ES_TaskRecord_t.EntryFunc 0)))
+    ReturnCode@498:31 before-loop at cfe/modules/es/fsw/src/cfe_es_apps.c:504:16 recognised flag {under-lock} value 3288334359
+    ReturnCode@498:31 in-body at cfe/modules/es/fsw/src/cfe_es_apps.c:519:28 recognised flag {under-lock} value 0 guard (and (ne local:TaskRecPtr 0) (and (call-result CFE_ResourceId_IsDefined (seq field:CFE_ES_TaskRecord_t.AppId)) (ne local:EntryFunc 0)))
+    EntryFunc@497:31 before-loop at cfe/modules/es/fsw/src/cfe_es_apps.c:506:16 recognised value {under-lock} value 0
+    EntryFunc@497:31 in-body at cfe/modules/es/fsw/src/cfe_es_apps.c:516:23 recognised value {under-lock} value field:CFE_ES_TaskRecord_t.EntryFunc guard (ne local:TaskRecPtr 0)
+    TaskRecPtr@496:31 in-body at cfe/modules/es/fsw/src/cfe_es_apps.c:513:20 recognised value {under-lock,call-result} value (call-result CFE_ES_GetTaskRecordByContext)
+  loop 204 cfe/modules/es/fsw/src/cfe_es_start.c:716:5 in CFE_ES_CreateObjects not-examined {}
+  loop 348 osal/src/os/posix/src/os-impl-tasks.c:721:5 in OS_TaskDelay_Impl refused-unresolved {}
+    status@709:21 in-body at osal/src/os/posix/src/os-impl-tasks.c:723:16 refused-unresolved {} value (call-result clock_nanosleep (seq 1 (seq 1 (seq (addr local:sleep_end) (seq 0)))))
+  loop 357 osal/src/os/shared/src/osapi-common.c:366:5 in OS_DeleteAllObjects refused-address-taken {}
+    ObjectCount@358:12 in-body at osal/src/os/shared/src/osapi-common.c:368:21 refused-address-taken {} value 0
+  loop 157 apps/to_lab/fsw/src/to_lab_app.c:96:5 in TO_LAB_AppMain refused-address-taken {}
+    RunStatus@81:12 before-loop at apps/to_lab/fsw/src/to_lab_app.c:81:12 refused-address-taken {} value 1

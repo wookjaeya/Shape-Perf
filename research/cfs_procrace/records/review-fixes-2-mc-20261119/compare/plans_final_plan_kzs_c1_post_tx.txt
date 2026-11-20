@@ -1,0 +1,4 @@
+cdiff old_lines=816 new_lines=816 only_old=3 only_new=3 other=0
+class - kzs-header-revisions pairs=1
+class - sidecar-sha256 pairs=1
+class - hex64-field pairs=1

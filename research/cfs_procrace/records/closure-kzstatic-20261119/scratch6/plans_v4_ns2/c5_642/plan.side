@@ -1,0 +1,584 @@
+kz-plan-sidecar 2
+generator tool=kz-static tool_sha256=36e0299521014b926b2f7d2bf6784b5b4ec97a929ff67799a34f72d610509eb5 tool_source=3b89477d1e4fe817d172d12fa839005f3f598e39143a21ff0fb3120279be972c core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+input facts sha256=bf0da400558b2a037547ebb66b0c8c1d1adf54d031fc2448eb9335c7b422e1e6 path=<scratch>/o/s6_final_extract/c5_642/c5_642/NP/facts.kz
+input basis sha256=407ea604958089f205bb4920d68d876a82baa7a2226c1bd6377fba7ec0794bdd path=<scratch>/o/s6_final_extract/c5_642/c5_642/NP/basis.kz
+input framework-layer-data sha256=e2a39203bac0b9a5c0016c71f076a898be8edeeb73e363a125768b92424696a0 path=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_api_roles.txt
+input namespace-data sha256=348ce515d9f37c221bd32e6c7414f87f36522999c548f3a284c0ca2247d02161 path=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.1.txt
+input namespace-data sha256=32c83db59b319a0652788e8626f9336cc8e80819773a6caa30034f46ee778c1b path=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.2.txt
+input namespace-data sha256=49028355f7abaac19ac5734b9b3331288180e4492068906e5ef05e9bb08e80f9 path=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-4.1.1.txt
+input namespace-data sha256=8245eebbf77ad6c21a8c957f07b7ef49b64aba85f7454c0c6cce003a006fb806 path=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-7.0.1.txt
+input namespace-data sha256=e587cee040e0a70561d07d6b0d15719bd2dbfeb97b0792f4cadc18600ed975b1 path=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-f34759d.txt
+facts-artifact bf0da400558b2a037547ebb66b0c8c1d1adf54d031fc2448eb9335c7b422e1e6
+basis-artifact 407ea604958089f205bb4920d68d876a82baa7a2226c1bd6377fba7ec0794bdd
+rules plan rules revision 5 (2026-11-19): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; with the name-space files of coverage rule revision 2: the namespace-entry and namespace-layer lines, the kind-value, rollback, clear and context-frame sites, the lifetime-end sites and the key text bound from the stored-name extent; relations rules revision 12 (2026-11-18)
+manifest-revision 4 (kzs-sites 4)
+plan-id 2df37d77fa24a126
+selection observation-set: every row of the relations (method document 3.1, the revised rule: no label and no proof of a row removes it)
+priority method-priority: method priority port revision 1 (2026-11-16): label, order class, reach mark and disposition of the method document's S1 rule over the row text; tier 1 = disposition D07 (label R or J, counterpart, order class RELOC), tier 2 = the other rows of order class RELOC, tier 3 = the rest; within a tier the order of the relations text
+classes rows 169 tier1 7 tier2 60 tier3 102
+budget value=tier:D07 reason="the record pool is fixed (KZ_RT_POOL_BYTES = KZ_RT_MAX_ACTORS x 65536, kairos/runtime/include/kz_rt.h:61-64) and no event volume of a generated plan is measured yet: the priority tier is planned whole, the next tier is not" disclosure="the value was chosen knowing which rows the priority tier holds on these builds (plan/ovm_rev1_20261116/S1_RETALLY.md 3.1 and its probe tables); which rows are in the plan is an output of the rule, checked after the generation" planned=7 truncation=162 rows cut (row lines with state cut) unresolved="whether the rows cut fit the record pool (no event volume measured)" sensitivity="not measured"
+control control selection rule revision 1 (2026-11-16): (a) path A rows with a probe-create handling line, (b) path A rows with a creator site (creator lines and not-a-pair lines of key constants), (a) then (b) in the order of the relations text; planned apart from the tier order (docs/plan_manifest.md section 7)
+control-budget value=all reason="the path A control selection (lead decisions, plan/full_stage_results_20261116.md 6.10 item 2 and 12.10 item 3; kairos/docs/plan_manifest.md section 7) is planned whole: the boots of these rows are control runs of design rows, rows whose text and earlier records were read when the rule was written, not a test of the name-binding rule; no event volume of a generated plan is measured yet, so no row is cut by a volume estimate" rows=2 (a 0, b 2) planned=2 cut=0 complete=yes unresolved="whether the control rows fit the record pool (no event volume measured)" sensitivity="not measured"
+requests sha256=dc3adf3c7078b5a7c3d5bd6c99747756464a71871da9d151dfb7cc56765c5755 file=plan.req rows=2 requests=18 planned=16
+namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.1.txt entries=2
+namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.2.txt entries=2
+namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-4.1.1.txt entries=10
+namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-7.0.1.txt entries=16
+namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-f34759d.txt entries=15
+namespace-layer data=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.2.txt sha256=32c83db59b319a0652788e8626f9336cc8e80819773a6caa30034f46ee778c1b clear-table=- clear-slot=- rollback=- status-param=- out-param=- delete-finalize=- fill-call=-
+namespace-layer data=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-4.1.1.txt sha256=49028355f7abaac19ac5734b9b3331288180e4492068906e5ef05e9bb08e80f9 clear-table=- clear-slot=- rollback=- status-param=- out-param=- delete-finalize=- fill-call=-
+bound string KZ_RT_STR_MAX=64 source=runtime/include/kz_rt.h:82 reason="the runtime's copy bound; a key text is bounded by the program's own constant length check where the facts show one" truncation="the runtime flags a cut string per value"
+bound string-extent source=ARG_TYPES reason="a key argument that is a character array read at a point that dominates the call is copied at the call within min(its extent, KZ_RT_STR_MAX)"
+bound slots=4 source=instrument/gcc/kzgcc.cpp build_obs reason="values per event bound by kzgcc 0.3"
+bound sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason="the binding id scheme" sites=157
+param tu-root - (units outside the bundle root are named relative to it)
+param bundle-root /home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release
+row bbcaec5d278f30b8 A1 tier=3 position=68 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row bbcaec5d278f30b8 observation not-planned reason=budget_not_run(row outside the budget)
+row 733afe901172257a A2 tier=3 position=69 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 733afe901172257a observation not-planned reason=budget_not_run(row outside the budget)
+row bbf4b4ba291468dd A3 tier=3 position=70 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row bbf4b4ba291468dd observation not-planned reason=budget_not_run(row outside the budget)
+row 5b457bd561ed6b33 A4 tier=3 position=71 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 5b457bd561ed6b33 observation not-planned reason=budget_not_run(row outside the budget)
+row f0558231f5a38416 A5 tier=3 position=72 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row f0558231f5a38416 observation not-planned reason=budget_not_run(row outside the budget)
+row d1c9bdc186427841 A6 tier=3 position=73 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row d1c9bdc186427841 observation not-planned reason=budget_not_run(row outside the budget)
+row 0afc3cc27aa74c00 A7 tier=3 position=74 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 0afc3cc27aa74c00 observation not-planned reason=budget_not_run(row outside the budget)
+row 2375461a5b2cde9a A8 tier=3 position=75 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 2375461a5b2cde9a observation not-planned reason=budget_not_run(row outside the budget)
+row 710162f9eb5e6d90 A9 tier=3 position=76 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 710162f9eb5e6d90 observation not-planned reason=budget_not_run(row outside the budget)
+row 5d7d60611d127379 A10 tier=3 position=77 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 5d7d60611d127379 observation not-planned reason=budget_not_run(row outside the budget)
+row 73c28c2b4ca5f149 A11 tier=3 position=78 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 73c28c2b4ca5f149 observation not-planned reason=budget_not_run(row outside the budget)
+row 46941597aa05dada A12 tier=3 position=79 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 46941597aa05dada observation not-planned reason=budget_not_run(row outside the budget)
+row 67a1fb9158bdc0d1 A13 tier=3 position=80 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 67a1fb9158bdc0d1 observation not-planned reason=budget_not_run(row outside the budget)
+row 88cc788fec26e1f7 A14 tier=3 position=81 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 88cc788fec26e1f7 observation not-planned reason=budget_not_run(row outside the budget)
+row ba0794e3f30cfddd A15 tier=3 position=82 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row ba0794e3f30cfddd observation not-planned reason=budget_not_run(row outside the budget)
+row 2ebcea15f4e79065 A16 tier=2 position=8 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=CALLEE-ONLY disposition=D11 state=cut control=b control-state=planned why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+row 5494d8cc9c1687f2 A17 tier=2 position=9 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=CALLEE-ONLY disposition=D11 state=cut control=b control-state=planned why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+row 8b4743e7695670c8 A18 tier=3 position=83 label=E fact-label=J? class=absence-undetermined order=NOPAIR reach=NO-FAILCONST disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row 8b4743e7695670c8 observation not-planned reason=budget_not_run(row outside the budget)
+row 58e715e2277f1fef A19 tier=3 position=84 label=E fact-label=J? class=absence-undetermined order=NOPAIR reach=NO-FAILCONST disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row 58e715e2277f1fef observation not-planned reason=budget_not_run(row outside the budget)
+row 36af47e311432de4 A20 tier=3 position=85 label=0 fact-label=J? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 36af47e311432de4 observation not-planned reason=budget_not_run(row outside the budget)
+row b955c7ab6464c8d7 A21 tier=3 position=86 label=0 fact-label=J? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row b955c7ab6464c8d7 observation not-planned reason=budget_not_run(row outside the budget)
+row d198d36b93b167c9 A22 tier=3 position=87 label=0 fact-label=J? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row d198d36b93b167c9 observation not-planned reason=budget_not_run(row outside the budget)
+row f44b82b204280c9f A23 tier=3 position=88 label=0 fact-label=J? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row f44b82b204280c9f observation not-planned reason=budget_not_run(row outside the budget)
+row 7f704205d9e76ef6 A24 tier=3 position=89 label=0 fact-label=none class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 7f704205d9e76ef6 observation not-planned reason=budget_not_run(row outside the budget)
+row 6f2baa5b19eb7ffc A25 tier=3 position=90 label=0 fact-label=J? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 6f2baa5b19eb7ffc observation not-planned reason=budget_not_run(row outside the budget)
+row c2e0cf77cff6fe23 A26 tier=3 position=91 label=0 fact-label=J? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row c2e0cf77cff6fe23 observation not-planned reason=budget_not_run(row outside the budget)
+row 61f19560972ae24e A27 tier=3 position=92 label=0 fact-label=H class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 61f19560972ae24e observation not-planned reason=budget_not_run(row outside the budget)
+row 9a6e0dbdeec414b0 A28 tier=3 position=93 label=0 fact-label=T? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 9a6e0dbdeec414b0 observation not-planned reason=budget_not_run(row outside the budget)
+row 1f1c895b93ac9665 A29 tier=3 position=94 label=0 fact-label=T? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 1f1c895b93ac9665 observation not-planned reason=budget_not_run(row outside the budget)
+row 1ed028c0e937b4b6 A30 tier=3 position=95 label=0 fact-label=H class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 1ed028c0e937b4b6 observation not-planned reason=budget_not_run(row outside the budget)
+row b8003f8b02e1a68d A31 tier=3 position=96 label=0 fact-label=T? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row b8003f8b02e1a68d observation not-planned reason=budget_not_run(row outside the budget)
+row 06b7a80dfee6bafb A32 tier=3 position=97 label=0 fact-label=T? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 06b7a80dfee6bafb observation not-planned reason=budget_not_run(row outside the budget)
+row b725fc19ac1644dc A33 tier=3 position=98 label=0 fact-label=T? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row b725fc19ac1644dc observation not-planned reason=budget_not_run(row outside the budget)
+row 6d757bcb9412e921 A34 tier=3 position=99 label=0 fact-label=T? class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 6d757bcb9412e921 observation not-planned reason=budget_not_run(row outside the budget)
+row 80afebde1dc3676a A35 tier=3 position=100 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 80afebde1dc3676a observation not-planned reason=budget_not_run(row outside the budget)
+row c858092726be070d A36 tier=3 position=101 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row c858092726be070d observation not-planned reason=budget_not_run(row outside the budget)
+row 9e2f102920c0861e A37 tier=3 position=102 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 9e2f102920c0861e observation not-planned reason=budget_not_run(row outside the budget)
+row 49aa151bd11573d9 A38 tier=3 position=103 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 49aa151bd11573d9 observation not-planned reason=budget_not_run(row outside the budget)
+row 26b7bac4f65fcacc A39 tier=3 position=104 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 26b7bac4f65fcacc observation not-planned reason=budget_not_run(row outside the budget)
+row e450207eda2971f2 A40 tier=3 position=105 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row e450207eda2971f2 observation not-planned reason=budget_not_run(row outside the budget)
+row 03c3499aa6b6ada2 A41 tier=3 position=106 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 03c3499aa6b6ada2 observation not-planned reason=budget_not_run(row outside the budget)
+row 4f183979a16da5c7 A42 tier=3 position=107 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 4f183979a16da5c7 observation not-planned reason=budget_not_run(row outside the budget)
+row 324a02df98593f6d A43 tier=3 position=108 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 324a02df98593f6d observation not-planned reason=budget_not_run(row outside the budget)
+row cc7629757c0fedbb A44 tier=3 position=109 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row cc7629757c0fedbb observation not-planned reason=budget_not_run(row outside the budget)
+row a7c56de3912f774a A45 tier=3 position=110 label=0 fact-label=R class=decided order=NOPAIR reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row a7c56de3912f774a observation not-planned reason=budget_not_run(row outside the budget)
+row 71fa2f4d58460006 A46 tier=3 position=111 label=J fact-label=J? class=decided order=NOPAIR reach=CALLEE-ONLY disposition=D06 state=cut why="label J, no creator in another actor"
+need row 71fa2f4d58460006 observation not-planned reason=budget_not_run(row outside the budget)
+row 1d2203ea763bca8d A47 tier=3 position=112 label=J fact-label=J? class=decided order=NOPAIR reach=CALLEE-ONLY disposition=D06 state=cut why="label J, no creator in another actor"
+need row 1d2203ea763bca8d observation not-planned reason=budget_not_run(row outside the budget)
+row be233c1ef867e45e A48 tier=3 position=113 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row be233c1ef867e45e observation not-planned reason=budget_not_run(row outside the budget)
+row 50a5d96622aba41a A49 tier=3 position=114 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 50a5d96622aba41a observation not-planned reason=budget_not_run(row outside the budget)
+row 453439e7a0ae669b A50 tier=3 position=115 label=E fact-label=J? class=absence-undetermined order=NOPAIR reach=NO-FAILCONST disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row 453439e7a0ae669b observation not-planned reason=budget_not_run(row outside the budget)
+row f3a414a9ea394624 A51 tier=3 position=116 label=E fact-label=J? class=absence-undetermined order=NOPAIR reach=NO-FAILCONST disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row f3a414a9ea394624 observation not-planned reason=budget_not_run(row outside the budget)
+row fbb1c32e651d2448 A52 tier=3 position=117 label=E fact-label=J? class=absence-undetermined order=NOPAIR reach=NO-FAILCONST disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row fbb1c32e651d2448 observation not-planned reason=budget_not_run(row outside the budget)
+row 25aba2721fc2bdec A53 tier=3 position=118 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 25aba2721fc2bdec observation not-planned reason=budget_not_run(row outside the budget)
+row 5ea512131ad962c6 A54 tier=3 position=119 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 5ea512131ad962c6 observation not-planned reason=budget_not_run(row outside the budget)
+row 5a236377382e0a5a A55 tier=3 position=120 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 5a236377382e0a5a observation not-planned reason=budget_not_run(row outside the budget)
+row 7ce1801426609b5b A56 tier=3 position=121 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 7ce1801426609b5b observation not-planned reason=budget_not_run(row outside the budget)
+row ce3b6577d04ae091 A57 tier=3 position=122 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row ce3b6577d04ae091 observation not-planned reason=budget_not_run(row outside the budget)
+row 547ca309bcfaadde A58 tier=3 position=123 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 547ca309bcfaadde observation not-planned reason=budget_not_run(row outside the budget)
+row 05c6121a0c75fd29 A59 tier=3 position=124 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 05c6121a0c75fd29 observation not-planned reason=budget_not_run(row outside the budget)
+row be05162cfe278097 A60 tier=3 position=125 label=T? fact-label=T? class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row be05162cfe278097 observation not-planned reason=budget_not_run(row outside the budget)
+row ba7ba0d56e8eedd0 A61 tier=3 position=126 label=T? fact-label=none class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row ba7ba0d56e8eedd0 observation not-planned reason=budget_not_run(row outside the budget)
+row 47816a91c7787892 A62 tier=3 position=127 label=T? fact-label=none class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 47816a91c7787892 observation not-planned reason=budget_not_run(row outside the budget)
+row 90653c94aa26e781 A63 tier=3 position=128 label=J fact-label=J? class=decided order=NOPAIR reach=CALLEE-ONLY disposition=D06 state=cut why="label J, no creator in another actor"
+need row 90653c94aa26e781 observation not-planned reason=budget_not_run(row outside the budget)
+row 3eac966a43ecda14 A64 tier=3 position=129 label=J fact-label=J? class=decided order=NOPAIR reach=CALLEE-ONLY disposition=D06 state=cut why="label J, no creator in another actor"
+need row 3eac966a43ecda14 observation not-planned reason=budget_not_run(row outside the budget)
+row 9b717cce08fe958c A65 tier=3 position=130 label=J fact-label=J? class=decided order=NOPAIR reach=CALLEE-ONLY disposition=D06 state=cut why="label J, no creator in another actor"
+need row 9b717cce08fe958c observation not-planned reason=budget_not_run(row outside the budget)
+row 3affab7930cd8a56 A66 tier=3 position=131 label=T? fact-label=R class=effect-undetermined order=NOPAIR reach=CALLEE-ONLY disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class NOPAIR"
+need row 3affab7930cd8a56 observation not-planned reason=budget_not_run(row outside the budget)
+row 00ede78ac5e754f1 B1 tier=2 position=10 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 00ede78ac5e754f1 observation not-planned reason=budget_not_run(row outside the budget)
+row afc08127c6db705c B2 tier=2 position=11 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row afc08127c6db705c observation not-planned reason=budget_not_run(row outside the budget)
+row 7000f3043b1a719e B3 tier=2 position=12 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 7000f3043b1a719e observation not-planned reason=budget_not_run(row outside the budget)
+row d92f50615417304a B4 tier=2 position=13 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row d92f50615417304a observation not-planned reason=budget_not_run(row outside the budget)
+row f0c1766a04eed06f B5 tier=2 position=14 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row f0c1766a04eed06f observation not-planned reason=budget_not_run(row outside the budget)
+row de4db46e82b0c1ab B6 tier=2 position=15 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row de4db46e82b0c1ab observation not-planned reason=budget_not_run(row outside the budget)
+row 4c3712db382fdfa0 B7 tier=1 position=1 label=J fact-label=J class=decided order=RELOC reach=UNEVALUATED disposition=D07 state=planned why="label J, counterpart, no static order; reach UNEVALUATED"
+row 19741e517073a62d B8 tier=2 position=16 label=T? fact-label=H class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 19741e517073a62d observation not-planned reason=budget_not_run(row outside the budget)
+row 93071f6d0f5975df B9 tier=2 position=17 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 93071f6d0f5975df observation not-planned reason=budget_not_run(row outside the budget)
+row d2a2f780424b72a2 B10 tier=2 position=18 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row d2a2f780424b72a2 observation not-planned reason=budget_not_run(row outside the budget)
+row 6ecbfcce067d5b59 B11 tier=2 position=19 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 6ecbfcce067d5b59 observation not-planned reason=budget_not_run(row outside the budget)
+row 1a3bf9e3f7bf7ec0 B12 tier=2 position=20 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 1a3bf9e3f7bf7ec0 observation not-planned reason=budget_not_run(row outside the budget)
+row d25e7c377c4c26c7 B13 tier=2 position=21 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row d25e7c377c4c26c7 observation not-planned reason=budget_not_run(row outside the budget)
+row a321757eecea9248 B14 tier=2 position=22 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row a321757eecea9248 observation not-planned reason=budget_not_run(row outside the budget)
+row 08819654fba7ca38 B15 tier=2 position=23 label=T? fact-label=T class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 08819654fba7ca38 observation not-planned reason=budget_not_run(row outside the budget)
+row fab0f93f37a73dde B16 tier=2 position=24 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row fab0f93f37a73dde observation not-planned reason=budget_not_run(row outside the budget)
+row 76c85be4f966d730 B17 tier=2 position=25 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 76c85be4f966d730 observation not-planned reason=budget_not_run(row outside the budget)
+row 15136ceffd23c14f B18 tier=1 position=2 label=J fact-label=J class=decided order=RELOC reach=UNEVALUATED disposition=D07 state=planned why="label J, counterpart, no static order; reach UNEVALUATED"
+row e1ccf563479366fe B19 tier=1 position=3 label=J fact-label=J class=decided order=RELOC reach=UNEVALUATED disposition=D07 state=planned why="label J, counterpart, no static order; reach UNEVALUATED"
+row 76f569a3d055340f B20 tier=2 position=26 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 76f569a3d055340f observation not-planned reason=budget_not_run(row outside the budget)
+row 1f25d9944d006436 B21 tier=2 position=27 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 1f25d9944d006436 observation not-planned reason=budget_not_run(row outside the budget)
+row b381e0460f9bdcdd B22 tier=2 position=28 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row b381e0460f9bdcdd observation not-planned reason=budget_not_run(row outside the budget)
+row 32199708cf5935ea B23 tier=2 position=29 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 32199708cf5935ea observation not-planned reason=budget_not_run(row outside the budget)
+row 9ad45745f130375d B24 tier=2 position=30 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 9ad45745f130375d observation not-planned reason=budget_not_run(row outside the budget)
+row d720202f9d5772ce B25 tier=2 position=31 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row d720202f9d5772ce observation not-planned reason=budget_not_run(row outside the budget)
+row 0a62eabc734223d1 B26 tier=2 position=32 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 0a62eabc734223d1 observation not-planned reason=budget_not_run(row outside the budget)
+row 2553d9ab50b23925 B27 tier=2 position=33 label=0 fact-label=none class=decided order=RELOC reach=NO-FAILCONST disposition=D05 state=cut why="no failure-class absence constant"
+need row 2553d9ab50b23925 observation not-planned reason=budget_not_run(row outside the budget)
+row f3a620f9f5a12ef0 B28 tier=2 position=34 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row f3a620f9f5a12ef0 observation not-planned reason=budget_not_run(row outside the budget)
+row 1729126ab9db1fa1 B29 tier=2 position=35 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 1729126ab9db1fa1 observation not-planned reason=budget_not_run(row outside the budget)
+row 49e11d0d6911e30b B30 tier=2 position=36 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 49e11d0d6911e30b observation not-planned reason=budget_not_run(row outside the budget)
+row 2c8ed05b5f736340 B31 tier=2 position=37 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 2c8ed05b5f736340 observation not-planned reason=budget_not_run(row outside the budget)
+row fb05e6e2f6b4cb48 B32 tier=2 position=38 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row fb05e6e2f6b4cb48 observation not-planned reason=budget_not_run(row outside the budget)
+row 19d3bd31786b5b60 B33 tier=1 position=4 label=J fact-label=J class=decided order=RELOC reach=UNEVALUATED disposition=D07 state=planned why="label J, counterpart, no static order; reach UNEVALUATED"
+row 18974f765b964355 B34 tier=2 position=39 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 18974f765b964355 observation not-planned reason=budget_not_run(row outside the budget)
+row 9afa7ec93478d6ac B35 tier=2 position=40 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 9afa7ec93478d6ac observation not-planned reason=budget_not_run(row outside the budget)
+row 281f9cb55c0a8efd B36 tier=2 position=41 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 281f9cb55c0a8efd observation not-planned reason=budget_not_run(row outside the budget)
+row 27131abe8590e783 B37 tier=2 position=42 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 27131abe8590e783 observation not-planned reason=budget_not_run(row outside the budget)
+row ed85d7dc93ac9c99 B38 tier=2 position=43 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row ed85d7dc93ac9c99 observation not-planned reason=budget_not_run(row outside the budget)
+row a86d2e8fd5a85472 B39 tier=1 position=5 label=J fact-label=J class=decided order=RELOC reach=UNEVALUATED disposition=D07 state=planned why="label J, counterpart, no static order; reach UNEVALUATED"
+row 37aec4aa69774ca5 B40 tier=2 position=44 label=T? fact-label=H class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 37aec4aa69774ca5 observation not-planned reason=budget_not_run(row outside the budget)
+row 59e76a34d6b3a2f2 B41 tier=2 position=45 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 59e76a34d6b3a2f2 observation not-planned reason=budget_not_run(row outside the budget)
+row f6498ff7968db0a2 B42 tier=2 position=46 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row f6498ff7968db0a2 observation not-planned reason=budget_not_run(row outside the budget)
+row 1d6a2070a5c39e7b B43 tier=2 position=47 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 1d6a2070a5c39e7b observation not-planned reason=budget_not_run(row outside the budget)
+row 2f91907dbc293a54 B44 tier=2 position=48 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 2f91907dbc293a54 observation not-planned reason=budget_not_run(row outside the budget)
+row bf3802bb879fda7e B45 tier=2 position=49 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row bf3802bb879fda7e observation not-planned reason=budget_not_run(row outside the budget)
+row b1613b9754817fa6 B46 tier=2 position=50 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row b1613b9754817fa6 observation not-planned reason=budget_not_run(row outside the budget)
+row c00758efeb2ec23c B47 tier=2 position=51 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row c00758efeb2ec23c observation not-planned reason=budget_not_run(row outside the budget)
+row 292cb0b201dc6061 B48 tier=2 position=52 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 292cb0b201dc6061 observation not-planned reason=budget_not_run(row outside the budget)
+row 7790bbae71516ab3 B49 tier=1 position=6 label=J fact-label=J class=decided order=RELOC reach=UNEVALUATED disposition=D07 state=planned why="label J, counterpart, no static order; reach UNEVALUATED"
+row 343574173974d111 B50 tier=2 position=53 label=T? fact-label=T class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 343574173974d111 observation not-planned reason=budget_not_run(row outside the budget)
+row e15a6b83796ed928 B51 tier=2 position=54 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row e15a6b83796ed928 observation not-planned reason=budget_not_run(row outside the budget)
+row 01496a67f7deecb4 B52 tier=2 position=55 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 01496a67f7deecb4 observation not-planned reason=budget_not_run(row outside the budget)
+row 263bcf86aba19aa0 B53 tier=2 position=56 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 263bcf86aba19aa0 observation not-planned reason=budget_not_run(row outside the budget)
+row 078b53761fed2139 B54 tier=2 position=57 label=T? fact-label=T class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 078b53761fed2139 observation not-planned reason=budget_not_run(row outside the budget)
+row d648e8fe6ae72e08 B55 tier=2 position=58 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row d648e8fe6ae72e08 observation not-planned reason=budget_not_run(row outside the budget)
+row 6ad5bc1537946337 B56 tier=1 position=7 label=J fact-label=J class=decided order=RELOC reach=UNEVALUATED disposition=D07 state=planned why="label J, counterpart, no static order; reach UNEVALUATED"
+row e1303ac2da880b17 B57 tier=2 position=59 label=T? fact-label=R class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row e1303ac2da880b17 observation not-planned reason=budget_not_run(row outside the budget)
+row 982931b1ed65d66e B58 tier=2 position=60 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 982931b1ed65d66e observation not-planned reason=budget_not_run(row outside the budget)
+row 54c1c8b6faa1e41b B59 tier=2 position=61 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 54c1c8b6faa1e41b observation not-planned reason=budget_not_run(row outside the budget)
+row 4331ce8daf4ce6fe B60 tier=2 position=62 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 4331ce8daf4ce6fe observation not-planned reason=budget_not_run(row outside the budget)
+row 1dbb17f039d89689 B61 tier=2 position=63 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 1dbb17f039d89689 observation not-planned reason=budget_not_run(row outside the budget)
+row 5283763b83a4afeb B62 tier=2 position=64 label=E fact-label=none class=absence-undetermined order=RELOC reach=NO-CHECK disposition=D12 state=cut why="the row gives no absence result; order class RELOC"
+need row 5283763b83a4afeb observation not-planned reason=budget_not_run(row outside the budget)
+row 6877863aa02508f6 B63 tier=2 position=65 label=T? fact-label=R class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 6877863aa02508f6 observation not-planned reason=budget_not_run(row outside the budget)
+row 189c7a447843ba86 B64 tier=2 position=66 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 189c7a447843ba86 observation not-planned reason=budget_not_run(row outside the budget)
+row 23ecde8001730ea3 B65 tier=2 position=67 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=UNEVALUATED disposition=D11 state=cut why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+need row 23ecde8001730ea3 observation not-planned reason=budget_not_run(row outside the budget)
+row 9d7dff651ba15779 C1 tier=3 position=132 label=E fact-label=- class=absence-undetermined order=ENF reach=INDEPENDENT disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row 9d7dff651ba15779 observation not-planned reason=budget_not_run(row outside the budget)
+row f952878534393fc2 C2 tier=3 position=133 label=E fact-label=- class=absence-undetermined order=ENF reach=INDEPENDENT disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row f952878534393fc2 observation not-planned reason=budget_not_run(row outside the budget)
+row 2429b19cf51d98e1 C3 tier=3 position=134 label=E fact-label=- class=absence-undetermined order=NOPAIR reach=INDEPENDENT disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row 2429b19cf51d98e1 observation not-planned reason=budget_not_run(row outside the budget)
+row ea5a510d13eeac80 C4 tier=3 position=135 label=E fact-label=- class=absence-undetermined order=NOPAIR reach=INDEPENDENT disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row ea5a510d13eeac80 observation not-planned reason=budget_not_run(row outside the budget)
+row 2857441507d2d351 C5 tier=3 position=136 label=E fact-label=- class=absence-undetermined order=NOPAIR reach=INDEPENDENT disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row 2857441507d2d351 observation not-planned reason=budget_not_run(row outside the budget)
+row 521d0a1fbc087862 C6 tier=3 position=137 label=E fact-label=- class=absence-undetermined order=NOPAIR reach=INDEPENDENT disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row 521d0a1fbc087862 observation not-planned reason=budget_not_run(row outside the budget)
+row fc4a0bc455da4d1d C7 tier=3 position=138 label=E fact-label=- class=absence-undetermined order=ENF reach=INDEPENDENT disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row fc4a0bc455da4d1d observation not-planned reason=budget_not_run(row outside the budget)
+row 7faf8aee8c363490 C8 tier=3 position=139 label=E fact-label=- class=absence-undetermined order=COND reach=INDEPENDENT disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label E"
+need row 7faf8aee8c363490 observation not-planned reason=budget_not_run(row outside the budget)
+row 519643c160f5b2c9 C9 tier=3 position=140 label=E fact-label=- class=absence-undetermined order=COND reach=INDEPENDENT disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label E"
+need row 519643c160f5b2c9 observation not-planned reason=budget_not_run(row outside the budget)
+row a5c80eecdc3cc230 C10 tier=3 position=141 label=F fact-label=- class=effect-undetermined order=ENF reach=REACH-STATED disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row a5c80eecdc3cc230 observation not-planned reason=budget_not_run(row outside the budget)
+row 6f3d83a2ee09d819 C11 tier=3 position=142 label=E fact-label=- class=absence-undetermined order=ENF reach=UNEVALUATED disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row 6f3d83a2ee09d819 observation not-planned reason=budget_not_run(row outside the budget)
+row 1bfd527bdcdb003b C12 tier=3 position=143 label=F fact-label=- class=effect-undetermined order=NOPAIR reach=REACH-STATED disposition=D10 state=cut why="failure absence constant with the earlier value; the caller's handling is not in the row; order class NOPAIR"
+need row 1bfd527bdcdb003b observation not-planned reason=budget_not_run(row outside the budget)
+row 4e1c3d5775e66ca2 C13 tier=3 position=144 label=F fact-label=- class=effect-undetermined order=NOPAIR reach=REACH-STATED disposition=D10 state=cut why="failure absence constant with the earlier value; the caller's handling is not in the row; order class NOPAIR"
+need row 4e1c3d5775e66ca2 observation not-planned reason=budget_not_run(row outside the budget)
+row 2e5347f583072582 C14 tier=3 position=145 label=F fact-label=- class=effect-undetermined order=NOPAIR reach=REACH-STATED disposition=D10 state=cut why="failure absence constant with the earlier value; the caller's handling is not in the row; order class NOPAIR"
+need row 2e5347f583072582 observation not-planned reason=budget_not_run(row outside the budget)
+row 26603a1f2d34b1fd C15 tier=3 position=146 label=F fact-label=- class=effect-undetermined order=NOPAIR reach=REACH-STATED disposition=D10 state=cut why="failure absence constant with the earlier value; the caller's handling is not in the row; order class NOPAIR"
+need row 26603a1f2d34b1fd observation not-planned reason=budget_not_run(row outside the budget)
+row 45ac9bf38a27ac8a C16 tier=3 position=147 label=F fact-label=- class=effect-undetermined order=ENF reach=REACH-STATED disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row 45ac9bf38a27ac8a observation not-planned reason=budget_not_run(row outside the budget)
+row b1db06829394171e C17 tier=3 position=148 label=F fact-label=- class=effect-undetermined order=COND reach=REACH-STATED disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label F"
+need row b1db06829394171e observation not-planned reason=budget_not_run(row outside the budget)
+row 49bd5c263edd6f57 C18 tier=3 position=149 label=F fact-label=- class=effect-undetermined order=COND reach=REACH-STATED disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label F"
+need row 49bd5c263edd6f57 observation not-planned reason=budget_not_run(row outside the budget)
+row fe8a11c4e2d4ec62 C19 tier=3 position=150 label=E fact-label=- class=absence-undetermined order=COND reach=UNEVALUATED disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label E"
+need row fe8a11c4e2d4ec62 observation not-planned reason=budget_not_run(row outside the budget)
+row 2bf1f13f59925089 C20 tier=3 position=151 label=E fact-label=- class=absence-undetermined order=COND reach=UNEVALUATED disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label E"
+need row 2bf1f13f59925089 observation not-planned reason=budget_not_run(row outside the budget)
+row d268e092b9b53c12 C21 tier=3 position=152 label=E fact-label=- class=absence-undetermined order=ENF reach=INDEPENDENT disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row d268e092b9b53c12 observation not-planned reason=budget_not_run(row outside the budget)
+row 961c9e043f1be052 C22 tier=3 position=153 label=E fact-label=- class=absence-undetermined order=ENF reach=INDEPENDENT disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row 961c9e043f1be052 observation not-planned reason=budget_not_run(row outside the budget)
+row d7836687f0fe8717 C23 tier=3 position=154 label=E fact-label=- class=absence-undetermined order=ENF reach=INDEPENDENT disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row d7836687f0fe8717 observation not-planned reason=budget_not_run(row outside the budget)
+row 46f52ddbb6ab4c46 C24 tier=3 position=155 label=E fact-label=- class=absence-undetermined order=ENF reach=INDEPENDENT disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row 46f52ddbb6ab4c46 observation not-planned reason=budget_not_run(row outside the budget)
+row 2ff866f929af9aec C25 tier=3 position=156 label=E fact-label=- class=absence-undetermined order=NOPAIR reach=INDEPENDENT disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row 2ff866f929af9aec observation not-planned reason=budget_not_run(row outside the budget)
+row b8543c19c39baa3c C26 tier=3 position=157 label=E fact-label=- class=absence-undetermined order=NOPAIR reach=INDEPENDENT disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row b8543c19c39baa3c observation not-planned reason=budget_not_run(row outside the budget)
+row b28aae2f9b79deae C27 tier=3 position=158 label=E fact-label=- class=absence-undetermined order=NOPAIR reach=INDEPENDENT disposition=D12 state=cut why="the row gives no absence result; order class NOPAIR"
+need row b28aae2f9b79deae observation not-planned reason=budget_not_run(row outside the budget)
+row be96a9fc001b3516 C28 tier=3 position=159 label=E fact-label=- class=absence-undetermined order=COND reach=INDEPENDENT disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label E"
+need row be96a9fc001b3516 observation not-planned reason=budget_not_run(row outside the budget)
+row 1f467494b3578120 C29 tier=3 position=160 label=E fact-label=- class=absence-undetermined order=COND reach=INDEPENDENT disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label E"
+need row 1f467494b3578120 observation not-planned reason=budget_not_run(row outside the budget)
+row 2ab4ffc6b7e93ef0 C30 tier=3 position=161 label=F fact-label=- class=effect-undetermined order=ENF reach=REACH-STATED disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row 2ab4ffc6b7e93ef0 observation not-planned reason=budget_not_run(row outside the budget)
+row 19153d49ae2e6593 C31 tier=3 position=162 label=E fact-label=- class=absence-undetermined order=ENF reach=UNEVALUATED disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row 19153d49ae2e6593 observation not-planned reason=budget_not_run(row outside the budget)
+row 74d0c93971d4cdf1 C32 tier=3 position=163 label=F fact-label=- class=effect-undetermined order=ENF reach=REACH-STATED disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row 74d0c93971d4cdf1 observation not-planned reason=budget_not_run(row outside the budget)
+row e9be082556b65d13 C33 tier=3 position=164 label=F fact-label=- class=effect-undetermined order=ENF reach=REACH-STATED disposition=D01 state=cut why="the row proves the opposite order impossible"
+need row e9be082556b65d13 observation not-planned reason=budget_not_run(row outside the budget)
+row e058109c5978f73f C34 tier=3 position=165 label=F fact-label=- class=effect-undetermined order=NOPAIR reach=REACH-STATED disposition=D10 state=cut why="failure absence constant with the earlier value; the caller's handling is not in the row; order class NOPAIR"
+need row e058109c5978f73f observation not-planned reason=budget_not_run(row outside the budget)
+row a70e771fdc60b778 C35 tier=3 position=166 label=F fact-label=- class=effect-undetermined order=NOPAIR reach=REACH-STATED disposition=D10 state=cut why="failure absence constant with the earlier value; the caller's handling is not in the row; order class NOPAIR"
+need row a70e771fdc60b778 observation not-planned reason=budget_not_run(row outside the budget)
+row c06dc899d8b750f3 C36 tier=3 position=167 label=F fact-label=- class=effect-undetermined order=NOPAIR reach=REACH-STATED disposition=D10 state=cut why="failure absence constant with the earlier value; the caller's handling is not in the row; order class NOPAIR"
+need row c06dc899d8b750f3 observation not-planned reason=budget_not_run(row outside the budget)
+row 4e7c214e1b0acbdb C37 tier=3 position=168 label=F fact-label=- class=effect-undetermined order=COND reach=REACH-STATED disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label F"
+need row 4e7c214e1b0acbdb observation not-planned reason=budget_not_run(row outside the budget)
+row 6365b5d29e6f8c66 C38 tier=3 position=169 label=F fact-label=- class=effect-undetermined order=COND reach=REACH-STATED disposition=D03 state=cut why="the order rests on a premise the facts do not establish; label F"
+need row 6365b5d29e6f8c66 observation not-planned reason=budget_not_run(row outside the budget)
+site 1 s0001.actor-root+actor-start key="apps/ci_lab/fsw/src/ci_lab_app.c|CI_Lab_AppMain|before|||0" refs="actor CI_Lab_AppMain (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine CI_Lab_AppMain"
+site 2 s0002.actor-root+actor-start key="apps/sample_app/fsw/src/sample_app.c|SAMPLE_AppMain|before|||0" refs="actor SAMPLE_AppMain (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine SAMPLE_AppMain"
+site 3 s0003.actor-root+actor-start key="apps/sample_lib/fsw/src/sample_lib.c|SAMPLE_LibInit|before|||0" refs="actor SAMPLE_LibInit (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine SAMPLE_LibInit"
+site 4 s0004.actor-root+actor-start key="apps/sch_lab/fsw/src/sch_lab_app.c|SCH_Lab_AppMain|before|||0" refs="actor SCH_Lab_AppMain (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine SCH_Lab_AppMain"
+site 5 s0005.actor-root+actor-start key="apps/to_lab/fsw/src/to_lab_app.c|TO_Lab_AppMain|before|||0" refs="actor TO_Lab_AppMain (script-entry); creation osal/src/os/posix/osapi.c:645:19 start routine TO_Lab_AppMain"
+site 6 s0006.stop-event key="cfe/fsw/cfe-core/src/es/cfe_es_api.c|CFE_ES_ExitApp|before|||0" refs="framework-layer data line 25: app-exit CFE_ES_ExitApp cfe/fsw/cfe-core/src/es/cfe_es_api.c:435 (cFE 6.4.2)"
+site 7 s0007.creator-call key="cfe/fsw/cfe-core/src/es/cfe_es_api.c|CFE_ES_RegisterCDS|point|after-call|CFE_ES_RegisterCDSEx|1603|col=24|nth=1" refs="row 2ebcea15f4e79065; row 5494d8cc9c1687f2"
+site 8 s0008.creator-call key="cfe/fsw/cfe-core/src/es/cfe_es_api.c|CFE_ES_RegisterCDS|point|at-call|CFE_ES_RegisterCDSEx|1603|col=24|nth=1" refs="row 2ebcea15f4e79065; row 5494d8cc9c1687f2"
+site 9 s0009.stop-event key="cfe/fsw/cfe-core/src/es/cfe_es_api.c|CFE_ES_RunLoop|before|||0" refs="framework-layer data line 24: run-loop CFE_ES_RunLoop cfe/fsw/cfe-core/src/es/cfe_es_api.c:540 (cFE 6.4.2)"
+site 10 s0010.actor-root+actor-start key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfLogDump|before|||0" refs="actor CFE_ES_PerfLogDump (spawn-entry); creation osal/src/os/posix/osapi.c:645:19 start routine CFE_ES_PerfLogDump"
+site 11 s0011.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfLogDump|point|after-call|OS_close|339|col=9|nth=1" refs="row 4c3712db382fdfa0"
+site 12 s0012.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfLogDump|point|after-call|OS_close|350|col=9|nth=2" refs="row 4c3712db382fdfa0"
+site 13 s0013.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfLogDump|point|after-call|OS_close|364|col=9|nth=3" refs="row 4c3712db382fdfa0"
+site 14 s0014.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfLogDump|point|after-call|OS_close|377|col=5|nth=4" refs="row 4c3712db382fdfa0"
+site 15 s0015.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfLogDump|point|at-call|OS_close|339|col=9|nth=1" refs="row 4c3712db382fdfa0"
+site 16 s0016.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfLogDump|point|at-call|OS_close|350|col=9|nth=2" refs="row 4c3712db382fdfa0"
+site 17 s0017.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfLogDump|point|at-call|OS_close|364|col=9|nth=3" refs="row 4c3712db382fdfa0"
+site 18 s0018.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfLogDump|point|at-call|OS_close|377|col=5|nth=4" refs="row 4c3712db382fdfa0"
+site 19 s0019.writer key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfStopDataCmd|effect|store||251" refs="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:251:11"
+site 20 s0020.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfStopDataCmd|point|after-call|OS_close|285|col=19|nth=1" refs="row 4c3712db382fdfa0"
+site 21 s0021.writer key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfStopDataCmd|point|after-call|strncpy|239|col=15|nth=1" refs="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:239:15"
+site 22 s0022.writer key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfStopDataCmd|point|after-call|strncpy|245|col=15|nth=2" refs="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:245:15"
+site 23 s0023.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfStopDataCmd|point|at-call|OS_close|285|col=19|nth=1" refs="row 4c3712db382fdfa0"
+site 24 s0024.writer key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfStopDataCmd|point|at-call|strncpy|239|col=15|nth=1" refs="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:239:15"
+site 25 s0025.writer key="cfe/fsw/cfe-core/src/es/cfe_es_perf.c|CFE_ES_PerfStopDataCmd|point|at-call|strncpy|245|col=15|nth=2" refs="row 4c3712db382fdfa0 cfe/fsw/cfe-core/src/es/cfe_es_perf.c:245:15"
+site 26 s0026.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_task.c|CFE_ES_DeleteCDSCmd|point|after-call|CFE_ES_DeleteCDS|1933|col=18|nth=1" refs="row 2ebcea15f4e79065"
+site 27 s0027.use-call key="cfe/fsw/cfe-core/src/es/cfe_es_task.c|CFE_ES_DeleteCDSCmd|point|at-call|CFE_ES_DeleteCDS|1933|col=18|nth=1" refs="row 2ebcea15f4e79065"
+site 28 s0028.effect-call key="cfe/fsw/cfe-core/src/es/cfe_es_task.c|CFE_ES_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1937|col=13|nth=1" refs="row 2ebcea15f4e79065 effect event-send cfe/fsw/cfe-core/src/es/cfe_es_task.c:1937:13 on failure 3288334368 of cfe/fsw/cfe-core/src/es/cfe_es_task.c:1933:18"
+site 29 s0029.effect-call key="cfe/fsw/cfe-core/src/es/cfe_es_task.c|CFE_ES_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1945|col=13|nth=2" refs="row 2ebcea15f4e79065 effect event-send cfe/fsw/cfe-core/src/es/cfe_es_task.c:1945:13 on failure 3288334370 of cfe/fsw/cfe-core/src/es/cfe_es_task.c:1933:18"
+site 30 s0030.effect-call key="cfe/fsw/cfe-core/src/es/cfe_es_task.c|CFE_ES_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1952|col=13|nth=3" refs="row 2ebcea15f4e79065 effect event-send cfe/fsw/cfe-core/src/es/cfe_es_task.c:1952:13 on failure 3288334369 of cfe/fsw/cfe-core/src/es/cfe_es_task.c:1933:18"
+site 31 s0031.effect-call key="cfe/fsw/cfe-core/src/es/cfe_es_task.c|CFE_ES_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1959|col=13|nth=4" refs="row 2ebcea15f4e79065 effect event-send cfe/fsw/cfe-core/src/es/cfe_es_task.c:1959:13 on failure -1 of cfe/fsw/cfe-core/src/es/cfe_es_task.c:1933:18; row 2ebcea15f4e79065 effect event-send cfe/fsw/cfe-core/src/es/cfe_es_task.c:1959:13 on failure 3288334343 of cfe/fsw/cfe-core/src/es/cfe_es_task.c:1933:18; row 2ebcea15f4e79065 effect event-send cfe/fsw/cfe-core/src/es/cfe_es_task.c:1959:13 on failure 3288334355 of cfe/fsw/cfe-core/src/es/cfe_es_task.c:1933:18"
+site 32 s0032.effect-call key="cfe/fsw/cfe-core/src/es/cfe_es_task.c|CFE_ES_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1967|col=13|nth=5" refs="row 2ebcea15f4e79065 effect event-send cfe/fsw/cfe-core/src/es/cfe_es_task.c:1967:13 on success 0 of cfe/fsw/cfe-core/src/es/cfe_es_task.c:1933:18"
+site 33 s0033.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|CFE_EVS_SetLoggingModeCmd|point|after-call|OS_MutSemGive|324|col=7|nth=1" refs="row 15136ceffd23c14f"
+site 34 s0034.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|CFE_EVS_SetLoggingModeCmd|point|after-call|OS_MutSemTake|322|col=7|nth=1" refs="row e1ccf563479366fe"
+site 35 s0035.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|CFE_EVS_SetLoggingModeCmd|point|at-call|OS_MutSemGive|324|col=7|nth=1" refs="row 15136ceffd23c14f"
+site 36 s0036.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|CFE_EVS_SetLoggingModeCmd|point|at-call|OS_MutSemTake|322|col=7|nth=1" refs="row e1ccf563479366fe"
+site 37 s0037.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|CFE_EVS_WriteLogFileCmd|point|after-call|OS_MutSemGive|298|col=4|nth=1" refs="row 15136ceffd23c14f"
+site 38 s0038.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|CFE_EVS_WriteLogFileCmd|point|after-call|OS_MutSemTake|213|col=4|nth=1" refs="row e1ccf563479366fe"
+site 39 s0039.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|CFE_EVS_WriteLogFileCmd|point|at-call|OS_MutSemGive|298|col=4|nth=1" refs="row 15136ceffd23c14f"
+site 40 s0040.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|CFE_EVS_WriteLogFileCmd|point|at-call|OS_MutSemTake|213|col=4|nth=1" refs="row e1ccf563479366fe"
+site 41 s0041.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|EVS_AddLog|point|after-call|OS_MutSemGive|151|col=7|nth=1" refs="row 15136ceffd23c14f"
+site 42 s0042.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|EVS_AddLog|point|after-call|OS_MutSemTake|110|col=7|nth=1" refs="row e1ccf563479366fe"
+site 43 s0043.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|EVS_AddLog|point|at-call|OS_MutSemGive|151|col=7|nth=1" refs="row 15136ceffd23c14f"
+site 44 s0044.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|EVS_AddLog|point|at-call|OS_MutSemTake|110|col=7|nth=1" refs="row e1ccf563479366fe"
+site 45 s0045.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|EVS_ClearLog|point|after-call|OS_MutSemGive|184|col=4|nth=1" refs="row 15136ceffd23c14f"
+site 46 s0046.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|EVS_ClearLog|point|after-call|OS_MutSemTake|173|col=4|nth=1" refs="row e1ccf563479366fe"
+site 47 s0047.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|EVS_ClearLog|point|at-call|OS_MutSemGive|184|col=4|nth=1" refs="row 15136ceffd23c14f"
+site 48 s0048.use-call key="cfe/fsw/cfe-core/src/evs/cfe_evs_log.c|EVS_ClearLog|point|at-call|OS_MutSemTake|173|col=4|nth=1" refs="row e1ccf563479366fe"
+site 49 s0049.writer key="cfe/fsw/cfe-core/src/evs/cfe_evs_task.c|CFE_EVS_EarlyInit|point|after-call|OS_MutSemCreate|224|col=16|nth=1" refs="row 15136ceffd23c14f cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:224:16; row e1ccf563479366fe cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:224:16"
+site 50 s0050.writer key="cfe/fsw/cfe-core/src/evs/cfe_evs_task.c|CFE_EVS_EarlyInit|point|at-call|OS_MutSemCreate|224|col=16|nth=1" refs="row 15136ceffd23c14f cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:224:16; row e1ccf563479366fe cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:224:16"
+site 51 s0051.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|effect|store||234" refs="row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:234:5"
+site 52 s0052.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|effect|store||237" refs="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:237:5"
+site 53 s0053.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|after-call|CFE_EVS_SendEventWithAppID|195|col=9|nth=1" refs="row 6ad5bc1537946337"
+site 54 s0054.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|after-call|CFE_EVS_SendEventWithAppID|207|col=9|nth=2" refs="row 6ad5bc1537946337"
+site 55 s0055.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|after-call|CFE_EVS_SendEventWithAppID|217|col=9|nth=3" refs="row 6ad5bc1537946337"
+site 56 s0056.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|after-call|CFE_EVS_SendEventWithAppID|264|col=5|nth=4" refs="row 6ad5bc1537946337"
+site 57 s0057.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|after-call|strcpy|241|col=5|nth=1" refs="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5; row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5; row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5"
+site 58 s0058.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|after-call|strncpy|242|col=5|nth=1" refs="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5; row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5; row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5"
+site 59 s0059.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|at-call|CFE_EVS_SendEventWithAppID|195|col=9|nth=1" refs="row 6ad5bc1537946337"
+site 60 s0060.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|at-call|CFE_EVS_SendEventWithAppID|207|col=9|nth=2" refs="row 6ad5bc1537946337"
+site 61 s0061.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|at-call|CFE_EVS_SendEventWithAppID|217|col=9|nth=3" refs="row 6ad5bc1537946337"
+site 62 s0062.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|at-call|CFE_EVS_SendEventWithAppID|264|col=5|nth=4" refs="row 6ad5bc1537946337"
+site 63 s0063.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|at-call|strcpy|241|col=5|nth=1" refs="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5; row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5; row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:241:5"
+site 64 s0064.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_CreatePipe|point|at-call|strncpy|242|col=5|nth=1" refs="row 19d3bd31786b5b60 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5; row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5; row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:242:5"
+site 65 s0065.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_DeletePipeFull|effect|store||430" refs="row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_api.c:430:5"
+site 66 s0066.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_DeletePipeFull|point|after-call|CFE_EVS_SendEventWithAppID|366|col=9|nth=1" refs="row 6ad5bc1537946337"
+site 67 s0067.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_DeletePipeFull|point|after-call|CFE_EVS_SendEventWithAppID|378|col=9|nth=2" refs="row 6ad5bc1537946337"
+site 68 s0068.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_DeletePipeFull|point|after-call|CFE_EVS_SendEventWithAppID|445|col=5|nth=3" refs="row 6ad5bc1537946337"
+site 69 s0069.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_DeletePipeFull|point|after-call|OS_QueueDelete|426|col=5|nth=1" refs="row a86d2e8fd5a85472"
+site 70 s0070.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_DeletePipeFull|point|at-call|CFE_EVS_SendEventWithAppID|366|col=9|nth=1" refs="row 6ad5bc1537946337"
+site 71 s0071.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_DeletePipeFull|point|at-call|CFE_EVS_SendEventWithAppID|378|col=9|nth=2" refs="row 6ad5bc1537946337"
+site 72 s0072.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_DeletePipeFull|point|at-call|CFE_EVS_SendEventWithAppID|445|col=5|nth=3" refs="row 6ad5bc1537946337"
+site 73 s0073.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_DeletePipeFull|point|at-call|OS_QueueDelete|426|col=5|nth=1" refs="row a86d2e8fd5a85472"
+site 74 s0074.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_GetLastSenderId|point|after-call|CFE_EVS_SendEventWithAppID|1599|col=7|nth=1" refs="row 6ad5bc1537946337"
+site 75 s0075.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_GetLastSenderId|point|after-call|CFE_EVS_SendEventWithAppID|1608|col=7|nth=2" refs="row 6ad5bc1537946337"
+site 76 s0076.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_GetLastSenderId|point|after-call|CFE_EVS_SendEventWithAppID|1622|col=7|nth=3" refs="row 6ad5bc1537946337"
+site 77 s0077.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_GetLastSenderId|point|at-call|CFE_EVS_SendEventWithAppID|1599|col=7|nth=1" refs="row 6ad5bc1537946337"
+site 78 s0078.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_GetLastSenderId|point|at-call|CFE_EVS_SendEventWithAppID|1608|col=7|nth=2" refs="row 6ad5bc1537946337"
+site 79 s0079.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_GetLastSenderId|point|at-call|CFE_EVS_SendEventWithAppID|1622|col=7|nth=3" refs="row 6ad5bc1537946337"
+site 80 s0080.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_RcvMsg|point|after-call|CFE_EVS_SendEventWithAppID|1464|col=9|nth=1" refs="row 6ad5bc1537946337"
+site 81 s0081.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_RcvMsg|point|after-call|CFE_EVS_SendEventWithAppID|1476|col=9|nth=2" refs="row 6ad5bc1537946337"
+site 82 s0082.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_RcvMsg|point|at-call|CFE_EVS_SendEventWithAppID|1464|col=9|nth=1" refs="row 6ad5bc1537946337"
+site 83 s0083.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_RcvMsg|point|at-call|CFE_EVS_SendEventWithAppID|1476|col=9|nth=2" refs="row 6ad5bc1537946337"
+site 84 s0084.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_ReadQueue|point|after-call|CFE_EVS_SendEventWithAppID|2025|col=11|nth=1" refs="row 6ad5bc1537946337"
+site 85 s0085.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_ReadQueue|point|at-call|CFE_EVS_SendEventWithAppID|2025|col=11|nth=1" refs="row 6ad5bc1537946337"
+site 86 s0086.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|after-call|CFE_EVS_SendEventWithAppID|1146|col=9|nth=1" refs="row 6ad5bc1537946337"
+site 87 s0087.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|after-call|CFE_EVS_SendEventWithAppID|1164|col=9|nth=2" refs="row 6ad5bc1537946337"
+site 88 s0088.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|after-call|CFE_EVS_SendEventWithAppID|1182|col=9|nth=3" refs="row 6ad5bc1537946337"
+site 89 s0089.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|after-call|CFE_EVS_SendEventWithAppID|1209|col=12|nth=4" refs="row 6ad5bc1537946337"
+site 90 s0090.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|after-call|CFE_EVS_SendEventWithAppID|1234|col=13|nth=5" refs="row 6ad5bc1537946337"
+site 91 s0091.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|after-call|CFE_EVS_SendEventWithAppID|1367|col=15|nth=6" refs="row 6ad5bc1537946337"
+site 92 s0092.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|after-call|CFE_EVS_SendEventWithAppID|1385|col=15|nth=7" refs="row 6ad5bc1537946337"
+site 93 s0093.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|after-call|CFE_EVS_SendEventWithAppID|1400|col=15|nth=8" refs="row 6ad5bc1537946337"
+site 94 s0094.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|at-call|CFE_EVS_SendEventWithAppID|1146|col=9|nth=1" refs="row 6ad5bc1537946337"
+site 95 s0095.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|at-call|CFE_EVS_SendEventWithAppID|1164|col=9|nth=2" refs="row 6ad5bc1537946337"
+site 96 s0096.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|at-call|CFE_EVS_SendEventWithAppID|1182|col=9|nth=3" refs="row 6ad5bc1537946337"
+site 97 s0097.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|at-call|CFE_EVS_SendEventWithAppID|1209|col=12|nth=4" refs="row 6ad5bc1537946337"
+site 98 s0098.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|at-call|CFE_EVS_SendEventWithAppID|1234|col=13|nth=5" refs="row 6ad5bc1537946337"
+site 99 s0099.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|at-call|CFE_EVS_SendEventWithAppID|1367|col=15|nth=6" refs="row 6ad5bc1537946337"
+site 100 s0100.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|at-call|CFE_EVS_SendEventWithAppID|1385|col=15|nth=7" refs="row 6ad5bc1537946337"
+site 101 s0101.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SendMsgFull|point|at-call|CFE_EVS_SendEventWithAppID|1400|col=15|nth=8" refs="row 6ad5bc1537946337"
+site 102 s0102.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|629|col=7|nth=1" refs="row 6ad5bc1537946337"
+site 103 s0103.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|639|col=7|nth=2" refs="row 6ad5bc1537946337"
+site 104 s0104.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|650|col=9|nth=3" refs="row 6ad5bc1537946337"
+site 105 s0105.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|660|col=9|nth=4" refs="row 6ad5bc1537946337"
+site 106 s0106.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|681|col=13|nth=5" refs="row 6ad5bc1537946337"
+site 107 s0107.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|704|col=9|nth=6" refs="row 6ad5bc1537946337"
+site 108 s0108.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|714|col=9|nth=7" refs="row 6ad5bc1537946337"
+site 109 s0109.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|750|col=7|nth=8" refs="row 6ad5bc1537946337"
+site 110 s0110.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|759|col=5|nth=9" refs="row 6ad5bc1537946337"
+site 111 s0111.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|629|col=7|nth=1" refs="row 6ad5bc1537946337"
+site 112 s0112.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|639|col=7|nth=2" refs="row 6ad5bc1537946337"
+site 113 s0113.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|650|col=9|nth=3" refs="row 6ad5bc1537946337"
+site 114 s0114.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|660|col=9|nth=4" refs="row 6ad5bc1537946337"
+site 115 s0115.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|681|col=13|nth=5" refs="row 6ad5bc1537946337"
+site 116 s0116.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|704|col=9|nth=6" refs="row 6ad5bc1537946337"
+site 117 s0117.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|714|col=9|nth=7" refs="row 6ad5bc1537946337"
+site 118 s0118.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|750|col=7|nth=8" refs="row 6ad5bc1537946337"
+site 119 s0119.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_SubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|759|col=5|nth=9" refs="row 6ad5bc1537946337"
+site 120 s0120.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|1004|col=11|nth=5" refs="row 6ad5bc1537946337"
+site 121 s0121.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|1014|col=5|nth=6" refs="row 6ad5bc1537946337"
+site 122 s0122.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|922|col=7|nth=1" refs="row 6ad5bc1537946337"
+site 123 s0123.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|931|col=7|nth=2" refs="row 6ad5bc1537946337"
+site 124 s0124.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|943|col=9|nth=3" refs="row 6ad5bc1537946337"
+site 125 s0125.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|after-call|CFE_EVS_SendEventWithAppID|955|col=9|nth=4" refs="row 6ad5bc1537946337"
+site 126 s0126.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|1004|col=11|nth=5" refs="row 6ad5bc1537946337"
+site 127 s0127.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|1014|col=5|nth=6" refs="row 6ad5bc1537946337"
+site 128 s0128.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|922|col=7|nth=1" refs="row 6ad5bc1537946337"
+site 129 s0129.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|931|col=7|nth=2" refs="row 6ad5bc1537946337"
+site 130 s0130.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|943|col=9|nth=3" refs="row 6ad5bc1537946337"
+site 131 s0131.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_api.c|CFE_SB_UnsubscribeFull|point|at-call|CFE_EVS_SendEventWithAppID|955|col=9|nth=4" refs="row 6ad5bc1537946337"
+site 132 s0132.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_init.c|CFE_SB_InitPipeTbl|effect|store||226" refs="row a86d2e8fd5a85472 cfe/fsw/cfe-core/src/sb/cfe_sb_init.c:226:9"
+site 133 s0133.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_task.c|CFE_SB_AppInit|point|after-call|CFE_ES_GetAppID|206|col=5|nth=1" refs="row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_task.c:206:5"
+site 134 s0134.writer key="cfe/fsw/cfe-core/src/sb/cfe_sb_task.c|CFE_SB_AppInit|point|at-call|CFE_ES_GetAppID|206|col=5|nth=1" refs="row 6ad5bc1537946337 cfe/fsw/cfe-core/src/sb/cfe_sb_task.c:206:5"
+site 135 s0135.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_task.c|CFE_SB_SendRtgInfo|point|after-call|CFE_ES_GetAppName|799|col=13|nth=1" refs="row 19d3bd31786b5b60"
+site 136 s0136.use-call key="cfe/fsw/cfe-core/src/sb/cfe_sb_task.c|CFE_SB_SendRtgInfo|point|at-call|CFE_ES_GetAppName|799|col=13|nth=1" refs="row 19d3bd31786b5b60"
+site 137 s0137.creator-call key="cfe/fsw/cfe-core/src/tbl/cfe_tbl_api.c|CFE_TBL_Register|point|after-call|CFE_ES_RegisterCDSEx|422|col=34|nth=1" refs="row 2ebcea15f4e79065; row 5494d8cc9c1687f2"
+site 138 s0138.creator-call key="cfe/fsw/cfe-core/src/tbl/cfe_tbl_api.c|CFE_TBL_Register|point|at-call|CFE_ES_RegisterCDSEx|422|col=34|nth=1" refs="row 2ebcea15f4e79065; row 5494d8cc9c1687f2"
+site 139 s0139.use-call key="cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c|CFE_TBL_DeleteCDSCmd|point|after-call|CFE_ES_DeleteCDS|1512|col=22|nth=1" refs="row 5494d8cc9c1687f2"
+site 140 s0140.use-call key="cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c|CFE_TBL_DeleteCDSCmd|point|at-call|CFE_ES_DeleteCDS|1512|col=22|nth=1" refs="row 5494d8cc9c1687f2"
+site 141 s0141.effect-call key="cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c|CFE_TBL_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1516|col=17|nth=1" refs="row 5494d8cc9c1687f2 effect event-send cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1516:17 on failure 3288334368 of cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1512:22"
+site 142 s0142.effect-call key="cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c|CFE_TBL_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1523|col=17|nth=2" refs="row 5494d8cc9c1687f2 effect event-send cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1523:17 on failure 3288334370 of cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1512:22"
+site 143 s0143.effect-call key="cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c|CFE_TBL_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1529|col=17|nth=3" refs="row 5494d8cc9c1687f2 effect event-send cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1529:17 on failure 3288334369 of cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1512:22"
+site 144 s0144.effect-call key="cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c|CFE_TBL_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1534|col=17|nth=4" refs="row 5494d8cc9c1687f2 effect event-send cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1534:17 on failure -1 of cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1512:22; row 5494d8cc9c1687f2 effect event-send cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1534:17 on failure 3288334343 of cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1512:22; row 5494d8cc9c1687f2 effect event-send cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1534:17 on failure 3288334355 of cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1512:22"
+site 145 s0145.effect-call key="cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c|CFE_TBL_DeleteCDSCmd|point|at-call|CFE_EVS_SendEvent|1540|col=17|nth=5" refs="row 5494d8cc9c1687f2 effect event-send cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1540:17 on success 0 of cfe/fsw/cfe-core/src/tbl/cfe_tbl_task_cmds.c:1512:22"
+site 146 s0146.writer key="cfe/fsw/cfe-core/src/time/cfe_time_task.c|CFE_TIME_TaskInit|point|after-call|OS_BinSemCreate|277|col=14|nth=2" refs="row 7790bbae71516ab3 cfe/fsw/cfe-core/src/time/cfe_time_task.c:277:14"
+site 147 s0147.writer key="cfe/fsw/cfe-core/src/time/cfe_time_task.c|CFE_TIME_TaskInit|point|at-call|OS_BinSemCreate|277|col=14|nth=2" refs="row 7790bbae71516ab3 cfe/fsw/cfe-core/src/time/cfe_time_task.c:277:14"
+site 148 s0148.use-call key="cfe/fsw/cfe-core/src/time/cfe_time_tone.c|CFE_TIME_Local1HzISR|point|after-call|OS_BinSemGive|1271|col=5|nth=1" refs="row 7790bbae71516ab3"
+site 149 s0149.use-call key="cfe/fsw/cfe-core/src/time/cfe_time_tone.c|CFE_TIME_Local1HzISR|point|at-call|OS_BinSemGive|1271|col=5|nth=1" refs="row 7790bbae71516ab3"
+site 150 s0150.actor-root+actor-start key="cfe/fsw/cfe-core/src/time/cfe_time_tone.c|CFE_TIME_Local1HzTask|before|||0" refs="actor CFE_TIME_Local1HzTask (spawn-entry); creation osal/src/os/posix/osapi.c:645:19 start routine CFE_TIME_Local1HzTask"
+site 151 s0151.actor-root+actor-start key="cfe/fsw/cfe-core/src/time/cfe_time_tone.c|CFE_TIME_Tone1HzTask|before|||0" refs="actor CFE_TIME_Tone1HzTask (spawn-entry); creation osal/src/os/posix/osapi.c:645:19 start routine CFE_TIME_Tone1HzTask"
+site 152 s0152.writer key="cfe/fsw/cfe-core/src/time/cfe_time_utils.c|CFE_TIME_InitData|point|after-call|strcpy|264|col=5|nth=1" refs="row 7790bbae71516ab3 cfe/fsw/cfe-core/src/time/cfe_time_utils.c:264:5"
+site 153 s0153.writer key="cfe/fsw/cfe-core/src/time/cfe_time_utils.c|CFE_TIME_InitData|point|at-call|strcpy|264|col=5|nth=1" refs="row 7790bbae71516ab3 cfe/fsw/cfe-core/src/time/cfe_time_utils.c:264:5"
+site 154 s0154.actor-owner key="osal/src/os/posix/osapi.c|OS_TaskCreate|effect|store||700" refs="actor CFE_ES_PerfLogDump (spawn-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CFE_TIME_Local1HzTask (spawn-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CFE_TIME_Tone1HzTask (spawn-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CI_Lab_AppMain (script-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor SAMPLE_AppMain (script-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor SAMPLE_LibInit (script-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor SCH_Lab_AppMain (script-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor TO_Lab_AppMain (script-entry) parameter 4 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:700:5 after the spawn osal/src/os/posix/osapi.c:645:19"
+site 155 s0155.actor-owner key="osal/src/os/posix/osapi.c|OS_TaskCreate|effect|store||702" refs="actor CFE_ES_PerfLogDump (spawn-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CFE_TIME_Local1HzTask (spawn-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CFE_TIME_Tone1HzTask (spawn-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor CI_Lab_AppMain (script-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor SAMPLE_AppMain (script-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor SAMPLE_LibInit (script-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor SCH_Lab_AppMain (script-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19; actor TO_Lab_AppMain (script-entry) parameter 5 of OS_TaskCreate stored at osal/src/os/posix/osapi.c:702:5 after the spawn osal/src/os/posix/osapi.c:645:19"
+site 156 s0156.actor-create key="osal/src/os/posix/osapi.c|OS_TaskCreate|point|after-call|pthread_create|645|col=19|nth=1" refs="creation osal/src/os/posix/osapi.c:645:19"
+site 157 s0157.actor-create key="osal/src/os/posix/osapi.c|OS_TaskCreate|point|at-call|pthread_create|645|col=19|nth=1" refs="creation osal/src/os/posix/osapi.c:645:19"
+map 15136ceffd23c14f 33 35 37 39 41 43 45 47 49 50
+map 19d3bd31786b5b60 52 57 58 63 64 135 136
+map 2ebcea15f4e79065 7 8 26 27 28 29 30 31 32 137 138
+map 4c3712db382fdfa0 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+map 5494d8cc9c1687f2 7 8 137 138 139 140 141 142 143 144 145
+map 6ad5bc1537946337 53 54 55 56 57 58 59 60 61 62 63 64 66 67 68 70 71 72 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 133 134
+map 7790bbae71516ab3 146 147 148 149 152 153
+map a86d2e8fd5a85472 51 57 58 63 64 65 69 73 132
+map e1ccf563479366fe 34 36 38 40 42 44 46 48 49 50
+need row 4c3712db382fdfa0 use-result planned reason=- note="" sites=11,12,13,14,20
+need row 4c3712db382fdfa0 wait-result cfe/fsw/cfe-core/src/es/cfe_es_perf.c:358:5 not-planned reason=plan_missing(wait predicate not recognised) note="FACT_LOOPS predicate form none; LOOP_DEFS refused-unresolved"
+need row 4c3712db382fdfa0 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 15136ceffd23c14f use-result planned reason=- note="" sites=33,37,41,45
+need row 15136ceffd23c14f wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 15136ceffd23c14f lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row e1ccf563479366fe use-result planned reason=- note="" sites=34,38,42,46
+need row e1ccf563479366fe wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row e1ccf563479366fe lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 19d3bd31786b5b60 use-result planned reason=- note="" sites=135
+need row 19d3bd31786b5b60 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 19d3bd31786b5b60 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row a86d2e8fd5a85472 use-result planned reason=- note="" sites=69
+need row a86d2e8fd5a85472 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row a86d2e8fd5a85472 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 7790bbae71516ab3 use-result planned reason=- note="" sites=148
+need row 7790bbae71516ab3 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 7790bbae71516ab3 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 6ad5bc1537946337 use-result planned reason=- note="" sites=53,54,55,56,66,67,68,74,75,76,80,81,84,86,87,88,89,90,91,92,93,102,103,104,105,106,107,108,109,110,120,121,122,123,124,125
+need row 6ad5bc1537946337 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 6ad5bc1537946337 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 2ebcea15f4e79065 use-result planned reason=- note="" sites=26
+need row 2ebcea15f4e79065 event-send planned reason=- note="" sites=28,29,30,31
+need row 2ebcea15f4e79065 event-send-other-outcome planned reason=- note="" sites=32
+need row 2ebcea15f4e79065 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 2ebcea15f4e79065 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 5494d8cc9c1687f2 use-result planned reason=- note="" sites=139
+need row 5494d8cc9c1687f2 event-send planned reason=- note="" sites=141,142,143,144
+need row 5494d8cc9c1687f2 event-send-other-outcome planned reason=- note="" sites=145
+need row 5494d8cc9c1687f2 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 5494d8cc9c1687f2 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 2ebcea15f4e79065 object-delete not-planned reason=plan_missing(no namespace data entry) note="the row's lookup and creators: CFE_ES_DeleteCDS CFE_ES_RegisterCDSEx"
+need row 5494d8cc9c1687f2 object-delete not-planned reason=plan_missing(no namespace data entry) note="the row's lookup and creators: CFE_ES_DeleteCDS CFE_ES_RegisterCDSEx"
+gap row 2ebcea15f4e79065 "key text of CFE_ES_DeleteCDS parameter 0: no non-null test of it before a call in the facts; recorded as a pointer" reason=record_insufficient(key text) rule=key-text
+gap row 2ebcea15f4e79065 "key text of CFE_ES_RegisterCDSEx parameter 2: no non-null test of it before a call in the facts; recorded as a pointer" reason=record_insufficient(key text) rule=key-text
+gap row 5494d8cc9c1687f2 "key text of CFE_ES_DeleteCDS parameter 0: no non-null test of it before a call in the facts; recorded as a pointer" reason=record_insufficient(key text) rule=key-text
+gap row 5494d8cc9c1687f2 "key text of CFE_ES_RegisterCDSEx parameter 2: no non-null test of it before a call in the facts; recorded as a pointer" reason=record_insufficient(key text) rule=key-text
+gap creation osal/src/os/posix/osapi.c:645:19 "creation argument 0 for the roots CFE_ES_PerfLogDump CFE_TIME_Local1HzTask CFE_TIME_Tone1HzTask CI_Lab_AppMain SAMPLE_AppMain SAMPLE_LibInit SCH_Lab_AppMain TO_Lab_AppMain" reason=link_unlinked(no creation-argument channel) rule=actor
+creation osal/src/os/posix/osapi.c:645:19 roots CFE_ES_PerfLogDump CFE_TIME_Local1HzTask CFE_TIME_Tone1HzTask CI_Lab_AppMain SAMPLE_AppMain SAMPLE_LibInit SCH_Lab_AppMain TO_Lab_AppMain; start routines CFE_ES_PerfLogDump CFE_TIME_Local1HzTask CFE_TIME_Tone1HzTask CI_Lab_AppMain SAMPLE_AppMain SAMPLE_LibInit SCH_Lab_AppMain TO_Lab_AppMain; tie: none (one constant argument)
+stop-event run-loop CFE_ES_RunLoop cfe/fsw/cfe-core/src/es/cfe_es_api.c:540 decl cfe/fsw/cfe-core/src/inc/cfe_es.h:543 version "cFE 6.4.2" data line 24
+stop-event app-exit CFE_ES_ExitApp cfe/fsw/cfe-core/src/es/cfe_es_api.c:435 decl cfe/fsw/cfe-core/src/inc/cfe_es.h:515 version "cFE 6.4.2" data line 25
+spawn 157 wrapper=kz_rt_posix_create P0 thread-creation entry pthread_create: start routine argument 2, creation argument 3, thread handle out argument 0 (P0_TABLE)
+module 1	/cf/apps/ci_lab.so	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/apps/ci_lab/fsw/src/
+module 2	/cf/apps/sample_app.so	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/apps/sample_app/fsw/src/
+module 3	/cf/apps/sample_lib.so	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/apps/sample_lib/fsw/src/
+module 4	/cf/apps/sch_lab.so	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/apps/sch_lab/fsw/src/
+module 5	/cf/apps/to_lab.so	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/apps/to_lab/fsw/src/
+default-module 6 core-linux.bin
+exe basis	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/build/cpu1/exe/core-linux.bin
+exe basis	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/build/cpu1/exe/cf/apps/ci_lab.so
+exe basis	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/build/cpu1/exe/cf/apps/sample_app.so
+exe basis	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/build/cpu1/exe/cf/apps/sample_lib.so
+exe basis	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/build/cpu1/exe/cf/apps/sch_lab.so
+exe basis	/home/user/work/c5tools/build/642/keep/cFE-6.4.2-OSS-release/build/cpu1/exe/cf/apps/to_lab.so

@@ -1,0 +1,27 @@
+# SL:3281 2026-11-09T08:42:16.473Z
+set -u; D=/home/user/work/preserve/tools-20261109; mkdir -p $D && cd /home/user/work && {
+  for pair in "merge-check/kz-llvm/tools/kz-static/kz-static:kz-static.db172b74" "merge-check/kz-llvm/tools/kz/kz:kz.b254483e" "merge-check/kz-llvm/tools/kz-dump/kz-dump:kz-dump.05623054" "kairos-build/tools/kz/kz:kz.5d64256a" "c5tools/kz-llvm/tools/kz-static/kz-static:kz-static.3ec20abf"; do
+    src=${pair%%:*}; dst=${pair##*:}
+    xz -9 -T4 -c "$src" > "$D/$dst.xz" || { echo "FAIL $src"; exit 1; }
+    echo "$(sha256sum "$src" | cut -d' ' -f1)  $src" >> $D/ORIGINAL_SHA256
+  done
+  ( cd $D && sha256sum *.xz > XZ_SHA256 )
+  for pair in "kz-static.db172b74:merge-check/kz-llvm/tools/kz-static/kz-static" "kz.5d64256a:kairos-build/tools/kz/kz"; do
+    a=${pair%%:*}; b=${pair##*:}; [ "$(xz -dc $D/$a.xz | sha256sum | cut -d' ' -f1)" = "$(sha256sum $b | cut -d' ' -f1)" ] && echo "roundtrip OK $a" || echo "roundtrip FAIL $a"
+  done
+  ls -la $D; df -h / | tail -1; }
+# SL:3282 2026-11-09T08:46:44.014Z
+roundtrip OK kz-static.db172b74
+roundtrip OK kz.5d64256a
+total 104172
+drwxr-xr-x 2 root root     4096 Nov  9 08:46 .
+drwxr-xr-x 3 root root     4096 Nov  9 08:42 ..
+-rw-r--r-- 1 root root      517 Nov  9 08:46 ORIGINAL_SHA256
+-rw-r--r-- 1 root root      424 Nov  9 08:46 XZ_SHA256
+-rw-r--r-- 1 root root   608596 Nov  9 08:44 kz-dump.05623054.xz
+-rw-r--r-- 1 root root 31906252 Nov  9 08:46 kz-static.3ec20abf.xz
+-rw-r--r-- 1 root root 39227324 Nov  9 08:43 kz-static.db172b74.xz
+-rw-r--r-- 1 root root 17427972 Nov  9 08:45 kz.5d64256a.xz
+-rw-r--r-- 1 root root 17478296 Nov  9 08:44 kz.b254483e.xz
+/dev/vda        252G   38G  1.2G  98% /
+Shell cwd was reset to /home/user/Shape-Perf

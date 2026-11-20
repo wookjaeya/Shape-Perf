@@ -1,0 +1,20 @@
+relations rows off 295 on 295; keys in both 295, only off 0, only on 0
+rows in both whose text differs: 178
+  line writers        differs in 178 rows
+  line incomplete     differs in 32 rows
+  line dependency     differs in 19 rows
+  line (other)        differs in 13 rows
+  line field          differs in 13 rows
+  line actors         differs in 4 rows
+  line feasibility    differs in 4 rows
+  line flip           differs in 3 rows
+  line layers         differs in 2 rows
+rows by path (off -> on): A 25 -> 25, B 155 -> 155, C 115 -> 115
+order row values (off -> on), keys in both 295:
+  fixed_early_proved -> fixed_early_proved 4
+  hard_before -> hard_before 33
+  hard_before -> unknown 1
+  unknown -> unknown 68
+  unordered -> unordered 189
+plan sites off 42 on 42; site lines only off 0, only on 0 (site numbers and label numbers masked)
+key values at use and creator calls, off: {}; on: {}

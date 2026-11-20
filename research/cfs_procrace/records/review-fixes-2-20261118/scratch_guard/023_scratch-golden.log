@@ -1,0 +1,9 @@
+# space_guard.sh kind=scratch-golden need=100000000 floor=314572800 interval=2 cmd=ctest -R static_golden|test_static_plan
+start 2026-11-18T10:06:54.850Z free=1174413312 threshold=414572800
+sample 2026-11-18T10:06:54.855Z 1174409216
+sample 2026-11-18T10:06:56.859Z 1171673088
+sample 2026-11-18T10:06:58.865Z 1170350080
+sample 2026-11-18T10:07:00.871Z 1170350080
+sample 2026-11-18T10:07:02.877Z 1168691200
+sample 2026-11-18T10:07:04.883Z 1167032320
+end 2026-11-18T10:07:06.889Z kind=scratch-golden verdict=completed rc=0 free=1166221312 lowest=1166221312 dip=8192000 change=-8192000

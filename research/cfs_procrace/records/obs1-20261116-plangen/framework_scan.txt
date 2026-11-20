@@ -1,0 +1,190 @@
+# c1-bundle-1df262a cfe/modules/core_api/fsw/inc/cfe_es.h sha256=cd8f5e6bd61d3072c7f4feebc5000f075467495ca3a72b456bb2c0ec1938f922
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:96	CFE_ES_AppID_ToIndex	Obtain an index value correlating to an ES Application ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:121	CFE_ES_LibID_ToIndex	Obtain an index value correlating to an ES Library ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:147	CFE_ES_TaskID_ToIndex	Obtain an index value correlating to an ES Task ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:172	CFE_ES_CounterID_ToIndex	Obtain an index value correlating to an ES Counter ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:205	CFE_ES_Main	cFE Main Entry Point used by Board Support Package to start cFE
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:232	CFE_ES_ResetCFE	Reset the cFE Core and all cFE Applications
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:272	CFE_ES_RestartApp	Restart a single cFE Application
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:308	CFE_ES_ReloadApp	Reload a single cFE Application
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:329	CFE_ES_DeleteApp	Delete a cFE Application
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:355	CFE_ES_ExitApp	Exit a cFE Application
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:397	CFE_ES_RunLoop	Check for Exit, Restart, or Reload commands
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:427	CFE_ES_WaitForSystemState	Allow an Application to Wait for a minimum global system state
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:458	CFE_ES_WaitForStartupSync	Allow an Application to Wait for the "OPERATIONAL" global system state
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:478	CFE_ES_IncrementTaskCounter	Increments the execution counter for the calling task
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:511	CFE_ES_GetResetType	Return the most recent Reset Type
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:534	CFE_ES_GetAppID	Get an Application ID for the calling Application
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:557	CFE_ES_GetTaskID	Get the task ID of the calling context
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:581	CFE_ES_GetAppIDByName	Get an Application ID associated with a specified Application name
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:605	CFE_ES_GetLibIDByName	Get a Library ID associated with a specified Library name
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:635	CFE_ES_GetAppName	Get an Application name for a specified Application ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:665	CFE_ES_GetLibName	Get a Library name for a specified Library ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:691	CFE_ES_GetAppInfo	Get Application Information given a specified App ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:719	CFE_ES_GetTaskInfo	Get Task Information given a specified Task ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:751	CFE_ES_GetLibInfo	Get Library Information given a specified Resource ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:783	CFE_ES_GetModuleInfo	Get Information given a specified Resource ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:857	CFE_ES_GetTaskIDByName	Get a Task ID associated with a specified Task name
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:887	CFE_ES_GetTaskName	Get a Task name for a specified Task ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:912	CFE_ES_DeleteChildTask	Deletes a task under an existing Application
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:932	CFE_ES_ExitChildTask	Exits a child task
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:955	CFE_ES_BackgroundWakeup	Wakes up the CFE background task
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:980	CFE_ES_WriteToSysLog	Write a string to the cFE System Log
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1015	CFE_ES_CalculateCRC	Calculate a CRC on a block of memory
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1032	CFE_ES_ProcessAsyncEvent	Notification that an asynchronous event was detected by the underlying OS/PSP
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1078	CFE_ES_RegisterCDS	Reserve space (or re-obtain previously reserved space) in the Critical Data Store (CDS)
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1103	CFE_ES_GetCDSBlockIDByName	Get a CDS Block ID associated with a specified CDS Block name
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1134	CFE_ES_GetCDSBlockName	Get a Block name for a specified Block ID
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1160	CFE_ES_CopyToCDS	Save a block of data in the Critical Data Store (CDS)
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1192	CFE_ES_RestoreFromCDS	Recover a block of data from the Critical Data Store (CDS)
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1232	CFE_ES_PoolCreateNoSem	Initializes a memory pool created by an application without using a semaphore during processing.
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1267	CFE_ES_PoolCreate	Initializes a memory pool created by an application while using a semaphore during processing.
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1340	CFE_ES_PoolDelete	Deletes a memory pool that was previously created
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1368	CFE_ES_GetPoolBuf	Gets a buffer from the memory pool created by #CFE_ES_PoolCreate or #CFE_ES_PoolCreateNoSem
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1393	CFE_ES_GetPoolBufInfo	Gets info on a buffer previously allocated via #CFE_ES_GetPoolBuf
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1419	CFE_ES_PutPoolBuf	Releases a buffer from the memory pool that was previously allocated via #CFE_ES_GetPoolBuf
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1447	CFE_ES_GetMemPoolStats	Extracts the statistics maintained by the memory pool software
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1521	CFE_ES_PerfLogAdd	Adds a new entry to the data buffer
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1553	CFE_ES_RegisterGenCounter	Register a generic counter
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1575	CFE_ES_DeleteGenCounter	Delete a generic counter
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1597	CFE_ES_IncrementGenCounter	Increments the specified generic counter
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1621	CFE_ES_SetGenCount	Set the specified generic counter
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1645	CFE_ES_GetGenCount	Get the specified generic counter count
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1668	CFE_ES_GetGenCounterIDByName	Get the Id associated with a generic counter name
+c1-bundle-1df262a	cfe/modules/core_api/fsw/inc/cfe_es.h:1698	CFE_ES_GetGenCounterName	Get a Counter name for a specified Counter ID
+# r2-cfs-ref cfe/modules/core_api/fsw/inc/cfe_es.h sha256=0ee6a236b9dd1b44f90ed3cfdad28fbaa24fa54aa7b551c7ee82b0fe03163b8c
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:87	CFE_ES_AppID_ToIndex	Obtain an index value correlating to an ES Application ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:112	CFE_ES_LibID_ToIndex	Obtain an index value correlating to an ES Library ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:138	CFE_ES_TaskID_ToIndex	Obtain an index value correlating to an ES Task ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:163	CFE_ES_CounterID_ToIndex	Obtain an index value correlating to an ES Counter ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:196	CFE_ES_Main	cFE Main Entry Point used by Board Support Package to start cFE
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:223	CFE_ES_ResetCFE	Reset the cFE Core and all cFE Applications
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:263	CFE_ES_RestartApp	Restart a single cFE Application
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:299	CFE_ES_ReloadApp	Reload a single cFE Application
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:320	CFE_ES_DeleteApp	Delete a cFE Application
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:346	CFE_ES_ExitApp	Exit a cFE Application
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:388	CFE_ES_RunLoop	Check for Exit, Restart, or Reload commands
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:418	CFE_ES_WaitForSystemState	Allow an Application to Wait for a minimum global system state
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:449	CFE_ES_WaitForStartupSync	Allow an Application to Wait for the "OPERATIONAL" global system state
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:469	CFE_ES_IncrementTaskCounter	Increments the execution counter for the calling task
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:502	CFE_ES_GetResetType	Return the most recent Reset Type
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:525	CFE_ES_GetAppID	Get an Application ID for the calling Application
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:548	CFE_ES_GetTaskID	Get the task ID of the calling context
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:572	CFE_ES_GetAppIDByName	Get an Application ID associated with a specified Application name
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:596	CFE_ES_GetLibIDByName	Get a Library ID associated with a specified Library name
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:626	CFE_ES_GetAppName	Get an Application name for a specified Application ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:656	CFE_ES_GetLibName	Get a Library name for a specified Library ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:682	CFE_ES_GetAppInfo	Get Application Information given a specified App ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:710	CFE_ES_GetTaskInfo	Get Task Information given a specified Task ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:742	CFE_ES_GetLibInfo	Get Library Information given a specified Resource ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:774	CFE_ES_GetModuleInfo	Get Information given a specified Resource ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:852	CFE_ES_GetTaskIDByName	Get a Task ID associated with a specified Task name
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:882	CFE_ES_GetTaskName	Get a Task name for a specified Task ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:907	CFE_ES_DeleteChildTask	Deletes a task under an existing Application
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:927	CFE_ES_ExitChildTask	Exits a child task
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:950	CFE_ES_BackgroundWakeup	Wakes up the CFE background task
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:975	CFE_ES_WriteToSysLog	Write a string to the cFE System Log
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1003	CFE_ES_CalculateCRC	Calculate a CRC on a block of memory
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1020	CFE_ES_ProcessAsyncEvent	Notification that an asynchronous event was detected by the underlying OS/PSP
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1066	CFE_ES_RegisterCDS	Reserve space (or re-obtain previously reserved space) in the Critical Data Store (CDS)
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1091	CFE_ES_GetCDSBlockIDByName	Get a CDS Block ID associated with a specified CDS Block name
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1122	CFE_ES_GetCDSBlockName	Get a Block name for a specified Block ID
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1148	CFE_ES_CopyToCDS	Save a block of data in the Critical Data Store (CDS)
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1180	CFE_ES_RestoreFromCDS	Recover a block of data from the Critical Data Store (CDS)
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1220	CFE_ES_PoolCreateNoSem	Initializes a memory pool created by an application without using a semaphore during processing.
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1255	CFE_ES_PoolCreate	Initializes a memory pool created by an application while using a semaphore during processing.
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1389	CFE_ES_PoolDelete	Deletes a memory pool that was previously created
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1417	CFE_ES_GetPoolBuf	Gets a buffer from the memory pool created by #CFE_ES_PoolCreate or #CFE_ES_PoolCreateNoSem
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1442	CFE_ES_GetPoolBufInfo	Gets info on a buffer previously allocated via #CFE_ES_GetPoolBuf
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1468	CFE_ES_PutPoolBuf	Releases a buffer from the memory pool that was previously allocated via #CFE_ES_GetPoolBuf
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1496	CFE_ES_GetMemPoolStats	Extracts the statistics maintained by the memory pool software
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1574	CFE_ES_PerfLogAdd	Adds a new entry to the data buffer
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1606	CFE_ES_RegisterGenCounter	Register a generic counter
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1628	CFE_ES_DeleteGenCounter	Delete a generic counter
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1650	CFE_ES_IncrementGenCounter	Increments the specified generic counter
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1674	CFE_ES_SetGenCount	Set the specified generic counter
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1698	CFE_ES_GetGenCount	Get the specified generic counter count
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1721	CFE_ES_GetGenCounterIDByName	Get the Id associated with a generic counter name
+r2-cfs-ref	cfe/modules/core_api/fsw/inc/cfe_es.h:1751	CFE_ES_GetGenCounterName	Get a Counter name for a specified Counter ID
+# cfe-6.4.1 cfe/fsw/cfe-core/src/inc/cfe_es.h sha256=9fde4f8b67b6bbb96bca0376da0319e34fcb1c0574c89996fe8fe8eaa70d8545
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:373	CFE_ES_Main	cFE Main Entry Point used by Board Support Package to start cFE
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:402	CFE_ES_GetResetType	Return the most recent Reset Type
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:428	CFE_ES_ResetCFE	Reset the cFE Core and all cFE Applications
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:449	CFE_ES_RestartApp	Restart a single cFE Application
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:473	CFE_ES_ReloadApp	Reload a single cFE Application
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:494	CFE_ES_DeleteApp	Delete a cFE Application
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:515	CFE_ES_ExitApp	Exit a cFE Application
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:543	CFE_ES_RunLoop	Check for Exit, Restart, or Reload commands
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:572	CFE_ES_WaitForStartupSync	Allow an Application to Wait for others to start up
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:598	CFE_ES_RegisterApp	Registers a cFE Application with the Executive Services
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:623	CFE_ES_GetAppID	Get an Application ID for the calling Application
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:651	CFE_ES_GetAppIDByName	Get an Application ID associated with a specified Application name
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:685	CFE_ES_GetAppName	Get an Application name for a specified Application ID
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:716	CFE_ES_GetAppInfo	Get Application Information given a specified App ID
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:747	CFE_ES_GetTaskInfo	Get Task Information given a specified Task ID
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:771	CFE_ES_RegisterChildTask	Registers a cFE Child task associated with a cFE Application
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:841	CFE_ES_DeleteChildTask	Deletes a task under an existing Application
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:864	CFE_ES_ExitChildTask	Exits a child task
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:888	CFE_ES_IncrementTaskCounter	Increments the execution counter for the calling task
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:919	CFE_ES_WriteToSysLog	Write a string to the cFE System Log
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:971	CFE_ES_RegisterDriver	Register a Device Driver
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:995	CFE_ES_UnloadDriver	Remove a Device Driver
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1027	CFE_ES_CalculateCRC	Calculate a CRC on a block of memory
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1066	CFE_ES_RegisterCDS	Reserve space (or re-obtain previously reserved space) in the Critical Data Store (CDS)
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1093	CFE_ES_CopyToCDS	Save a block of data in the Critical Data Store (CDS)
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1125	CFE_ES_RestoreFromCDS	Recover a block of data from the Critical Data Store (CDS)
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1161	CFE_ES_PoolCreateNoSem	Initializes a memory pool created by an application without using a semaphore during processing.
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1193	CFE_ES_PoolCreate	Initializes a memory pool created by an application while using a semaphore during processing.
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1234	CFE_ES_PoolCreateEx	Initializes a memory pool created by an application with application specified block sizes.
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1264	CFE_ES_GetPoolBuf	Gets a buffer from the memory pool created by #CFE_ES_PoolCreate or #CFE_ES_PoolCreateNoSem
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1289	CFE_ES_GetPoolBufInfo	Gets info on a buffer previously allocated via #CFE_ES_GetPoolBuf
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1313	CFE_ES_PutPoolBuf	Releases a buffer from the memory pool that was previously allocated via #CFE_ES_GetPoolBuf
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1342	CFE_ES_GetMemPoolStats	Extracts the statistics maintained by the memory pool software
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1405	CFE_ES_PerfLogAdd	Function called by CFE_ES_PerfLogEntry and CFE_ES_PerfLogExit macros
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1433	CFE_ES_RegisterGenCounter	Register a generic counter
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1455	CFE_ES_DeleteGenCounter	Delete a generic counter
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1477	CFE_ES_IncrementGenCounter	Increments the specified generic counter
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1501	CFE_ES_SetGenCount	Set the specified generic counter
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1525	CFE_ES_GetGenCount	Get the specified generic counter count
+cfe-6.4.1	cfe/fsw/cfe-core/src/inc/cfe_es.h:1549	CFE_ES_GetGenCounterIDByName	Get the Id associated with a generic counter name
+# cfe-6.4.2 cfe/fsw/cfe-core/src/inc/cfe_es.h sha256=9fde4f8b67b6bbb96bca0376da0319e34fcb1c0574c89996fe8fe8eaa70d8545
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:373	CFE_ES_Main	cFE Main Entry Point used by Board Support Package to start cFE
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:402	CFE_ES_GetResetType	Return the most recent Reset Type
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:428	CFE_ES_ResetCFE	Reset the cFE Core and all cFE Applications
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:449	CFE_ES_RestartApp	Restart a single cFE Application
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:473	CFE_ES_ReloadApp	Reload a single cFE Application
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:494	CFE_ES_DeleteApp	Delete a cFE Application
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:515	CFE_ES_ExitApp	Exit a cFE Application
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:543	CFE_ES_RunLoop	Check for Exit, Restart, or Reload commands
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:572	CFE_ES_WaitForStartupSync	Allow an Application to Wait for others to start up
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:598	CFE_ES_RegisterApp	Registers a cFE Application with the Executive Services
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:623	CFE_ES_GetAppID	Get an Application ID for the calling Application
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:651	CFE_ES_GetAppIDByName	Get an Application ID associated with a specified Application name
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:685	CFE_ES_GetAppName	Get an Application name for a specified Application ID
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:716	CFE_ES_GetAppInfo	Get Application Information given a specified App ID
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:747	CFE_ES_GetTaskInfo	Get Task Information given a specified Task ID
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:771	CFE_ES_RegisterChildTask	Registers a cFE Child task associated with a cFE Application
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:841	CFE_ES_DeleteChildTask	Deletes a task under an existing Application
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:864	CFE_ES_ExitChildTask	Exits a child task
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:888	CFE_ES_IncrementTaskCounter	Increments the execution counter for the calling task
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:919	CFE_ES_WriteToSysLog	Write a string to the cFE System Log
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:971	CFE_ES_RegisterDriver	Register a Device Driver
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:995	CFE_ES_UnloadDriver	Remove a Device Driver
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1027	CFE_ES_CalculateCRC	Calculate a CRC on a block of memory
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1066	CFE_ES_RegisterCDS	Reserve space (or re-obtain previously reserved space) in the Critical Data Store (CDS)
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1093	CFE_ES_CopyToCDS	Save a block of data in the Critical Data Store (CDS)
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1125	CFE_ES_RestoreFromCDS	Recover a block of data from the Critical Data Store (CDS)
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1161	CFE_ES_PoolCreateNoSem	Initializes a memory pool created by an application without using a semaphore during processing.
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1193	CFE_ES_PoolCreate	Initializes a memory pool created by an application while using a semaphore during processing.
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1234	CFE_ES_PoolCreateEx	Initializes a memory pool created by an application with application specified block sizes.
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1264	CFE_ES_GetPoolBuf	Gets a buffer from the memory pool created by #CFE_ES_PoolCreate or #CFE_ES_PoolCreateNoSem
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1289	CFE_ES_GetPoolBufInfo	Gets info on a buffer previously allocated via #CFE_ES_GetPoolBuf
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1313	CFE_ES_PutPoolBuf	Releases a buffer from the memory pool that was previously allocated via #CFE_ES_GetPoolBuf
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1342	CFE_ES_GetMemPoolStats	Extracts the statistics maintained by the memory pool software
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1405	CFE_ES_PerfLogAdd	Function called by CFE_ES_PerfLogEntry and CFE_ES_PerfLogExit macros
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1433	CFE_ES_RegisterGenCounter	Register a generic counter
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1455	CFE_ES_DeleteGenCounter	Delete a generic counter
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1477	CFE_ES_IncrementGenCounter	Increments the specified generic counter
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1501	CFE_ES_SetGenCount	Set the specified generic counter
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1525	CFE_ES_GetGenCount	Get the specified generic counter count
+cfe-6.4.2	cfe/fsw/cfe-core/src/inc/cfe_es.h:1549	CFE_ES_GetGenCounterIDByName	Get the Id associated with a generic counter name

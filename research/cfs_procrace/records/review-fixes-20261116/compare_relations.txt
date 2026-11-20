@@ -1,0 +1,15 @@
+OK c1_pre_tx relations.txt: classes: marked 94, rules 1, set not established 5; other 0
+OK c1_pre_tx keys.txt same apart from line 3 (rules revision 9)
+OK c1_pre_tx relations.log empty
+OK c1_post_tx relations.txt: classes: marked 94, rules 1, set not established 5; other 0
+OK c1_post_tx keys.txt same apart from line 3 (rules revision 9)
+OK c1_post_tx relations.log empty
+OK r2_core relations.txt: classes: marked 14, rules 1, set not established 1; other 0
+OK r2_core keys.txt same apart from line 3 (rules revision 9)
+OK r2_core relations.log empty
+OK c5_641 relations.txt: classes: marked 18, rules 1, set complete 13, set not established 2; other 0
+OK c5_641 keys.txt same apart from line 3 (rules revision 9)
+OK c5_641 relations.log empty
+OK c5_642 relations.txt: classes: marked 18, rules 1, set complete 13, set not established 2; other 0
+OK c5_642 keys.txt same apart from line 3 (rules revision 9)
+OK c5_642 relations.log empty

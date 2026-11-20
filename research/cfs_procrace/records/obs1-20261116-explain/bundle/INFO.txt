@@ -1,0 +1,17 @@
+bundle=obs1-20261116-cycle
+created_utc=2026-11-16T08:37:51.358Z
+repo_commit=ab230a14ecf0892dad7b37c4d888a661916f5f0f
+kernel=6.18.44-fc-v470
+source=/home/user/work/redesign/obs1/plangen files=30 bytes=994424
+source=/home/user/work/redesign/obs1/c1pre_rt files=355 bytes=5032847
+source=/home/user/work/redesign/obs1/c1pre_derived files=3957 bytes=33032031
+source=/home/user/work/redesign/obs1/c1pre_bprime files=10 bytes=13100847
+source=/home/user/work/redesign/obs1/c1pre_boot files=52 bytes=3613913
+source=/home/user/work/redesign/obs1/c1pre_convert files=5 bytes=844336
+source=/home/user/work/redesign/obs1/c1pre_explain files=145 bytes=7091104
+tar_xz_bytes=9341660 parts=1 tar_xz_sha256=4d2a032571614ee47eca9501ddc36080e07fd68b1eb2589011e8e8d39f258501
+location=/home/user/work/preserve/bundles-20261116/obs1-20261116-cycle (local, not in the repository, not pushed)
+made_with=bundle_local.sh (tar --sort=name --owner=0 --group=0 --numeric-owner | xz -9 -T4 | split -b 45M), started 2026-11-16T08:37:29.929Z
+df_free_before=3735601152 df_free_after_create=3724517376
+credential_pattern_hits=none
+note=the first automatic observation path, c1_pre_tx: plans, runtime tree, derived build, B' basis and facts, the boot, the conversion, the explanation records

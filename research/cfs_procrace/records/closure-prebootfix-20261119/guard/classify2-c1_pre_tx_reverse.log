@@ -1,0 +1,4 @@
+# space_guard.sh kind=classify2-c1_pre_tx_reverse need=2000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-prebootfix-20261119/scripts/classify_compare2.py --compare /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/compare/synth_c1_pre_tx_reverse.txt --records /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_reverse/explain --order reverse --uses /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/uses/uses_c1_pre_tx.tsv --out /home/user/Shape-Perf/research/cfs_procrace/records/closure-prebootfix-20261119/compare/classify2_synth_c1_pre_tx_reverse.tsv
+start 2026-11-19T17:47:04.541Z free=764526592 threshold=316572800
+sample 2026-11-19T17:47:04.545Z 764522496
+end 2026-11-19T17:47:06.551Z kind=classify2-c1_pre_tx_reverse verdict=completed rc=0 free=764456960 lowest=764456960 dip=69632 change=-69632

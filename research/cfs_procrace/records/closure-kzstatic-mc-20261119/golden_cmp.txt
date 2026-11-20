@@ -1,0 +1,8 @@
+# the goldens after the update against the scratch copies (records/closure-kzstatic-20261119/scratch6/checkbuild/golden_scratch)
+SAME closure_np.golden
+SAME looplock_order_np.golden
+SAME order_np.golden
+SAME planv4_np.plan.golden
+SAME planv5_np.plan.golden
+SAME resultflow_np.golden
+SAME resultflow_order_np.golden

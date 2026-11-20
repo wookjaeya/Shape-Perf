@@ -1,0 +1,8 @@
+# kz executables to check; plan sidecar /home/user/work/redesign/obs1/plangen/c5_641/plan.side sha256=2276c1015f7b0f3adb83a9019851bcbf960154bb2e2cddced917e6c97da7aa28
+# the reference build's paths (basis); a derived build maps them to its install tree
+basis	/home/user/work/c5tools/build/641/keep/cFE-6.4.1-OSS-release/build/cpu1/exe/core-linux.bin
+basis	/home/user/work/c5tools/build/641/keep/cFE-6.4.1-OSS-release/build/cpu1/exe/cf/apps/ci_lab.so
+basis	/home/user/work/c5tools/build/641/keep/cFE-6.4.1-OSS-release/build/cpu1/exe/cf/apps/sample_app.so
+basis	/home/user/work/c5tools/build/641/keep/cFE-6.4.1-OSS-release/build/cpu1/exe/cf/apps/sample_lib.so
+basis	/home/user/work/c5tools/build/641/keep/cFE-6.4.1-OSS-release/build/cpu1/exe/cf/apps/sch_lab.so
+basis	/home/user/work/c5tools/build/641/keep/cFE-6.4.1-OSS-release/build/cpu1/exe/cf/apps/to_lab.so

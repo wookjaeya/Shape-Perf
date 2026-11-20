@@ -1,0 +1,31 @@
+findings 22
+review rules findings 8 blocking 2 major 4 minor 2
+review builds findings 7 blocking 1 major 4 minor 2
+review semantics findings 7 blocking 1 major 5 minor 1
+severity blocking 4 major 13 minor 5
+verdicts 22
+real true 20 real false 2
+before_boot true 5 before_boot false 15 before_boot absent 2
+id rules-01 blocking real=true before_boot=true
+id rules-02 blocking real=true before_boot=true
+id rules-03 major real=true before_boot=false
+id rules-04 major real=true before_boot=true
+id rules-05 major real=true before_boot=false
+id rules-06 major real=true before_boot=false
+id rules-07 minor real=false before_boot=-
+id rules-08 minor real=false before_boot=-
+id builds-01 blocking real=true before_boot=false
+id builds-02 major real=true before_boot=false
+id builds-03 major real=true before_boot=false
+id builds-04 major real=true before_boot=true
+id builds-05 major real=true before_boot=false
+id builds-06 minor real=true before_boot=false
+id builds-07 minor real=true before_boot=false
+id semantics-01 blocking real=true before_boot=true
+id semantics-02 major real=true before_boot=false
+id semantics-03 major real=true before_boot=false
+id semantics-04 major real=true before_boot=false
+id semantics-05 major real=true before_boot=false
+id semantics-06 major real=true before_boot=false
+id semantics-07 minor real=true before_boot=false
+prep_open_points 9 xp_open_points 7

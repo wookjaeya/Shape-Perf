@@ -1,0 +1,50 @@
+header same=4 differing=4 [basis_sha256 container parent[0] tool_sha256]
+section STRINGS old=0 new=0 same
+count STRINGS old=3783804 new=3804986
+section BASIS old=515 new=518 differs removed=49 added=52
+section FILE_HASHES old=355 new=355 same
+section PROVENANCE old=4 new=4 same
+section FACTS old=7909 new=7909 same
+section FACT_ARGS old=17715 new=17715 same
+section DERIVES old=0 new=0 same
+section FACT_EXPRS old=32824 new=32824 same
+section FACT_LOOPS old=412 new=412 same
+section FACT_INIT old=369 new=369 same
+section FACT_CONSTS old=96 new=96 same
+section FACT_ATYPE old=36635 new=36635 same
+section WRITERS old=1274 new=1274 same
+section FUNCS old=2180 new=2180 same
+section CALL_TARGETS old=340 new=340 same
+section STATIC_IMAGE old=0 new=0 same
+section FACT_LOCS old=341 new=341 same
+section TERMINALS old=81 new=81 same
+section OUTCALLS old=630 new=630 same
+section LOOP_ITERS old=0 new=0 same
+section SPAWN_PARAMS old=3 new=3 same
+section FUNC_WRITES old=4940 new=4940 same
+section P0_TABLE old=72 new=72 same
+section OP_DERIV old=173 new=173 same
+section SPAWN_WRAP old=18 new=18 same
+section READS old=5437 new=5437 same
+section RETURNS old=3045 new=3045 same
+section RET_CONSTS old=1560 new=1560 same
+section LOOP_EXITS old=1072 new=1072 same
+section ARGFLOW old=17715 new=17715 same
+section PARAM_FLOW old=8020 new=8020 same
+section PTR_FIELDS old=175 new=175 same
+section GLOBAL_IMAGES old=588 new=588 same
+section LOCK_OPS old=2450 new=2450 same
+section LOCK_IDS old=5 new=5 same
+section LOCKSET old=20639 new=20639 same
+section FIELD_STATUS old=1816 new=1816 same
+section AWAIT_L1 old=10 new=10 same
+section LOCK_PATHS old=9420 new=9420 same
+section OBJECT_ACCESS old=6711 new=6711 same
+section FIELD_TYPES old=1816 new=1816 same
+section ARG_TYPES old=17715 new=17715 same
+section LOOP_DEFS old=19 new=19 same
+section SEMANTICS old=1931 new=1931 same
+section RESULT_FLOW old=13036 new=13036 same
+section RESULT_EFFECT old=15933 new=15933 differs removed=72 added=72
+section LOCK_HANDLES old=1573 new=1573 same
+summary sections old=47 new=47 same=45 differing=2 only-old=0 only-new=0

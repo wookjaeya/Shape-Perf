@@ -1,0 +1,410 @@
+# status_change.py on the facts views (kz-static 88f529b1 show) of objacc_off_extract and objacc_on_extract, 2026-11-16T17:34:18Z; views in the scratchpad, removed after
+status_change c1_pre_tx: target locations off 341 on 341, in both 341
+  off status: DISABLED 199, writer-set-complete 142
+  on status: DISABLED 260, writer-set-complete 81
+  transition DISABLED -> DISABLED: 199
+  transition writer-set-complete -> DISABLED: 61
+  transition writer-set-complete -> writer-set-complete: 81
+  complete -> DISABLED: 61; by the A-TYPE change: new escape, untyped exposed 42; no new escape, untyped exposed 19
+    BP_StorageService_t.Handle escape 0->0 untyped 0->133 writers 2->2 (out-pointer 0->0)
+    BP_StorageService_t.Name escape 0->1 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    BP_Throttle_t.Max escape 0->0 untyped 0->133 writers 0->0 (out-pointer 0->0)
+    BP_Throttle_t.MsgId escape 0->0 untyped 0->133 writers 0->0 (out-pointer 0->0)
+    BP_Throttle_t.Name escape 0->6 untyped 0->133 writers 0->0 (out-pointer 0->0)
+    BP_Throttle_t.Sem escape 0->0 untyped 0->133 writers 2->2 (out-pointer 2->2)
+    CFE_ES_AppRecord_t.AppName escape 0->2 untyped 0->133 writers 5->6 (out-pointer 0->0)
+    CFE_ES_AppRecord_t.LoadStatus escape 0->1 untyped 0->133 writers 5->5 (out-pointer 2->2)
+    CFE_ES_AppRecord_t.MainTaskId escape 0->1 untyped 0->133 writers 7->7 (out-pointer 4->4)
+    CFE_ES_ModuleLoadParams_t.FileName escape 0->8 untyped 0->133 writers 10->15 (out-pointer 0->4)
+    CFE_ES_ObjectTable_t.ObjectName escape 0->3 untyped 0->133 writers 0->0 (out-pointer 0->0)
+    CFE_ES_TaskRecord_t.AppId escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    CFE_ES_TaskRecord_t.TaskName escape 0->1 untyped 0->133 writers 3->4 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.CpuId escape 0->0 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.CpuName escape 0->1 untyped 0->133 writers 3->5 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.ResetType escape 0->4 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SpacecraftId escape 0->0 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SubType escape 0->0 untyped 0->133 writers 4->4 (out-pointer 0->0)
+    CFE_SB_MemParams_t::Partition.Data escape 0->2 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_BufParams_t::Partition.Data escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_DumpControl_t.Size escape 0->0 untyped 0->133 writers 2->2 (out-pointer 0->0)
+    CFE_TBL_DumpControl_t.TableName escape 0->1 untyped 0->133 writers 2->2 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastFileDumped escape 0->0 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastFileLoaded escape 0->0 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastTableLoaded escape 0->0 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastUpdatedTable escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastValTableName escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_LoadBuff_t.BufferPtr escape 0->0 untyped 0->133 writers 11->11 (out-pointer 3->3)
+    CFE_TBL_LoadBuff_t.Crc escape 0->0 untyped 0->133 writers 10->10 (out-pointer 0->0)
+    CFE_TBL_LoadBuff_t.DataSource escape 0->5 untyped 0->133 writers 12->14 (out-pointer 0->0)
+    CFE_TBL_LoadBuff_t.FileCreateTimeSecs escape 0->0 untyped 0->133 writers 11->11 (out-pointer 0->0)
+    CFE_TBL_LoadBuff_t.FileCreateTimeSubSecs escape 0->0 untyped 0->133 writers 11->11 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.HeadOfAccessList escape 0->0 untyped 0->133 writers 8->8 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.LastFileLoaded escape 0->3 untyped 0->133 writers 8->13 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.Name escape 0->27 untyped 0->133 writers 5->8 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.OwnerAppId escape 0->0 untyped 0->133 writers 8->8 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.Size escape 0->0 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    CFE_TBL_TblRegPacket_Payload_t.LastFileLoaded escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_TblRegPacket_Payload_t.Name escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_TblRegPacket_Payload_t.OwnerAppName escape 0->0 untyped 0->133 writers 1->4 (out-pointer 0->3)
+    CFE_TBL_ValidationResult_t.TableName escape 0->1 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    OS_bin_sem_internal_record_t.obj_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_condvar_internal_record_t.obj_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_console_internal_record_t.device_name escape 0->2 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_count_sem_internal_record_t.obj_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_dir_internal_record_t.dir_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_filesys_internal_record_t.device_name escape 0->3 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    OS_filesys_internal_record_t.system_mountpt escape 0->8 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    OS_filesys_internal_record_t.virtual_mountpt escape 0->5 untyped 0->133 writers 5->6 (out-pointer 0->0)
+    OS_filesys_internal_record_t.volume_name escape 0->4 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    OS_module_internal_record_t.file_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_module_internal_record_t.module_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_mutex_internal_record_t.last_owner escape 0->1 untyped 0->133 writers 4->4 (out-pointer 0->0)
+    OS_mutex_internal_record_t.obj_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_queue_internal_record_t.queue_name escape 0->2 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_stream_internal_record_t.stream_name escape 0->9 untyped 0->133 writers 8->10 (out-pointer 0->0)
+    OS_task_internal_record_t.priority escape 0->1 untyped 0->133 writers 4->4 (out-pointer 0->0)
+    OS_task_internal_record_t.stack_size escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_task_internal_record_t.task_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_timebase_internal_record_t.first_cb escape 0->1 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    OS_timebase_internal_record_t.timebase_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+  address-escape lines: off 993 on 1526, only on 533, only off 0
+    only on, assigned to RegRecPtr: 175
+    only on, passed to a call: 131
+    only on, assigned to AccessDescPtr: 96
+    only on, initializer of AccessDescPtr: 16
+    only on, initializer of RegRecPtr: 16
+    only on, assigned to CDSRegRecPtr: 14
+    only on, initializer of c: 14
+    only on, returned: 9
+    only on, assigned to *CritRegRecPtr: 8
+    only on, assigned to CritRegRecPtr: 8
+    only on, assigned to EntryPtr: 6
+    only on, assigned to OS_OBJECT_INIT(timecb_token, timecb, timer_name, timer_name)...: 5
+    only on, assigned to p: 5
+    only on, assigned to OS_OBJECT_INIT(token, filesys, device_name, dev_name): 4
+    only on, assigned to OS_OBJECT_INIT(token, filesys, device_name, fsdevname): 4
+    only on, assigned to OS_OBJECT_INIT(token, task, task_name, task_name): 3
+    only on, assigned to OS_OBJECT_INIT(token, module, module_name, module_name): 2
+    only on, assigned to OS_OBJECT_INIT(token, mutex, obj_name, sem_name): 2
+    only on, assigned to OS_OBJECT_INIT(token, timebase, timebase_name, timebase_name...: 2
+    only on, assigned to c: 2
+    only on, assigned to InstPtr: 1
+    only on, assigned to OS_OBJECT_INIT(token, binsem, obj_name, sem_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, condvar, obj_name, var_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, console, device_name, OS_PRINTF_CONSOL...: 1
+    only on, assigned to OS_OBJECT_INIT(token, countsem, obj_name, sem_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, dir, dir_name, path): 1
+    only on, assigned to OS_OBJECT_INIT(token, queue, queue_name, queue_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, stream, stream_name, path): 1
+    only on, assigned to conn_record->name_entry: 1
+    only on, assigned to record->name_entry: 1
+    only on, converted to an integer: 1
+    callees of the 'passed to a call' lines only on (35 callees): CFE_EVS_SendEventWithAppID 25, CFE_EVS_SendEvent 20, CFE_ES_WriteToSysLog 15, strncmp 10, CFE_SB_MessageStringSet 8, strcmp 6, OS_strnlen 5, snprintf 5, CFE_ES_CopyToCDS 3, OS_OpenCreate 3, CFE_EVS_Register 2, CFE_TBL_DumpToFile 2, OS_CountSemGetIdByName 2, OS_DebugPrintf 2, OS_stat 2, printf 2, CFE_ES_FileWriteByteCntErr 1, CFE_ES_PoolCreate 1, CFE_ES_PoolCreateEx 1, CFE_ES_RestoreFromCDS 1, CFE_ES_StartAppTask 1, CFE_ES_SysLogWrite_Unsync 1, CFE_PSP_WriteToCDS 1, CFE_SB_MessageStringGet 1, CFE_TBL_GetInfo 1, OS_Console_CopyOut 1, OS_CountSemCreate 1, OS_ModuleLoad 1, OS_SocketAddrFromString 1, OS_SocketAddrToString_Impl 1, backtrace 1, mkdir 1, stat 1, statvfs 1, strlen 1
+status_change c1_post_tx: target locations off 341 on 341, in both 341
+  off status: DISABLED 199, writer-set-complete 142
+  on status: DISABLED 260, writer-set-complete 81
+  transition DISABLED -> DISABLED: 199
+  transition writer-set-complete -> DISABLED: 61
+  transition writer-set-complete -> writer-set-complete: 81
+  complete -> DISABLED: 61; by the A-TYPE change: new escape, untyped exposed 42; no new escape, untyped exposed 19
+    BP_StorageService_t.Handle escape 0->0 untyped 0->133 writers 2->2 (out-pointer 0->0)
+    BP_StorageService_t.Name escape 0->1 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    BP_Throttle_t.Max escape 0->0 untyped 0->133 writers 0->0 (out-pointer 0->0)
+    BP_Throttle_t.MsgId escape 0->0 untyped 0->133 writers 0->0 (out-pointer 0->0)
+    BP_Throttle_t.Name escape 0->6 untyped 0->133 writers 0->0 (out-pointer 0->0)
+    BP_Throttle_t.Sem escape 0->0 untyped 0->133 writers 2->2 (out-pointer 2->2)
+    CFE_ES_AppRecord_t.AppName escape 0->2 untyped 0->133 writers 5->6 (out-pointer 0->0)
+    CFE_ES_AppRecord_t.LoadStatus escape 0->1 untyped 0->133 writers 5->5 (out-pointer 2->2)
+    CFE_ES_AppRecord_t.MainTaskId escape 0->1 untyped 0->133 writers 7->7 (out-pointer 4->4)
+    CFE_ES_ModuleLoadParams_t.FileName escape 0->8 untyped 0->133 writers 10->15 (out-pointer 0->4)
+    CFE_ES_ObjectTable_t.ObjectName escape 0->3 untyped 0->133 writers 0->0 (out-pointer 0->0)
+    CFE_ES_TaskRecord_t.AppId escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    CFE_ES_TaskRecord_t.TaskName escape 0->1 untyped 0->133 writers 3->4 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.CpuId escape 0->0 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.CpuName escape 0->1 untyped 0->133 writers 3->5 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.ResetType escape 0->4 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SpacecraftId escape 0->0 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SubType escape 0->0 untyped 0->133 writers 4->4 (out-pointer 0->0)
+    CFE_SB_MemParams_t::Partition.Data escape 0->2 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_BufParams_t::Partition.Data escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_DumpControl_t.Size escape 0->0 untyped 0->133 writers 2->2 (out-pointer 0->0)
+    CFE_TBL_DumpControl_t.TableName escape 0->1 untyped 0->133 writers 2->2 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastFileDumped escape 0->0 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastFileLoaded escape 0->0 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastTableLoaded escape 0->0 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastUpdatedTable escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastValTableName escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_LoadBuff_t.BufferPtr escape 0->0 untyped 0->133 writers 11->11 (out-pointer 3->3)
+    CFE_TBL_LoadBuff_t.Crc escape 0->0 untyped 0->133 writers 10->10 (out-pointer 0->0)
+    CFE_TBL_LoadBuff_t.DataSource escape 0->5 untyped 0->133 writers 12->14 (out-pointer 0->0)
+    CFE_TBL_LoadBuff_t.FileCreateTimeSecs escape 0->0 untyped 0->133 writers 11->11 (out-pointer 0->0)
+    CFE_TBL_LoadBuff_t.FileCreateTimeSubSecs escape 0->0 untyped 0->133 writers 11->11 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.HeadOfAccessList escape 0->0 untyped 0->133 writers 8->8 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.LastFileLoaded escape 0->3 untyped 0->133 writers 8->13 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.Name escape 0->27 untyped 0->133 writers 5->8 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.OwnerAppId escape 0->0 untyped 0->133 writers 8->8 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.Size escape 0->0 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    CFE_TBL_TblRegPacket_Payload_t.LastFileLoaded escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_TblRegPacket_Payload_t.Name escape 0->1 untyped 0->133 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_TblRegPacket_Payload_t.OwnerAppName escape 0->0 untyped 0->133 writers 1->4 (out-pointer 0->3)
+    CFE_TBL_ValidationResult_t.TableName escape 0->1 untyped 0->133 writers 2->3 (out-pointer 0->0)
+    OS_bin_sem_internal_record_t.obj_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_condvar_internal_record_t.obj_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_console_internal_record_t.device_name escape 0->2 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_count_sem_internal_record_t.obj_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_dir_internal_record_t.dir_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_filesys_internal_record_t.device_name escape 0->3 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    OS_filesys_internal_record_t.system_mountpt escape 0->8 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    OS_filesys_internal_record_t.virtual_mountpt escape 0->5 untyped 0->133 writers 5->6 (out-pointer 0->0)
+    OS_filesys_internal_record_t.volume_name escape 0->4 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    OS_module_internal_record_t.file_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_module_internal_record_t.module_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_mutex_internal_record_t.last_owner escape 0->1 untyped 0->133 writers 4->4 (out-pointer 0->0)
+    OS_mutex_internal_record_t.obj_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_queue_internal_record_t.queue_name escape 0->2 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_stream_internal_record_t.stream_name escape 0->9 untyped 0->133 writers 8->10 (out-pointer 0->0)
+    OS_task_internal_record_t.priority escape 0->1 untyped 0->133 writers 4->4 (out-pointer 0->0)
+    OS_task_internal_record_t.stack_size escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_task_internal_record_t.task_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+    OS_timebase_internal_record_t.first_cb escape 0->1 untyped 0->133 writers 5->5 (out-pointer 0->0)
+    OS_timebase_internal_record_t.timebase_name escape 0->1 untyped 0->133 writers 3->3 (out-pointer 0->0)
+  address-escape lines: off 993 on 1526, only on 533, only off 0
+    only on, assigned to RegRecPtr: 175
+    only on, passed to a call: 131
+    only on, assigned to AccessDescPtr: 96
+    only on, initializer of AccessDescPtr: 16
+    only on, initializer of RegRecPtr: 16
+    only on, assigned to CDSRegRecPtr: 14
+    only on, initializer of c: 14
+    only on, returned: 9
+    only on, assigned to *CritRegRecPtr: 8
+    only on, assigned to CritRegRecPtr: 8
+    only on, assigned to EntryPtr: 6
+    only on, assigned to OS_OBJECT_INIT(timecb_token, timecb, timer_name, timer_name)...: 5
+    only on, assigned to p: 5
+    only on, assigned to OS_OBJECT_INIT(token, filesys, device_name, dev_name): 4
+    only on, assigned to OS_OBJECT_INIT(token, filesys, device_name, fsdevname): 4
+    only on, assigned to OS_OBJECT_INIT(token, task, task_name, task_name): 3
+    only on, assigned to OS_OBJECT_INIT(token, module, module_name, module_name): 2
+    only on, assigned to OS_OBJECT_INIT(token, mutex, obj_name, sem_name): 2
+    only on, assigned to OS_OBJECT_INIT(token, timebase, timebase_name, timebase_name...: 2
+    only on, assigned to c: 2
+    only on, assigned to InstPtr: 1
+    only on, assigned to OS_OBJECT_INIT(token, binsem, obj_name, sem_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, condvar, obj_name, var_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, console, device_name, OS_PRINTF_CONSOL...: 1
+    only on, assigned to OS_OBJECT_INIT(token, countsem, obj_name, sem_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, dir, dir_name, path): 1
+    only on, assigned to OS_OBJECT_INIT(token, queue, queue_name, queue_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, stream, stream_name, path): 1
+    only on, assigned to conn_record->name_entry: 1
+    only on, assigned to record->name_entry: 1
+    only on, converted to an integer: 1
+    callees of the 'passed to a call' lines only on (35 callees): CFE_EVS_SendEventWithAppID 25, CFE_EVS_SendEvent 20, CFE_ES_WriteToSysLog 15, strncmp 10, CFE_SB_MessageStringSet 8, strcmp 6, OS_strnlen 5, snprintf 5, CFE_ES_CopyToCDS 3, OS_OpenCreate 3, CFE_EVS_Register 2, CFE_TBL_DumpToFile 2, OS_CountSemGetIdByName 2, OS_DebugPrintf 2, OS_stat 2, printf 2, CFE_ES_FileWriteByteCntErr 1, CFE_ES_PoolCreate 1, CFE_ES_PoolCreateEx 1, CFE_ES_RestoreFromCDS 1, CFE_ES_StartAppTask 1, CFE_ES_SysLogWrite_Unsync 1, CFE_PSP_WriteToCDS 1, CFE_SB_MessageStringGet 1, CFE_TBL_GetInfo 1, OS_Console_CopyOut 1, OS_CountSemCreate 1, OS_ModuleLoad 1, OS_SocketAddrFromString 1, OS_SocketAddrToString_Impl 1, backtrace 1, mkdir 1, stat 1, statvfs 1, strlen 1
+status_change r2_core: target locations off 241 on 241, in both 241
+  off status: DISABLED 130, writer-set-complete 111
+  on status: DISABLED 174, writer-set-complete 67
+  transition DISABLED -> DISABLED: 130
+  transition writer-set-complete -> DISABLED: 44
+  transition writer-set-complete -> writer-set-complete: 67
+  complete -> DISABLED: 44; by the A-TYPE change: new escape, untyped exposed 40; no new escape, untyped exposed 4
+    CFE_ES_AppRecord_t.AppName escape 0->2 untyped 0->99 writers 5->6 (out-pointer 0->0)
+    CFE_ES_AppRecord_t.LoadStatus escape 0->1 untyped 0->99 writers 5->5 (out-pointer 2->2)
+    CFE_ES_AppRecord_t.MainTaskId escape 0->1 untyped 0->99 writers 7->7 (out-pointer 4->4)
+    CFE_ES_ModuleLoadParams_t.FileName escape 0->8 untyped 0->99 writers 12->17 (out-pointer 0->4)
+    CFE_ES_TaskRecord_t.AppId escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    CFE_ES_TaskRecord_t.TaskName escape 0->1 untyped 0->99 writers 3->4 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.CpuId escape 0->0 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.CpuName escape 0->1 untyped 0->99 writers 3->5 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.ResetType escape 0->4 untyped 0->99 writers 2->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SpacecraftId escape 0->0 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SubType escape 0->0 untyped 0->99 writers 4->4 (out-pointer 0->0)
+    CFE_SB_MemParams_t::Partition.Data escape 0->2 untyped 0->99 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_BufParams_t::Partition.Data escape 0->1 untyped 0->99 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastFileDumped escape 0->1 untyped 0->99 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastFileLoaded escape 0->1 untyped 0->99 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastTableLoaded escape 0->1 untyped 0->99 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastUpdatedTable escape 0->1 untyped 0->99 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_HousekeepingTlm_Payload_t.LastValTableName escape 0->1 untyped 0->99 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_TblRegPacket_Payload_t.LastFileLoaded escape 0->1 untyped 0->99 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_TblRegPacket_Payload_t.Name escape 0->1 untyped 0->99 writers 1->1 (out-pointer 0->0)
+    CFE_TBL_TblRegPacket_Payload_t.OwnerAppName escape 0->0 untyped 0->99 writers 1->4 (out-pointer 0->3)
+    OS_bin_sem_internal_record_t.obj_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_condvar_internal_record_t.obj_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_console_internal_record_t.device_name escape 0->2 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_count_sem_internal_record_t.obj_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_dir_internal_record_t.dir_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_filesys_internal_record_t.device_name escape 0->3 untyped 0->99 writers 5->5 (out-pointer 0->0)
+    OS_filesys_internal_record_t.system_mountpt escape 0->8 untyped 0->99 writers 6->7 (out-pointer 0->0)
+    OS_filesys_internal_record_t.virtual_mountpt escape 0->5 untyped 0->99 writers 7->8 (out-pointer 0->0)
+    OS_filesys_internal_record_t.volume_name escape 0->4 untyped 0->99 writers 5->5 (out-pointer 0->0)
+    OS_module_internal_record_t.file_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_module_internal_record_t.module_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_mutex_internal_record_t.last_owner escape 0->1 untyped 0->99 writers 4->4 (out-pointer 0->0)
+    OS_mutex_internal_record_t.obj_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_queue_internal_record_t.queue_name escape 0->2 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_rwlock_internal_record_t.last_writer escape 0->1 untyped 0->99 writers 4->4 (out-pointer 0->0)
+    OS_rwlock_internal_record_t.obj_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_stream_internal_record_t.stream_name escape 0->9 untyped 0->99 writers 8->10 (out-pointer 0->0)
+    OS_task_internal_record_t.priority escape 0->1 untyped 0->99 writers 5->5 (out-pointer 0->0)
+    OS_task_internal_record_t.stack_pointer escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_task_internal_record_t.stack_size escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_task_internal_record_t.task_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+    OS_timebase_internal_record_t.first_cb escape 0->1 untyped 0->99 writers 5->5 (out-pointer 0->0)
+    OS_timebase_internal_record_t.timebase_name escape 0->1 untyped 0->99 writers 3->3 (out-pointer 0->0)
+  address-escape lines: off 626 on 1069, only on 443, only off 0
+    only on, assigned to RegRecPtr: 92
+    only on, passed to a call: 70
+    only on, assigned to AccessDescPtr: 34
+    only on, assigned to DumpCtrlPtr: 34
+    only on, assigned to LoadBuffPtr: 34
+    only on, assigned to LocalPtr: 34
+    only on, assigned to AccDescPtr: 17
+    only on, assigned to BlockPtr: 17
+    only on, assigned to BuffPtr: 17
+    only on, assigned to CritRegRecPtr: 17
+    only on, assigned to ParentRegRecPtr: 17
+    only on, assigned to CDSRegRecPtr: 14
+    only on, assigned to EntryPtr: 6
+    only on, assigned to OS_OBJECT_INIT(timecb_token, timecb, timer_name, timer_name)...: 5
+    only on, returned: 5
+    only on, assigned to OS_OBJECT_INIT(token, filesys, device_name, fsdevname): 4
+    only on, assigned to OS_OBJECT_INIT(token, filesys, virtual_mountpt, virt_path): 4
+    only on, assigned to OS_OBJECT_INIT(token, task, task_name, task_name): 4
+    only on, assigned to OS_OBJECT_INIT(token, module, module_name, module_name): 2
+    only on, assigned to OS_OBJECT_INIT(token, mutex, obj_name, sem_name): 2
+    only on, assigned to OS_OBJECT_INIT(token, rwlock, obj_name, rw_name): 2
+    only on, assigned to OS_OBJECT_INIT(token, timebase, timebase_name, timebase_name...: 2
+    only on, assigned to OS_OBJECT_INIT(token, binsem, obj_name, sem_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, condvar, obj_name, var_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, console, device_name, OS_PRINTF_CONSOL...: 1
+    only on, assigned to OS_OBJECT_INIT(token, countsem, obj_name, sem_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, dir, dir_name, path): 1
+    only on, assigned to OS_OBJECT_INIT(token, queue, queue_name, queue_name): 1
+    only on, assigned to OS_OBJECT_INIT(token, stream, stream_name, path): 1
+    only on, assigned to conn_record->name_entry: 1
+    only on, assigned to record->name_entry: 1
+    only on, converted to an integer: 1
+    callees of the 'passed to a call' lines only on (28 callees): strncmp 9, CFE_EVS_SendEventWithAppID 8, CFE_EVS_SendEvent 7, CFE_SB_MessageStringSet 7, OS_strnlen 6, CFE_ES_CopyToCDS 3, CFE_ES_WriteToSysLog 3, strcmp 3, OS_DebugPrintf 2, OS_OpenCreate 2, OS_stat 2, printf 2, CFE_ES_FileWriteByteCntErr 1, CFE_ES_PoolCreate 1, CFE_ES_PoolCreateEx 1, CFE_ES_RestoreFromCDS 1, CFE_ES_StartAppTask 1, CFE_ES_SysLogWrite_Unsync 1, CFE_EVS_Register 1, CFE_PSP_WriteToCDS 1, OS_Console_CopyOut 1, OS_ModuleLoad 1, OS_SocketAddrToString_Impl 1, backtrace 1, mkdir 1, snprintf 1, stat 1, statvfs 1
+status_change c5_641: target locations off 259 on 259, in both 259
+  off status: DISABLED 185, writer-set-complete 74
+  on status: DISABLED 227, writer-set-complete 32
+  transition DISABLED -> DISABLED: 185
+  transition writer-set-complete -> DISABLED: 42
+  transition writer-set-complete -> writer-set-complete: 32
+  complete -> DISABLED: 42; by the A-TYPE change: new escape, untyped exposed 15; no new escape, untyped exposed 27
+    CFE_ES_GenCounterRecord_t.Counter escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    CFE_ES_GenCounterRecord_t.CounterName escape 0->1 untyped 0->63 writers 1->1 (out-pointer 0->0)
+    CFE_ES_GenCounterRecord_t.RecordUsed escape 0->0 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_ES_ObjectTable_t.ObjectName escape 0->6 untyped 0->63 writers 0->0 (out-pointer 0->0)
+    CFE_ES_ObjectTable_t.ObjectPriority escape 0->0 untyped 0->63 writers 0->0 (out-pointer 0->0)
+    CFE_ES_ObjectTable_t.ObjectSize escape 0->0 untyped 0->63 writers 0->0 (out-pointer 0->0)
+    CFE_ES_ResetData_t.ERLog escape 0->0 untyped 0->63 writers 6->7 (out-pointer 1->2)
+    CFE_ES_ResetData_t.SystemLog escape 0->1 untyped 0->63 writers 4->6 (out-pointer 0->1)
+    CFE_PSP_CommandData_t.CpuId escape 0->0 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.CpuName escape 0->1 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.ResetType escape 0->4 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SpacecraftId escape 0->0 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SubType escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    CFE_SB_MemParams_t.Partition escape 0->2 untyped 0->63 writers 2->2 (out-pointer 0->0)
+    CFE_SB_MemParams_t.PoolHdl escape 0->0 untyped 0->63 writers 3->3 (out-pointer 1->1)
+    CFE_TBL_BufParams_t.Partition escape 0->1 untyped 0->63 writers 0->0 (out-pointer 0->0)
+    CFE_TBL_BufParams_t.PoolHdl escape 0->0 untyped 0->63 writers 1->1 (out-pointer 1->1)
+    CFE_TBL_DumpControl_t.Size escape 0->0 untyped 0->63 writers 2->2 (out-pointer 0->0)
+    CFE_TBL_DumpControl_t.TableName escape 0->1 untyped 0->63 writers 0->2 (out-pointer 0->1)
+    CFE_TBL_RegistryRec_t.HeadOfAccessList escape 0->0 untyped 0->63 writers 7->7 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.LastFileLoaded escape 0->2 untyped 0->63 writers 6->9 (out-pointer 0->1)
+    CFE_TBL_RegistryRec_t.Name escape 0->27 untyped 0->63 writers 4->9 (out-pointer 0->2)
+    CFE_TBL_RegistryRec_t.OwnerAppId escape 0->0 untyped 0->63 writers 7->7 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.Size escape 0->0 untyped 0->63 writers 5->5 (out-pointer 0->0)
+    OS_FDTableEntry.IsValid escape 0->0 untyped 0->63 writers 16->16 (out-pointer 0->0)
+    OS_FDTableEntry.OSfd escape 0->0 untyped 0->63 writers 13->13 (out-pointer 0->0)
+    OS_FDTableEntry.Path escape 0->6 untyped 0->63 writers 9->9 (out-pointer 0->0)
+    OS_VolumeInfo_t.DeviceName escape 0->4 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_VolumeInfo_t.MountPoint escape 0->3 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_VolumeInfo_t.PhysDevName escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_VolumeInfo_t.VolumeName escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_VolumeInfo_t.VolumeType escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_module_record_t.entry_point escape 0->0 untyped 0->63 writers 5->5 (out-pointer 0->0)
+    OS_module_record_t.filename escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_module_record_t.free escape 0->0 untyped 0->63 writers 8->8 (out-pointer 0->0)
+    OS_module_record_t.host_module_id escape 0->0 untyped 0->63 writers 5->5 (out-pointer 0->0)
+    OS_module_record_t.name escape 0->1 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_queue_record_t.creator escape 0->0 untyped 0->63 writers 6->6 (out-pointer 0->0)
+    OS_queue_record_t.free escape 0->0 untyped 0->63 writers 8->8 (out-pointer 0->0)
+    OS_queue_record_t.id escape 0->0 untyped 0->63 writers 6->6 (out-pointer 0->0)
+    OS_queue_record_t.max_size escape 0->0 untyped 0->63 writers 5->5 (out-pointer 0->0)
+    OS_queue_record_t.name escape 0->2 untyped 0->63 writers 3->3 (out-pointer 0->0)
+  address-escape lines: off 1357 on 2122, only on 765, only off 0
+    only on, assigned to RegRecPtr: 318
+    only on, assigned to AccessDescPtr: 168
+    only on, passed to a call: 129
+    only on, assigned to AppDataPtr: 35
+    only on, initializer of AccessDescPtr: 28
+    only on, initializer of RegRecPtr: 28
+    only on, returned: 19
+    only on, assigned to *CritRegRecPtr: 14
+    only on, assigned to CritRegRecPtr: 14
+    only on, assigned to PipeDscPtr: 12
+    callees of the 'passed to a call' lines only on (23 callees): CFE_ES_WriteToSysLog 34, strcmp 27, CFE_EVS_SendEvent 15, CFE_EVS_SendEventWithAppID 13, strncmp 10, CFE_ES_AppCreate 6, CFE_ES_CopyToCDS 3, CFE_SB_CreatePipe 3, CFE_TBL_DumpToFile 2, OS_read 2, printf 2, CFE_ES_PoolCreate 1, CFE_ES_PoolCreateEx 1, CFE_ES_RestoreFromCDS 1, CFE_EVS_Register 1, CFE_PSP_WriteToCDS 1, CFE_SB_SendMapInfo 1, CFE_SB_SendPipeInfo 1, CFE_SB_SendRtgInfo 1, OS_TaskCreate 1, OS_open 1, OS_write 1, strlen 1
+status_change c5_642: target locations off 261 on 261, in both 261
+  off status: DISABLED 187, writer-set-complete 74
+  on status: DISABLED 229, writer-set-complete 32
+  transition DISABLED -> DISABLED: 187
+  transition writer-set-complete -> DISABLED: 42
+  transition writer-set-complete -> writer-set-complete: 32
+  complete -> DISABLED: 42; by the A-TYPE change: new escape, untyped exposed 15; no new escape, untyped exposed 27
+    CFE_ES_GenCounterRecord_t.Counter escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    CFE_ES_GenCounterRecord_t.CounterName escape 0->1 untyped 0->63 writers 1->1 (out-pointer 0->0)
+    CFE_ES_GenCounterRecord_t.RecordUsed escape 0->0 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_ES_ObjectTable_t.ObjectName escape 0->7 untyped 0->63 writers 0->0 (out-pointer 0->0)
+    CFE_ES_ObjectTable_t.ObjectPriority escape 0->0 untyped 0->63 writers 0->0 (out-pointer 0->0)
+    CFE_ES_ObjectTable_t.ObjectSize escape 0->0 untyped 0->63 writers 0->0 (out-pointer 0->0)
+    CFE_ES_ResetData_t.ERLog escape 0->0 untyped 0->63 writers 6->7 (out-pointer 1->2)
+    CFE_ES_ResetData_t.SystemLog escape 0->1 untyped 0->63 writers 4->6 (out-pointer 0->1)
+    CFE_PSP_CommandData_t.CpuId escape 0->0 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.CpuName escape 0->1 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.ResetType escape 0->4 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SpacecraftId escape 0->0 untyped 0->63 writers 3->3 (out-pointer 0->0)
+    CFE_PSP_CommandData_t.SubType escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    CFE_SB_MemParams_t.Partition escape 0->2 untyped 0->63 writers 2->2 (out-pointer 0->0)
+    CFE_SB_MemParams_t.PoolHdl escape 0->0 untyped 0->63 writers 3->3 (out-pointer 1->1)
+    CFE_TBL_BufParams_t.Partition escape 0->1 untyped 0->63 writers 0->0 (out-pointer 0->0)
+    CFE_TBL_BufParams_t.PoolHdl escape 0->0 untyped 0->63 writers 1->1 (out-pointer 1->1)
+    CFE_TBL_DumpControl_t.Size escape 0->0 untyped 0->63 writers 2->2 (out-pointer 0->0)
+    CFE_TBL_DumpControl_t.TableName escape 0->1 untyped 0->63 writers 0->2 (out-pointer 0->1)
+    CFE_TBL_RegistryRec_t.HeadOfAccessList escape 0->0 untyped 0->63 writers 7->7 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.LastFileLoaded escape 0->2 untyped 0->63 writers 6->9 (out-pointer 0->1)
+    CFE_TBL_RegistryRec_t.Name escape 0->27 untyped 0->63 writers 4->9 (out-pointer 0->2)
+    CFE_TBL_RegistryRec_t.OwnerAppId escape 0->0 untyped 0->63 writers 7->7 (out-pointer 0->0)
+    CFE_TBL_RegistryRec_t.Size escape 0->0 untyped 0->63 writers 5->5 (out-pointer 0->0)
+    OS_FDTableEntry.IsValid escape 0->0 untyped 0->63 writers 16->16 (out-pointer 0->0)
+    OS_FDTableEntry.OSfd escape 0->0 untyped 0->63 writers 13->13 (out-pointer 0->0)
+    OS_FDTableEntry.Path escape 0->6 untyped 0->63 writers 9->9 (out-pointer 0->0)
+    OS_VolumeInfo_t.DeviceName escape 0->4 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_VolumeInfo_t.MountPoint escape 0->3 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_VolumeInfo_t.PhysDevName escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_VolumeInfo_t.VolumeName escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_VolumeInfo_t.VolumeType escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_module_record_t.entry_point escape 0->0 untyped 0->63 writers 5->5 (out-pointer 0->0)
+    OS_module_record_t.filename escape 0->0 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_module_record_t.free escape 0->0 untyped 0->63 writers 8->8 (out-pointer 0->0)
+    OS_module_record_t.host_module_id escape 0->0 untyped 0->63 writers 5->5 (out-pointer 0->0)
+    OS_module_record_t.name escape 0->1 untyped 0->63 writers 4->4 (out-pointer 0->0)
+    OS_queue_record_t.creator escape 0->0 untyped 0->63 writers 6->6 (out-pointer 0->0)
+    OS_queue_record_t.free escape 0->0 untyped 0->63 writers 8->8 (out-pointer 0->0)
+    OS_queue_record_t.id escape 0->0 untyped 0->63 writers 6->6 (out-pointer 0->0)
+    OS_queue_record_t.max_size escape 0->0 untyped 0->63 writers 5->5 (out-pointer 0->0)
+    OS_queue_record_t.name escape 0->2 untyped 0->63 writers 3->3 (out-pointer 0->0)
+  address-escape lines: off 1359 on 2125, only on 766, only off 0
+    only on, assigned to RegRecPtr: 318
+    only on, assigned to AccessDescPtr: 168
+    only on, passed to a call: 130
+    only on, assigned to AppDataPtr: 35
+    only on, initializer of AccessDescPtr: 28
+    only on, initializer of RegRecPtr: 28
+    only on, returned: 19
+    only on, assigned to *CritRegRecPtr: 14
+    only on, assigned to CritRegRecPtr: 14
+    only on, assigned to PipeDscPtr: 12
+    callees of the 'passed to a call' lines only on (23 callees): CFE_ES_WriteToSysLog 35, strcmp 27, CFE_EVS_SendEvent 15, CFE_EVS_SendEventWithAppID 13, strncmp 10, CFE_ES_AppCreate 6, CFE_ES_CopyToCDS 3, CFE_SB_CreatePipe 3, CFE_TBL_DumpToFile 2, OS_read 2, printf 2, CFE_ES_PoolCreate 1, CFE_ES_PoolCreateEx 1, CFE_ES_RestoreFromCDS 1, CFE_EVS_Register 1, CFE_PSP_WriteToCDS 1, CFE_SB_SendMapInfo 1, CFE_SB_SendPipeInfo 1, CFE_SB_SendRtgInfo 1, OS_TaskCreate 1, OS_open 1, OS_write 1, strlen 1

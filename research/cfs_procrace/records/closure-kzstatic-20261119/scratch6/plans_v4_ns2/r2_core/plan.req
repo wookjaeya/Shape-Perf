@@ -1,0 +1,11 @@
+kz-plan-requests 1
+# value requests of the planned rows: what value of a record would decide a row the method cannot label from the facts, and which site of the plan records it
+rule value requests rule revision 1 (2026-11-16): rows of path A and B with the handling label T?, J? or F, or an open effect in their absence line; the result and out values at the use's after-call, the effect calls of RESULT_EFFECT with the argument a SEMANTICS arg-role row names, the branch taken (no site kind)
+facts-artifact f79a4249ab278ce85fa5370e8cd7fa58894c04ef16ab1560b18ecbeea4184364
+request 1 row=fb05e6e2f6b4cb48 id=B73 label=T? value=result state=planned site=27 slot=ret reason=- what="status of CFE_ES_PutPoolBuf at cfe/modules/sb/fsw/src/cfe_sb_buf.c:154:5" note="label T?"
+request 2 row=fb05e6e2f6b4cb48 id=B73 label=T? value=branch state=not-planned site=- slot=- reason=plan_missing(no rule of this revision) what="the branch the result takes at cfe/modules/sb/fsw/src/cfe_sb_buf.c:154:5" note="a branch is no site kind of the manifest; the result and the effect calls reached stand for it; label T?"
+request 3 row=fb05e6e2f6b4cb48 id=B73 label=T? value=result state=planned site=25 slot=ret reason=- what="status of CFE_ES_PutPoolBuf at cfe/modules/sb/fsw/src/cfe_sb_buf.c:237:12" note="label T?"
+request 4 row=fb05e6e2f6b4cb48 id=B73 label=T? value=branch state=not-planned site=- slot=- reason=plan_missing(no rule of this revision) what="the branch the result takes at cfe/modules/sb/fsw/src/cfe_sb_buf.c:237:12" note="a branch is no site kind of the manifest; the result and the effect calls reached stand for it; label T?"
+request 5 row=fb05e6e2f6b4cb48 id=B73 label=T? value=result state=planned site=33 slot=ret reason=- what="status of CFE_ES_PutPoolBuf at cfe/modules/sb/fsw/src/cfe_sb_task.c:228:14" note="label T?"
+request 6 row=fb05e6e2f6b4cb48 id=B73 label=T? value=branch state=not-planned site=- slot=- reason=plan_missing(no rule of this revision) what="the branch the result takes at cfe/modules/sb/fsw/src/cfe_sb_task.c:228:14" note="a branch is no site kind of the manifest; the result and the effect calls reached stand for it; label T?"
+end rows=1 requests=6 planned=3

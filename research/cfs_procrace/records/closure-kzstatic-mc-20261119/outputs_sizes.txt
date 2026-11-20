@@ -1,0 +1,11 @@
+72953356	/home/user/work/redesign/obs1/cz_final_extract
+42260658	/home/user/work/redesign/obs1/cz_final_order
+46953038	/home/user/work/redesign/obs1/cz_off_extract
+39552943	/home/user/work/redesign/obs1/cz_off_order
+31936298	/home/user/work/redesign/obs1/cz_order
+894450	/home/user/work/redesign/obs1/cz_plans_final
+886478	/home/user/work/redesign/obs1/cz_plans_t8cf
+1195728	/home/user/work/redesign/obs1/cz_plans_v4
+1264431	/home/user/work/redesign/obs1/cz_plans_v4_ns2
+7615561	/home/user/work/redesign/obs1/cz_relcheck
+total 245512941

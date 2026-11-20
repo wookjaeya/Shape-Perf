@@ -1,0 +1,6 @@
+plan_regen: generator /home/user/work/preserve/tools-20261116-c/kz-static.de1315b3.xz decompressed, sha256 de1315b359af279c46585d80e8a71db6143a19ded1ca164e4b88bc7106a3abdc
+same      -o /home/user/work/redesign/obs1/plangen/c5_641/plan.kzs sha256 17b6ab6a4089039b5ce601102a85adee6fed0a60f5218789155322d79907317e
+same      --sidecar /home/user/work/redesign/obs1/plangen/c5_641/plan.side sha256 2276c1015f7b0f3adb83a9019851bcbf960154bb2e2cddced917e6c97da7aa28
+same      --modules-out /home/user/work/redesign/obs1/plangen/c5_641/plan.mod (first line except the sidecar path)
+same      --exes-out /home/user/work/redesign/obs1/plangen/c5_641/plan.exe (first line except the sidecar path)
+PASS: the plan regenerates byte-identically

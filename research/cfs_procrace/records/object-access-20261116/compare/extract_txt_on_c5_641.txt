@@ -1,0 +1,6 @@
+# extract.txt: lines only off / only on
+124
+124
+# relations.txt: lines only off / only on
+376
+287

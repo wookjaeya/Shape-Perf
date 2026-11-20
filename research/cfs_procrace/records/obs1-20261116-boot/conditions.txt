@@ -1,0 +1,11 @@
+# conditions of the G-I boot pre/1df262a/tx (pilot/dev; derived configuration of c1_build/pre/1df262a)
+item	run.group	G-I: KZ_RT_MODE=record for tx (recording on, no gate, no plan)	unset
+item	run.count	this boot alone; repetition counts are the PI's (P8, D14)	unspecified_by_reference
+item	cfs.build	/home/user/work/redesign/obs1/c1pre_derived (derive_c1.sh instr; differences D1-D4 in /home/user/work/redesign/obs1/c1pre_derived/build_instr.record)	deviation
+item	cfs.user	ubuntu (setpriv; cFS README L107)	from-reference
+item	cfs.start_stop	observe_c1_smoke.sh --instances: tx and rx in the background, sleep 5, OPERATIONAL check, ES restart POWERON to UDP 1234/1235, sleep 5 (CI L165-L200)	from-reference
+deviation	runtime.mode.rx	F0 smoke3 ran rx from unprobed reference files	rx runs the derived rx binary with KZ_RT_MODE=off (G-I0)	one binary per instance; the hooks of rx return at once	rx code layout is the derived one; rx not recorded	yes
+deviation	observer.method	F0: kz observe (perf-sample uprobes)	no observer; compiler-inserted hooks (kzgcc) and the kzrt runtime record into a static pool, dumped at exit	stage D G-I boot	hook code in the instrumented units; runtime bss 4 MiB; not measured	no
+deviation	cfs.environment	the F0 instance environment	+= KZ_RT_MODE KZ_RT_DUMP KZ_RT_RUN_ID KZ_RT_INSTANCE (read by the runtime start object; cFS does not read them)	the runtime is configured from the environment	none expected; not verified	no
+item	start_state	fresh untar of the installed tree into a new directory, empty storage (the reference procedure); persist_snapshot.sh before/after	from-reference
+deviation	procedure.pre_run_reads	F0: tar, untar, kz anchor, start	tar, untar, sha256sum, persist_snapshot.sh (read only), start	record S0	page cache warm; not measured	yes

@@ -1,0 +1,6 @@
+# space_guard.sh kind=kz-static-run need=60000000 floor=314572800 interval=2 cmd=./keys_check.sh
+start 2026-11-16T14:58:08.451Z free=2805444608 threshold=374572800
+sample 2026-11-16T14:58:08.455Z 2805440512
+sample 2026-11-16T14:58:10.464Z 2701426688
+sample 2026-11-16T14:58:12.469Z 2618040320
+end 2026-11-16T14:58:14.476Z kind=kz-static-run verdict=completed rc=0 free=2797830144 lowest=2618040320 dip=187404288 change=-7614464

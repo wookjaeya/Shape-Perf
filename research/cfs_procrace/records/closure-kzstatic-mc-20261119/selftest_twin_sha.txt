@@ -1,0 +1,15 @@
+# self-test of twin_sha.py (2026-11-19T05:57:39Z) on the ten kept plan.side and plan.req copies of the scratch run (scratch6/plans_v4_ns2, <scratch> written back as the real output root)
+## 1. as kept: expect same=10, rc 0
+same cz_plans_v4_ns2/r2_core/plan.req
+same cz_plans_v4_ns2/r2_core/plan.side
+summary files=10 same=10 diff=0 only-scratch=0 only-real=0 skipped=0 (second pass; map entries 8)
+rc=0
+## 2. one byte added to r2_core/plan.req: expect DIFF 1, rc 1
+DIFF cz_plans_v4_ns2/r2_core/plan.req
+summary files=10 same=9 diff=1 only-scratch=0 only-real=0 skipped=0 (second pass; map entries 8)
+rc=1
+## 3. that file removed and an unlisted file added: expect only-scratch 1, only-real 1, rc 1
+only-real cz_plans_v4_ns2/r2_core/extra.txt
+only-scratch cz_plans_v4_ns2/r2_core/plan.req
+summary files=11 same=9 diff=0 only-scratch=1 only-real=1 skipped=0 (second pass; map entries 8)
+rc=1

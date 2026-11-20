@@ -1,0 +1,9 @@
+# space_guard.sh kind=archive need=20000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/reclaim/archive.sh sem_off_extract records/semantics-20261116/sem_off_extract.sha256
+start 2026-11-19T08:46:15.803Z free=582631424 threshold=334572800
+sample 2026-11-19T08:46:15.808Z 582627328
+sample 2026-11-19T08:46:17.815Z 582619136
+sample 2026-11-19T08:46:19.820Z 582619136
+sample 2026-11-19T08:46:21.826Z 582619136
+sample 2026-11-19T08:46:23.832Z 582619136
+sample 2026-11-19T08:46:25.839Z 579125248
+end 2026-11-19T08:46:27.846Z kind=archive verdict=completed rc=0 free=626278400 lowest=579125248 dip=3506176 change=43646976

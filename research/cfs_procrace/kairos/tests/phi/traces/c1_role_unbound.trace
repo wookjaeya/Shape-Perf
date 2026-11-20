@@ -1,0 +1,9 @@
+# A role site that does not follow a return of the role's operation binds nothing (a finding); the
+# occurrence stays an instance.  Synthetic, unit-test values.
+const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
+BP BP_FlowInit call
+BP OS_CountSemGetIdByName call arg.sem_name=@BP0_tsem
+BP OS_CountSemGetIdByName.exists pt
+BP OS_CountSemGetIdByName ret result=-17
+BP BP_FlowInit ret result=0
+BP bp_existence_probe_call pt

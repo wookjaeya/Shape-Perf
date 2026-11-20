@@ -1,0 +1,83 @@
+new names: 5
+  name __atomic_wide_counter::__value32
+  name __pthread_mutex_s::__elision_data
+  name sigaction::__sigaction_handler
+  name sigevent_t::_sigev_un
+  name sigevent_t::_sigev_un::_sigev_thread
+class basis          change:basis-count                       1
+class basis          change:units-from                        1
+class basis          insert:reading-options                   1
+class basis          mask:count-head                          1
+class fwrites        added-named                              2
+class fwrites        mask:count-head                          1
+class fwrites        removed-anon-paired                      11
+class fwrites        renamed                                  16
+class lockpaths      mask:row                                 114
+class lockpaths      removed-anon-paired                      1
+class lockpaths      renamed                                  2
+class lockset        mask:count-head                          1
+class lockset        removed-anon-paired                      12
+class lockset        renamed                                  21
+pairs of an old <anonymous> line and its successors (a successor not equal after the names alone): 60 lines
+  -   OS_API_Init record <anonymous>.* at osal/src/os/posix/osapi.c:301
+    +   OS_API_Init record __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:301
+    +   OS_API_Init record __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:301
+  -   OS_BinSemCreate record <anonymous>.* at osal/src/os/posix/osapi.c:2123
+    +   OS_BinSemCreate record __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:2123
+    +   OS_BinSemCreate record __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:2123
+  -   OS_BinSemDelete record <anonymous>.* at osal/src/os/posix/osapi.c:2204
+    +   OS_BinSemDelete record __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:2204
+    +   OS_BinSemDelete record __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:2204
+  -   OS_CountSemCreate record <anonymous>.* at osal/src/os/posix/osapi.c:2671
+    +   OS_CountSemCreate record __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:2671
+    +   OS_CountSemCreate record __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:2671
+  -   OS_CountSemDelete record <anonymous>.* at osal/src/os/posix/osapi.c:2752
+    +   OS_CountSemDelete record __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:2752
+    +   OS_CountSemDelete record __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:2752
+  -   OS_MutSemCreate record <anonymous>.* at osal/src/os/posix/osapi.c:3217
+    +   OS_MutSemCreate record __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:3217
+  -   OS_MutSemDelete record <anonymous>.* at osal/src/os/posix/osapi.c:3264
+    +   OS_MutSemDelete record __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:3264
+  -   OS_TimerCreate record <anonymous>.* at osal/src/os/posix/ostimer.c:320
+    +   OS_TimerCreate record sigaction::__sigaction_handler.* at osal/src/os/posix/ostimer.c:320
+  -   OS_TimerCreate field <anonymous>.sa_handler at osal/src/os/posix/ostimer.c:322
+    +   OS_TimerCreate field sigaction::__sigaction_handler.sa_handler at osal/src/os/posix/ostimer.c:322
+  -   main record <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_start.c:280
+    +   main record sigaction::__sigaction_handler.* at psp/fsw/pc-linux/src/cfe_psp_start.c:280
+  -   main field <anonymous>.sa_handler at psp/fsw/pc-linux/src/cfe_psp_start.c:281
+    +   main field sigaction::__sigaction_handler.sa_handler at psp/fsw/pc-linux/src/cfe_psp_start.c:281
+  -   write <anonymous>.* at osal/src/os/posix/osapi.c:301:9 in OS_API_Init held=0 {}
+    +   write __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:301:9 in OS_API_Init held=0 {}
+    +   write __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:301:9 in OS_API_Init held=0 {}
+  -   write <anonymous>.* at osal/src/os/posix/osapi.c:309:9 in OS_API_Init held=0 {}
+    +   write __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:309:9 in OS_API_Init held=0 {}
+    +   write __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:309:9 in OS_API_Init held=0 {}
+  -   write <anonymous>.* at osal/src/os/posix/osapi.c:317:9 in OS_API_Init held=0 {}
+    +   write __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:317:9 in OS_API_Init held=0 {}
+  -   write <anonymous>.* at osal/src/os/posix/osapi.c:2123:17 in OS_BinSemCreate held=1 [#2 &OS_bin_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2055:5] {}
+    +   write __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:2123:17 in OS_BinSemCreate held=1 [#2 &OS_bin_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2055:5] {}
+    +   write __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:2123:17 in OS_BinSemCreate held=1 [#2 &OS_bin_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2055:5] {}
+  -   write <anonymous>.* at osal/src/os/posix/osapi.c:2204:5 in OS_BinSemDelete held=1 [#2 &OS_bin_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2198:5] {}
+    +   write __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:2204:5 in OS_BinSemDelete held=1 [#2 &OS_bin_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2198:5] {}
+    +   write __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:2204:5 in OS_BinSemDelete held=1 [#2 &OS_bin_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2198:5] {}
+  -   write <anonymous>.* at osal/src/os/posix/osapi.c:2671:17 in OS_CountSemCreate held=1 [#4 &OS_count_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2615:5] {}
+    +   write __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:2671:17 in OS_CountSemCreate held=1 [#4 &OS_count_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2615:5] {}
+    +   write __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:2671:17 in OS_CountSemCreate held=1 [#4 &OS_count_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2615:5] {}
+  -   write <anonymous>.* at osal/src/os/posix/osapi.c:2752:5 in OS_CountSemDelete held=1 [#4 &OS_count_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2746:5] {}
+    +   write __atomic_wide_counter::__value32.* at osal/src/os/posix/osapi.c:2752:5 in OS_CountSemDelete held=1 [#4 &OS_count_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2746:5] {}
+    +   write __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:2752:5 in OS_CountSemDelete held=1 [#4 &OS_count_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:2746:5] {}
+  -   write <anonymous>.* at osal/src/os/posix/osapi.c:3217:8 in OS_MutSemCreate held=1 [#15 &OS_mut_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:3215:8] {}
+    +   write __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:3217:8 in OS_MutSemCreate held=1 [#15 &OS_mut_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:3215:8] {}
+  -   write <anonymous>.* at osal/src/os/posix/osapi.c:3264:5 in OS_MutSemDelete held=1 [#15 &OS_mut_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:3261:5] {}
+    +   write __pthread_mutex_s::__elision_data.* at osal/src/os/posix/osapi.c:3264:5 in OS_MutSemDelete held=1 [#15 &OS_mut_sem_table_mut] acquired-at=[osal/src/os/posix/osapi.c:3261:5] {}
+  -   write <anonymous>.* at osal/src/os/posix/ostimer.c:320:4 in OS_TimerCreate held=0 {}
+    +   write sigaction::__sigaction_handler.* at osal/src/os/posix/ostimer.c:320:4 in OS_TimerCreate held=0 {}
+  -   write <anonymous>.* at osal/src/os/posix/ostimer.c:325:4 in OS_TimerCreate held=0 {}
+    +   write sigevent_t::_sigev_un.* at osal/src/os/posix/ostimer.c:325:4 in OS_TimerCreate held=0 {}
+    +   write sigevent_t::_sigev_un::_sigev_thread.* at osal/src/os/posix/ostimer.c:325:4 in OS_TimerCreate held=0 {}
+  -   write <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_start.c:280:4 in main held=0 {}
+    +   write sigaction::__sigaction_handler.* at psp/fsw/pc-linux/src/cfe_psp_start.c:280:4 in main held=0 {}
+  -   entry-release row 9231 write <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_start.c:280:4 in main through the call psp/fsw/pc-linux/src/cfe_psp_start.c:270:4 signal
+    +   entry-release row 9240 write sigaction::__sigaction_handler.* at psp/fsw/pc-linux/src/cfe_psp_start.c:280:4 in main through the call psp/fsw/pc-linux/src/cfe_psp_start.c:270:4 signal
+undeclared other: 0
+compare_classes: only declared classes

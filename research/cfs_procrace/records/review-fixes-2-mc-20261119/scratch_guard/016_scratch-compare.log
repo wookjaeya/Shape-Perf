@@ -1,0 +1,6 @@
+# space_guard.sh kind=scratch-compare need=150000000 floor=314572800 interval=2 cmd=<scratch>/rfb/iter.sh 1 relations order off_order final_order plans_t8cf plans_final plans_v4 plans_v4_all plans_v4_kept
+start 2026-11-18T10:47:29.246Z free=955011072 threshold=464572800
+sample 2026-11-18T10:47:29.250Z 955006976
+sample 2026-11-18T10:47:31.255Z 954052608
+sample 2026-11-18T10:47:33.260Z 952545280
+end 2026-11-18T10:47:35.267Z kind=scratch-compare verdict=completed rc=0 free=952410112 lowest=952410112 dip=2600960 change=-2600960

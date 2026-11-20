@@ -1,0 +1,5 @@
+# basis.txt, sha256.txt and args.txt of one build (one_build.sh): the basis line, the sha256 of the two containers and
+# of the kz-static binary (with its path).
+mask	basis-hash	.*	^basis [0-9a-f]{64}$	basis H
+mask	container-sha256	.*	^[0-9a-f]{64}  (basis|facts)\.kz$	H  \1.kz
+mask	tool-sha256-and-path	.*	^[0-9a-f]{64}  \S*/kz-static$	H  TOOL

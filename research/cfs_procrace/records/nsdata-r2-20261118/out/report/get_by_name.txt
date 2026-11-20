@@ -1,0 +1,8 @@
+== osal-f34759d
+get OS_ObjectIdGetByName in OS_ObjectIdFindByName at=osal/src/os/shared/src/osapi-idmap.c:975 kind=unresolved
+get OS_ObjectIdGetByName in OS_mount at=osal/src/os/shared/src/osapi-filesys.c:427 kind=OS_OBJECT_TYPE_OS_FILESYS
+get OS_ObjectIdGetByName in OS_rmfs at=osal/src/os/shared/src/osapi-filesys.c:360 kind=OS_OBJECT_TYPE_OS_FILESYS
+== osal-7.0.1
+get OS_ObjectIdGetByName in OS_ObjectIdFindByName at=osal/src/os/shared/src/osapi-idmap.c:988 kind=unresolved
+get OS_ObjectIdGetByName in OS_mount at=osal/src/os/shared/src/osapi-filesys.c:413 kind=OS_OBJECT_TYPE_OS_FILESYS
+get OS_ObjectIdGetByName in OS_rmfs at=osal/src/os/shared/src/osapi-filesys.c:346 kind=OS_OBJECT_TYPE_OS_FILESYS

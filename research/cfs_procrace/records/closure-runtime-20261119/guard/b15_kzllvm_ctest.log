@@ -1,0 +1,5 @@
+# space_guard.sh kind=plugin need=52428800 floor=314572800 interval=2 cmd=ctest --test-dir /home/user/work/instr/kzllvm-0.2/plugin-build -V
+start 2026-11-19T07:42:16.016Z free=741679104 threshold=367001600
+sample 2026-11-19T07:42:16.020Z 741675008
+sample 2026-11-19T07:42:18.025Z 741027840
+end 2026-11-19T07:42:20.032Z kind=plugin verdict=completed rc=0 free=740855808 lowest=740855808 dip=823296 change=-823296

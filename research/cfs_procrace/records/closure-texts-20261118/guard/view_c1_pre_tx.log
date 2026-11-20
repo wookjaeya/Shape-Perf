@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-view need=120000000 floor=314572800 interval=2 cmd=bash -c <scratch>/closure_texts_work/bin/kz-static.1a47abd0 show /home/user/work/redesign/obs1/ll_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz > <scratch>/closure_texts_work/views/c1_pre_tx.txt
+start 2026-11-18T10:30:33.047Z free=1312555008 threshold=434572800
+sample 2026-11-18T10:30:33.051Z 1312550912
+end 2026-11-18T10:30:35.057Z kind=scratch-view verdict=completed rc=0 free=1268580352 lowest=1268580352 dip=43974656 change=-43974656

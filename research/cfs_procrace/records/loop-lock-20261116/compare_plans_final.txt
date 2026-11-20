@@ -1,0 +1,35 @@
+c1_pre_tx extract-final OK plan.kzs: lines 861, allowed differences 2, other differences 0
+c1_pre_tx extract-final OK plan.side: lines 1056, allowed differences 5, other differences 0
+c1_pre_tx extract-final OK plan.mod: lines 10, allowed differences 1, other differences 0
+c1_pre_tx extract-final OK plan.exe: lines 10, allowed differences 1, other differences 0
+c1_pre_tx extract-final OK plan.log: lines 1, allowed differences 0, other differences 0
+c1_pre_tx extract-final OK args.txt: lines 25, allowed differences 2, other differences 0
+c1_pre_tx extract-final compare_plans: only declared differences
+c1_post_tx extract-final OK plan.kzs: lines 817, allowed differences 2, other differences 0
+c1_post_tx extract-final OK plan.side: lines 1039, allowed differences 5, other differences 0
+c1_post_tx extract-final OK plan.mod: lines 10, allowed differences 1, other differences 0
+c1_post_tx extract-final OK plan.exe: lines 10, allowed differences 1, other differences 0
+c1_post_tx extract-final OK plan.log: lines 1, allowed differences 0, other differences 0
+c1_post_tx extract-final OK args.txt: lines 25, allowed differences 2, other differences 0
+c1_post_tx extract-final compare_plans: only declared differences
+r2_core extract-final OK plan.kzs: lines 111, allowed differences 2, other differences 0
+r2_core extract-final OK plan.side: lines 662, allowed differences 5, other differences 0
+r2_core extract-final OK plan.mod: lines 4, allowed differences 1, other differences 0
+r2_core extract-final OK plan.exe: lines 4, allowed differences 1, other differences 0
+r2_core extract-final OK plan.log: lines 1, allowed differences 0, other differences 0
+r2_core extract-final OK args.txt: lines 25, allowed differences 2, other differences 0
+r2_core extract-final compare_plans: only declared differences
+c5_641 extract-final OK plan.kzs: lines 434, allowed differences 2, other differences 0
+c5_641 extract-final OK plan.side: lines 542, allowed differences 5, other differences 0
+c5_641 extract-final OK plan.mod: lines 9, allowed differences 1, other differences 0
+c5_641 extract-final OK plan.exe: lines 9, allowed differences 1, other differences 0
+c5_641 extract-final OK plan.log: lines 1, allowed differences 0, other differences 0
+c5_641 extract-final OK args.txt: lines 25, allowed differences 2, other differences 0
+c5_641 extract-final compare_plans: only declared differences
+c5_642 extract-final OK plan.kzs: lines 414, allowed differences 2, other differences 0
+c5_642 extract-final OK plan.side: lines 526, allowed differences 5, other differences 0
+c5_642 extract-final OK plan.mod: lines 9, allowed differences 1, other differences 0
+c5_642 extract-final OK plan.exe: lines 9, allowed differences 1, other differences 0
+c5_642 extract-final OK plan.log: lines 1, allowed differences 0, other differences 0
+c5_642 extract-final OK args.txt: lines 25, allowed differences 2, other differences 0
+c5_642 extract-final compare_plans: only declared differences

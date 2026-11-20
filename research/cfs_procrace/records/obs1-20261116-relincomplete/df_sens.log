@@ -1,0 +1,22 @@
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static basis --no-profile --compile-db /home/user/work/procrace/c1_build/pre/1df262a/build/native/default/compile_commands.json --build-dir /home/user/work/procrace/c1_build/pre/1df262a/build --bundle-root /home/user/work/procrace/c1_build/bundle_1df262a --recipe /home/user/work/redesign/extract_baseline/inputs/c1_pre_tx.kzb --text -o /home/user/work/redesign/obs1/relincomplete_sens/c1_pre_tx/NP/basis.kz.partial
+start 2026-11-16T06:17:32.537Z free=4158730240 threshold=334572800
+sample 2026-11-16T06:17:32.542Z 4158726144
+end 2026-11-16T06:17:34.549Z kind=extract verdict=completed rc=0 free=4158578688 lowest=4158578688 dip=151552 change=-151552
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static extract --no-profile --basis /home/user/work/redesign/obs1/relincomplete_sens/c1_pre_tx/NP/basis.kz.partial --targets-rule R-T1,R-T2 --image-budget 3 -o /home/user/work/redesign/obs1/relincomplete_sens/c1_pre_tx/NP/facts.kz.partial
+start 2026-11-16T06:17:34.555Z free=4158578688 threshold=334572800
+sample 2026-11-16T06:17:34.559Z 4158578688
+sample 2026-11-16T06:17:36.565Z 4158578688
+sample 2026-11-16T06:17:38.572Z 4158570496
+sample 2026-11-16T06:17:40.581Z 4158570496
+sample 2026-11-16T06:17:42.587Z 4158570496
+sample 2026-11-16T06:17:44.594Z 4158570496
+sample 2026-11-16T06:17:46.601Z 4158570496
+sample 2026-11-16T06:17:48.607Z 4158570496
+sample 2026-11-16T06:17:50.614Z 4158570496
+sample 2026-11-16T06:17:52.619Z 4158562304
+sample 2026-11-16T06:17:54.625Z 4158562304
+end 2026-11-16T06:17:56.631Z kind=extract verdict=completed rc=0 free=4147560448 lowest=4147560448 dip=11018240 change=-11018240
+# space_guard.sh kind=relations need=20000000 floor=314572800 interval=2 cmd=/home/user/work/merge-check/kz-llvm/tools/kz-static/kz-static relations /home/user/work/redesign/obs1/relincomplete_sens/c1_pre_tx/NP/facts.kz.partial -o /home/user/work/redesign/obs1/relincomplete_sens/c1_pre_tx/NP/relations.txt.partial
+start 2026-11-16T06:17:56.638Z free=4147560448 threshold=334572800
+sample 2026-11-16T06:17:56.645Z 4147560448
+end 2026-11-16T06:17:58.652Z kind=relations verdict=completed rc=0 free=4146688000 lowest=4146688000 dip=872448 change=-872448

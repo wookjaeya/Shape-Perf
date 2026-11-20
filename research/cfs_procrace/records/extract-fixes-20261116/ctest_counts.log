@@ -1,0 +1,6 @@
+254: test_static_cli: 953 checks passed
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+253: test_static_plan: 182 checks passed
+105: lint selftest: 109 cases, 0 failed
+68: test_core_schema: 34017 checks passed
+100% tests passed, 0 tests failed out of 7

@@ -1,0 +1,1365 @@
+Test project <scratch>/kzc4_build
+      Start  98: golden_layout
+Could not find executable <scratch>/kzc4_build/tests/golden/kz_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+Unable to find executable: <scratch>/kzc4_build/tests/golden/kz_golden
+ 1/79 Test  #98: golden_layout .................................***Not Run   0.00 sec
+      Start  99: golden_records
+Could not find executable <scratch>/kzc4_build/tests/golden/kz_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+Unable to find executable: <scratch>/kzc4_build/tests/golden/kz_golden
+ 2/79 Test  #99: golden_records ................................***Not Run   0.00 sec
+      Start 100: golden_container_facts
+Could not find executable <scratch>/kzc4_build/tests/golden/kz_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+Unable to find executable: <scratch>/kzc4_build/tests/golden/kz_golden
+ 3/79 Test #100: golden_container_facts ........................***Not Run   0.00 sec
+      Start 101: golden_container_run
+Could not find executable <scratch>/kzc4_build/tests/golden/kz_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+Unable to find executable: <scratch>/kzc4_build/tests/golden/kz_golden
+ 4/79 Test #101: golden_container_run ..........................***Not Run   0.00 sec
+      Start 102: golden_container_verdicts
+Could not find executable <scratch>/kzc4_build/tests/golden/kz_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+Unable to find executable: <scratch>/kzc4_build/tests/golden/kz_golden
+ 5/79 Test #102: golden_container_verdicts .....................***Not Run   0.00 sec
+      Start 103: golden_render
+Could not find executable <scratch>/kzc4_build/tests/golden/kz_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+Unable to find executable: <scratch>/kzc4_build/tests/golden/kz_golden
+ 6/79 Test #103: golden_render .................................***Not Run   0.00 sec
+      Start 104: golden_tool_hash
+Could not find executable <scratch>/kzc4_build/tests/golden/kz_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Release/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/Debug/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/MinSizeRel/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Deployment/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+<scratch>/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Release/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Debug/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/MinSizeRel/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/RelWithDebInfo/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Deployment/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/golden/Development/kz_golden
+Unable to find executable: <scratch>/kzc4_build/tests/golden/kz_golden
+ 7/79 Test #104: golden_tool_hash ..............................***Not Run   0.00 sec
+      Start 105: lint_selftest
+      Start 106: lint_case-ids
+      Start 107: lint_case-ids-data
+      Start 108: lint_semantics-names
+ 8/79 Test #105: lint_selftest .................................   Passed    0.06 sec
+      Start 109: lint_retired-term
+ 9/79 Test #108: lint_semantics-names ..........................   Passed    0.07 sec
+      Start 110: lint_banned-files
+10/79 Test #110: lint_banned-files .............................   Passed    0.05 sec
+      Start 111: lint_no-llvm
+11/79 Test #109: lint_retired-term .............................   Passed    0.07 sec
+      Start 112: lint_no-generated
+12/79 Test #111: lint_no-llvm ..................................   Passed    0.04 sec
+      Start 140: test_probe_golden
+Could not find executable <scratch>/kzc4_build/tests/cfs-free/test_probe_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/cfs-free/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/Release/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/Release/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/Debug/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/Debug/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/MinSizeRel/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/MinSizeRel/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/RelWithDebInfo/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/RelWithDebInfo/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/Deployment/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/Deployment/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/Development/test_probe_golden
+<scratch>/kzc4_build/tests/cfs-free/Development/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/Release/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/Release/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/Debug/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/Debug/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/MinSizeRel/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/MinSizeRel/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/RelWithDebInfo/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/RelWithDebInfo/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/Deployment/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/Deployment/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/Development/test_probe_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/cfs-free/Development/test_probe_golden
+Unable to find executable: <scratch>/kzc4_build/tests/cfs-free/test_probe_golden
+13/79 Test #140: test_probe_golden .............................***Not Run   0.00 sec
+      Start 149: phi_golden_profile_canonical
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+14/79 Test #149: phi_golden_profile_canonical ..................***Not Run   0.00 sec
+      Start 150: phi_golden_profile_summary
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+15/79 Test #150: phi_golden_profile_summary ....................***Not Run   0.00 sec
+      Start 151: phi_golden_replay_startup_ok
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+16/79 Test #151: phi_golden_replay_startup_ok ..................***Not Run   0.00 sec
+      Start 152: phi_golden_replay_startup_old_version
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+17/79 Test #152: phi_golden_replay_startup_old_version .........***Not Run   0.00 sec
+      Start 153: phi_golden_replay_startup_no_version
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+18/79 Test #153: phi_golden_replay_startup_no_version ..........***Not Run   0.00 sec
+      Start 154: phi_golden_replay_startup_no_predicate
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+19/79 Test #154: phi_golden_replay_startup_no_predicate ........***Not Run   0.00 sec
+      Start 155: phi_golden_replay_kid_illegal
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+20/79 Test #155: phi_golden_replay_kid_illegal .................***Not Run   0.00 sec
+      Start 156: phi_golden_replay_kid_unregistered
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+21/79 Test #156: phi_golden_replay_kid_unregistered ............***Not Run   0.00 sec
+      Start 157: phi_golden_replay_kid_ordinals
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+22/79 Test #157: phi_golden_replay_kid_ordinals ................***Not Run   0.00 sec
+      Start 158: phi_golden_replay_kid_disagree
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+23/79 Test #158: phi_golden_replay_kid_disagree ................***Not Run   0.00 sec
+      Start 159: phi_golden_replay_shutdown_scope
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+24/79 Test #159: phi_golden_replay_shutdown_scope ..............***Not Run   0.00 sec
+      Start 160: phi_golden_replay_poll_timeout
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+25/79 Test #160: phi_golden_replay_poll_timeout ................***Not Run   0.00 sec
+      Start 161: phi_golden_replay_poll_timeout_wrong
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+26/79 Test #161: phi_golden_replay_poll_timeout_wrong ..........***Not Run   0.00 sec
+      Start 162: phi_golden_replay_kid_outcomes
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+27/79 Test #162: phi_golden_replay_kid_outcomes ................***Not Run   0.00 sec
+      Start 163: phi_golden_replay_effects_core
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+28/79 Test #163: phi_golden_replay_effects_core ................***Not Run   0.00 sec
+      Start 164: phi_golden_replay_effects_external
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+29/79 Test #164: phi_golden_replay_effects_external ............***Not Run   0.00 sec
+      Start 165: phi_golden_replay_cleanup_window
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+30/79 Test #165: phi_golden_replay_cleanup_window ..............***Not Run   0.00 sec
+      Start 171: phi_c1_golden_summary_281a941_1df262a
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+31/79 Test #171: phi_c1_golden_summary_281a941_1df262a .........***Not Run   0.00 sec
+      Start 172: phi_c1_golden_canonical_281a941_1df262a
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+32/79 Test #172: phi_c1_golden_canonical_281a941_1df262a .......***Not Run   0.00 sec
+      Start 175: phi_c1_golden_summary_281a941_1df262a-altP3
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+33/79 Test #175: phi_c1_golden_summary_281a941_1df262a-altP3 ...***Not Run   0.00 sec
+      Start 178: phi_c1_golden_summary_281a941_1b0b338
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+34/79 Test #178: phi_c1_golden_summary_281a941_1b0b338 .........***Not Run   0.00 sec
+      Start 183: phi_c1_golden_summary_833fdbb_1df262a
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+35/79 Test #183: phi_c1_golden_summary_833fdbb_1df262a .........***Not Run   0.00 sec
+      Start 184: phi_c1_golden_canonical_833fdbb_1df262a
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+36/79 Test #184: phi_c1_golden_canonical_833fdbb_1df262a .......***Not Run   0.00 sec
+      Start 187: phi_c1_golden_summary_833fdbb_1df262a-altP3
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+37/79 Test #187: phi_c1_golden_summary_833fdbb_1df262a-altP3 ...***Not Run   0.00 sec
+      Start 190: phi_c1_golden_summary_833fdbb_1b0b338
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+38/79 Test #190: phi_c1_golden_summary_833fdbb_1b0b338 .........***Not Run   0.00 sec
+      Start 193: phi_golden_replay_c1_pre_fail
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+39/79 Test #193: phi_golden_replay_c1_pre_fail .................***Not Run   0.00 sec
+      Start 194: phi_golden_replay_c1_post_retry
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+40/79 Test #194: phi_golden_replay_c1_post_retry ...............***Not Run   0.00 sec
+      Start 195: phi_golden_replay_c1_post_retry_altP3
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+41/79 Test #195: phi_golden_replay_c1_post_retry_altP3 .........***Not Run   0.00 sec
+      Start 196: phi_golden_replay_c1_role_unbound
+Could not find executable <scratch>/kzc4_build/tests/phi/kz_phi_golden
+Looked in the following places:
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Release/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Debug/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Deployment/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+<scratch>/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Release/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Debug/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/MinSizeRel/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/RelWithDebInfo/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Deployment/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/kzc4_build/tests/phi/Development/kz_phi_golden
+Unable to find executable: <scratch>/kzc4_build/tests/phi/kz_phi_golden
+42/79 Test #196: phi_golden_replay_c1_role_unbound .............***Not Run   0.00 sec
+      Start 226: static_golden_writers
+43/79 Test #112: lint_no-generated .............................   Passed    0.07 sec
+      Start 227: static_golden_outptr
+44/79 Test #107: lint_case-ids-data ............................   Passed    0.20 sec
+      Start 228: static_golden_derives
+45/79 Test #226: static_golden_writers .........................   Passed    0.03 sec
+      Start 229: static_golden_loops
+46/79 Test #227: static_golden_outptr ..........................   Passed    0.03 sec
+      Start 230: static_golden_spawn
+47/79 Test #228: static_golden_derives .........................   Passed    0.04 sec
+      Start 231: static_golden_atype
+48/79 Test #229: static_golden_loops ...........................   Passed    0.05 sec
+      Start 232: static_golden_wrappers
+49/79 Test #230: static_golden_spawn ...........................   Passed    0.03 sec
+      Start 233: static_golden_flowfacts
+50/79 Test #231: static_golden_atype ...........................   Passed    0.03 sec
+      Start 234: static_golden_argflow
+51/79 Test #233: static_golden_flowfacts .......................   Passed    0.04 sec
+      Start 235: static_golden_lockset
+52/79 Test #232: static_golden_wrappers ........................   Passed    0.06 sec
+      Start 236: static_golden_relations
+53/79 Test #234: static_golden_argflow .........................   Passed    0.04 sec
+      Start 237: static_golden_clobber
+54/79 Test #237: static_golden_clobber .........................   Passed    0.03 sec
+      Start 238: static_golden_flowfacts_np
+55/79 Test #235: static_golden_lockset .........................   Passed    0.05 sec
+      Start 239: static_golden_argflow_np
+56/79 Test #238: static_golden_flowfacts_np ....................   Passed    0.05 sec
+      Start 240: static_golden_lockset_np
+57/79 Test #236: static_golden_relations .......................   Passed    0.09 sec
+      Start 241: static_golden_relations_np
+58/79 Test #239: static_golden_argflow_np ......................   Passed    0.06 sec
+      Start 242: static_golden_lockpaths_np
+59/79 Test #240: static_golden_lockset_np ......................   Passed    0.06 sec
+      Start 243: static_golden_relpaths_np
+60/79 Test #241: static_golden_relations_np ....................   Passed    0.10 sec
+      Start 244: static_golden_relsound_np
+61/79 Test #242: static_golden_lockpaths_np ....................   Passed    0.11 sec
+      Start 245: static_golden_imgbudget_np
+62/79 Test #245: static_golden_imgbudget_np ....................   Passed    0.05 sec
+      Start 246: static_golden_relincomplete_np
+63/79 Test #243: static_golden_relpaths_np .....................   Passed    0.13 sec
+      Start 247: static_golden_relincomplete_cut_np
+64/79 Test #246: static_golden_relincomplete_np ................   Passed    0.10 sec
+      Start 248: static_golden_relcallback_np
+65/79 Test #247: static_golden_relincomplete_cut_np ............   Passed    0.10 sec
+      Start 249: static_golden_order_np
+66/79 Test #244: static_golden_relsound_np .....................   Passed    0.25 sec
+      Start 250: static_golden_anonrec_np
+67/79 Test #248: static_golden_relcallback_np ..................   Passed    0.11 sec
+      Start 251: static_golden_objaccess
+68/79 Test #250: static_golden_anonrec_np ......................   Passed    0.06 sec
+      Start 252: static_golden_objaccess_off
+69/79 Test #251: static_golden_objaccess .......................   Passed    0.05 sec
+      Start 253: static_golden_semantics_np
+70/79 Test #249: static_golden_order_np ........................***Failed    0.15 sec
+      Start 254: static_golden_resultflow_np
+71/79 Test #252: static_golden_objaccess_off ...................   Passed    0.05 sec
+      Start 255: static_golden_resultflow_order_np
+72/79 Test #253: static_golden_semantics_np ....................   Passed    0.11 sec
+      Start 256: static_golden_looplock_np
+73/79 Test #254: static_golden_resultflow_np ...................***Failed    0.13 sec
+      Start 257: static_golden_looplock_order_np
+74/79 Test #255: static_golden_resultflow_order_np .............***Failed    0.15 sec
+      Start 258: static_golden_closure_np
+75/79 Test #256: static_golden_looplock_np .....................   Passed    0.14 sec
+      Start 259: static_golden_core_cpu1
+76/79 Test #257: static_golden_looplock_order_np ...............***Failed    0.17 sec
+77/79 Test #258: static_golden_closure_np ......................***Failed    0.19 sec
+78/79 Test #106: lint_case-ids .................................   Passed    1.92 sec
+79/79 Test #259: static_golden_core_cpu1 .......................   Passed    7.94 sec
+
+47% tests passed, 42 tests failed out of 79
+
+Label Time Summary:
+golden         =  10.78 sec*proc (71 tests)
+integration    =   7.94 sec*proc (1 test)
+legacy-case    =   7.94 sec*proc (30 tests)
+lint           =   2.49 sec*proc (8 tests)
+static         =  10.78 sec*proc (34 tests)
+unit           =   0.00 sec*proc (1 test)
+
+Total Test time (real) =   9.03 sec
+
+The following tests FAILED:
+	 98 - golden_layout (Not Run)
+	 99 - golden_records (Not Run)
+	100 - golden_container_facts (Not Run)
+	101 - golden_container_run (Not Run)
+	102 - golden_container_verdicts (Not Run)
+	103 - golden_render (Not Run)
+	104 - golden_tool_hash (Not Run)
+	140 - test_probe_golden (Not Run)
+	149 - phi_golden_profile_canonical (Not Run)
+	150 - phi_golden_profile_summary (Not Run)
+	151 - phi_golden_replay_startup_ok (Not Run)
+	152 - phi_golden_replay_startup_old_version (Not Run)
+	153 - phi_golden_replay_startup_no_version (Not Run)
+	154 - phi_golden_replay_startup_no_predicate (Not Run)
+	155 - phi_golden_replay_kid_illegal (Not Run)
+	156 - phi_golden_replay_kid_unregistered (Not Run)
+	157 - phi_golden_replay_kid_ordinals (Not Run)
+	158 - phi_golden_replay_kid_disagree (Not Run)
+	159 - phi_golden_replay_shutdown_scope (Not Run)
+	160 - phi_golden_replay_poll_timeout (Not Run)
+	161 - phi_golden_replay_poll_timeout_wrong (Not Run)
+	162 - phi_golden_replay_kid_outcomes (Not Run)
+	163 - phi_golden_replay_effects_core (Not Run)
+	164 - phi_golden_replay_effects_external (Not Run)
+	165 - phi_golden_replay_cleanup_window (Not Run)
+	171 - phi_c1_golden_summary_281a941_1df262a (Not Run)
+	172 - phi_c1_golden_canonical_281a941_1df262a (Not Run)
+	175 - phi_c1_golden_summary_281a941_1df262a-altP3 (Not Run)
+	178 - phi_c1_golden_summary_281a941_1b0b338 (Not Run)
+	183 - phi_c1_golden_summary_833fdbb_1df262a (Not Run)
+	184 - phi_c1_golden_canonical_833fdbb_1df262a (Not Run)
+	187 - phi_c1_golden_summary_833fdbb_1df262a-altP3 (Not Run)
+	190 - phi_c1_golden_summary_833fdbb_1b0b338 (Not Run)
+	193 - phi_golden_replay_c1_pre_fail (Not Run)
+	194 - phi_golden_replay_c1_post_retry (Not Run)
+	195 - phi_golden_replay_c1_post_retry_altP3 (Not Run)
+	196 - phi_golden_replay_c1_role_unbound (Not Run)
+	249 - static_golden_order_np (Failed)
+	254 - static_golden_resultflow_np (Failed)
+	255 - static_golden_resultflow_order_np (Failed)
+	257 - static_golden_looplock_order_np (Failed)
+	258 - static_golden_closure_np (Failed)
+Errors while running CTest
+Output from these tests are in: <scratch>/kzc4_build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.

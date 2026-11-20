@@ -1,0 +1,3 @@
+diffkinds old_lines=860 new_lines=860 only_old=2 only_new=2 labels=2
+label removed=1 added=1 0|# sidecar
+label removed=1 added=1 0|source build

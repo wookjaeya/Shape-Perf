@@ -1,0 +1,4 @@
+# kz path map; derive_c1.sh prepare pre 1df262a: the reference directories and their copies in /home/user/work/redesign/obs1/c1pre_derived
+/home/user/work/procrace/c1_build/bundle_1df262a/	/home/user/work/redesign/obs1/c1pre_derived/bundle_1df262a/
+/home/user/work/procrace/c1_build/pre/src/	/home/user/work/redesign/obs1/c1pre_derived/src/
+/home/user/work/procrace/c1_build/pre/1df262a/	/home/user/work/redesign/obs1/c1pre_derived/ws/

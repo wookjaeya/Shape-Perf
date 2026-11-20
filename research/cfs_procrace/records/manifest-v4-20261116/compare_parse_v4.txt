@@ -1,0 +1,11 @@
+mv_plans_v4/c1_pre_tx: version 4; 
+mv_plans_v4/c1_post_tx: version 4; 
+mv_plans_v4/r2_core: version 4; v4 plan=65b47717c178f09d needs=29 gaps=0 spawn=1 load=0 skey=65
+mv_plans_v4/c5_641: version 4; 
+mv_plans_v4/c5_642: version 4; 
+mv_plans_v4_all/c1_pre_tx: version 4; 
+mv_plans_v4_all/c1_post_tx: version 4; 
+mv_plans_v4_all/r2_core: version 4; 
+mv_plans_v4_all/c5_641: version 4; 
+mv_plans_v4_all/c5_642: version 4; 
+compare.sh parse_v4 rc=0

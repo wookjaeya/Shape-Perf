@@ -1,0 +1,149 @@
+# DESCRY report verification evidence (used to correct descry.md). 2026-10-08T02:17:08Z. Nothing here runs DESCRY or installs anything.
+
+## 1. Comment counts of the five original reports (GitHub MCP search_issues, field 'comments', 2026-10-08 ~02:15Z)
+nasa/CF#184   comments=5   'Possible race condition with creation of throttle sem (needs to exist before CF initializes)'
+nasa/cFE#198  comments=11  'Additional CFE start up state for application sync'
+nasa/cFE#73   comments=14  'Race conditions / dependencies between CFE core apps'
+nasa/cFE#72   comments=9   'Race condition within CFE_ES_AppCreate'
+nasa/cFE#2663 comments=2   'Unregistered AppId error with CFE_EVS_SendEventWithAppID() during cFE task startup'
+# Comment bodies: not read (issue_read denied for nasa/cfe, see descry_cfs_case_inputs_20261008.log header). CONDITIONS_POLICY.md:7 counts comments as part of the original report.
+
+## 2. Author GitHub accounts (MCP search_repositories, 2026-10-08)
+user:chaowang-vt -> total_count 7: GridLayout, SendMessage, safetyguard, StopWatch, BeerAdviser, chaowang-vt.github.io, TestingIMath (none is DESCRY)
+user:tarannumzaman -> total_count 1: tarannumzaman/Scminer ('Diagnose System-Level Concurrency Bugs')
+
+## 3. Project-page block is the session egress allowlist (curl -i)
+$ curl -sS -i http://cs.uky.edu/~tyu/research/descry
+HTTP/1.1 403 Forbidden
+x-deny-reason: host_not_allowed
+content-length: 97
+content-type: text/plain
+date: Thu, 08 Oct 2026 02:17:08 GMT
+
+Host not in allowlist: cs.uky.edu. Add this host to your network egress settings to allow access.
+$ curl -sS -i http://uknowledge.uky.edu/cs_etds/119
+HTTP/1.1 403 Forbidden
+x-deny-reason: host_not_allowed
+content-length: 105
+content-type: text/plain
+date: Thu, 08 Oct 2026 02:17:08 GMT
+
+Host not in allowlist: uknowledge.uky.edu. Add this host to your network egress settings to allow access.
+## 4. KLEE build recipe at the two candidate tags (blob-less clones in scratchpad descry_verify/klee13, klee14; only Dockerfile, .travis.yml, README.md read)
+### klee13: v1.3.0 3cc70a08f2f09034d781555175a9ab1b62ab8f64 2016-11-30T17:51:42+00:00
+# Dockerfile lines 1-28:
+Dockerfile:1: FROM ubuntu:14.04
+Dockerfile:2: MAINTAINER Dan Liew <daniel.liew@imperial.ac.uk>
+Dockerfile:3: 
+Dockerfile:4: # FIXME: Docker doesn't currently offer a way to
+Dockerfile:5: # squash the layers from within a Dockerfile so
+Dockerfile:6: # the resulting image is unnecessarily large!
+Dockerfile:7: 
+Dockerfile:8: ENV LLVM_VERSION=3.4 \
+Dockerfile:9:     SOLVERS=STP:Z3 \
+Dockerfile:10:     STP_VERSION=master \
+Dockerfile:11:     DISABLE_ASSERTIONS=0 \
+Dockerfile:12:     ENABLE_OPTIMIZED=1 \
+Dockerfile:13:     KLEE_UCLIBC=klee_uclibc_v1.0.0 \
+Dockerfile:14:     KLEE_SRC=/home/klee/klee_src \
+Dockerfile:15:     COVERAGE=0 \
+Dockerfile:16:     BUILD_DIR=/home/klee/klee_build
+Dockerfile:17: 
+Dockerfile:18: RUN apt-get update && \
+Dockerfile:19:     apt-get -y --no-install-recommends install \
+Dockerfile:20:         clang-${LLVM_VERSION} \
+Dockerfile:21:         llvm-${LLVM_VERSION} \
+Dockerfile:22:         llvm-${LLVM_VERSION}-dev \
+Dockerfile:23:         llvm-${LLVM_VERSION}-runtime \
+Dockerfile:24:         llvm \
+Dockerfile:25:         libcap-dev \
+Dockerfile:26:         git \
+Dockerfile:27:         subversion \
+Dockerfile:28:         cmake \
+# .travis.yml: dist and every LLVM_VERSION=3.4 matrix row:
+.travis.yml:2: dist: trusty
+.travis.yml:34:     - LLVM_VERSION=3.4 SOLVERS=metaSMT METASMT_DEFAULT=btor KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:36:     - LLVM_VERSION=3.4 SOLVERS=metaSMT METASMT_DEFAULT=stp  KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:38:     - LLVM_VERSION=3.4 SOLVERS=metaSMT METASMT_DEFAULT=z3   KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:41:     - LLVM_VERSION=3.4 SOLVERS=Z3 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:43:     - LLVM_VERSION=3.4 SOLVERS=STP:Z3 STP_VERSION=2.1.0 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:47:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=master KLEE_UCLIBC=0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=1
+.travis.yml:48:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=master KLEE_UCLIBC=klee_0_9_29 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:51:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=2.1.0 KLEE_UCLIBC=0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:52:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=2.1.0 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:61:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=master KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=0 COVERAGE=0
+.travis.yml:64:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=2.1.0 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0 USE_TCMALLOC=1
+### klee14: v1.4.0 9fb2f5666d5f8c7c2f335fc8408883a0cf958964 2017-07-21T16:37:32+01:00
+# Dockerfile lines 1-28:
+Dockerfile:1: FROM ubuntu:14.04
+Dockerfile:2: MAINTAINER Dan Liew <daniel.liew@imperial.ac.uk>
+Dockerfile:3: 
+Dockerfile:4: # FIXME: Docker doesn't currently offer a way to
+Dockerfile:5: # squash the layers from within a Dockerfile so
+Dockerfile:6: # the resulting image is unnecessarily large!
+Dockerfile:7: 
+Dockerfile:8: ENV LLVM_VERSION=3.4 \
+Dockerfile:9:     SOLVERS=STP:Z3 \
+Dockerfile:10:     STP_VERSION=2.1.2 \
+Dockerfile:11:     DISABLE_ASSERTIONS=0 \
+Dockerfile:12:     ENABLE_OPTIMIZED=1 \
+Dockerfile:13:     KLEE_UCLIBC=klee_uclibc_v1.0.0 \
+Dockerfile:14:     KLEE_SRC=/home/klee/klee_src \
+Dockerfile:15:     COVERAGE=0 \
+Dockerfile:16:     BUILD_DIR=/home/klee/klee_build \
+Dockerfile:17:     USE_CMAKE=1 \
+Dockerfile:18:     ASAN_BUILD=0 \
+Dockerfile:19:     UBSAN_BUILD=0 \
+Dockerfile:20:     TRAVIS_OS_NAME=linux
+Dockerfile:21: 
+Dockerfile:22: RUN apt-get update && \
+Dockerfile:23:     apt-get -y --no-install-recommends install \
+Dockerfile:24:         clang-${LLVM_VERSION} \
+Dockerfile:25:         llvm-${LLVM_VERSION} \
+Dockerfile:26:         llvm-${LLVM_VERSION}-dev \
+Dockerfile:27:         llvm-${LLVM_VERSION}-runtime \
+Dockerfile:28:         llvm \
+# .travis.yml: dist and every LLVM_VERSION=3.4 matrix row:
+.travis.yml:2: dist: trusty
+.travis.yml:47:     - LLVM_VERSION=3.4 SOLVERS=STP:Z3 STP_VERSION=2.1.2 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0 USE_TCMALLOC=1 USE_CMAKE=1
+.travis.yml:48:     - LLVM_VERSION=3.4 SOLVERS=metaSMT METASMT_VERSION=v4.rc1 METASMT_DEFAULT=STP KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0 USE_TCMALLOC=1 USE_CMAKE=1
+.travis.yml:52:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=2.1.2 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=0 COVERAGE=0 USE_CMAKE=1 USE_TCMALLOC=0 ASAN_BUILD=1
+.travis.yml:53:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=2.1.2 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=0 COVERAGE=0 USE_CMAKE=0 USE_TCMALLOC=0 ASAN_BUILD=1
+.travis.yml:61:     - LLVM_VERSION=3.4 SOLVERS=Z3 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:65:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=master KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:68:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=2.1.2 KLEE_UCLIBC=klee_0_9_29 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:72:     - LLVM_VERSION=3.4 SOLVERS=metaSMT METASMT_VERSION=v4.rc1 METASMT_DEFAULT=btor KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:76:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=2.1.2 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=1 ENABLE_OPTIMIZED=1 COVERAGE=0
+.travis.yml:79:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=2.1.2 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=0 COVERAGE=0
+.travis.yml:82:     - LLVM_VERSION=3.4 SOLVERS=STP STP_VERSION=2.1.2 KLEE_UCLIBC=klee_uclibc_v1.0.0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0 USE_TCMALLOC=1
+.travis.yml:93:       env: LLVM_VERSION=3.4 SOLVERS=STP:Z3 STP_VERSION=2.1.2 KLEE_UCLIBC=0 DISABLE_ASSERTIONS=0 ENABLE_OPTIMIZED=1 COVERAGE=0 USE_TCMALLOC=0 USE_CMAKE=1
+# => At both tags the Docker recipe is ubuntu:14.04 + apt clang/llvm-3.4 + SOLVERS=STP:Z3; STP_VERSION=master (v1.3.0) vs 2.1.2 (v1.4.0).
+#    KLEE's CI at both tags also builds LLVM 3.4 with STP alone, Z3 alone and metaSMT (btor/stp/z3 backends), so the solver DESCRY used is not fixed by KLEE's docs either.
+
+## 5. Feasibility facts for that recipe here
+$ which docker dockerd containerd
+/usr/bin/docker
+/usr/bin/dockerd
+/usr/bin/containerd
+$ docker info (tail)
+Server:
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+$ df -h /home/user/work
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G   35G  2.4G  94% /
+
+## 6. Signal PuD candidates in native cFS (reference psp c4b3b0b6, osal d2d877a6)
+psp/fsw/pc-linux/src/cfe_psp_exception.c:179:     sigaction(signo, &sa, NULL);
+psp/fsw/pc-linux/src/cfe_psp_exception.c:232:     CFE_PSP_AttachSigHandler(SIGINT);
+psp/fsw/pc-linux/src/cfe_psp_exception.c:233:     CFE_PSP_AttachSigHandler(SIGTERM);
+psp/fsw/pc-linux/src/cfe_psp_exception.c:262:      * As the PC-Linux platform is often used for debugging, it is better to
+psp/fsw/pc-linux/src/cfe_psp_exception.c:263:      * maintain the default signal handler for the SIGILL/SIGBUS/SIGSEGV which will
+psp/fsw/pc-linux/src/cfe_psp_exception.c:264:      * abort the program and generate a core file.
+psp/fsw/pc-linux/src/cfe_psp_exception.c:265:      */
+psp/fsw/pc-linux/src/cfe_psp_exception.c:266:     CFE_PSP_AttachSigHandler(SIGFPE);
+osal/src/os/posix/src/os-impl-timebase.c:150:         ret = sigwait(&impl->sigset, &sig);
+osal/src/os/posix/src/os-impl-idmap.c:92:         ret = pthread_mutex_lock(&impl->mutex);
+osal/src/os/posix/src/os-impl-idmap.c:116:         ret = pthread_cond_broadcast(&impl->cond);
+osal/src/os/posix/src/os-impl-idmap.c:210:         ret = pthread_mutexattr_setprotocol(&mutex_attr, PTHREAD_PRIO_INHERIT);
+
+## 7. PI-mutex re-check of the visibility test: see descry_syscall_visibility_pi_recheck_20261008.log

@@ -1,0 +1,3 @@
+# keys.txt of one build (relations --keys): the facts line and the relations rules line.
+mask	facts-hash	.*	^facts [0-9a-f]{64}$	facts H
+mask	rules-line-revision	.*	^rules relations rules revision [0-9]+ \([0-9-]+\)$	rules relations rules revision R

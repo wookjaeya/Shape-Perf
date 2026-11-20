@@ -1,0 +1,6 @@
+VERIFIED_LOCAL step2a-20261109-tests 2cd36d137aef 2026-11-09T10:23:47.075Z
+방법: 스트림 검증(디스크에 풀지 않음). PARTS.sha256 -c, cat 조각 | xz -t, cat 조각 | xz -dc | tar -x --to-command(멤버마다 sha256).
+결과: 조각 1개 OK, xz -t OK, 멤버 665개의 sha256·크기가 MANIFEST.tsv 665줄과 같다(차이 0줄), 멤버 종류 -=665 d=225 , 원본도 MANIFEST.sha256과 같다.
+tar_xz_bytes=31536344 tar_xz_sha256=7a65f18e10357e146fdd82afd243272b72473dec0b1d8f24f0dd913eeada6a11
+verify_bundle.sh와 다르다: clone 없음(push하지 않았다), 이은 xz 파일 없음, 풀기 없음. 이유는 디스크다(여유 1123602432 B, 하한 314572800 B).
+이것은 CM §5의 '보존됨'이 아니다. 원격에서 다시 받아 확인하지 않았다. 컨테이너 손실은 막지 못한다.

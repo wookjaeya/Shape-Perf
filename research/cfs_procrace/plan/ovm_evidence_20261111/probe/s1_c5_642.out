@@ -1,0 +1,36 @@
+rows 175 {'A': 66, 'B': 71, 'C': 38}
+ path A labels {'0': 26, 'E': 5, 'J': 5, 'T?': 30}
+        label x order {'0/unordered': 26, 'E/unordered': 5, 'J/unordered': 5, 'T?/unordered': 30}
+ path B labels {'0': 1, 'E': 47, 'J': 7, 'T?': 16}
+        label x order {'0/unordered': 1, 'E/unordered': 47, 'J/unordered': 7, 'T?/unordered': 16}
+ path C labels {'E': 22, 'F': 16}
+        label x order {'E/enforced': 9, 'E/undecided': 13, 'F/enforced': 5, 'F/undecided': 11}
+ A: R rows []
+ A: R rows with a creator in another actor []
+ A: H rows []
+ A: J rows ['A46', 'A47', 'A63', 'A64', 'A65']  with creator: []
+ A: T? rows 30 with a creator in another actor ['A16', 'A17']
+ A: result column {'tested': 50, 'discarded': 16} key {'unresolved': 64, 'known': 2} rows with creator(s) in other actors 2
+ A: distinct lookup sites 63 ; sites of R rows 0 ; of R rows with a creator in another actor [] ; of J rows with a creator [] ; of T? rows with a creator 2
+ B: J rows [('B7', 'DataFileDescriptor', 'd5/u0/t0', 'unordered', 'static-undetermined', 'OS_FS_ERROR,OS_FS_ERR_INVALID_FD'), ('B18', 'EVS_SharedDataMutexID', 'd4/u0/t0', 'unordered', 'static-undetermined', 'OS_ERR_INVALID_ID,OS_SEM_FAILURE'), ('B19', 'EVS_SharedDataMutexID', 'd4/u0/t0', 'unordered', 'static-undetermined', 'OS_ERR_INVALID_ID,OS_SEM_FAILURE'), ('B33', 'AppId', 'd1/u0/t0', 'unordered', 'static-undetermined', 'CFE_ES_ERR_APPID'), ('B39', 'SysQueueId', 'd1/u0/t0', 'unordered', 'static-undetermined', 'OS_ERROR,OS_ERR_INVALID_ID'), ('B56', 'LocalSemaphore', 'd1/u0/t0', 'unordered', 'static-undetermined', '(OS_SEM_FAILURE),OS_ERR_INVALID_ID'), ('B62', 'AppId', 'd36/u0/t0', 'unordered', 'static-undetermined', 'CFE_EVS_APP_ILLEGAL_APP_ID')]
+ B: T? rows 16  B: E rows (no callee-check line) 47  B: flip {'none': 47, 'static-undetermined': 24}
+ B: fixed? rows 0 of them J [] T? []
+ C: F rows [('C10', 'CFE_ES_TaskRecord_t.RecordUsed', 'enforced', 'CFE_ES_ERR_APPID'), ('C12', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C13', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C14', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C15', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C16', 'CFE_ES_TaskRecord_t.RecordUsed', 'enforced', 'CFE_ES_ERR_APPID'), ('C17', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C18', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C30', 'CFE_ES_TaskRecord_t.RecordUsed', 'enforced', 'CFE_ES_ERR_APPID'), ('C32', 'CFE_ES_TaskRecord_t.RecordUsed', 'enforced', 'CFE_ES_ERR_APPID'), ('C33', 'CFE_ES_TaskRecord_t.RecordUsed', 'enforced', 'CFE_ES_ERR_APPID'), ('C34', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C35', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C36', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C37', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID'), ('C38', 'CFE_ES_TaskRecord_t.RecordUsed', 'undecided', 'CFE_ES_ERR_APPID')]
+ survivors (A: R|J with a creator in another actor; B: J; C: F): 23 {'B': 7, 'C': 16}
+   by order {('B', 'unordered'): 7, ('C', 'enforced'): 5, ('C', 'undecided'): 11}
+   distinct (path, shared element) 7
+ UNDECIDED-EVAL rows (label not decidable from the row; S3 would observe them): 74 {'A': 5, 'B': 47, 'C': 22}
+ S3 observation set = survivors + UNDECIDED-EVAL: 97
+   survivors minus enforced and minus B rows with flip none: 18 {'B': 7, 'C': 11} elements 7
+SHOW A21 label 0 order unordered result discarded flip none elem CFE_SB_PipeD_t.PipeId key unresolved pair 0 feas undecidable: no pair
+SHOW A24 label 0 order unordered result tested flip none elem CFE_SB_PipeD_t.PipeId key unresolved pair 0 feas undecidable: no pair
+SHOW B18 label J order unordered result d4/u0/t0 flip static-undetermined elem CFE_EVS_GlobalData_t.EVS_SharedDataMutexID key  pair 1 feas undecidable: no static order between the reader and the writ
+SHOW B19 label J order unordered result d4/u0/t0 flip static-undetermined elem CFE_EVS_GlobalData_t.EVS_SharedDataMutexID key  pair 1 feas undecidable: no static order between the reader and the writ
+SHOW B56 label J order unordered result d1/u0/t0 flip static-undetermined elem CFE_TIME_TaskData_t.LocalSemaphore key  pair 1 feas undecidable: no static order between the reader and the writ
+SHOW B64 label E order unordered result d0/u0/t2 flip none elem cfe_sb_t.CmdPipe key  pair 1 feas undecidable: no static order between the reader and the writ
+SHOW B65 label E order unordered result d1/u0/t0 flip none elem cfe_sb_t.CmdPipePktPtr key  pair 1 feas undecidable: no static order between the reader and the writ
+SHOW C30 label F order enforced result (not in row) flip static-possible elem CFE_ES_TaskRecord_t.RecordUsed key  pair 1 feas proven-impossible: lock #9 &OS_mut_sem_table[CFE_ES_Global.S
+SHOW C31 label E order enforced result (not in row) flip static-undetermined elem CFE_ES_TaskRecord_t.RecordUsed key  pair 1 feas proven-impossible: lock #9 &OS_mut_sem_table[CFE_ES_Global.S
+ C: rows 38 distinct spawn sites 2 distinct fields 3 distinct (spawn, field) 5 ; feasibility possible 0 distinct (spawn, field) among them 0 ; flip {'none': 18, 'static-possible': 16, 'static-undetermined': 4}
+ lenient reading (a path B row with no callee-check line counts as label 0): UNDECIDED-EVAL 27 ; S3 observation set 50
+ T? rows (status tested, no terminal chain in the row; the body of the failing branch is not in the row): 46

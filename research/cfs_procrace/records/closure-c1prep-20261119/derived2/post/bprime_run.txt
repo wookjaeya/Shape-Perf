@@ -1,0 +1,2 @@
+one_build.sh c1_post_tx: PASS -> /home/user/work/redesign/obs1/c1p2_post_bprime/c1_post_tx/NP
+rc=0

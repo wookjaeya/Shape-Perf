@@ -1,0 +1,2 @@
+cdiff old_lines=281 new_lines=281 only_old=1 only_new=1 other=0
+class - facts-hash pairs=1

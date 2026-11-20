@@ -1,0 +1,5 @@
+diffkinds old_lines=234400 new_lines=234403 only_old=74 only_new=77 labels=4
+label removed=1 added=1 0|[..] N
+label removed=0 added=3 2|source_tree[..]
+label removed=1 added=1 2|extract.units_from
+label removed=72 added=72 6|chain

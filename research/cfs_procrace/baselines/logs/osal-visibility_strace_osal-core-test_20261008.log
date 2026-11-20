@@ -1,0 +1,68 @@
+# Supplementary contrast: OSAL's own src/tests/osal-core-test (task create + OS_TaskGetIdByName L304-315; queue create + OS_QueueGetIdByName L374-414; bin/mut sems), 2026-10-08T01:53:54Z
+# Run as ubuntu from build_osal_test/tests with /home/user/work/procrace/baselines/osal-visibility/scripts/strace_osaltest.sh
+# exact:     strace -f -e trace=all -o core_exact.strace ./osal-core-test                -> exit 0, TOTAL::624   PASS::624   FAIL::0
+# annotated: strace -f -e trace=all -tt -T -s 65535 -k -o core_annotated.strace ./osal-core-test -> exit 0, TOTAL::624   PASS::624   FAIL::0
+# full traces kept in /home/user/work/procrace/baselines/osal-visibility/traces (core_exact.strace 6101 lines; core_annotated.strace 57164 lines)
+
+## 1. exact trace: every mq_* syscall (OSAL queue = POSIX mqueue, os-impl-queues.c L111-116 name '/<pid>.<queue name>', L142 mq_unlink)
+25212 mq_open("25212.q 0", O_RDWR|O_CREAT, 0666, {mq_flags=0, mq_maxmsg=10, mq_msgsize=4, mq_curmsgs=0}) = 3
+25212 mq_unlink("25212.q 0")            = 0
+25212 mq_open("25212.q 1", O_RDWR|O_CREAT, 0666, {mq_flags=0, mq_maxmsg=10, mq_msgsize=4, mq_curmsgs=0}) = 4
+25212 mq_unlink("25212.q 1")            = 0
+25212 mq_open("25212.q 2", O_RDWR|O_CREAT, 0666, {mq_flags=0, mq_maxmsg=10, mq_msgsize=4, mq_curmsgs=0}) = 5
+25212 mq_unlink("25212.q 2")            = 0
+25212 mq_open("25212.q 3", O_RDWR|O_CREAT, 0666, {mq_flags=0, mq_maxmsg=10, mq_msgsize=4, mq_curmsgs=0}) = 6
+25212 mq_unlink("25212.q 3")            = 0
+25212 mq_open("25212.q 4", O_RDWR|O_CREAT, 0666, {mq_flags=0, mq_maxmsg=10, mq_msgsize=4, mq_curmsgs=0}) = 7
+25212 mq_unlink("25212.q 4")            = 0
+25212 mq_open("25212.q 5", O_RDWR|O_CREAT, 0666, {mq_flags=0, mq_maxmsg=10, mq_msgsize=4, mq_curmsgs=0}) = 8
+25212 mq_unlink("25212.q 5")            = 0
+  ... (69 mq_open and 69 mq_unlink in total)
+
+## 2. stack-attributed summary of the annotated trace
+# trace: /home/user/work/procrace/baselines/osal-visibility/traces/core_annotated.strace | syscall records: 4992
+## (1) syscalls whose arguments contain one of: ['q 0', 'q 1', 'q 2', 'q 3', 'Task 0', 'Task 1', 'Task 2', 'Task 3', 'Bin 0', 'Mut 0']
+    37 x mq_open    stack: OS_QueueCreate_Impl <- OS_QueueCreate <- TestQueues
+    37 x mq_unlink  stack: OS_QueueCreate_Impl <- OS_QueueCreate <- TestQueues
+    21 x write      stack: OS_BSP_ConsoleOutput_Impl <- UT_BSP_DoText <- UtAssert_DoReport
+     1 x mq_open    stack: OS_QueueCreate_Impl <- OS_QueueCreate <- TestGetInfos
+     1 x mq_unlink  stack: OS_QueueCreate_Impl <- OS_QueueCreate <- TestGetInfos
+     1 x mq_open    stack: OS_QueueCreate_Impl <- OS_QueueCreate <- TestGenericQueries
+     1 x mq_unlink  stack: OS_QueueCreate_Impl <- OS_QueueCreate <- TestGenericQueries
+## (2) syscalls under each function
+### OS_QueueCreate: 207
+    69 x getpid     stack: OS_QueueCreate_Impl <- OS_QueueCreate
+    69 x mq_open    stack: OS_QueueCreate_Impl <- OS_QueueCreate
+    69 x mq_unlink  stack: OS_QueueCreate_Impl <- OS_QueueCreate
+### OS_QueueGetIdByName: 0
+### OS_TaskCreate: 406
+   270 x rt_sigprocmask stack: OS_Posix_InternalTaskCreate_Impl <- OS_TaskCreate_Impl <- OS_TaskCreate
+   135 x clone3     stack: OS_Posix_InternalTaskCreate_Impl <- OS_TaskCreate_Impl <- OS_TaskCreate
+     1 x futex      stack: OS_Unlock_Global_Impl <- OS_Unlock_Global <- OS_ObjectIdTransactionFinish <- OS_ObjectIdFinalizeNew <- OS_TaskCreate
+### OS_TaskGetIdByName: 0
+### OS_BinSemCreate: 0
+### OS_BinSemGetIdByName: 0
+### OS_MutSemCreate: 0
+### OS_MutSemGetIdByName: 0
+### OS_TaskPrepare: 2
+     1 x futex      stack: OS_WaitForStateChange_Impl <- OS_WaitForStateChange <- OS_ObjectIdConvertToken <- OS_ObjectIdGetById <- OS_TaskPrepare
+     1 x futex      stack: OS_Unlock_Global_Impl <- OS_Unlock_Global <- OS_ObjectIdTransactionFinish <- OS_ObjectIdRelease <- OS_TaskPrepare
+### OS_Lock_Global_Impl: 0
+### OS_Unlock_Global_Impl: 2
+     2 x futex      stack: OS_Unlock_Global_Impl
+### OS_WaitForStateChange_Impl: 1
+     1 x futex      stack: OS_WaitForStateChange_Impl
+
+## 3. the only syscalls issued by OSAL idmap locking in this run (full records)
+25402 01:53:00.517088 futex(0x555e2b9754b0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, {tv_sec=1791424380, tv_nsec=527083867}, FUTEX_BITSET_MATCH_ANY) = 0 <0.003583>
+   stack: OS_WaitForStateChange_Impl <- OS_WaitForStateChange <- OS_ObjectIdConvertToken <- OS_ObjectIdGetById <- OS_TaskPrepare <- OS_TaskEntryPoint <- OS_PthreadTaskEntry
+25354 01:53:00.519411 futex(0x555e2b9754b0, FUTEX_WAKE_PRIVATE, 2147483647) = 1 <0.000099>
+   stack: OS_Unlock_Global_Impl <- OS_Unlock_Global <- OS_ObjectIdTransactionFinish <- OS_ObjectIdFinalizeNew <- OS_TaskCreate <- TestTasks <- UtTest_Run <- OS_Application_Run
+25402 01:53:00.523754 futex(0x555e2b975460, FUTEX_UNLOCK_PI_PRIVATE) = 0 <0.000036>
+   stack: OS_Unlock_Global_Impl <- OS_Unlock_Global <- OS_ObjectIdTransactionFinish <- OS_ObjectIdRelease <- OS_TaskPrepare <- OS_TaskEntryPoint <- OS_PthreadTaskEntry
+$ nm -S -n osal-core-test | grep OS_global_task_table_lock
+0000000000144460 0000000000000058 b OS_global_task_table_lock
+# load base = 0x555e2b975460 - 0x144460 = 0x555e2b831000 (page aligned). 0x...460 = OS_global_task_table_lock.mutex (+0); 0x...4b0 = +0x50 = inside .cond (pthread_cond_t at +0x28, __g_signals at +0x28 within it).
+# Reading: the new task (25402) found its OSAL task record still RESERVED (creator 25354 had not finalized it), waited on the task-table condvar
+#   (osapi-idmap.c L460-485 -> os-impl-idmap.c L137-172), and was woken by the creator's OS_ObjectIdFinalizeNew (osapi-idmap.c L859 -> L1105 -> os-impl-idmap.c L116).
+# => a wait on OSAL registry state CAN surface at syscall level, but only as futex operations on an anonymous lock/condvar address; no name and no record content.

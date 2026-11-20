@@ -1,0 +1,225 @@
+// real_trace.hpp -- from a run container (.kzt) to the real-record trace of the replay.
+//
+// The observer records probe events; the replay (kz/core/eval_trace.hpp) reads a trace of calls,
+// returns and points of a profile.  This adapter maps one to the other and states only what the
+// container establishes (SPEC 4.8 "Explanation set", ADR-055, ADR-056; docs/observer.md section 13).
+//
+// Neutral layer (schema revision 3, docs/schema.md section 12): the adapter reads the run through the neutral
+// event layer (neutral.hpp) only: the container's neutral sections, or, for a container without them (every F0
+// record written before), its F0 sections converted in memory by neutral_from_f0.  The F0-specific rules below
+// (tids and the incarnation alive at an event, FORK, MAPS, the decoders' fixed positions, kernel loss reports) are
+// rules of that conversion; the replay sees actors with a creation generation and a backend binding, logical
+// sites, observed values and loss intervals.  An instrumented run (kzrt-dump) is converted to the same layer
+// (kzrt_convert.hpp).  The items:
+//
+//   events      an ENTRY site on the symbol an operation binds is a Call of it, a RET site a Return, a
+//               POINT site whose label is a point name of the profile (an `OP.LABEL` linearization point,
+//               a site, a terminal step) is that Point.  A slot whose role names a parameter of the
+//               operation (compared without case and underscores) gives `arg.NAME` (`out.NAME` at a
+//               return); at a return the role "status" or "result" gives the result; at a point a role
+//               naming a value of the point gives `lp.NAME`, the role "value" gives `value`.  An event
+//               with TRUNC set keeps no slot value.  Events of other sites are counted, not replayed.
+//               The order is the container's merged order (time, CPU, arrival); the trace does NOT
+//               declare it established, so the replay never takes it as the order of different actors.
+//   order       (2026-10-28) the merged order is then made a linear extension of the record's known order
+//               (eval::linearize_real_trace: program order, the run's control edges, the rules' edges and matches of a
+//               first pass), the merged order breaking the ties; a record whose merged order already is one is unchanged.
+//               An edge (a control edge included) is refused only where it contradicts program order and the rules'
+//               edges, or lies on a cycle with other order facts of the record (report "order" and "control" lines).
+//               The linearization reads with the replay's reading options (RealTraceOptions::reading): a reading
+//               without control order, reads-from edges or uses by returned code is not shaped by them.
+//   actors      one per thread incarnation (THREADS): the kernel name, made unique with the tid and the
+//               generation where needed; "tid<N>" for a thread without a name.
+//   observed    the labels of the point sites that map: they were attached for the whole record.
+//   start       when the record covers the process from its first execution mapping of the traced file
+//               (a MAPS record no later than the first event), the record starts at program entry
+//               (start_evidence init): a location with an INIT fact of the profile has a known start state.
+//               A kind's start state is not declared (2026-10-24, IN-03, OB-05): the replay takes it from an
+//               observed effect that sets every resource of the kind.
+//   lifetime    in such a record, a kind of scope `process` whose every effect that returns a resource to its
+//               initial state (an end of a lifetime in the profile) has its point observed: lifetime=known.
+//               Writer and alias coverage need the closure (below).
+//   loss        a reported loss (RUNMETA loss-present, LOSS) becomes a loss interval: a throttle interval
+//               from its start; a lost-records report from the start of the record (the kernel does not
+//               say when the lost records were written) up to the report; a loss without a record (stream
+//               errors) the whole record.  A container without RUNMETA has no loss evidence: the whole
+//               record is treated as lossy, never as loss-free.
+//   owners      ACTOR_OWNERS (schema revision 2) gives each thread's app_owner level and the identity of
+//               the owning application in the id space of the profile's owner kind (the value the
+//               creation request passed).  The adapter maps it to the owner kind's record key with the
+//               kind's id rule: valid iff (id - base) mod 2^32 <= serial_max, key = (id - base) mod 2^32
+//               modulo the table size (the profile's `ids` block and `table`; the size is a `ref eval`
+//               constant the caller gives).  A thread without a record there, a record without a key, an
+//               id the rule rejects or a table size not given: no owner line, so the replay reads the
+//               owner as unknown (ownership_undetermined), never as a guess and never as "no owner".  The
+//               creating executor is the thread that forked the thread (FORK, ptid).
+//               The identity value itself is given as well (Trace::owner_ids): it names the resource an
+//               effect targets by the writer's identity (`id(owner(exec))`) for the execution relation only.
+//   core        whether an owning application is a core service (the execution relation core-application,
+//               SPEC 1.1): established only with the basis symbols and the calling functions the caller names
+//               (`core_request_callers`, each from its reference: SPEC 3.3 "Creation events used for app_owner"
+//               names the function of the core-object loop).  An owner whose OWNER_REQUEST was made
+//               from one of them is a core service, one whose request was made from another resolved function
+//               is not; a child task shares its creator's owner.  Anything else (no symbols, no names, a
+//               return address without a symbol, both kinds of request for one owner): not established.
+//   spawn out   the out-parameter of a spawn rule's create operation (`create OP out NAME`) is set on its
+//               return only where the identity join bound the call to a thread by the id (ID_MATCHED: the id
+//               the call assigned, read at the SPAWN_ID site inside it, equals the id the child announced; the
+//               profile's provenance of that site says the out-parameter receives that id on success).  A
+//               link by FORK time alone binds nothing.
+//   loss        (see above) a loss is attributed to the whole record: a kernel loss report names the CPU
+//               ring (`kz_loss.cpu`), but the events carry no CPU and the backend records no context
+//               switches, so which task's events were lost is not established.
+//   constants   a run container carries no value of a `ref eval` constant: the caller supplies them.
+//   strings     a string slot (a fetch slot of the probe event, EVENT_STRINGS) gives a text: `arg.NAME=@text`
+//               for a parameter of sort Str (the replay reads its handle), never its length as a number; a
+//               string the kernel could not read leaves the value unknown.
+//   capture sites  a point site labelled `P@Q`, where P is the name of a capture point of the profile (`OP.LABEL` of an
+//               `lp capture` conjunct), is that point P observed at one of its call sites (Q only tells the sites
+//               apart: a plan label is unique).  A capture is per call, so probing some call sites of an operation
+//               and not others is allowed: a call without a capture event is read at the call (eval_trace.hpp).
+//   cells       a slot whose role is `value(L)` gives `value` and the text `cell` = L: the value was loaded from
+//               the location L of the profile (stated by the plan from the source line and the static derives).
+//   closure     with RealTraceOptions::facts (a kz-static FACTS container of the traced binary), writer and alias
+//               coverage are set from the static closure, matched with the point sites of the record
+//               (static_closure.hpp); without it they stay uncovered.
+//   out values  a point site that names no point of the profile, but whose slot role names an `out`
+//               parameter of the operation of the actor's innermost open call, gives that parameter's value
+//               (out.NAME) on the call's return, unless the return carries it itself: the value the call
+//               stores through the parameter, read inside the call before it returns.
+//   arguments   a slot of a linearization point (a conjunct's or an effect's `lp at`) whose role names a non-out
+//               parameter of that point's operation gives arg.NAME at the point; when the actor's innermost open
+//               call is of that operation and its call event lacks arg.NAME, the call event takes it.  This is how
+//               a backend that reads an argument only after the callee checked it (a name at a pointer, read
+//               where the callee passes it on; event_semantics.md 3, PD26 section 4) gives the call its key.  A
+//               call event that carries the argument itself keeps its own value.
+#pragma once
+
+#include <cstdint>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+#include "kz/core/container.hpp"
+#include "kz/core/eval_trace.hpp"
+#include "kz/core/phi.hpp"
+#include "kz/core/status.hpp"
+#include "kz/trace/identity_symbols.hpp"
+#include "kz/trace/neutral.hpp"
+#include "kz/trace/static_closure.hpp"
+
+namespace kz::trace {
+
+struct RealTraceOptions {
+  std::map<std::string, int64_t> consts;  // values of `ref eval` constants (table sizes), by name
+  // Core status of owners (see "core" above): the basis symbols of the traced binary (not owned) and the
+  // calling functions of a core application's creation request.  Both needed; otherwise not established.
+  const SymbolIndex* symbols = nullptr;
+  std::set<std::string> core_request_callers;
+  // The static closure (header, "closure"): a FACTS container of the traced binary (not owned), or null.
+  const Container* facts = nullptr;
+  // The versions of components (the guards of rules), for the first pass of the linearization (header, "order").
+  std::map<std::string, std::string> versions;
+  // The reading of the replay that will read the trace (its switches, predicates and versions; not owned), for the
+  // linearization (header, "order"); null: the default reading with `versions`.
+  const eval::Options* reading = nullptr;
+};
+
+// How the adapter maps one site of the run container: kind 0 not mapped, 1 call of `name` (an operation),
+// 2 return of it, 3 the point or site `name`.
+struct SiteMapEntry {
+  uint32_t site = 0;  // index in `section`: the backend's site record (F0 SITES) where there is one, else NSITES
+  uint8_t kind = 0;
+  std::string name;
+  uint32_t section = KZ_SEC_SITES;
+};
+
+// One thread's identities as the container states them (for the report).
+struct ThreadIdentity {
+  std::string actor;
+  uint32_t actor_index = KZ_NONE32;  // NACTORS index (neutral layer)
+  uint8_t binding = KZ_NBIND_UNRESOLVED;  // KZ_NBIND: what the actor is bound to in its backend
+  uint32_t tid = 0, generation = 0;  // the binding's native key (F0: the kernel tid) and the creation generation
+  uint32_t creator_thread = KZ_NONE32;  // THREADS index of the creating executor, or KZ_NONE32
+  std::string creator;     // the creating executor (FORK parent), empty if not recorded
+  uint8_t level = KZ_OWNER_LEVEL_UNDETERMINED;
+  uint32_t evidence = 0;   // set KZ_OWNER_EVIDENCE
+  uint32_t owner_id = KZ_NONE32;  // identity value of the owning application, or KZ_NONE32
+  bool key_resolved = false;
+  int64_t key = 0;         // record key in the owner kind (when resolved)
+  std::string app_name;
+  uint32_t thread_flags = 0;
+  int8_t core = -1;              // the owning application is a core service: 1 yes, 0 no, -1 not established
+  std::string request_caller;    // the function that made the OWNER_REQUEST, where resolved
+  // The task's place among the tasks of its owning application (record key) in creation order, from 1; 0 = not
+  // established.  Creation order is the order of creation paths: the rank of the task's creation request among the
+  // requests its requesting actor made for the application (that actor's program order), after the requesting actor's
+  // own path where it is a task of the same application.  Path independent: no actor name, thread id, time or merged
+  // order enters it (replay_container.hpp: OCC_BASIS `task`).
+  uint32_t task_ordinal = 0;
+};
+
+struct RealTraceReport {
+  uint64_t raw_events = 0;
+  uint64_t events = 0;             // trace events made
+  uint64_t unmapped_events = 0;    // events of sites that name no operation or point of the profile
+  uint64_t unreadable_events = 0;  // events with TRUNC: kept without slot values
+  std::vector<std::string> sites;  // per site: "<label>: call|return of OP", "<label>: point NAME" or "<label>: not mapped"
+  uint64_t threads = 0;
+  uint64_t owners_determined = 0;  // threads whose owner level is inferred or confirmed and whose key the replay uses
+  uint64_t owners_confirmed = 0, owners_inferred = 0, owners_undetermined = 0;  // levels as the container states them
+  uint64_t owners_unresolved = 0;  // inferred/confirmed with an id the adapter could not map to a record key
+  bool owner_section = false;      // the container has ACTOR_OWNERS
+  std::vector<ThreadIdentity> identities;  // per thread (THREADS order)
+  bool runmeta = false;
+  bool loss_present = false;
+  uint64_t loss_intervals = 0;
+  bool starts_at_exec = false;
+  uint64_t spawn_returns = 0;      // returns of a spawn rule's create operation
+  uint64_t spawn_outs_bound = 0;   // of those, with the out-parameter bound by the id (ID_MATCHED)
+  uint64_t string_values = 0;      // slot values taken as text (string fetch slots, EVENT_STRINGS)
+  uint64_t out_values_from_points = 0;  // out values set on a return from a point inside the call
+  uint64_t out_values_stored = 0;       // ... of them the operand of a store (slot from=operand0): texts "store.out.X
+  uint64_t args_from_points = 0;   // call arguments taken from a linearization point inside the call (header, "arguments")
+  uint64_t owners_core = 0, owners_not_core = 0;  // threads whose owner's core status is established
+  bool core_evidence = false;      // symbols and core request callers were given
+  std::vector<std::pair<uint32_t, uint64_t>> loss_cpus;  // per kernel loss report: (CPU ring, count)
+  std::vector<SiteMapEntry> site_map;  // per site of the run container (SITES order)
+  uint64_t cell_values = 0;        // slot values taken as `value` with a named location (`value(L)` roles)
+  bool closure_given = false;
+  std::vector<std::string> closure_lines;  // per kind and location: what the static closure established
+  std::vector<std::string> lifetime_lines;  // per kind: whether the lifetime is established, and why not
+  std::vector<std::string> not_app_lines;   // the actors stated not to be an application's task, and why (Trace::not_app)
+  bool neutral_sections = false;   // read from the container's neutral sections (else its F0 sections, converted in memory)
+  uint8_t backend = KZ_NBACKEND_NONE;
+  uint8_t start = KZ_NSTART_NONE;  // KZ_NSTART: why the record covers the process start
+  std::vector<std::string> loss_lines;  // loss records of a backend other than F0 (neutral.hpp loss_text)
+  std::string end;                       // how the record says the run ended (neutral.hpp run_end_text), empty if it does not
+  // The realized control of a controlled run (NCTL; P11, header "control"): the releases that resumed a held thread,
+  // the control edges made from them (Trace::control_edges), and per release why no edge was made where none was.
+  uint64_t control_records = 0, control_resumes = 0, control_edges = 0;
+  std::vector<std::string> control_lines;
+  // The linearization of the merged order (header, "order"): the events it moved and what it says (empty: nothing to say).
+  uint64_t order_moved = 0;
+  std::vector<std::string> order_lines;
+};
+
+// Normalized parameter / role name: lower case, without '_'.
+std::string role_key(const std::string& name);
+
+// The record key in the profile's owner kind of an application identity `id` (the owners rule above):
+// false if the profile has no owner kind with an id space and a table, the table size is not given, or
+// the id is not valid in the id space.
+bool owner_record_key(const phi::Profile& p, const std::map<std::string, int64_t>& consts, uint32_t id, int64_t* key);
+
+Status real_trace_from_run(const Container& run, const phi::Profile& p, eval::Trace* out, RealTraceReport* report);
+Status real_trace_from_run(const Container& run, const phi::Profile& p, const RealTraceOptions& opt, eval::Trace* out, RealTraceReport* report);
+// The same from a neutral layer in memory (neutral.hpp): real_trace_from_run reads the container's neutral sections,
+// or converts its F0 sections in memory, and calls this.
+Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const RealTraceOptions& opt, eval::Trace* out, RealTraceReport* report);
+
+// The text of a report (one item per line).
+std::string report_text(const RealTraceReport& r);
+
+}  // namespace kz::trace

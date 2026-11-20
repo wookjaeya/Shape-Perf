@@ -1,0 +1,28 @@
+# check after the session restart (2026-11-16, 22:56:16Z); HEAD 8cca180
+## MC binaries against post_mc.txt
+tools/kz-static/kz-static: OK
+tools/kz/kz: OK
+tools/kz-dump/kz-dump: OK
+runtime/kz-rt-dump: OK
+tools/kz-phi/kz-phi: OK
+tests/lint/kz_lint: OK
+instrument/clang/kz-instr-clang: OK
+CMakeCache.txt: OK
+## kz-static --identity against identity_kz-static.txt
+identity SAME
+## tool copy
+xz -t OK
+xz sha256 de44cdf42632108c66bf9dfc026446f86c0b29775cfed44ba6fb4f82edd5cb7c
+## the nine output directories against ll_*.sha256
+ll_relcheck OK files=15 listed=15 bytes=7630029
+ll_order OK files=15 listed=15 bytes=7058482
+ll_off_extract OK files=50 listed=50 bytes=46967354
+ll_off_order OK files=30 listed=30 bytes=14689595
+ll_final_extract OK files=50 listed=50 bytes=72159659
+ll_final_order OK files=35 listed=35 bytes=15953440
+ll_plans OK files=30 listed=30 bytes=886291
+ll_plans_off OK files=30 listed=30 bytes=886583
+ll_plans_final OK files=30 listed=30 bytes=894413
+## free (df -B1 /): 1691062272
+## ledger_check.sh -> ledger_check_verify.txt: rc=0, ledger_check: 124 rows, 0 failing
+## tools_check.sh --deep -> tools_check_verify.txt: tools rc=0, tools_check: 45 rows, 0 failing (deep); the nine LISTED rows the same as tools_check_end.txt

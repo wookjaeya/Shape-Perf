@@ -1,0 +1,177 @@
+# key_map.py: status	old row	old key	new row	new key	key text (new; renamed: then the old)
+# new record type names in the new key texts: 0
+same	A1	bbcaec5d278f30b8	A1	bbcaec5d278f30b8	A|CFE_ES_AppStartParams_t.Name|CFE_ES_DeleteCDS|CFE_ES_GetAppIDByName#1|1
+same	A2	733afe901172257a	A2	733afe901172257a	A|CFE_ES_AppStartParams_t.Name|CFE_ES_StopAppCmd|CFE_ES_GetAppIDByName#1|1
+same	A3	bbf4b4ba291468dd	A3	bbf4b4ba291468dd	A|CFE_ES_AppStartParams_t.Name|CFE_ES_RestartAppCmd|CFE_ES_GetAppIDByName#1|1
+same	A4	5b457bd561ed6b33	A4	5b457bd561ed6b33	A|CFE_ES_AppStartParams_t.Name|CFE_ES_ReloadAppCmd|CFE_ES_GetAppIDByName#1|1
+same	A5	f0558231f5a38416	A5	f0558231f5a38416	A|CFE_ES_AppStartParams_t.Name|CFE_ES_QueryOneCmd|CFE_ES_GetAppIDByName#1|1
+same	A6	d1c9bdc186427841	A6	d1c9bdc186427841	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_SetFilterMaskCmd|EVS_GetApplicationInfo#1|1
+same	A7	0afc3cc27aa74c00	A7	0afc3cc27aa74c00	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_EnableAppEventTypesCmd|EVS_GetApplicationInfo#1|1
+same	A8	2375461a5b2cde9a	A8	2375461a5b2cde9a	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_DisableAppEventTypesCmd|EVS_GetApplicationInfo#1|1
+same	A9	710162f9eb5e6d90	A9	710162f9eb5e6d90	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_EnableAppEventsCmd|EVS_GetApplicationInfo#1|1
+same	A10	5d7d60611d127379	A10	5d7d60611d127379	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_DisableAppEventsCmd|EVS_GetApplicationInfo#1|1
+same	A11	73c28c2b4ca5f149	A11	73c28c2b4ca5f149	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_ResetAppEventCounterCmd|EVS_GetApplicationInfo#1|1
+same	A12	46941597aa05dada	A12	46941597aa05dada	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_ResetFilterCmd|EVS_GetApplicationInfo#1|1
+same	A13	67a1fb9158bdc0d1	A13	67a1fb9158bdc0d1	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_ResetAllFiltersCmd|EVS_GetApplicationInfo#1|1
+same	A14	88cc788fec26e1f7	A14	88cc788fec26e1f7	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_AddEventFilterCmd|EVS_GetApplicationInfo#1|1
+same	A15	ba0794e3f30cfddd	A15	ba0794e3f30cfddd	A|CFE_ES_AppStartParams_t.Name|CFE_EVS_DeleteEventFilterCmd|EVS_GetApplicationInfo#1|1
+same	A16	2ebcea15f4e79065	A16	2ebcea15f4e79065	A|CFE_ES_CDS_RegRec_t.Name|CFE_ES_DeleteCDSCmd|CFE_ES_DeleteCDS#0|1
+same	A17	5494d8cc9c1687f2	A17	5494d8cc9c1687f2	A|CFE_ES_CDS_RegRec_t.Name|CFE_TBL_DeleteCDSCmd|CFE_ES_DeleteCDS#0|1
+same	A18	8b4743e7695670c8	A18	8b4743e7695670c8	A|CFE_SB_PipeD_t.AppId|CFE_ES_ScanAppTable|CFE_ES_ProcessControlRequest#0|1
+same	A19	58e715e2277f1fef	A19	58e715e2277f1fef	A|CFE_SB_PipeD_t.AppId|CFE_ES_ScanAppTable|CFE_ES_ProcessControlRequest#0|2
+same	A20	36af47e311432de4	A20	36af47e311432de4	A|CFE_SB_PipeD_t.PipeId|CI_TaskInit|CFE_SB_Subscribe#1|1
+same	A21	b955c7ab6464c8d7	A21	b955c7ab6464c8d7	A|CFE_SB_PipeD_t.PipeId|CI_TaskInit|CFE_SB_Subscribe#1|2
+same	A22	d198d36b93b167c9	A22	d198d36b93b167c9	A|CFE_SB_PipeD_t.PipeId|SAMPLE_AppInit|CFE_SB_Subscribe#1|1
+same	A23	f44b82b204280c9f	A23	f44b82b204280c9f	A|CFE_SB_PipeD_t.PipeId|SAMPLE_AppInit|CFE_SB_Subscribe#1|2
+same	A24	7f704205d9e76ef6	A24	7f704205d9e76ef6	A|CFE_SB_PipeD_t.PipeId|SCH_Lab_AppMain|CFE_SB_Subscribe#1|1
+same	A25	6f2baa5b19eb7ffc	A25	6f2baa5b19eb7ffc	A|CFE_SB_PipeD_t.PipeId|TO_init@apps/to_lab/fsw/src/to_lab_app.c|CFE_SB_Subscribe#1|1
+same	A26	c2e0cf77cff6fe23	A26	c2e0cf77cff6fe23	A|CFE_SB_PipeD_t.PipeId|TO_init@apps/to_lab/fsw/src/to_lab_app.c|CFE_SB_Subscribe#1|2
+same	A27	61f19560972ae24e	A27	61f19560972ae24e	A|CFE_SB_PipeD_t.PipeId|TO_init@apps/to_lab/fsw/src/to_lab_app.c|CFE_SB_SubscribeEx#1|1
+same	A28	9a6e0dbdeec414b0	A28	9a6e0dbdeec414b0	A|CFE_SB_PipeD_t.PipeId|TO_AddPkt@apps/to_lab/fsw/src/to_lab_app.c|CFE_SB_SubscribeEx#1|1
+same	A29	1f1c895b93ac9665	A29	1f1c895b93ac9665	A|CFE_SB_PipeD_t.PipeId|TO_RemovePkt@apps/to_lab/fsw/src/to_lab_app.c|CFE_SB_Unsubscribe#1|1
+same	A30	1ed028c0e937b4b6	A30	1ed028c0e937b4b6	A|CFE_SB_PipeD_t.PipeId|TO_RemoveAllPkt@apps/to_lab/fsw/src/to_lab_app.c|CFE_SB_Unsubscribe#1|1
+same	A31	b8003f8b02e1a68d	A31	b8003f8b02e1a68d	A|CFE_SB_PipeD_t.PipeId|TO_RemoveAllPkt@apps/to_lab/fsw/src/to_lab_app.c|CFE_SB_Unsubscribe#1|2
+same	A32	06b7a80dfee6bafb	A32	06b7a80dfee6bafb	A|CFE_SB_PipeD_t.PipeId|TO_RemoveAllPkt@apps/to_lab/fsw/src/to_lab_app.c|CFE_SB_Unsubscribe#1|3
+same	A33	b725fc19ac1644dc	A33	b725fc19ac1644dc	A|CFE_SB_PipeD_t.PipeId|CFE_ES_TaskInit|CFE_SB_SubscribeEx#1|1
+same	A34	6d757bcb9412e921	A34	6d757bcb9412e921	A|CFE_SB_PipeD_t.PipeId|CFE_ES_TaskInit|CFE_SB_SubscribeEx#1|2
+same	A35	80afebde1dc3676a	A35	80afebde1dc3676a	A|CFE_SB_PipeD_t.PipeId|CFE_EVS_TaskInit|CFE_SB_SubscribeEx#1|1
+same	A36	c858092726be070d	A36	c858092726be070d	A|CFE_SB_PipeD_t.PipeId|CFE_EVS_TaskInit|CFE_SB_SubscribeEx#1|2
+same	A37	9e2f102920c0861e	A37	9e2f102920c0861e	A|CFE_SB_PipeD_t.PipeId|CFE_SB_AppInit|CFE_SB_Subscribe#1|1
+same	A38	49aa151bd11573d9	A38	49aa151bd11573d9	A|CFE_SB_PipeD_t.PipeId|CFE_SB_AppInit|CFE_SB_Subscribe#1|2
+same	A39	26b7bac4f65fcacc	A39	26b7bac4f65fcacc	A|CFE_SB_PipeD_t.PipeId|CFE_TBL_TaskInit|CFE_SB_Subscribe#1|1
+same	A40	e450207eda2971f2	A40	e450207eda2971f2	A|CFE_SB_PipeD_t.PipeId|CFE_TBL_TaskInit|CFE_SB_Subscribe#1|2
+same	A41	03c3499aa6b6ada2	A41	03c3499aa6b6ada2	A|CFE_SB_PipeD_t.PipeId|CFE_TIME_TaskInit|CFE_SB_Subscribe#1|1
+same	A42	4f183979a16da5c7	A42	4f183979a16da5c7	A|CFE_SB_PipeD_t.PipeId|CFE_TIME_TaskInit|CFE_SB_SubscribeLocal#1|1
+same	A43	324a02df98593f6d	A43	324a02df98593f6d	A|CFE_SB_PipeD_t.PipeId|CFE_TIME_TaskInit|CFE_SB_SubscribeLocal#1|2
+same	A44	cc7629757c0fedbb	A44	cc7629757c0fedbb	A|CFE_SB_PipeD_t.PipeId|CFE_TIME_TaskInit|CFE_SB_SubscribeLocal#1|3
+same	A45	a7c56de3912f774a	A45	a7c56de3912f774a	A|CFE_SB_PipeD_t.PipeId|CFE_TIME_TaskInit|CFE_SB_Subscribe#1|2
+same	A46	71fa2f4d58460006	A46	71fa2f4d58460006	A|CFE_TBL_AccessDescriptor_t.AppId|CFE_ES_ScanAppTable|CFE_ES_ProcessControlRequest#0|1
+same	A47	1d2203ea763bca8d	A47	1d2203ea763bca8d	A|CFE_TBL_AccessDescriptor_t.AppId|CFE_ES_ScanAppTable|CFE_ES_ProcessControlRequest#0|2
+same	A48	be233c1ef867e45e	A48	be233c1ef867e45e	A|CFE_TBL_CmdHandlerTblRec_t.CmdCode|CFE_TBL_TaskPipe|CFE_TBL_SearchCmdHndlrTbl#1|1
+same	A49	50a5d96622aba41a	A49	50a5d96622aba41a	A|CFE_TBL_CmdHandlerTblRec_t.MsgId|CFE_TBL_TaskPipe|CFE_TBL_SearchCmdHndlrTbl#0|1
+same	A50	453439e7a0ae669b	A50	453439e7a0ae669b	A|CFE_TBL_CritRegRec_t.CDSHandle|CFE_TBL_Register|CFE_TBL_FindCriticalTblInfo#1|1
+same	A51	f3a414a9ea394624	A51	f3a414a9ea394624	A|CFE_TBL_CritRegRec_t.CDSHandle|CFE_TBL_Register|CFE_TBL_FindCriticalTblInfo#1|2
+same	A52	fbb1c32e651d2448	A52	fbb1c32e651d2448	A|CFE_TBL_CritRegRec_t.CDSHandle|CFE_TBL_UpdateCriticalTblCDS|CFE_TBL_FindCriticalTblInfo#1|1
+same	A53	25aba2721fc2bdec	A53	25aba2721fc2bdec	A|CFE_TBL_RegistryRec_t.Name|CFE_TBL_Register|CFE_TBL_FindTableInRegistry#0|1
+same	A54	5ea512131ad962c6	A54	5ea512131ad962c6	A|CFE_TBL_RegistryRec_t.Name|CFE_TBL_LoadCmd|CFE_TBL_FindTableInRegistry#0|1
+same	A55	5a236377382e0a5a	A55	5a236377382e0a5a	A|CFE_TBL_RegistryRec_t.Name|CFE_TBL_DumpCmd|CFE_TBL_FindTableInRegistry#0|1
+same	A56	7ce1801426609b5b	A56	7ce1801426609b5b	A|CFE_TBL_RegistryRec_t.Name|CFE_TBL_ValidateCmd|CFE_TBL_FindTableInRegistry#0|1
+same	A57	ce3b6577d04ae091	A57	ce3b6577d04ae091	A|CFE_TBL_RegistryRec_t.Name|CFE_TBL_ActivateCmd|CFE_TBL_FindTableInRegistry#0|1
+same	A58	547ca309bcfaadde	A58	547ca309bcfaadde	A|CFE_TBL_RegistryRec_t.Name|CFE_TBL_TlmRegCmd|CFE_TBL_FindTableInRegistry#0|1
+same	A59	05c6121a0c75fd29	A59	05c6121a0c75fd29	A|CFE_TBL_RegistryRec_t.Name|CFE_TBL_DeleteCDSCmd|CFE_TBL_FindTableInRegistry#0|1
+same	A60	be05162cfe278097	A60	be05162cfe278097	A|CFE_TBL_RegistryRec_t.Name|CFE_TBL_AbortLoadCmd|CFE_TBL_FindTableInRegistry#0|1
+same	A61	ba7ba0d56e8eedd0	A61	ba7ba0d56e8eedd0	A|OS_FDTableEntry.Path|CFE_ES_AppCreate|OS_remove#0|1
+same	A62	47816a91c7787892	A62	47816a91c7787892	A|OS_FDTableEntry.Path|CFE_ES_LoadLibrary|OS_remove#0|1
+same	A63	90653c94aa26e781	A63	90653c94aa26e781	A|OS_FDTableEntry.Path|CFE_ES_ShellOutputCommand|OS_remove#0|1
+same	A64	3eac966a43ecda14	A64	3eac966a43ecda14	A|OS_FDTableEntry.Path|CFE_ES_QueryAllCmd|OS_remove#0|1
+same	A65	9b717cce08fe958c	A65	9b717cce08fe958c	A|OS_FDTableEntry.Path|CFE_ES_QueryAllTasksCmd|OS_remove#0|1
+same	A66	3affab7930cd8a56	A66	3affab7930cd8a56	A|OS_VolumeInfo_t.DeviceName|CFE_ES_InitializeFileSystems|OS_rmfs#0|1
+same	B1	00ede78ac5e754f1	B1	00ede78ac5e754f1	B|CFE_ES_AppStartParams_t.Name|-|CFE_ES_WriteToSysLog#1|-
+same	B2	afc08127c6db705c	B2	afc08127c6db705c	B|CFE_ES_AppState_t.AppControlRequest|-|CFE_EVS_SendEvent#3|-
+same	B3	7000f3043b1a719e	B3	7000f3043b1a719e	B|CFE_ES_ERLog_t.Context|-|CFE_PSP_MemCpy#0|-
+same	B4	d92f50615417304a	B4	d92f50615417304a	B|CFE_ES_Global_t.SharedDataMutex|-|OS_MutSemGive#0|-
+same	B5	f0c1766a04eed06f	B5	f0c1766a04eed06f	B|CFE_ES_Global_t.SharedDataMutex|-|OS_MutSemTake#0|-
+same	B6	de4db46e82b0c1ab	B6	de4db46e82b0c1ab	B|CFE_ES_PerfLogDump_t.DataFileDescriptor|-|CFE_FS_WriteHeader#0|-
+same	B7	4c3712db382fdfa0	B7	4c3712db382fdfa0	B|CFE_ES_PerfLogDump_t.DataFileDescriptor|-|OS_close#0|-
+same	B8	19741e517073a62d	B8	19741e517073a62d	B|CFE_ES_PerfLogDump_t.DataFileDescriptor|-|OS_write#0|-
+same	B9	93071f6d0f5975df	B9	93071f6d0f5975df	B|CFE_ES_PerfMetaData_t.DataCount|-|CFE_EVS_SendEvent#4|-
+same	B10	d2a2f780424b72a2	B10	d2a2f780424b72a2	B|CFE_ES_PerfMetaData_t.DataCount|-|CFE_EVS_SendEvent#5|-
+same	B11	6ecbfcce067d5b59	B11	6ecbfcce067d5b59	B|CFE_ES_PerfMetaData_t.FilterMask|-|CFE_PSP_MemCpy#1|-
+same	B12	1a3bf9e3f7bf7ec0	B12	1a3bf9e3f7bf7ec0	B|CFE_ES_PerfMetaData_t.TriggerMask|-|CFE_PSP_MemCpy#1|-
+same	B13	d25e7c377c4c26c7	B13	d25e7c377c4c26c7	B|CFE_ES_ResetData_t.ERLog|-|CFE_PSP_MemSet#0|-
+same	B14	a321757eecea9248	B14	a321757eecea9248	B|CFE_ES_ResetData_t.SystemLog|-|CFE_PSP_MemSet#0|-
+same	B15	08819654fba7ca38	B15	08819654fba7ca38	B|CFE_ES_ResetData_t.SystemLog|-|OS_write#1|-
+same	B16	fab0f93f37a73dde	B16	fab0f93f37a73dde	B|CFE_EVS_GlobalData_t.EVS_AppID|-|EVS_IsFiltered#0|-
+same	B17	76c85be4f966d730	B17	76c85be4f966d730	B|CFE_EVS_GlobalData_t.EVS_AppID|-|EVS_SendPacket#0|-
+same	B18	15136ceffd23c14f	B18	15136ceffd23c14f	B|CFE_EVS_GlobalData_t.EVS_SharedDataMutexID|-|OS_MutSemGive#0|-
+same	B19	e1ccf563479366fe	B19	e1ccf563479366fe	B|CFE_EVS_GlobalData_t.EVS_SharedDataMutexID|-|OS_MutSemTake#0|-
+same	B20	76f569a3d055340f	B20	76f569a3d055340f	B|CFE_EVS_Log_t.LogCount|-|CFE_ES_WriteToSysLog#2|-
+same	B21	1f25d9944d006436	B21	1f25d9944d006436	B|CFE_EVS_Log_t.LogCount|-|EVS_SendEvent#3|-
+same	B22	b381e0460f9bdcdd	B22	b381e0460f9bdcdd	B|CFE_EVS_Log_t.LogEntry|-|CFE_PSP_MemSet#0|-
+same	B23	32199708cf5935ea	B23	32199708cf5935ea	B|CFE_EVS_Log_t.LogFullFlag|-|CFE_ES_WriteToSysLog#3|-
+same	B24	9ad45745f130375d	B24	9ad45745f130375d	B|CFE_EVS_Log_t.LogMode|-|CFE_ES_WriteToSysLog#4|-
+same	B25	d720202f9d5772ce	B25	d720202f9d5772ce	B|CFE_EVS_Log_t.LogOverflowCounter|-|CFE_ES_WriteToSysLog#5|-
+same	B26	0a62eabc734223d1	B26	0a62eabc734223d1	B|CFE_EVS_Log_t.Next|-|CFE_ES_WriteToSysLog#1|-
+same	B27	2553d9ab50b23925	B27	2553d9ab50b23925	B|CFE_SB_BufferD_t.MsgId|-|CFE_SB_GetDestPtr#0|-
+same	B28	f3a620f9f5a12ef0	B28	f3a620f9f5a12ef0	B|CFE_SB_MemParams_t.Partition|-|CFE_ES_PoolCreateEx#1|-
+same	B29	1729126ab9db1fa1	B29	1729126ab9db1fa1	B|CFE_SB_MemParams_t.Partition|-|CFE_ES_WriteToSysLog#1|-
+same	B30	49e11d0d6911e30b	B30	49e11d0d6911e30b	B|CFE_SB_MemParams_t.PoolHdl|-|CFE_ES_GetPoolBuf#1|-
+same	B31	2c8ed05b5f736340	B31	2c8ed05b5f736340	B|CFE_SB_MemParams_t.PoolHdl|-|CFE_ES_GetPoolBufInfo#0|-
+same	B32	fb05e6e2f6b4cb48	B32	fb05e6e2f6b4cb48	B|CFE_SB_MemParams_t.PoolHdl|-|CFE_ES_PutPoolBuf#0|-
+same	B33	19d3bd31786b5b60	B33	19d3bd31786b5b60	B|CFE_SB_PipeD_t.AppId|-|CFE_ES_GetAppName#1|-
+same	B34	18974f765b964355	B34	18974f765b964355	B|CFE_SB_PipeD_t.AppId|-|CFE_SB_GetAppTskName#0|-
+same	B35	9afa7ec93478d6ac	B35	9afa7ec93478d6ac	B|CFE_SB_PipeD_t.PipeId|-|CFE_EVS_SendEventWithAppID#5|-
+same	B36	281f9cb55c0a8efd	B36	281f9cb55c0a8efd	B|CFE_SB_PipeD_t.PipeId|-|CFE_SB_DeletePipeWithAppId#0|-
+same	B37	27131abe8590e783	B37	27131abe8590e783	B|CFE_SB_PipeD_t.PipeId|-|CFE_SB_GetDestPtr#1|-
+same	B38	ed85d7dc93ac9c99	B38	ed85d7dc93ac9c99	B|CFE_SB_PipeD_t.PipeId|-|CFE_SB_GetPipeName#0|-
+same	B39	a86d2e8fd5a85472	B39	a86d2e8fd5a85472	B|CFE_SB_PipeD_t.SysQueueId|-|OS_QueueDelete#0|-
+same	B40	37aec4aa69774ca5	B40	37aec4aa69774ca5	B|CFE_SB_PipeD_t.SysQueueId|-|OS_QueuePut#0|-
+same	B41	59e76a34d6b3a2f2	B41	59e76a34d6b3a2f2	B|CFE_SB_PipeD_t.ToTrashBuff|-|CFE_SB_DecrBufUseCnt#0|-
+same	B42	f6498ff7968db0a2	B42	f6498ff7968db0a2	B|CFE_SB_RouteEntry_t.MsgId|-|CFE_EVS_SendEventWithAppID#4|-
+same	B43	1d6a2070a5c39e7b	B43	1d6a2070a5c39e7b	B|CFE_SB_RouteEntry_t.MsgId|-|CFE_SB_UnsubscribeWithAppId#0|-
+same	B44	2f91907dbc293a54	B44	2f91907dbc293a54	B|CFE_SB_RouteEntry_t.SeqCnt|-|CFE_SB_SetMsgSeqCnt#1|-
+same	B45	bf3802bb879fda7e	B45	bf3802bb879fda7e	B|CFE_TBL_LoadBuff_t.BufferPtr|-|CFE_PSP_MemCpy#1|-
+same	B46	28851b5c6bc45dc1	B46	28851b5c6bc45dc1	B|CFE_TBL_LoadBuff_t.DataSource|-|CFE_ES_WriteToSysLog#1|-
+same	B47	d2b2f9cd8b71a747	B47	d2b2f9cd8b71a747	B|CFE_TBL_LoadBuff_t.DataSource|-|CFE_PSP_MemCpy#0|-
+same	B48	9b3af5f089c9b778	B48	9b3af5f089c9b778	B|CFE_TBL_LoadBuff_t.DataSource|-|CFE_PSP_MemSet#0|-
+same	B49	a467d7bc2e1c7378	B49	a467d7bc2e1c7378	B|CFE_TBL_LoadBuff_t.DataSource|-|CFE_TBL_DumpToFile#0|-
+same	B50	a2a5771c66ae4bac	B50	a2a5771c66ae4bac	B|CFE_TBL_LoadBuff_t.DataSource|-|OS_open#0|-
+same	B51	4270fdd2f9ee52d3	B51	4270fdd2f9ee52d3	B|CFE_TBL_RegistryRec_t.LastFileLoaded|-|CFE_PSP_MemCpy#1|-
+same	B52	b1613b9754817fa6	B52	b1613b9754817fa6	B|CFE_TBL_RegistryRec_t.Name|-|CFE_ES_WriteToSysLog#3|-
+same	B53	c00758efeb2ec23c	B53	c00758efeb2ec23c	B|CFE_TBL_RegistryRec_t.Name|-|CFE_EVS_SendEventWithAppID#5|-
+same	B54	f945ac32ad82cf19	B54	f945ac32ad82cf19	B|CFE_TBL_RegistryRec_t.Name|-|CFE_PSP_MemCpy#1|-
+same	B55	292cb0b201dc6061	B55	292cb0b201dc6061	B|CFE_TBL_TaskData_t.TableTaskAppId|-|CFE_ES_WriteToSysLog#1|-
+same	B56	7790bbae71516ab3	B56	7790bbae71516ab3	B|CFE_TIME_TaskData_t.LocalSemaphore|-|OS_BinSemGive#0|-
+same	B57	343574173974d111	B57	343574173974d111	B|CFE_TIME_TaskData_t.LocalSemaphore|-|OS_BinSemTake#0|-
+same	B58	e15a6b83796ed928	B58	e15a6b83796ed928	B|CFE_TIME_TaskData_t.MaxLocalClock|-|CFE_TIME_Subtract#0|-
+same	B59	01496a67f7deecb4	B59	01496a67f7deecb4	B|CFE_TIME_TaskData_t.OneHzAdjust|-|CFE_TIME_Add#1|-
+same	B60	263bcf86aba19aa0	B60	263bcf86aba19aa0	B|CFE_TIME_TaskData_t.OneHzAdjust|-|CFE_TIME_Subtract#1|-
+same	B61	078b53761fed2139	B61	078b53761fed2139	B|CFE_TIME_TaskData_t.ToneSemaphore|-|OS_BinSemTake#0|-
+same	B62	6ad5bc1537946337	B62	6ad5bc1537946337	B|cfe_sb_t.AppId|-|CFE_EVS_SendEventWithAppID#2|-
+same	B63	e1303ac2da880b17	B63	e1303ac2da880b17	B|cfe_sb_t.CmdPipe|-|CFE_SB_RcvMsg#1|-
+same	B64	982931b1ed65d66e	B64	982931b1ed65d66e	B|cfe_sb_t.CmdPipe|-|CFE_SB_Subscribe#1|-
+same	B65	54c1c8b6faa1e41b	B65	54c1c8b6faa1e41b	B|cfe_sb_t.CmdPipePktPtr|-|CFE_SB_DisableRoute#0|-
+same	B66	4331ce8daf4ce6fe	B66	4331ce8daf4ce6fe	B|cfe_sb_t.CmdPipePktPtr|-|CFE_SB_EnableRoute#0|-
+same	B67	1dbb17f039d89689	B67	1dbb17f039d89689	B|cfe_sb_t.CmdPipePktPtr|-|CFE_SB_GetCmdCode#0|-
+same	B68	5283763b83a4afeb	B68	5283763b83a4afeb	B|cfe_sb_t.CmdPipePktPtr|-|CFE_SB_GetMsgId#0|-
+same	B69	6877863aa02508f6	B69	6877863aa02508f6	B|cfe_sb_t.EventFilters|-|CFE_EVS_Register#0|-
+same	B70	189c7a447843ba86	B70	189c7a447843ba86	B|cfe_sb_t.SharedDataMutexId|-|OS_MutSemGive#0|-
+same	B71	23ecde8001730ea3	B71	23ecde8001730ea3	B|cfe_sb_t.SharedDataMutexId|-|OS_MutSemTake#0|-
+same	C1	9d7dff651ba15779	C1	9d7dff651ba15779	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppID 1|itself
+same	C2	f952878534393fc2	C2	f952878534393fc2	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetTaskInfo 1|itself
+same	C3	2429b19cf51d98e1	C3	2429b19cf51d98e1	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_ExitApp CFE_ES_GetAppIDInternal 1
+same	C4	ea5a510d13eeac80	C4	ea5a510d13eeac80	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_RunLoop CFE_ES_GetAppIDInternal 1
+same	C5	2857441507d2d351	C5	2857441507d2d351	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_WaitForStartupSync CFE_ES_GetAppIDInternal 1
+same	C6	521d0a1fbc087862	C6	521d0a1fbc087862	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_CreateChildTask CFE_ES_GetAppIDInternal 1
+same	C7	fc4a0bc455da4d1d	C7	fc4a0bc455da4d1d	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_ExitChildTask CFE_ES_GetAppIDInternal 1
+same	C8	7faf8aee8c363490	C8	7faf8aee8c363490	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_LockSharedData CFE_ES_GetAppIDInternal 1
+same	C9	519643c160f5b2c9	C9	519643c160f5b2c9	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_UnlockSharedData CFE_ES_GetAppIDInternal 1
+same	C10	a5c80eecdc3cc230	C10	a5c80eecdc3cc230	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppID 1|itself
+same	C11	6f3d83a2ee09d819	C11	6f3d83a2ee09d819	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetTaskInfo 1|itself
+same	C12	1bfd527bdcdb003b	C12	1bfd527bdcdb003b	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_ExitApp CFE_ES_GetAppIDInternal 1
+same	C13	4e1c3d5775e66ca2	C13	4e1c3d5775e66ca2	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_RunLoop CFE_ES_GetAppIDInternal 1
+same	C14	2e5347f583072582	C14	2e5347f583072582	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_WaitForStartupSync CFE_ES_GetAppIDInternal 1
+same	C15	26603a1f2d34b1fd	C15	26603a1f2d34b1fd	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_CreateChildTask CFE_ES_GetAppIDInternal 1
+same	C16	45ac9bf38a27ac8a	C16	45ac9bf38a27ac8a	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_ExitChildTask CFE_ES_GetAppIDInternal 1
+same	C17	b1db06829394171e	C17	b1db06829394171e	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_LockSharedData CFE_ES_GetAppIDInternal 1
+same	C18	49bd5c263edd6f57	C18	49bd5c263edd6f57	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_CreateChildTask|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_UnlockSharedData CFE_ES_GetAppIDInternal 1
+same	C19	fe8a11c4e2d4ec62	C19	fe8a11c4e2d4ec62	C|CFE_ES_AppRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppName 1|itself
+same	C20	2bf1f13f59925089	C20	2bf1f13f59925089	C|CFE_ES_AppRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetTaskInfo 1|itself
+same	C21	d268e092b9b53c12	C21	d268e092b9b53c12	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppID 1|itself
+same	C22	961c9e043f1be052	C22	961c9e043f1be052	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetTaskInfo 1|itself
+same	C23	d7836687f0fe8717	C23	d7836687f0fe8717	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_ExitApp CFE_ES_GetAppIDInternal 1
+same	C24	46f52ddbb6ab4c46	C24	46f52ddbb6ab4c46	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_RunLoop CFE_ES_GetAppIDInternal 1
+same	C25	2ff866f929af9aec	C25	2ff866f929af9aec	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_WaitForStartupSync CFE_ES_GetAppIDInternal 1
+same	C26	b8543c19c39baa3c	C26	b8543c19c39baa3c	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_CreateChildTask CFE_ES_GetAppIDInternal 1
+same	C27	b28aae2f9b79deae	C27	b28aae2f9b79deae	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_ExitChildTask CFE_ES_GetAppIDInternal 1
+same	C28	be96a9fc001b3516	C28	be96a9fc001b3516	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_LockSharedData CFE_ES_GetAppIDInternal 1
+same	C29	1f467494b3578120	C29	1f467494b3578120	C|CFE_ES_TaskRecord_t.AppId|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_UnlockSharedData CFE_ES_GetAppIDInternal 1
+same	C30	2ab4ffc6b7e93ef0	C30	2ab4ffc6b7e93ef0	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppID 1|itself
+same	C31	19153d49ae2e6593	C31	19153d49ae2e6593	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetTaskInfo 1|itself
+same	C32	74d0c93971d4cdf1	C32	74d0c93971d4cdf1	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_ExitApp CFE_ES_GetAppIDInternal 1
+same	C33	e9be082556b65d13	C33	e9be082556b65d13	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_RunLoop CFE_ES_GetAppIDInternal 1
+same	C34	e058109c5978f73f	C34	e058109c5978f73f	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_WaitForStartupSync CFE_ES_GetAppIDInternal 1
+same	C35	a70e771fdc60b778	C35	a70e771fdc60b778	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_CreateChildTask CFE_ES_GetAppIDInternal 1
+same	C36	c06dc899d8b750f3	C36	c06dc899d8b750f3	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_ExitChildTask CFE_ES_GetAppIDInternal 1
+same	C37	4e7c214e1b0acbdb	C37	4e7c214e1b0acbdb	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_LockSharedData CFE_ES_GetAppIDInternal 1
+same	C38	6365b5d29e6f8c66	C38	6365b5d29e6f8c66	C|CFE_ES_TaskRecord_t.RecordUsed|CFE_ES_AppCreate|OS_TaskCreate|1|read CFE_ES_GetAppIDInternal 1|call CFE_ES_UnlockSharedData CFE_ES_GetAppIDInternal 1

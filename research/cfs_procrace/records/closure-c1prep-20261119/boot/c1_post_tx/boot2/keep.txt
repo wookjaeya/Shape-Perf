@@ -1,0 +1,6 @@
+kz-keep 1 (run_cycle.sh keep; results 26.9, evaluation protocol 14.14 item 1) 2026-11-19T20:18:52Z
+boot /home/user/work/redesign/obs1/c1cyc_post_boot2: 52 files, row OBS_c1cyc_post_boot2, list records/closure-c1prep-20261119/boot/c1_post_tx/boot2/c1cyc_post_boot2.sha256
+convert /home/user/work/redesign/obs1/c1cyc_post_convert2: 4 files, row OBS_c1cyc_post_convert2, list records/closure-c1prep-20261119/boot/c1_post_tx/boot2/c1cyc_post_convert2.sha256
+explain /home/user/work/redesign/obs1/c1cyc_post_explain2: 788 files, row OBS_c1cyc_post_explain2, list records/closure-c1prep-20261119/boot/c1_post_tx/boot2/c1cyc_post_explain2.sha256
+eval /home/user/work/redesign/obs1/c1cyc_post_eval2: 1 files, row OBS_c1cyc_post_eval2, list records/closure-c1prep-20261119/boot/c1_post_tx/boot2/c1cyc_post_eval2.sha256
+keep: 4 ledger rows added; ledger_check: 233 rows, 0 failing

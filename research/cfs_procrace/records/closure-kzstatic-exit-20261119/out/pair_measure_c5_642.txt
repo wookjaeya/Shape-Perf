@@ -1,0 +1,56 @@
+build /home/user/work/redesign/obs1/cz_final_order/c5_642
+K kept pair measure (cdr.txt): 4298 (unordered 4019)
+T sum of the pairs: lines: 4382; fixed_early_proved 1, hard_before 195, unknown 167, unordered 4019
+F pair-file lines: 5207 (pairs 5149, no_pair 58); fixed_early_proved 1, hard_before 195, no_pair 58, same_thread 850, unknown 84, unordered 4019
+  unknown lines: no root reaches 84, other 0
+  same_thread lines: counted by the text as one-thread unknown 83, not counted 767
+  same_thread lines not counted, by other kind and path:
+    creator-not-a-pair(same actor only) path A: 18
+    writer path B: 749
+  same_thread lines counted, by other kind and path:
+    writer path B: 83
+ok   (1) T - K = 4382 - 4298 = 84 = unknown(no root reaches) lines 84
+ok       text unknown 167 = no-root 84 + other unknown 0 + one-thread same_thread 83
+ok   (2) F(pairs) - T = 5149 - 4382 = 767 = same_thread lines not counted by the text 767
+ok   (3) K 4298 = hard_before + conditional + fixed_early + unordered 4215 + counted one-thread 83 + other unknown 0
+ok       unordered: measure 4019, text 4019, file 4019
+plan /home/user/work/redesign/obs1/cz_plans_v4/c5_642/plan.side: planned rows 9
+  row id | selection | text sum | file lines | file no_pair | same_thread not counted | file - text
+  A16 | control | 2 | 3 | 0 | 1 | 1
+  A17 | control | 2 | 3 | 0 | 1 | 1
+  B7 | design | 15 | 15 | 0 | 0 | 0
+  B18 | design | 10 | 11 | 0 | 1 | 1
+  B19 | design | 10 | 11 | 0 | 1 | 1
+  B33 | design | 12 | 15 | 0 | 3 | 3
+  B39 | design | 14 | 17 | 0 | 3 | 3
+  B49 | design | 2 | 2 | 0 | 0 | 0
+  B56 | design | 1458 | 1758 | 0 | 300 | 300
+  sums: text 1525, file lines 1835, difference 310
+ok     rows whose difference file - text = same_thread not counted + no_pair: 9 of 9
+plan /home/user/work/redesign/obs1/cz_plans_v4_ns2/c5_642/plan.side: planned rows 9
+  row id | selection | text sum | file lines | file no_pair | same_thread not counted | file - text
+  A16 | control | 2 | 3 | 0 | 1 | 1
+  A17 | control | 2 | 3 | 0 | 1 | 1
+  B7 | design | 15 | 15 | 0 | 0 | 0
+  B18 | design | 10 | 11 | 0 | 1 | 1
+  B19 | design | 10 | 11 | 0 | 1 | 1
+  B33 | design | 12 | 15 | 0 | 3 | 3
+  B39 | design | 14 | 17 | 0 | 3 | 3
+  B49 | design | 2 | 2 | 0 | 0 | 0
+  B56 | design | 1458 | 1758 | 0 | 300 | 300
+  sums: text 1525, file lines 1835, difference 310
+ok     rows whose difference file - text = same_thread not counted + no_pair: 9 of 9
+plan /home/user/work/redesign/obs1/rf2_plans_v4/c5_642/plan.side: planned rows 9
+  row id | selection | text sum | file lines | file no_pair | same_thread not counted | file - text
+  A16 | control | 2 | 3 | 0 | 1 | 1
+  A17 | control | 2 | 3 | 0 | 1 | 1
+  B7 | design | 15 | 15 | 0 | 0 | 0
+  B18 | design | 10 | 11 | 0 | 1 | 1
+  B19 | design | 10 | 11 | 0 | 1 | 1
+  B33 | design | 12 | 15 | 0 | 3 | 3
+  B39 | design | 14 | 17 | 0 | 3 | 3
+  B49 | design | 2 | 2 | 0 | 0 | 0
+  B56 | design | 1458 | 1758 | 0 | 300 | 300
+  sums: text 1525, file lines 1835, difference 310
+ok     rows whose difference file - text = same_thread not counted + no_pair: 9 of 9
+result PASS

@@ -1,0 +1,8 @@
+bundle=w6-20261029-replays
+created_utc=2026-10-29T06:59:55.798Z
+repo_commit=4e8f31d42376771774d379654221f64fe9f06666
+kernel=6.18.44-fc-v185
+source=/home/user/work/w6/replay files=1024 bytes=31586461
+source=/home/user/work/w6/bprime_f1 files=42 bytes=19497541
+tar_xz_bytes=1070132 parts=1
+note=W6 analysis outputs: C1 replays of the 36 W6 records and R2 replays of the 2 W6 records with one fixed analysis configuration (kz 5d64256a, profiles at 84cd331/845eebc), kz occ diff path comparisons, PD29 D8 decomposition (d8diag), R2 closures/B' and interval tagging (replay/r2), B' of the f1 derived builds (bprime_f1); drivers env/c1/replay_w6.sh (4e8f31d), env/r2/replay_w6.sh (d625d7b); results plan/results_w6_20261029.md. The two SUMMARY.md files were not written (subagent harness refused report files); their content is in the results doc.

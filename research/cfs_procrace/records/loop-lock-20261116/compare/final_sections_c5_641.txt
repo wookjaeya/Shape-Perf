@@ -1,0 +1,1 @@
+OK /home/user/work/redesign/obs1/ll_final_extract/c5_641/c5_641/NP/facts.kz: sections of the earlier round 45, the same record text 44 (['FACT_EXPRS']), differing ['BASIS'], new ['LOCK_HANDLES', 'LOOP_DEFS'] (LOCK_HANDLES 0 record lines, LOOP_DEFS 11 record lines)

@@ -1,0 +1,40 @@
+hand sites-cf281a941.kzs: 37 sites; generated: 301 sites
+MISS   hand   1 es.start_task.entry CFE_ES_StartAppTask before line 576                                    
+MISS   hand   2 es.start_task.ret CFE_ES_StartAppTask after                                                
+MISS   hand   3 es.child_task.entry CFE_ES_CreateChildTask before line 1247                                
+MATCH  hand   4 es.child_task.ret CFE_ES_CreateChildTask after                                             gen 19 after-call of it in CFE_ES_BackgroundInit
+MISS   hand   5 osal.task_create.entry OS_TaskCreate before line 164                                       
+MISS   hand   6 osal.task_create.ret OS_TaskCreate after                                                   
+MISS   hand   7 osal.task_entry OS_TaskEntryPoint before line 124                                          
+MISS   hand   8 osal.task_create.id OS_Posix_InternalTaskCreate_Impl before line 434                       
+MATCH  hand   9 es.exit_app.entry CFE_ES_ExitApp before line 340                                           gen 6 same (entry)
+MISS   hand  10 osal.countsem_lookup.entry OS_CountSemGetIdByName before line 204                          
+MATCH  hand  11 osal.countsem_lookup.ret OS_CountSemGetIdByName after                                      gen 288 after-call of it in CF_CFDP_InitEngine
+MATCH  hand  12 OS_CountSemGetIdByName.exists OS_CountSemGetIdByName at-call OS_ObjectIdFindByName line 212 gen 273 same
+MISS   hand  13 osal.countsem_lookup.found OS_ObjectIdFindByName store line 978                            
+MISS   hand  14 osal.countsem_create.entry OS_CountSemCreate before line 83                                
+MATCH  hand  15 osal.countsem_create.ret OS_CountSemCreate after                                           gen 2 after-call of it in SCH_LAB_AppInit; gen 279 after-call of it in initialize_throttling
+MISS   hand  16 OS_CountSemCreate.publish OS_CountSemCreate at-call OS_ObjectIdFinalizeNew line 106        
+MISS   hand  17 osal.countsem_create.created OS_ObjectIdFinalizeNew at-call OS_NotifyEvent line 854        
+MISS   hand  18 OS_ObjectIdInit.clear_table OS_ObjectIdInit after-call memset line 120                     
+MISS   hand  19 OS_CountSemAPI_Init.clear_names OS_CountSemAPI_Init after-call memset line 73              
+MISS   hand  20 osal.countsem_delete.entry OS_CountSemDelete before line 118                               
+MISS   hand  21 osal.countsem_delete.ret OS_CountSemDelete after                                           
+MISS   hand  22 OS_CountSemDelete.retire OS_CountSemDelete after-call OS_ObjectIdFinalizeDelete line 129   
+MISS   hand  23 CFE_PSP_Restart.request_shutdown CFE_PSP_Restart store line 93                             
+MISS   hand  24 OS_Application_Run.teardown OS_Application_Run at-call OS_DeleteAllObjects line 487        
+MISS   hand  30 cf.init.entry CF_Init before line 206                                                      
+MATCH  hand  31 cf.init.ret CF_Init after                                                                  gen 285 after-call of it in CF_AppMain
+MISS   hand  32 cf.init_engine.entry CF_CFDP_InitEngine before line 952                                    
+MATCH  hand  33 cf.init_engine.ret CF_CFDP_InitEngine after                                                gen 287 after-call of it in CF_Init
+MATCH  hand  34 cf_lookup_call.before CF_CFDP_InitEngine at-call OS_CountSemGetIdByName line 993           gen 289 same
+MATCH  hand  35 cf_lookup_call CF_CFDP_InitEngine after-call OS_CountSemGetIdByName line 993               gen 288 same
+MATCH  hand  37 cf_exit_app_call.before CF_AppMain at-call CFE_ES_ExitApp line 366                         gen 286 same
+MISS   hand  40 bp.flow_init.entry BP_FlowInit before line 519                                             
+MISS   hand  41 bp.flow_init.ret BP_FlowInit after                                                         
+MISS   hand  42 bp_existence_probe_call.before initialize_throttling at-call OS_CountSemGetIdByName line 126 
+MISS   hand  43 bp_existence_probe_call initialize_throttling after-call OS_CountSemGetIdByName line 126   
+MATCH  hand  44 bp_create_call.before initialize_throttling at-call OS_CountSemCreate line 132             gen 280 same
+MATCH  hand  45 bp_create_call initialize_throttling after-call OS_CountSemCreate line 132                 gen 279 same
+generated sites with no hand counterpart: 290
+  by rule: {'actor-create': 2, 'actor-owner': 2, 'actor-root': 15, 'actor-start': 1, 'creator-call': 37, 'handling-chain': 3, 'key-text': 3, 'stop-event': 1, 'use-call': 192, 'writer': 34}

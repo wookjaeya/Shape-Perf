@@ -1,0 +1,9 @@
+kz-admitted 1
+candidates 6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73
+branch D2[termination]
+ground termination: none: evaluation branch written before the PI's answer
+columns layer	function	column	data_file	data_sha256	data_line	named_by	kind
+P0	abort	role	kairos/lib/llvm/p0.cpp	b9d3cc57375d014024cb447260a038b31eeaf49d72bfa7af517ddfb150c6e035	137	P0-unverified	termination
+P0	pthread_exit	role	kairos/lib/llvm/p0.cpp	b9d3cc57375d014024cb447260a038b31eeaf49d72bfa7af517ddfb150c6e035	133	P0-unverified	termination
+lines 2
+end

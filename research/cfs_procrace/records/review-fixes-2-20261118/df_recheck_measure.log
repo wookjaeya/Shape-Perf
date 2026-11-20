@@ -1,0 +1,4 @@
+# space_guard.sh kind=recheck need=20000000 floor=314572800 interval=2 cmd=/home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-20261118/recheck/recheck.sh measure
+start 2026-11-18T09:27:21.411Z free=1322426368 threshold=334572800
+sample 2026-11-18T09:27:21.414Z 1322422272
+end 2026-11-18T09:27:23.421Z kind=recheck verdict=completed rc=0 free=1322393600 lowest=1322393600 dip=32768 change=-32768

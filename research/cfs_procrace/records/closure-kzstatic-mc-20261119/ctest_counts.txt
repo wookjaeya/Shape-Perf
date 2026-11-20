@@ -1,0 +1,82 @@
+68: test_core_schema: 34017 checks passed
+69: test_core_identity: 26 checks passed
+70: test_core_kzdump: 35 checks passed
+73: test_core_container: 221 checks passed
+74: test_core_container_corrupt: 128 checks passed
+75: test_core_crc32: 15 checks passed
+76: test_core_dump: 4964 checks passed
+77: test_core_eval: 478 checks passed
+78: test_core_monitor: 68 checks passed
+79: test_core_phi_allowed: 83 checks passed
+80: test_core_phi_canonical: 74 checks passed
+81: test_core_phi_check: 162 checks passed
+82: test_core_phi_parser: 307 checks passed
+83: test_core_phi_provenance: 156 checks passed
+84: test_core_realrecord: 402 checks passed
+85: test_core_replay: 5964 checks passed
+86: test_core_sha256: 224 checks passed
+87: test_core_state_order: 165 checks passed
+88: test_core_verdict: 246 checks passed
+89: test_core_verify: 5909 checks passed
+90: test_core_vocab: 24291 checks passed
+105: lint selftest: 114 cases, 0 failed
+106: lint case-ids: clean
+107: lint case-ids-data: clean
+108: lint semantics-names: clean
+109: lint retired-term: clean
+110: lint banned-files: clean
+111: lint no-llvm: clean
+112: lint no-generated: clean
+113: test_trace_decode_fetch: 65 checks passed
+114: test_trace_decode_merge: 159 checks passed
+115: test_trace_decode_perf: 60074 checks passed
+116: test_trace_decode_real: 3847 checks passed
+117: test_trace_decode_sites: 92 checks passed
+118: test_trace_hold_nctl: 274 checks passed
+119: test_trace_identity: 245 checks passed
+120: test_trace_key_separation: 31 checks passed
+121: test_trace_merge_order: 480 checks passed
+122: test_trace_neutral: 391 checks passed
+123: test_trace_neutral_rev12: 113 checks passed
+124: test_trace_occ_basis: 93 checks passed
+125: test_trace_occ_match: 59 checks passed
+126: test_trace_replay_out: 107 checks passed
+127: test_trace_static_closure: 114 checks passed
+128: test_trace_symbols: 38 checks passed
+129: test_trace_occ_basis_cli: 28 checks passed
+130: test_realrecord_derived: 53142 checks passed
+132: test_neutral_kzrt: 73 checks passed
+133: test_kzrt_identity: 82 checks passed
+134: test_kzrt_app_request: 102 checks passed
+135: test_kzrt_recovered: 65 checks passed
+136: test_probe_anchor_compilers: 655 checks passed
+137: test_probe_anchor_reached: 74 checks passed
+138: test_probe_basis: 166 checks passed
+139: test_probe_elf_dwarf: 3390 checks passed
+140: test_probe_golden: 72 checks passed
+141: test_probe_observe: 3334 checks passed
+142: test_probe_profile: 135 checks passed
+143: test_probe_record: 99 checks passed
+145: test_hold_ptrace: 9 checks passed
+146: test_hold_sequence: 39 checks passed
+147: test_hold_plan: 27 checks passed
+148: test_rt_plan_convert: 42 checks passed
+        Start 165: phi_golden_replay_cleanup_window
+165: Test command: /home/user/work/merge-check/kz-llvm/tests/phi/kz_phi_golden "replay_cleanup_window" "/home/user/Shape-Perf/research/cfs_procrace/kairos/profiles/cfs-v7.0.1" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/phi/data" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/phi/traces"
+165: replay_cleanup_window: matches
+165/271 Test #165: phi_golden_replay_cleanup_window ..............   Passed    0.00 sec
+167:   es_apps_cleanup_match (cfe/modules/es/fsw/src/cfe_es_apps.c:1435-1435)
+168: test_phi_cli: 33 checks passed
+197: test_predict_model: 126 checks passed
+198: test_property_eval_agreement: 10 checks passed
+261: test_static_expr: 26 checks passed
+262: test_static_flow: 36 checks passed
+263: test_static_recipe: 71 checks passed
+264: test_static_gitrev: 13 checks passed
+265: test_static_unroll: 90 checks passed
+266: test_static_wrappers: 512 checks passed
+267: test_static_link: 68 checks passed
+268: test_static_elf32: 233 checks passed
+269: test_static_reasons: 804 checks passed
+270: test_static_plan: 389 checks passed
+271: test_static_cli: 1217 checks passed

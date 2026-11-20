@@ -1,0 +1,15 @@
+# space_guard.sh kind=rt-rt_format15 need=30000000 floor=314572800 interval=2 cmd=env DRYRUN_OUT=<scratch>/xr6_dry_rt_rt_format15 bash -c 
+      set -uo pipefail; OUT=$DRYRUN_OUT; R=/home/user/Shape-Perf/research/cfs_procrace; O=/home/user/work/redesign/obs1; EX=/home/user/Shape-Perf/research/cfs_procrace/env/obs1; VOC=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/reason_vocabulary.txt; PREP=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119; K=/home/user/work/redesign/obs1/xr5_dry_rt_rt_format15; b=rt_format15
+      mkdir -p "$OUT" || exit 2
+      P=$O/cz_plans_v4_ns2/c1_pre_tx; Z=$O/cz_final_order/c1_pre_tx; D=$O/xr4_dry_inputs/c1_pre_tx
+      python3 -I "$EX/explain_read.py" --sidecar "$P/plan.side" --manifest "$P/plan.kzs" --bindings "$D/binds_bindcheck.kzs" \
+        --relations "$Z/relations.txt" --keys "$Z/keys.txt" --pairs "$Z/pairs.tsv" --facts-view "$D/facts_view.txt" \
+        --bprime-basis "$O/cz_final_extract/c1_pre_tx/c1_pre_tx/NP/basis.kz" --build-label c1_pre_tx --branches "$PREP/candidates/branches_16.txt" \
+        --candidates "$PREP/candidates/candidates.tsv" --named-calls "$PREP/candidates/named_calls.tsv" \
+        --label-record "dry run on a runtime test dump (no plan of that dump; results 26.3)" --dump-text "$K/$b.dump.txt" --run-meta "$K/run.meta" \
+        --chain "$K/chain.txt" --startup-script "$K/startup.scr" --normal-out "$OUT/normal.json"; echo "reader rc=$?"
+      cmp "$OUT/normal.json" "$K/normal.json" && echo "normal.json byte-identical to the kept one"
+      python3 -I "$EX/explain_judge.py" --normal "$OUT/normal.json" --vocabulary "$VOC" --out "$OUT/judge"; echo "judge rc=$?"
+start 2026-11-19T17:45:11.510Z free=767901696 threshold=344572800
+sample 2026-11-19T17:45:11.514Z 767897600
+end 2026-11-19T17:45:13.521Z kind=rt-rt_format15 verdict=completed rc=0 free=743501824 lowest=743501824 dip=24399872 change=-24399872

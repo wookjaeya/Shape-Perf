@@ -1,0 +1,6 @@
+- 0|facts-artifact H	facts-artifact 50e2130cb3312e2a0ced87fd3026706a7a8662a373a6e6536c842675d38f0578
++ 0|facts-artifact H	facts-artifact 77532840db27038edd009421060b5cdead8ebab6fe32ab9f317637cd470bd979
+- 0|request N	request 7 row=bdcc6978b9a41c8c id=A20 label=H value=result state=planned site=269 slot=ret reason=- what="status of OS_CountSemGetIdByName at /home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:126:13" note="label H, an open effect in its absence line"
+- 0|request N	request 8 row=bdcc6978b9a41c8c id=A20 label=H value=out0 state=planned site=269 slot=out0 reason=- what="out0 of OS_CountSemGetIdByName at /home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:126:13" note="label H, an open effect in its absence line"
++ 0|request N	request 7 row=bb0951052e63f1bc id=A20 label=H value=result state=planned site=269 slot=ret reason=- what="status of OS_CountSemGetIdByName at /home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:126:13" note="label H, an open effect in its absence line"
++ 0|request N	request 8 row=bb0951052e63f1bc id=A20 label=H value=out0 state=planned site=269 slot=out0 reason=- what="out0 of OS_CountSemGetIdByName at /home/user/work/procrace/c1_build/post/src/bp/fsw/src/bp_flow.c:126:13" note="label H, an open effect in its absence line"

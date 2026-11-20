@@ -1,0 +1,4 @@
+# space_guard.sh kind=run need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/result-flow-20261116/rerun.sh
+start 2026-11-16T21:00:04.097Z free=2110902272 threshold=414572800
+sample 2026-11-16T21:00:04.109Z 2110889984
+end 2026-11-16T21:00:06.117Z kind=run verdict=completed rc=0 free=2103222272 lowest=2103222272 dip=7680000 change=-7680000

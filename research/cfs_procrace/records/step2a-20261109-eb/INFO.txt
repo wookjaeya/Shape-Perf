@@ -1,0 +1,11 @@
+bundle=step2a-20261109-eb
+created_utc=2026-11-09T10:25:02.274Z
+repo_commit=7aabae45352093f0831c83f706207e574afcd1fc
+kernel=6.18.44-fc-v310
+source=/home/user/work/redesign/extract_baseline files=383 bytes=325344562
+tar_xz_bytes=7141564 parts=1 tar_xz_sha256=984394afd6c6e197aa21718feb5793f2c02df7ff7467ee5f3426c031d8f93c78
+location=/home/user/work/preserve/bundles-20261109/step2a-20261109-eb (local, not in the repository, not pushed)
+made_with=bundle_local.sh (tar --sort=name --owner=0 --group=0 --numeric-owner | xz -9 -T4 | split -b 45M), started 2026-11-09T10:24:09.053Z
+df_free_before=1091686400 df_free_after_create=1084194816
+credential_pattern_hits=none
+note=EB: 2a extract baseline outputs and inputs/ (RV3A 6.1 P2, EB); local only, not pushed (public repository; preservation location waits for the PI, RV4 analysis 7.3)

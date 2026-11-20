@@ -1,0 +1,14 @@
+# commands of the fixes after review of the explanation step (plan/observation_path_results_20261116.md 7.11), in order, with their outcome
+env/tools/build_record.sh pre MC pre_mc.txt -> rc 0; equal to records/obs1-20261116-explain/post_mc.txt except the time, HEAD and free lines
+env/tools/tests/run_unit.sh -> 15 of 15 (unit_tools_before.txt; check 15: fixtures 20 of 20); env/redesign/step2a_tests_unit.sh -> 7 of 7 (unit_step2a_before.txt)
+check 11 with its new fixtures against the comparator of a79aa6d (scratchpad copy) -> FAIL, (b) 3 undeclared; against the present comparator -> PASS (comparator_fixtures.txt); scratchpad copy removed
+commit 7614009: declaration 7.11.0, explain.py revision 2, fixtures, plan_bindings.py --file-hashes, run_unit.sh checks 11 (b) and 12, this directory's scripts
+run_fix.sh explain -> 45 records, 0 refused, rc 0 (09:15Z; explain_r4; df_explain.log dip 2,654,208)
+explain.py again into the scratchpad with the same inputs -> byte-identical to explain_r4 (48 files; determinism.txt); scratchpad copy removed
+run_fix.sh copy -> index, inputs, refused, the relation-1 record, explain_r4.sha256 (48), r3_r4_diff.txt
+python3 -I env/obs1/explain.py --check records/c1_pre_tx.A21.17975444d83f6589.actor-12.json -> check ok (0 failures)
+run_fix.sh summary -> summary.txt; rowsites -> row_sites_17975444d83f6589.tsv; runtime-refs -> runtime_refs.txt; cfe-assert -> cfe_assert_compare.txt (the step's disassembly comparison added after its first run)
+run_fix.sh bindings, first run -> rc 1: 26 of 33 units "NOT-IN-FILE_HASHES": the basis writes the bundle's files relative to its bundle.root (BASIS[3]); plan_bindings.py now joins that root (run_unit.sh check 12 case added) -> rc 0, 33 of 33 units tied, disk=same 33 (bindings_report_src.tsv)
+LEDGER.tsv: OBS_c1pre_explain_reviewfix (49 files); ledger_check 45 rows 0 failing; tools_check --deep 31 rows 0 failing
+run_unit.sh 15 of 15 (unit_tools.txt); step2a_tests_unit.sh 7 of 7 (unit_step2a.txt); build_record.sh post MC post_mc.txt -> equal to pre_mc.txt except the time, HEAD and free lines
+name_check.sh --tree c1pre_explain_reviewfix and this directory -> rc 0

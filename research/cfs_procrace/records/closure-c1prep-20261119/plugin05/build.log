@@ -1,0 +1,126 @@
+[  6%] Creating directories for 'kzrt_standalone'
+[ 13%] Building C object CMakeFiles/kzgcc-events.dir/tools/kzgcc_events.c.o
+[ 20%] Building CXX object CMakeFiles/kzgcc.dir/kzgcc.cpp.o
+[ 26%] Building CXX object CMakeFiles/kzgcc.dir/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tools/manifest/kz_rt_manifest.cpp.o
+[ 33%] No download step for 'kzrt_standalone'
+[ 40%] Building C object CMakeFiles/kzgcc-events.dir/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/tools/decode/kz_rt_decode.c.o
+[ 46%] No update step for 'kzrt_standalone'
+[ 53%] No patch step for 'kzrt_standalone'
+[ 60%] Performing configure step for 'kzrt_standalone'
+[ 66%] Linking C executable kzgcc-events
+-- The C compiler identification is GNU 13.3.0
+[ 66%] Built target kzgcc-events
+[ 73%] Building CXX object CMakeFiles/kzgcc.dir/home/user/Shape-Perf/research/cfs_procrace/kairos/lib/core/sha256.cpp.o
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Configuring done (0.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/user/work/instr/kzgcc-0.5/plugin-build/kzrt
+[ 80%] Performing build step for 'kzrt_standalone'
+[  1%] Building C object CMakeFiles/kzrt.dir/src/kz_rt.c.o
+[  3%] Building C object CMakeFiles/kzrt-decode.dir/tools/decode/kz_rt_decode.c.o
+[  5%] Linking C static library libkzrt-decode.a
+[  5%] Built target kzrt-decode
+[  6%] Building C object CMakeFiles/kzrt.dir/src/kz_rt_plan.c.o
+[  8%] Building CXX object CMakeFiles/kzrt-manifest.dir/tools/manifest/kz_rt_manifest.cpp.o
+[ 10%] Linking C static library libkzrt.a
+[ 10%] Built target kzrt
+[ 11%] Building C object tests/CMakeFiles/rt_objects_mod_id.dir/rt_objects_module.c.o
+[ 13%] Linking C shared library librt_objects_mod_id.so
+[ 13%] Built target rt_objects_mod_id
+[ 15%] Building C object tests/CMakeFiles/rt_objects_mod_noid.dir/rt_objects_module.c.o
+[ 16%] Linking C shared library librt_objects_mod_noid.so
+[ 16%] Built target rt_objects_mod_noid
+[ 18%] Building C object tests/CMakeFiles/test_rt_format15.dir/test_rt_format15.c.o
+[ 20%] Building C object tests/CMakeFiles/kzrt-pool4.dir/__/src/kz_rt.c.o
+[ 21%] Linking C executable test_rt_format15
+[ 21%] Built target test_rt_format15
+[ 23%] Building C object tests/CMakeFiles/kzrt-pool4.dir/__/src/kz_rt_plan.c.o
+[ 25%] Building C object tests/CMakeFiles/kzrt-build-info-test.dir/__/src/kz_rt_build_info.c.o
+[ 25%] Built target kzrt-build-info-test
+[ 26%] Linking C static library libkzrt-pool4.a
+[ 28%] Building C object tests/CMakeFiles/kzrt-build-info-bad.dir/__/src/kz_rt_build_info.c.o
+[ 28%] Built target kzrt-build-info-bad
+[ 28%] Built target kzrt-pool4
+[ 30%] Building C object CMakeFiles/kzrt-posix.dir/src/kz_rt_posix.c.o
+[ 31%] Building C object tests/CMakeFiles/test_rt_pool4.dir/test_rt_pool.c.o
+[ 33%] Linking C static library libkzrt-posix.a
+[ 35%] Linking C executable test_rt_pool4
+[ 35%] Built target kzrt-posix
+[ 36%] Building C object CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o
+[ 36%] Built target test_rt_pool4
+[ 38%] Building C object tests/CMakeFiles/test_rt_bootstrap.dir/test_rt_bootstrap.c.o
+[ 38%] Built target kzrt-posix-auto
+[ 40%] Building C object tests/CMakeFiles/test_rt_order.dir/test_rt_order.c.o
+[ 41%] Linking C executable test_rt_bootstrap
+[ 41%] Built target test_rt_bootstrap
+[ 43%] Linking C executable test_rt_order
+[ 45%] Building C object tests/CMakeFiles/test_rt_loss.dir/test_rt_loss.c.o
+[ 45%] Built target test_rt_order
+[ 46%] Building C object tests/CMakeFiles/test_rt_serial.dir/test_rt_serial.c.o
+[ 48%] Linking C executable test_rt_loss
+[ 48%] Built target test_rt_loss
+[ 50%] Building C object tests/CMakeFiles/test_rt_gate.dir/test_rt_gate.c.o
+[ 51%] Linking C executable test_rt_serial
+[ 51%] Built target test_rt_serial
+[ 53%] Linking C executable test_rt_gate
+[ 55%] Building C object tests/CMakeFiles/test_rt_holdsem.dir/test_rt_holdsem.c.o
+[ 55%] Built target test_rt_gate
+[ 56%] Building C object tests/CMakeFiles/test_rt_auto.dir/test_rt_auto.c.o
+[ 58%] Linking C executable test_rt_holdsem
+[ 60%] Linking C executable test_rt_auto
+[ 60%] Built target test_rt_holdsem
+[ 61%] Building C object tests/CMakeFiles/test_rt_pool.dir/test_rt_pool.c.o
+[ 61%] Built target test_rt_auto
+[ 63%] Building C object tests/CMakeFiles/test_rt_mode.dir/test_rt_mode.c.o
+[ 65%] Linking CXX static library libkzrt-manifest.a
+[ 66%] Linking C executable test_rt_pool
+[ 68%] Linking C executable test_rt_mode
+[ 68%] Built target test_rt_pool
+[ 68%] Built target kzrt-manifest
+[ 68%] Built target test_rt_mode
+[ 70%] Building C object tests/CMakeFiles/test_rt_objects.dir/test_rt_objects.c.o
+[ 71%] Building C object tests/CMakeFiles/test_rt_auto_bad.dir/test_rt_auto.c.o
+[ 73%] Building C object tests/CMakeFiles/test_rt_mode_api.dir/test_rt_mode_api.c.o
+[ 75%] Linking C executable test_rt_auto_bad
+[ 76%] Linking C executable test_rt_objects
+[ 78%] Linking C executable test_rt_mode_api
+[ 78%] Built target test_rt_auto_bad
+[ 78%] Built target test_rt_objects
+[ 78%] Built target test_rt_mode_api
+[ 80%] Building C object tests/CMakeFiles/test_rt_auto_bi.dir/test_rt_auto.c.o
+[ 81%] Building C object tests/CMakeFiles/test_rt_plan.dir/test_rt_plan.c.o
+[ 83%] Building C object tests/CMakeFiles/test_rt_plan_nb.dir/test_rt_plan.c.o
+[ 85%] Linking C executable test_rt_auto_bi
+[ 86%] Linking C executable test_rt_plan
+[ 86%] Built target test_rt_auto_bi
+[ 86%] Linking CXX shared module kzgcc.so
+[ 88%] Building C object tests/CMakeFiles/test_rt_end.dir/test_rt_end.c.o
+[ 90%] Linking C executable test_rt_plan_nb
+[ 90%] Built target test_rt_plan
+[ 91%] Building CXX object CMakeFiles/kz-rt-dump.dir/tools/kz-rt-dump/kz_rt_dump.cpp.o
+[ 91%] Built target test_rt_plan_nb
+[ 93%] Building CXX object CMakeFiles/kz-rt-dump.dir/home/user/Shape-Perf/research/cfs_procrace/kairos/lib/core/sha256.cpp.o
+[ 86%] Built target kzgcc
+[ 95%] Linking C executable test_rt_end
+[ 96%] Building CXX object tests/CMakeFiles/test_rt_manifest.dir/test_rt_manifest.cpp.o
+[ 96%] Built target test_rt_end
+[ 98%] Linking CXX executable test_rt_manifest
+[ 98%] Built target test_rt_manifest
+[100%] Linking CXX executable kz-rt-dump
+[100%] Built target kz-rt-dump
+[ 93%] No install step for 'kzrt_standalone'
+[100%] Completed 'kzrt_standalone'
+[100%] Built target kzrt_standalone

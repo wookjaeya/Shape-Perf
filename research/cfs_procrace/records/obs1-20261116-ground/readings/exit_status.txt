@@ -1,0 +1,18 @@
+# exit status in the F0 records (kz-dump 05623054 of the merge-check tree; full dumps not kept, their sha256 below)
+## /home/user/work/w6/run/c1nat/f0tx/pre_1df262a/run.kzt sha256 d1e205171b7a8fa3297dc035fec2f9b2490d8daf9a88d9229bc3f38c8a5fdb32; dump sha256 89002a341ca5d571e12c2506384ea9c2163db06ca5fe8d6e6483f16a2996ce46, 664 lines
+75:  BASIS[64] name="target.exit" value="exited 0" policy=unset prov=none deviation=none
+157:  BASIS[146] name="hits.site8.es.exit_app.entry" value="1" policy=unset prov=none deviation=none
+268:  SITES[8] site=8 kind=entry-probe insn_class=emulated decoder=generic phases={ENTRY} line=0 file_offset=0x17584 inode=936229 device=65024 build_id=61357215181fcb22aba7615ab173cd994b0a9dd5 symbol="CFE_ES_ExitApp" label="es.exit_app.entry" source=""
+394:  RAW_EVENTS[100] t_ns=14429508713071 tid=403 tseq=21 site=8 phase=ENTRY flags={} objseq=0x0 a=[0x3,0x0,0x0,0x7f96b4faf048]
+503:  SITE_SLOTS[21] site=8 slot=0 src=reg width=4 index=5 role="exit_status"
+504:  SITE_SLOTS[22] site=8 slot=3 src=stack width=8 index=0 role="return_address"
+## /home/user/work/w6/run/c1nat/f0tx/pre_1b0b338/run.kzt sha256 c41adc9eab65e6d6f331ff5db06c1a502649ab733d890ec4da3baa81be93f79e; dump sha256 b7badd7a781178afb54957daa5cc426d58012afb1cc4129eb2bf5953aaf99831, 664 lines
+75:  BASIS[64] name="target.exit" value="exited 0" policy=unset prov=none deviation=none
+157:  BASIS[146] name="hits.site8.es.exit_app.entry" value="1" policy=unset prov=none deviation=none
+268:  SITES[8] site=8 kind=entry-probe insn_class=emulated decoder=generic phases={ENTRY} line=0 file_offset=0x17584 inode=1385813 device=65024 build_id=4ae5883f793c8c11b465916e20ee7c4e67cdc3ef symbol="CFE_ES_ExitApp" label="es.exit_app.entry" source=""
+394:  RAW_EVENTS[100] t_ns=14503579568580 tid=3579 tseq=21 site=8 phase=ENTRY flags={} objseq=0x0 a=[0x3,0x0,0x0,0x7f7f88058048]
+503:  SITE_SLOTS[21] site=8 slot=0 src=reg width=4 index=5 role="exit_status"
+504:  SITE_SLOTS[22] site=8 slot=3 src=stack width=8 index=0 role="return_address"
+## the derived-build G-I record of pre/1df262a tx (runtime dump text)
+/home/user/work/w6/run/c1nat/gi/pre_1df262a_tx/tx.dump.txt:218:ev actor=13 aseq=14 site=37[cf_exit_app_call.before] bind=131664 link=0 t=14453373268504 pc=0x7f2e9a252194 key=tid:1998 v=[0x3,-,-,-] flags=clock,pc
+/home/user/work/w6/run/c1nat/gi/pre_1df262a_tx/tx.dump.txt:219:ev actor=13 aseq=15 site=9[es.exit_app.entry] bind=65680 link=0 t=14453373269259 pc=0x56251f9f0f9d key=tid:1998 v=[0x3,-,-,-] flags=clock,pc

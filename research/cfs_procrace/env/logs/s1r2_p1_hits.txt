@@ -1,0 +1,89 @@
+kz hits /home/user/Shape-Perf/research/cfs_procrace/env/logs/s1r2_p1.kzt
+artifact_sha256 6df021fb65289a278182c9c4e2d49f24215c1babfa9f09ebb943feb58e77b414
+events 629
+sites:
+  site 0  evs.send.entry               events 271
+  site 1  evs.send.ret                 events 271
+  site 2  sb.appid.store               events 1
+  site 3  es.sync.entry                events 7
+  site 4  es.sync.ret                  events 7
+  site 5  osal.task_create.entry       events 24
+  site 6  osal.task_create.ret         events 24
+  site 7  osal.task_entry              events 24
+threads:
+  CF (tid 14757)                           events 19
+  CFE_ES (tid 14662)                       events 43
+  CFE_EVS (tid 14729)                      events 9
+  CFE_SB (tid 14732)                       events 12
+  CFE_TBL (tid 14739)                      events 9
+  CFE_TIME (tid 14744)                     events 21
+  CI_LAB (tid 14753)                       events 9
+  CS (tid 14767)                           events 17
+  DS (tid 14759)                           events 43
+  ES_BG_TASK (tid 14694)                   events 1
+  FM (tid 14760)                           events 13
+  FM_CHILD_TASK (tid 14810)                events 1
+  HK (tid 14761)                           events 23
+  HS (tid 14762)                           events 21
+  LC (tid 14756)                           events 17
+  MD (tid 14766)                           events 17
+  MM (tid 14763)                           events 7
+  SAMPLE_APP (tid 14755)                   events 11
+  SBN (tid 14768)                          events 15
+  SC (tid 14765)                           events 19
+  SCH_LAB (tid 14751)                      events 7
+  TIME_ONEHZ_TASK (tid 14746)              events 1
+  TIME_TONE_TASK (tid 14745)               events 1
+  TO_LAB (tid 14754)                       events 239
+  core-cpu1 (tid 14587)                    events 54
+
+kz hits /home/user/Shape-Perf/research/cfs_procrace/env/logs/s1r2_p1.kzt
+artifact_sha256 6df021fb65289a278182c9c4e2d49f24215c1babfa9f09ebb943feb58e77b414
+events 629
+sites:
+  site 0  evs.send.entry               events 271
+  site 1  evs.send.ret                 events 271
+  site 2  sb.appid.store               events 1
+  site 3  es.sync.entry                events 7
+  site 4  es.sync.ret                  events 7
+  site 5  osal.task_create.entry       events 24
+  site 6  osal.task_create.ret         events 24
+  site 7  osal.task_entry              events 24
+threads:
+  CF (tid 14757)                           events 19
+  CFE_ES (tid 14662)                       events 43
+  CFE_EVS (tid 14729)                      events 9
+  CFE_SB (tid 14732)                       events 12
+  CFE_TBL (tid 14739)                      events 9
+  CFE_TIME (tid 14744)                     events 21
+  CI_LAB (tid 14753)                       events 9
+  CS (tid 14767)                           events 17
+  DS (tid 14759)                           events 43
+  ES_BG_TASK (tid 14694)                   events 1
+  FM (tid 14760)                           events 13
+  FM_CHILD_TASK (tid 14810)                events 1
+  HK (tid 14761)                           events 23
+  HS (tid 14762)                           events 21
+  LC (tid 14756)                           events 17
+  MD (tid 14766)                           events 17
+  MM (tid 14763)                           events 7
+  SAMPLE_APP (tid 14755)                   events 11
+  SBN (tid 14768)                          events 15
+  SC (tid 14765)                           events 19
+  SCH_LAB (tid 14751)                      events 7
+  TIME_ONEHZ_TASK (tid 14746)              events 1
+  TIME_TONE_TASK (tid 14745)               events 1
+  TO_LAB (tid 14754)                       events 239
+  core-cpu1 (tid 14587)                    events 54
+
+first event of site sb.appid.store: index 65, thread CFE_SB (tid 14732), t_ns 11413869213250
+events of site evs.send.entry before the first event of site sb.appid.store: 24
+  by thread name:
+    CFE_ES                               20
+    CFE_EVS                              4
+  by app_id (slot 2):
+    0x0                                  24
+  by status of the paired return:
+    0xc2000003                           24
+    (no return event paired)             0
+note: "before" is the container's merged order (time, CPU, arrival) of one clock; it is evidence, not a happens-before relation.

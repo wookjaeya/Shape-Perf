@@ -1,0 +1,33 @@
+lines 10198 bytes 4206477 sha256 b7bf62bd0f6be578f85fade4499c9d46a4fb51dddd0c626caf876a7b9184fea9
+kz-order-pairs 1
+facts <masked>
+tool kz-static <masked>
+relations rules relations rules revision 12 (2026-11-18); rules with lock handles: relations rules revision 11 (2026-11-16), over LOCK_HANDLES (extract --lock-handles, docs/static_facts.md 5v): 967 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 11, not-static 956, of them no handle found 97); path C rows whose common lock is identified by its handle 0, of them with a static-instance handle 0; rules with result flow: relations rules revision 13 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): 9645 rows (uses: branch 1823, return 717, argument 1478, store 336, other 866, none 1496; guard rows 2929); calls with a result 4680; 11198 rows (open 5543; event send 307, application exit 86, terminal 158; calls on the paths that are none of these, no row: 6206); calls explored 1841, outcomes 5390; rules with object access: relations rules revision 14 (2026-11-19), over OBJECT_ACCESS (extract --object-access, docs/static_facts.md 5x): key texts by source tree 0 (BASIS source_tree items); with RESULT_FLOW and RESULT_EFFECT: the success path, absence origins, holder, alternatives, stored-name buffer and lifetime-end lines; rules with decided call results: relations rules revision 14 (the stored-field rule, judgement rules 8.13 item 17): open effects by reason: branch not decided by the value 4176; other 1884; outcome not enumerated 2771; address-passing calls on stored-location paths 0 (call sites 0): decided 0; not decided: none; call sites decided by the stored-field rule 0 (rows 0)
+order order rules revision 8 (2026-11-19): the complete pair file; order rules revision 5 (2026-11-18); rules with result flow: order rules revision 6 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects 23; caller-side uses of waits 4, HB-await edges to them 116; rules with loop definitions and lock handles: order rules revision 7 (2026-11-18), over LOOP_DEFS and LOCK_HANDLES (extract --loop-defs, --lock-handles, docs/static_facts.md 5v): waits with a predicate through local definitions 1; caller-side budget values through a flag 1; HB-lock edges whose lock is identified by its handle 0
+domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B and C); a pair in one thread has the value same_thread
+columns row_key	path	use_pos	use_function	use_root	other_kind	other_pos	other_function	other_root	value	edges	premises	row_line
+rows 295 pairs 9622 hard_before 1117 conditional_before 0 fixed_early_proved 825 fixed_early_candidate 0 unordered 6489 unknown 173 same_thread 1018 no_pair 21 edges_not_in_tsv 546
+end
+value-counts:
+21	-	no_pair
+49	CFE_ES_BackgroundTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+59	CFE_ES_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+17	CFE_ES_TaskMain (table-walk-entry)	program order of one thread: the event is inside the call 
+64	CFE_EVS_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+61	CFE_SB_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+58	CFE_TBL_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+35	CFE_TIME_Local1HzTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+1	CFE_TIME_TaskMain (table-walk-entry)	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call 
+83	CFE_TIME_TaskMain (table-walk-entry)	program order of one thread: a thread's start precedes every event of its code 
+42	CFE_TIME_TaskMain (table-walk-entry)	program order of one thread: the event is inside the call 
+52	CFE_TIME_Tone1HzTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+1	creator	unordered
+3	creator-not-a-pair(key constants differ)	same_thread
+12	creator-not-a-pair(same actor only)	same_thread
+25	main (process)	program order of one thread: the event is inside the call 
+1	other_kind	value
+825	writer	fixed_early_proved
+1117	writer	hard_before
+1003	writer	same_thread
+173	writer	unknown
+6488	writer	unordered

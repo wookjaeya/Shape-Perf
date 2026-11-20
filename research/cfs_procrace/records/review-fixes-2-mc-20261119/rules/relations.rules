@@ -1,0 +1,44 @@
+# relations.txt of one build: the lines that may differ between the earlier tool (relations rules revision 9, 10, 11) and
+# the rebuilt one (revision 12, 13, 11).  A class is a line label of the relations text; del = lines only in the earlier
+# output, add = lines only in the new one.
+mask	facts-hash	.*	^facts [0-9a-f]{64}$	facts H
+mask	rules-line-revision	.*	^rules relations rules revision [0-9]+ \([0-9-]+\)$	rules relations rules revision R
+del	header:semantics-of-these-facts	.*	^semantics of these facts 
+add	header:semantics-of-these-facts	.*	^semantics of these facts 
+del	header:rules-with-result-flow	.*	^rules with result flow: 
+add	header:rules-with-result-flow	.*	^rules with result flow: 
+del	header:rules-with-lock-handles	.*	^rules with lock handles: 
+add	header:rules-with-lock-handles	.*	^rules with lock handles: 
+del	header:handling-labels	.*	^handling labels 
+add	header:handling-labels	.*	^handling labels 
+del	summary-A	.*	^summary A [0-9]
+add	summary-A	.*	^summary A [0-9]
+del	summary-A-membership-and-creators	.*	^summary A membership and creators 
+add	summary-A-membership-and-creators	.*	^summary A membership and creators 
+del	summary-incomplete	.*	^summary incomplete 
+add	summary-incomplete	.*	^summary incomplete 
+del	namespace:publication-writes-of-the-creator	.*	^      publication writes of the creator 
+add	namespace:publication-writes-of-the-creator	.*	^      publication writes of the creator 
+del	namespace:key-parameter-functions	.*	^      key-parameter functions: 
+add	namespace:key-parameter-functions	.*	^      key-parameter functions: 
+del	namespace:uses	.*	^      uses: 
+add	namespace:uses	.*	^      uses: 
+del	namespace:left-out	.*	^      left out: 
+add	namespace:left-out	.*	^      left out: 
+add	row:key-clearing	.*	^      key clearing: 
+del	row:dependency	.*	^      dependency: path A: 
+add	row:dependency	.*	^      dependency: path A: 
+del	row:creator	.*	^      creator: 
+add	row:creator	.*	^      creator: 
+del	row:not-a-pair	.*	^      not a pair: 
+add	row:not-a-pair	.*	^      not a pair: 
+del	row:callee-check	.*	^      callee-check[ :(]
+add	row:callee-check	.*	^      callee-check[ :(]
+del	row:flip	.*	^      flip: 
+add	row:flip	.*	^      flip: 
+del	row:feasibility	.*	^      feasibility: 
+add	row:feasibility	.*	^      feasibility: 
+del	row:incomplete	.*	^      incomplete: 
+add	row:incomplete	.*	^      incomplete: 
+del	row:layers	.*	^      layers: 
+add	row:layers	.*	^      layers: 

@@ -1,0 +1,11 @@
+# chain_check.py --plan /home/user/Shape-Perf/research/cfs_procrace/kairos/profiles/c5-cfe-6.4.x/instr/sites-641.draft.kzs --build-record /home/user/work/c5tools/build/641/build_instr.record --run-meta /home/user/work/c5run/641/run.meta --build-root /home/user/work/c5tools/build/641/b/cFE-6.4.1-OSS-release --dump-text /home/user/work/c5run/641/cpu1.dump.txt --basis-text /home/user/work/redesign/step2a/tests_8c_fix/c5_641/NP/basis.txt --main build/cpu1/exe/core-linux.bin
+manifest	confirmed	plan=6bd88dcb4439734d build_record=6bd88dcb4439734d run.meta=6bd88dcb4439734d dump=6bd88dcb4439734d
+exe build/cpu1/exe/core-linux.bin	confirmed	record=ad21723204aa4752 tree=ad21723204aa4752 run.meta[build/cpu1/exe/core-linux.bin]=ad21723204aa4752
+exe build/cpu1/exe/cf/apps/sample_app.so	confirmed	record=4d62fc3c54ed55b4 tree=4d62fc3c54ed55b4 run.meta[build/cpu1/exe/cf/apps/sample_app.so]=4d62fc3c54ed55b4
+exe build/cpu1/exe/cf/apps/sample_lib.so	confirmed	record=0ef28ab01c06bb97 tree=0ef28ab01c06bb97 run.meta[build/cpu1/exe/cf/apps/sample_lib.so]=0ef28ab01c06bb97
+exe build/cpu1/exe/cf/apps/ci_lab.so	confirmed	record=4c15e44e83a4b65a tree=4c15e44e83a4b65a run.meta[build/cpu1/exe/cf/apps/ci_lab.so]=4c15e44e83a4b65a
+exe build/cpu1/exe/cf/apps/to_lab.so	confirmed	record=d87c353e6e9fd95f tree=d87c353e6e9fd95f run.meta[build/cpu1/exe/cf/apps/to_lab.so]=d87c353e6e9fd95f
+exe build/cpu1/exe/cf/apps/sch_lab.so	confirmed	record=e4087a9d76420487 tree=e4087a9d76420487 run.meta[build/cpu1/exe/cf/apps/sch_lab.so]=e4087a9d76420487
+facts_build	refused	basis binary.sha256=867499f7546b0ee4 != run main build/cpu1/exe/core-linux.bin=ad21723204aa4752
+same_build	unconfirmed(no build-id in dump)	build-id of build/cpu1/exe/core-linux.bin in the tree=9c8cd965b3fc5c95a5c68e89ddcbc4c856e85c12 dump=none
+chain	refused	8 links

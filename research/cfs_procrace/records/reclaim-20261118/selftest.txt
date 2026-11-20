@@ -1,0 +1,11 @@
+identity_listing rc 0
+# candidate	reference	candidate_row	reference_row	files_candidate	bytes_candidate	allocated_bytes_candidate	files_reference	bytes_reference	same	bytes_same	differs	only_candidate	only_reference	other_candidate	other_reference	empty_dir_candidate	shared_inode	verdict
+same	ref	ROW_C	ROW_R	3	9	8192	3	9	3	9	0	0	0	0	0	0	0	identical-no-extra
+diff	ref	ROW_C	ROW_R	3	9	8192	3	9	2	5	1	0	0	0	0	0	0	not-eligible(1 files differ)
+extra	ref	ROW_C	ROW_R	4	11	12288	3	9	3	9	0	1	0	0	0	0	0	not-eligible(1 entries only in the candidate)
+link	ref	ROW_C	ROW_R	3	9	8192	3	9	3	9	0	0	0	1	0	0	0	not-eligible(1 entries of the candidate are not regular files)
+empty	ref	ROW_C	ROW_R	3	9	8192	3	9	3	9	0	0	0	0	0	1	0	not-eligible(1 empty directories in the candidate)
+hardlink	ref	ROW_C	ROW_R	3	9	8192	3	9	3	9	0	0	0	0	0	0	1	not-eligible(1 files share an inode with the reference)
+# pairs 6; identical-no-extra 1 (files 3, bytes 9, allocated bytes 8192); not eligible 5
+second run into the same output names rc 1 (1 expected: no overwrite)
+selftest: OK

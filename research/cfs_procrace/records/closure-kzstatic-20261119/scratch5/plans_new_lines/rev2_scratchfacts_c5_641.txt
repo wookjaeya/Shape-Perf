@@ -1,0 +1,4 @@
+namespace-layer data=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_cfe-6.4.1.txt sha256=348ce515d9f37c221bd32e6c7414f87f36522999c548f3a284c0ca2247d02161 clear-table=- clear-slot=- rollback=- status-param=- out-param=- delete-finalize=- fill-call=-
+namespace-layer data=/home/user/Shape-Perf/research/cfs_procrace/kairos/semantics/framework_namespaces2_osal-4.1.1.txt sha256=49028355f7abaac19ac5734b9b3331288180e4492068906e5ef05e9bb08e80f9 clear-table=- clear-slot=- rollback=- status-param=- out-param=- delete-finalize=- fill-call=-
+need row 2ebcea15f4e79065 object-delete not-planned reason=plan_missing(no namespace data entry) note="the row's lookup and creators: CFE_ES_DeleteCDS CFE_ES_RegisterCDSEx"
+need row 5494d8cc9c1687f2 object-delete not-planned reason=plan_missing(no namespace data entry) note="the row's lookup and creators: CFE_ES_DeleteCDS CFE_ES_RegisterCDSEx"

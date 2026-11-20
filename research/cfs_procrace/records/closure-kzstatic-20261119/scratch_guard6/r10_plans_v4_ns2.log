@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-plans_v4_ns2 need=120000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-20261119/scripts/scratch6_run.sh plans_v4_ns2
+start 2026-11-19T05:32:54.815Z free=701100032 threshold=434572800
+sample 2026-11-19T05:32:54.820Z 701095936
+sample 2026-11-19T05:32:56.826Z 700321792
+end 2026-11-19T05:32:58.833Z kind=scratch-plans_v4_ns2 verdict=completed rc=0 free=699719680 lowest=699719680 dip=1380352 change=-1380352

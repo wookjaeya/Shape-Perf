@@ -1,0 +1,30 @@
+# c1_pre_tx.txt
+address uses: body followed, no write (discharged)	1
+address uses: copied (not discharged)	3
+address uses: library with an entry (discharged)	5
+address uses: library, no entry or writes (not discharged)	16
+address uses: passed on to a library call (not discharged)	6
+address uses: test (discharged)	4
+address uses: variadic or indirect (not discharged)	1
+buffers	19
+buffers with other writers	8
+buffers: not complete: FIELD_STATUS disabled	11
+buffers: not complete: other writers	8
+causes: address-escape: not discharged	19
+causes: array-element-stores-not-collected: discharged	19
+causes: several-instances: not a cause	19
+causes: untyped writes: not discharged	6
+causes: untyped-in-program: not a cause	13
+causes: writer-function-not-once: not a cause	19
+causes: writer-in-loop: not a cause	4
+lifetime ends: clear-slot	10
+lifetime ends: clear-slot: not shown	10
+lifetime ends: clear-table	5
+lifetime ends: release	1
+lifetime ends: release through a parameter	1
+release-through callers: delete	1
+release-through callers: null pointer	1
+release-through callers: rollback	1
+writer groups: none	30
+writer groups: one partition	11
+writer groups: shared	2

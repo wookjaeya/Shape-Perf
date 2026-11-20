@@ -1,0 +1,4 @@
+# space_guard.sh kind=verify-c1_post_tx need=2000000 floor=314572800 interval=2 cmd=bash research/cfs_procrace/records/closure-c1prep-20261119/boot/run_cycle.sh verify c1_post_tx 0
+start 2026-11-19T15:28:34.170Z free=811626496 threshold=316572800
+sample 2026-11-19T15:28:34.174Z 811622400
+end 2026-11-19T15:28:36.181Z kind=verify-c1_post_tx verdict=completed rc=0 free=811585536 lowest=811585536 dip=40960 change=-40960

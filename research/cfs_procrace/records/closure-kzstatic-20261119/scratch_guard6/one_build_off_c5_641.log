@@ -1,0 +1,14 @@
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static basis --no-profile --compile-db /home/user/work/c5tools/build/641/est/compile_commands.json --build-dir /home/user/work/c5tools/build/641/keep/cFE-6.4.1-OSS-release/build/cpu1 --bundle-root /home/user/work/c5tools/build/641/keep/cFE-6.4.1-OSS-release --recipe /home/user/work/redesign/extract_baseline/inputs/c5_641.kzb --text -o <scratch>/o/s6_off_extract/c5_641/c5_641/NP/basis.kz.partial
+start 2026-11-19T05:29:18.659Z free=935403520 threshold=334572800
+sample 2026-11-19T05:29:18.662Z 935399424
+end 2026-11-19T05:29:20.670Z kind=extract verdict=completed rc=0 free=935337984 lowest=935337984 dip=65536 change=-65536
+# space_guard.sh kind=extract need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static extract --no-profile --basis <scratch>/o/s6_off_extract/c5_641/c5_641/NP/basis.kz.partial --targets-rule R-T1,R-T2 -o <scratch>/o/s6_off_extract/c5_641/c5_641/NP/facts.kz.partial
+start 2026-11-19T05:29:20.676Z free=935337984 threshold=334572800
+sample 2026-11-19T05:29:20.680Z 935337984
+sample 2026-11-19T05:29:22.687Z 935337984
+sample 2026-11-19T05:29:24.693Z 935337984
+end 2026-11-19T05:29:26.700Z kind=extract verdict=completed rc=0 free=930455552 lowest=930455552 dip=4882432 change=-4882432
+# space_guard.sh kind=relations need=20000000 floor=314572800 interval=2 cmd=<scratch>/cb/tools/kz-static/kz-static relations <scratch>/o/s6_off_extract/c5_641/c5_641/NP/facts.kz.partial -o <scratch>/o/s6_off_extract/c5_641/c5_641/NP/relations.txt.partial
+start 2026-11-19T05:29:26.707Z free=930455552 threshold=334572800
+sample 2026-11-19T05:29:26.711Z 930455552
+end 2026-11-19T05:29:28.718Z kind=relations verdict=completed rc=0 free=929587200 lowest=929587200 dip=868352 change=-868352

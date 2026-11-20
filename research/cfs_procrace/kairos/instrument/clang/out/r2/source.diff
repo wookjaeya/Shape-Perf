@@ -1,0 +1,298 @@
+--- a/cfe/modules/es/fsw/src/cfe_es_api.c
++++ b/cfe/modules/es/fsw/src/cfe_es_api.c
+@@ -1199,6 +1199,8 @@
+  * See description in header file for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++#line 1202
+ CFE_Status_t CFE_ES_CreateChildTask(CFE_ES_TaskId_t              *TaskIdPtr,
+                                     const char                   *TaskName,
+                                     CFE_ES_ChildTaskMainFuncPtr_t FunctionPtr,
+@@ -1206,7 +1208,7 @@
+                                     size_t                        StackSize,
+                                     CFE_ES_TaskPriority_Atom_t    Priority,
+                                     uint32                        Flags)
+-{
++{ uint32_t kz_e65537 = kz_rt_obs(63u, 65537u, 0u, 0x3u, (uint64_t)(uintptr_t)(TaskName), (uint64_t)(uintptr_t)(FunctionPtr), 0u, 0u);
+     int32                    ReturnCode;
+     CFE_ES_AppRecord_t      *AppRecPtr;
+     CFE_ES_AppId_t           ParentAppId;
+@@ -1290,7 +1292,7 @@
+         ReturnCode = CFE_ES_StartAppTask(TaskIdPtr, TaskName, FunctionPtr, &Params, ParentAppId);
+     }
+ 
+-    return ReturnCode;
++    { CFE_Status_t kz_r = ( ReturnCode); (void)kz_rt_obs(64u, 65538u, kz_e65537, (0x1u | ((TaskIdPtr != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (TaskIdPtr != 0 ? (uint64_t)(uint32_t)(*TaskIdPtr) : 0u), 0u, 0u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------
+@@ -2145,3 +2147,10 @@
+     }
+     return string;
+ }
++
++/* kz-instr-clang: registration of module 1 */
++static void kz_module_1(void) __attribute__((constructor));
++static void kz_module_1(void)
++{
++    kz_rt_module(1u, 0);
++}
+--- a/cfe/modules/es/fsw/src/cfe_es_apps.c
++++ b/cfe/modules/es/fsw/src/cfe_es_apps.c
+@@ -646,12 +646,14 @@
+  * See description in header file for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++#line 649
+ int32 CFE_ES_StartAppTask(CFE_ES_TaskId_t                *TaskIdPtr,
+                           const char                     *TaskName,
+                           CFE_ES_TaskEntryFuncPtr_t       EntryFunc,
+                           const CFE_ES_TaskStartParams_t *Params,
+                           CFE_ES_AppId_t                  ParentAppId)
+-{
++{ uint32_t kz_e65539 = kz_rt_obs(61u, 65539u, 0u, 0x7u, (uint64_t)(uintptr_t)(TaskName), (uint64_t)(uintptr_t)(EntryFunc), (uint64_t)(uint32_t)(ParentAppId), 0u);
+     CFE_ES_TaskRecord_t *TaskRecPtr;
+     osal_id_t            OsalTaskId = OS_OBJECT_ID_UNDEFINED;
+     CFE_ES_TaskId_t      LocalTaskId;
+@@ -721,7 +723,7 @@
+ 
+     CFE_ES_UnlockSharedData(__func__, __LINE__);
+ 
+-    return ReturnCode;
++    { int32 kz_r = ( ReturnCode); (void)kz_rt_obs(62u, 65540u, kz_e65539, (0x1u | ((TaskIdPtr != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (TaskIdPtr != 0 ? (uint64_t)(uint32_t)(*TaskIdPtr) : 0u), 0u, 0u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------
+--- a/cfe/modules/evs/fsw/src/cfe_evs.c
++++ b/cfe/modules/evs/fsw/src/cfe_evs.c
+@@ -166,12 +166,14 @@
+  * See description in header file for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++#line 169
+ CFE_Status_t CFE_EVS_SendEventWithAppID(uint16                   EventID,
+                                         CFE_EVS_EventType_Enum_t EventType,
+                                         CFE_ES_AppId_t           AppID,
+                                         const char              *Spec,
+                                         ...)
+-{
++{ uint32_t kz_e65541 = kz_rt_obs(57u, 65541u, 0u, 0x7u, (uint64_t)(uint16_t)(EventID), (uint64_t)(uint16_t)(EventType), (uint64_t)(uint32_t)(AppID), 0u);
+     int32              Status = CFE_SUCCESS;
+     CFE_TIME_SysTime_t Time;
+     va_list            Ptr;
+@@ -179,7 +181,7 @@
+ 
+     if (Spec == NULL)
+     {
+-        return CFE_EVS_INVALID_PARAMETER;
++        { CFE_Status_t kz_r = ( CFE_EVS_INVALID_PARAMETER); (void)kz_rt_obs(58u, 65542u, kz_e65541, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_r), 0u, 0u, 0u); return kz_r; }
+     }
+ 
+     AppDataPtr = EVS_GetAppDataByID(AppID);
+@@ -210,7 +212,7 @@
+         }
+     }
+ 
+-    return Status;
++    { CFE_Status_t kz_r = ( Status); (void)kz_rt_obs(58u, 65542u, kz_e65541, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_r), 0u, 0u, 0u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------
+--- a/cfe/modules/sb/fsw/src/cfe_sb_api.c
++++ b/cfe/modules/sb/fsw/src/cfe_sb_api.c
+@@ -92,8 +92,26 @@
+  * See description in header file for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
+-CFE_Status_t CFE_SB_CreatePipe(CFE_SB_PipeId_t *PipeIdPtr, uint16 Depth, const char *PipeName)
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++/* kz-instr-clang call-site taps (variadic callee): CFE_EVS_SendEventWithAppID called by CFE_SB_CreatePipe at cfe_sb_api.c:275:9; binds 65543/65544 */
++static inline uint16 kz_t65543_0(uint32_t *kz_l, uint16 kz_v)
++{
++    *kz_l = kz_rt_obs(50u, 65543u, 0u, 0x1u, (uint64_t)(uint16_t)(kz_v), 0u, 0u, 0u);
++    return kz_v;
++}
++static inline CFE_ES_AppId_t kz_t65543_2(uint32_t *kz_l, CFE_ES_AppId_t kz_v)
++{
++    *kz_l = kz_rt_obs(50u, 65543u, 0u, 0x4u, 0u, 0u, (uint64_t)(uint32_t)(kz_v), 0u);
++    return kz_v;
++}
++static inline CFE_Status_t kz_r65544(const uint32_t *kz_l, CFE_Status_t kz_v)
+ {
++    (void)kz_rt_obs(51u, 65544u, *kz_l, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_v), 0u, 0u, 0u);
++    return kz_v;
++}
++#line 95
++CFE_Status_t CFE_SB_CreatePipe(CFE_SB_PipeId_t *PipeIdPtr, uint16 Depth, const char *PipeName)
++{ uint32_t kz_l65543 = 0u;
+     CFE_ES_AppId_t   AppId;
+     CFE_ES_TaskId_t  TskId;
+     osal_id_t        SysQueueId;
+@@ -272,13 +290,13 @@
+     if (Status == CFE_SUCCESS)
+     {
+         /* send debug event */
+-        CFE_EVS_SendEventWithAppID(CFE_SB_PIPE_ADDED_EID,
++        kz_r65544(&kz_l65543, (CFE_EVS_SendEventWithAppID(kz_t65543_0(&kz_l65543, (CFE_SB_PIPE_ADDED_EID)),
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   kz_t65543_2(&kz_l65543, (CFE_SB_Global.AppId)),
+                                    "Pipe Created:name %s,id %d,app %s",
+                                    PipeName,
+                                    (int)CFE_ResourceId_ToInteger(PendingPipeId),
+-                                   CFE_SB_GetAppTskName(TskId, FullName));
++                                   CFE_SB_GetAppTskName(TskId, FullName))));
+ 
+         /* give the pipe handle to the caller */
+         *PipeIdPtr = CFE_SB_PIPEID_C(PendingPipeId);
+@@ -934,12 +952,29 @@
+  * See description in header file for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
++/* kz-instr-clang call-site taps (variadic callee): CFE_EVS_SendEventWithAppID called by CFE_SB_SubscribeFull at cfe_sb_api.c:1183:9; binds 65545/65546 */
++static inline uint16 kz_t65545_0(uint32_t *kz_l, uint16 kz_v)
++{
++    *kz_l = kz_rt_obs(52u, 65545u, 0u, 0x1u, (uint64_t)(uint16_t)(kz_v), 0u, 0u, 0u);
++    return kz_v;
++}
++static inline CFE_ES_AppId_t kz_t65545_2(uint32_t *kz_l, CFE_ES_AppId_t kz_v)
++{
++    *kz_l = kz_rt_obs(52u, 65545u, 0u, 0x4u, 0u, 0u, (uint64_t)(uint32_t)(kz_v), 0u);
++    return kz_v;
++}
++static inline CFE_Status_t kz_r65546(const uint32_t *kz_l, CFE_Status_t kz_v)
++{
++    (void)kz_rt_obs(53u, 65546u, *kz_l, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_v), 0u, 0u, 0u);
++    return kz_v;
++}
++#line 937
+ int32 CFE_SB_SubscribeFull(CFE_SB_MsgId_t  MsgId,
+                            CFE_SB_PipeId_t PipeId,
+                            CFE_SB_Qos_t    Quality,
+                            uint16          MsgLim,
+                            uint8           Scope)
+-{
++{ uint32_t kz_l65545 = 0u;
+     CFE_SBR_RouteId_t      RouteId;
+     CFE_SB_PipeD_t        *PipeDscPtr;
+     int32                  Status;
+@@ -1180,13 +1215,13 @@
+     /* If no other event pending, send a debug event indicating success */
+     if (Status == CFE_SUCCESS && PendingEventID == 0)
+     {
+-        CFE_EVS_SendEventWithAppID(CFE_SB_SUBSCRIPTION_RCVD_EID,
++        kz_r65546(&kz_l65545, (CFE_EVS_SendEventWithAppID(kz_t65545_0(&kz_l65545, (CFE_SB_SUBSCRIPTION_RCVD_EID)),
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   kz_t65545_2(&kz_l65545, (CFE_SB_Global.AppId)),
+                                    "Subscription Rcvd:MsgId 0x%x on PipeId %lu,app %s",
+                                    (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                    CFE_RESOURCEID_TO_ULONG(PipeId),
+-                                   CFE_SB_GetAppTskName(TskId, FullName));
++                                   CFE_SB_GetAppTskName(TskId, FullName))));
+     }
+ 
+     if (Status == CFE_SUCCESS && Scope == CFE_SB_MSG_GLOBAL)
+--- a/cfe/modules/sb/fsw/src/cfe_sb_priv.c
++++ b/cfe/modules/sb/fsw/src/cfe_sb_priv.c
+@@ -760,10 +760,28 @@
+  * Not invoked outside of this unit
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++/* kz-instr-clang call-site taps (variadic callee): CFE_EVS_SendEventWithAppID called by CFE_SB_MessageTxn_ReportSingleEvent at cfe_sb_priv.c:786:9; binds 65547/65548 */
++static inline uint16 kz_t65547_0(uint32_t *kz_l, uint16 kz_v)
++{
++    *kz_l = kz_rt_obs(54u, 65547u, 0u, 0x1u, (uint64_t)(uint16_t)(kz_v), 0u, 0u, 0u);
++    return kz_v;
++}
++static inline CFE_ES_AppId_t kz_t65547_2(uint32_t *kz_l, CFE_ES_AppId_t kz_v)
++{
++    *kz_l = kz_rt_obs(54u, 65547u, 0u, 0x4u, 0u, 0u, (uint64_t)(uint32_t)(kz_v), 0u);
++    return kz_v;
++}
++static inline CFE_Status_t kz_r65548(const uint32_t *kz_l, CFE_Status_t kz_v)
++{
++    (void)kz_rt_obs(55u, 65548u, *kz_l, 0x1u, (uint64_t)(int64_t)(int32_t)(kz_v), 0u, 0u, 0u);
++    return kz_v;
++}
++#line 763
+ bool CFE_SB_MessageTxn_ReportSingleEvent(const CFE_SB_MessageTxn_State_t *TxnPtr,
+                                          const CFE_SB_PipeSetEntry_t     *ContextPtr,
+                                          uint16                           EventId)
+-{
++{ uint32_t kz_l65547 = 0u;
+     CFE_ES_TaskId_t          TskId;
+     CFE_EVS_EventType_Enum_t EventType;
+     char                     Message[CFE_MISSION_EVS_MAX_MESSAGE_LENGTH];
+@@ -783,7 +801,7 @@
+ 
+     if (EventType > 0 && CFE_SB_RequestToSendEvent(TskId, ReqBit) == CFE_SB_GRANTED)
+     {
+-        CFE_EVS_SendEventWithAppID(EventId, EventType, CFE_SB_Global.AppId, "%s", Message);
++        kz_r65548(&kz_l65547, (CFE_EVS_SendEventWithAppID(kz_t65547_0(&kz_l65547, (EventId)), EventType, kz_t65547_2(&kz_l65547, (CFE_SB_Global.AppId)), "%s", Message)));
+ 
+         /* clear the bit so the task may send this event again */
+         CFE_SB_FinishSendEvent(TskId, ReqBit);
+--- a/cfe/modules/sb/fsw/src/cfe_sb_task.c
++++ b/cfe/modules/sb/fsw/src/cfe_sb_task.c
+@@ -127,6 +127,15 @@
+  * See description in header file for argument/return detail
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++/* kz-instr-clang call-site wrapper: CFE_ES_GetAppID called by CFE_SB_AppInit at cfe_sb_task.c:138:5; binds -/65549 */
++static inline CFE_Status_t kz_w65549(CFE_ES_AppId_t *kz_p0)
++{
++    CFE_Status_t kz_r = CFE_ES_GetAppID(kz_p0);
++    (void)kz_rt_obs(56u, 65549u, 0u, (0x1u | ((kz_p0 != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (kz_p0 != 0 ? (uint64_t)(uint32_t)(*kz_p0) : 0u), 0u, 0u);
++    return kz_r;
++}
++#line 130
+ int32 CFE_SB_AppInit(void)
+ {
+     uint32              CfgFileEventsToFilter = 0;
+@@ -135,7 +144,7 @@
+     char                VersionString[CFE_CFG_MAX_VERSION_STR_LEN];
+ 
+     /* Get the assigned Application ID for the SB Task */
+-    CFE_ES_GetAppID(&CFE_SB_Global.AppId);
++    kz_w65549(&CFE_SB_Global.AppId);
+ 
+     /* Process the platform cfg file events to be filtered */
+     int32 CurrEvent, CurrMask;
+--- a/osal/src/os/shared/src/osapi-task.c
++++ b/osal/src/os/shared/src/osapi-task.c
+@@ -121,8 +121,10 @@
+  *           call the user's intended entry point function.
+  *
+  *-----------------------------------------------------------------*/
++#include "kz_rt.h" /* kz-instr-clang: hook ABI 1 */
++#line 124
+ void OS_TaskEntryPoint(osal_id_t task_id)
+-{
++{ (void)kz_rt_obs(67u, 65552u, 0u, 0x1u, (uint64_t)(uint32_t)(task_id), 0u, 0u, 0u);
+     osal_task_entry task_entry;
+ 
+     if (OS_TaskPrepare(task_id, &task_entry) == OS_SUCCESS)
+@@ -168,7 +170,7 @@
+                     size_t          stack_size,
+                     osal_priority_t priority,
+                     uint32          flags)
+-{
++{ uint32_t kz_e65550 = kz_rt_obs(65u, 65550u, 0u, 0x7u, (uint64_t)(uintptr_t)(task_name), (uint64_t)(uintptr_t)(function_pointer), (uint64_t)(uint8_t)(priority), 0u);
+     int32                      return_code;
+     OS_object_token_t          token;
+     OS_task_internal_record_t *task;
+@@ -207,7 +209,7 @@
+         return_code = OS_ObjectIdFinalizeNew(return_code, &token, task_id);
+     }
+ 
+-    return return_code;
++    { int32 kz_r = ( return_code); (void)kz_rt_obs_str(66u, 65551u, kz_e65550, (0x5u | ((task_id != 0) ? 0x2u : 0u)), (uint64_t)(int64_t)(int32_t)(kz_r), (task_id != 0 ? (uint64_t)(uint32_t)(*task_id) : 0u), (uint64_t)(uintptr_t)(task_name), 0u, 2u, 20u); return kz_r; }
+ }
+ 
+ /*----------------------------------------------------------------

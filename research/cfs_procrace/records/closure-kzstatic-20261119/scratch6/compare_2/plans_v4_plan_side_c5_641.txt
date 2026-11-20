@@ -1,0 +1,9 @@
+diffkinds old_lines=599 new_lines=599 only_old=8 only_new=8 labels=8
+label removed=1 added=1 0|generator tool=kz-static
+label removed=1 added=1 0|input facts
+label removed=1 added=1 0|input basis
+label removed=1 added=1 0|facts-artifact H
+label removed=1 added=1 0|basis-artifact H
+label removed=1 added=1 0|rules plan rules revision N (N-N-N)
+label removed=1 added=1 0|plan-id H
+label removed=1 added=1 0|requests shaN=H

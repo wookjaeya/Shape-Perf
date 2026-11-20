@@ -1,0 +1,26 @@
+# rel6.txt
+address uses: body followed, no write (discharged)	2
+address uses: body writes through it (not discharged)	1
+address uses: copied (not discharged)	1
+address uses: library, no entry or writes (not discharged)	1
+address uses: test (discharged)	2
+buffers	2
+buffers with other writers	1
+buffers: not complete: FIELD_STATUS disabled	1
+buffers: not complete: other writers	1
+causes: address-escape: not discharged	2
+causes: array-element-stores-not-collected: discharged	2
+causes: several-instances: not a cause	2
+causes: untyped-in-program: not a cause	2
+causes: writer-function-not-once: not a cause	2
+lifetime ends: clear-slot	2
+lifetime ends: clear-slot: free-record condition shown	1
+lifetime ends: clear-slot: not shown	1
+lifetime ends: clear-table	1
+lifetime ends: release	1
+lifetime ends: release through a parameter	1
+release-through callers: delete	1
+release-through callers: null pointer	1
+release-through callers: rollback	2
+writer groups: none	2
+writer groups: one partition	2

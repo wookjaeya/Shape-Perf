@@ -1,0 +1,158 @@
+kz-plan-sidecar 2
+generator tool=kz-static tool_sha256=fcfe1aa1bbb8f49aa5c10d55cc9fd06eb4cccdee867a054ba68ff6fc03221f8c tool_source=08b2e2ac20abb3b94f0d3e0cb34f1590574402c31dfd8ec2868f0df6e283af0a core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+input facts sha256=a7164384c8d3618cd133d63cddabffb12805bc328aefcee44e7a8e35aa7ab372 path=<scratch>/kzc5_build/tests/static/work_plan/planv5.kz
+input framework-layer-data sha256=aab16b2f581ecccde0ea72e0305a4399c1deb240b376bf62a5fd33280f69f6e2 path=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv4_framework.txt
+input namespace-data sha256=07cfe4e3e2380c25d4c9b2fb4584def33d53ccfeb53df74372b15ef85952b6e0 path=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt
+input namespace-data sha256=3c2433cfed5725e07bc011897ecf803f7f0d0ce521917b46843bf64abc26c0e3 path=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5t.txt
+facts-artifact a7164384c8d3618cd133d63cddabffb12805bc328aefcee44e7a8e35aa7ab372
+rules plan rules revision 4 (2026-11-18): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart; relations rules revision 12 (2026-11-18)
+manifest-revision 4 (kzs-sites 4)
+plan-id 080c5a01c1f0f68a
+selection observation-set: every row of the relations (method document 3.1, the revised rule: no label and no proof of a row removes it)
+priority method-priority: method priority port revision 1 (2026-11-16): label, order class, reach mark and disposition of the method document's S1 rule over the row text; tier 1 = disposition D07 (label R or J, counterpart, order class RELOC), tier 2 = the other rows of order class RELOC, tier 3 = the rest; within a tier the order of the relations text
+classes rows 5 tier1 2 tier2 3 tier3 0
+budget value=all reason="the test budget" disclosure="none given" planned=5 truncation=0 rows cut (row lines with state cut) unresolved="none" sensitivity="not measured"
+control control selection rule revision 1 (2026-11-16): (a) path A rows with a probe-create handling line, (b) path A rows with a creator site (creator lines and not-a-pair lines of key constants), (a) then (b) in the order of the relations text; planned apart from the tier order (docs/plan_manifest.md section 7)
+control-budget value=all reason="the test control budget" rows=5 (a 0, b 5) planned=5 cut=0 complete=yes unresolved="whether the control rows fit the record pool (no event volume measured)" sensitivity="not measured"
+requests sha256=4232793c9f8b9821c61bea51e77b7d6713b6f6ba5c038401fa7adb0abf3cb949 file=plan.req rows=2 requests=6 planned=4
+namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt entries=2
+namespace-data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5t.txt entries=1
+namespace-layer data=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt sha256=07cfe4e3e2380c25d4c9b2fb4584def33d53ccfeb53df74372b15ef85952b6e0 clear-table=obj_init@planv5.c:109:applies clear-slot=obj_free@planv5.c:77:applies,obj_reset@planv5.c:83:applies rollback=obj_finish:applies status-param=0 out-param=2 delete-finalize=obj_finish_delete:applies fill-call=memset@planv5.c:109
+namespace-layer data=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5t.txt sha256=3c2433cfed5725e07bc011897ecf803f7f0d0ce521917b46843bf64abc26c0e3 clear-table=- clear-slot=- rollback=- status-param=- out-param=- delete-finalize=- fill-call=-
+bound string KZ_RT_STR_MAX=64 source=runtime/include/kz_rt.h:82 reason="the runtime's copy bound; a key text is bounded by the program's own constant length check where the facts show one" truncation="the runtime flags a cut string per value"
+bound string-extent source=ARG_TYPES reason="a key argument that is a character array read at a point that dominates the call is copied at the call within min(its extent, KZ_RT_STR_MAX)"
+bound string-namespace-extent source=namespace-entry extent reason="a key text of a planned row with a namespace-entry line is copied within the extent of the name space's stored name where that is smaller (plan rules revision 5 10.5)" sites=3
+bound slots=4 source=instrument/gcc/kzgcc.cpp build_obs reason="values per event bound by kzgcc 0.3"
+bound sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason="the binding id scheme" sites=44
+param tu-root - (units outside the bundle root are named relative to it)
+param bundle-root -
+row 48f4064d0ad31b0c A1 tier=2 position=3 label=T? fact-label=T class=effect-undetermined order=RELOC reach=REACH-FLIP disposition=D11 state=planned control=b control-state=planned why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+row c4f431270ed3128f A2 tier=1 position=1 label=R fact-label=R class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned control=b control-state=planned why="label R, counterpart, no static order; reach REACH-FLIP"
+row 17a56a69be953c0e A3 tier=2 position=4 label=E fact-label=T? class=absence-undetermined order=RELOC reach=REACH-FLIP disposition=D12 state=planned control=b control-state=planned why="the row gives no absence result; order class RELOC"
+row be08fd4bfcdfd653 A4 tier=1 position=2 label=R fact-label=R class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned control=b control-state=planned why="label R, counterpart, no static order; reach REACH-FLIP"
+row 1d4f1aed1b83ea7f A5 tier=2 position=5 label=T? fact-label=T? class=effect-undetermined order=RELOC reach=REACH-FLIP disposition=D11 state=planned control=b control-state=planned why="the status is tested; the effect of the absence branch is not in the row; order class RELOC"
+site 1 s0001.handling-chain+use-call key="planv5.c|app_init|point|after-call|sem_get|186|col=36|nth=1" refs="row be08fd4bfcdfd653; row c4f431270ed3128f"
+site 2 s0002.use-call key="planv5.c|app_init|point|at-call|sem_get|186|col=36|nth=1" refs="row be08fd4bfcdfd653"
+site 3 s0003.actor-root+actor-start key="planv5.c|app_main|before|||0" refs="actor app_main@planv5.c:199 (spawn-entry); creation planv5.c:216:9 start routine app_main@planv5.c:199"
+site 4 s0004.context-frame key="planv5.c|app_main|point|after-call|app_init|201|col=7|nth=1" refs="row be08fd4bfcdfd653 context 1 frame planv5.c:201:7; row c4f431270ed3128f context 1 frame planv5.c:201:7"
+site 5 s0005.use-call key="planv5.c|app_main|point|after-call|cfg_find|203|col=7|nth=1" refs="row 48f4064d0ad31b0c"
+site 6 s0006.use-call key="planv5.c|app_main|point|after-call|que_get|202|col=7|nth=1" refs="row 1d4f1aed1b83ea7f"
+site 7 s0007.context-frame key="planv5.c|app_main|point|at-call|app_init|201|col=7|nth=1" refs="row be08fd4bfcdfd653 context 1 frame planv5.c:201:7; row c4f431270ed3128f context 1 frame planv5.c:201:7"
+site 8 s0008.use-call key="planv5.c|app_main|point|at-call|cfg_find|203|col=7|nth=1" refs="row 48f4064d0ad31b0c"
+site 9 s0009.handling-chain key="planv5.c|app_main|point|at-call|exit|201|col=28|nth=1" refs="row be08fd4bfcdfd653; row c4f431270ed3128f"
+site 10 s0010.use-call key="planv5.c|app_main|point|at-call|que_get|202|col=7|nth=1" refs="row 1d4f1aed1b83ea7f"
+site 11 s0011.actor-root+actor-start key="planv5.c|cmd_main|before|||0" refs="actor cmd_main@planv5.c:207 (spawn-entry); creation planv5.c:217:9 start routine cmd_main@planv5.c:207"
+site 12 s0012.context-frame key="planv5.c|cmd_main|point|after-call|app_init|209|col=7|nth=1" refs="row be08fd4bfcdfd653 context 2 frame planv5.c:209:7; row c4f431270ed3128f context 2 frame planv5.c:209:7"
+site 13 s0013.context-frame key="planv5.c|cmd_main|point|at-call|app_init|209|col=7|nth=1" refs="row be08fd4bfcdfd653 context 2 frame planv5.c:209:7; row c4f431270ed3128f context 2 frame planv5.c:209:7"
+site 14 s0014.actor-create key="planv5.c|main|point|after-call|pthread_create|215|col=9|nth=1" refs="creation planv5.c:215:9"
+site 15 s0015.actor-create key="planv5.c|main|point|after-call|pthread_create|216|col=9|nth=2" refs="creation planv5.c:216:9"
+site 16 s0016.actor-create key="planv5.c|main|point|after-call|pthread_create|217|col=9|nth=3" refs="creation planv5.c:217:9"
+site 17 s0017.actor-create key="planv5.c|main|point|at-call|pthread_create|215|col=9|nth=1" refs="creation planv5.c:215:9"
+site 18 s0018.actor-create key="planv5.c|main|point|at-call|pthread_create|216|col=9|nth=2" refs="creation planv5.c:216:9"
+site 19 s0019.actor-create key="planv5.c|main|point|at-call|pthread_create|217|col=9|nth=3" refs="creation planv5.c:217:9"
+site 20 s0020.actor-root+actor-start key="planv5.c|maker_main|before|||0" refs="actor maker_main@planv5.c:188 (spawn-entry); creation planv5.c:215:9 start routine maker_main@planv5.c:188"
+site 21 s0021.creator-call key="planv5.c|maker_main|point|after-call|cfg_add|193|col=7|nth=1" refs="row 48f4064d0ad31b0c"
+site 22 s0022.creator-call key="planv5.c|maker_main|point|after-call|que_create|192|col=7|nth=1" refs="row 1d4f1aed1b83ea7f"
+site 23 s0023.creator-call key="planv5.c|maker_main|point|after-call|sem_create|191|col=7|nth=1" refs="row be08fd4bfcdfd653"
+site 24 s0024.creator-call key="planv5.c|maker_main|point|at-call|cfg_add|193|col=7|nth=1" refs="row 48f4064d0ad31b0c"
+site 25 s0025.creator-call key="planv5.c|maker_main|point|at-call|que_create|192|col=7|nth=1" refs="row 1d4f1aed1b83ea7f"
+site 26 s0026.creator-call key="planv5.c|maker_main|point|at-call|sem_create|191|col=7|nth=1" refs="row be08fd4bfcdfd653"
+site 27 s0027.object-clear key="planv5.c|obj_free|effect|store||77" refs="namespace data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 19: layer-op clear-slot obj_free store at planv5.c:77"
+site 28 s0028.object-clear key="planv5.c|obj_init|point|at-call|memset|109|col=23|nth=1" refs="namespace data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 18: layer-op clear-table obj_init fill planv5.c:109:23"
+site 29 s0029.creator-call key="planv5.c|que_create|point|after-call|obj_alloc|148|col=8|nth=1" refs="row 17a56a69be953c0e; row c4f431270ed3128f"
+site 30 s0030.object-rollback key="planv5.c|que_create|point|after-call|obj_finish|152|col=10|nth=1" refs="namespace data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 30: K_QUE rollback in que_create at planv5.c:152:10"
+site 31 s0031.creator-call+key-text+kind-value key="planv5.c|que_create|point|at-call|obj_alloc|148|col=8|nth=1" refs="row 17a56a69be953c0e; row 1d4f1aed1b83ea7f; row 1d4f1aed1b83ea7f K_QUE create que_create layer call planv5.c:148:8; row c4f431270ed3128f"
+site 32 s0032.object-rollback key="planv5.c|que_create|point|at-call|obj_finish|152|col=10|nth=1" refs="namespace data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 30: K_QUE rollback in que_create at planv5.c:152:10"
+site 33 s0033.handling-chain+use-call key="planv5.c|que_get|point|after-call|obj_find|142|col=10|nth=1" refs="row 17a56a69be953c0e"
+site 34 s0034.key-text key="planv5.c|que_get|point|at-call|memchr|141|col=7|nth=1" refs="row 1d4f1aed1b83ea7f"
+site 35 s0035.kind-value+use-call key="planv5.c|que_get|point|at-call|obj_find|142|col=10|nth=1" refs="row 17a56a69be953c0e; row 1d4f1aed1b83ea7f K_QUE lookup que_get layer call planv5.c:142:10"
+site 36 s0036.creator-call key="planv5.c|sem_create|point|after-call|obj_alloc|123|col=8|nth=1" refs="row 17a56a69be953c0e; row c4f431270ed3128f"
+site 37 s0037.object-rollback key="planv5.c|sem_create|point|after-call|obj_finish|127|col=10|nth=1" refs="namespace data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 24: K_SEM rollback in sem_create at planv5.c:127:10"
+site 38 s0038.key-text key="planv5.c|sem_create|point|at-call|name_ok|122|col=7|nth=1" refs="row be08fd4bfcdfd653"
+site 39 s0039.creator-call+kind-value key="planv5.c|sem_create|point|at-call|obj_alloc|123|col=8|nth=1" refs="row 17a56a69be953c0e; row be08fd4bfcdfd653 K_SEM create sem_create layer call planv5.c:123:8; row c4f431270ed3128f"
+site 40 s0040.object-rollback key="planv5.c|sem_create|point|at-call|obj_finish|127|col=10|nth=1" refs="namespace data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 24: K_SEM rollback in sem_create at planv5.c:127:10"
+site 41 s0041.object-delete key="planv5.c|sem_delete|before|||0" refs="namespace data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 28: K_SEM delete sem_delete"
+site 42 s0042.object-delete key="planv5.c|sem_delete|point|after-call|obj_finish_delete|135|col=10|nth=1" refs="namespace data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 28: K_SEM delete sem_delete retire call planv5.c:135:10"
+site 43 s0043.handling-chain+use-call key="planv5.c|sem_get|point|after-call|obj_find|116|col=10|nth=1" refs="row c4f431270ed3128f"
+site 44 s0044.key-text+kind-value+use-call key="planv5.c|sem_get|point|at-call|obj_find|116|col=10|nth=1" refs="row be08fd4bfcdfd653; row be08fd4bfcdfd653 K_SEM lookup sem_get layer call planv5.c:116:10; row c4f431270ed3128f"
+map 17a56a69be953c0e 29 31 33 35 36 39
+map 1d4f1aed1b83ea7f 6 10 22 25 31 34 35
+map 48f4064d0ad31b0c 5 8 21 24
+map be08fd4bfcdfd653 1 2 4 7 9 12 13 23 26 38 39 44
+map c4f431270ed3128f 1 4 7 9 12 13 29 31 36 39 43 44
+need row c4f431270ed3128f context-frame 1 planned reason=- note="" sites=4,7
+need row c4f431270ed3128f context-frame 2 planned reason=- note="" sites=12,13
+need row c4f431270ed3128f use-result planned reason=- note="" sites=43
+need row c4f431270ed3128f event-send not-planned reason=plan_missing(need not planned) note="no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use"
+need row c4f431270ed3128f wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row c4f431270ed3128f lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row be08fd4bfcdfd653 context-frame 1 planned reason=- note="" sites=4,7
+need row be08fd4bfcdfd653 context-frame 2 planned reason=- note="" sites=12,13
+need row be08fd4bfcdfd653 use-result planned reason=- note="" sites=1
+need row be08fd4bfcdfd653 event-send not-planned reason=plan_missing(need not planned) note="no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use"
+need row be08fd4bfcdfd653 wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row be08fd4bfcdfd653 lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 48f4064d0ad31b0c use-result planned reason=- note="" sites=5
+need row 48f4064d0ad31b0c event-send not-planned reason=plan_missing(need not planned) note="no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use"
+need row 48f4064d0ad31b0c wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 48f4064d0ad31b0c lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 17a56a69be953c0e use-result planned reason=- note="" sites=33
+need row 17a56a69be953c0e event-send not-planned reason=plan_missing(need not planned) note="no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use"
+need row 17a56a69be953c0e wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 17a56a69be953c0e lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need row 1d4f1aed1b83ea7f use-result planned reason=- note="" sites=6
+need row 1d4f1aed1b83ea7f event-send not-planned reason=plan_missing(need not planned) note="no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use"
+need row 1d4f1aed1b83ea7f wait-result not-planned reason=plan_missing(need not planned) note="no poll or count-bounded loop (FACT_LOOPS) at or before the row's sites in their functions"
+need row 1d4f1aed1b83ea7f lock-result not-planned reason=plan_missing(no rule of this revision) note="the lock rule of this revision plans the lock calls of path C rows (the creator's and the reader's)"
+need actor app_main@planv5.c:199 (spawn-entry) owner-request not-planned reason=plan_missing(need not planned) note="the facts show no store of a parameter after a spawn of the chain in the spawn's function"
+need actor cmd_main@planv5.c:207 (spawn-entry) owner-request not-planned reason=plan_missing(need not planned) note="the facts show no store of a parameter after a spawn of the chain in the spawn's function"
+need actor maker_main@planv5.c:188 (spawn-entry) owner-request not-planned reason=plan_missing(need not planned) note="the facts show no store of a parameter after a spawn of the chain in the spawn's function"
+need plan stop-event run-loop not-planned reason=plan_missing(need not planned) note="no entry of the framework-layer data matches a file and a definition of the facts"
+need plan stop-event app-exit not-planned reason=plan_missing(need not planned) note="no entry of the framework-layer data matches a file and a definition of the facts"
+need row 48f4064d0ad31b0c object-delete not-planned reason=plan_missing(no lifetime-end entry in the namespace data) note="the matching entries have no delete statement that applies to the build"
+need row 48f4064d0ad31b0c kind-value not-planned reason=plan_missing(no rule of this revision) note="an entry of the table-copy generation has no kind value"
+need row 48f4064d0ad31b0c object-rollback not-planned reason=plan_missing(no lifetime-end entry in the namespace data) note="no rollback statement for the kind"
+need row 48f4064d0ad31b0c object-clear not-planned reason=plan_missing(no lifetime-end entry in the namespace data) note="no layer-op clear statement in the component's data"
+need row c4f431270ed3128f object-delete not-planned reason=plan_missing(no namespace data entry) note="the row's lookup and creators: obj_alloc obj_find"
+need row 17a56a69be953c0e object-delete not-planned reason=plan_missing(no namespace data entry) note="the row's lookup and creators: obj_alloc obj_find"
+need row be08fd4bfcdfd653 object-delete planned reason=- note="" sites=41,42
+need row be08fd4bfcdfd653 kind-value planned reason=- note="" sites=39,44
+need row be08fd4bfcdfd653 object-rollback planned reason=- note="" sites=37,40
+need row be08fd4bfcdfd653 object-clear planned reason=- note="" sites=27,28
+need row 1d4f1aed1b83ea7f object-delete not-planned reason=plan_missing(no lifetime-end entry in the namespace data) note="the matching entries have no delete statement that applies to the build"
+need row 1d4f1aed1b83ea7f kind-value planned reason=- note="" sites=31,35
+need row 1d4f1aed1b83ea7f object-rollback planned reason=- note="" sites=30,32
+need row 1d4f1aed1b83ea7f object-clear planned reason=- note="" sites=27,28
+gap row c4f431270ed3128f "key text of obj_alloc parameter 1: no non-null test of it before a call in the facts; recorded as a pointer" reason=record_insufficient(key text) rule=key-text
+gap row 48f4064d0ad31b0c "key text of cfg_find parameter 1: no non-null test of it before a call in the facts; recorded as a pointer" reason=record_insufficient(key text) rule=key-text
+gap row 48f4064d0ad31b0c "key text of cfg_add parameter 0: no non-null test of it before a call in the facts; recorded as a pointer" reason=record_insufficient(key text) rule=key-text
+gap row 17a56a69be953c0e "key text of obj_alloc parameter 1: no non-null test of it before a call in the facts; recorded as a pointer" reason=record_insufficient(key text) rule=key-text
+gap creation planv5.c:215:9 "creation argument 0 for the roots maker_main@planv5.c:188" reason=link_unlinked(no creation-argument channel) rule=actor
+gap creation planv5.c:216:9 "creation argument 0 for the roots app_main@planv5.c:199" reason=link_unlinked(no creation-argument channel) rule=actor
+gap creation planv5.c:217:9 "creation argument 0 for the roots cmd_main@planv5.c:207" reason=link_unlinked(no creation-argument channel) rule=actor
+creation planv5.c:215:9 roots maker_main@planv5.c:188; start routines maker_main@planv5.c:188; tie: none (one constant argument)
+creation planv5.c:216:9 roots app_main@planv5.c:199; start routines app_main@planv5.c:199; tie: none (one constant argument)
+creation planv5.c:217:9 roots cmd_main@planv5.c:207; start routines cmd_main@planv5.c:207; tie: none (one constant argument)
+lifetime K_QUE clear-slot obj_free planv5.c:69 data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 19: applies; store at planv5.c:77; relations: lifetime end [shared by partitions {} {1} {2}]: clear-slot planv5.c:77:15 in obj_free@planv5.c:69: not shown (the store's guard (ge local:r 0) tests no active field of the record (Com.act == 0)) sites=27
+lifetime K_QUE clear-slot obj_reset planv5.c:82 data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 20: not-a-lifetime-end(lifetime end [no key-parameter function reaches obj_reset@planv5.c:82]: clear-slot planv5.c:83:25 in obj_reset@planv5.c:82: free-record condition shown ((eq field:Com.act 0); planv5.c:83:25))
+lifetime K_QUE clear-table obj_init planv5.c:109 data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 18: applies; fill memset@planv5.c:109 sites=28
+lifetime K_QUE rollback que_create planv5.c:145 data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 33: applies; create-finalize obj_finish at planv5.c:152:10, status arg0, out arg2; reentry=none sites=30,32
+lifetime K_SEM clear-slot obj_free planv5.c:69 data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 19: applies; store at planv5.c:77; relations: lifetime end [shared by partitions {} {1} {2}]: clear-slot planv5.c:77:15 in obj_free@planv5.c:69: not shown (the store's guard (ge local:r 0) tests no active field of the record (Com.act == 0)) sites=27
+lifetime K_SEM clear-slot obj_reset planv5.c:82 data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 20: not-a-lifetime-end(lifetime end [no key-parameter function reaches obj_reset@planv5.c:82]: clear-slot planv5.c:83:25 in obj_reset@planv5.c:82: free-record condition shown ((eq field:Com.act 0); planv5.c:83:25))
+lifetime K_SEM clear-table obj_init planv5.c:109 data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 18: applies; fill memset@planv5.c:109 sites=28
+lifetime K_SEM delete sem_delete planv5.c:132 data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 28: applies sites=41,42
+lifetime K_SEM rollback sem_create planv5.c:119 data /home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt line 27: applies; create-finalize obj_finish at planv5.c:127:10, status arg0, out arg2; reentry=none sites=37,40
+lifetime-complete kind=K_QUE no(no delete statement)
+lifetime-complete kind=K_SEM yes
+lifetime-complete kind=cfgs[].key no(no delete statement; no rollback statement; no layer-op statement)
+namespace-entry row=48f4064d0ad31b0c data=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5t.txt sha256=3c2433cfed5725e07bc011897ecf803f7f0d0ce521917b46843bf64abc26c0e3 line=10 kind=cfgs[].key value=- kind-at=- lookup=cfg_find:applies create=cfg_add:applies compare=cfg_find:applies compare-call=strncmp@planv5.c:162 stored-name=Cfg.key decl=planv5.c:47 extent=NAMELEN extent-value=12 extent-source=FIELD_TYPES copy-call=strncpy@planv5.c:175 length-call=- success-path=cfg_add:missing
+namespace-entry row=be08fd4bfcdfd653 data=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt sha256=07cfe4e3e2380c25d4c9b2fb4584def33d53ccfeb53df74372b15ef85952b6e0 line=24 kind=K_SEM value=1 kind-at=planv5.c:24 lookup=sem_get:applies create=sem_create:applies compare=obj_find:applies compare-call=strcmp@planv5.c:61 stored-name=Sem.name decl=planv5.c:39 extent=NAMELEN extent-value=12 extent-source=FIELD_TYPES copy-call=strncpy@planv5.c:125 length-call=memchr@planv5.c:112 success-path=sem_create:held
+namespace-entry row=1d4f1aed1b83ea7f data=/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/data/planv5_fixture/framework_namespaces2_fixture-v5.txt sha256=07cfe4e3e2380c25d4c9b2fb4584def33d53ccfeb53df74372b15ef85952b6e0 line=30 kind=K_QUE value=2 kind-at=planv5.c:25 lookup=que_get:applies create=que_create:applies compare=obj_find:applies compare-call=strcmp@planv5.c:61 stored-name=Que.name decl=planv5.c:43 extent=NAMELEN extent-value=12 extent-source=FIELD_TYPES copy-call=strncpy@planv5.c:150 length-call=memchr@planv5.c:141 success-path=que_create:held
+context row=c4f431270ed3128f id=1 frame=7,4 chain="app_main@planv5.c:199@planv5.c:201:7 <- app_init@planv5.c:186@planv5.c:186:36 <- sem_get@planv5.c:116:10"
+context row=c4f431270ed3128f id=2 frame=13,12 chain="cmd_main@planv5.c:207@planv5.c:209:7 <- app_init@planv5.c:186@planv5.c:186:36 <- sem_get@planv5.c:116:10"
+context row=be08fd4bfcdfd653 id=1 frame=7,4 chain="app_main@planv5.c:199@planv5.c:201:7 <- app_init@planv5.c:186@planv5.c:186:36"
+context row=be08fd4bfcdfd653 id=2 frame=13,12 chain="cmd_main@planv5.c:207@planv5.c:209:7 <- app_init@planv5.c:186@planv5.c:186:36"
+spawn 17 wrapper=kz_rt_posix_create P0 thread-creation entry pthread_create: start routine argument 2, creation argument 3, thread handle out argument 0 (P0_TABLE)
+spawn 18 wrapper=kz_rt_posix_create P0 thread-creation entry pthread_create: start routine argument 2, creation argument 3, thread handle out argument 0 (P0_TABLE)
+spawn 19 wrapper=kz_rt_posix_create P0 thread-creation entry pthread_create: start routine argument 2, creation argument 3, thread handle out argument 0 (P0_TABLE)
+default-module 1 program

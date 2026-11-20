@@ -1,0 +1,6 @@
+# archive.sh objacc_on_extract records/object-access-20261116/objacc_on_extract.sha256 2026-11-19T13:50:02Z
+1. directory = list: 50 files, 53971697 bytes (apparent), 54153216 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/objacc_on_extract/objacc_on_extract.tar.xz 3821736 bytes sha256 1c12969265f1cde0285573ff8cb6340994c5fcbd941045ad3bb65a90346bb9b1
+4. round trip: 50 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/objacc_on_extract removed 2026-11-19T13:50:15Z
+PASS

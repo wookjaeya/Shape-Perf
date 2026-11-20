@@ -1,0 +1,68 @@
+# kz-llvm: the analysis layer that links LLVM and Clang (SPEC 4.1, 4.2).  Built only with
+# -DKZ_BUILD_LLVM_TOOLS=ON (the top-level CMakeLists skips this directory otherwise).
+#
+#   model, spec, finalize, serialize, facts_text    no Clang types: the facts model, what to look
+#                                                   for, whole-program resolution, the KZ
+#                                                   container, the text view
+#   p0, wrappers                                    no Clang types: the built-in table of library
+#                                                   primitives and the operations the profile-free
+#                                                   mode derives from it through wrappers
+#   argflow                                         no Clang types: the whole-program part of the
+#                                                   extended facts F4 and F6
+#   lockset                                         no Clang types: F5 LOCKSET and the writer-set and
+#                                                   L1 (i) rules that do not depend on the targets
+#   target_rules                                    no Clang types: the targets the profile-free mode
+#                                                   chooses by rule (R-T1, R-T2)
+#   relations                                       no Clang types: `kz-static relations` (paths A/B/C,
+#                                                   the outcome-flip signal) over a facts container,
+#                                                   rows as records with a use-site key
+#   rel_facts                                       no Clang types: the facts the relation rules read,
+#                                                   loaded and indexed once, with the static actors
+#   plan_gen                                        no Clang types: `kz-static plan`, the observation plan
+#                                                   derived by rule from the relations rows
+#   order                                           no Clang types: `kz-static order`, the order edges with
+#                                                   kinds and premises and the static order of each row
+#   semantics                                       no Clang types: the semantics data files and the SEMANTICS
+#                                                   rows they give a build (extract --semantics)
+#   result_flow                                     no Clang types: the values each function may return, for the
+#                                                   outcome classes of extract --result-flow
+#   ast_*                                           the Clang front end of the extraction
+#   basis_*                                         the analysis basis B (SPEC 1.7)
+add_library(kz-llvm STATIC
+  model.cpp
+  spec.cpp
+  p0.cpp
+  wrappers.cpp
+  finalize.cpp
+  argflow.cpp
+  lockset.cpp
+  target_rules.cpp
+  serialize.cpp
+  facts_text.cpp
+  facts_query.cpp
+  rel_facts.cpp
+  relations.cpp
+  semantics.cpp
+  result_flow.cpp
+  plan_gen.cpp
+  order.cpp
+  unroll.cpp
+  elf_info.cpp
+  linkset.cpp
+  gitrev.cpp
+  recipe.cpp
+  profile_load.cpp
+  basis.cpp
+  ast_tu.cpp
+  ast_fn.cpp
+  ast_run.cpp
+  ast_basis.cpp)
+target_include_directories(kz-llvm PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(kz-llvm PUBLIC kz-core clangTooling clangFrontend clangAnalysis clangAST clangLex clangBasic)
+kz_use_llvm(kz-llvm)
+kz_apply_settings(kz-llvm)
+
+# gcc 13 reports a false 'this pointer is null' (-Wnonnull) from Clang's RecursiveASTVisitor
+# (LazyOffsetPtr::get, inlined into TraverseCXXRecordHelper) in code that instantiates the visitor.
+# The warning is in the LLVM headers, not in Kairos code; it is switched off for gcc only.
+target_compile_options(kz-llvm PRIVATE "$<$<CXX_COMPILER_ID:GNU>:-Wno-nonnull>")

@@ -1,0 +1,25 @@
+OK c1_pre_tx check_extract: only declared differences
+OK c1_pre_tx compare_build: not allowed 0
+OK c1_pre_tx relations.txt of the re-extraction same apart from line 2
+OK c1_pre_tx order.txt on the re-extraction same apart from line 2
+OK c1_pre_tx edges.tsv on the re-extraction same
+OK c1_post_tx check_extract: only declared differences
+OK c1_post_tx compare_build: not allowed 0
+OK c1_post_tx relations.txt of the re-extraction same apart from line 2
+OK c1_post_tx order.txt on the re-extraction same apart from line 2
+OK c1_post_tx edges.tsv on the re-extraction same
+OK r2_core check_extract: only declared differences
+OK r2_core compare_build: not allowed 0
+OK r2_core relations.txt of the re-extraction same apart from line 2
+OK r2_core order.txt on the re-extraction same apart from line 2
+OK r2_core edges.tsv on the re-extraction same
+OK c5_641 check_extract: only declared differences
+OK c5_641 compare_build: not allowed 0
+OK c5_641 relations.txt of the re-extraction same apart from line 2
+OK c5_641 order.txt on the re-extraction same apart from line 2
+OK c5_641 edges.tsv on the re-extraction same
+OK c5_642 check_extract: only declared differences
+OK c5_642 compare_build: not allowed 0
+OK c5_642 relations.txt of the re-extraction same apart from line 2
+OK c5_642 order.txt on the re-extraction same apart from line 2
+OK c5_642 edges.tsv on the re-extraction same

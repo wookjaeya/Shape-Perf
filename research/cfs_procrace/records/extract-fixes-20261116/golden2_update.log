@@ -1,0 +1,11 @@
+Test project /home/user/work/merge-check/kz-llvm
+    Start 242: static_golden_anonrec_np
+1/1 Test #242: static_golden_anonrec_np .........   Passed    0.09 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+golden    =   0.09 sec*proc (1 test)
+static    =   0.09 sec*proc (1 test)
+
+Total Test time (real) =   0.09 sec

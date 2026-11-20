@@ -1,0 +1,47 @@
+# MC tree before the build (2026-11-19T01:34:00Z), HEAD 95ce80e6aa7e063442748ed8c05442270958d979
+bc2f43b405fb16bfe8a12974af2be70ce2600dd43aa5550bff1c5600e1a996da  CMakeCache.txt
+== tools/kz-static/kz-static 1a47abd05b8289bce90e6da8906d3b84d9bec48befc99634295d5350cd261086 213484504 B
+tool=kz-static
+tool_sha256=b6a64d836fa32f4ff18fdbf5cc0fc8379dc67b251ed7d7ee63ec6301f54db8b4
+tool_source=88806cfe654000efe3f07518af0cc5270eb23a9f58c35c77977b83c4abc63f78
+core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+schema_revision=12
+schema_fingerprint=6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd
+== tools/kz/kz fd40bc4dc76939abbd3a03ae1d3a6fbe5d387f49625e8b74f9066d13e0c140fe 77211200 B
+tool=kz
+tool_sha256=80064cc33906bda52b2cf6397c45327973fa435b392739f6c65f18873ae14b49
+tool_source=500185a619fd0bc0921e5563b9dfaae7f0e344a410669b5cadbc3acf0100d4cf
+core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+schema_revision=12
+schema_fingerprint=6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd
+== tools/kz-dump/kz-dump 32a96ae7138fd71c9efd63d0439021cae044c4045b6a9557b659e1e1911c0438 2583144 B
+tool=kz-dump
+tool_sha256=c5e70435233f9832514210a124948b57501ef4bfca82e9b190e95774f3584504
+tool_source=21cc60f2cd17b27f8b0831c34ab6e5ef4cdfa649ad012b44ac880e0725a7ce02
+core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+schema_revision=12
+schema_fingerprint=6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd
+== tools/kz-phi/kz-phi df79fb82f962e69fdd29493cf9fd664feae38e370aa3578697227109cf1d59e2 28720024 B
+tool=kz-phi
+tool_sha256=7792f19bd4f3a57fae9c9ea614b12cd6eba93dd345ed547822f27844b0ed68f2
+tool_source=4a234a89c792b28ee1eafc71611cc70b325aaabeafa837285699fd693d63832d
+core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+schema_revision=12
+schema_fingerprint=6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd
+== tests/lint/kz_lint 3d4d5a8faf6995d367ba428412f3d373615d064f45e009e9fb3a907ec38e91e5 4306808 B
+usage: kz_lint <rule> <root> --data <dir> | --selftest --data <dir>
+== runtime/kz-rt-dump 40e23d4db230806c08742f7a33da5abda67dce7eb6e0f2d81532d890cb859ddc 3494088 B
+usage: kz-rt-dump [--manifest <kzs-sites file>]... [--plan <kzrt-plan file>] [--events-only] <dump-file>
+       kz-rt-dump --recover <store file> --out <dump-file> [--signal <n> | --exit-status <n>] [--manifest ...] [--plan ...] [--events-only]
+== instrument/clang/kz-instr-clang 36becd040abec0b0bd302d59ae26b88252ad1e7c65ad1fb26cc31c5da86343f6 97334248 B
+kz-instr-clang: unknown or incomplete argument --identity
+usage: kz-instr-clang --sites <logical.kzs> (--db <compile_commands.json>... | --fixed <dir> -- <args>)
+                      --map <from>=<to>... --module <id>=<path-part>|*... [--exclude <text>]...
+                      [--resource-dir <dir>] [--backend <name>] --binds-out <file> --report-out <file>
+== scratch check build kz-static (<scratch>/sbuild, Release): file sha256 8763d7e75c0afcb7942c61a810825bc10de3b3d6793c5a3d343dc14969dbc099
+tool=kz-static
+tool_sha256=73c3491cead05ce1f4f6adb999970a41e680569182848a644646fca65613ecff
+tool_source=2b8834da4c83efe08b12d090bf2db4b269edf14d67fac0b8da25cc3ef012c13b
+core_source=568e5061e6092557602716e123e6ad63e124336904dcbf34d94eaba432119920
+schema_revision=12
+schema_fingerprint=6fbff6c6c6044d07158109057b05cbcd358bd319e79219f259cfac656b3c8ebd

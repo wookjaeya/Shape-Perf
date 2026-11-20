@@ -1,0 +1,8 @@
+diffkinds old_lines=1055 new_lines=1055 only_old=11 only_new=11 labels=7
+label removed=1 added=1 0|generator tool=kz-static
+label removed=1 added=1 0|input facts
+label removed=1 added=1 0|input basis
+label removed=1 added=1 0|facts-artifact H
+label removed=1 added=1 0|basis-artifact H
+label removed=3 added=3 0|row H
+label removed=3 added=3 0|need row

@@ -1,0 +1,4 @@
+# space_guard.sh kind=archive need=20000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-space-20261119/archive.sh revfix_on_extract records/review-fixes-20261116/revfix_on_extract.sha256
+start 2026-11-19T13:52:22.577Z free=1031942144 threshold=334572800
+sample 2026-11-19T13:52:22.581Z 1031938048
+end 2026-11-19T13:52:24.588Z kind=archive verdict=completed rc=0 free=1046458368 lowest=1031938048 dip=4096 change=14516224

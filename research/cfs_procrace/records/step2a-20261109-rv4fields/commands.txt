@@ -1,0 +1,32 @@
+# step2a-20261109-rv4fields: 명령, rc, 여유(df -B1 /, Available 바이트)
+# <scratchpad>는 이 세션의 scratchpad 디렉터리다. 거기 둔 측정용 파일은 끝에 지웠다.
+
+## 측정 (허용표의 fields 열을 정하려고)
+# 표의 changed 항목에 임시 값 MEASURE를 두고, 같은 여섯 단계를 <scratchpad>/f1/m1 에 돌렸다(rc 1, 예상대로).
+# 비교 출력의 "fields SECTION changed {..} key K: n" 줄을 모아 항목을 필드 서명마다 나눴다(<scratchpad>/f1/mktable.py).
+# 기존 항목의 빌드별 수와 서명별 수의 합이 모두 같았다. V0와 V2의 수도 같았다. 측정 디렉터리는 지웠다.
+
+## 실행
+O=/home/user/work/redesign/step2a/tests_rv4f        # 새 디렉터리 (없을 때만 만든다)
+mkdir -p $O/<build>; ln -s /home/user/work/redesign/step2a/tests_rv4/<build>/NP $O/<build>/NP   # 다섯 빌드
+for st in identity npsame s5same fixsame fix2same fix3same; do
+  env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools \
+    bash $R/env/redesign/step2a_tests.sh $st $O
+done                                                  # rc 0 0 0 0 0 0
+free: 앞 851,922,944 (11:39:40Z), 뒤 828,579,840 (11:41:19Z); 가장 낮은 값 828,579,840 (df.log)
+
+## 실행 뒤 점검
+sha256sum -c --quiet T/sha256.txt                     -> rc 0 (T/ 그대로; T/status.txt 없음)
+sha256sum -c --quiet tests_rv4/sha256.txt             -> rc 0 (T_RV4 그대로)
+grep '^FAIL' $O/status.txt                            -> 0줄
+verdict 줄: npsame s5same fixsame fix2same fix3same 다섯씩 PASS; identity 레코드 12 + show 텍스트 6 PASS
+changed/added/removed 수: AR 14.4와 같음(빌드마다, 단계마다)
+첫 두 줄(옛 드라이버의 줄): 다섯 비교 단계 모두 T_RV4와 같음
+cmp 파일마다 (compare_rv4.tsv)                        -> 같음 65, 다름 7: npsame·s5same·fixsame·fix2same·fix3same·identity 텍스트(필드 줄이 더해짐), run.log(identity의 one() 여섯 줄; 시간 칸 말고 같음)
+
+## 단위 점검
+TMPDIR=<scratchpad>/f1/unit/tmp bash env/redesign/step2a_tests_unit.sh -> unit_new.txt, 6 of 6, rc 0 (임시 디렉터리는 스크립트가 지움)
+# 점검 5의 결함을 따로 재현(<scratchpad>, 지움): FIELD_STATUS 옛 status_field=complete flags={}, 새 status_field=INCOMPLETE
+# flags={array-element-stores-not-collected}, 항목 키 flags=...array-element-stores-not-collected:
+#   c4fe9db의 compare_records (표 10칸) -> verdict PASS, rc 0
+#   이 판 (fields=flags)                -> UNEXPECTED FIELDS {flags,status_field}, verdict FAIL, rc 1

@@ -1,0 +1,3 @@
+# FIELD_STATUS rows of c1_pre_tx (view of rf2_final_extract facts, same FIELD_STATUS section as the scratch re-extraction) that carry array-element-stores-not-collected, and how many of them have no other cause (what an extraction change dropping that flag under --object-access would move; not made in this step)
+rows with the flag 185; of them no own hit (per-field would be complete) 33; of those, type-level also without the other-field and untyped cause 27
+examples: BP_FlowStats_t.Name, CFE_ES_HousekeepingTlm_Payload_t.PerfFilterMask, CFE_ES_HousekeepingTlm_Payload_t.PerfTriggerMask, CFE_SB_Global_t.StopRecurseFlags, CFE_TBL_HousekeepingTlm_Payload_t.LastFileDumped

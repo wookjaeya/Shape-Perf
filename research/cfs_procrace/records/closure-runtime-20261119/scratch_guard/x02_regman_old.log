@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-bind need=52428800 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-runtime-20261119/scripts/regress_manifest.sh <scratch>/rm_old /home/user/work/c5tools/plugin-build/kzgcc.so
+start 2026-11-19T07:24:50.436Z free=682557440 threshold=367001600
+sample 2026-11-19T07:24:50.441Z 682553344
+end 2026-11-19T07:24:52.448Z kind=scratch-bind verdict=completed rc=0 free=682209280 lowest=682209280 dip=348160 change=-348160

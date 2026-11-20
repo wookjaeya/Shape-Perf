@@ -1,0 +1,83 @@
+## host snapshot: before runtest (2026-10-08T02:07:44.591Z)
+loadavg: 0.94 0.56 0.50 2/112 1397
+ipcs:
+  
+  ------ Message Queues --------
+  key        msqid      owner      perms      used-bytes   messages    
+  
+  ------ Shared Memory Segments --------
+  key        shmid      owner      perms      bytes      nattch     status      
+  
+  ------ Semaphore Arrays --------
+  key        semid      owner      perms      nsems     
+  
+dev_shm:
+  total 0
+  drwxrwxrwt 7 root   root    140 2026-10-08 01:45:52.924455336 +0000 .
+  drwxr-xr-x 6 root   root   2260 2026-10-08 01:05:21.960817874 +0000 ..
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:44:32.956957624 +0000 osal:RAM
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.950596053 +0000 osal:RAM3
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.920962378 +0000 osal:RAM4
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.920962378 +0000 osal:RAM5
+  drwx------ 2 root   root     40 2026-10-08 01:05:21.960817874 +0000 rclone-vfscache
+dev_shm_osal_contents:
+  /dev/shm/osal:RAM: total 0
+  /dev/shm/osal:RAM: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:44:32.956957624 +0000 .
+  /dev/shm/osal:RAM: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM3: total 0
+  /dev/shm/osal:RAM3: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.950596053 +0000 .
+  /dev/shm/osal:RAM3: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM4: total 0
+  /dev/shm/osal:RAM4: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.920962378 +0000 .
+  /dev/shm/osal:RAM4: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM5: total 0
+  /dev/shm/osal:RAM5: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.920962378 +0000 .
+  /dev/shm/osal:RAM5: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+udp_sockets (lsof -nP -iUDP; empty = none):
+processes_of_ubuntu:
+    PID  PPID                  STARTED COMMAND         COMMAND
+## isolation check before runtest: no conflicting activity found
+## host snapshot: after runtest (2026-10-08T02:08:46.426Z)
+loadavg: 0.49 0.51 0.49 1/109 3314
+ipcs:
+  
+  ------ Message Queues --------
+  key        msqid      owner      perms      used-bytes   messages    
+  
+  ------ Shared Memory Segments --------
+  key        shmid      owner      perms      bytes      nattch     status      
+  
+  ------ Semaphore Arrays --------
+  key        semid      owner      perms      nsems     
+  
+dev_shm:
+  total 0
+  drwxrwxrwt 7 root   root    140 2026-10-08 01:45:52.924455336 +0000 .
+  drwxr-xr-x 6 root   root   2260 2026-10-08 01:05:21.960817874 +0000 ..
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 02:08:16.633610085 +0000 osal:RAM
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.950596053 +0000 osal:RAM3
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.920962378 +0000 osal:RAM4
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 01:45:52.920962378 +0000 osal:RAM5
+  drwx------ 2 root   root     40 2026-10-08 01:05:21.960817874 +0000 rclone-vfscache
+dev_shm_osal_contents:
+  /dev/shm/osal:RAM: total 0
+  /dev/shm/osal:RAM: drwx------ 2 ubuntu ubuntu  40 2026-10-08 02:08:16.633610085 +0000 .
+  /dev/shm/osal:RAM: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM3: total 0
+  /dev/shm/osal:RAM3: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.950596053 +0000 .
+  /dev/shm/osal:RAM3: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM4: total 0
+  /dev/shm/osal:RAM4: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.920962378 +0000 .
+  /dev/shm/osal:RAM4: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+  /dev/shm/osal:RAM5: total 0
+  /dev/shm/osal:RAM5: drwx------ 2 ubuntu ubuntu  40 2026-10-08 01:45:52.920962378 +0000 .
+  /dev/shm/osal:RAM5: drwxrwxrwt 7 root   root   140 2026-10-08 01:45:52.924455336 +0000 ..
+udp_sockets (lsof -nP -iUDP; empty = none):
+processes_of_ubuntu:
+    PID  PPID                  STARTED COMMAND         COMMAND
+## test results (2026-10-08T02:08:46.483Z)
+tests listed in test-list.json: 198
+passed (<name>.log present): 68
+failed or not completed (<name>.log.tmp left behind, local-test.mk L26-31):
+  network-api-test.log.tmp
+all_tests_complete.stamp: absent

@@ -1,0 +1,42 @@
+# derive_c1.sh check pre 1df262a 2026-11-16T07:40:31Z
+objects: 261, differing: 35
+units with sites (binding files): 33
+differs (instrumented unit): ./apps/bp/CMakeFiles/bp.dir/fsw/src/bp_app.c.o
+differs (instrumented unit): ./apps/bp/CMakeFiles/bp.dir/fsw/src/bp_cla_bundle_io.c.o
+differs (instrumented unit): ./apps/bp/CMakeFiles/bp.dir/fsw/src/bp_flow.c.o
+differs (instrumented unit): ./apps/cf/CMakeFiles/cf.dir/fsw/src/cf_app.c.o
+differs (instrumented unit): ./apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp.c.o
+differs (instrumented unit): ./apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp_r.c.o
+differs (instrumented unit): ./apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp_s.c.o
+differs (instrumented unit): ./apps/ci_lab/CMakeFiles/ci_lab.dir/fsw/src/ci_lab_app.c.o
+differs (instrumented unit): ./apps/sch_lab/CMakeFiles/sch_lab.dir/fsw/src/sch_lab_app.c.o
+differs (instrumented unit): ./apps/to_lab/CMakeFiles/to_lab.dir/fsw/src/to_lab_app.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_api.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_apps.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_backgroundtask.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_perf.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_start.c.o
+differs (instrumented unit): ./es/CMakeFiles/es.dir/fsw/src/cfe_es_task.c.o
+differs (instrumented unit): ./evs/CMakeFiles/evs.dir/fsw/src/cfe_evs_log.c.o
+differs (instrumented unit): ./evs/CMakeFiles/evs.dir/fsw/src/cfe_evs_task.c.o
+differs (instrumented unit): ./fs/CMakeFiles/fs.dir/fsw/src/cfe_fs_api.c.o
+differs (instrumented unit): ./osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-countsem.c.o
+differs (instrumented unit): ./osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-filesys.c.o
+differs (instrumented unit): ./osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-module.c.o
+differs (instrumented unit): ./osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-tasks.c.o
+differs (D4 build date/user/host): ./rx/CMakeFiles/core-rx.dir/cfe_build_env_table.c.o
+differs (instrumented unit): ./sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_api.c.o
+differs (instrumented unit): ./sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_buf.c.o
+differs (instrumented unit): ./sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_init.c.o
+differs (instrumented unit): ./sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_task.c.o
+differs (instrumented unit): ./tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_api.c.o
+differs (instrumented unit): ./tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_internal.c.o
+differs (instrumented unit): ./tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_task.c.o
+differs (instrumented unit): ./tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_task_cmds.c.o
+differs (instrumented unit): ./time/CMakeFiles/time.dir/fsw/src/cfe_time_task.c.o
+differs (instrumented unit): ./time/CMakeFiles/time.dir/fsw/src/cfe_time_tone.c.o
+differs (D4 build date/user/host): ./tx/CMakeFiles/core-tx.dir/cfe_build_env_table.c.o
+binds_instr.kzs: 301 bindings (    293 bound       6 duplicated       2 inlined)
+hook calls: basis 315
+hookcheck basis rc=0 summary: ok=301
+installed files: 31, same as the reference 15, differing 16, in the plan's list 7 (install_inventory.tsv)

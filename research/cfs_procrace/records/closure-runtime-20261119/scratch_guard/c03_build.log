@@ -1,0 +1,11 @@
+# space_guard.sh kind=scratch-check need=314572800 floor=314572800 interval=2 cmd=make -j8 -k kz-trace kz-hold kz-loader kz-plan kz-rt-dump kzrt-decode kzrt-manifest kzrt-posix kzrt kzrt-pool4 test_rt_auto test_rt_auto_bad test_rt_auto_bi test_rt_bootstrap test_rt_end test_rt_gate test_rt_holdsem test_rt_loss test_rt_manifest test_rt_mode test_rt_mode_api test_rt_order test_rt_plan test_rt_plan_nb test_rt_pool test_rt_pool4 test_rt_serial test_hold_plan test_kzrt_app_request test_kzrt_identity test_kzrt_recovered test_neutral_kzrt test_probe_anchor_compilers test_probe_anchor_reached test_probe_basis test_probe_elf_dwarf test_probe_golden test_probe_observe test_probe_profile test_probe_record test_realrecord_derived test_rt_plan_convert test_trace_decode_fetch test_trace_decode_merge test_trace_decode_perf test_trace_decode_real test_trace_decode_sites test_trace_hold_nctl test_trace_identity test_trace_key_separation test_trace_merge_order test_trace_neutral test_trace_neutral_rev12 test_trace_occ_basis test_trace_occ_match test_trace_replay_out test_trace_static_closure test_trace_symbols kz test_rt_objects rt_objects_mod_id rt_objects_mod_noid test_rt_format15
+start 2026-11-19T07:19:12.465Z free=688893952 threshold=629145600
+sample 2026-11-19T07:19:12.469Z 688889856
+sample 2026-11-19T07:19:14.475Z 689131520
+sample 2026-11-19T07:19:16.489Z 688218112
+sample 2026-11-19T07:19:18.502Z 688058368
+sample 2026-11-19T07:19:20.511Z 687403008
+sample 2026-11-19T07:19:22.518Z 687681536
+sample 2026-11-19T07:19:24.524Z 687919104
+sample 2026-11-19T07:19:26.530Z 687349760
+end 2026-11-19T07:19:28.536Z kind=scratch-check verdict=completed rc=0 free=687296512 lowest=687296512 dip=1597440 change=-1597440

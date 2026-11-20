@@ -1,0 +1,9 @@
+# hold_defer.kzh -- a release on a held hit acts on the resume, and an unless-released gate (kzp-hold 1).  At the
+# consumer's first lookup of "OBJ0" G_c holds it, and R_same -- at the same address -- is deferred until the consumer
+# is resumed (by the provider's first creation event).  R_same then acts while G_x (the provider's creation of
+# "OBJ1") holds nothing: G_x is unless-released, so it is satisfied and the provider passes it.  Unit-test values.
+kzp-hold 1
+gate G_c site=obj.lookup.entry when name name "OBJ0" occurrence first
+release R_p site=provider.created.entry releases G_c occurrence first
+gate G_x site=obj.create.entry when name name "OBJ1" occurrence first unless-released
+release R_same site=obj.lookup.entry releases G_x when name name "OBJ0" occurrence first

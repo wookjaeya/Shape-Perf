@@ -1,0 +1,38 @@
+manifest	confirmed	plan=ef35173ee767be1a build_record=ef35173ee767be1a run.meta=ef35173ee767be1a dump=ef35173ee767be1a kzt.nrun=ef35173ee767be1a kzt.file_hashes=ef35173ee767be1a
+sidecar	confirmed	plan header=4ef73c918ac41cdc = file
+plan_inputs	confirmed	facts=77532840db27038e basis=9171ac7510c772d7
+inst_list	confirmed	run.meta list_sha256=2797362b0e2b6731 = file (31 entries)
+instance	confirmed	entries=31 equal=31 differing=0 missing=0
+exe exe/tx/core-tx	confirmed	record=770f215b68dec60b tree=770f215b68dec60b run.meta[tx/core-tx]=770f215b68dec60b inst_list[tx/core-tx]=770f215b68dec60b
+exe exe/tx/cf/bp.so	confirmed	record=df92b9134f393b72 tree=df92b9134f393b72 run.meta[tx/cf/bp.so]=df92b9134f393b72 inst_list[tx/cf/bp.so]=df92b9134f393b72
+exe exe/tx/cf/bplib.so	confirmed	record=f6ee63fc4e98c9f6 tree=f6ee63fc4e98c9f6 inst_list[tx/cf/bplib.so]=f6ee63fc4e98c9f6
+exe exe/tx/cf/cf.so	confirmed	record=22adc9301c17c64d tree=22adc9301c17c64d run.meta[tx/cf/cf.so]=22adc9301c17c64d inst_list[tx/cf/cf.so]=22adc9301c17c64d
+exe exe/tx/cf/ci_lab.so	confirmed	record=fdf7ffb7e674d6e5 tree=fdf7ffb7e674d6e5 inst_list[tx/cf/ci_lab.so]=fdf7ffb7e674d6e5
+exe exe/tx/cf/sch_lab.so	confirmed	record=95d99f36699dc7e5 tree=95d99f36699dc7e5 inst_list[tx/cf/sch_lab.so]=95d99f36699dc7e5
+exe exe/tx/cf/to_lab.so	confirmed	record=1a74474a8a8836e8 tree=1a74474a8a8836e8 inst_list[tx/cf/to_lab.so]=1a74474a8a8836e8
+facts_build	confirmed	basis binary.sha256=770f215b68dec60b = run main exe/tx/core-tx
+bprime	confirmed	basis=324cf73ee0a48732 facts.parent=324cf73ee0a48732 kzt.parent=324cf73ee0a48732
+dump	confirmed	file=69c1c49f1ef30ddf run.meta=69c1c49f1ef30ddf kzt=69c1c49f1ef30ddf
+bindings	confirmed	file=b719efeea53fec55 run.meta=b719efeea53fec55 kzt=b719efeea53fec55
+same_build_object	confirmed	main path=exe/tx/core-tx tree=acee9edd432e2e987903efefe7fc0c19bdee41ac dump=acee9edd432e2e987903efefe7fc0c19bdee41ac
+same_build_object	unconfirmed(object not in the build record)	module:5 path=./core-tx tree=not read dump=acee9edd432e2e987903efefe7fc0c19bdee41ac
+same_build_object	unconfirmed(object not in the build record)	module:4 path=./cf/ci_lab.so tree=not read dump=8dc25470e6749a4d0fd4ce53061b9601e21fe540
+same_build_object	unconfirmed(object not in the build record)	module:7 path=./cf/to_lab.so tree=not read dump=a79dc81815ccd1875206b916ddfd390f8afddbda
+same_build_object	unconfirmed(object not in the build record)	module:6 path=./cf/sch_lab.so tree=not read dump=14e71ebd93acc0d75f74c233ae07449f43685b18
+same_build_object	unconfirmed(object not in the build record)	module:3 path=./cf/cf.so tree=not read dump=3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7
+same_build_object	unconfirmed(object not in the build record)	module:1 path=./cf/bp.so tree=not read dump=f359e98bd5420438130647946f80fd562e03edf7
+same_build	unconfirmed(object not in the build record)	7 objects: confirmed 1, refused 0, unconfirmed 6
+chain	confirmed	16 links
+chain_check rc=0
+bprime	confirmed	basis=324cf73ee0a48732 facts.parent=324cf73ee0a48732 kzt.parent=324cf73ee0a48732
+dump	confirmed	file=69c1c49f1ef30ddf run.meta=69c1c49f1ef30ddf kzt=69c1c49f1ef30ddf
+bindings	confirmed	file=b719efeea53fec55 run.meta=b719efeea53fec55 kzt=b719efeea53fec55
+same_build_object	confirmed	main path=exe/tx/core-tx tree=acee9edd432e2e987903efefe7fc0c19bdee41ac dump=acee9edd432e2e987903efefe7fc0c19bdee41ac
+same_build_object	unconfirmed(object not in the build record)	module:5 path=./core-tx tree=not read dump=acee9edd432e2e987903efefe7fc0c19bdee41ac
+same_build_object	unconfirmed(object not in the build record)	module:4 path=./cf/ci_lab.so tree=not read dump=8dc25470e6749a4d0fd4ce53061b9601e21fe540
+same_build_object	unconfirmed(object not in the build record)	module:7 path=./cf/to_lab.so tree=not read dump=a79dc81815ccd1875206b916ddfd390f8afddbda
+same_build_object	unconfirmed(object not in the build record)	module:6 path=./cf/sch_lab.so tree=not read dump=14e71ebd93acc0d75f74c233ae07449f43685b18
+same_build_object	unconfirmed(object not in the build record)	module:3 path=./cf/cf.so tree=not read dump=3eb1b8b3762d84c5212a50a1e4ef09f85ee43cd7
+same_build_object	unconfirmed(object not in the build record)	module:1 path=./cf/bp.so tree=not read dump=f359e98bd5420438130647946f80fd562e03edf7
+same_build	unconfirmed(object not in the build record)	7 objects: confirmed 1, refused 0, unconfirmed 6
+chain	confirmed	16 links

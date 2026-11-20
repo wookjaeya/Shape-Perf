@@ -1,0 +1,1 @@
+compare_order: edge changed HB-lock 18, edge changed HB-spawn 14, head allowed 4, new listed hard/fixed pairs 90, old listed hard/fixed pairs 90, row lines changed 18, tsv HB-lock condition 18; undeclared 0

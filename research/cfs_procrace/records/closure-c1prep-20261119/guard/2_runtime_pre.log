@@ -1,0 +1,5 @@
+# space_guard.sh kind=runtime need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/gcc/scripts/build_runtime.sh /home/user/work/redesign/obs1/c1p2_pre_rt/rt /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.kzs /home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so
+start 2026-11-19T09:10:21.271Z free=635756544 threshold=414572800
+sample 2026-11-19T09:10:21.283Z 635752448
+sample 2026-11-19T09:10:23.289Z 631230464
+end 2026-11-19T09:10:25.296Z kind=runtime verdict=completed rc=0 free=628187136 lowest=628187136 dip=7569408 change=-7569408

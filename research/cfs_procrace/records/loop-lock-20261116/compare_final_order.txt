@@ -1,0 +1,45 @@
+OK c1_pre_tx order.txt two runs same
+OK c1_pre_tx edges.tsv two runs same
+OK c1_pre_tx cdr.txt two runs same
+OK c1_pre_tx order.txt: only declared differences: the new header line; new HB-await edges 120; lock identity lines 0; waits: predicate lines 5, awaited lines 1, use-the-call consequences 4, caller-side use lines 4; rows the same
+OK c1_pre_tx edges.tsv: only declared differences: every OLD line in NEW, new HB-await lines 120
+OK c1_pre_tx relations.txt = the final re-extraction's
+OK c1_pre_tx keys.txt = rf_on_order's apart from line 2
+OK c1_pre_tx order.log empty
+OK c1_pre_tx relations.log empty
+OK c1_post_tx order.txt two runs same
+OK c1_post_tx edges.tsv two runs same
+OK c1_post_tx cdr.txt two runs same
+OK c1_post_tx order.txt: only declared differences: the new header line; new HB-await edges 120; lock identity lines 0; waits: predicate lines 6, awaited lines 2, use-the-call consequences 6, caller-side use lines 4; rows the same
+OK c1_post_tx edges.tsv: only declared differences: every OLD line in NEW, new HB-await lines 120
+OK c1_post_tx relations.txt = the final re-extraction's
+OK c1_post_tx keys.txt = rf_on_order's apart from line 2
+OK c1_post_tx order.log empty
+OK c1_post_tx relations.log empty
+OK r2_core order.txt two runs same
+OK r2_core edges.tsv two runs same
+OK r2_core cdr.txt two runs same
+OK r2_core order.txt: only declared differences: the new header line; new HB-await edges 64; lock identity lines 0; waits: predicate lines 4, awaited lines 1, use-the-call consequences 4, caller-side use lines 4; rows the same
+OK r2_core edges.tsv: only declared differences: every OLD line in NEW, new HB-await lines 64
+OK r2_core relations.txt = the final re-extraction's
+OK r2_core keys.txt = rf_on_order's apart from line 2
+OK r2_core order.log empty
+OK r2_core relations.log empty
+OK c5_641 order.txt two runs same
+OK c5_641 edges.tsv two runs same
+OK c5_641 cdr.txt two runs same
+OK c5_641 order.txt: only declared differences: the new header line; new HB-await edges 0; lock identity lines 18; waits: predicate lines 5, awaited lines 0, use-the-call consequences 0, caller-side use lines 0; rows the same
+OK c5_641 edges.tsv: only declared differences: every OLD line in NEW, new HB-await lines 0
+OK c5_641 relations.txt = the final re-extraction's
+OK c5_641 keys.txt = rf_on_order's apart from line 2
+OK c5_641 order.log empty
+OK c5_641 relations.log empty
+OK c5_642 order.txt two runs same
+OK c5_642 edges.tsv two runs same
+OK c5_642 cdr.txt two runs same
+OK c5_642 order.txt: only declared differences: the new header line; new HB-await edges 0; lock identity lines 48; waits: predicate lines 5, awaited lines 0, use-the-call consequences 2, caller-side use lines 0; rows the same
+OK c5_642 edges.tsv: only declared differences: every OLD line in NEW, new HB-await lines 0
+OK c5_642 relations.txt = the final re-extraction's
+OK c5_642 keys.txt = rf_on_order's apart from line 2
+OK c5_642 order.log empty
+OK c5_642 relations.log empty

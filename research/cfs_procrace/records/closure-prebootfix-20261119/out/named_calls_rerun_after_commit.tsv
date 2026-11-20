@@ -1,0 +1,13 @@
+kz-named-calls 1
+rule judgement rules 8.14 item 5 (2026-11-19): every library call that a planned row's namespace-entry or namespace-layer line names, with its records in the facts
+plan a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4 /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side
+plan 4ef73c918ac41cdc5e41be1dcc12b996557b0f954208ea80d06d1250dcfbd0e9 /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/plan.side
+facts 7403a3775bb49f9f0e1e347236ac4b11ed655f5b8fbe69625f8743fe14c1f3f9 /home/user/work/redesign/obs1/cz_final_extract/c1_pre_tx/c1_pre_tx/NP/facts.kz
+facts 77532840db27038edd009421060b5cdead8ebab6fe32ab9f317637cd470bd979 /home/user/work/redesign/obs1/cz_final_extract/c1_post_tx/c1_post_tx/NP/facts.kz
+columns function	named_by	records	unverified	layers
+memchr	length-call	0	0	-
+memset	copy-call,fill-call	4	2	P0
+strcmp	compare-call	3	1	P0
+strncpy	copy-call	4	2	P0
+lines 4 no_entry 1
+end

@@ -1,0 +1,16 @@
+# c1_post_1df262a.identity.kzs -- identity reads (kzs-sites 2, kairos/docs/event_semantics.md section 3) over the logical
+# sites 1-8 of c1_post_1df262a.kzs, for the host's identity join (kz convert --kzrt; kz/trace/identity_rule.hpp).
+# Read after c1_post_1df262a.kzs (the site ids are declared there).  The readers have the meaning of the F0 plan's
+# decoder= at the same labels (kairos/profiles/c1-bp-b051eb0/observe/sites-cf833fdbb.kzp L129-L139); the references
+# are that plan's provenance records.  OS_TaskCreate's out parameter is not read at these sites (callee side), so the
+# spawn-return has no id: the id comes from the spawn-id site inside the call, as in F0.  Nothing here is a research
+# condition.
+kzs-sites 2
+identity 1 decoder=owner-request owner=2 ref="es_startapptask_def: cfe_es_apps.c:576-591 (ParentAppId, the 5th argument; L619 TaskRecPtr->AppId = ParentAppId)"
+identity 2 decoder=request-return ref="es_startapptask_def"
+identity 3 decoder=child-request ref="es_childtask_owner: cfe_es_api.c:1302-1329 (the parent application is the caller's own)"
+identity 4 decoder=request-return ref="es_childtask_sig"
+identity 5 decoder=spawn-create ref="osal_task_create_def: osapi-task.c:164-200"
+identity 6 decoder=spawn-return ref="osal_task_create_def"
+identity 7 decoder=thread-entry id=0 ref="osal_task_entry_def: osapi-task.c:124-140 (OS_TaskEntryPoint(task_id) runs first in the new task)"
+identity 8 decoder=spawn-id id=0 ref="osal_taskcreate_impl_arg: os-impl-tasks.c:571-590 (arg.id = OS_ObjectIdFromToken(token), passed as entry_arg)"

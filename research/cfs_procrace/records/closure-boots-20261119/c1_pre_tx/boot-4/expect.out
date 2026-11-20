@@ -1,0 +1,3 @@
+match 1040, mismatch 64, no_record 1104
+rc=0
+# match 1040, mismatch 64, no_record 1104

@@ -1,0 +1,5 @@
+# space_guard.sh kind=notes-lint need=10000000 floor=314572800 interval=2 cmd=bash -c for r in case-ids case-ids-data semantics-names retired-term banned-files no-llvm no-generated; do "/home/user/work/merge-check/kz-llvm/tests/lint/kz_lint" $r "/home/user/Shape-Perf/research/cfs_procrace/kairos" --data "/home/user/Shape-Perf/research/cfs_procrace/kairos"/tests/lint/data; echo "lint $r rc=$?"; done > lint.txt 2>&1
+start 2026-11-19T13:24:45.854Z free=381894656 threshold=324572800
+sample 2026-11-19T13:24:45.858Z 381890560
+sample 2026-11-19T13:24:47.864Z 381890560
+end 2026-11-19T13:24:49.871Z kind=notes-lint verdict=completed rc=0 free=381886464 lowest=381886464 dip=8192 change=-8192

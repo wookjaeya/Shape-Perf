@@ -1,0 +1,4 @@
+# space_guard.sh kind=relations need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/semantics-20261116/rerun.sh
+start 2026-11-16T18:58:06.182Z free=2470817792 threshold=414572800
+sample 2026-11-16T18:58:06.186Z 2470813696
+end 2026-11-16T18:58:08.193Z kind=relations verdict=completed rc=0 free=2463141888 lowest=2463141888 dip=7675904 change=-7675904

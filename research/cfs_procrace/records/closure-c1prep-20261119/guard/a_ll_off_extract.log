@@ -1,0 +1,9 @@
+# space_guard.sh kind=archive need=20000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/reclaim/archive.sh ll_off_extract records/loop-lock-20261116/ll_off_extract.sha256
+start 2026-11-19T08:46:39.911Z free=669863936 threshold=334572800
+sample 2026-11-19T08:46:39.915Z 669859840
+sample 2026-11-19T08:46:41.921Z 669851648
+sample 2026-11-19T08:46:43.927Z 669577216
+sample 2026-11-19T08:46:45.933Z 669577216
+sample 2026-11-19T08:46:47.938Z 669564928
+sample 2026-11-19T08:46:49.944Z 666132480
+end 2026-11-19T08:46:51.951Z kind=archive verdict=completed rc=0 free=713269248 lowest=666132480 dip=3731456 change=43405312

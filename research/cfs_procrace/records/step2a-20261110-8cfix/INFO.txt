@@ -1,0 +1,17 @@
+record=step2a-20261110-8cfix
+kind=text record of the 8c fix stage: the 16 findings of the 8c verification checked and fixed (code, tests, lint, docs), an in-place rebuild and a measurement run; not a bundle; no parts; not preserved in the CONFIG_MANAGEMENT 5 sense
+work=RV3A 6.7 step 8c, fix stage; PI answer 11-10: Q12 (ga), rebuild in place in MC; Q2 (ga), only re-creatable scratch copies (eight scratchpad copies packed without loss, pack.txt); AR section 16.10 (16.10.0 the declaration, committed before the build as 08a3632; 16.10.1 the judgment of the findings)
+build_dir=/home/user/work/merge-check/kz-llvm (MC; no second build directory)
+tool_before=kz-static ab482eab0fb34aa86e8a839ef35fa8207054ea4b28ff186f5c5079a1cd30b326 (the 8c tool); kz_lint 191d0da095e75736ecfdf0d790815fb219e6738281ee0bb7f310bc898dad50df; kz-instr-clang 28db40172dbdb06faa0e607b9a494805b19768ca888e865d0a5c3859dab8bcaf
+tool_after=kz-static 0024f192980dfbd93e4a662666239c3b4082fcb65f3bd5d25a19fbbfc06d2431 (tool_sha256 3b7de5b7d595d3c0f0042ea8e264d7865835dfa7cbc0524fcdcb2323ede43269, tool_source bbd484360f2a56ad44a2aead276e4c4c9be1066994aee087a9fc08767ac19aab, core_source f6e3c7b4 unchanged); kz_lint b0f0d6a55153c8c76edb0f6592e1963c593c2b8298fc87ffca44e935d5c9650a
+unchanged=kz 931dd39c, kz-dump 05623054, kz-rt-dump 4390d4f1, kz-phi 7d34e6e2, kz-instr-clang 28db4017 (not relinked; hashes before and after recorded)
+source=1377957 (code, lint, docs and most tests: a working-tree snapshot committed by the lead while this stage was editing; pushed by someone else) and 90e423c (one test line, committed after the build, before the run); git diff 1377957 90e423c over the tool paths: 0 lines; the run's identity.txt: repo 90e423c, kairos_uncommitted_lines=0
+outputs=/home/user/work/redesign/step2a/tests_8c_fix (outside the repository; 149 files, 202212496 bytes; not in T/, tests_rv4, tests_8b, tests_8b_fix or tests_8c)
+outputs_sha256_list=sha256.txt here (136 lines; sha256 e79490531c47c0c520696120799bf78aea112b8c528afe193f5becf9bb631d80)
+status_sha256=83d043834d9fcc1c7bb18ee35c58071f488a8b3d0ec180c3f3a611896cb1bb0f (status.txt here)
+rc=make 2 then 0 (the first build stopped at a shadowing local in the new test block); ctest 239 tests, 0 failed, 1 skipped (skip_reason.log); legacy-case 51; lint 6 of 6 (case-ids over every text file of probe/ and instrument/ outside tests/, scripts/, sites/, out/; clean); lint selftest 102 cases; test_static_cli 752 checks; unit checks 6 of 6; all 0 (ten steps PASS, no FAIL line)
+compared_with=tests_8c, tests_8b_fix, T/ (/home/user/work/redesign/step2a/tests) and tests_rv4, every file, nothing masked: compare_8cfix.tsv (AR 16.10.6)
+counts=verdicts and burden.tsv unchanged; image_budget_exhausted 0 and image_leaves_omitted 0 in the five builds; no unknown target in any output
+pv=the 2a tools of MC in PV stream back to their ORIGINAL_SHA256 (pv_check.txt)
+no cFS booted; nothing in RD, EB, CK, PV, T/, a build tree or a cFS tree deleted; not pushed
+files=INFO.txt commands.txt declared_before_build.txt finding_checks.txt pack.txt pre_mc.txt post_mc.txt make.log ctest_full.log skip_reason.log labels.txt lint_widened.txt lint_groups.txt unit.txt status.txt sha256.txt twice_detail.txt compare_8cfix.py compare_8cfix.tsv df_build.log df_run.log pv_check.txt

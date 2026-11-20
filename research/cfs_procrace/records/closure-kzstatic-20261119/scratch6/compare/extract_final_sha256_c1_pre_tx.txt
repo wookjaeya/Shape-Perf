@@ -1,0 +1,2 @@
+diffkinds old_lines=5 new_lines=5 only_old=3 only_new=3 labels=1
+label removed=3 added=3 0|H 

@@ -1,0 +1,8 @@
+# hold_rearm.kzh -- a released thread fires a later release (kzp-hold 1).  The consumer is held at its first
+# lookup of "OBJ0" until the provider's first creation event; the provider is then held at the creation of
+# "OBJ1" until the consumer -- the thread resumed from G_cons -- reaches seq_consumer_done.  Unit-test values.
+kzp-hold 1
+gate G_cons site=obj.lookup.entry when name name "OBJ0" occurrence first
+release R_made site=provider.created.entry releases G_cons occurrence first
+gate G_prov site=obj.create.entry when name name "OBJ1" occurrence first
+release R_done site=consumer.done.entry releases G_prov occurrence first

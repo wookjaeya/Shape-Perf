@@ -1,0 +1,21 @@
+normal <scratch>/xr6_dry_rt_rt_format15/normal.json inputs 16 checks refused 0 unparsed 0 mismatch 2 branches 16
+reader rc=0
+normal.json byte-identical to the kept one
+branch D1-R0 records 46 refused 0 uses 0
+branch D1-Ra records 46 refused 0 uses 0
+branch D1-Rb records 46 refused 0 uses 0
+branch D1-Rc records 46 refused 0 uses 0
+branch D1-Rd records 46 refused 0 uses 0
+branch D1-Re records 46 refused 0 uses 0
+branch D1-Rf records 46 refused 0 uses 0
+branch D1-all records 46 refused 0 uses 0
+branch D2-R0 records 46 refused 0 uses 0
+branch D2-Ra records 46 refused 0 uses 0
+branch D2-Rb records 46 refused 0 uses 0
+branch D2-Rc records 46 refused 0 uses 0
+branch D2-Rd records 46 refused 0 uses 0
+branch D2-Re records 46 refused 0 uses 0
+branch D2-Rf records 46 refused 0 uses 0
+branch D2-all records 46 refused 0 uses 0
+compat refused: run.meta names another manifest; the dump's RUN or module records carry another manifest sha256
+judge rc=3

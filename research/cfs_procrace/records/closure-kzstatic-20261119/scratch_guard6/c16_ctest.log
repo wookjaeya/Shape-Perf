@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-ctest need=50000000 floor=314572800 interval=2 cmd=ctest -V -R ^test_static_gitrev$|^test_static_unroll$|^test_static_wrappers$
+start 2026-11-19T05:22:28.128Z free=637583360 threshold=364572800
+sample 2026-11-19T05:22:28.132Z 637579264
+end 2026-11-19T05:22:30.141Z kind=scratch-ctest verdict=completed rc=0 free=637575168 lowest=637575168 dip=8192 change=-8192

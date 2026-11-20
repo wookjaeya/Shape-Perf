@@ -1,0 +1,7 @@
+rev1-identical
+git diff rc=0 lines=0
+?? kairos/semantics/framework_namespaces2_cfe-6.4.1.txt
+?? kairos/semantics/framework_namespaces2_cfe-6.4.2.txt
+?? kairos/semantics/framework_namespaces2_osal-4.1.1.txt
+?? kairos/semantics/framework_namespaces2_osal-7.0.1.txt
+?? kairos/semantics/framework_namespaces2_osal-f34759d.txt

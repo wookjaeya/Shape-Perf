@@ -1,0 +1,4 @@
+# space_guard.sh kind=regress need=40000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-explain-rev4-20261119/scripts/regress.sh 4 <scratch>/xr6_regress  /home/user/Shape-Perf/research/cfs_procrace/records/closure-explain-rev4-20261119/out/branches_d1.txt
+start 2026-11-19T17:44:44.260Z free=768380928 threshold=354572800
+sample 2026-11-19T17:44:44.265Z 768376832
+end 2026-11-19T17:44:46.272Z kind=regress verdict=completed rc=0 free=744341504 lowest=744341504 dip=24039424 change=-24039424

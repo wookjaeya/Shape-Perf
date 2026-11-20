@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-run need=120000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-20261118/build/run.sh plans_t8cf
+start 2026-11-18T10:42:15.788Z free=1056165888 threshold=434572800
+sample 2026-11-18T10:42:15.792Z 1056161792
+end 2026-11-18T10:42:17.798Z kind=scratch-run verdict=completed rc=0 free=1055178752 lowest=1055178752 dip=987136 change=-987136

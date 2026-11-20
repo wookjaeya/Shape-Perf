@@ -1,0 +1,4 @@
+# space_guard.sh kind=explaincheck2 need=30000000 floor=314572800 interval=2 cmd=bash <scratch>/cmd_pre.sh
+start 2026-11-19T09:46:18.669Z free=447320064 threshold=344572800
+sample 2026-11-19T09:46:18.675Z 447315968
+end 2026-11-19T09:46:20.682Z kind=explaincheck2 verdict=completed rc=0 free=420450304 lowest=420450304 dip=26869760 change=-26869760

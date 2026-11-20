@@ -1,0 +1,42 @@
+OK c1_pre_tx basis.kz = the option-off round's
+OK c1_pre_tx basis.txt = the option-off round's
+OK c1_pre_tx relations.log = the option-off round's
+OK c1_pre_tx relations.log empty
+OK c1_pre_tx args.txt: only the extract-only line (--object-access)
+OK c1_pre_tx sha256.txt: only the facts.kz line
+OK c1_pre_tx facts views: compare_on c1_pre_tx: only declared classes
+OK c1_pre_tx extract.txt and relations.txt differences counted (compare/extract_txt_on_c1_pre_tx.txt)
+OK c1_post_tx basis.kz = the option-off round's
+OK c1_post_tx basis.txt = the option-off round's
+OK c1_post_tx relations.log = the option-off round's
+OK c1_post_tx relations.log empty
+OK c1_post_tx args.txt: only the extract-only line (--object-access)
+OK c1_post_tx sha256.txt: only the facts.kz line
+OK c1_post_tx facts views: compare_on c1_post_tx: only declared classes
+OK c1_post_tx extract.txt and relations.txt differences counted (compare/extract_txt_on_c1_post_tx.txt)
+OK c1 names: name_stability: declared (names with a position: pre 17, post 17, in both 17, in one only 0 (by source tree 1, absolute 0, relative to the root 16))
+OK c1 names without the option, for the difference (compare/names_c1_off.txt: names with a position: pre 17, post 17, in both 16, in one only 2 (by source tree 0, absolute 2, relative to the root 16))
+OK r2_core basis.kz = the option-off round's
+OK r2_core basis.txt = the option-off round's
+OK r2_core relations.log = the option-off round's
+OK r2_core relations.log empty
+OK r2_core args.txt: only the extract-only line (--object-access)
+OK r2_core sha256.txt: only the facts.kz line
+OK r2_core facts views: compare_on r2_core: only declared classes
+OK r2_core extract.txt and relations.txt differences counted (compare/extract_txt_on_r2_core.txt)
+OK c5_641 basis.kz = the option-off round's
+OK c5_641 basis.txt = the option-off round's
+OK c5_641 relations.log = the option-off round's
+OK c5_641 relations.log empty
+OK c5_641 args.txt: only the extract-only line (--object-access)
+OK c5_641 sha256.txt: only the facts.kz line
+OK c5_641 facts views: compare_on c5_641: only declared classes
+OK c5_641 extract.txt and relations.txt differences counted (compare/extract_txt_on_c5_641.txt)
+OK c5_642 basis.kz = the option-off round's
+OK c5_642 basis.txt = the option-off round's
+OK c5_642 relations.log = the option-off round's
+OK c5_642 relations.log empty
+OK c5_642 args.txt: only the extract-only line (--object-access)
+OK c5_642 sha256.txt: only the facts.kz line
+OK c5_642 facts views: compare_on c5_642: only declared classes
+OK c5_642 extract.txt and relations.txt differences counted (compare/extract_txt_on_c5_642.txt)

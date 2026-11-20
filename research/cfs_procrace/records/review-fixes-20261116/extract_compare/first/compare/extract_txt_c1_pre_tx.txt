@@ -1,0 +1,15 @@
+new names: 4
+  name CFE_SB_MemParams_t::Partition
+  name CFE_TBL_BufParams_t::Partition
+  name PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type
+  name UnSock_Global@psp/fsw/modules/unsock_intf/unsock_intf_c:85::type
+class head           added-named                              4
+class head           change:facts-hash                        1
+class head           change:rule-targets                      1
+class head           other                                    3
+pairs of an old <anonymous> line and its successors (a successor not equal after the names alone): 0 lines
+undeclared other: 3
+  - [head] (no successor)   location <anonymous>.Data   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  - [head] (no successor)   location <anonymous>.State   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  - [head] (no successor)   location <anonymous>.sys_timebase_id   writers 1 (direct 0, data function 0, out-pointer 1, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+compare_classes: 3 undeclared differences

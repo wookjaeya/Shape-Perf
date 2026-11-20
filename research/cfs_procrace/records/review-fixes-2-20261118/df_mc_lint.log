@@ -1,0 +1,5 @@
+# space_guard.sh kind=mc-lint need=50000000 floor=314572800 interval=2 cmd=ctest -V -R ^lint
+start 2026-11-18T10:11:54.774Z free=1465548800 threshold=364572800
+sample 2026-11-18T10:11:54.777Z 1465544704
+sample 2026-11-18T10:11:56.781Z 1465532416
+end 2026-11-18T10:11:58.787Z kind=mc-lint verdict=completed rc=0 free=1466523648 lowest=1465532416 dip=16384 change=974848

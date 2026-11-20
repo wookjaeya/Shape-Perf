@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-compile need=100000000 floor=314572800 interval=2 cmd=g++ -std=c++17 -O1 -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/mv/printers/old /home/user/Shape-Perf/research/cfs_procrace/records/manifest-v4-20261116/regress/manifest_print.cpp /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/mv/printers/old/kz_rt_manifest.cpp -o /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/mv/printers/print_old
+start 2026-11-18T04:26:49.003Z free=1569755136 threshold=414572800
+sample 2026-11-18T04:26:49.007Z 1569751040
+sample 2026-11-18T04:26:51.012Z 1569402880
+end 2026-11-18T04:26:53.018Z kind=scratch-compile verdict=completed rc=0 free=1569599488 lowest=1569402880 dip=352256 change=-155648

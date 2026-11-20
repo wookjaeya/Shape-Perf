@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-run need=60000000 floor=314572800 interval=2 cmd=bash -c <scratch>/kzc_build/tools/kz-static/kz-static order /home/user/work/redesign/obs1/rf2_final_extract/c5_642/c5_642/NP/facts.kz -o <scratch>/kzc_work/pairs5b/c5_642.order.txt --edges <scratch>/kzc_work/pairs5b/c5_642.edges.tsv --pairs <scratch>/kzc_work/pairs5b/c5_642.pairs.tsv
+start 2026-11-19T02:27:05.949Z free=1050013696 threshold=374572800
+sample 2026-11-19T02:27:05.953Z 1050009600
+end 2026-11-19T02:27:07.959Z kind=scratch-run verdict=completed rc=0 free=1047801856 lowest=1047801856 dip=2211840 change=-2211840

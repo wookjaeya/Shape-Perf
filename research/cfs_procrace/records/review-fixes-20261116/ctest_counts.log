@@ -1,0 +1,9 @@
+# ctest -V counts after the build of the review fixes (2026-11-16T15:44:27Z); test binaries: 9a448f53c72ec7d6 test_static_cli, 7d3d2d81be9672aa test_static_reasons, b0b90e222afaa49b test_static_plan
+68: test_core_schema: 34017 checks passed
+105: lint selftest: 109 cases, 0 failed
+252: test_static_reasons: 660 checks passed
+253: test_static_plan: 182 checks passed
+254: test_static_cli: 963 checks passed
+The following tests passed:
+100% tests passed, 0 tests failed out of 5
+100% tests passed, 0 tests failed out of 7

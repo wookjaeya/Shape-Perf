@@ -1,0 +1,46 @@
+lines 27163 bytes 9083448 sha256 c91113d5c5d0ce4c62807938b9b3a42e859069857b5d3d5e7c2f82cd9e0b29dd
+kz-order-pairs 1
+facts <masked>
+tool kz-static <masked>
+relations rules relations rules revision 12 (2026-11-18); rules with lock handles: relations rules revision 11 (2026-11-16), over LOCK_HANDLES (extract --lock-handles, docs/static_facts.md 5v): 1573 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 23, not-static 1550, of them no handle found 187); path C rows whose common lock is identified by its handle 0, of them with a static-instance handle 0; rules with result flow: relations rules revision 13 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): 13033 rows (uses: branch 2482, return 834, argument 1800, store 431, other 1352, none 2093; guard rows 4041); calls with a result 6019; 15930 rows (open 8549; event send 1073, application exit 305, terminal 159; calls on the paths that are none of these, no row: 9040); calls explored 2432, outcomes 7265; rules with object access: relations rules revision 14 (2026-11-19), over OBJECT_ACCESS (extract --object-access, docs/static_facts.md 5x): key texts by source tree 3 (BASIS source_tree items); with RESULT_FLOW and RESULT_EFFECT: the success path, absence origins, holder, alternatives, stored-name buffer and lifetime-end lines; rules with decided call results: relations rules revision 14 (the stored-field rule, judgement rules 8.13 item 17): open effects by reason: address passed on the paths 72; branch not decided by the value 6812; other 2398; outcome not enumerated 3857; address-passing calls on stored-location paths 72 (call sites 2): decided 0; not decided: (5) or (6) rests on a premise 66; the store is on a path this value does not decide 2; the stored location is not a field 4; call sites decided by the stored-field rule 0 (rows 0)
+order order rules revision 8 (2026-11-19): the complete pair file; order rules revision 5 (2026-11-18); rules with result flow: order rules revision 6 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT (extract --result-flow, docs/static_facts.md 5u): inner spawn calls read from their effects 34; caller-side uses of waits 4, HB-await edges to them 284; rules with loop definitions and lock handles: order rules revision 7 (2026-11-18), over LOOP_DEFS and LOCK_HANDLES (extract --loop-defs, --lock-handles, docs/static_facts.md 5v): waits with a predicate through local definitions 1; caller-side budget values through a flag 1; HB-lock edges whose lock is identified by its handle 0
+domain every creator and writer the relations rows name (creator lines; not-a-pair lines: key constants differ, probe-create, same actor only; writers of path B and C); a pair in one thread has the value same_thread
+columns row_key	path	use_pos	use_function	use_root	other_kind	other_pos	other_function	other_root	value	edges	premises	row_line
+rows 367 pairs 26572 hard_before 1525 conditional_before 0 fixed_early_proved 1276 fixed_early_candidate 0 unordered 21664 unknown 187 same_thread 1920 no_pair 62 edges_not_in_tsv 520
+end
+value-counts:
+62	-	no_pair
+19	BP_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+20	BP_AppMain (script-entry)	program order of one thread: the event is inside the call 
+14	BP_CLA_InputTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+16	BP_CLA_OutputTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+2	CFE_ES_BackgroundTask (spawn-entry)	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call 
+29	CFE_ES_BackgroundTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+19	CFE_ES_BackgroundTask (spawn-entry)	program order of one thread: the event is inside the call 
+4	CFE_ES_TaskMain (table-image-entry)	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call 
+22	CFE_ES_TaskMain (table-image-entry)	program order of one thread: a thread's start precedes every event of its code 
+40	CFE_ES_TaskMain (table-image-entry)	program order of one thread: the event is inside the call 
+22	CFE_EVS_TaskMain (table-image-entry)	program order of one thread: a thread's start precedes every event of its code 
+22	CFE_SB_TaskMain (table-image-entry)	program order of one thread: a thread's start precedes every event of its code 
+22	CFE_TBL_TaskMain (table-image-entry)	program order of one thread: a thread's start precedes every event of its code 
+21	CFE_TIME_Local1HzTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+2	CFE_TIME_TaskMain (table-image-entry)	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call 
+25	CFE_TIME_TaskMain (table-image-entry)	program order of one thread: a thread's start precedes every event of its code 
+55	CFE_TIME_TaskMain (table-image-entry)	program order of one thread: the event is inside the call 
+21	CFE_TIME_Tone1HzTask (spawn-entry)	program order of one thread: a thread's start precedes every event of its code 
+21	CF_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+25	CI_Lab_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+29	SCH_Lab_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+26	TO_LAB_AppMain (script-entry)	program order of one thread: a thread's start precedes every event of its code 
+1	creator	unknown
+5	creator	unordered
+1	creator-not-a-pair(probe-create)	same_thread
+12	creator-not-a-pair(same actor only)	same_thread
+2	main (process)	program order of one call: LOCK_PATHS after-spawn has no row of the event for this spawn call 
+42	main (process)	program order of one thread: the event is inside the call 
+1	other_kind	value
+1276	writer	fixed_early_proved
+1525	writer	hard_before
+1907	writer	same_thread
+186	writer	unknown
+21659	writer	unordered

@@ -1,0 +1,3 @@
+2026-11-19T19:21:05Z
+Filesystem        1B-blocks        Used  Available Use% Mounted on
+/dev/vda       270553174016 40286412800 1036095488  98% /

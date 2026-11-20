@@ -1,0 +1,85 @@
+# regress_eid1.sh 2026-11-16T12:49:47Z: old=/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/m9/old new=/home/user/work/merge-check/kz-llvm
+kz 931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248 kz-dump 05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43 (/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/m9/old)
+kz 913fcd99064b5aeca3b2c52da6f6f9e72584680ea783e6edb2f959eeb22eccfa kz-dump 32a96ae7138fd71c9efd63d0439021cae044c4045b6a9557b659e1e1911c0438 (/home/user/work/merge-check/kz-llvm)
+replay_stdout: 5139 lines, 2 differ; with the identity hash lines masked: 0 differ
+replay_converted_stdout: 5138 lines, 2 differ; with the identity hash lines masked: 0 differ
+replay_container: 1113 lines, 4 differ; with the identity hash lines masked: 0 differ
+replay_container_bytes: sizes 84096 / 84096; differing bytes 121-156 (36 bytes)
+convert_stdout: 6 lines, 2 differ; with the identity hash lines masked: 0 differ
+convert_container: 3496 lines, 4 differ; with the identity hash lines masked: 0 differ
+convert_container_bytes: sizes 176536 / 176536; differing bytes 121-156 (36 bytes)
+kzrt_rt_end_normal.kzrt_stdout: 10 lines, 2 differ; with the identity hash lines masked: 0 differ
+kzrt_rt_end_normal.kzrt_container: 2741 lines, 4 differ; with the identity hash lines masked: 0 differ
+kzrt_rt_end_normal.kzrt_container_bytes: sizes 125624 / 125624; differing bytes 121-156 (36 bytes)
+  NOWNER in the new container: 0
+kzrt_rt_end_kill.rec.kzrt_stdout: 11 lines, 2 differ; with the identity hash lines masked: 0 differ
+kzrt_rt_end_kill.rec.kzrt_container: 2742 lines, 4 differ; with the identity hash lines masked: 0 differ
+kzrt_rt_end_kill.rec.kzrt_container_bytes: sizes 125792 / 125792; differing bytes 121-156 (36 bytes)
+  NOWNER in the new container: 0
+kzrt_rt_serial.kzrt_stdout: 10 lines, 2 differ; with the identity hash lines masked: 0 differ
+kzrt_rt_serial.kzrt_container: 66 lines, 4 differ; with the identity hash lines masked: 0 differ
+kzrt_rt_serial.kzrt_container_bytes: sizes 4312 / 4312; differing bytes 121-156 (36 bytes)
+  NOWNER in the new container: 0
+w6_r2_gi: /home/user/work/w6/run/r2/gi/dump/cpu1.kzrt; the old tool's container is the W6 one: NO (593dfd755aaca397135eab88d22d9170cb96c2c200d71916c83925bd47124632); note: identity join (by the id; no creation record): identity events 154, of unresolved actors (not used) 0; announced ids 24, unreadable 0, repeated 0; spawn c
+w6_r2_gi_convert_stdout: 12 lines, 2 differ; with the identity hash lines masked: 0 differ
+w6_r2_gi_convert_container: 3862 lines, 4 differ; with the identity hash lines masked: 0 differ
+w6_r2_gi_convert_container_bytes: sizes 193520 / 193520; differing bytes 121-156 (36 bytes)
+w6_r2_gi_replay_stdout: 7764 lines, 4 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_r2_gi_replay_container: 1435 lines, 46 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_r2_gi_replay_container_bytes: sizes 105288 / 105288; differing bytes 121-191,337-340,1585-1615,1625-1655,1665-1695,1705-1735,1745-1775,1785-1815,1825-1855,1865-1895,1905-1935,1945-1975,1985-2015,2025-2055,2105-2135,2145-2175,2185-2215,2225-2255,2265-2295,2305-2335,2345-2375 (660 bytes)
+w6_c1_gi_post_1b0b338_rx: /home/user/work/w6/run/c1nat/gi/post_1b0b338_rx/dump/rx.kzrt; the old tool's container is the W6 one: NO (75826299a4b14ead7f104455dcb42e3beec3da24450b5c6d4db614b616264567); note: identity join (by the id; no creation record): identity events 102, of unresolved actors (not used) 0; announced ids 15, unreadable 0, repeated 0; spawn c
+w6_c1_gi_post_1b0b338_rx_convert_stdout: 12 lines, 2 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_post_1b0b338_rx_convert_container: 799 lines, 4 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_post_1b0b338_rx_convert_container_bytes: sizes 48392 / 48392; differing bytes 121-156 (36 bytes)
+w6_c1_gi_post_1b0b338_rx_replay_stdout: 411 lines, 4 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_post_1b0b338_rx_replay_container: 57 lines, 22 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_post_1b0b338_rx_replay_container_bytes: sizes 3192 / 3192; differing bytes 121-192,337-340,1585-1616,1625-1656,1665-1696,1705-1736,1745-1776,1785-1816,1825-1856 (296 bytes)
+w6_c1_gi_post_1b0b338_tx: /home/user/work/w6/run/c1nat/gi/post_1b0b338_tx/dump/tx.kzrt; the old tool's container is the W6 one: NO (1692c348306d5480a9b1e0cad7403a30755eb0d5eea0d930d50f6634dee5bc45); note: identity join (by the id; no creation record): identity events 102, of unresolved actors (not used) 0; announced ids 15, unreadable 0, repeated 0; spawn c
+w6_c1_gi_post_1b0b338_tx_convert_stdout: 12 lines, 2 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_post_1b0b338_tx_convert_container: 799 lines, 4 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_post_1b0b338_tx_convert_container_bytes: sizes 48392 / 48392; differing bytes 121-156 (36 bytes)
+w6_c1_gi_post_1b0b338_tx_replay_stdout: 411 lines, 4 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_post_1b0b338_tx_replay_container: 57 lines, 22 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_post_1b0b338_tx_replay_container_bytes: sizes 3192 / 3192; differing bytes 121-192,337-340,1585-1616,1625-1656,1665-1696,1705-1736,1745-1776,1785-1816,1825-1856 (296 bytes)
+w6_c1_gi_post_1df262a_rx: /home/user/work/w6/run/c1nat/gi/post_1df262a_rx/dump/rx.kzrt; the old tool's container is the W6 one: NO (e7d34a755aa9b97e9886e4dbba72b736aed3fe4f638091b0eb80c7d4bd4d0e28); note: identity join (by the id; no creation record): identity events 102, of unresolved actors (not used) 0; announced ids 15, unreadable 0, repeated 0; spawn c
+w6_c1_gi_post_1df262a_rx_convert_stdout: 12 lines, 2 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_post_1df262a_rx_convert_container: 799 lines, 4 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_post_1df262a_rx_convert_container_bytes: sizes 48392 / 48392; differing bytes 121-156 (36 bytes)
+w6_c1_gi_post_1df262a_rx_replay_stdout: 411 lines, 4 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_post_1df262a_rx_replay_container: 57 lines, 22 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_post_1df262a_rx_replay_container_bytes: sizes 3192 / 3192; differing bytes 121-192,337-340,1585-1616,1625-1656,1665-1696,1705-1736,1745-1776,1785-1816,1825-1856 (296 bytes)
+w6_c1_gi_post_1df262a_tx: /home/user/work/w6/run/c1nat/gi/post_1df262a_tx/dump/tx.kzrt; the old tool's container is the W6 one: NO (ab9bb6ed9825303767a3aa7f9f786a52cddc0ac4b81af1afa394316ad8c5e920); note: identity join (by the id; no creation record): identity events 102, of unresolved actors (not used) 0; announced ids 15, unreadable 0, repeated 0; spawn c
+w6_c1_gi_post_1df262a_tx_convert_stdout: 12 lines, 2 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_post_1df262a_tx_convert_container: 799 lines, 4 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_post_1df262a_tx_convert_container_bytes: sizes 48392 / 48392; differing bytes 121-156 (36 bytes)
+w6_c1_gi_post_1df262a_tx_replay_stdout: 411 lines, 4 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_post_1df262a_tx_replay_container: 57 lines, 22 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_post_1df262a_tx_replay_container_bytes: sizes 3192 / 3192; differing bytes 121-192,337-340,1585-1616,1625-1656,1665-1696,1705-1736,1745-1776,1785-1816,1825-1856 (296 bytes)
+w6_c1_gi_pre_1b0b338_rx: /home/user/work/w6/run/c1nat/gi/pre_1b0b338_rx/dump/rx.kzrt; the old tool's container is the W6 one: NO (19d2e420d6f1ea64257dcd94b9b0fcaaa9944ed30587c4fb599fd8bd4f1b2dba); note: identity join (by the id; no creation record): identity events 102, of unresolved actors (not used) 0; announced ids 15, unreadable 0, repeated 0; spawn c
+w6_c1_gi_pre_1b0b338_rx_convert_stdout: 12 lines, 2 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_pre_1b0b338_rx_convert_container: 764 lines, 4 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_pre_1b0b338_rx_convert_container_bytes: sizes 46552 / 46552; differing bytes 121-156 (36 bytes)
+w6_c1_gi_pre_1b0b338_rx_replay_stdout: 337 lines, 4 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_pre_1b0b338_rx_replay_container: 43 lines, 22 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_pre_1b0b338_rx_replay_container_bytes: sizes 2288 / 2288; differing bytes 121-192,337-340,1521-1552,1561-1592,1601-1632,1641-1672,1681-1712,1721-1752,1761-1792 (296 bytes)
+w6_c1_gi_pre_1b0b338_tx: /home/user/work/w6/run/c1nat/gi/pre_1b0b338_tx/dump/tx.kzrt; the old tool's container is the W6 one: NO (45241847f0731dee0eae7e85f184ab7b3e2b59b134f4bcfed5658f18f2baef37); note: identity join (by the id; no creation record): identity events 102, of unresolved actors (not used) 0; announced ids 15, unreadable 0, repeated 0; spawn c
+w6_c1_gi_pre_1b0b338_tx_convert_stdout: 12 lines, 2 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_pre_1b0b338_tx_convert_container: 764 lines, 4 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_pre_1b0b338_tx_convert_container_bytes: sizes 46552 / 46552; differing bytes 121-156 (36 bytes)
+w6_c1_gi_pre_1b0b338_tx_replay_stdout: 337 lines, 4 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_pre_1b0b338_tx_replay_container: 43 lines, 22 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_pre_1b0b338_tx_replay_container_bytes: sizes 2288 / 2288; differing bytes 121-192,337-340,1521-1552,1561-1592,1601-1632,1641-1672,1681-1712,1721-1752,1761-1792 (296 bytes)
+w6_c1_gi_pre_1df262a_rx: /home/user/work/w6/run/c1nat/gi/pre_1df262a_rx/dump/rx.kzrt; the old tool's container is the W6 one: NO (97e6002b9cf34cff2cf63a2bfb326c87a2fc6cad83a7288fbc54d3c6741a69bf); note: identity join (by the id; no creation record): identity events 102, of unresolved actors (not used) 0; announced ids 15, unreadable 0, repeated 0; spawn c
+w6_c1_gi_pre_1df262a_rx_convert_stdout: 12 lines, 2 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_pre_1df262a_rx_convert_container: 764 lines, 4 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_pre_1df262a_rx_convert_container_bytes: sizes 46552 / 46552; differing bytes 121-156 (36 bytes)
+w6_c1_gi_pre_1df262a_rx_replay_stdout: 337 lines, 4 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_pre_1df262a_rx_replay_container: 43 lines, 22 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_pre_1df262a_rx_replay_container_bytes: sizes 2288 / 2288; differing bytes 121-192,337-340,1521-1552,1561-1592,1601-1632,1641-1672,1681-1712,1721-1752,1761-1792 (296 bytes)
+w6_c1_gi_pre_1df262a_tx: /home/user/work/w6/run/c1nat/gi/pre_1df262a_tx/dump/tx.kzrt; the old tool's container is the W6 one: NO (9c2f3e964ec7831a61bd6a419e6a4e17631ea530479a1b7acf1b58a978e2b5f3); note: identity join (by the id; no creation record): identity events 102, of unresolved actors (not used) 0; announced ids 15, unreadable 0, repeated 0; spawn c
+w6_c1_gi_pre_1df262a_tx_convert_stdout: 12 lines, 2 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_pre_1df262a_tx_convert_container: 764 lines, 4 differ; with the identity hash lines masked: 0 differ
+w6_c1_gi_pre_1df262a_tx_convert_container_bytes: sizes 46552 / 46552; differing bytes 121-156 (36 bytes)
+w6_c1_gi_pre_1df262a_tx_replay_stdout: 337 lines, 4 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_pre_1df262a_tx_replay_container: 43 lines, 22 differ; with the identity hash lines masked and the input hash named alike: 0 differ
+w6_c1_gi_pre_1df262a_tx_replay_container_bytes: sizes 2288 / 2288; differing bytes 121-192,337-340,1521-1552,1561-1592,1601-1632,1641-1672,1681-1712,1721-1752,1761-1792 (295 bytes)

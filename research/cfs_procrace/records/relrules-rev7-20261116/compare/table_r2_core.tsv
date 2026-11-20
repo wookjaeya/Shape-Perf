@@ -1,0 +1,69 @@
+# key	path	old id	new id	namespace	old partition	new partition	old creators	new creators	old dependency (class)	new dependency (class)	old flip	new flip	change
+02bb2fbde62ba25f	A	A62	-	OS_filesys_internal_record_t.virtual_mountpt		-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+049f3ef73f04ad95	A	A23	A10	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+05a56f8d23c48752	A	A4	-	OS_common_record_t.name_entry	1,11	-	9	-	path A: 9 creator(s) of this partition in other actors	-	static-undetermined	-	removed (left out: another callback)
+135b96d036148ae8	A	A53	-	OS_filesys_internal_record_t.virtual_mountpt	4	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+17264d37ac94665f	A	A38	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+193d75271409cb6d	A	A39	-	OS_filesys_internal_record_t.virtual_mountpt	8,0	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+1ba7a41bbfb56553	A	A16	-	OS_filesys_internal_record_t.virtual_mountpt	10	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+1fa4450e1dac4f6e	A	A66	-	OS_filesys_internal_record_t.virtual_mountpt	1,1	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+202e1a2e2282a093	A	A45	A21	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+250aa5e0a1394395	A	A27	A12	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	0	0	no creator left after exclusions (probe-create 0, key constant	no creator of this partition: key written without a key parame	none	none	kept; creator set changed; partition changed
+26641fb3c5e9c641	A	A22	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+26f928e44f005d3e	A	A64	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+28de9288de3f8923	A	A46	A22	OS_filesys_internal_record_t.virtual_mountpt	3,1	11	0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept; partition changed
+2b822048f2f335ab	A	A24	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+2cd7f88fbdb5f377	A	A17	A9	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+359d52edb049c819	A	A2	-	OS_common_record_t.name_entry	1,11	-	11	-	path A: 11 creator(s) of this partition in other actors	-	static-undetermined	-	removed (left out: another callback)
+36a9fe1421709523	A	A63	-	OS_filesys_internal_record_t.virtual_mountpt		-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+3b1b5f5b62661fb9	A	A59	-	OS_filesys_internal_record_t.virtual_mountpt		-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+3b76ea762072114b	A	A8	-	OS_common_record_t.name_entry	1,11	-	8	-	path A: 8 creator(s) of this partition in other actors	-	static-undetermined	-	removed (left out: another callback)
+474a0fc0ceca11bb	A	A14	A8	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	0	0	no creator left after exclusions (probe-create 0, key constant	no creator of this partition: key written without a key parame	none	none	kept; creator set changed; partition changed
+47577578d4bd59e4	A	A34	A15	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+4882062654c890a3	A	A57	-	OS_filesys_internal_record_t.virtual_mountpt	8	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+490c3b0987b61c68	A	A26	A11	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	0	0	no creator left after exclusions (probe-create 0, key constant	no creator of this partition: key written without a key parame	none	none	kept; creator set changed; partition changed
+51363f66940ce36e	A	A12	A6	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+5339899b5cc729c7	A	A58	-	OS_filesys_internal_record_t.virtual_mountpt	0	-	0	-	path A: no creator left after exclusions (probe-create 0, ke	-	none	-	removed (left out: another callback)
+5461ac9505958a72	A	A32	A13	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+5882a5db95c22821	A	A61	-	OS_filesys_internal_record_t.virtual_mountpt		-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+59385e6a65f033fd	A	A44	-	OS_filesys_internal_record_t.virtual_mountpt	8,0	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+5b4c9f0f9483f1ee	A	A36	A17	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+6053829fb2d49c1e	A	A54	-	OS_filesys_internal_record_t.virtual_mountpt	1	-	0	-	path A: no creator left after exclusions (probe-create 0, ke	-	none	-	removed (left out: another callback)
+6620bef8db9132d5	A	A20	-	OS_filesys_internal_record_t.virtual_mountpt	1	-	0	-	path A: no creator left after exclusions (probe-create 0, ke	-	none	-	removed (left out: another callback)
+67a1a8d0196bb9d4	A	A28	-	OS_filesys_internal_record_t.virtual_mountpt	3,11	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+67e94076a2726bc6	A	A47	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+6d68763a2e9af5a1	A	A7	A4	OS_common_record_t.name_entry	1,11	11	9	0	9 creator(s) of this partition in other actors	no creator left after exclusions (probe-create 0, key constant	static-undetermined	none	kept; creator set changed; partition changed
+714f3ab4001e57f7	A	A52	-	OS_filesys_internal_record_t.virtual_mountpt	4	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+7330a646224de513	A	A42	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+78673e4d25030b02	A	A49	-	OS_filesys_internal_record_t.virtual_mountpt	8,0	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+79409e1d730d6278	A	A6	A3	OS_common_record_t.name_entry	3,11	11	0	0	no creator of this partition	no creator left after exclusions (probe-create 0, key constant	none	none	kept; creator set changed; partition changed
+8343a000b25c4e39	A	A37	A18	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+84e50f991766fd35	A	A11	-	OS_common_record_t.name_entry	1,1	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+950fb3537d1dd4cf	A	A25	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+973ca6409db4bc87	A	A51	A24	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+9ab739b6e1442c16	A	A13	A7	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	0	0	no creator left after exclusions (probe-create 0, key constant	no creator of this partition: key written without a key parame	none	none	kept; creator set changed; partition changed
+a628fd2d6d1c9956	A	A60	-	OS_filesys_internal_record_t.virtual_mountpt		-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+a808885192ecfeec	A	A55	-	OS_filesys_internal_record_t.virtual_mountpt	1	-	0	-	path A: no creator left after exclusions (probe-create 0, ke	-	none	-	removed (left out: another callback)
+a9a52f69323c098d	A	A33	A14	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+aa5f43638fa5e3c7	A	A41	A20	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+abc419bf15d1b1e7	A	A9	-	OS_common_record_t.name_entry	1,11	-	10	-	path A: 10 creator(s) of this partition in other actors	-	static-undetermined	-	removed (left out: another callback)
+ad9fc1058923aad9	A	A10	A5	OS_common_record_t.name_entry	8	8	1	1	1 creator(s) of this partition in other actors	1 creator(s) of this partition in other actors	static-possible	static-possible	kept
+b3c2ad872500a65c	A	A68	-	OS_impl_task_internal_record_t.id		-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+b4a0a42a49b4cf57	A	A29	-	OS_filesys_internal_record_t.virtual_mountpt	1	-	0	-	path A: no creator left after exclusions (probe-create 0, ke	-	none	-	removed (left out: another callback)
+b8965bc2ca0e7e23	A	A56	-	OS_filesys_internal_record_t.virtual_mountpt	8,0	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+bf828c2274e57374	A	A3	A2	OS_common_record_t.name_entry	1,11	11	9	0	9 creator(s) of this partition in other actors	no creator left after exclusions (probe-create 0, key constant	static-undetermined	none	kept; creator set changed; partition changed
+c59d1a9094068e64	A	A65	-	OS_filesys_internal_record_t.virtual_mountpt	8	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+df8ab82b2b78cc10	A	A30	-	OS_filesys_internal_record_t.virtual_mountpt	8,0	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+e28862a2018f805e	A	A67	A25	OS_impl_task_internal_record_t.id			0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept
+e43a85ce1d3f2e85	A	A50	A23	OS_filesys_internal_record_t.virtual_mountpt	0,0	11	0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept; partition changed
+e5fc550084b73dba	A	A21	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+e6502c2ef0d1d113	A	A19	-	OS_filesys_internal_record_t.virtual_mountpt	4	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+e6b6b7deef4930b5	A	A43	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+e9485d9e0a39c329	A	A35	A16	OS_filesys_internal_record_t.virtual_mountpt	3,1	11	0	0	no creator of this partition	no creator of this partition: key written without a key parame	none	none	kept; partition changed
+e96600974c8ebb77	A	A1	A1	CFE_TBL_CmdHandlerTblRec_t.CmdCode			0	0	no creator of this partition	no creator of this partition: only initial values (no writer o	none	none	kept
+ec3fdc4025216ff3	A	A5	-	OS_common_record_t.name_entry	1,11	-	9	-	path A: 9 creator(s) of this partition in other actors	-	static-undetermined	-	removed (left out: another callback)
+ece55032452aaae3	A	A40	A19	OS_filesys_internal_record_t.virtual_mountpt	1,11	11	2	0	2 creator(s) of this partition in other actors	no creator of this partition: key written without a key parame	static-undetermined	none	kept; creator set changed; partition changed
+ef7e4e73a079bd9b	A	A31	-	OS_filesys_internal_record_t.virtual_mountpt	10	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+f149a3b78a65b9ee	A	A48	-	OS_filesys_internal_record_t.virtual_mountpt	5	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+f91059c6416ae93f	A	A18	-	OS_filesys_internal_record_t.virtual_mountpt	10	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)
+fbe4bc8b2599263b	A	A15	-	OS_filesys_internal_record_t.virtual_mountpt	10	-	0	-	path A: no creator of this partition	-	none	-	removed (left out: another callback)

@@ -1,0 +1,60 @@
+# declaration: sha256 of declared_before_build.txt (= the lines of section 3 of plan/observation_path_results_20261116.md up to the end of 3.0, before the build) = 6d5f7af47f32f3d133055580dfbfac089556d575e627aaf1968080960e2ea1b5 (2026-11-16T06:12:08Z; committed before the build)
+# obs1-20261116-relincomplete: commands, rc and free space (df -B1 /, bytes available)
+start: free 4367933440 at the first measurement of this step (after 05:47:40Z, the end of the step before; the time was not written down)
+# <scratch> is this session's scratchpad directory (m2/)
+
+## 0. before the declaration
+kz-static a763e255 (the tree's tool before this build) on <scratch>/fx/relincomplete.c, extract --no-profile --targets-rule R-T1,R-T2 [--image-budget 3] and relations: used to shape the fixture (the extraction is not changed by this step); at --image-budget 3 the old relations give the key of the cut name table as 'known' with three of the four names, and count the marker task_defs[...] as a non-constant leaf covering the member
+grep -l 'kz-relations 1' kairos/tests/{static,golden,phi}/data/* -> relations.golden relations_np.golden relpaths_np.golden relsound_np.golden (the goldens that draw relations)
+grep -c '      incomplete: ' and '^summary incomplete' over T8CF/*/NP/relations.txt -> 0 each (the new lines collide with no line)
+T8CF row counts: rows 431/431/338/178/175, A rows 127/127/68/66/66, A rows with key unresolved 72/72/32/64/64, lines 7162/7162/4966/3083/3037
+g++ <the MC kz-llvm / test flags, -Werror> -fsyntax-only lib/llvm/{rel_facts,relations}.cpp tests/static/{test_static_reasons,test_static_cli,static_golden}.cpp -> clean
+MC/tests/lint/kz_lint <rule> kairos --data kairos/tests/lint/data for case-ids retired-term banned-files no-llvm no-generated (kz_lint b0f0d6a5) -> clean
+python3 -I vocab_check.py plan/ovm_rev1_20261116/JUDGEMENT_RULES_REV1.md kairos/tests/static/data/reason_vocabulary.txt -> SAME table 22 reasons, data file 22 lines
+tool copy (tool_copy/): space_guard.sh --need 60000000 --kind tool-copy -- xz -9 -T4 -c MC/tools/kz-static/kz-static > /home/user/work/preserve/tools-20261116-b/kz-static.a763e255.xz (06:08-06:10Z) -> rc 0, 39,612,812 B, dip 39,632,896; round trip OK (ROUNDTRIP.txt)
+free before the commit of the declaration: 4324368384 (2026-11-16T06:12:08Z)
+
+## 1. declaration, code, tests and docs committed together before the build: 750cc43 (line 1 above)
+
+## 2. before the build (pre_mc.txt, 06:12:46Z): the seven tools equal records/obs1-20261116-relrows/post_mc.txt; HEAD 750cc43, uncommitted lines under kairos 0
+
+## 3. rebuild in place in MC under the space guard
+cd MC && env/tools/space_guard.sh --need 116020160 --log df_build.log --kind kz-static -- bash -c "make -j4 all > make.log 2>&1"   (06:12:56Z-06:15:16Z) -> rc 0, first time
+CMake re-ran; links (13 Linking lines): libkz-llvm.a, kz-static, test_static_{expr,recipe,flow,gitrev,unroll,wrappers,link,elf32,cli}, the new test_static_reasons, static_golden
+free: start 4323872768, lowest 4149112832, end 4166381568 (dip 174759936, change -157491200); floor never crossed (the dip is above the declared need 116020160: the new test program test_static_reasons is 154,547,088 B)
+find kairos/{lib,tools,include,cmake,CMakeLists.txt,probe,instrument,runtime} -newer <build start> -> 0 files
+post_mc.txt: kz-static 5d4a1d7f (tool_sha256 c162e7f6, tool_source 7003f7ed, core_source f6e3c7b4 unchanged); kz, kz-dump, kz-rt-dump, kz-phi, kz_lint, kz-instr-clang unchanged;
+  defines of kz, kz-phi, kz-dump unchanged; CMakeCache.txt bc2f43b4 unchanged; flags.make list b354fbbf -> 1d3b5bba (kz-static's flags.make and the new test_static_reasons)
+
+## 4. tests
+ctest -j4 --output-on-failure -> ctest_first.log: 243 tests, 7 failed as expected before the golden update (static_golden_{relations,relations_np,relpaths_np,relsound_np} with the declared lines, static_golden_relincomplete{,_cut}_np without a golden, test_static_reasons reading those goldens), test_static_cli passed
+KZ_GOLDEN_UPDATE=1 ctest -R '^static_golden_(relations|relations_np|relpaths_np|relsound_np|relincomplete_np|relincomplete_cut_np)$' -> golden_update.log, rc 0
+python3 -I compare_declared.py relations <the golden at 750cc43> <the updated golden> for the four -> golden_compare.txt: 4 of 4 SAME (rows 3/5/7/38, one incomplete line each)
+the two new goldens read: relincomplete_cut_np differs from relincomplete_np only where the cut reaches (image rows with image-truncated and the markers name_defs[...], task_defs[...]; the key of seek_known unresolved and paired; entries red_main green_main; the C row of blue_main undecidable)
+ctest -j4 --output-on-failure (06:16:14Z-06:16:34Z) -> ctest_full.log: 243 tests, 0 failed, 1 skipped (test_probe_anchor_reached); labels golden 60, static 49, legacy-case 51, unit 84, runtime 66, lint 6
+ctest -V: test_static_cli 837 checks passed (798 before, +39), test_static_reasons 575 checks passed, lint selftest 102 cases 0 failed; ctest -L lint 6 of 6
+ctest -R '^test_probe_anchor_reached$' -V -O skip_reason.log -> Skipped (no tracefs)
+TMPDIR=<scratch>/tmp bash env/tools/tests/run_unit.sh -> unit_tools.txt, 8 of 8;  TMPDIR=<scratch>/tmp bash env/redesign/step2a_tests_unit.sh -> unit_step2a.txt, 7 of 7
+
+## 5. relations of the five builds on the tests_8c_fix NP facts (facts not re-extracted)
+env/tools/space_guard.sh --need 30000000 --log df_rerun.log --kind relations -- bash rerun.sh   (06:17:10Z-06:17:12Z) -> rc 0; dip 6488064
+compare_declared.py relations T8CF/<b>/NP/relations.txt O/<b>/relations.txt, keys relrows_check/<b>/keys.txt O/<b>/keys.txt, cmp of relations.log -> byte_identity.txt: 5 of 5 SAME (rows 431/431/338/178/175 with one incomplete line each;
+  A rows with key unresolved 72/72/32/64/64, each with a key_unresolved reason), keys: only line 3 differs, logs empty, facts line the same; lines 7594/7594/5305/3262/3213 (O = /home/user/work/redesign/obs1/relincomplete_check, new)
+kept: O/<b>/{relations.txt,keys.txt,relations.log} (outputs.sha256; 6,444,906 B)
+
+## 6. sensitivity: c1_pre_tx at --image-budget 3
+ONE_BUILD_EXTRACT_EXTRA="--image-budget 3" bash env/redesign/one_build.sh c1_pre_tx /home/user/work/redesign/obs1/relincomplete_sens (06:17:32Z-06:17:58Z) -> PASS (sens_run.txt, sens_status.txt, sens_args.txt, df_sens.log; extract dip 11018240)
+kz-static relations <sens>/facts.kz -o relations_k.txt --keys keys.txt -> rc 0, text equal to the runner's relations.txt
+BASIS count.walk_bounds_hit: image_budget_exhausted 34 objects, image_leaves_omitted 46 markers; the other walk bounds 0
+rows 305 (A 127, B 135, C 43) against 431 (A 127, B 170, C 134); every key of the 305 is a key of the default run; 126 rows only in the default run (B 35, C 91)
+the spawn at cfe_es_start.c:767:34 is no longer resolved through the image of CFE_ES_ObjectTable (cut before any MainTaskPtr leaf): table-image-entry 5 -> 0
+rows with key_unresolved(static image truncated) 3 (A20, A40, A41), with truncated(static image) 4 (those and A21, through the BP creator's key): sens_detail.txt
+kept: <sens>/c1_pre_tx/NP (sens_outputs.sha256; 12,955,197 B)
+
+## 7. registry, ledger, cumulative list
+records/TOOLS.tsv: a763e255 in-place -> copy (/home/user/work/preserve/tools-20261116-b/kz-static.a763e255.xz; superseded: its five key listings re-made identically except line 3); new row 5d4a1d7f in-place
+env/tools/tools_check.sh --deep -> tools_check.txt, 28 rows, 0 failing
+records/LEDGER.tsv: new rows TOOLS_20261116b, OBS_relincomplete, OBS_relincomplete_sens.  env/tools/ledger_check.sh -> ledger_check.txt, 33 rows, 0 failing
+name_check.sh --tree over the two output directories and the tool copy directory -> clean
+nothing deleted; no cFS boot; no push
+end: 2026-11-16T06:19:09Z, free 4145606656

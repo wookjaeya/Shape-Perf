@@ -1,0 +1,50 @@
+# head and tail of <scratch>/eval_c1_pre_tx_script.txt (removed after this copy): sha256 5463bb46e8d991fc6e3f2a24ffcd85dbc15b4e6535eeb66756ed477ec075fb0c, 6143 lines
+1:kz-eval 1
+4:input uses 0ca47839d43db83c9821cab74445dff58cdfa9fb69e71ccf47e5fd4abd214e14 /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/uses/uses_c1_pre_tx.tsv
+5:input sidecar a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4 /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side
+6:input relations a10fcf92a051bd3c84a7057032f1746eb565a02336e17c9a08a89f3c0df41b31 /home/user/work/redesign/obs1/cz_final_order/c1_pre_tx/relations.txt
+7:input pairs c91113d5c5d0ce4c62807938b9b3a42e859069857b5d3d5e7c2f82cd9e0b29dd /home/user/work/redesign/obs1/cz_final_order/c1_pre_tx/pairs.tsv
+8:input sheets_static e70c31f2cf4e285df00ff28489ab3952b4d3611e5e9ae7ec52e12ee251458a1f /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/sheets/sheets_static.tsv
+9:input index:D1-R0 a8deee3c2435ca64c25927fee3ed8166c14f889b2cfad33d9889a6d89ee863f3 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D1-R0/index.tsv
+10:input index:D1-Ra 1d5b9c415ebbdee56011f4a3922076af05945e648c923df0b7a8316b6f8cbee8 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D1-Ra/index.tsv
+11:input index:D1-Rb 725a04522bc7e9b5b7bf27698a4a2a585b5ef64b7013a6302cf38132e82c0ad2 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D1-Rb/index.tsv
+12:input index:D1-Rc ad591f148c8e95aa78451e86329c23f3e47ceabfc80c9158b2724d3bd7526c31 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D1-Rc/index.tsv
+13:input index:D1-Rd e76056e17449344de324fb624a6721c0521741b7a9245acc9cfa0273bfa0c3cc /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D1-Rd/index.tsv
+14:input index:D1-Re 622e113741d1bc684aaa117caa2ebdc408e7f48c1665a7ff17b8bfd2a367f4cf /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D1-Re/index.tsv
+15:input index:D1-Rf b9bf8592edfc91254f5310fded6f5454097c41141f9436785cbaa558733dfc65 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D1-Rf/index.tsv
+16:input index:D1-all 4ef22e3cc6f9eaba156cf8d734308ac5c3d1b298a33f323e7c1ff3042d9ce723 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D1-all/index.tsv
+17:input index:D2-R0 363c73fa8021e7cb164da006b7a4405831478c162596d9b836e07e799364ca3f /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D2-R0/index.tsv
+18:input index:D2-Ra bb5a802322a0dfc454f844c9284da53483e523be521ec9b66ddb11ad2d2e43c4 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D2-Ra/index.tsv
+19:input index:D2-Rb f4d130b207062079b6fb0882cc3e6e05347396d78fbb38e9f5f80ce93d04e939 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D2-Rb/index.tsv
+20:input index:D2-Rc 1854a03b52e890a33b3cd6c3f38e9100f5e7ca12e6a01bb45ebbc27c5bc7e372 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D2-Rc/index.tsv
+21:input index:D2-Rd 9ec0464304fb6e38be92cc1859b8ecf67fffe83d9fd5b5871a812087309e6860 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D2-Rd/index.tsv
+22:input index:D2-Re 7306aa02baf77ba2a73fbbb8469a98dc5e966d2c9531b0369b52f73e53cf2957 /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D2-Re/index.tsv
+23:input index:D2-Rf 0440dd862fb147c3e48cfb6d8e7d688e86ec5849ced14e7c6c8713e355ff572e /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D2-Rf/index.tsv
+24:input index:D2-all a0d6fd9a9d4cf328f0acaf5f24837744b281d0a45db3819274d0ee82fa04c82b /home/user/work/redesign/obs1/xr5_synth_c1_pre_tx_script/explain/D2-all/index.tsv
+25:input expect 444f7615f7830f464e1f713244c558e263ffbee1c76d5b3a615fa2aa6d04f0ef /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/expect/expect_c1_2.tsv
+count	F1	boot	fail	192
+count	F1	boot	pass	272
+count	F1	static	pass	640
+count	F10	boot	not_evaluable	736
+count	F2a	static	pass	368
+count	F2b	format	pass	368
+count	F3	boot	pass	736
+count	F4	boot	pass	736
+count	F5	static	pass	80
+count	F6	static	pass	736
+count	F7	format	pass	10
+count	F8a	static	pass	5
+count	F8b	boot	not_evaluable	736
+count	F9	boot	pass	16
+count	expect_discriminate	static	not_counted	16
+count	expect_discriminate	static	unmet	64
+count	in_plan_recall	boot	value	16
+count	precision	boot	value	16
+count	s1	static	pass	40
+count	s2	static	pass	80
+count	s3	static	pass	80
+count	s4	static	pass	80
+count	undetermined_split	boot	value	16
+form ok
+lines 6039
+end

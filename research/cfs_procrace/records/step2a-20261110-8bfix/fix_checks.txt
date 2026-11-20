@@ -1,0 +1,158 @@
+# checks of the 8b fix-stage tool on small sources (scratch; the sources are quoted here, the outputs not kept)
+# tool: kz-static 3c5dfc56293d69cd (2026-11-10T08:15:38Z)
+
+## finding 1 (relations does not read the record/union marker): the source
+#include <pthread.h>
+typedef struct { int used; } Rec;
+static Rec recs[4];
+typedef union { void (*init)(void); void *(*main)(void *); } Fn;
+typedef struct { int kind; Fn fn; } Entry;
+
+int rd(void) {
+  if (recs[0].used == 1) return 0;
+  return -1;
+}
+void *main_a(void *arg) { (void)rd(); return arg; }
+void *main_b(void *arg) { return arg; }
+static const Entry table[3] = {{1, {.main = main_b}}, {1, {.main = main_b}}, {1, {.main = main_a}}};
+static int count = 3;
+
+int create_all(void) {
+  pthread_t t;
+  int i;
+  for (i = 0; i < count; i++) pthread_create(&t, 0, table[i].fn.main, 0);
+  recs[0].used = 1;
+  return 0;
+}
+int start(void) { return create_all(); }
+### budget def: extract rc=0
+    table@v5.c:13[0].kind int 1 at v5.c:13:33 {const-object} reach={argument} field=Entry.kind
+    table@v5.c:13[0].fn.main function main_b at v5.c:13:45 {const-object} reach={argument}
+    table@v5.c:13[1].kind int 1 at v5.c:13:56 {const-object} reach={argument} field=Entry.kind
+    table@v5.c:13[1].fn.main function main_b at v5.c:13:68 {const-object} reach={argument}
+    table@v5.c:13[2].kind int 1 at v5.c:13:79 {const-object} reach={argument} field=Entry.kind
+    table@v5.c:13[2].fn.main function main_a at v5.c:13:91 {const-object} reach={argument}
+  actors: roots 2 (process 0, spawn-entry 0, table-walk-entry 0, table-image-entry 2, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and
+  spawn calls resolved through the static image of the table their entry argument is read from: 1 [v5.c:19:31: main_a main_b; the member Fn.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written]
+  summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition in another actor 0, key-matched 0) B 0 (with a callee check 0) C 1 (self-identity reads 0); flip static-possible 1, static-undetermined 0, none 0; feasibility proven-impossible 0, possible 1, undecidable 0, not graded 0
+### budget 5: extract rc=0
+    table@v5.c:13[0].kind int 1 at v5.c:13:33 {const-object,image-truncated} reach={argument} field=Entry.kind
+    table@v5.c:13[0].fn.main function main_b at v5.c:13:45 {const-object,image-truncated} reach={argument}
+    table@v5.c:13[1].kind int 1 at v5.c:13:56 {const-object,image-truncated} reach={argument} field=Entry.kind
+    table@v5.c:13[1].fn.main function main_b at v5.c:13:68 {const-object,image-truncated} reach={argument}
+    table@v5.c:13[2].kind int 1 at v5.c:13:79 {const-object,image-truncated} reach={argument} field=Entry.kind
+    table@v5.c:13[2].fn... non-constant at v5.c:13:20 {const-object,image-truncated} reach={argument}
+  actors: roots 1 (process 0, spawn-entry 0, table-walk-entry 0, table-image-entry 1, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and
+  spawn calls resolved through the static image of the table their entry argument is read from: 1 [v5.c:19:31: main_b; the member Fn.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written]
+  summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition in another actor 0, key-matched 0) B 0 (with a callee check 0) C 0 (self-identity reads 0); flip static-possible 0, static-undetermined 0, none 0; feasibility proven-impossible 0, possible 0, undecidable 0, not graded 0
+### budget 4: extract rc=0
+    table@v5.c:13[0].kind int 1 at v5.c:13:33 {const-object,image-truncated} reach={argument} field=Entry.kind
+    table@v5.c:13[0].fn.main function main_b at v5.c:13:45 {const-object,image-truncated} reach={argument}
+    table@v5.c:13[1].kind int 1 at v5.c:13:56 {const-object,image-truncated} reach={argument} field=Entry.kind
+    table@v5.c:13[1].fn.main function main_b at v5.c:13:68 {const-object,image-truncated} reach={argument}
+    table@v5.c:13[...] non-constant at v5.c:13:20 {const-object,image-truncated} reach={argument}
+  actors: roots 1 (process 0, spawn-entry 0, table-walk-entry 0, table-image-entry 1, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and
+  spawn calls resolved through the static image of the table their entry argument is read from: 1 [v5.c:19:31: main_b; the member Fn.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written; besides the function leaves of Fn.main, the image of table has 1 non-constant leaf/leaves covering that member (table[...]): that the spawn reads only th
+  summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition in another actor 0, key-matched 0) B 0 (with a callee check 0) C 0 (self-identity reads 0); flip static-possible 0, static-undetermined 0, none 0; feasibility proven-impossible 0, possible 0, undecidable 0, not graded 0
+
+## finding 2 (table-walk reason on a cut image): the source
+typedef struct {
+  const char *name;
+  int pad[2];
+  int (*init)(void);
+  void (*task)(void);
+} Mod;
+typedef struct {
+  int p0;
+  int p1;
+  const Mod *const *list;
+  int tail;
+} Cfg;
+int fx_spawn(unsigned *tid, const char *name, void (*entry)(void));
+static int a_init(void) { return 0; }
+static int b_init(void) { return 1; }
+static void b_task(void) {}
+static void c_task(void) {}
+static const Mod mod_a = {"a", {1, 2}, a_init, 0};
+static const Mod mod_b = {"b", {3, 4}, b_init, b_task};
+static const Mod mod_c = {"c", {5, 6}, 0, c_task};
+static const Mod *const mod_list[5] = {&mod_a, &mod_b, &mod_c};
+Cfg g_cfg = {7, 8, mod_list, 9};
+
+void init_all(void) {
+  unsigned long i;
+  const Mod *e;
+  for (i = 0;; i++) {
+    e = g_cfg.list[i];
+    if (e == 0) break;
+    if (e->init != 0) (void)e->init();
+  }
+}
+void spawn_all(void) {
+  unsigned long i;
+  unsigned tid;
+  const Mod *e;
+  for (i = 0;; i++) {
+    e = g_cfg.list[i];
+    if (e == 0) break;
+    if (e->task == 0) continue;
+    fx_spawn(&tid, e->name, e->task);
+  }
+}
+### budget 2: extract rc=0
+    loop 0 site 0 v2.c:27:3 in init_all depth=1 table-walk trip=unknown exits=1 calls=1 table=g_cfg.list (the field .list of g_cfg was not read: the static image of g_cfg was cut at the image budget there (g_cfg.list...))
+    loop 1 site 2 v2.c:37:3 in spawn_all depth=1 table-walk trip=unknown exits=1 calls=1 table=g_cfg.list (the field .list of g_cfg was not read: the static image of g_cfg was cut at the image budget there (g_cfg.list...))
+### budget 3: extract rc=0
+    loop 0 site 0 v2.c:27:3 in init_all depth=1 table-walk trip=exact(3) exits=1 calls=1 table=g_cfg.list
+    loop 1 site 2 v2.c:37:3 in spawn_all depth=1 table-walk trip=exact(3) exits=1 calls=1 table=g_cfg.list
+    g_cfg.p0 int 7 at v2.c:22:14 {image-truncated} reach={pointer-field} field=Cfg.p0
+    g_cfg.p1 int 8 at v2.c:22:17 {image-truncated} reach={pointer-field} field=Cfg.p1
+    g_cfg.list address mod_list@v2.c:21 at v2.c:22:20 {image-truncated} reach={pointer-field} field=Cfg.list
+    g_cfg.tail... non-constant at v2.c:22:5 {image-truncated} reach={pointer-field}
+
+## findings 3 and 4 (anonymous member marker path; array initialized by an overriding designator): the source
+int an_use(const void *p);
+struct AN2 { int a; struct { int b; int c; }; int d; } s_an = {1, {2, 3}, 4};
+struct DU { char s[4]; int n; } u_du = {.s = "abc", .s[1] = 'X', .n = 5};
+struct In2 { int p; int q; };
+struct DV { struct In2 in; int m; } v_du = {.in = (struct In2){1, 2}, .in.q = 7, .m = 3};
+int an_main(void) { return an_use(&s_an) + an_use(&u_du) + an_use(&v_du); }
+### budget def
+    s_an.a int 1 at an.c:2:64 {object-written} reach={argument} field=AN2.a
+    s_an..b int 2 at an.c:2:68 {object-written} reach={argument} field=<anonymous>.b
+    s_an..c int 3 at an.c:2:71 {object-written} reach={argument} field=<anonymous>.c
+    s_an.d int 4 at an.c:2:75 {object-written} reach={argument} field=AN2.d
+    u_du.s non-constant at an.c:3:46 {object-written} reach={argument} field=DU.s
+    u_du.n int 5 at an.c:3:71 {object-written} reach={argument} field=DU.n
+    v_du.in non-constant at an.c:5:51 {object-written} reach={argument} field=DV.in
+    v_du.m int 3 at an.c:5:87 {object-written} reach={argument} field=DV.m
+  kz-static: static image of s_an: budget 1 used up, marker leaves 1
+  kz-static: static image of u_du: budget 1 used up, marker leaves 1
+  kz-static: static image of v_du: budget 1 used up, marker leaves 1
+### budget 1
+    s_an.a int 1 at an.c:2:64 {image-truncated,object-written} reach={argument} field=AN2.a
+    s_an.... non-constant at an.c:2:56 {image-truncated,object-written} reach={argument}
+    u_du.s non-constant at an.c:3:46 {image-truncated,object-written} reach={argument} field=DU.s
+    u_du.n... non-constant at an.c:3:33 {image-truncated,object-written} reach={argument}
+    v_du.in non-constant at an.c:5:51 {image-truncated,object-written} reach={argument} field=DV.in
+    v_du.m... non-constant at an.c:5:37 {image-truncated,object-written} reach={argument}
+  kz-static: static image of s_an: budget 2 used up, marker leaves 2
+  kz-static: static image of u_du: budget 2 used up, marker leaves 0 (an exact fit)
+  kz-static: static image of v_du: budget 2 used up, marker leaves 0 (an exact fit)
+### budget 2
+    s_an.a int 1 at an.c:2:64 {image-truncated,object-written} reach={argument} field=AN2.a
+    s_an..b int 2 at an.c:2:68 {image-truncated,object-written} reach={argument} field=<anonymous>.b
+    s_an..c... non-constant at an.c:2:56 {image-truncated,object-written} reach={argument}
+    s_an.d... non-constant at an.c:2:56 {image-truncated,object-written} reach={argument}
+    u_du.s non-constant at an.c:3:46 {object-written} reach={argument} field=DU.s
+    u_du.n int 5 at an.c:3:71 {object-written} reach={argument} field=DU.n
+    v_du.in non-constant at an.c:5:51 {object-written} reach={argument} field=DV.in
+    v_du.m int 3 at an.c:5:87 {object-written} reach={argument} field=DV.m
+
+### budget 3: the walk resolves (g_cfg is read to .list) while the images of the elements are cut; the unrolled iterations read the missing field as not in the image
+      iter 0 mod_a@v2.c:18 -> non-constant field init not in the image  residual if (ne element:init 0)
+      iter 1 mod_b@v2.c:19 -> non-constant field init not in the image  residual if (ne element:init 0)
+    mod_a@v2.c:18.init... non-constant
+    mod_a@v2.c:18.name string "a"
+    mod_a@v2.c:18.pad[0] int 1
+    mod_a@v2.c:18.pad[1] int 2

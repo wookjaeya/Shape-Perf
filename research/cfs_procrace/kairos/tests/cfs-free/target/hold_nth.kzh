@@ -1,0 +1,9 @@
+# hold_nth.kzh -- occurrence <n> and two points on one address (kzp-hold 1).  G_first holds the provider at
+# the creation of "OBJ0" until the consumer's third failed lookup (R_third: the 3rd hit of
+# seq_consumer_retry); G_second, at the same address without a name condition, holds the second creation
+# (that of "OBJ1") until the consumer's end.  Unit-test values.
+kzp-hold 1
+gate G_first site=obj.create.entry when name name "OBJ0" occurrence first
+gate G_second site=obj.create.entry occurrence 2
+release R_third site=consumer.retry.entry releases G_first occurrence 3
+release R_done site=consumer.done.entry releases G_second occurrence first

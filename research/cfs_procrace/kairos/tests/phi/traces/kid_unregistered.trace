@@ -1,0 +1,19 @@
+# kid_unregistered -- a valid identity that was never registered with the event service.
+#
+# Unit-test values only.  The identity is valid, so the value conjunct holds at its capture; the
+# registry slot is still unregistered when the call reads it, so the registry conjunct is false at
+# its point.  The occurrence is decided at that point (not at the call), VIOLATING, and the returned
+# code agrees with the not_ready outcome of the registry conjunct.
+const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
+owner T_SB 2
+
+T0 CFE_ES_CreateObjects.reserve_core pt lp.slot=2
+T0 CFE_ES_CreateObjects.publish_core pt lp.slot=2 lp.pending_id=0x110002
+T_SB CFE_ES_GetAppID call
+T_SB CFE_ES_GetAppID.self_live pt
+T_SB CFE_ES_GetAppID.store_ok pt out.AppIdPtr=@CFE_SB_Global.AppId value=0x110002
+T_SB CFE_ES_GetAppID ret result=0
+T_SB CFE_EVS_SendEventWithAppID.id_valid pt arg.AppID=0x110002 cell=@CFE_SB_Global.AppId value=0x110002
+T_SB CFE_EVS_SendEventWithAppID call arg.AppID=0x110002
+T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+T_SB CFE_EVS_SendEventWithAppID ret result=0xc2000002

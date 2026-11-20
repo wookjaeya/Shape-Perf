@@ -1,0 +1,6 @@
+# archive.sh rf2_off_extract records/review-fixes-2-mc-20261119/rf2_off_extract.sha256 2026-11-19T13:50:37Z
+1. directory = list: 50 files, 46952338 bytes (apparent), 47136768 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/rf2_off_extract/rf2_off_extract.tar.xz 3391580 bytes sha256 2279507c8b33ece76b980f40f761644945edba08879aaf64575bdd118214bea0
+4. round trip: 50 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/rf2_off_extract removed 2026-11-19T13:50:49Z
+PASS

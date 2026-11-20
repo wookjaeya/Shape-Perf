@@ -1,0 +1,417 @@
+extract
+  translation units          1
+  functions                  25 (bodies read 19, in system headers skipped 0)
+  call sites                 27
+  indirect calls             1 (resolved 1, unresolved 0)
+  spawn calls                3 (entry resolved 3)
+  loops                      2 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 1, await 0, star-closed 1
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 3, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Def.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Holder.ids   writers 2 (direct 0, data function 0, out-pointer 2, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Holder.path_id   writers 1 (direct 0, data function 0, out-pointer 1, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Rec.active   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Rec.name   writers 2 (direct 0, data function 2, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 19, control-flow graphs 19, call-graph components 19 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 1 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               5 (R-T1 5, R-T2 1, both 1; left out, reached only through an unshared base: R-T1 1, R-T2 3)
+facts-view 1
+[functions] 25
+  fn 0 alloc_check relcallback.c:99-110 params=3 {defined,static}
+  fn 1 cleaner_main relcallback.c:174-178 params=1 {defined,address-taken}
+  fn 2 find_by_name relcallback.c:83-88 params=4 {defined}
+  fn 3 find_next relcallback.c:59-72 params=3 {defined}
+  fn 4 get_by_search relcallback.c:78-81 params=5 {defined}
+  fn 5 in_use relcallback.c:57-57 params=1 {defined,static}
+  fn 6 main relcallback.c:180-187 params=0 {defined}
+  fn 7 maker_main relcallback.c:156-160 params=1 {defined,address-taken}
+  fn 8 memset /usr/include/string.h:61 params=3 {builtin}
+  fn 9 name_match relcallback.c:74-74 params=2 {defined,address-taken}
+  fn 10 path_find relcallback.c:92-97 params=2 {defined}
+  fn 11 path_match relcallback.c:76-76 params=2 {defined,address-taken}
+  fn 12 pick_match relcallback.c:132 params=0 {}
+  fn 13 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 14 rec_create relcallback.c:112-122 params=3 {defined}
+  fn 15 rec_finish relcallback.c:111-111 params=3 {defined,static}
+  fn 16 search_with relcallback.c:126-129 params=2 {defined}
+  fn 17 sem_create relcallback.c:124-124 params=2 {defined}
+  fn 18 sem_delete relcallback.c:164-172 params=1 {defined}
+  fn 19 sem_find relcallback.c:90-90 params=2 {defined}
+  fn 20 strcmp /usr/include/string.h:156 params=2 {builtin}
+  fn 21 strncmp /usr/include/string.h:159 params=3 {builtin}
+  fn 22 strncpy /usr/include/string.h:144 params=3 {builtin}
+  fn 23 token_init relcallback.c:51-55 params=3 {defined,static}
+  fn 24 user_main relcallback.c:148-154 params=1 {defined,address-taken}
+[argflow] 80
+  arg 0 of site 1 relcallback.c:66:9 [rec->active] <- field Rec.active root=table base=global-array-element object=table@relcallback.c:41 hops=0 {through-pointer,base-via-local} read=3 chain=field:Rec.active
+  arg 0 of site 2 relcallback.c:66:32 [ref] <- param root=ref param=1 hops=0 {} chain=param:ref#1
+  arg 1 of site 2 relcallback.c:66:32 [rec] <- address <global>.table root=table base=global-array-element object=table@relcallback.c:41 hops=1 {} index=[field:Token.kind, field:Token.idx] chain=(copy rec (addr (index (index global:table field:Token.kind) field:Token.idx)))
+  arg 0 of site 3 relcallback.c:74:56 [(const char *)ref] <- param root=ref param=0 hops=0 {pointer-conversion} chain=param:ref#0
+  arg 1 of site 3 relcallback.c:74:56 [r->name] <- field Rec.name root=r param=1 base=parameter hops=0 {through-pointer,array-contents} read=4 chain=field:Rec.name
+  arg 0 of site 4 relcallback.c:76:56 [(const char *)ref] <- param root=ref param=0 hops=0 {pointer-conversion} chain=param:ref#0
+  arg 1 of site 4 relcallback.c:76:56 [r->path] <- field Rec.path root=r param=1 base=parameter hops=0 {through-pointer,array-contents} read=5 chain=field:Rec.path
+  arg 2 of site 4 relcallback.c:76:56 [8] <- const 8 hops=0 {} chain=8
+  arg 0 of site 5 relcallback.c:79:3 [t] <- param root=t param=4 hops=0 {} chain=param:t#4
+  arg 1 of site 5 relcallback.c:79:3 [lock_mode] <- param root=lock_mode param=0 hops=0 {} chain=param:lock_mode#0
+  arg 2 of site 5 relcallback.c:79:3 [kind] <- param root=kind param=1 hops=0 {} chain=param:kind#1
+  arg 0 of site 6 relcallback.c:80:10 [m] <- param root=m param=2 hops=0 {} chain=param:m#2
+  arg 1 of site 6 relcallback.c:80:10 [ref] <- param root=ref param=3 hops=0 {} chain=param:ref#3
+  arg 2 of site 6 relcallback.c:80:10 [t] <- param root=t param=4 hops=0 {} chain=param:t#4
+  arg 0 of site 7 relcallback.c:85:12 [lock_mode] <- param root=lock_mode param=0 hops=0 {} chain=param:lock_mode#0
+  arg 1 of site 7 relcallback.c:85:12 [kind] <- param root=kind param=1 hops=0 {} chain=param:kind#1
+  arg 2 of site 7 relcallback.c:85:12 [name_match] <- function root=name_match hops=0 {} chain=function:name_match
+  arg 3 of site 7 relcallback.c:85:12 [name] <- param root=name param=2 hops=0 {pointer-conversion} chain=param:name#2
+  arg 4 of site 7 relcallback.c:85:12 [&t] <- address root=t base=local hops=0 {} chain=(addr local:t)
+  arg 0 of site 8 relcallback.c:90:50 [LOCK_SHARED] <- const 2 hops=0 {in-macro} chain=2
+  arg 1 of site 8 relcallback.c:90:50 [KIND_SEM] <- const 1 hops=0 {in-macro} chain=1
+  arg 2 of site 8 relcallback.c:90:50 [name] <- param root=name param=0 hops=0 {} chain=param:name#0
+  arg 3 of site 8 relcallback.c:90:50 [id] <- param root=id param=1 hops=0 {} chain=param:id#1
+  arg 0 of site 9 relcallback.c:94:12 [LOCK_SHARED] <- const 2 hops=0 {in-macro} chain=2
+  arg 1 of site 9 relcallback.c:94:12 [KIND_PATH] <- const 0 hops=0 {in-macro,null} chain=0
+  arg 2 of site 9 relcallback.c:94:12 [path_match] <- function root=path_match hops=0 {} chain=function:path_match
+  arg 3 of site 9 relcallback.c:94:12 [path] <- param root=path param=0 hops=0 {pointer-conversion} chain=param:path#0
+  arg 4 of site 9 relcallback.c:94:12 [&t] <- address root=t base=local hops=0 {} chain=(addr local:t)
+  arg 0 of site 10 relcallback.c:101:3 [t] <- param root=t param=2 hops=0 {} chain=param:t#2
+  arg 1 of site 10 relcallback.c:101:3 [LOCK_EXCL] <- const 3 hops=0 {in-macro} chain=3
+  arg 2 of site 10 relcallback.c:101:3 [kind] <- param root=kind param=0 hops=0 {} chain=param:kind#0
+  arg 0 of site 11 relcallback.c:102:7 [name_match] <- function root=name_match hops=0 {} chain=function:name_match
+  arg 1 of site 11 relcallback.c:102:7 [name] <- param root=name param=1 hops=0 {pointer-conversion} chain=param:name#1
+  arg 2 of site 11 relcallback.c:102:7 [t] <- param root=t param=2 hops=0 {} chain=param:t#2
+  arg 0 of site 13 relcallback.c:116:8 [kind] <- param root=kind param=0 hops=0 {} chain=param:kind#0
+  arg 1 of site 13 relcallback.c:116:8 [name] <- param root=name param=1 hops=0 {} chain=param:name#1
+  arg 2 of site 13 relcallback.c:116:8 [&t] <- address root=t base=local hops=0 {} chain=(addr local:t)
+  arg 0 of site 14 relcallback.c:118:5 [table[kind][t.idx].name] <- field Rec.name root=table base=global-array-element object=table@relcallback.c:41 hops=0 {array-contents} index=[param:kind#0, field:Token.idx] read=11 chain=field:Rec.name
+  arg 1 of site 14 relcallback.c:118:5 [name] <- param root=name param=1 hops=0 {} chain=param:name#1
+  arg 2 of site 14 relcallback.c:118:5 [15] <- const 15 hops=0 {} chain=15
+  arg 0 of site 17 relcallback.c:120:10 [rc] <- local root=rc base=local hops=0 {} (multiple-definitions) chain=local:rc
+  arg 1 of site 17 relcallback.c:120:10 [&t] <- address root=t base=local hops=0 {} chain=(addr local:t)
+  arg 2 of site 17 relcallback.c:120:10 [id] <- param root=id param=2 hops=0 {} chain=param:id#2
+  arg 0 of site 18 relcallback.c:124:52 [KIND_SEM] <- const 1 hops=0 {in-macro} chain=1
+  arg 1 of site 18 relcallback.c:124:52 [name] <- param root=name param=0 hops=0 {} chain=param:name#0
+  arg 2 of site 18 relcallback.c:124:52 [id] <- param root=id param=1 hops=0 {} chain=param:id#1
+  arg 0 of site 19 relcallback.c:128:10 [LOCK_SHARED] <- const 2 hops=0 {in-macro} chain=2
+  arg 1 of site 19 relcallback.c:128:10 [KIND_SEM] <- const 1 hops=0 {in-macro} chain=1
+  arg 2 of site 19 relcallback.c:128:10 [m] <- param root=m param=0 hops=0 {} chain=param:m#0
+  arg 3 of site 19 relcallback.c:128:10 [ref] <- param root=ref param=1 hops=0 {pointer-conversion} chain=param:ref#1
+  arg 4 of site 19 relcallback.c:128:10 [&t] <- address root=t base=local hops=0 {} chain=(addr local:t)
+  arg 0 of site 20 relcallback.c:151:9 [holder.defs[0].name] <- field Def.name root=Holder.defs base=pointer-field object=holder@relcallback.c:146 hops=0 {through-pointer} index=[0] read=15 chain=field:Def.name
+  arg 1 of site 20 relcallback.c:151:9 [&holder.ids[0]] <- address Holder.ids root=holder base=global-array-element object=holder@relcallback.c:146 hops=0 {} index=[0] chain=(addr (index field:Holder.ids 0))
+  arg 0 of site 21 relcallback.c:152:9 ["/mnt/a"] <- string root="/mnt/a" hops=0 {} chain=string:/mnt/a
+  arg 1 of site 21 relcallback.c:152:9 [&holder.path_id] <- address Holder.path_id root=holder base=global object=holder@relcallback.c:146 hops=0 {} chain=(addr field:Holder.path_id)
+  arg 0 of site 22 relcallback.c:158:9 ["alpha"] <- string root="alpha" hops=0 {} chain=string:alpha
+  arg 1 of site 22 relcallback.c:158:9 [&holder.ids[1]] <- address Holder.ids root=holder base=global-array-element object=holder@relcallback.c:146 hops=0 {} index=[1] chain=(addr (index field:Holder.ids 1))
+  arg 0 of site 23 relcallback.c:166:12 [LOCK_EXCL] <- const 3 hops=0 {in-macro} chain=3
+  arg 1 of site 23 relcallback.c:166:12 [KIND_SEM] <- const 1 hops=0 {in-macro} chain=1
+  arg 2 of site 23 relcallback.c:166:12 [name_match] <- function root=name_match hops=0 {} chain=function:name_match
+  arg 3 of site 23 relcallback.c:166:12 [name] <- param root=name param=0 hops=0 {pointer-conversion} chain=param:name#0
+  arg 4 of site 23 relcallback.c:166:12 [&t] <- address root=t base=local hops=0 {} chain=(addr local:t)
+  arg 0 of site 24 relcallback.c:168:5 [table[KIND_SEM][t.idx].name] <- field Rec.name root=table base=global-array-element object=table@relcallback.c:41 hops=0 {array-contents,pointer-conversion} index=[1, field:Token.idx] read=17 chain=field:Rec.name
+  arg 1 of site 24 relcallback.c:168:5 [0] <- const 0 hops=0 {null} chain=0
+  arg 2 of site 24 relcallback.c:168:5 [sizeof table[KIND_SEM][t.idx].name] <- const 16 hops=0 {} chain=16
+  arg 0 of site 27 relcallback.c:176:9 ["alpha"] <- string root="alpha" hops=0 {} chain=string:alpha
+  arg 0 of site 28 relcallback.c:182:3 [&a] <- address root=a base=local hops=0 {} chain=(addr local:a)
+  arg 1 of site 28 relcallback.c:182:3 [0] <- const 0 hops=0 {null} chain=0
+  arg 2 of site 28 relcallback.c:182:3 [user_main] <- function root=user_main hops=0 {} chain=function:user_main
+  arg 3 of site 28 relcallback.c:182:3 [0] <- const 0 hops=0 {null} chain=0
+  arg 0 of site 29 relcallback.c:183:3 [&b] <- address root=b base=local hops=0 {} chain=(addr local:b)
+  arg 1 of site 29 relcallback.c:183:3 [0] <- const 0 hops=0 {null} chain=0
+  arg 2 of site 29 relcallback.c:183:3 [maker_main] <- function root=maker_main hops=0 {} chain=function:maker_main
+  arg 3 of site 29 relcallback.c:183:3 [0] <- const 0 hops=0 {null} chain=0
+  arg 0 of site 30 relcallback.c:184:3 [&c] <- address root=c base=local hops=0 {} chain=(addr local:c)
+  arg 1 of site 30 relcallback.c:184:3 [0] <- const 0 hops=0 {null} chain=0
+  arg 2 of site 30 relcallback.c:184:3 [cleaner_main] <- function root=cleaner_main hops=0 {} chain=function:cleaner_main
+  arg 3 of site 30 relcallback.c:184:3 [0] <- const 0 hops=0 {null} chain=0
+  arg 0 of site 31 relcallback.c:185:9 [pick_match()] <- call-result root=pick_match hops=0 {} (from-call-result) chain=(call-result pick_match)
+  arg 1 of site 31 relcallback.c:185:9 ["gamma"] <- string root="gamma" hops=0 {} chain=string:gamma
+[paramflow] 86
+  alloc_check@relcallback.c:99#0 d0 call-argument -> token_init@relcallback.c:51#2 at site 10 relcallback.c:101:3 {} [kind]
+  alloc_check@relcallback.c:99#0 d0 subscript at relcallback.c:104:9 {in-loop} [table[kind]] expr=(index global:table param:kind#0) guard=(and (not (eq (call-result find_next (seq function:name_match (seq param:name#1 (seq param:t#2)))) 0)) (lt local:i 4))
+  alloc_check@relcallback.c:99#0 d1 store in token_init@relcallback.c:51 at relcallback.c:53:3 via site 10 relcallback.c:101:3 {through-pointer-parameter} [t->kind = kind] expr=field:Token.kind
+      chain alloc_check#0 -> token_init#2
+  alloc_check@relcallback.c:99#1 d0 call-argument -> find_next#1 at site 11 relcallback.c:102:7 {result-tested} [name]
+  alloc_check@relcallback.c:99#1 d2 call-argument in name_match at relcallback.c:74:56 via site 11 relcallback.c:102:7 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain alloc_check#1 -> find_next#1 -> name_match#0
+  alloc_check@relcallback.c:99#1 d2 call-argument in path_match at relcallback.c:76:56 via site 11 relcallback.c:102:7 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain alloc_check#1 -> find_next#1 -> path_match#0
+  alloc_check@relcallback.c:99#2 d0 call-argument -> token_init@relcallback.c:51#0 at site 10 relcallback.c:101:3 {} [t]
+  alloc_check@relcallback.c:99#2 d0 call-argument -> find_next#2 at site 11 relcallback.c:102:7 {result-tested} [t]
+  alloc_check@relcallback.c:99#2 d0 out-store at relcallback.c:105:7 {} [store to a member of the pointee: t->idx = i] guard=(and (and (not (eq (call-result find_next (seq function:name_match (seq param:name#1 (seq param:t#2)))) 0)) (lt local:i 4)) (eq field:Rec.active 0))
+  alloc_check@relcallback.c:99#2 d1 out-store in find_next at relcallback.c:63:5 via site 11 relcallback.c:102:7 {} [store to a member of the pointee: ++t->idx] guard=1
+      chain alloc_check#2 -> find_next#2
+  alloc_check@relcallback.c:99#2 d1 out-store in token_init@relcallback.c:51 at relcallback.c:52:3 via site 10 relcallback.c:101:3 {} [store to a member of the pointee: t->lock_mode = lock_mode]
+      chain alloc_check#2 -> token_init#0
+  alloc_check@relcallback.c:99#2 d1 out-store in token_init@relcallback.c:51 at relcallback.c:53:3 via site 10 relcallback.c:101:3 {} [store to a member of the pointee: t->kind = kind]
+      chain alloc_check#2 -> token_init#0
+  alloc_check@relcallback.c:99#2 d1 out-store in token_init@relcallback.c:51 at relcallback.c:54:3 via site 10 relcallback.c:101:3 {} [store to a member of the pointee: t->idx = -1]
+      chain alloc_check#2 -> token_init#0
+  find_by_name#0 d0 call-argument -> get_by_search#0 at site 7 relcallback.c:85:12 {result-tested} [lock_mode]
+  find_by_name#0 d2 store in token_init@relcallback.c:51 at relcallback.c:52:3 via site 7 relcallback.c:85:12 {through-pointer-parameter} [t->lock_mode = lock_mode] expr=field:Token.lock_mode
+      chain find_by_name#0 -> get_by_search#0 -> token_init#1
+  find_by_name#1 d0 call-argument -> get_by_search#1 at site 7 relcallback.c:85:12 {result-tested} [kind]
+  find_by_name#1 d2 store in token_init@relcallback.c:51 at relcallback.c:53:3 via site 7 relcallback.c:85:12 {through-pointer-parameter} [t->kind = kind] expr=field:Token.kind
+      chain find_by_name#1 -> get_by_search#1 -> token_init#2
+  find_by_name#2 d0 call-argument -> get_by_search#3 at site 7 relcallback.c:85:12 {result-tested} [name]
+  find_by_name#2 d3 call-argument in name_match at relcallback.c:74:56 via site 7 relcallback.c:85:12 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain find_by_name#2 -> get_by_search#3 -> find_next#1 -> name_match#0
+  find_by_name#2 d3 call-argument in path_match at relcallback.c:76:56 via site 7 relcallback.c:85:12 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain find_by_name#2 -> get_by_search#3 -> find_next#1 -> path_match#0
+  find_by_name#3 d0 out-store at relcallback.c:86:20 {} [t.idx] guard=(eq local:rc 0)
+  find_next#1 d0 call-argument -> name_match#0 at site 2 relcallback.c:66:32 {may,indirect,result-tested,in-loop} [ref] guard=(and (not (ge field:Token.idx 4)) (ne (call-result in_use (seq field:Rec.active)) 0))
+  find_next#1 d0 call-argument -> path_match#0 at site 2 relcallback.c:66:32 {may,indirect,result-tested,in-loop} [ref] guard=(and (not (ge field:Token.idx 4)) (ne (call-result in_use (seq field:Rec.active)) 0))
+  find_next#1 d1 call-argument in name_match at relcallback.c:74:56 via site 2 relcallback.c:66:32 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain find_next#1 -> name_match#0
+  find_next#1 d1 call-argument in path_match at relcallback.c:76:56 via site 2 relcallback.c:66:32 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain find_next#1 -> path_match#0
+  find_next#2 d0 out-store at relcallback.c:63:5 {} [store to a member of the pointee: ++t->idx] guard=1
+  get_by_search#0 d0 call-argument -> token_init@relcallback.c:51#1 at site 5 relcallback.c:79:3 {} [lock_mode]
+  get_by_search#0 d1 store in token_init@relcallback.c:51 at relcallback.c:52:3 via site 5 relcallback.c:79:3 {through-pointer-parameter} [t->lock_mode = lock_mode] expr=field:Token.lock_mode
+      chain get_by_search#0 -> token_init#1
+  get_by_search#1 d0 call-argument -> token_init@relcallback.c:51#2 at site 5 relcallback.c:79:3 {} [kind]
+  get_by_search#1 d1 store in token_init@relcallback.c:51 at relcallback.c:53:3 via site 5 relcallback.c:79:3 {through-pointer-parameter} [t->kind = kind] expr=field:Token.kind
+      chain get_by_search#1 -> token_init#2
+  get_by_search#2 d0 call-argument -> find_next#0 at site 6 relcallback.c:80:10 {} [m]
+  get_by_search#3 d0 call-argument -> find_next#1 at site 6 relcallback.c:80:10 {} [ref]
+  get_by_search#3 d2 call-argument in name_match at relcallback.c:74:56 via site 6 relcallback.c:80:10 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain get_by_search#3 -> find_next#1 -> name_match#0
+  get_by_search#3 d2 call-argument in path_match at relcallback.c:76:56 via site 6 relcallback.c:80:10 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain get_by_search#3 -> find_next#1 -> path_match#0
+  get_by_search#4 d0 call-argument -> token_init@relcallback.c:51#0 at site 5 relcallback.c:79:3 {} [t]
+  get_by_search#4 d0 call-argument -> find_next#2 at site 6 relcallback.c:80:10 {} [t]
+  get_by_search#4 d1 out-store in find_next at relcallback.c:63:5 via site 6 relcallback.c:80:10 {} [store to a member of the pointee: ++t->idx] guard=1
+      chain get_by_search#4 -> find_next#2
+  get_by_search#4 d1 out-store in token_init@relcallback.c:51 at relcallback.c:52:3 via site 5 relcallback.c:79:3 {} [store to a member of the pointee: t->lock_mode = lock_mode]
+      chain get_by_search#4 -> token_init#0
+  get_by_search#4 d1 out-store in token_init@relcallback.c:51 at relcallback.c:53:3 via site 5 relcallback.c:79:3 {} [store to a member of the pointee: t->kind = kind]
+      chain get_by_search#4 -> token_init#0
+  get_by_search#4 d1 out-store in token_init@relcallback.c:51 at relcallback.c:54:3 via site 5 relcallback.c:79:3 {} [store to a member of the pointee: t->idx = -1]
+      chain get_by_search#4 -> token_init#0
+  in_use@relcallback.c:57#0 d0 comparison at relcallback.c:57:40 {} [active != 0] expr=(ne param:active#0 0)
+  name_match#0 d0 call-argument -> strcmp#0 at site 3 relcallback.c:74:56 {callee-without-body,result-tested} [(const char *)ref]
+  path_find#0 d0 call-argument -> get_by_search#3 at site 9 relcallback.c:94:12 {result-tested} [path]
+  path_find#0 d3 call-argument in name_match at relcallback.c:74:56 via site 9 relcallback.c:94:12 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain path_find#0 -> get_by_search#3 -> find_next#1 -> name_match#0
+  path_find#0 d3 call-argument in path_match at relcallback.c:76:56 via site 9 relcallback.c:94:12 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain path_find#0 -> get_by_search#3 -> find_next#1 -> path_match#0
+  path_find#1 d0 out-store at relcallback.c:95:20 {} [t.idx] guard=(eq local:rc 0)
+  path_match#0 d0 call-argument -> strncmp#0 at site 4 relcallback.c:76:56 {callee-without-body,result-tested} [(const char *)ref]
+  rec_create#0 d0 call-argument -> alloc_check@relcallback.c:99#0 at site 13 relcallback.c:116:8 {result-tested} [kind] guard=(not (eq param:id#2 0))
+  rec_create#0 d0 subscript at relcallback.c:118:13 {} [table[kind]] expr=(index global:table param:kind#0) guard=(and (not (eq param:id#2 0)) (eq local:rc 0))
+  rec_create#0 d0 subscript at relcallback.c:119:5 {} [table[kind]] expr=(index global:table param:kind#0) guard=(and (not (eq param:id#2 0)) (eq local:rc 0))
+  rec_create#0 d1 subscript in alloc_check@relcallback.c:99 at relcallback.c:104:9 via site 13 relcallback.c:116:8 {in-loop} [table[kind]] expr=(index global:table param:kind#0) guard=(and (not (eq (call-result find_next (seq function:name_match (seq param:name#1 (seq param:t#2)))) 0)) (lt local:i 4))
+      chain rec_create#0 -> alloc_check#0
+  rec_create#0 d2 store in token_init@relcallback.c:51 at relcallback.c:53:3 via site 13 relcallback.c:116:8 {through-pointer-parameter} [t->kind = kind] expr=field:Token.kind
+      chain rec_create#0 -> alloc_check#0 -> token_init#2
+  rec_create#1 d0 call-argument -> alloc_check@relcallback.c:99#1 at site 13 relcallback.c:116:8 {result-tested} [name] guard=(not (eq param:id#2 0))
+  rec_create#1 d0 call-argument -> strncpy#1 at site 14 relcallback.c:118:5 {callee-without-body} [name] guard=(and (not (eq param:id#2 0)) (eq local:rc 0))
+  rec_create#1 d3 call-argument in name_match at relcallback.c:74:56 via site 13 relcallback.c:116:8 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain rec_create#1 -> alloc_check#1 -> find_next#1 -> name_match#0
+  rec_create#1 d3 call-argument in path_match at relcallback.c:76:56 via site 13 relcallback.c:116:8 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain rec_create#1 -> alloc_check#1 -> find_next#1 -> path_match#0
+  rec_create#2 d0 comparison at relcallback.c:115:7 {} [id == 0] expr=(eq param:id#2 0)
+  rec_create#2 d0 call-argument -> rec_finish@relcallback.c:111#2 at site 17 relcallback.c:120:10 {result-tested} [id] guard=(and (not (eq param:id#2 0)) (eq local:rc 0))
+  rec_create#2 d1 out-store in rec_finish@relcallback.c:111 at relcallback.c:111:69 via site 17 relcallback.c:120:10 {} [t->idx] guard=(eq param:rc#0 0)
+      chain rec_create#2 -> rec_finish#2
+  rec_finish@relcallback.c:111#0 d0 comparison at relcallback.c:111:56 {} [rc == RC_OK] expr=(eq param:rc#0 0)
+  rec_finish@relcallback.c:111#0 d0 return at relcallback.c:111:83 {} [return rc] expr=param:rc#0
+  rec_finish@relcallback.c:111#2 d0 out-store at relcallback.c:111:69 {} [t->idx] guard=(eq param:rc#0 0)
+  search_with#0 d0 call-argument -> get_by_search#2 at site 19 relcallback.c:128:10 {} [m]
+  search_with#1 d0 call-argument -> get_by_search#3 at site 19 relcallback.c:128:10 {} [ref]
+  search_with#1 d3 call-argument in name_match at relcallback.c:74:56 via site 19 relcallback.c:128:10 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain search_with#1 -> get_by_search#3 -> find_next#1 -> name_match#0
+  search_with#1 d3 call-argument in path_match at relcallback.c:76:56 via site 19 relcallback.c:128:10 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain search_with#1 -> get_by_search#3 -> find_next#1 -> path_match#0
+  sem_create#0 d0 call-argument -> rec_create#1 at site 18 relcallback.c:124:52 {} [name]
+  sem_create#0 d1 call-argument in rec_create at relcallback.c:118:5 via site 18 relcallback.c:124:52 (call site 14 relcallback.c:118:5 arg 1) {callee-without-body} [name] guard=(and (not (eq param:id#2 0)) (eq local:rc 0))
+      chain sem_create#0 -> rec_create#1
+  sem_create#0 d4 call-argument in name_match at relcallback.c:74:56 via site 18 relcallback.c:124:52 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain sem_create#0 -> rec_create#1 -> alloc_check#1 -> find_next#1 -> name_match#0
+  sem_create#0 d4 call-argument in path_match at relcallback.c:76:56 via site 18 relcallback.c:124:52 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain sem_create#0 -> rec_create#1 -> alloc_check#1 -> find_next#1 -> path_match#0
+  sem_create#1 d0 call-argument -> rec_create#2 at site 18 relcallback.c:124:52 {} [id]
+  sem_create#1 d1 comparison in rec_create at relcallback.c:115:7 via site 18 relcallback.c:124:52 {} [id == 0] expr=(eq param:id#2 0)
+      chain sem_create#1 -> rec_create#2
+  sem_create#1 d2 out-store in rec_finish@relcallback.c:111 at relcallback.c:111:69 via site 18 relcallback.c:124:52 {} [t->idx] guard=(eq param:rc#0 0)
+      chain sem_create#1 -> rec_create#2 -> rec_finish#2
+  sem_delete#0 d0 call-argument -> get_by_search#3 at site 23 relcallback.c:166:12 {result-tested} [name]
+  sem_delete#0 d3 call-argument in name_match at relcallback.c:74:56 via site 23 relcallback.c:166:12 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain sem_delete#0 -> get_by_search#3 -> find_next#1 -> name_match#0
+  sem_delete#0 d3 call-argument in path_match at relcallback.c:76:56 via site 23 relcallback.c:166:12 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain sem_delete#0 -> get_by_search#3 -> find_next#1 -> path_match#0
+  sem_find#0 d0 call-argument -> find_by_name#2 at site 8 relcallback.c:90:50 {} [name]
+  sem_find#0 d4 call-argument in name_match at relcallback.c:74:56 via site 8 relcallback.c:90:50 (call site 3 relcallback.c:74:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain sem_find#0 -> find_by_name#2 -> get_by_search#3 -> find_next#1 -> name_match#0
+  sem_find#0 d4 call-argument in path_match at relcallback.c:76:56 via site 8 relcallback.c:90:50 (call site 4 relcallback.c:76:56 arg 0) {may,callee-without-body,result-tested} [(const char *)ref]
+      chain sem_find#0 -> find_by_name#2 -> get_by_search#3 -> find_next#1 -> path_match#0
+  sem_find#1 d0 call-argument -> find_by_name#3 at site 8 relcallback.c:90:50 {} [id]
+  sem_find#1 d1 out-store in find_by_name at relcallback.c:86:20 via site 8 relcallback.c:90:50 {} [t.idx] guard=(eq local:rc 0)
+      chain sem_find#1 -> find_by_name#3
+  token_init@relcallback.c:51#0 d0 out-store at relcallback.c:52:3 {} [store to a member of the pointee: t->lock_mode = lock_mode]
+  token_init@relcallback.c:51#0 d0 out-store at relcallback.c:53:3 {} [store to a member of the pointee: t->kind = kind]
+  token_init@relcallback.c:51#0 d0 out-store at relcallback.c:54:3 {} [store to a member of the pointee: t->idx = -1]
+  token_init@relcallback.c:51#1 d0 store at relcallback.c:52:3 {through-pointer-parameter} [t->lock_mode = lock_mode] expr=field:Token.lock_mode
+  token_init@relcallback.c:51#2 d0 store at relcallback.c:53:3 {through-pointer-parameter} [t->kind = kind] expr=field:Token.kind
+[ptrfields] 2
+  0 address-write Holder.defs at relcallback.c:150:3 in user_main root=holder@relcallback.c:146 -> defs@relcallback.c:138[0] [defs] other-writes=0 {}
+  1 read Holder.defs at relcallback.c:151:33 in user_main read=15 root=holder@relcallback.c:146 resolved candidates=1 write=0 -> defs@relcallback.c:138 path=.name index=0 elements=0+0k (k<1) {write-before-read,same-root,constant-index}
+      defs@relcallback.c:138[0].name = string "alpha" at relcallback.c:138:30 {const-object}
+[gimages] 4
+  defs@relcallback.c:138[0].name string "alpha" at relcallback.c:138:30 {const-object} reach={pointer-field} field=Def.name
+  defs@relcallback.c:138[1].name string "beta" at relcallback.c:138:41 {const-object} reach={pointer-field} field=Def.name
+  holder@relcallback.c:146 int 0 at relcallback.c:146:15 {zero-initialized} reach={argument,pointer-field}
+  table@relcallback.c:41 int 0 at relcallback.c:41:12 {zero-initialized} reach={argument}
+
+# relations
+kz-relations 1
+rules relations rules revision 12 (2026-11-18)
+mode profile-free
+  extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
+  extract.profile = kz-static-builtin-minimal / 
+  extract.p0_table = P0 table revision 3 (2026-10-30), 72 entries
+  extract.p0_table_scope = families of this revision: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread or process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Of a family the members that take, release, wait, signal, sleep, end, name a thread, bind or create a key, push or pop a handler, load or look up, or store memory are entries; a family is not listed whole where this list names members left out.  Not in this revision: read-write locks (pthread_rwlock_*; their shared acquisitions are not read by the lock-set analysis, so the family is left out whole and its acquisitions are no lock operations), barriers (pthread_barrier_*), one-time initialization (pthread_once, call_once), thread cancellation of another thread (pthread_cancel and the cancellation state functions), signals (kill, raise, pthread_kill, sigwait), dlclose, dlerror and dladdr, functions a compiler or a fortify wrapper calls without a call in the source (__stack_chk_fail, __chk_fail and the *_chk functions); thread join and detach (pthread_join, pthread_tryjoin_np, pthread_timedjoin_np, pthread_detach, thrd_join, thrd_detach); POSIX timers (timer_create, timer_settime, timer_gettime, timer_getoverrun, timer_delete; a timer with SIGEV_THREAD notification starts its function on a new thread, which is no actor here); I/O multiplexing (select, pselect, poll, ppoll); the initialization, destruction, attribute and query members of the mutex, spin lock, semaphore and condition variable families and of thread creation (pthread_mutex_init, pthread_mutex_destroy, pthread_mutexattr_*, pthread_spin_init, pthread_spin_destroy, sem_init, sem_destroy, sem_open, sem_close, sem_unlink, sem_getvalue, pthread_cond_init, pthread_cond_destroy, pthread_condattr_*, mtx_init, mtx_destroy, cnd_init, cnd_destroy, pthread_attr_*); scheduling (sched_*, pthread_setschedparam, pthread_getschedparam, pthread_setschedprio); data functions not in this revision (stpcpy, stpncpy, strlcpy and strlcat (glibc 2.38 and later), mempcpy, memccpy, explicit_bzero, and the wide-character members); formatted input, which stores through its arguments (sscanf, vsscanf, fscanf, vfscanf, scanf, vscanf); handlers registered for process exit (atexit, at_quick_exit, on_exit)
+  extract.derivation_rules = wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  extract.targets_rule = R-T1,R-T2 (target rules revision 1): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)
+  extract.reading_options_vs_basis = not compared: no basis (--source)
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
+run order: no record given (this revision reads no run record; the column says so in every row)
+functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
+actors: roots 4 (process 1, spawn-entry 3, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 0
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
+summary A 4 (namespaces 2, lookup uses 4, with a creator of the same partition in another actor 1, key-matched 1) B 1 (with a callee check 0) C 0 (self-identity reads 0); flip static-possible 1, static-undetermined 0, none 4; feasibility proven-impossible 0, possible 0, undecidable 5, not graded 0
+summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 4, creators 0; lookup rows with the membership unresolved 2; lookup rows without a creator of their partition 3 [creators may be in code not read 1, namespace membership unresolved 2, only initial values 2, writer set not complete 3]; key-clearing calls, no creator sites (relations rules revision 12): 1
+summary incomplete (rows that carry the reason, then per sub-reason; reasons of the judgement rules' vocabulary, docs/static_facts.md §5m): no_run 5 [no run record read 5]; writer_set_incomplete 4 [FIELD_STATUS not complete 4, zero writers under the rules 3, key writes reachable through unresolved indirect calls 1]; fixed_proof_open 2 [no static order between the actors 2]; link_unlinked 2 [namespace membership unresolved 2]; reasons of the whole facts on every row: none
+[A] 4 (namespaces 2, key comparisons 2; left out: searches over no global table 0)
+  namespace Rec.name (record type Rec; tables table)
+      search: A2 callback search (indirect call relcallback.c:66:32) relcallback.c:62:3 in find_next: key Rec.name strcmp at relcallback.c:74:56 compared with parameter 0 [(const char *)ref] (search parameter 1)
+      active fields: Rec.active 
+      active test: Rec.active == 0 is empty (a search with the key comparison skips it)
+      lifecycle Rec.active: writers 2 from WRITERS (the field is an extraction target)
+        assign at relcallback.c:119:5 in rec_create value=1 [1] guard=(and (not (eq param:id#2 0)) (eq local:rc 0))
+        assign at relcallback.c:169:5 in sem_delete value=0 [0] guard=(eq local:rc 0) class=release (writes the empty value)
+      lifecycle Rec.name: writers 2 from WRITERS (the field is an extraction target)
+        memcpy at relcallback.c:118:5 in rec_create value=top [copy of name] guard=(and (not (eq param:id#2 0)) (eq local:rc 0))
+        memset at relcallback.c:168:5 in sem_delete value=0 [fill 0] guard=(eq local:rc 0)
+      publication writes of the creator rec_create#1: Rec.active assign relcallback.c:119:5 in rec_create := 1; Rec.name memcpy relcallback.c:118:5 in rec_create
+      publication writes of the creator sem_create#0: Rec.active assign relcallback.c:119:5 in rec_create := 1; Rec.name memcpy relcallback.c:118:5 in rec_create
+      key-parameter functions: lookups alloc_check@relcallback.c:99#1 find_by_name#2 find_next#1 get_by_search#3 name_match#0 path_find#0 search_with#1 sem_find#0; creators rec_create#1 sem_create#0; key-clearing (they reach constant stores of the key only) sem_delete#0
+      uses: lookups 2, creators 1 (calls from outside the key-parameter functions; a creator reaches a write of the key); key-clearing calls 1 (every write of the key they reach stores a constant, WRITERS: no creator site and no lookup row); left out, another callback passed to the search: lookups 1, creators 0
+      left out: relcallback.c:152:9 in user_main -> path_find#0 (lookup): the callback path_match passed as argument 2 at relcallback.c:94:12 in path_find is not the comparison's function name_match
+      namespace layers: B P0 R
+  A1 lookup relcallback.c:151:9 in user_main -> sem_find#0 namespace Rec.name partition {1} key known
+      partition: 1 [KIND_SEM] as find_by_name arg 1 at relcallback.c:90:50 (selects the table: stored to Token.kind at relcallback.c:53:3, which find_next reads as a subscript at relcallback.c:65:21); not a table selector: 2 [LOCK_SHARED] as find_by_name arg 0 at relcallback.c:90:50
+      membership: the callback name_match passed as argument 2 at relcallback.c:85:12 in find_by_name is the comparison's function name_match
+      key: read through the pointer field Holder.defs -> defs@relcallback.c:138 (PTR_FIELDS resolved), elements from 0 step 0 count 1; image defs[0].name = "alpha"
+      aliases: the key is read through the pointer field Holder.defs -> defs@relcallback.c:138 (PTR_FIELDS resolved)
+      actors: {user_main (spawn-entry)}; result=discarded
+      id holder: the lookup's arg 1 [&holder.ids[0]] address Holder.ids base global-array-element object holder@relcallback.c:146 <- sem_find stores through its parameter 1 in find_by_name at relcallback.c:86:20 [t.idx]
+      creator: same key: relcallback.c:158:9 in maker_main -> sem_create key string literal "alpha" actors {maker_main (spawn-entry)}
+      key clearing: relcallback.c:176:9 in cleaner_main -> sem_delete key string literal "alpha" actors {cleaner_main (spawn-entry)}; no creator: every write of the key it reaches stores a constant (relcallback.c:168:5 in sem_delete := 0 [fill 0])
+      id holder: the creator relcallback.c:158:9 -> sem_create: arg 1 [&holder.ids[1]] address Holder.ids base global-array-element object holder@relcallback.c:146 <- sem_create stores through its parameter 1 in rec_finish@relcallback.c:111 at relcallback.c:111:69 [t->idx]
+      callee-check: sem_create returns -2 [RC_BAD_POINTER] through sem_create -> rec_create when (eq param:id#2 0)
+      callee-check: sem_create returns -15 [RC_NAME_TAKEN] through sem_create -> rec_create -> alloc_check@relcallback.c:99 when (eq (call-result find_next (seq function:name_match (seq param:name#1 (seq param:t#2)))) 0); not shown to reach the return: rec_create returns the result of alloc_check at relcallback.c:121:3 from the definition at relcallback.c:116:6, redefined later on a path to the return
+      callee-check: sem_create returns -14 [RC_NO_FREE] through sem_create -> rec_create -> alloc_check@relcallback.c:99 when (not (eq (call-result find_next (seq function:name_match (seq param:name#1 (seq param:t#2)))) 0)); not shown to reach the return: rec_create returns the result of alloc_check at relcallback.c:121:3 from the definition at relcallback.c:116:6, redefined later on a path to the return
+      callee-check: sem_create returns 0 [RC_OK] through sem_create -> rec_create -> alloc_check@relcallback.c:99 when (and (and (not (eq (call-result find_next (seq function:name_match (seq param:name#1 (seq param:t#2)))) 0)) (lt local:i 4)) (eq field:Rec.active 0)); not shown to reach the return: rec_create returns the result of alloc_check at relcallback.c:121:3 from the definition at relcallback.c:116:6, redefined later on a path to the return
+      callee-check (returns not followed): sem_create: rec_finish@relcallback.c:111 returns param [rc] at relcallback.c:111:83
+      callee-check (set): sem_create: not established (1 returns not followed, 3 constants not shown to reach the return): the constants listed are not all it returns, or not shown; no success constant is taken from them
+      writers: Def.name: no writer found under these premises; premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 0: direct 0, data-function 0, out-pointer 0, initial values 1; instances 0); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Rec.active: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Rec.name: 2 (memcpy 1, memset 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 2: direct 0, data-function 2, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances, array-element-stores-not-collected; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result discarded; no return of it and no terminal operation under it found
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: find_next returns -17 [RC_NOT_FOUND], find_next returns 0 [RC_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); writer_set_incomplete(zero writers under the rules); fixed_proof_open(no static order between the actors)
+  A2 lookup relcallback.c:185:9 in main -> search_with#1 namespace Rec.name partition {1} key known
+      partition: 1 [KIND_SEM] as get_by_search arg 1 at relcallback.c:128:10 (selects the table: stored to Token.kind at relcallback.c:53:3, which find_next reads as a subscript at relcallback.c:65:21); not a table selector: 2 [LOCK_SHARED] as get_by_search arg 0 at relcallback.c:128:10
+      membership: unresolved: the callback is argument 0 of the use [pick_match()] (call-result), not followed beyond the use
+      key: string literal "gamma"
+      actors: {main (process)}; result=discarded
+      not a pair: key constants differ: relcallback.c:158:9 in maker_main -> sem_create key string literal "alpha" actors {maker_main (spawn-entry)}
+      key clearing: relcallback.c:176:9 in cleaner_main -> sem_delete key string literal "alpha" actors {cleaner_main (spawn-entry)}; no creator: every write of the key it reaches stores a constant (relcallback.c:168:5 in sem_delete := 0 [fill 0])
+      writers: Rec.active: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Rec.name: 2 (memcpy 1, memset 1) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 2: direct 0, data-function 2, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances, array-element-stores-not-collected; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result discarded; no return of it and no terminal operation under it found
+      dependency: path A: no creator left after exclusions (probe-create 0, key constants differ 1, same actor only 0): writer set not complete (Rec.name not complete); creators may be in code not read (1 indirect calls with unresolved targets may run rec_create, which write the key); namespace membership unresolved (the lookup's callback)
+      run-order: no record given
+      feasibility: undecidable: no pair
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no creator of the same partition and key in another actor; search returns: find_next returns -17 [RC_NOT_FOUND], find_next returns 0 [RC_OK]
+      layers: B P0 R P0-unverified(strcmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); writer_set_incomplete(key writes reachable through unresolved indirect calls); link_unlinked(namespace membership unresolved)
+  namespace Rec.path (record type Rec; tables table)
+      search: A2 callback search (indirect call relcallback.c:66:32) relcallback.c:62:3 in find_next: key Rec.path strncmp at relcallback.c:76:56 compared with parameter 0 [(const char *)ref] (search parameter 1)
+      active fields: Rec.active 
+      active test: Rec.active == 0 is empty (a search with the key comparison skips it)
+      lifecycle Rec.active: writers 2 from WRITERS (the field is an extraction target)
+        assign at relcallback.c:119:5 in rec_create value=1 [1] guard=(and (not (eq param:id#2 0)) (eq local:rc 0))
+        assign at relcallback.c:169:5 in sem_delete value=0 [0] guard=(eq local:rc 0) class=release (writes the empty value)
+      lifecycle Rec.path: writers 0 from nothing
+      key-parameter functions: lookups alloc_check@relcallback.c:99#1 find_by_name#2 find_next#1 get_by_search#3 path_find#0 path_match#0 rec_create#1 search_with#1 sem_create#0 sem_delete#0 sem_find#0; creators none
+      uses: lookups 2, creators 0 (calls from outside the key-parameter functions; a creator reaches a write of the key); left out, another callback passed to the search: lookups 3, creators 0
+      left out: relcallback.c:151:9 in user_main -> sem_find#0 (lookup): the callback name_match passed as argument 2 at relcallback.c:85:12 in find_by_name is not the comparison's function path_match
+      left out: relcallback.c:158:9 in maker_main -> sem_create#0 (lookup): the callback name_match passed as argument 0 at relcallback.c:102:7 in alloc_check@relcallback.c:99 is not the comparison's function path_match
+      left out: relcallback.c:176:9 in cleaner_main -> sem_delete#0 (lookup): the callback name_match passed as argument 2 at relcallback.c:166:12 in sem_delete is not the comparison's function path_match
+      namespace layers: B P0 R
+  A3 lookup relcallback.c:152:9 in user_main -> path_find#0 namespace Rec.path partition {0} key known
+      partition: 0 [KIND_PATH] as get_by_search arg 1 at relcallback.c:94:12 (selects the table: stored to Token.kind at relcallback.c:53:3, which find_next reads as a subscript at relcallback.c:65:21); not a table selector: 2 [LOCK_SHARED] as get_by_search arg 0 at relcallback.c:94:12
+      membership: the callback path_match passed as argument 2 at relcallback.c:94:12 in path_find is the comparison's function path_match
+      key: string literal "/mnt/a"
+      actors: {user_main (spawn-entry)}; result=discarded
+      id holder: the lookup's arg 1 [&holder.path_id] address Holder.path_id base global object holder@relcallback.c:146 <- path_find stores through its parameter 1 in path_find at relcallback.c:95:20 [t.idx]
+      writers: Rec.active: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Rec.path: no writer found under these premises; premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 0: direct 0, data-function 0, out-pointer 0, initial values 1; instances 0); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags array-element-stores-not-collected; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result discarded; no return of it and no terminal operation under it found
+      dependency: path A: no creator of this partition: writer set not complete (Rec.path not complete); only initial values (no writer of Rec.path found under the premises of its writers line)
+      run-order: no record given
+      feasibility: undecidable: no pair
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no creator of the same partition and key in another actor; search returns: find_next returns -17 [RC_NOT_FOUND], find_next returns 0 [RC_OK]
+      layers: B P0 R P0-unverified(strncmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); writer_set_incomplete(zero writers under the rules)
+  A4 lookup relcallback.c:185:9 in main -> search_with#1 namespace Rec.path partition {1} key known
+      partition: 1 [KIND_SEM] as get_by_search arg 1 at relcallback.c:128:10 (selects the table: stored to Token.kind at relcallback.c:53:3, which find_next reads as a subscript at relcallback.c:65:21); not a table selector: 2 [LOCK_SHARED] as get_by_search arg 0 at relcallback.c:128:10
+      membership: unresolved: the callback is argument 0 of the use [pick_match()] (call-result), not followed beyond the use
+      key: string literal "gamma"
+      actors: {main (process)}; result=discarded
+      writers: Rec.active: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      writers: Rec.path: no writer found under these premises; premises: FIELD_STATUS per-field DISABLED, type-level DISABLED (writers 0: direct 0, data-function 0, out-pointer 0, initial values 1; instances 0); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags array-element-stores-not-collected; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      handling: result discarded; no return of it and no terminal operation under it found
+      dependency: path A: no creator of this partition: writer set not complete (Rec.path not complete); only initial values (no writer of Rec.path found under the premises of its writers line); namespace membership unresolved (the lookup's callback)
+      run-order: no record given
+      feasibility: undecidable: no pair
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no creator of the same partition and key in another actor; search returns: find_next returns -17 [RC_NOT_FOUND], find_next returns 0 [RC_OK]
+      layers: B P0 R P0-unverified(strncmp)
+      incomplete: no_run(no run record read); writer_set_incomplete(FIELD_STATUS not complete); writer_set_incomplete(zero writers under the rules); link_unlinked(namespace membership unresolved)
+[B] 1 (field-argument groups 2; left out: no writer 1, one actor only 0)
+  B1 Rec.active -> in_use@relcallback.c:57#0 sites=1 callee-check=none
+      site relcallback.c:66:9 in find_next [rec->active] base=global-array-element hops=0 result=tested
+      field: INIT 0 (table); writers 2 from WRITERS (the field is an extraction target)
+        assign at relcallback.c:119:5 in rec_create value=1 [1] guard=(and (not (eq param:id#2 0)) (eq local:rc 0))
+        assign at relcallback.c:169:5 in sem_delete value=0 [0] guard=(eq local:rc 0)
+      writers: Rec.active: 2 (assign 2) from WRITERS (the field is an extraction target); premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete (writers 2: direct 2, data-function 0, out-pointer 0, initial values 1; instances 2); hits on the field: escape 0, cast 0, union 0, unknown effect 0; hits on other fields of the type 0; untyped write sites in the program 0; flags writer-function-not-once, several-instances; not covered: calls whose targets are not resolved (1 in these facts; they may run any address-taken function), writes in units outside the closure (not read)
+      actors: readers {cleaner_main (spawn-entry), main (process), maker_main (spawn-entry), user_main (spawn-entry)}; writers {cleaner_main (spawn-entry), maker_main (spawn-entry)} (inter-actor)
+      handling: discarded 0, used 0, tested 1
+      dependency: path B: the shared field Rec.active is read as argument 0 of in_use@relcallback.c:57 at 1 sites; its writers run in another actor
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no callee check depends on the argument
+      layers: B P0 R (writers: rule targets)
+      incomplete: no_run(no run record read); fixed_proof_open(no static order between the actors)
+[C] 0 (spawn calls 3, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 9; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 0, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)

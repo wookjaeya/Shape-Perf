@@ -1,0 +1,4 @@
+# space_guard.sh kind=remeasure-860c2cd need=2000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/scripts/remeasure.py /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/declaration.tsv /home/user/Shape-Perf/research/cfs_procrace /home/user/work/redesign/obs1 /home/user/Shape-Perf/research/cfs_procrace/records/closure-preboot-20261119/declaration/remeasure_860c2cd.tsv
+start 2026-11-19T15:25:21.297Z free=812236800 threshold=316572800
+sample 2026-11-19T15:25:21.307Z 812232704
+end 2026-11-19T15:25:23.314Z kind=remeasure-860c2cd verdict=completed rc=0 free=812199936 lowest=812199936 dip=36864 change=-36864

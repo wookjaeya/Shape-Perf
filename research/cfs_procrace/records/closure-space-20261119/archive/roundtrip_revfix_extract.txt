@@ -1,0 +1,6 @@
+# archive.sh revfix_extract records/review-fixes-20261116/revfix_extract.sha256 2026-11-19T13:50:21Z
+1. directory = list: 50 files, 46967397 bytes (apparent), 47149056 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/revfix_extract/revfix_extract.tar.xz 3390692 bytes sha256 4e6cfe4195fc953577d3ad14b58c291194a076b9f896e55a542590972c3cd258
+4. round trip: 50 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/revfix_extract removed 2026-11-19T13:50:32Z
+PASS

@@ -1,0 +1,270 @@
+new names: 25
+  name Buffer@cfe/modules/es/fsw/src/cfe_es_syslog_c:447::type
+  name CFE_SB_MemParams_t::Partition
+  name CFE_TBL_BufParams_t::Partition
+  name CborEncoder::data
+  name CborValue::source
+  name EndianCheck@cfe/modules/es/fsw/src/cfe_es_perf_c:50::type
+  name IdBuf@cfe/modules/es/fsw/src/cfe_es_apps_c:294::type
+  name IdBuf@cfe/modules/es/fsw/src/cfe_es_task_c:1110::type
+  name PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type
+  name UnSock_Global@psp/fsw/modules/unsock_intf/unsock_intf_c:85::type
+  name __atomic_wide_counter::__value32
+  name item@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd_c:945::type
+  name sigaction::__sigaction_handler
+  name sigevent_t::_sigev_un
+  name sigevent_t::_sigev_un::_sigev_thread
+  name siginfo_t::_sifields
+  name siginfo_t::_sifields::_kill
+  name siginfo_t::_sifields::_rt
+  name siginfo_t::_sifields::_sigchld
+  name siginfo_t::_sifields::_sigfault
+  name siginfo_t::_sifields::_sigfault::_bounds
+  name siginfo_t::_sifields::_sigfault::_bounds::_addr_bnd
+  name siginfo_t::_sifields::_sigpoll
+  name siginfo_t::_sifields::_sigsys
+  name siginfo_t::_sifields::_timer
+class argflow        mask:site                                16086
+class argflow        renamed                                  20
+class atype          added-named                              134
+class atype          mask:count-head                          1
+class awaits         mask:site                                8
+class basis          change:basis-count                       9
+class basis          change:units-from                        1
+class basis          insert:reading-options                   1
+class basis          mask:count-head                          1
+class basis          removed-anon-paired                      3
+class basis          renamed                                  4
+class calls          mask:site                                7143
+class calls          renamed                                  16
+class derived        mask:site                                169
+class fstatus        added-named                              8
+class fstatus        mask:count-head                          1
+class fstatus        removed-anon-paired                      10
+class fstatus        successor:atype-hits+flags+status+writers 13
+class fwrites        mask:count-head                          1
+class fwrites        removed-anon-paired                      23
+class fwrites        renamed                                  53
+class init           added-named                              4
+class init           mask:count-head                          1
+class lockops        mask:site                                2117
+class lockpaths      insert:cf-entry-release                  8
+class lockpaths      mask:count-head                          1
+class lockpaths      mask:row                                 1634
+class lockpaths      remove:cf-entry-release                  7
+class lockpaths      removed-anon-paired                      2
+class lockpaths      renamed                                  21
+class lockset        mask:count-head                          1
+class lockset        mask:site                                7143
+class lockset        removed-anon-paired                      12
+class lockset        renamed                                  80
+class locs           mask:count-head                          1
+class locs           removed-anon-paired                      3
+class locs           successor:atype-hits+status+writers      4
+class loops          mask:and-more                            1
+class loops          mask:site                                380
+class outcalls       mask:site                                447
+class outcalls       renamed                                  1
+class paramflow      mask:site                                5471
+class paramflow      renamed                                  15
+class reads          mask:site                                1930
+class reads          renamed                                  24
+class returns        mask:site                                649
+class returns        renamed                                  12
+class spawnparams    mask:site                                3
+class spawnwrap      mask:site                                16
+class targets        added-named                              1
+class targets        mask:count-head                          1
+class targets        mask:site                                290
+class targets        renamed                                  2
+class terminals      mask:site                                80
+class writers        added-named                              4
+class writers        mask:count-head                          1
+class writers        removed-anon-paired                      1
+class writers        renamed                                  1
+pairs of an old <anonymous> line and its successors (a successor not equal after the names alone): 183 lines
+  -   target.<anonymous>.Data = rule R-T1  (unset)
+    +   target.CFE_SB_MemParams_t::Partition.Data = rule R-T1  (unset)
+    +   target.CFE_TBL_BufParams_t::Partition.Data = rule R-T1  (unset)
+  -   target.<anonymous>.State = rule R-T1  (unset)
+    +   target.UnSock_Global@psp/fsw/modules/unsock_intf/unsock_intf_c:85::type.State = rule R-T1  (unset)
+  -   target.<anonymous>.sys_timebase_id = rule R-T1  (unset)
+    +   target.PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type.sys_timebase_id = rule R-T1  (unset)
+  -   <anonymous>.sys_timebase_id out-pointer at psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:53:14 in soft_timebase_Init via OS_ObjectIdFinalizeNew osal/src/os/shared/src/osapi-idmap.c:860 value=symbolic [final_id] key=*OS_TimeBaseCreate argument 0 guard=(ne param:outid#2 0) {} n/a
+    +   PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type.sys_timebase_id out-pointer at psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:53:14 in soft_timebase_Init via OS_ObjectIdFinalizeNew osal/src/os/shared/src/osapi-idmap.c:860 value=symbolic [final_id] key=
+  -   <anonymous>.Data writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=0 unresolved-indirect=18
+    +   CFE_SB_MemParams_t::Partition.Data writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+    +   CFE_TBL_BufParams_t::Partition.Data writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  -   <anonymous>.State writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=0 unresolved-indirect=18
+    +   UnSock_Global@psp/fsw/modules/unsock_intf/unsock_intf_c:85::type.State DISABLED writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=133 escape=1 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  -   <anonymous>.sys_timebase_id writer-set-complete writers=1 (direct 0, data-fn 0, out-pointer 1) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=0 unresolved-indirect=18
+    +   PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type.sys_timebase_id writer-set-complete writers=2 (direct 0, data-fn 1, out-pointer 1) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=18
+  -   CFE_ES_ParseFileEntry address-argument <anonymous>.AppId at cfe/modules/es/fsw/src/cfe_es_apps.c:368
+    +   CFE_ES_ParseFileEntry address-argument IdBuf@cfe/modules/es/fsw/src/cfe_es_apps_c:294::type.AppId at cfe/modules/es/fsw/src/cfe_es_apps.c:368
+  -   CFE_ES_ParseFileEntry address-argument <anonymous>.LibId at cfe/modules/es/fsw/src/cfe_es_apps.c:377
+    +   CFE_ES_ParseFileEntry address-argument IdBuf@cfe/modules/es/fsw/src/cfe_es_apps_c:294::type.LibId at cfe/modules/es/fsw/src/cfe_es_apps.c:377
+  -   CFE_ES_QueryOneCmd address-argument <anonymous>.AppId at cfe/modules/es/fsw/src/cfe_es_task.c:1115
+    +   CFE_ES_QueryOneCmd address-argument IdBuf@cfe/modules/es/fsw/src/cfe_es_task_c:1110::type.AppId at cfe/modules/es/fsw/src/cfe_es_task.c:1115
+  -   CFE_ES_QueryOneCmd address-argument <anonymous>.LibId at cfe/modules/es/fsw/src/cfe_es_task.c:1119
+    +   CFE_ES_QueryOneCmd address-argument IdBuf@cfe/modules/es/fsw/src/cfe_es_task_c:1110::type.LibId at cfe/modules/es/fsw/src/cfe_es_task.c:1119
+  -   CFE_PSP_AttachSigHandler record <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:149
+    +   CFE_PSP_AttachSigHandler record sigaction::__sigaction_handler.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:149
+  -   CFE_PSP_AttachSigHandler field <anonymous>.sa_sigaction at psp/fsw/pc-linux/src/cfe_psp_exception.c:160
+    +   CFE_PSP_AttachSigHandler field sigaction::__sigaction_handler.sa_sigaction at psp/fsw/pc-linux/src/cfe_psp_exception.c:160
+  -   CFE_PSP_ExceptionSigHandler record <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields::_kill.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields::_rt.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields::_sigchld.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields::_sigfault.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields::_sigfault::_bounds.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields::_sigfault::_bounds::_addr_bnd.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields::_sigpoll.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields::_sigsys.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+    +   CFE_PSP_ExceptionSigHandler record siginfo_t::_sifields::_timer.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97
+  -   CFE_PSP_Exception_GetNextContextBuffer record <anonymous>.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields::_kill.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields::_rt.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields::_sigchld.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields::_sigfault.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields::_sigfault::_bounds.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields::_sigfault::_bounds::_addr_bnd.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields::_sigpoll.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields::_sigsys.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+    +   CFE_PSP_Exception_GetNextContextBuffer record siginfo_t::_sifields::_timer.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102
+  -   CFE_PSP_InitProcessorReservedMemory record <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields::_kill.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields::_rt.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields::_sigchld.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields::_sigfault.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields::_sigfault::_bounds.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields::_sigfault::_bounds::_addr_bnd.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields::_sigpoll.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields::_sigsys.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+    +   CFE_PSP_InitProcessorReservedMemory record siginfo_t::_sifields::_timer.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686
+  -   CFE_SB_EarlyInit record <anonymous>.* at cfe/modules/sb/fsw/src/cfe_sb_init.c:61
+    +   CFE_SB_EarlyInit record CFE_SB_MemParams_t::Partition.* at cfe/modules/sb/fsw/src/cfe_sb_init.c:61
+  -   CFE_TBL_EarlyInit record <anonymous>.* at cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52
+    +   CFE_TBL_EarlyInit record CFE_TBL_BufParams_t::Partition.* at cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52
+  -   CF_CmdGetSetParam record <anonymous>.* at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd.c:950
+    +   CF_CmdGetSetParam record item@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd_c:945::type.* at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd.c:950
+  -   CF_CmdGetSetParam field <anonymous>.fn at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd.c:977
+    +   CF_CmdGetSetParam field item@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd_c:945::type.fn at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd.c:977
+  -   CF_CmdGetSetParam field <anonymous>.ptr at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd.c:955
+    +   CF_CmdGetSetParam field item@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd_c:945::type.ptr at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd.c:955
+  -   CF_CmdGetSetParam field <anonymous>.size at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd.c:956
+    +   CF_CmdGetSetParam field item@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd_c:945::type.size at /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd.c:956
+  -   OS_BinSemCreate_Impl record <anonymous>.* at osal/src/os/posix/src/os-impl-binsem.c:142
+    +   OS_BinSemCreate_Impl record __atomic_wide_counter::__value32.* at osal/src/os/posix/src/os-impl-binsem.c:142
+  -   OS_Posix_BinSemAPI_Impl_Init record <anonymous>.* at osal/src/os/posix/src/os-impl-binsem.c:108
+    +   OS_Posix_BinSemAPI_Impl_Init record __atomic_wide_counter::__value32.* at osal/src/os/posix/src/os-impl-binsem.c:108
+  -   OS_Posix_CondVarAPI_Impl_Init record <anonymous>.* at osal/src/os/posix/src/os-impl-condvar.c:58
+    +   OS_Posix_CondVarAPI_Impl_Init record __atomic_wide_counter::__value32.* at osal/src/os/posix/src/os-impl-condvar.c:58
+  -   OS_TimeBaseCreate_Impl record <anonymous>.* at osal/src/os/posix/src/os-impl-timebase.c:438
+    +   OS_TimeBaseCreate_Impl record sigevent_t::_sigev_un.* at osal/src/os/posix/src/os-impl-timebase.c:438
+    +   OS_TimeBaseCreate_Impl record sigevent_t::_sigev_un::_sigev_thread.* at osal/src/os/posix/src/os-impl-timebase.c:438
+  -   soft_timebase_Init@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:46 record <anonymous>.* at psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:50
+    +   soft_timebase_Init@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:46 record PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type.* at psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:50
+  -   soft_timebase_Init@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:46 address-argument <anonymous>.sys_timebase_id at psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:53
+    +   soft_timebase_Init@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:46 address-argument PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type.sys_timebase_id at psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c:53
+  -   unsock_intf_Init@psp/fsw/modules/unsock_intf/unsock_intf.c:227 record <anonymous>.* at psp/fsw/modules/unsock_intf/unsock_intf.c:231
+    +   unsock_intf_Init@psp/fsw/modules/unsock_intf/unsock_intf.c:227 record UnSock_Global@psp/fsw/modules/unsock_intf/unsock_intf_c:85::type.* at psp/fsw/modules/unsock_intf/unsock_intf.c:231
+  -   unsock_intf_Init@psp/fsw/modules/unsock_intf/unsock_intf.c:227 field <anonymous>.MyPspModuleId at psp/fsw/modules/unsock_intf/unsock_intf.c:233
+    +   unsock_intf_Init@psp/fsw/modules/unsock_intf/unsock_intf.c:227 field UnSock_Global@psp/fsw/modules/unsock_intf/unsock_intf_c:85::type.MyPspModuleId at psp/fsw/modules/unsock_intf/unsock_intf.c:233
+  -   write <anonymous>.* at cfe/modules/sb/fsw/src/cfe_sb_init.c:61:5 in CFE_SB_EarlyInit held=0 {}
+    +   write CFE_SB_MemParams_t::Partition.* at cfe/modules/sb/fsw/src/cfe_sb_init.c:61:5 in CFE_SB_EarlyInit held=0 {}
+    +   write CFE_SB_MemParams_t::Partition.* at cfe/modules/sb/fsw/src/cfe_sb_init.c:61:5 in CFE_SB_EarlyInit held=0 {}
+  -   write <anonymous>.* at cfe/modules/sb/fsw/src/cfe_sb_init.c:61:5 in CFE_SB_EarlyInit held=0 {}
+    +   write CFE_SB_MemParams_t::Partition.* at cfe/modules/sb/fsw/src/cfe_sb_init.c:61:5 in CFE_SB_EarlyInit held=0 {}
+    +   write CFE_SB_MemParams_t::Partition.* at cfe/modules/sb/fsw/src/cfe_sb_init.c:61:5 in CFE_SB_EarlyInit held=0 {}
+  -   write <anonymous>.* at cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5 in CFE_TBL_EarlyInit held=0 {}
+    +   write CFE_TBL_BufParams_t::Partition.* at cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5 in CFE_TBL_EarlyInit held=0 {}
+    +   write CFE_TBL_BufParams_t::Partition.* at cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5 in CFE_TBL_EarlyInit held=0 {}
+  -   write <anonymous>.* at cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5 in CFE_TBL_EarlyInit held=0 {}
+    +   write CFE_TBL_BufParams_t::Partition.* at cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5 in CFE_TBL_EarlyInit held=0 {}
+    +   write CFE_TBL_BufParams_t::Partition.* at cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:52:5 in CFE_TBL_EarlyInit held=0 {}
+  -   write <anonymous>.* at osal/src/os/posix/src/os-impl-binsem.c:108:5 in OS_Posix_BinSemAPI_Impl_Init held=0 {}
+    +   write __atomic_wide_counter::__value32.* at osal/src/os/posix/src/os-impl-binsem.c:108:5 in OS_Posix_BinSemAPI_Impl_Init held=0 {}
+  -   write <anonymous>.* at osal/src/os/posix/src/os-impl-binsem.c:142:5 in OS_BinSemCreate_Impl held=0 {}
+    +   write __atomic_wide_counter::__value32.* at osal/src/os/posix/src/os-impl-binsem.c:142:5 in OS_BinSemCreate_Impl held=0 {}
+  -   write <anonymous>.* at osal/src/os/posix/src/os-impl-condvar.c:58:5 in OS_Posix_CondVarAPI_Impl_Init held=0 {}
+    +   write __atomic_wide_counter::__value32.* at osal/src/os/posix/src/os-impl-condvar.c:58:5 in OS_Posix_CondVarAPI_Impl_Init held=0 {}
+  -   write <anonymous>.* at osal/src/os/posix/src/os-impl-timebase.c:438:13 in OS_TimeBaseCreate_Impl held=0 {}
+    +   write sigevent_t::_sigev_un.* at osal/src/os/posix/src/os-impl-timebase.c:438:13 in OS_TimeBaseCreate_Impl held=0 {}
+    +   write sigevent_t::_sigev_un::_sigev_thread.* at osal/src/os/posix/src/os-impl-timebase.c:438:13 in OS_TimeBaseCreate_Impl held=0 {}
+  -   write <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields::_kill.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields::_rt.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields::_sigchld.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields::_sigfault.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields::_sigfault::_bounds.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields::_sigfault::_bounds::_addr_bnd.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields::_sigpoll.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields::_sigsys.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+    +   write siginfo_t::_sifields::_timer.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:97:9 in CFE_PSP_ExceptionSigHandler held=0 {}
+  -   write <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:149:5 in CFE_PSP_AttachSigHandler held=0 {}
+    +   write sigaction::__sigaction_handler.* at psp/fsw/pc-linux/src/cfe_psp_exception.c:149:5 in CFE_PSP_AttachSigHandler held=0 {}
+  -   write <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields::_kill.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields::_rt.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields::_sigchld.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields::_sigfault.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields::_sigfault::_bounds.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields::_sigfault::_bounds::_addr_bnd.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields::_sigpoll.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields::_sigsys.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+    +   write siginfo_t::_sifields::_timer.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory held=0 {}
+  -   write <anonymous>.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields::_kill.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields::_rt.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields::_sigchld.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields::_sigfault.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields::_sigfault::_bounds.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields::_sigfault::_bounds::_addr_bnd.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields::_sigpoll.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields::_sigsys.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+    +   write siginfo_t::_sifields::_timer.* at psp/fsw/shared/src/cfe_psp_exceptionstorage.c:102:5 in CFE_PSP_Exception_GetNextContextBuffer held=0 {}
+  -   <anonymous>.Data per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program}
+    +   CFE_SB_MemParams_t::Partition.Data per-field=DISABLED type-level=DISABLED writers=1 (direct 0, data 1, out-pointer 0, init 1) instances=1 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program,writer-function-not-once,array-element-stores-not-col
+    +   CFE_TBL_BufParams_t::Partition.Data per-field=DISABLED type-level=DISABLED writers=1 (direct 0, data 1, out-pointer 0, init 1) instances=1 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program,writer-function-not-once,array-element-stores-not-co
+  -   <anonymous>.Endian per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program}
+    +   EndianCheck@cfe/modules/es/fsw/src/cfe_es_perf_c:50::type.Endian per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 1, data 0, out-pointer 0, init 0) instances=1 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program,w
+  -   <anonymous>.ResourceID per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program}
+    +   IdBuf@cfe/modules/es/fsw/src/cfe_es_task_c:1110::type.ResourceID per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in
+  -   <anonymous>.Word per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program}
+    +   EndianCheck@cfe/modules/es/fsw/src/cfe_es_perf_c:50::type.Word per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 1, data 0, out-pointer 0, init 0) instances=1 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program,wri
+  -   <anonymous>.bytes_needed per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program}
+    +   CborEncoder::data.bytes_needed per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 18, other fields 0; untyped sites 133 {untyped-in-program}
+  -   <anonymous>.fn per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program}
+    +   item@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd_c:945::type.fn per-field=writer-set-complete type-level=writer-set-complete writers=3 (direct 2, data 1, out-pointer 0, init 0) instances=3 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {unty
+  -   <anonymous>.ptr per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program}
+    +   CborEncoder::data.ptr per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 18, other fields 0; untyped sites 133 {untyped-in-program}
+    +   CborValue::source.ptr per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 30, other fields 0; untyped sites 133 {untyped-in-program}
+    +   item@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd_c:945::type.ptr per-field=writer-set-complete type-level=writer-set-complete writers=11 (direct 10, data 1, out-pointer 0, init 0) instances=11 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {
+  -   <anonymous>.si_addr per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program}
+    +   siginfo_t::_sifields::_sigfault.si_addr per-field=DISABLED type-level=DISABLED writers=3 (direct 0, data 3, out-pointer 0, init 0) instances=3 not-once hits: escape 0, cast 3, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program,writer-function-not-once,several-instances} by C
+  -   <anonymous>.size per-field=writer-set-complete type-level=writer-set-complete writers=0 (direct 0, data 0, out-pointer 0, init 0) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program}
+    +   item@/home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cmd_c:945::type.size per-field=writer-set-complete type-level=writer-set-complete writers=11 (direct 10, data 1, out-pointer 0, init 0) instances=11 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 
+  -   <anonymous>.sys_timebase_id per-field=writer-set-complete type-level=writer-set-complete writers=1 (direct 0, data 0, out-pointer 1, init 0) instances=1 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; untyped sites 133 {untyped-in-program,writer-function-not-once} by soft_time
+    +   PSP_SoftTimebase_Global@psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase_c:44::type.sys_timebase_id per-field=writer-set-complete type-level=writer-set-complete writers=2 (direct 0, data 1, out-pointer 1, init 1) instances=2 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 0; u
+  -   after-spawn row 17159 write <anonymous>.* at osal/src/os/posix/src/os-impl-timebase.c:438:13 in OS_TimeBaseCreate_Impl after the spawn osal/src/os/posix/src/os-impl-timebase.c:350:19 OS_Posix_InternalTaskCreate_Impl
+    +   after-spawn row 17161 write sigevent_t::_sigev_un.* at osal/src/os/posix/src/os-impl-timebase.c:438:13 in OS_TimeBaseCreate_Impl after the spawn osal/src/os/posix/src/os-impl-timebase.c:350:19 OS_Posix_InternalTaskCreate_Impl
+    +   after-spawn row 17162 write sigevent_t::_sigev_un::_sigev_thread.* at osal/src/os/posix/src/os-impl-timebase.c:438:13 in OS_TimeBaseCreate_Impl after the spawn osal/src/os/posix/src/os-impl-timebase.c:350:19 OS_Posix_InternalTaskCreate_Impl
+  -   entry-release row 17598 write <anonymous>.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17613 write siginfo_t::_sifields.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17614 write siginfo_t::_sifields::_kill.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17615 write siginfo_t::_sifields::_rt.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17616 write siginfo_t::_sifields::_sigchld.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17617 write siginfo_t::_sifields::_sigfault.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17618 write siginfo_t::_sifields::_sigfault::_bounds.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17619 write siginfo_t::_sifields::_sigfault::_bounds::_addr_bnd.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17620 write siginfo_t::_sifields::_sigpoll.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17621 write siginfo_t::_sifields::_sigsys.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+    +   entry-release row 17622 write siginfo_t::_sifields::_timer.* at psp/fsw/pc-linux/src/cfe_psp_memory.c:686:9 in CFE_PSP_InitProcessorReservedMemory through the call psp/fsw/pc-linux/src/cfe_psp_memory.c:678:9 OS_printf
+undeclared other: 0
+compare_classes: only declared classes

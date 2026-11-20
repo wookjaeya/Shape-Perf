@@ -1,0 +1,5 @@
+# space_guard.sh kind=dev-evfx-oldeval need=20000000 floor=314572800 interval=2 cmd=python3 -I env/obs1/tests/test_explain_eval.py <scratch>/oldev <scratch>/evfx0
+start 2026-11-19T17:37:30.249Z free=764157952 threshold=334572800
+sample 2026-11-19T17:37:30.254Z 764153856
+sample 2026-11-19T17:37:32.260Z 759566336
+end 2026-11-19T17:37:34.267Z kind=dev-evfx-oldeval verdict=completed rc=1 free=759250944 lowest=759250944 dip=4907008 change=-4907008

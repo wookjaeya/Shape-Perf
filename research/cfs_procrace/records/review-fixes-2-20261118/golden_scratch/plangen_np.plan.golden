@@ -1,0 +1,129 @@
+# kz plan written by kz-static plan (plan rules revision 2 (2026-11-16); relations rules revision 12 (2026-11-18))
+# sidecar sha256=<sha256>
+# every site: a label from the sorted site keys with its rule names, a ref to the facts it came from; the plan states what to record, never what to expect
+kzs-sites 3
+source build rev=facts-<sha256> ref="facts extracted without a basis: every source file read is hashed in their FILE_HASHES"
+module 1 name=program source=build
+site 1 label=s0001.stop-event op=entry.app_exit phase=before tu=plangen.c func=app_exit ref="framework-layer data line 5: app-exit app_exit plangen.c:71 (fixture plangen.c)"
+value 1 0 role=param0 from=arg0 type=u64
+site 2 label=s0002.handling-chain+use-call op=call.reg_find phase=point tu=plangen.c func=one_init callee=reg_find line=96 place=after-call ref="row dc9d01d0d30e2ad2"
+value 2 0 role=status from=ret type=s64
+value 2 1 role=out0 from=out0 type=u64
+site 3 label=s0003.use-call op=call.reg_find phase=point tu=plangen.c func=one_init callee=reg_find line=96 place=at-call ref="row dc9d01d0d30e2ad2"
+value 3 0 role=key from=arg1 type=ptr string=pointer-only
+value 3 1 role=arg0 from=arg0 type=u64
+site 4 label=s0004.actor-root+actor-start op=entry.one_main phase=before tu=plangen.c func=one_main ref="actor one_main (spawn-entry); creation plangen.c:82:12 start routine one_main"
+value 4 0 role=param0 from=arg0 type=u64
+site 5 label=s0005.handling-chain op=store.one_main phase=effect tu=plangen.c func=one_main line=104 place=store ref="row dc9d01d0d30e2ad2 plangen.c:104:5"
+value 5 0 role=value from=operand0 type=u64
+value 5 1 role=address from=operand1 type=u64
+site 6 label=s0006.handling-chain op=call.one_init phase=point tu=plangen.c func=one_main callee=one_init line=102 place=after-call ref="row dc9d01d0d30e2ad2"
+value 6 0 role=status from=ret type=s64
+site 7 label=s0007.use-call op=call.reg_find phase=point tu=plangen.c func=one_main callee=reg_find line=107 place=after-call ref="row d02cca883808c9d8"
+value 7 0 role=status from=ret type=s64
+value 7 1 role=out0 from=out0 type=u64
+site 8 label=s0008.handling-chain op=call.app_exit phase=point tu=plangen.c func=one_main callee=app_exit line=111 place=at-call ref="row dc9d01d0d30e2ad2"
+value 8 0 role=arg0 from=arg0 type=u64
+site 9 label=s0009.use-call op=call.reg_find phase=point tu=plangen.c func=one_main callee=reg_find line=107 place=at-call ref="row d02cca883808c9d8"
+value 9 0 role=key from=arg1 type=ptr string=pointer-only
+value 9 1 role=arg0 from=arg0 type=u64
+site 10 label=s0010.key-text op=call.memchr phase=point tu=plangen.c func=reg_create callee=memchr line=55 place=at-call ref="row 0cab3eacd5372d0b; row 9f0ca9751b2d7055; row d02cca883808c9d8; row dc9d01d0d30e2ad2"
+value 10 0 role=key_text from=arg0 type=ptr string=validated bound=16 ref="non-null test (not (eq param:name#1 0)) in the guard (not (or (eq param:out#0 0) (eq param:name#1 0))) of parameter 1 of reg_create before plangen.c:55:7; bound memchr of the parameter with the length 16 at plangen.c:55:7, its result tested; premise: the string is NUL-terminated within the bound or the cut is flagged"
+value 10 1 role=arg1 from=arg1 type=u64
+value 10 2 role=arg2 from=arg2 type=u64
+site 11 label=s0011.key-text op=call.reg_search phase=point tu=plangen.c func=reg_find callee=reg_search line=49 place=at-call ref="row 0cab3eacd5372d0b; row 9f0ca9751b2d7055; row d02cca883808c9d8; row dc9d01d0d30e2ad2"
+value 11 0 role=key_text from=arg0 type=ptr string=validated bound=64 ref="non-null test (not (eq param:name#1 0)) in the guard (and (not (eq param:out#0 0)) (not (eq param:name#1 0))) of parameter 1 of reg_find before plangen.c:49:10; bound KZ_RT_STR_MAX 64 (runtime/include/kz_rt.h:82; the runtime copies up to the NUL or the bound and flags a cut); premise: the string is NUL-terminated within the bound or the cut is flagged"
+value 11 1 role=arg1 from=arg1 type=u64
+site 12 label=s0012.stop-event op=entry.run_loop phase=before tu=plangen.c func=run_loop ref="framework-layer data line 4: run-loop run_loop plangen.c:69 (fixture plangen.c)"
+value 12 0 role=param0 from=arg0 type=u64
+site 13 label=s0013.actor-owner op=store.spawn_task phase=effect tu=plangen.c func=spawn_task line=84 place=store ref="actor one_main (spawn-entry) parameter 2 of spawn_task stored at plangen.c:84:3 after the spawn plangen.c:82:12; actor two_main (spawn-entry) parameter 2 of spawn_task stored at plangen.c:84:3 after the spawn plangen.c:82:12"
+value 13 0 role=value from=operand0 type=u64
+value 13 1 role=address from=operand1 type=u64
+site 14 label=s0014.actor-create op=call.pthread_create phase=point tu=plangen.c func=spawn_task callee=pthread_create line=82 place=after-call ref="creation plangen.c:82:12"
+value 14 0 role=status from=ret type=s64
+value 14 1 role=out0 from=out0 type=u64
+site 15 label=s0015.actor-create op=call.pthread_create phase=point tu=plangen.c func=spawn_task callee=pthread_create line=82 place=at-call ref="creation plangen.c:82:12"
+value 15 0 role=start_routine from=arg2 type=u64
+value 15 1 role=creation_arg from=arg3 type=u64
+value 15 2 role=arg0 from=arg0 type=u64
+value 15 3 role=arg1 from=arg1 type=u64
+site 16 label=s0016.actor-root+actor-start op=entry.two_main phase=before tu=plangen.c func=two_main ref="actor two_main (spawn-entry); creation plangen.c:82:12 start routine two_main"
+value 16 0 role=param0 from=arg0 type=u64
+site 17 label=s0017.creator-call op=call.reg_create phase=point tu=plangen.c func=two_main callee=reg_create line=121 place=after-call ref="row 0cab3eacd5372d0b; row 9f0ca9751b2d7055; row d02cca883808c9d8; row dc9d01d0d30e2ad2"
+value 17 0 role=status from=ret type=s64
+value 17 1 role=out0 from=out0 type=u64
+site 18 label=s0018.creator-call op=call.reg_create phase=point tu=plangen.c func=two_main callee=reg_create line=121 place=at-call ref="row 0cab3eacd5372d0b; row 9f0ca9751b2d7055; row d02cca883808c9d8; row dc9d01d0d30e2ad2"
+value 18 0 role=key from=arg1 type=ptr string=pointer-only
+value 18 1 role=arg0 from=arg0 type=u64
+
+# sidecar
+kz-plan-sidecar 1
+generator tool=kz-static tool_sha256=<sha256> tool_source=<sha256> core_source=<sha256>
+input facts sha256=<sha256> path=<path>
+input framework-layer-data sha256=<sha256> path=<path>
+facts-artifact <sha256>
+rules plan rules revision 2 (2026-11-16); relations rules revision 12 (2026-11-18)
+selection observation-set: every row of the relations (method document 3.1, the revised rule: no label and no proof of a row removes it)
+priority method-priority: method priority port revision 1 (2026-11-16): label, order class, reach mark and disposition of the method document's S1 rule over the row text; tier 1 = disposition D07 (label R or J, counterpart, order class RELOC), tier 2 = the other rows of order class RELOC, tier 3 = the rest; within a tier the order of the relations text
+classes rows 4 tier1 4 tier2 0 tier3 0
+budget value=tier:D07 reason="the priority tier whole (test)" disclosure="none given" planned=4 truncation=0 rows cut (row lines with state cut) unresolved="none" sensitivity="not measured"
+bound string KZ_RT_STR_MAX=64 source=runtime/include/kz_rt.h:82 reason="the runtime's copy bound; a key text is bounded by the program's own constant length check where the facts show one" truncation="the runtime flags a cut string per value"
+bound slots=4 source=instrument/gcc/kzgcc.cpp build_obs reason="values per event bound by kzgcc 0.3"
+bound sites<=4095 source=instrument/gcc/kzgcc.cpp plugin_init reason="the binding id scheme" sites=18
+param tu-root - (units outside the bundle root are named relative to it)
+param bundle-root -
+row dc9d01d0d30e2ad2 A1 tier=1 position=1 label=R class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned why="label R, counterpart, no static order; reach REACH-FLIP"
+row 0cab3eacd5372d0b A2 tier=1 position=2 label=J class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned why="label J, counterpart, no static order; reach REACH-FLIP"
+row 9f0ca9751b2d7055 A3 tier=1 position=3 label=J class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned why="label J, counterpart, no static order; reach REACH-FLIP"
+row d02cca883808c9d8 A4 tier=1 position=4 label=J class=decided order=RELOC reach=REACH-FLIP disposition=D07 state=planned why="label J, counterpart, no static order; reach REACH-FLIP"
+site 1 s0001.stop-event key="plangen.c|app_exit|before|||0" refs="framework-layer data line 5: app-exit app_exit plangen.c:71 (fixture plangen.c)"
+site 2 s0002.handling-chain+use-call key="plangen.c|one_init|point|after-call|reg_find|96" refs="row dc9d01d0d30e2ad2"
+site 3 s0003.use-call key="plangen.c|one_init|point|at-call|reg_find|96" refs="row dc9d01d0d30e2ad2"
+site 4 s0004.actor-root+actor-start key="plangen.c|one_main|before|||0" refs="actor one_main (spawn-entry); creation plangen.c:82:12 start routine one_main"
+site 5 s0005.handling-chain key="plangen.c|one_main|effect|store||104" refs="row dc9d01d0d30e2ad2 plangen.c:104:5"
+site 6 s0006.handling-chain key="plangen.c|one_main|point|after-call|one_init|102" refs="row dc9d01d0d30e2ad2"
+site 7 s0007.use-call key="plangen.c|one_main|point|after-call|reg_find|107" refs="row d02cca883808c9d8"
+site 8 s0008.handling-chain key="plangen.c|one_main|point|at-call|app_exit|111" refs="row dc9d01d0d30e2ad2"
+site 9 s0009.use-call key="plangen.c|one_main|point|at-call|reg_find|107" refs="row d02cca883808c9d8"
+site 10 s0010.key-text key="plangen.c|reg_create|point|at-call|memchr|55" refs="row 0cab3eacd5372d0b; row 9f0ca9751b2d7055; row d02cca883808c9d8; row dc9d01d0d30e2ad2"
+site 11 s0011.key-text key="plangen.c|reg_find|point|at-call|reg_search|49" refs="row 0cab3eacd5372d0b; row 9f0ca9751b2d7055; row d02cca883808c9d8; row dc9d01d0d30e2ad2"
+site 12 s0012.stop-event key="plangen.c|run_loop|before|||0" refs="framework-layer data line 4: run-loop run_loop plangen.c:69 (fixture plangen.c)"
+site 13 s0013.actor-owner key="plangen.c|spawn_task|effect|store||84" refs="actor one_main (spawn-entry) parameter 2 of spawn_task stored at plangen.c:84:3 after the spawn plangen.c:82:12; actor two_main (spawn-entry) parameter 2 of spawn_task stored at plangen.c:84:3 after the spawn plangen.c:82:12"
+site 14 s0014.actor-create key="plangen.c|spawn_task|point|after-call|pthread_create|82" refs="creation plangen.c:82:12"
+site 15 s0015.actor-create key="plangen.c|spawn_task|point|at-call|pthread_create|82" refs="creation plangen.c:82:12"
+site 16 s0016.actor-root+actor-start key="plangen.c|two_main|before|||0" refs="actor two_main (spawn-entry); creation plangen.c:82:12 start routine two_main"
+site 17 s0017.creator-call key="plangen.c|two_main|point|after-call|reg_create|121" refs="row 0cab3eacd5372d0b; row 9f0ca9751b2d7055; row d02cca883808c9d8; row dc9d01d0d30e2ad2"
+site 18 s0018.creator-call key="plangen.c|two_main|point|at-call|reg_create|121" refs="row 0cab3eacd5372d0b; row 9f0ca9751b2d7055; row d02cca883808c9d8; row dc9d01d0d30e2ad2"
+map 0cab3eacd5372d0b 10 11 17 18
+map 9f0ca9751b2d7055 10 11 17 18
+map d02cca883808c9d8 7 9 10 11 17 18
+map dc9d01d0d30e2ad2 2 3 5 6 8 10 11 17 18
+need row dc9d01d0d30e2ad2 event-send not-planned reason=plan_missing(need not planned) note="the effects of a result (an event or a message sent on it) are not in the facts of this revision"
+need row dc9d01d0d30e2ad2 wait-result not-planned reason=plan_missing(need not planned) note="rule added in the manifest revision 4"
+need row dc9d01d0d30e2ad2 lock-result not-planned reason=plan_missing(need not planned) note="rule added in the manifest revision 4"
+need row 0cab3eacd5372d0b event-send not-planned reason=plan_missing(need not planned) note="the effects of a result (an event or a message sent on it) are not in the facts of this revision"
+need row 0cab3eacd5372d0b wait-result not-planned reason=plan_missing(need not planned) note="rule added in the manifest revision 4"
+need row 0cab3eacd5372d0b lock-result not-planned reason=plan_missing(need not planned) note="rule added in the manifest revision 4"
+need row 9f0ca9751b2d7055 event-send not-planned reason=plan_missing(need not planned) note="the effects of a result (an event or a message sent on it) are not in the facts of this revision"
+need row 9f0ca9751b2d7055 wait-result not-planned reason=plan_missing(need not planned) note="rule added in the manifest revision 4"
+need row 9f0ca9751b2d7055 lock-result not-planned reason=plan_missing(need not planned) note="rule added in the manifest revision 4"
+need row d02cca883808c9d8 event-send not-planned reason=plan_missing(need not planned) note="the effects of a result (an event or a message sent on it) are not in the facts of this revision"
+need row d02cca883808c9d8 wait-result not-planned reason=plan_missing(need not planned) note="rule added in the manifest revision 4"
+need row d02cca883808c9d8 lock-result not-planned reason=plan_missing(need not planned) note="rule added in the manifest revision 4"
+gap plangen.c:106:9 "at-call reg_find in one_main" reason=record_insufficient(two calls of one callee on one line) rule=use-call
+gap plangen.c:106:9 "after-call reg_find in one_main" reason=record_insufficient(two calls of one callee on one line) rule=use-call
+gap plangen.c:106:42 "at-call reg_find in one_main" reason=record_insufficient(two calls of one callee on one line) rule=use-call
+gap plangen.c:106:42 "after-call reg_find in one_main" reason=record_insufficient(two calls of one callee on one line) rule=use-call
+creation plangen.c:82:12 roots one_main two_main; start routines one_main two_main; tie: creation argument = start routine parameter 0 (premise: the argument reaches the start routine unchanged; a repeated value makes the tie undetermined)
+stop-event run-loop run_loop plangen.c:69 decl plangen.c:69 version "fixture plangen.c" data line 4
+stop-event app-exit app_exit plangen.c:71 decl plangen.c:71 version "fixture plangen.c" data line 5
+default-module 1 program
+
+# module table
+# kz module table; plan sidecar <work>/p1/plan.side sha256=<sha256>
+# the reference build's source paths (basis); a derived build in another directory maps them to its copies
+default	1
+
+# executables
+# kz executables to check; plan sidecar <work>/p1/plan.side sha256=<sha256>
+# the reference build's paths (basis); a derived build maps them to its install tree

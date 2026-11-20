@@ -1,0 +1,7 @@
+# 05_consts.kzp -- constants of profile c5-cfe-6.4.x.  Each literal is read from the cited line (cfe_error.h, the
+# same lines in both releases).  Codes are compared with the value a call returned modulo 2^32.
+phi 1;
+
+const CFE_SUCCESS = 0 prov err_h_success;
+const CFE_ES_ERR_APPID = 0xc4000001 prov err_h_es_appid;
+const CFE_ES_ERR_BUFFER = 0xc4000003 prov err_h_es_buffer;

@@ -1,0 +1,3 @@
+kz-dev/configure.log
+kz-dev/build0.log
+kz-dev/CMakeCache.txt

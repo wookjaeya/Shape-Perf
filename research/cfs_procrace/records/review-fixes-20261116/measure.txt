@@ -1,0 +1,29 @@
+== c1_pre_tx
+rows 367 / 367; row values changed 0
+row values after: A:unknown 60, A:unordered 3, B:unknown 8, B:unordered 162, C:unknown 7, C:unordered 127
+all pairs before: fixed_early_proved 2549, hard_before 5023, unknown 317, unordered 16868
+all pairs after:  fixed_early_proved 1276, hard_before 1525, unknown 317, unordered 21639
+named pair: write cfe/modules/es/fsw/src/cfe_es_syslog.c:219:9 in CFE_ES_SysLogAppend_Unsync [CCSDS_PrimaryHeader_t.*] BP_ ... : hard_before -> unordered
+== c1_post_tx
+rows 367 / 367; row values changed 0
+row values after: A:unknown 60, A:unordered 3, B:unknown 8, B:unordered 162, C:unknown 7, C:unordered 127
+all pairs before: fixed_early_proved 2549, hard_before 5023, unknown 317, unordered 16868
+all pairs after:  fixed_early_proved 1276, hard_before 1525, unknown 317, unordered 21639
+== r2_core
+rows 295 / 295; row values changed 0
+row values after: A:unknown 24, A:unordered 1, B:fixed_early_proved 4, B:hard_before 34, B:unknown 43, B:unordered 74, C:unknown 1, C:unordered 114
+all pairs before: fixed_early_proved 1348, hard_before 1660, unknown 294, unordered 5399
+all pairs after:  fixed_early_proved 825, hard_before 1117, unknown 294, unordered 6465
+named pair: write cfe/modules/es/fsw/src/cfe_es_syslog.c:219:9 in CFE_ES_SysLogAppend_Unsync [CCSDS_PrimaryHeader_t.*] CFE ... : hard_before -> unordered
+named pair: write osal/src/os/posix/src/os-impl-tasks.c:614:9 in OS_TaskCreate_Impl [OS_task_internal_record_t.priority] C ... : hard_before -> unordered
+== c5_641
+rows 178 / 178; row values changed 0
+row values after: A:unknown 53, A:unordered 13, B:hard_before 2, B:unknown 16, B:unordered 55, C:hard_before 18, C:unordered 21
+all pairs before: fixed_early_proved 1, hard_before 123, unknown 198, unordered 4011
+all pairs after:  fixed_early_proved 1, hard_before 123, unknown 198, unordered 4011
+== c5_642
+rows 175 / 175; row values changed 0
+row values after: A:unknown 53, A:unordered 13, B:hard_before 2, B:unknown 15, B:unordered 54, C:hard_before 36, C:unordered 2
+all pairs before: fixed_early_proved 1, hard_before 195, unknown 195, unordered 3931
+all pairs after:  fixed_early_proved 1, hard_before 195, unknown 195, unordered 3931
+== r2_core B37 fixed_early_proved pairs whose path takes E73f4411c15f2c30c (the spawn call os-impl-tasks.c:617:19 -> CFE_TIME_TaskMain) from CFE_ES_BackgroundTask: before 1, after 0

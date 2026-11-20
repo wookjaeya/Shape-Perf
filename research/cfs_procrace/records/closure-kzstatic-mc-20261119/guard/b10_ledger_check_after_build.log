@@ -1,0 +1,7 @@
+# space_guard.sh kind=check need=20000000 floor=314572800 interval=2 cmd=bash -c bash env/tools/ledger_check.sh > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/ledger_check_after_build.txt 2>&1
+start 2026-11-19T06:16:26.647Z free=1082789888 threshold=334572800
+sample 2026-11-19T06:16:26.650Z 1082785792
+sample 2026-11-19T06:16:28.657Z 1082781696
+sample 2026-11-19T06:16:30.663Z 1082777600
+sample 2026-11-19T06:16:32.669Z 1082773504
+end 2026-11-19T06:16:34.676Z kind=check verdict=completed rc=0 free=1082769408 lowest=1082769408 dip=20480 change=-20480

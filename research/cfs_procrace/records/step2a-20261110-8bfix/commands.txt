@@ -1,0 +1,51 @@
+# declaration: sha256 of the AR lines from the 15.10 heading to the end, before the build = 66c0621c8518b30f6b415876c7dfc8380927b1979ea77cff6c7341b97f8927f2 (2026-11-10T08:00:17Z; declared_before_build.txt here; committed before the build)
+# step2a-20261110-8bfix: commands, rc and free space (df -B1 /, bytes available)
+start: 2026-11-10T08:00:17Z, free 878940160
+# <scratch> is this session's scratchpad directory (8bfix/); the scripts there are described here, not copied
+
+## 1. the 13 findings checked (AR 15.10.1)
+the verifier's scratch sources (v2.c, v5.c) and a new one (an.c: anonymous member, overriding designator) read with the 8b tool 7ef1a28c:
+  v5.c --no-profile --targets-rule R-T1,R-T2, budgets default/5/4, then relations -> entries main_a main_b / main_b / main_b (+ covering note at 4); path C 1/0/0
+  v2.c --image-budget 2 -> loops: "no null element ends the table g_cfg.list"
+  an.c budgets default/1/2 -> s_an.... ; no row for u_du.s at any budget
+diff T/count/summary.txt tests_8b/count/summary.txt -> 10 lines in 6 hunks (381 396 411 426 441 487-491); tests_rv4 the same 10
+kz-dump of T/ and tests_8b NP facts.kz -> HEADER tool_sha256 5e5d9e4e -> add6cb73, size 10980536 -> 10980752 (c1_pre_tx), section crc32 changed: C1 and C5 35 of 39 lines (STRINGS, BASIS, 33 others), R2 37 (STRINGS, BASIS, 35 others); unchanged: empty sections (crc 0) and LOCK_PATHS
+git show --numstat fdea6a8 -> lib/llvm/ast_reader.hpp +6
+
+## 2. the declaration before the build (line 1 above): AR 15.10.0 and 15.10.1, committed as ea4e406 (08:00Z)
+
+## 3. code, tests, docs (working tree; committed as 6fc275e after the tests, before the run)
+lib/llvm/finalize.cpp, lib/llvm/ast_tu.cpp; tests/static/{test_static_flow.cpp,test_static_cli.cpp,static_golden.cpp,CMakeLists.txt}; docs/{schema.md,static_facts.md}
+
+## 4. before touching MC (pre_mc.txt): the five tools equal the 8b post_mc.txt values (7ef1a28c b254483e 05623054 4390d4f1 7d34e6e2)
+
+## 5. rebuild in place in MC (2026-11-10T08:01:03Z - 2026-11-10T08:02:52Z)
+cd MC && make -j4 kz-static static_golden test_static_cli test_static_expr test_static_flow test_static_recipe test_static_gitrev \
+  test_static_unroll test_static_wrappers test_static_link test_static_elf32 kz_lint   -> rc 0 (make.log; CMake re-ran: tests/static/CMakeLists.txt)
+free: before 878710784 (08:01:03Z), lowest 866832384 (08:01:25Z), after 936570880 (08:02:51Z); df_build.log (watcher stops the build below 330000000; did not trigger)
+KZ_GOLDEN_UPDATE=1 ctest -R '^static_golden_imgbudget_np$' -> wrote tests/static/data/imgbudget_np.golden (56 lines; its 23 GLOBAL_IMAGES rows read against AR 15.4)
+
+## 6. full ctest
+first run (08:03Z): 239 tests, 1 failed: test_static_cli, 1 of 686 checks (test_static_cli.cpp:829, the expected text "table-walk trip=1 "; the view gives "trip=exact(1)")
+the expectation fixed; make test_static_cli (kz-static not relinked; sha256 3c5dfc56 before and after)
+second run (08:05Z): ctest -j4 --output-on-failure -> ctest_full.log: 239 tests, 0 failed, 1 skipped (test_probe_anchor_reached, exit 77), rc 0
+ctest -N | grep -cE 'Test +#[0-9]+: phi_' -> 47; ctest -N -L legacy-case -> 0; lint_* 6 passed
+git status -- kairos/tests/static/data kairos/tests/golden -> only the new imgbudget_np.golden
+
+## 7. unit checks of the driver
+TMPDIR=<scratch>/unit/tmp bash env/redesign/step2a_tests_unit.sh -> unit.txt, 6 of 6, rc 0 (driver 6e78820c, unit a02e56a8, count 7d2ab6a8)
+
+## 8. post_mc.txt: kz-static 3c5dfc56 (tool_sha256 9b9189d1, tool_source ae73a609); kz, kz-dump, kz-rt-dump, kz-phi unchanged; the tool-identity files not changed after the build start; MC 3554960160 B
+
+## 9. the driver (2026-11-10T08:06:44Z - 2026-11-10T08:11:36Z)
+env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools \
+  bash R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8b_fix          -> rc 0, result all: PASS (status.txt)
+free: before 876924928 (08:06:44Z), lowest 651919360 (08:10:02Z), after 674869248 (08:11:35Z); df_run.log
+du -sb tests_8b_fix -> 202169780; find -type f | wc -l -> 149; sha256.txt 136 lines (sha256 b87a5a94...)
+
+## 10. checks after the run
+(cd T/ && sha256sum -c --quiet sha256.txt) -> rc 0; tests_rv4 rc 0; tests_8b rc 0; tests_8b_fix rc 0
+python3 -I <scratch>/cmp/compare_8bfix.py MC/tools/kz-dump/kz-dump compare_8bfix.tsv tests_8b_fix tests_8b T/ tests_rv4
+  -> tests_8b same 39 DIFF 110 only-in-ref 1; T/ same 29 DIFF 108 only-in-new 12; tests_rv4 same 34 DIFF 115 (AR 15.10.6 reads every DIFF line against tests_8b)
+fix_checks.txt: the new tool on v5.c, v2.c (budgets 2, 3) and an.c (budgets default, 1, 2)
+nothing deleted (free never below 300000000); free at the end (before the last commit): 672600064 (2026-11-10T08:19:42Z)

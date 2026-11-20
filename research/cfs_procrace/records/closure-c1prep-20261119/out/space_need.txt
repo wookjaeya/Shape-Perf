@@ -1,0 +1,24 @@
+# Space need of the C1 cycle preparation (2026-11-19), written before any action of the step.
+# free at the start: 541,810,688 B (df -B1 /, 2026-11-19T08:41:11Z, out/free_start.txt); floor 314,572,800 B;
+# headroom 227,237,888 B.  Values [I] from the first cycle's kept guard logs and sizes
+# (records/obs1-20261116-derived/df_*.log; results plan/observation_path_results_20261116.md 5.6) and from the kept
+# extraction the derived facts are compared with (cz_final_extract/<b>/<b>/NP: 20.8 MB apparent).
+action                                   per build kept   per build dip   guard --need
+plan regeneration (plan_regen.sh)        1.3 MB           1.3 MB          10,000,000
+runtime tree (build_runtime.sh)          6.5 MB           6.5 MB          100,000,000
+prepare (derive_c1.sh prepare)           27.3 MB          27.3 MB         100,000,000
+reference build at the derived path      0 (removed)      14.3 MB         100,000,000
+derived build (instr)                    +19.4 MB (W 46.7) 19.2 MB        100,000,000
+check, bindings, rx, build-ids           < 1 MB           0.2 MB          100,000,000
+derived basis and facts (one_build.sh,
+  every extraction option)               21 MB            25 MB           60,000,000 (one_build.sh steps)
+base-to-derived comparison               1 MB (report)    0 (kz-dump to memory)  10,000,000
+reader and judge check of the branch
+  file (scratch, removed after)          0                26 MB           60,000,000
+records                                  5 MB in all
+sum, two builds: kept about 156 MB; at the last derived action the guard needs floor + 100,000,000 with about
+130 MB of the step already kept: 130 + 100 = 230 MB > headroom 227 MB.  The need does not fit above the floor.
+Therefore (rule of the task, results 12.10 item 2): the four option-off extract rounds objacc_off_extract,
+sem_off_extract, rf_off_extract, ll_off_extract (4 x 47,149,056 B blocks) are replaced by xz tar archives in
+/home/user/work/preserve/archives-20261119/ (reclaim/archive.sh: round trip file by file, then removal; ledger rows
+with the archive sha256 and the member list).  The intermediate option-on rounds are not touched.

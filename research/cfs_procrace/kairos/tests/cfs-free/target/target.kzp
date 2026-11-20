@@ -1,0 +1,15 @@
+# target.kzp -- the observation profile of the unit-test target program (target_prog.c).
+# Unit-test values: this is not a framework profile and not a research condition.
+kzp-observe 1
+binary target_prog
+
+prov tp_plan tier=researcher kind=researcher file="tests/cfs-free/target/target_prog.c" lines=1-20 cite="the sites the observer tests need" authored="K2, observer tests"
+prov tp_send_def tier=code-derived kind=code_pattern file="tests/cfs-free/target/target_prog.c" lines=51-58 cite="tp_send: (event id, event type, app id, spec, ...) returns a status"
+prov tp_create_def tier=code-derived kind=code_pattern file="tests/cfs-free/target/target_prog.c" lines=78-88 cite="tp_task_create: (id out, name, entry, priority, arg)"
+
+site send.entry entry func=tp_send prov=tp_send_def s0=rdi:u16:event_id s1=rsi:u16:event_type s2=rdx:u32:app_id s3=stack+0:u64:return_address
+site send.ret ret func=tp_send prov=tp_send_def s0=rax:u32:status s3=ip:u64:return_address
+site publish.after_get point at=target_prog.c:64 after-call=tp_get_identity prov=tp_plan s0=rax:u32:status
+site spawn.create entry func=tp_task_create decoder=spawn-create prov=tp_create_def s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=rcx:u32:priority s3=stack+0:u64:return_address
+site spawn.return ret func=tp_task_create decoder=spawn-return prov=tp_create_def s0=rax:u32:status s3=ip:u64:return_address
+site thread.entry entry func=tp_task_entry decoder=thread-entry prov=tp_create_def s0=rdi:u32:task_id s3=stack+0:u64:return_address

@@ -1,0 +1,11 @@
+# allowance of the c1_pre_tx re-extraction with the new kz-static against tests_8c_fix/c1_pre_tx/NP (the declaration, plan/observation_path_results_20261116.md 4.0)
+# the containers: only the header fields of the tool identity and what follows from it; every section record must be the same (read from the compare output)
+basis.kz	DIFF
+facts.kz	DIFF
+basis.txt	DIFF
+extract.txt	DIFF
+relations.txt	DIFF
+sha256.txt	DIFF
+facts.txt	ONLY
+status.txt	ONLY
+space_guard.log	ONLY

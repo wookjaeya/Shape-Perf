@@ -1,0 +1,4 @@
+# space_guard.sh kind=run-relcheck need=30000000 floor=314572800 interval=2 cmd=bash -c bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/run.sh relcheck > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/run_relcheck.txt 2>&1
+start 2026-11-19T06:19:18.476Z free=1082159104 threshold=344572800
+sample 2026-11-19T06:19:18.486Z 1082146816
+end 2026-11-19T06:19:20.492Z kind=run-relcheck verdict=completed rc=0 free=1074421760 lowest=1074421760 dip=7737344 change=-7737344

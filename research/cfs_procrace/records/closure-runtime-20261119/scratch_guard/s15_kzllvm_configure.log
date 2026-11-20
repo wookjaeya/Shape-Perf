@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-plugin need=157286400 floor=314572800 interval=2 cmd=cmake -S /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/llvm -B <scratch>/kzllvm
+start 2026-11-19T07:12:52.815Z free=784998400 threshold=471859200
+sample 2026-11-19T07:12:52.819Z 784994304
+end 2026-11-19T07:12:54.826Z kind=scratch-plugin verdict=completed rc=0 free=784203776 lowest=784203776 dip=794624 change=-794624

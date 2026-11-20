@@ -1,0 +1,26 @@
+== relations
+rows: A old 2 new 2 (kept 2, removed 0; partition changed 0, creator set changed 0); B and C kept 1
+left out lines: 0
+RESULT: all differences of declared classes
+== relations_np
+rows: A old 2 new 2 (kept 2, removed 0; partition changed 0, creator set changed 0); B and C kept 3
+left out lines: 0
+RESULT: all differences of declared classes
+== relpaths_np
+rows: A old 1 new 1 (kept 1, removed 0; partition changed 0, creator set changed 0); B and C kept 6
+left out lines: 0
+RESULT: all differences of declared classes
+== relsound_np
+rows: A old 0 new 0 (kept 0, removed 0; partition changed 0, creator set changed 0); B and C kept 38
+left out lines: 0
+RESULT: all differences of declared classes
+== relincomplete_np
+rows: A old 3 new 3 (kept 3, removed 0; partition changed 0, creator set changed 0); B and C kept 3
+left out lines: 0
+RESULT: all differences of declared classes
+== relincomplete_cut_np
+rows: A old 3 new 3 (kept 3, removed 0; partition changed 0, creator set changed 0); B and C kept 3
+left out lines: 0
+RESULT: all differences of declared classes
+== plangen_np.plan.golden
+SAME after the two revision lines (lines changed: 2)

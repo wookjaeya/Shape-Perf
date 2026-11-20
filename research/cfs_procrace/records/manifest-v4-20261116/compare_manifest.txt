@@ -1,0 +1,2 @@
+groups 129 same 129 differ 0 (groups whose old parse is an error: 4)
+compare.sh manifest rc=0

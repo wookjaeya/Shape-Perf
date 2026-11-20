@@ -1,0 +1,192 @@
+extract
+  translation units          1
+  functions                  9 (bodies read 6, in system headers skipped 0)
+  call sites                 12
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                0 (entry resolved 0)
+  loops                      1 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 1, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 1, escaping 1, unsummarized 6
+  untyped write sites        1 in the program, 1 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Chan.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 3, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Ent.n_comma   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Ent.n_cond   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Ent.n_grid   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 3, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Ent.n_var   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 3, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Mem.buf   writers 2 (direct 0, data function 1, out-pointer 1, initial values 1), A-TYPE hits: untyped 1, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Mem.count   writers 4 (direct 4, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Mem.data   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Mem.label   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 3, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Mem.pool   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 3, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Mem.raw   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Mem.tag   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  hand-entered inputs        24 (built-in data-function table 12, command line 12)
+  declared assumptions       0 (static images of table-walk links that are not const)
+facts-view 1
+[functions] 9
+  fn 0 decay_cases objaccess.c:90-95 params=1 {defined}
+  fn 1 ext_read objaccess.c:87 params=1 {}
+  fn 2 fill objaccess.c:52-52 params=1 {defined}
+  fn 3 init objaccess.c:56-76 params=0 {defined}
+  fn 4 log_text objaccess.c:88-88 params=1 {defined,variadic}
+  fn 5 lookup objaccess.c:45 params=2 {}
+  fn 6 memset /usr/include/string.h:61 params=3 {builtin}
+  fn 7 pool_create objaccess.c:47-50 params=2 {defined}
+  fn 8 set_count objaccess.c:54-54 params=2 {defined}
+[writers] 7
+  Mem.buf out-pointer at objaccess.c:61:3 in init via fill objaccess.c:52 value=const 7 [7] key=*fill argument 0 {} n/a
+  Mem.buf memset at objaccess.c:66:3 in init value=const 0 [fill 0] key=mem.buf {} n/a
+  Mem.count assign at objaccess.c:54:33 in set_count value=symbolic [v] key=m {} n/a
+  Mem.count assign at objaccess.c:67:3 in init value=const 1 [1] key=mem {} n/a
+  Mem.count assign at objaccess.c:72:34 in init value=const 3 [3] key=mem guard=(ne (index field:Chan.name 0) 0) {} n/a
+  Mem.count assign at objaccess.c:75:22 in init value=const 4 [4] key=mem guard=(ne field:Mem.flag 0) {} n/a
+  Mem.data assign at objaccess.c:65:3 in init value=const 5 [mem.data[1] = 5] key=mem {partial-write} n/a
+[atype] 41
+  Chan.name untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Chan.name address-escape at objaccess.c:70:37 in init: the array decays to a pointer to its first element, passed to lookup: the callee has no body in the closed program
+  Chan.name address-escape at objaccess.c:71:9 in init: the array decays to a pointer to its first element, passed to lookup: the callee has no body in the closed program
+  Chan.name address-escape at objaccess.c:74:9 in init: the array decays to a pointer to its first element, passed to lookup: the callee has no body in the closed program
+  Ent.n_comma untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Ent.n_comma address-escape at objaccess.c:91:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the out-pointer rule does not read (a conditional or comma operand)
+  Ent.n_comma address-escape at objaccess.c:92:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the out-pointer rule does not read (a conditional or comma operand)
+  Ent.n_cond untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Ent.n_cond address-escape at objaccess.c:91:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the out-pointer rule does not read (a conditional or comma operand)
+  Ent.n_cond address-escape at objaccess.c:92:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the out-pointer rule does not read (a conditional or comma operand)
+  Ent.n_grid untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Ent.n_grid address-escape at objaccess.c:91:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the out-pointer rule does not read (a conditional or comma operand)
+  Ent.n_grid address-escape at objaccess.c:92:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the out-pointer rule does not read (a conditional or comma operand)
+  Ent.n_grid address-escape at objaccess.c:93:9 in decay_cases: the array decays to a pointer to its first element, passed to ext_read: the callee has no body in the closed program
+  Ent.n_var untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Ent.n_var address-escape at objaccess.c:91:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the out-pointer rule does not read (a conditional or comma operand)
+  Ent.n_var address-escape at objaccess.c:92:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the out-pointer rule does not read (a conditional or comma operand)
+  Ent.n_var address-escape at objaccess.c:94:9 in decay_cases: the array decays to a pointer to its first element, passed to log_text: an argument beyond the named parameters of a callee defined in the closed program: it reaches the callee through its variable argument list, which is not summarized
+  Mem.buf untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Mem.buf address-escape at objaccess.c:63:3 in init: the array decays to a pointer to its first element: assigned to last
+  Mem.buf address-escape at objaccess.c:64:14 in init: the array decays to a pointer to its first element: converted to an integer
+  Mem.count untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Mem.count address-escape at objaccess.c:63:3 in init: the array decays to a pointer to its first element: assigned to last
+  Mem.count address-escape at objaccess.c:64:14 in init: the array decays to a pointer to its first element: converted to an integer
+  Mem.data untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Mem.data address-escape at objaccess.c:63:3 in init: the array decays to a pointer to its first element: assigned to last
+  Mem.data address-escape at objaccess.c:64:14 in init: the array decays to a pointer to its first element: converted to an integer
+  Mem.label untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Mem.label address-escape at objaccess.c:62:9 in init: the array decays to a pointer to its first element, passed to lookup: the callee has no body in the closed program
+  Mem.label address-escape at objaccess.c:63:3 in init: the array decays to a pointer to its first element: assigned to last
+  Mem.label address-escape at objaccess.c:64:14 in init: the array decays to a pointer to its first element: converted to an integer
+  Mem.pool untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Mem.pool address-escape at objaccess.c:60:3 in init: the array decays to a pointer to its first element, passed to pool_create: used by CStyleCastExpr at objaccess.c:48:30
+  Mem.pool address-escape at objaccess.c:63:3 in init: the array decays to a pointer to its first element: assigned to last
+  Mem.pool address-escape at objaccess.c:64:14 in init: the array decays to a pointer to its first element: converted to an integer
+  Mem.raw untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Mem.raw address-escape at objaccess.c:63:3 in init: the array decays to a pointer to its first element: assigned to last
+  Mem.raw address-escape at objaccess.c:64:14 in init: the array decays to a pointer to its first element: converted to an integer
+  Mem.tag untyped-write at objaccess.c:52:20 in fill: store through an untyped pointer: *p
+  Mem.tag address-escape at objaccess.c:63:3 in init: the array decays to a pointer to its first element: assigned to last
+  Mem.tag address-escape at objaccess.c:64:14 in init: the array decays to a pointer to its first element: converted to an integer
+[locs] 13
+  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=0 unresolved-indirect=0
+  Chan.name DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=1 escape=3 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Ent.n_comma DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=1 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Ent.n_cond DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=1 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Ent.n_grid DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=1 escape=3 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Ent.n_var DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=1 escape=3 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Mem.buf DISABLED writers=2 (direct 0, data-fn 1, out-pointer 1) atype: untyped=1 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Mem.count DISABLED writers=4 (direct 4, data-fn 0, out-pointer 0) atype: untyped=1 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Mem.data DISABLED writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=1 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Mem.label DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=1 escape=3 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Mem.pool DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=1 escape=3 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Mem.raw DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=1 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Mem.tag DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=1 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+[outcalls] 8
+  site 13 objaccess.c:60:3 pool_create arg 0 = &Mem.pool escapes stores=0
+  site 15 objaccess.c:61:3 fill arg 0 = &Mem.buf store-only stores=1
+  site 16 objaccess.c:62:9 lookup arg 1 = &Mem.label unsummarized stores=0
+  site 38 objaccess.c:70:37 lookup arg 1 = &Chan.name unsummarized stores=0
+  site 40 objaccess.c:71:9 lookup arg 1 = &Chan.name unsummarized stores=0
+  site 43 objaccess.c:74:9 lookup arg 1 = &Chan.name unsummarized stores=0
+  site 56 objaccess.c:93:9 ext_read arg 0 = &Ent.n_grid unsummarized stores=0
+  site 58 objaccess.c:94:9 log_text arg 1 = &Ent.n_var unsummarized stores=0
+[fstatus] 15
+  Chan.name per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 3, cast 0, union 0, unknown 0, other fields 0; untyped sites 1 {untyped-in-program,array-element-stores-not-collected}
+  Chan.used per-field=writer-set-complete type-level=DISABLED writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program} by init
+  Ent.n_comma per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 1, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program,array-element-stores-not-collected}
+  Ent.n_cond per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 1, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program,array-element-stores-not-collected}
+  Ent.n_grid per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 1, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program,array-element-stores-not-collected}
+  Ent.n_var per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 1, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program,array-element-stores-not-collected}
+  Mem.addr per-field=writer-set-complete type-level=DISABLED writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 4; untyped sites 1 {sibling-exposed,untyped-in-program} by init
+  Mem.buf per-field=DISABLED type-level=DISABLED writers=2 (direct 0, data 1, out-pointer 1, init 1) instances=2 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 4; untyped sites 1 {sibling-exposed,untyped-in-program,several-instances,array-element-stores-not-collected} by init
+  Mem.count per-field=writer-set-complete type-level=DISABLED writers=4 (direct 4, data 0, out-pointer 0, init 1) instances=4 not-once hits: escape 0, cast 0, union 0, unknown 0, other fields 4; untyped sites 1 {sibling-exposed,untyped-in-program,several-instances} by init; set_count
+  Mem.data per-field=DISABLED type-level=DISABLED writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: escape 0, cast 0, union 0, unknown 0, other fields 4; untyped sites 1 {sibling-exposed,untyped-in-program,array-element-stores-not-collected} by init
+  Mem.flag per-field=writer-set-complete type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 0, cast 0, union 0, unknown 0, other fields 4; untyped sites 1 {sibling-exposed,untyped-in-program}
+  Mem.label per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 1, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program,array-element-stores-not-collected}
+  Mem.pool per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 1, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program,array-element-stores-not-collected}
+  Mem.raw per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 1, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program,array-element-stores-not-collected}
+  Mem.tag per-field=DISABLED type-level=DISABLED writers=0 (direct 0, data 0, out-pointer 0, init 1) instances=0 no-writer-instance hits: escape 1, cast 0, union 0, unknown 0, other fields 3; untyped sites 1 {sibling-exposed,untyped-in-program,array-element-stores-not-collected}
+[objaccess] 26
+  read Mem.pool at objaccess.c:60:19 in init base=global object=mem path=[mem.pool] resolved {} read 0
+  read Mem.buf at objaccess.c:61:12 in init base=global object=mem path=[mem.buf] resolved {} read 1
+  read Mem.label at objaccess.c:62:24 in init base=global object=mem path=[mem.label] resolved {} read 2
+  read Mem.tag at objaccess.c:63:14 in init base=global object=mem path=[mem.tag] resolved {} read 3
+  read Mem.raw at objaccess.c:64:33 in init base=global object=mem path=[mem.raw] resolved {} read 4
+  read Mem.buf at objaccess.c:66:14 in init base=global object=mem path=[mem.buf] resolved {} read 5
+  read <global>.cfg at objaccess.c:70:9 in init base=global object=cfg path=[cfg] resolved {} read 6
+  read Chan.name at objaccess.c:70:22 in init base=global object=cfg path=[cfg->chan[i].name] partial {index-unknown} index=[local:i, 0] read 7
+  read <global>.cfg at objaccess.c:70:48 in init base=global object=cfg path=[cfg] resolved {} read 8
+  read Chan.name at objaccess.c:70:61 in init base=global object=cfg path=[cfg->chan[i].name] partial {index-unknown} index=[local:i] read 9
+  read Chan.name at objaccess.c:71:38 in init base=global-element object=cfg_store@objaccess.c:41 path=[cfg_store.chan[1].name] resolved {} index=[1] read 10
+  read Chan.name at objaccess.c:72:25 in init base=global-element object=cfg_store@objaccess.c:41 path=[cfg_store.chan[1].name] resolved {} index=[1, 0] read 11
+  read Mem.count at objaccess.c:73:20 in init base=global object=mem path=[mem.count] resolved {} read 12
+  read Chan.name at objaccess.c:74:26 in init base=local object=init/local path=[local.name] resolved {} read 13
+  read Mem.flag at objaccess.c:75:11 in init base=global object=mem path=[mem.flag] resolved {} read 14
+  read Ent.n_cond at objaccess.c:91:26 in decay_cases base=global object=ent path=[ent.n_cond] resolved {} read 15
+  read Ent.n_comma at objaccess.c:92:32 in decay_cases base=global object=ent path=[ent.n_comma] resolved {} read 16
+  read Ent.n_grid at objaccess.c:93:22 in decay_cases base=global object=ent path=[ent.n_grid] resolved {} index=[1] read 17
+  read Ent.n_var at objaccess.c:94:28 in decay_cases base=global object=ent path=[ent.n_var] resolved {} read 18
+  out-pointer Mem.buf at objaccess.c:61:3 in init base=global object=mem path=[mem.buf] resolved {} writer 0 call site 15 objaccess.c:61:3
+  data-function Mem.buf at objaccess.c:66:3 in init base=global object=mem path=[mem.buf] resolved {} writer 1 call site 34
+  write Mem.count at objaccess.c:54:33 in set_count base=param-pointee object=- path=[m->count] unresolved {} writer 2
+  write Mem.count at objaccess.c:67:3 in init base=global object=mem path=[mem.count] resolved {} writer 3
+  write Mem.count at objaccess.c:72:34 in init base=global object=mem path=[mem.count] resolved {} writer 4
+  write Mem.count at objaccess.c:75:22 in init base=global object=mem path=[mem.count] resolved {} writer 5
+  write Mem.data at objaccess.c:65:3 in init base=global object=mem path=[mem.data] resolved {} writer 6
+[ftypes] 15
+  Mem.pool at objaccess.c:28:6 element char [u8] size 1 extent constant 32 [POOLSZ] {typedef-named}
+  Mem.buf at objaccess.c:29:6 element char [u8] size 1 extent constant 8 [8] {typedef-named}
+  Mem.label at objaccess.c:30:8 element char [char] size 1 extent constant 20 [NAMELEN] {}
+  Mem.tag at objaccess.c:31:8 element char [char] size 1 extent constant 4 [4] {}
+  Mem.data at objaccess.c:32:6 element char [u8] size 1 extent constant 4 [4] {typedef-named}
+  Mem.raw at objaccess.c:33:6 element char [u8] size 1 extent constant 4 [4] {typedef-named}
+  Mem.addr at objaccess.c:34:17 element unsigned-integer [unsigned long] size 8 extent none 0 {}
+  Mem.count at objaccess.c:35:7 element signed-integer [int] size 4 extent none 0 {}
+  Mem.flag at objaccess.c:36:12 element unsigned-integer [unsigned int] size 4 extent none 0 bits 3 {bit-field}
+  Chan.name at objaccess.c:19:8 element char [char] size 1 extent constant 20 [NAMELEN] {}
+  Chan.used at objaccess.c:20:7 element signed-integer [int] size 4 extent none 0 {}
+  Ent.n_cond at objaccess.c:81:8 element char [char] size 1 extent constant 20 [NAMELEN] {}
+  Ent.n_comma at objaccess.c:82:8 element char [char] size 1 extent constant 20 [NAMELEN] {}
+  Ent.n_grid at objaccess.c:83:8 element array [char[20]] size 20 extent constant 2 [2] {}
+  Ent.n_var at objaccess.c:84:8 element char [char] size 1 extent constant 20 [NAMELEN] {}
+[argtypes] 21
+  objaccess.c:60:3 pool_create arg 0 char-array [u8[32]] width 8 extent 32 of Mem.pool declared at objaccess.c:28 not-read {}
+  objaccess.c:60:3 pool_create arg 1 unsigned-integer [__size_t] width 8 {}
+  objaccess.c:61:3 fill arg 0 char-array [u8[8]] width 8 extent 8 of Mem.buf declared at objaccess.c:29 not-read {}
+  objaccess.c:62:9 lookup arg 0 pointer [int *] width 8 {}
+  objaccess.c:62:9 lookup arg 1 char-array [char[20]] width 8 extent 20 of Mem.label declared at objaccess.c:30 not-read {const-pointee}
+  objaccess.c:66:3 memset arg 0 char-array [u8[8]] width 8 extent 8 of Mem.buf declared at objaccess.c:29 not-read {}
+  objaccess.c:66:3 memset arg 1 signed-integer [int] width 4 {}
+  objaccess.c:66:3 memset arg 2 unsigned-integer [__size_t] width 8 {}
+  objaccess.c:68:3 set_count arg 0 record-pointer [Mem *] width 8 {}
+  objaccess.c:68:3 set_count arg 1 signed-integer [int] width 4 {}
+  objaccess.c:70:37 lookup arg 0 pointer [int *] width 8 {}
+  objaccess.c:70:37 lookup arg 1 char-array [char[20]] width 8 extent 20 of Chan.name declared at objaccess.c:19 read-dominating by the read at objaccess.c:70:22 {const-pointee,via-pointer-field}
+  objaccess.c:71:9 lookup arg 0 pointer [int *] width 8 {}
+  objaccess.c:71:9 lookup arg 1 char-array [char[20]] width 8 extent 20 of Chan.name declared at objaccess.c:19 read-not-dominating {const-pointee}
+  objaccess.c:74:9 lookup arg 0 pointer [int *] width 8 {}
+  objaccess.c:74:9 lookup arg 1 char-array [char[20]] width 8 extent 20 of Chan.name declared at objaccess.c:19 not-read {const-pointee}
+  objaccess.c:91:9 ext_read arg 0 pointer [const char *] width 8 {const-pointee}
+  objaccess.c:92:9 ext_read arg 0 pointer [const char *] width 8 {const-pointee}
+  objaccess.c:93:9 ext_read arg 0 char-array [char[20]] width 8 extent 20 of  not-computed {const-pointee}
+  objaccess.c:94:9 log_text arg 0 char-array [char[3]] width 8 extent 3 of  not-computed {const-pointee}
+  objaccess.c:94:9 log_text arg 1 char-array [char[20]] width 8 extent 20 of Ent.n_var declared at objaccess.c:84 not-read {}

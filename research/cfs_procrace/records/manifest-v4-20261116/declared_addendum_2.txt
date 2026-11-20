@@ -1,0 +1,9 @@
+### 11.0.2 덧붙임 2 (2026-11-18, 선언 밖의 차이 하나를 밝히고 선언함; 다시 돌리기 전에 커밋함) [D]
+
+**멈춘 곳.** `compare.sh tools`(유도되는 묶음의 회귀: 빌드 전 도구의 `mv_regress_tools_old` 와 빌드 뒤 도구의 `mv_regress_tools_new`)가 rc 1 로 끝났다(`compare_tools.txt`: 선언 밖의 차이 4 줄). 선언 11.0 은 "`rc.txt` 의 첫 줄(도구 해시)과 kz-dump 글의 `tool_sha256=` 줄만 다를 수 있다"고 적었다. 그 비교에서 멈추고 아래를 밝힌 뒤 이 덧붙임을 커밋했다. 앞의 출력(`compare_tools.txt`, `mv_regress_tools_new`)은 그대로 둔다.
+
+**차이.** 네 줄 모두 컨테이너의 `artifact_sha256` 이다: `c1.run.kzt.txt` 의 3,823 째 줄과 `c5.run.kzt.txt` 의 2,721 째 줄(`artifact_sha256=…`), `c1.convert.log` 의 10 째 줄과 `c5.convert.log` 의 11 째 줄(`wrote <OUT>/<c>.run.kzt artifact_sha256 …`). 그 밖의 줄은 같다(`compare_tools.txt`: `c1.dump.txt` 1,082 줄·`c5.dump.txt` 1,190 줄은 차이 0, kz-dump 글 둘은 허용된 `tool_sha256=` 한 줄과 이 한 줄씩뿐).
+
+**까닭**(코드). `artifact_sha256` 은 컨테이너 파일 전체의 sha256 이다(`kairos/lib/core/container_reader.cpp:136` `c.hash_ = sha256(b.data(), b.size())`, 찍는 곳 `lib/core/dump.cpp:230`). 컨테이너 머리에는 그것을 쓴 도구의 해시 `tool_sha256` 과 머리의 `header_crc` 가 들어 있다(`kairos/include/kz/schema/kz_schema.h:279-293`: magic 8 바이트, uint32 여섯, uint64 셋, `basis_sha256` 32, `profile_sha256` 32 다음의 `tool_sha256` 32 바이트가 파일 오프셋 120–151, `header_crc` 가 152–155). kz 의 `tool_sha256` 이 바뀌는 것은 선언한 변화이고(11.0 의 도구 해시와 정체성: `c19937fd…` → 빌드 뒤 `80064cc3…`, `identity_kz_post.txt`), 파일 전체의 해시는 그 바이트를 따라 바뀐다. 선언이 이 따름 결과를 허용 목록에 넣지 않은 것이 빠뜨림이다. 내용의 차이가 아니라는 것은 바이트로 잰다: 두 컨테이너는 크기가 같고(234,528 B, 149,872 B) `cmp -l` 이 내는 다른 바이트는 각각 36 개, 오프셋 120–155(1 부터 세어 121–156) 뿐이다(2026-11-18 에 잼; 아래 비교가 남긴 출력으로 다시 적는다).
+
+**선언.** 유도되는 묶음의 회귀에서 다를 수 있는 것은 다음뿐이다: `rc.txt` 의 첫 줄; `c1.run.kzt.txt`·`c5.run.kzt.txt` 의 `tool_sha256=` 줄과 `artifact_sha256=` 줄; `c1.convert.log`·`c5.convert.log` 의 `wrote <OUT>/<c>.run.kzt artifact_sha256 …` 줄; 컨테이너 `c1.run.kzt`·`c5.run.kzt` 는 크기가 같고 다른 바이트가 모두 오프셋 120–155 안. 그 밖의 줄과 바이트는 같아야 한다. 비교 스크립트 `compare_tools_2.py`(이 덧붙임과 함께 커밋; `compare_tools.py` 는 그대로 둠)를 감시 아래 돌려 `compare_tools_2.txt` 에 남긴다. 도구도, 두 출력 디렉터리도 다시 만들지 않는다.

@@ -1,0 +1,1 @@
+only declared differences: line 2, the new header line (rules with lock handles: relations rules revision 11 (2026-11-16), over LOCK_HANDLES (extract --lock-handles, docs/stati ...), every other line the same (5386 lines)

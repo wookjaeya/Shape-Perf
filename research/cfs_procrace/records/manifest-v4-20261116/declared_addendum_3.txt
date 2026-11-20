@@ -1,0 +1,7 @@
+### 11.0.3 덧붙임 3 (2026-11-18, 점검 둘을 더함; 그것을 돌리기 전에 커밋함) [D]
+
+이 글을 쓰는 지금 선언 11.0 과 덧붙임 1·2 의 실행은 모두 rc 0 으로 끝났다(`commands.txt` 4 절). 아래 둘은 선언에 없던 점검이고, 도구와 앞의 출력은 바꾸지 않는다.
+
+1. **판 4 읽기의 요약 줄.** `compare.sh parse_v4` 는 rc 0 이고 계획 열 개가 모두 첫 줄 `version 4` 를 냈다(`compare_parse_v4.txt`). 그러나 그 단계는 점검 프로그램의 표준 출력을 `head -1` 에 잇는다. `head` 가 첫 줄 뒤에 관을 닫으므로 프로그램은 출력 도중에 끝나고, 맨 끝에 표준 오류로 내는 판 4 요약 줄(`v4 plan= needs= gaps= spawn= load= skey=`)에 이르지 못한다: 요약 파일 `compare/parse_<dir>_<b>.v4` 열 개 가운데 아홉이 비었다(r2_core 의 `mv_plans_v4` 하나만 줄이 있음). 점검 프로그램은 모든 입력을 다 읽은 뒤에야 첫 줄을 내므로(`regress/manifest_print.cpp`: `parse_manifest` 가 실패하면 `error …` 한 줄만 냄) "판 4 로 읽힌다"는 선언의 조건은 그 출력으로 섰지만, 요약은 남지 않았다. 스크립트의 결함이다. 새 스크립트 `parse_v4_full.sh`(이 덧붙임과 함께 커밋; `compare.sh` 는 그대로 둠)는 관을 끝까지 읽고, 요약 줄을 `compare/parsefull_<dir>_<b>.v4` 에 남기며, 그 수(need·gap·spawn 문, `place=load` site, `skey=` site, plan id)를 계획 글에서 `grep` 으로 센 수와 견준다(`compare_parse_v4_full.txt`). 열 개가 모두 같아야 한다.
+
+2. **첫 관측 경로의 계획의 경로별 분모.** 덧붙임 1 의 3 과 같은 스크립트 `measure_paths.py` 를 첫 관측 경로 단계가 남긴 계획 다섯(`/home/user/work/redesign/obs1/plangen/<b>/plan.side`, 그 단계의 facts 와 층 예산 `tier:D07`)에 돌린다(`measure_paths_first.sh` → `compare_paths_first.txt`, `compare/paths_first_<b>.txt`). 그 계획의 계획된 행이 경로별로 몇이었는지를 같은 잣대로 적기 위해서다(그 단계의 결과 문서는 층 1 곧 D07 의 행 수를 12/11/3/8/7 로 적었다: `plan/observation_path_results_20261116.md` 의 층별 행 수 줄). 측정이고 판정이 아니다. 덧붙임 1 의 3 에서 코드로 읽은 것대로면 경로 C 의 층 차례 계획 행은 다섯 빌드 모두 0 이다 [I: 측정 전].

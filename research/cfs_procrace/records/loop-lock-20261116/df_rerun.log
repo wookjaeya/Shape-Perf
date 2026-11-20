@@ -1,0 +1,4 @@
+# space_guard.sh kind=relations need=100000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/loop-lock-20261116/rerun.sh
+start 2026-11-16T22:31:05.916Z free=1861468160 threshold=414572800
+sample 2026-11-16T22:31:05.920Z 1861464064
+end 2026-11-16T22:31:07.927Z kind=relations verdict=completed rc=0 free=1853792256 lowest=1853792256 dip=7675904 change=-7675904

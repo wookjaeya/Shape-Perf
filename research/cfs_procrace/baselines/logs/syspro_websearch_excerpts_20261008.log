@@ -1,0 +1,50 @@
+# SysPro: web-search excerpts (SECONDARY, NOT OPENED SOURCES) -- 2026-10-08
+# These are model-written summaries returned by the WebSearch tool. The underlying pages
+# (arxiv.org, sciencedirect.com, papers.ssrn.com, emergentmind.com) were NOT opened: every
+# direct fetch was refused by the egress proxy (see syspro_paper_fetch_20261008.log).
+# Nothing below is used as a `from-reference` value. It is recorded only as a lead to be
+# checked against the paper once the paper can be opened.
+
+## Query 1 (standard): "SysPro: Reproducing System-Level Concurrency Bugs from Bug Reports PIN system call"
+Result URLs: arxiv.org/pdf/2601.09616, arxiv.org/abs/2601.09616v1, arxiv.org/html/2601.09616v1,
+  emergentmind.com/topics/syspro, web3.arxiv.org/pdf/2601.09616, uknowledge.uky.edu/cs_etds/119,
+  sunypoly.edu news, par.nsf.gov/servlets/purl/10075449
+Summary claims (attributed by the search tool to the arXiv abstract):
+  - arXiv record: six authors led by Tarannum Shaila Zaman, posted 2026-01-14, Comments: "Accepted in JSS".
+  - "Reproducing system-level concurrency bugs requires both input data and the precise interleaving order of system calls."
+  - Pipeline: extract relevant system call names from the report, locate them in source code; generate input data
+    using information retrieval, regular expression matching, and the category-partition method; reproduce via
+    "dynamic source code instrumentation" driven by the extracted input and interleaving data.
+  - Third-party (emergentmind) says the tool relies on Intel PIN; search tool could not match PIN in excerpts it reached.
+
+## Query 2 (extended): "arxiv 2601.09616 SysPro Intel PIN version sleep injection system call dictionary implementation"
+New URLs: papers.ssrn.com abstract_id=5035178 (authors: Zaman, Yan, Wang, Islam, Shi, Yu),
+  sciencedirect.com/science/article/abs/pii/S0164121226000191
+Summary claims:
+  - Preprint: tool "forces a specific ordering of system calls during each run by using the sleep function";
+    hooks on both sides of each relevant call; candidate calls processed in ranked order; if a run does not
+    reproduce, move to the next call.
+  - Third-party (emergentmind): PIN tool inserts Sleep() before/after system calls; scheduler capped at
+    100 runs or 120 minutes. UNVERIFIED.
+  - No "system call dictionary" found by that name. Third-party: TF-IDF retrieval over man-page NAME sections,
+    and structured search converting source files to XML (srcML) matched against report queries. UNVERIFIED.
+  - Journal page highlights vs. introduction give inconsistent benchmark counts (24 reports vs. 19 reports/17 apps).
+  - No PIN version found.
+
+## Query 3 (extended): '"SysPro" Zaman Yu concurrency bug reports reproduce benchmark programs Linux evaluation setup Ubuntu PIN tool "ReproSys"'
+Summary claims:
+  - JSS: authors Zaman, Islam, Shi, Shi, Xian, Yu; JSS vol. 236, June 2026, DOI 10.1016/j.jss.2026.112785.
+  - "It instruments these system calls using PIN, an open-source binary instrumentation tool, by inserting a sleep
+    function between each relevant system call pair."  (search tool's paraphrase; note: PIN is not open source,
+    it is a free-of-charge proprietary Intel tool -- the summary wording is not reliable)
+  - Implementation components: srcML, NLTK, Gensim, SPMF (Java), PIN.
+  - Evaluation programs (third-party): 17 Linux utilities (mv, rm, mkdir, gzip, bzip2, bash, coreutils ...), 3-39 KLOC.
+  - Case study: Linux Coreutils 6.9 bug from Bugzilla, race when replacing the contents of two files.
+  - Results (third-party, UNVERIFIED): 23/24 reproduced (95.8%); avg 2 instrumentation runs (1-14);
+    avg 8.9 min (0.6-59 min).
+  - No Ubuntu release, kernel version, or PIN version tied to the paper. No "ReproSys" hit in search results.
+
+## Query 4 (extended): "SysPro 2601.09616 system call names man pages TF-IDF srcML Gensim SPMF PIN version kernel version large language model"
+Summary claims:
+  - No retrieved snippet mentions a large language model; none names a kernel version or PIN version.
+  - Components again: srcML, NLTK, Gensim, SPMF, PIN.

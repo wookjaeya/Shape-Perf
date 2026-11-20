@@ -1,0 +1,7 @@
+# round trip of the copy of kz-static b1bf545d (the first build of order rules revision 1) before the second build overwrites it (2026-11-16T11:43:04Z)
+copy: /home/user/work/preserve/tools-20261116-d/kz-static.b1bf545d.xz (42426196 B)
+xz -t: OK
+sha256 of the xz file: 9a7575f6453e9586c393e8b0b206fffbe931a84e07543c1a16e68c37154eb287
+xz -dc | sha256sum: b1bf545defe081a0de513ede65d2c6021388ddf2b46490983e2bc26a4831fa60
+in place: b1bf545defe081a0de513ede65d2c6021388ddf2b46490983e2bc26a4831fa60
+xz -dc | cmp in place: SAME

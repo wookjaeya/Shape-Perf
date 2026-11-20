@@ -1,0 +1,62 @@
+== cfe_error.h ==
+defines total 144
+value-cast defines 141 other defines 3
+  other: (35, 'CFE_ERROR_H', None, '')
+  other: (48, 'CFE_STATUS_C', '(X)', '((CFE_Status_t)(X))')
+  other: (56, 'CFE_STATUS_STRING_LENGTH', None, '11')
+mask/field defines 12 ['CFE_SEVERITY_BITMASK', 'CFE_SEVERITY_SUCCESS', 'CFE_SEVERITY_INFO', 'CFE_SEVERITY_ERROR', 'CFE_SERVICE_BITMASK', 'CFE_EVENTS_SERVICE', 'CFE_EXECUTIVE_SERVICE', 'CFE_FILE_SERVICE', 'CFE_GENERIC_SERVICE', 'CFE_SOFTWARE_BUS_SERVICE', 'CFE_TABLE_SERVICE', 'CFE_TIME_SERVICE']
+status codes (incl. CFE_SUCCESS) 129
+by severity bits (31-30): 00=1 01=17 10=0 11=111
+cast type: {'CFE_Status_t': 125, 'int32': 4}
+by service bits (27-25): {0: 1, 1: 10, 2: 39, 3: 4, 4: 10, 5: 14, 6: 45, 7: 6}
+severity 00 members: [('CFE_SUCCESS', '0', 147)]
+severity 10 members: []
+severity 01 members:
+   ('CFE_STATUS_NO_COUNTER_INCREMENT', '0x48000001', 155)
+   ('CFE_ES_CDS_ALREADY_EXISTS', '0x4400000d', 415)
+   ('CFE_ES_LIB_ALREADY_LOADED', '0x44000028', 631)
+   ('CFE_ES_ERR_SYS_LOG_TRUNCATED', '0x44000029', 640)
+   ('CFE_TBL_INFO_UPDATE_PENDING', '0x4c000004', 913)
+   ('CFE_TBL_WARN_DUPLICATE', '0x4c000007', 940)
+   ('CFE_TBL_INFO_UPDATED', '0x4c00000E', 998)
+   ('CFE_TBL_WARN_SHORT_FILE', '0x4c000015', 1055)
+   ('CFE_TBL_INFO_NO_UPDATE_PENDING', '0x4c000017', 1072)
+   ('CFE_TBL_INFO_TABLE_LOCKED', '0x4c000018', 1080)
+   ('CFE_TBL_INFO_VALIDATION_PENDING', '0x4c000019', 1088)
+   ('CFE_TBL_INFO_NO_VALIDATION_PENDING', '0x4c00001A', 1096)
+   ('CFE_TBL_WARN_PARTIAL_LOAD', '0x4c000022', 1168)
+   ('CFE_TBL_INFO_DUMP_PENDING', '0x4c000024', 1190)
+   ('CFE_TBL_WARN_NOT_CRITICAL', '0x4c000026', 1217)
+   ('CFE_TBL_INFO_RECOVERED_TBL', '0x4c000027', 1230)
+   ('CFE_TBL_INFO_NO_DUMP_PENDING', '0x4c00002e', 1290)
+reserved bits 29-28 nonzero: []
+mission bits 24-16 nonzero: []
+distinct values 129 duplicated values {}
+sev 11 but name has INFO/WARN: []
+sev 01 but name has ERR: [('CFE_ES_ERR_SYS_LOG_TRUNCATED', '0x44000029')]
+== osapi-error.h ==
+defines total 46 negative 42 zero 1 positive 0 other 3
+zero: [('OS_SUCCESS', 0, 96)]
+positive: []
+other: [(26, 'OSAPI_ERROR_H', None, ''), (35, 'OS_ERROR_NAME_LENGTH', None, '35'), (55, 'OS_STATUS_STRING_LENGTH', None, '12')]
+min -108 max-neg -1
+duplicated negative values: {}
+negative names with TIMEOUT/EMPTY/FULL: [('OS_ERROR_TIMEOUT', -4), ('OS_SEM_TIMEOUT', -7), ('OS_QUEUE_EMPTY', -8), ('OS_QUEUE_FULL', -9), ('OS_QUEUE_TIMEOUT', -10), ('OS_ERR_SEM_NOT_FULL', -18), ('OS_ERR_EMPTY_SET', -44)]
+== EVS event types ==
+   ('CFE_EVS_EventType_DEBUG', 1, 84)
+   ('CFE_EVS_EventType_INFORMATION', 2, 89)
+   ('CFE_EVS_EventType_ERROR', 3, 94)
+   ('CFE_EVS_EventType_CRITICAL', 4, 99)
+== ES RunStatus ==
+   ('CFE_ES_RunStatus_UNDEFINED', 0, 116)
+   ('CFE_ES_RunStatus_APP_RUN', 1, 121)
+   ('CFE_ES_RunStatus_APP_EXIT', 2, 126)
+   ('CFE_ES_RunStatus_APP_ERROR', 3, 131)
+   ('CFE_ES_RunStatus_SYS_EXCEPTION', 4, 136)
+   ('CFE_ES_RunStatus_SYS_RESTART', 5, 141)
+   ('CFE_ES_RunStatus_SYS_RELOAD', 6, 146)
+   ('CFE_ES_RunStatus_SYS_DELETE', 7, 151)
+   ('CFE_ES_RunStatus_CORE_APP_INIT_ERROR', 8, 156)
+   ('CFE_ES_RunStatus_CORE_APP_RUNTIME_ERROR', 9, 161)
+== cfe_psp_error.h ==
+numeric defines 0 negative 0 zero [] positive []

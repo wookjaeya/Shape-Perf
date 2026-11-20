@@ -1,0 +1,4 @@
+# space_guard.sh kind=need need=5000000 floor=314572800 interval=2 cmd=python3 -I need3.py --research /home/user/Shape-Perf/research/cfs_procrace --free 1035739136 --out need.txt
+start 2026-11-19T19:25:11.151Z free=1035739136 threshold=319572800
+sample 2026-11-19T19:25:11.155Z 1035735040
+end 2026-11-19T19:25:13.162Z kind=need verdict=completed rc=0 free=1035726848 lowest=1035726848 dip=12288 change=-12288

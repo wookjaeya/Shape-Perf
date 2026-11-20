@@ -1,0 +1,13 @@
+# tailjump.kzp -- the observation profile of the entry-reached tests (tailjump_prog.c).  Unit-test values:
+# not a framework profile and not a research condition.
+kzp-observe 1
+binary tailjump_prog
+
+prov tj_plan tier=researcher kind=researcher file="tests/cfs-free/target/tailjump_prog.c" lines=1-9 cite="the sites the entry-reached tests need" authored="observer tests"
+
+site lookup.entry entry func=lookup_by_name prov=tj_plan s0=rsi:u64:name_ptr s3=stack+0:u64:return_address
+site lookup.ret ret func=lookup_by_name prov=tj_plan s0=rax:u32:status s3=ip:u64:return_address
+# The search, entered by the lookup's tail jump: its name argument read as a string by the kernel.
+site lookup.search point func=lookup_by_name enter=find_by_name prov=tj_plan s1=+0(rsi):string:name s3=stack+0:u64:return_address
+# The finishing call inside the search, reached from the lookup: the token's id field (offset 16).
+site lookup.found point func=lookup_by_name enter=find_by_name>finish prov=tj_plan s0=+16(rdi):u32:id s3=stack+0:u64:return_address

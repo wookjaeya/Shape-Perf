@@ -1,0 +1,15 @@
+# r2_v701.identity.kzs -- identity reads (kzs-sites 2, kairos/docs/event_semantics.md section 3) over the logical sites
+# 1-8 of r2_v701.kzs, for the host's identity join (kz convert --kzrt; kz/trace/identity_rule.hpp).  Read after
+# r2_v701.kzs.  The readers have the meaning of the F0 plan's decoder= at the same labels
+# (kairos/profiles/cfs-v7.0.1/observe/sites.kzp L85-L87, L141-L149); the references are that plan's provenance
+# records.  The spawn-return has no id (OS_TaskCreate's out parameter is not read at the callee-side return); the id
+# comes from the spawn-id site inside the call, as in F0.  Nothing here is a research condition.
+kzs-sites 2
+identity 1 decoder=owner-request owner=2 ref="es_startapptask_def: cfe_es_apps.c:649-670 (ParentAppId; L696 TaskRecPtr->AppId = ParentAppId)"
+identity 2 decoder=request-return ref="es_startapptask_def"
+identity 3 decoder=child-request ref="es_childtask_owner: cfe_es_api.c:1255-1290 (the parent application is the caller's own)"
+identity 4 decoder=request-return ref="es_childtask_sig"
+identity 5 decoder=spawn-create ref="os_create_sig: osapi-task.c:164-170"
+identity 6 decoder=spawn-return ref="os_create_sig"
+identity 7 decoder=thread-entry id=0 ref="os_entry_def: osapi-task.c:124-138"
+identity 8 decoder=spawn-id id=0 ref="osal_taskcreate_impl_arg: os-impl-tasks.c:596-625 (arg.id passed as entry_arg, the 6th argument)"

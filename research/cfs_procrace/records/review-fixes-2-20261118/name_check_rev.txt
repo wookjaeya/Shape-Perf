@@ -1,0 +1,1 @@
+name_check.sh --rev 36d61db d564a01 rc=0 (the commits of this step: fb1d9ff, 8bb5a81, d564a01)

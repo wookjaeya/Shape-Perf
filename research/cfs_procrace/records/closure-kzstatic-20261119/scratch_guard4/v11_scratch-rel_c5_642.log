@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-run need=60000000 floor=314572800 interval=2 cmd=<scratch>/kzc4_build/tools/kz-static/kz-static relations <scratch>/kzc4_out/rf2_final_extract/c5_642/c5_642/NP/facts.kz -o <scratch>/w4/rel/c5_642.txt
+start 2026-11-19T04:08:19.416Z free=907902976 threshold=374572800
+sample 2026-11-19T04:08:19.420Z 907898880
+end 2026-11-19T04:08:21.428Z kind=scratch-run verdict=completed rc=0 free=906883072 lowest=906883072 dip=1019904 change=-1019904

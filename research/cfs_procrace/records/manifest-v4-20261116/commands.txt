@@ -1,0 +1,70 @@
+sha256 of declared_before_build.txt: 477099f63bbfa82dcbd3dd6ff394d3e7024d4aad0b2dc17f4db031401c3031f7
+# commands of the manifest revision 4 step (plan/full_stage_results_20261116.md section 11); <scratch> is this session's scratchpad
+# directory (one directory in it); times UTC
+## 0. before the declaration
+control selection rule text: kairos/docs/plan_manifest.md section 7, committed alone as 037c047 before any code that reads it was built or any plan was generated
+code (runtime/tools/manifest, runtime/tests, lib/llvm/plan_gen, tools/kz-static), fixture planv4.c and its hand-written data, tests, documents, env/tools/plan_regen.sh and run_unit.sh check 17
+two syntax and compile checks of the parser with g++ in <scratch> before the guard helper existed (no build tree; a few hundred kB), then every compile, build, extract, plan and test run under env/tools/space_guard.sh (scratch_guard/)
+scratch check build <scratch>/mv/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_BUILD_LLVM_TOOLS=ON (the pinned LLVM); targets kz-static, test_static_plan, test_rt_manifest, kz-rt-dump, test_static_reasons, test_static_cli, kz_lint
+  build 1 failed (a type used before its declaration in the class; a missing initializer), fixed; then rc 0
+  fixes during the check: the wait rule took definitions before the loop and the argument loads of the call results (now: the in-body and in-condition definitions, no loads under a call result); the lock rule read LOCK_OPS rows by their call (now: the calls of a LOCK_OPS operation in the function); the semantics role is the item's first word; the sidecar names the requests file by its name only (no output path)
+  fixture planv4.c adjusted three times until its relations had a probe-create row and a path C row (a start function that writes after the spawn; the read in a branch)
+  ctest in scratch: rt_manifest, lint_* (7), test_static_reasons 751 checks, test_static_cli, static_fixture_compile_planv4 pass; test_static_plan 275 checks with the golden written into a scratch copy of the data directory; plangen_np.plan.golden byte-identical with the new tool; the golden kept in <scratch>/mv/gkeep (golden_scratch.sha256)
+  the scratch tool on the five builds (ll_final_extract facts) into <scratch>: the default path equals ll_plans_final under masking; plans v4 and v4all, measure_v4.py: the [I] values of 11.0; the regression printers on 129 groups: 129 same; run_unit.sh 17 of 17 (TMPDIR in <scratch>)
+  these outputs are scratch and no evidence; the scratch build and outputs are removed before the build
+relink set: make -n all in the MC tree (dry run) names the recompiled sources; the relinked binaries are counted from the link.txt files that name libkzrt-manifest.a, libkz-llvm.a, libkz-trace.a or libkz-hold.a (50); the rest of the 124 of the earlier lists: 74
+tools_check.sh --deep -> tools_check_pre.txt (45 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (124 rows, 0 failing)
+## 1. tool copies, the old tools' regression run, build record (start 2026-11-16T23:49:23Z); HEAD 5011169 (declaration commit)
+/dev/vda       270553174016 39637991424 1684516864  96% /
+copy rc=0
+tools after copy rc=0
+regress_tools old rc=0
+build_record pre rc=0
+## 2. build (start 2026-11-16T23:55:08Z)
+/dev/vda       270553174016 39725060096 1597448192  97% /
+make kz-static rc=0
+make all rc=0
+## 3. after the session stop: the build tree checked, records after the build (2026-11-18T04:17Z); HEAD 3c7391a (kairos/ as in 5011169)
+(the session stopped after "make all rc=0"; nothing after the build had been run; the build is not run again)
+make -q all (under the guard, df_make_question.log) rc=1; make -n all > make_dryrun_after_build.log rc=0: 0 compile lines, 0 link lines (the one command besides echo and depend lines: cmake -P VerifyGlobs.cmake)
+build_start.txt (the start time of section 2); relink_result.txt: 50 declared to relink, changed 16 (the 11 the declaration says must change among them), 34 relinked to the same bytes, 0 older than the build start; not_relink 74 OK
+build_record post rc=0 (post_mc.txt); kz-static --identity -> identity_kz-static.txt; kz --identity -> identity_kz_post.txt
+records/TOOLS.tsv: the four overwritten tools' rows to copy (kz-static 9eb1395f, kz 913fcd99, kz-instr-clang 28db4017, kz-rt-dump 4390d4f1), four new rows in-place (kz-static 1a47abd0, kz fd40bc4d, kz-rt-dump 40e23d4d, kz-instr-clang 36becd04)
+tools after build rc=0 (tools_check_after_build.txt: 49 rows, 0 failing, deep; df_tools_check_after_build.log)
+ledger after build rc=0 (ledger_check_after_build.txt: 124 rows, 0 failing)
+ctest first rc=8 (ctest -V > ctest_first.log; 268 tests, 1 failed: test_static_plan, the declared one; df_ctest_first.log)
+golden update rc=0 (KZ_GOLDEN_UPDATE=1 ctest -V -R '^test_static_plan$' > golden_update.log)
+GOLDEN_SAME_AS_SCRATCH (cmp with <scratch>/mv/gkeep/planv4_np.plan.golden; sha256sum -c golden_scratch.sha256 OK; git status: no other file under kairos changed)
+ctest full rc=0 (ctest -V > ctest_full.log; 268 tests, 0 failed, 1 skipped; counts in ctest_counts.log)
+run_unit rc=0 (unit_tools.txt: 17 of 17; TMPDIR in <scratch>)
+step2a unit rc=0 (unit_step2a.txt: 7 of 7)
+sha256 of declared_addendum_1.txt: e17088e9a096ce5d198e8837e2bd857d5134b0147b3843b070d454c1779a2de9 (addendum 1: the session stop, the order of the runs, the added per-path measurement measure_paths.py / measure_paths.sh, the ledger rows; committed before any plan of this step is generated)
+## 4. the regressions and the five builds' plans (start 2026-11-18T04:26:48Z); HEAD a2c8dbc (addendum 1 commit)
+/dev/vda       270553174016 39752704000 1569804288  97% /
+build_printers rc=0 (regress/build_printers.sh <scratch>/mv/printers; each compile under the guard)
+compare manifest rc=0
+regress_tools new rc=0
+compare tools rc=1
+(compare tools rc=1: compare_tools.txt names 4 lines outside the declaration, all artifact_sha256 lines; stopped at this comparison)
+sha256 of declared_addendum_2.txt: 7b1423ebae9d5ff3dc26e473c188ce3c45926f01f2a8197cc49d4179a8ba520a (addendum 2: the artifact_sha256 lines follow the declared tool hash; compare_tools_2.py; committed before the re-run)
+compare tools_2 rc=0 (compare_tools_2.py mv_regress_tools_old mv_regress_tools_new > compare_tools_2.txt; HEAD 6474cd5, the addendum 2 commit)
+plans_v3_t8cf rc=0
+plans_v3_final rc=0
+compare plans_v3 rc=0
+plans_v4 rc=0
+plans_v4_all rc=0
+compare regen rc=0 (SCRATCH=<scratch>/mv/regen)
+compare parse_v4 rc=0
+compare measure rc=0
+measure_paths rc=0
+sha256 of declared_addendum_3.txt: e2f305ae10ed84983adb32cb4b8d895cd9e839d971129e55eb68bccc90ba928d (addendum 3: the full read of the version 4 plans with the summary line, parse_v4_full.sh; the per-path measurement of the first observation path's plans, measure_paths_first.sh; committed before the two runs)
+parse_v4_full rc=0 (HEAD 9ff7b95, the addendum 3 commit)
+measure_paths_first rc=0
+ledger_check end rc=0 (ledger_check: 132 rows, 0 failing)
+tools_check --deep end rc=0 (tools_check: 49 rows, 0 failing (deep))
+## 5. end (2026-11-18T04:33Z)
+sha256 lists of the seven output directories -> mv_*.sha256; records/LEDGER.tsv: rows OBS_mv_regress_tools_old, OBS_mv_regress_tools_new, OBS_mv_regress_manifest, OBS_mv_plans_v3_t8cf, OBS_mv_plans_v3_final, OBS_mv_plans_v4, OBS_mv_plans_v4_all, TOOLS_20261116l
+name_check.sh --tree on the seven output directories, the copy directory and this directory -> name_check_tree.txt (9 lines, all rc 0)
+removed from <scratch>/mv: printers/ (the two check programs and their sources), regen/ (the regenerated plans, compared in compare_regen.txt), tmp_unit/ (empty)
+results: plan/full_stage_results_20261116.md sections 11.0.1-11.0.3 and 11.1-11.8
+name_check.sh --rev 3c7391a fb2c6c5 -> name_check_rev.txt (rc 0); free at the end (df -B1 /): 1538666496

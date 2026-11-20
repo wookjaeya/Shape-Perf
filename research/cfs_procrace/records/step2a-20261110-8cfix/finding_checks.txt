@@ -1,0 +1,78 @@
+# the small C99 sources of the finding checks (AR 16.10.1), run 09:2xZ-09:40Z with the 8c tool ab482eab (MC before the rebuild); <fx> = kairos/tests/static/profile/00_fixture.kzp; <scratch> = this session's scratchpad
+## rt.c
+  struct { int u1; int u2; } g_anon;
+  struct Outer { struct Inner { int ix; } in; int oy; };
+  struct Outer g_outer;
+  int rd_u1(void) { return g_anon.u1; }
+  int rd_ix(void) { return g_outer.in.ix; }
+  void w1(void) { g_anon.u1 = 3; }
+  void w2(void) { g_outer.in.ix = 7; }
+  int pick(int *p) { return *p; }
+  int use(void) { return pick(&g_anon.u1) + pick(&g_outer.in.ix); }
+## nest.c
+  struct Outer { struct Inner { int ix; } in; };
+  struct Inner g_inner;
+  void w2(void) { g_inner.ix = 9; }
+## blk.c
+  int f(void) { struct Blk { int bq; } b; b.bq = 4; return b.bq; }
+## unn.c
+  struct Unn { struct { int q; } m; int r; };
+  struct Unn g_unn;
+  void w5(void) { g_unn.m.q = 5; }
+## o2.c
+  struct Other { int k; };
+  struct Other g_o;
+  void wo(void) { g_o.k = 1; }
+## rd.c
+  #include <stddef.h>
+  #ifdef KZ_FAKE_RD
+  struct Marker { int a; };
+  struct Marker g_m;
+  void wm(void) { g_m.a = 1; }
+  #endif
+  struct Real { int a; };
+## fakerd/include/stddef.h
+  #define KZ_FAKE_RD 1
+  typedef unsigned long size_t;
+  #define NULL ((void*)0)
+## #1 extract --no-profile --targets-rule R-T1,R-T2 --source rt.c
+    location <anonymous>.ix   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+    location <anonymous>.u1   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+## #2 extract --profile <fx> --target <T.f> (summary lines)
+grep: nest.c.Inner.ix.out: No such file or directory
+grep: blk.c.Blk.bq.out: No such file or directory
+grep: unn.c.Unn.q.out: No such file or directory
+grep: unn.c.Unn.zz.out: No such file or directory
+## #4 extract --profile <fx> --source rd.c --extra-arg -resource-dir=<scratch>/fakerd --target Marker.a --target Real.a
+    location Cell.id   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+    location Marker.a   writers 1 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+    location Real.a   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+    extract.resource_dir = /home/user/work/llvm-project/build/lib/clang/23 (the tool's built-in default; no --resource-dir)  (unset)
+    extract.extra_arg[0] = -resource-dir=<scratch>/8cfix/v/fakerd  (unset)
+## #5 extract --profile <fx> --source o2.c --target Cell.id --target Cell.zz
+    location Cell.id   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+    location Cell.zz   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> unknown-target (no record type Cell is defined in the units read)
+    target.Cell.id = profile loc Cell.id  (from-reference)
+    target.Cell.zz = command line  (declared-assumption)
+    unknown_target.Cell.zz = unknown-target: no record type Cell is defined in the units read; FACT_LOCS status unchecked (not writer-set-complete)  (unset)
+## #7 --resource-dir fakerd (relative) on rd.c; --resource-dir "" on writers.c and on rd.c
+    extract.resource_dir = fakerd (--resource-dir)  (unset)
+  writers.c:   extract.resource_dir = none (no resource directory: the front end's own search)  (unset)
+  rd.c:   <scratch>/8cfix/v/rd.c:1:10: 'stddef.h' file not found
+## #11 the anchor test alone before the rebuild (ctest -R '^test_probe_anchor_reached$' -V); after the rebuild: skip_reason.log
+  133: observe: not root, no tracefs (KZ_TRACEFS) or no binary: the run part skipped
+  133: test_probe_anchor_reached: 74 checks passed
+  ***Skipped   0.02 sec
+## after the rebuild (kz-static 0024f192, 10:0xZ): the same commands for #2, #4, #5
+  nest.c:   location Cell.id   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  nest.c:   location Inner.ix   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> unknown-target (no record type Inner is found among the file-scope tags and typedef names of the units read)
+  rd.c:   location Cell.id   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  rd.c:   location Marker.a   writers 1 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  rd.c:   location Real.a   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  rd.c:   extract.resource_dir = <scratch>/8cfix/v/fakerd (--extra-arg -resource-dir, after and over the tool's: /home/user/work/llvm-project/build/lib/clang/23 (the tool's built-in default; no --resource-dir))  (unset)
+  o2.c:   location Cell.id   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> unknown-target (no record type Cell is found among the file-scope tags and typedef names of the units read)
+  o2.c:   location Cell.zz   writers 0 : A-TYPE untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> unknown-target (no record type Cell is found among the file-scope tags and typedef names of the units read)
+  o2.c:   target.Cell.id = profile loc Cell.id  (from-reference)
+  o2.c:   target.Cell.zz = command line  (declared-assumption)
+  o2.c:   unknown_target.Cell.id = unknown-target: no record type Cell is found among the file-scope tags and typedef names of the units read; FACT_LOCS status unchecked (not writer-set-complete)  (unset)
+  o2.c:   unknown_target.Cell.zz = unknown-target: no record type Cell is found among the file-scope tags and typedef names of the units read; FACT_LOCS status unchecked (not writer-set-complete)  (unset)

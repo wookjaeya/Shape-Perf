@@ -1,0 +1,6 @@
+# kz-space3-chosen 1: lines 9-12 of records/closure-space2-20261119/chosen.tsv, copied unchanged (the lines that step left for a later step that finds the space short; results 26.8 open point 1).  This step archives all four, in this order, with no stop before a line (results 26.9; protocol 14.14 item 4): the restated need is short now (need.txt), and the free space fell by more than one line's gain between the end of 26.8 and the start of this step
+seq	tier	dir	ledger_row	blocks	expected_gain	expected_free_after	why
+9	A	redesign/obs1/xr5_dry_static_c1_pre_tx	OBS_xr5_dry_static_c1_pre_tx	27983872	25945678	1067587831	static dry run with the 16 branches, no run; compared in results 26.5
+10	A	redesign/obs1/xr5_dry_static_c1_post_tx	OBS_xr5_dry_static_c1_post_tx	27979776	25941880	1093529711	static dry run with the 16 branches, no run; compared in results 26.5
+11	A	redesign/obs1/xr5_regress_rev4fix	OBS_xr5_regress_rev4fix	23973888	22227759	1115757470	the regression on the 2026-11-16 inputs (8 D1 branches); compared in results 26.5
+12	A	redesign/obs1/xr5_candidates_regen	OBS_xr5_candidates_regen	450560	417743	1116175213	candidates.py re-run: 64 files byte-identical to records/closure-c1prep-20261119/candidates

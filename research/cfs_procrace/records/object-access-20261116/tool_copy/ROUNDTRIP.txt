@@ -1,0 +1,7 @@
+# round trip of the tool copy before the build of the types and object access step (2026-11-16T17:02:22Z)
+copy: /home/user/work/preserve/tools-20261116-h/kz-static.6adc1bdd.xz (43317232 B)
+xz -t: OK
+sha256 of the xz file: 8934e6d54dc5914c63f6114a8f900daffb3d720f6c6c84b7feed551d7a80fd56
+xz -dc | sha256sum: 6adc1bdd3d7e78ba29d2ea44f316a36e0944d4fdead0a4159fd61f0480e99ec0
+in place: 6adc1bdd3d7e78ba29d2ea44f316a36e0944d4fdead0a4159fd61f0480e99ec0
+xz -dc | cmp in place: SAME

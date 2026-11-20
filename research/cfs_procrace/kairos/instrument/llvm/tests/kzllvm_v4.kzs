@@ -1,0 +1,26 @@
+# kzllvm_v4.kzs -- logical sites of the kzllvm kzs-sites 4 test (kzllvm 0.2, docs/event_semantics.md 13.6) on the GCC
+# candidate's target kzgcc_v4.c.  Generic names, unit-test values; not a cFS manifest and not research conditions.
+# Call sites of the kzs-sites 1 shapes (phase=before/after with callee=) with col= and nth=, and kinds kzllvm does not
+# bind (a place= site, a load, an at-call with a spawn statement).
+kzs-sites 4
+plan 0123456789abcdef facts=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa relrules="unit test" obsrules="unit test" semantics=none select=unit-test budget=unit-test
+source unit rev=0000000000000000000000000000000000000000 ref="instrument/gcc/tests/kzgcc_v4.c"
+module 1 name=kzgcc_v4 source=unit
+site 1 label=v4.first op=call.pick phase=before tu=tests/kzgcc_v4.c func=two_on_line callee=pick line=16 skey=00000000000000b1 col=11 nth=1
+value 1 0 role=arg from=arg0 type=s32
+site 2 label=v4.second op=call.pick phase=after tu=tests/kzgcc_v4.c func=two_on_line callee=pick line=16 skey=00000000000000b2 col=21 nth=2
+value 2 0 role=ret from=ret type=s32
+site 3 label=v4.nocol op=call.pick phase=before tu=tests/kzgcc_v4.c func=two_on_line callee=pick line=16 skey=00000000000000b3 col=99 nth=3
+value 3 0 role=arg from=arg0 type=s32
+site 4 label=v4.nested op=call.pick phase=before tu=tests/kzgcc_v4.c func=two_on_line callee=pick line=17 skey=00000000000000b4 col=13 nth=3
+value 4 0 role=arg from=arg0 type=s32
+site 5 label=v4.place op=call.pick phase=point tu=tests/kzgcc_v4.c func=two_on_line callee=pick line=18 place=at-call skey=00000000000000b5 col=8 nth=4
+value 5 0 role=arg from=arg0 type=s32
+site 6 label=v4.load op=load.reader phase=point tu=tests/kzgcc_v4.c func=reader line=22 place=load field=rec.used skey=00000000000000b6
+value 6 0 role=value from=operand0 type=s32
+site 7 label=v4.create op=call.pthread_create phase=point tu=tests/kzgcc_v4.c func=spawn_one callee=pthread_create line=27 place=at-call skey=00000000000000b7 col=7 nth=1
+value 7 0 role=start from=arg2 type=ptr
+spawn 7 wrapper=kz_rt_posix_create start=arg2 arg=arg3 out=arg0 ref="unit test"
+identity 7 decoder=spawn-token
+site 8 label=v4.entry op=entry.two_on_line phase=before tu=tests/kzgcc_v4.c func=two_on_line skey=00000000000000b8
+value 8 0 role=a from=arg0 type=s32

@@ -1,0 +1,25 @@
+# framework_api_roles.txt -- the framework-layer data of `kz-static plan` (docs/plan_manifest.md section 4): for each
+# framework version of the analysed builds, the API that plays each role of the method's stop event:
+#   run-loop  the call an application makes in its main loop to learn whether it is to go on
+#   app-exit  the call by which an application ends itself
+# One entry per role per version.  An entry names the function, its definition (file relative to the tree root, line,
+# sha256 of the file at the pinned revision) and its declaration in the version's public header (file, line, sha256).
+# The generator applies an entry to a build when the build's facts hold the definition file with that sha256 and define
+# the function on that line; it plans the entry of the function (one callee-side site per role).  The versions are told
+# apart by the definition file's sha256.  Provenance: every entry is in the output of the mechanical scan of the public
+# headers (research env/tools/framework_scan.py scan), and the check (framework_scan.py check) passes.  Which declared
+# function plays a role is read from the header's documentation of it (the brief line the scan prints).  This file is
+# data, not code: it names no case and no other file.
+#
+# cFE of the bundle 1df262a (cfe tree 6cccb3f5; cfe_version.h: 6.7.99, baseline v7.0.0-rc4, build 205)
+role run-loop function=CFE_ES_RunLoop def=cfe/modules/es/fsw/src/cfe_es_api.c:470 def_sha256=6f94e5a53ca493f382ebaae07ccc3258768158792e44539c9234975d765e4441 decl=cfe/modules/core_api/fsw/inc/cfe_es.h:397 decl_sha256=cd8f5e6bd61d3072c7f4feebc5000f075467495ca3a72b456bb2c0ec1938f922 version="cFE 6.7.99 (baseline v7.0.0-rc4, build 205)"
+role app-exit function=CFE_ES_ExitApp def=cfe/modules/es/fsw/src/cfe_es_api.c:340 def_sha256=6f94e5a53ca493f382ebaae07ccc3258768158792e44539c9234975d765e4441 decl=cfe/modules/core_api/fsw/inc/cfe_es.h:355 decl_sha256=cd8f5e6bd61d3072c7f4feebc5000f075467495ca3a72b456bb2c0ec1938f922 version="cFE 6.7.99 (baseline v7.0.0-rc4, build 205)"
+# cFE 7.0.1 (cfe_version.h: 7.0.1, baseline v7.0.1)
+role run-loop function=CFE_ES_RunLoop def=cfe/modules/es/fsw/src/cfe_es_api.c:426 def_sha256=e1b3bcdb3fd884e2484d7246bfd818b6829ea54b24d83f3aaa983279b8b631cf decl=cfe/modules/core_api/fsw/inc/cfe_es.h:388 decl_sha256=0ee6a236b9dd1b44f90ed3cfdad28fbaa24fa54aa7b551c7ee82b0fe03163b8c version="cFE 7.0.1"
+role app-exit function=CFE_ES_ExitApp def=cfe/modules/es/fsw/src/cfe_es_api.c:292 def_sha256=e1b3bcdb3fd884e2484d7246bfd818b6829ea54b24d83f3aaa983279b8b631cf decl=cfe/modules/core_api/fsw/inc/cfe_es.h:346 decl_sha256=0ee6a236b9dd1b44f90ed3cfdad28fbaa24fa54aa7b551c7ee82b0fe03163b8c version="cFE 7.0.1"
+# cFE 6.4.1 (OSS release; cfe_version.h: 6.4.1)
+role run-loop function=CFE_ES_RunLoop def=cfe/fsw/cfe-core/src/es/cfe_es_api.c:540 def_sha256=0cb4c1c740f897a305ffd831a68dd8fa638a2e4001bc06c0d8f55e5b35694577 decl=cfe/fsw/cfe-core/src/inc/cfe_es.h:543 decl_sha256=9fde4f8b67b6bbb96bca0376da0319e34fcb1c0574c89996fe8fe8eaa70d8545 version="cFE 6.4.1"
+role app-exit function=CFE_ES_ExitApp def=cfe/fsw/cfe-core/src/es/cfe_es_api.c:435 def_sha256=0cb4c1c740f897a305ffd831a68dd8fa638a2e4001bc06c0d8f55e5b35694577 decl=cfe/fsw/cfe-core/src/inc/cfe_es.h:515 decl_sha256=9fde4f8b67b6bbb96bca0376da0319e34fcb1c0574c89996fe8fe8eaa70d8545 version="cFE 6.4.1"
+# cFE 6.4.2 (OSS release; cfe_version.h: 6.4.2)
+role run-loop function=CFE_ES_RunLoop def=cfe/fsw/cfe-core/src/es/cfe_es_api.c:540 def_sha256=8a67d0502452c0c6d720a2609ace8e92490f833e4035a99a80f0e1093b6ba795 decl=cfe/fsw/cfe-core/src/inc/cfe_es.h:543 decl_sha256=9fde4f8b67b6bbb96bca0376da0319e34fcb1c0574c89996fe8fe8eaa70d8545 version="cFE 6.4.2"
+role app-exit function=CFE_ES_ExitApp def=cfe/fsw/cfe-core/src/es/cfe_es_api.c:435 def_sha256=8a67d0502452c0c6d720a2609ace8e92490f833e4035a99a80f0e1093b6ba795 decl=cfe/fsw/cfe-core/src/inc/cfe_es.h:515 decl_sha256=9fde4f8b67b6bbb96bca0376da0319e34fcb1c0574c89996fe8fe8eaa70d8545 version="cFE 6.4.2"

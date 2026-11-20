@@ -1,0 +1,16 @@
+record=step2a-20261110-8c
+kind=text record of step 8c: four items of RV3A 6.3 (O2, O8, O9, O12) in code, tests, lint, labels and docs, an in-place rebuild and a measurement run; not a bundle; no parts; not preserved in the CONFIG_MANAGEMENT 5 sense
+work=RV3A 6.7 step 8c (the second in-place rebuild); PI answer 11-10 Q12 (ga), rebuild in place in MC; Q2 (ga) was done before (114f33b); E1 (Q4) not in this build; AR section 16 (16.0 the declaration, committed before the build as 7cc970d; 16.1 the items checked against files)
+build_dir=/home/user/work/merge-check/kz-llvm (MC; no second build directory)
+tool_before=kz-static 3c5dfc56293d69cd8bd05c1e75e7c0b5da7da559d54f5df4d7770ae6e0366cc2 (the 8b fix tool); kz b254483e25873902ec6408b1764c7e9b71238fe4c400e237ae49f88f55fc824c
+tool_after=kz-static ab482eab0fb34aa86e8a839ef35fa8207054ea4b28ff186f5c5079a1cd30b326 (tool_sha256 b61256c55c84f199a09a50727e36e59d7e1c968b2c71662f4564446877143d20, tool_source c2da0fdc3be3e79995a5b767d2000a7c49a980b288afe02e9a114eff10016a46, core_source f6e3c7b4 unchanged); kz 931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248 (tool_source caf58235d6b9d032685e0f5df7eb4c5f8cfcdaadd0e37457c897664fa4911141); kz-instr-clang 28db40172dbdb06faa0e607b9a494805b19768ca888e865d0a5c3859dab8bcaf (its hash before was not recorded; object of the old and new source equal); kz_lint 191d0da095e75736ecfdf0d790815fb219e6738281ee0bb7f310bc898dad50df
+unchanged=kz-dump 05623054, kz-rt-dump 4390d4f1, kz-phi 7d34e6e2 (not rebuilt)
+source=e261861 (code, tests, lint, labels, most kairos docs; a working-tree snapshot committed by the lead while this stage was editing) and dde72e1 (driver, docs/framework_layer.md, docs/schema.md wording; committed after the tests, before the run); the run's identity.txt: repo dde72e1, kairos_uncommitted_lines=0
+outputs=/home/user/work/redesign/step2a/tests_8c (outside the repository; 149 files, 202212345 bytes; not in T/, tests_rv4, tests_8b or tests_8b_fix)
+outputs_sha256_list=sha256.txt here (136 lines; sha256 950eb65179fc5f3be8eb08589d345bcfbec5160af2fe9e93a038f311b13e575b)
+status_sha256=0b47a12fb77b515b89c43f4e49a886c7ae0c882807ea0206ebdc884fa814acec (status.txt here)
+rc=make 0; ctest 239 tests, 0 failed, 1 skipped; ctest -N -L legacy-case 51; lint 6 of 6 (case-ids widened to the code files of probe/ and instrument/, clean); unit checks 6 of 6; all 0 (ten steps PASS, no FAIL line)
+compared_with=tests_8b_fix, T/ (/home/user/work/redesign/step2a/tests) and tests_rv4, every file, nothing masked: compare_8c.tsv (AR 16.7)
+counts=verdicts and burden.tsv unchanged; the two new BASIS items in each of the five builds (extract.resource_dir, extract.extra_arg = none); no unknown target in any output
+no cFS booted; nothing deleted; not pushed
+files=INFO.txt commands.txt declared_before_build.txt pre_mc.txt post_mc.txt make.log ctest_full.log labels.txt lint_widened.txt lint_groups.txt lintgroups.py unit.txt status.txt sha256.txt twice_detail.txt compare_8c.py compare_8c.tsv df_build.log df_run.log

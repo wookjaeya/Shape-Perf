@@ -1,0 +1,32 @@
+# counts by build (columns: c1_pre_tx c1_post_tx r2_core c5_641 c5_642 fixture_closure), from counts_<b>.txt (scripts/buffer_counts.py over the scratch relations texts)
+address uses: body followed, no write (discharged)	1/1/1/0/0/2
+address uses: body writes through it (not discharged)	0/0/0/0/0/1
+address uses: copied (not discharged)	0/0/0/0/0/1
+address uses: library with an entry (discharged)	1/1/1/0/0/0
+address uses: library, no entry or writes (not discharged)	12/12/13/0/0/1
+address uses: passed on to a library call (not discharged)	1/1/1/0/0/0
+address uses: test (discharged)	4/4/4/0/0/2
+address uses: variadic or indirect (not discharged)	1/1/1/0/0/0
+buffers	16/16/17/0/0/2
+buffers with other writers	5/5/5/0/0/1
+buffers: not complete: FIELD_STATUS disabled	11/11/12/0/0/1
+buffers: not complete: other writers	5/5/5/0/0/1
+causes: address-escape: not discharged	16/16/17/0/0/2
+causes: array-element-stores-not-collected: discharged	16/16/17/0/0/2
+causes: several-instances: not a cause	16/16/17/0/0/2
+causes: untyped writes: not discharged	4/4/4/0/0/0
+causes: untyped-in-program: not a cause	12/12/13/0/0/2
+causes: writer-function-not-once: not a cause	16/16/16/0/0/2
+causes: writer-in-loop: not a cause	3/3/3/0/0/0
+lifetime ends: clear-slot	10/10/6/18/18/2
+lifetime ends: clear-slot: free-record condition shown	0/0/0/0/0/1
+lifetime ends: clear-slot: not shown	10/10/6/18/18/1
+lifetime ends: clear-table	5/5/6/0/0/1
+lifetime ends: release	1/1/0/23/23/1
+lifetime ends: release through a parameter	1/1/1/0/0/1
+release-through callers: delete	1/1/1/0/0/1
+release-through callers: null pointer	1/1/1/0/0/1
+release-through callers: rollback	1/1/1/0/0/2
+writer groups: none	30/30/14/79/79/2
+writer groups: one partition	11/11/12/17/17/2
+writer groups: shared	2/2/2/0/0/0

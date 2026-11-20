@@ -1,0 +1,13 @@
+common rows 305 same incomplete line 244 same first line 296
+cut 35f07539e7606e2e default A20 budget3 A20 | lookup /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:126:13 in initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_fl
+    default inc: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry)
+    budget3 inc: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); key_unresolved(static image truncated); truncated(static image); fixed_proof_open(no static order between the actors)
+cut 17975444d83f6589 default A21 budget3 A21 | lookup /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_cfdp.c:993:19 in CF_CFDP_InitEngine -> OS_CountSemGetIdByName#1 namespace OS_common_record_t.name
+    default inc: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); key_unresolved(pointer field without points-to); fixed_proof_open(no static order between the actors)
+    budget3 inc: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); key_unresolved(pointer field without points-to); key_unresolved(creator key); truncated(static image); fixed_proof_open(no static order between the actors)
+cut e6d3bc65380a6fc9 default A40 budget3 A40 | lookup /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:126:13 in initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_fl
+    default inc: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(FIELD_STATUS not complete)
+    budget3 inc: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); key_unresolved(static image truncated); truncated(static image); writer_set_incomplete(FIELD_STATUS not complete)
+cut f682b6c8f2e9db22 default A41 budget3 A41 | lookup /home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_flow.c:132:18 in initialize_throttling@/home/user/work/procrace/c1_build/pre/src/bp/fsw/src/bp_fl
+    default inc: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); writer_set_incomplete(FIELD_STATUS not complete)
+    budget3 inc: no_run(no run record read); actor_not_extracted(spawn call with no resolved entry); key_unresolved(static image truncated); truncated(static image); writer_set_incomplete(FIELD_STATUS not complete)

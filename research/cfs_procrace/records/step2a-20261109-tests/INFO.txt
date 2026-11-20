@@ -1,0 +1,15 @@
+bundle=step2a-20261109-tests
+created_utc=2026-11-09T10:23:38.066Z
+repo_commit=2cd36d137aeff1238325ed0be0153226a554763d
+kernel=6.18.44-fc-v310
+source=/home/user/work/redesign/step2a/tests files=137 bytes=163241845
+source=/home/user/work/redesign/step2a/tests_fix1 files=131 bytes=159781663
+source=/home/user/work/redesign/step2a/tests_fix2 files=133 bytes=161220192
+source=/home/user/work/redesign/step2a/tests_fix3 files=135 bytes=162103391
+source=/home/user/work/redesign/step2a/tests_s5 files=129 bytes=150939064
+tar_xz_bytes=31536344 parts=1 tar_xz_sha256=7a65f18e10357e146fdd82afd243272b72473dec0b1d8f24f0dd913eeada6a11
+location=/home/user/work/preserve/bundles-20261109/step2a-20261109-tests (local, not in the repository, not pushed)
+made_with=bundle_local.sh (tar --sort=name --owner=0 --group=0 --numeric-owner | xz -9 -T4 | split -b 45M), started 2026-11-09T10:22:35.108Z
+df_free_before=1123602432 df_free_after_create=1091735552
+credential_pattern_hits=none
+note=2a test outputs: T/ (final 2a outputs) and tests_fix1-3, tests_s5 (RV3A 6.1 P2, tests); local only, not pushed (public repository; preservation location waits for the PI, RV4 analysis 7.3)

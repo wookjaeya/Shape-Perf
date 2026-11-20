@@ -1,0 +1,46 @@
+# kid_disagree -- every disagreement between a trace and the profile is a finding.
+#
+# Unit-test values only.  Each line below is wrong in one way; the replay reports it and goes on.
+const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
+owner T_SB 2
+
+T0 CFE_ES_CreateObjects.reserve_core pt lp.slot=2
+T0 CFE_ES_CreateObjects.publish_core pt lp.slot=2 lp.pending_id=0x110002
+T_SB CFE_EVS_Register call
+T_SB CFE_EVS_Register.clear_slot pt
+T_SB CFE_EVS_Register.register pt
+T_SB CFE_EVS_Register ret result=0
+T_SB CFE_ES_GetAppID call
+T_SB CFE_ES_GetAppID.self_live pt
+T_SB CFE_ES_GetAppID.store_ok pt out.AppIdPtr=@CFE_SB_Global.AppId value=0x110003
+T_SB CFE_ES_GetAppID ret result=0
+
+# the captured value is not what the replay holds in the cell
+T_SB CFE_EVS_SendEventWithAppID.id_valid pt arg.AppID=0x110002 cell=@CFE_SB_Global.AppId value=0x110009
+T_SB CFE_EVS_SendEventWithAppID call arg.AppID=0x110002
+T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+# ready in the replay, but the code says the identity is illegal
+T_SB CFE_EVS_SendEventWithAppID ret result=0xc2000003
+
+# a result code the outcome list does not map
+T_SB CFE_EVS_SendEventWithAppID.id_valid pt arg.AppID=0x110002
+T_SB CFE_EVS_SendEventWithAppID call arg.AppID=0x110002
+T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+T_SB CFE_EVS_SendEventWithAppID ret result=77
+
+# the value the call receives is missing
+T_SB CFE_EVS_SendEventWithAppID.id_valid pt cell=@CFE_SB_Global.AppId value=0
+T_SB CFE_EVS_SendEventWithAppID call
+T_SB CFE_EVS_SendEventWithAppID ret result=0
+
+# a point outside its call, a point the profile does not know, an operation it does not know,
+# a return without a call, a location it does not know
+T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+T_SB no_such_point pt
+T_SB no_such_op call
+T_SB no_such_op ret
+T_SB CFE_ES_RunLoop ret result=1
+T_SB CFE_ES_GetAppID call
+T_SB CFE_ES_GetAppID.self_live pt
+T_SB CFE_ES_GetAppID.store_ok pt out.AppIdPtr=@no.such.location
+T_SB CFE_ES_GetAppID ret result=0

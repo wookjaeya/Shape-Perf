@@ -1,0 +1,19 @@
+# /dev/kvm:
+ls: cannot access '/dev/kvm': No such file or directory
+# qemu-system-i386 installed?
+# apt-get -s install qemu-system-x86:
+Inst qemu-system-common (1:8.2.2+ds-0ubuntu1.18 Ubuntu:24.04/noble-updates [amd64])
+Inst qemu-system-data (1:8.2.2+ds-0ubuntu1.18 Ubuntu:24.04/noble-updates [all])
+Inst qemu-system-x86 (1:8.2.2+ds-0ubuntu1.18 Ubuntu:24.04/noble-updates [amd64])
+# reachability (HTTP status via proxy):
+200 http://old-releases.ubuntu.com/releases/10.10/
+200 https://old-releases.ubuntu.com/releases/10.10/
+curl: (56) CONNECT tunnel failed, response 403
+000 https://cdn.kernel.org/pub/linux/kernel/v2.6/
+curl: (56) CONNECT tunnel failed, response 403
+000 https://www.cs.columbia.edu/~orenl/papers/sosp2011-racepro.pdf
+curl: (56) CONNECT tunnel failed, response 403
+000 https://viennot.biz/scribe-slides/
+403 http://snapshot.debian.org/
+curl: (56) CONNECT tunnel failed, response 403
+000 https://archive.debian.org/debian/dists/

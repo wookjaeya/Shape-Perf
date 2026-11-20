@@ -1,0 +1,15 @@
+# root /home/user/work/redesign/obs1; run 2026-11-18T10:23:23Z
+# candidate	reference	candidate_row	reference_row	files_candidate	bytes_candidate	allocated_bytes_candidate	files_reference	bytes_reference	same	bytes_same	differs	only_candidate	only_reference	other_candidate	other_reference	empty_dir_candidate	shared_inode	verdict
+orderrev1_relcheck	relrev7_check	OBS_orderrev1_relcheck	OBS_relrev7_check	15	7564932	7581696	15	7564932	15	7564932	0	0	0	0	0	0	0	identical-no-extra
+orderrev1b_relcheck	relrev7_check	OBS_orderrev1b_relcheck	OBS_relrev7_check	15	7564932	7581696	15	7564932	15	7564932	0	0	0	0	0	0	0	identical-no-extra
+schema12_relcheck	relrev7_check	OBS_schema12_relcheck	OBS_relrev7_check	15	7564932	7581696	15	7564932	15	7564932	0	0	0	0	0	0	0	identical-no-extra
+schema12_order	order_rev1b	OBS_schema12_order	OBS_orderrev1b_order	15	7758336	7778304	15	7758336	15	7758336	0	0	0	0	0	0	0	identical-no-extra
+objacc_relcheck	revfix_relcheck	OBS_objacc_relcheck	OBS_revfix_relcheck	15	7630029	7647232	15	7630029	15	7630029	0	0	0	0	0	0	0	identical-no-extra
+objacc_order	revfix_order	OBS_objacc_order	OBS_revfix_order	15	7058482	7077888	15	7058482	15	7058482	0	0	0	0	0	0	0	identical-no-extra
+sem_relcheck	revfix_relcheck	OBS_sem_relcheck	OBS_revfix_relcheck	15	7630029	7647232	15	7630029	15	7630029	0	0	0	0	0	0	0	identical-no-extra
+sem_order	revfix_order	OBS_sem_order	OBS_revfix_order	15	7058482	7077888	15	7058482	15	7058482	0	0	0	0	0	0	0	identical-no-extra
+rf_relcheck	revfix_relcheck	OBS_rf_relcheck	OBS_revfix_relcheck	15	7630029	7647232	15	7630029	15	7630029	0	0	0	0	0	0	0	identical-no-extra
+rf_order	revfix_order	OBS_rf_order	OBS_revfix_order	15	7058482	7077888	15	7058482	15	7058482	0	0	0	0	0	0	0	identical-no-extra
+ll_relcheck	revfix_relcheck	OBS_ll_relcheck	OBS_revfix_relcheck	15	7630029	7647232	15	7630029	15	7630029	0	0	0	0	0	0	0	identical-no-extra
+ll_order	revfix_order	OBS_ll_order	OBS_revfix_order	15	7058482	7077888	15	7058482	15	7058482	0	0	0	0	0	0	0	identical-no-extra
+# pairs 12; identical-no-extra 12 (files 180, bytes 89207176, allocated bytes 89423872); not eligible 0

@@ -1,0 +1,43 @@
+# committed scripts (*.sh, *.py) that name obs1/xr5_* (git grep at HEAD 874c4b4, 2026-11-19T18:17:04Z); both belong to finished steps (results 26.3 and 26.5); after results 26.8 they do not run again as they are for the eight archived directories (the bytes are in /home/user/work/preserve/archives-20261119/<name>)
+records/closure-explain-fix-20261119/scripts/runs.sh:9:#   regress             revision 4 as revised on the 2026-11-16 inputs, the eight D1 branches -> obs1/xr5_regress_rev4fix
+records/closure-explain-fix-20261119/scripts/runs.sh:11:#                       no run -> obs1/xr5_dry_static_BUILD
+records/closure-explain-fix-20261119/scripts/runs.sh:12:#   rtread NAME         the runtime step's test dump NAME (kz-rt-dump of the MC) with the c1_pre_tx plan -> obs1/xr5_dry_rt_NAME
+records/closure-explain-fix-20261119/scripts/runs.sh:14:#                       the explanation with the 16 branches -> obs1/xr5_synth_BUILD_ORDER (a test input, never evidence)
+records/closure-explain-fix-20261119/scripts/runs.sh:38:    OUT=$O/xr5_regress_rev4fix
+records/closure-explain-fix-20261119/scripts/runs.sh:42:    b=$a1; OUT=$O/xr5_dry_static_$b; D=$O/xr4_dry_inputs/$b; P=$O/cz_plans_v4_ns2/$b; Z=$O/cz_final_order/$b
+records/closure-explain-fix-20261119/scripts/runs.sh:51:    n=$a1; OUT=$O/xr5_dry_rt_$n; [ ! -e "$OUT" ] || { echo "$OUT exists" >&2; exit 2; }
+records/closure-explain-fix-20261119/scripts/runs.sh:74:    b=$a1; ord=$a2; SY=$O/xr5_synth_${b}_${ord}; P=$O/cz_plans_v4_ns2/$b; Z=$O/cz_final_order/$b; D=$O/xr4_dry_inputs/$b
+records/closure-prebootfix-20261119/scripts/runs.sh:11:#                                     with obs1/xr5_regress_rev4fix (../compare/regress.txt)
+records/closure-prebootfix-20261119/scripts/runs.sh:12:#   static BUILD                      the static outputs with the 16 branches, no run; compared with obs1/xr5_dry_static_BUILD
+records/closure-prebootfix-20261119/scripts/runs.sh:13:#   rtread NAME                       the runtime step's test dump NAME; compared with obs1/xr5_dry_rt_NAME
+records/closure-prebootfix-20261119/scripts/runs.sh:14:#   synth BUILD ORDER                 the kept SYNTHETIC record of obs1/xr5_synth_BUILD_ORDER (a test input, never evidence)
+records/closure-prebootfix-20261119/scripts/runs.sh:28:#   sizes                             du -sb and du -sB1 of obs1/xr5_* (../out/xr5_sizes.txt)
+records/closure-prebootfix-20261119/scripts/runs.sh:76:    python3 -I "$CMPR" "$O/xr5_regress_rev4fix" "$OUT" > "$HERE/compare/regress.txt" 2>&1; rc=$?
+records/closure-prebootfix-20261119/scripts/runs.sh:86:    python3 -I "$CMPR" "$O/xr5_dry_static_$b" "$OUT" > "$HERE/compare/static_$b.txt" 2>&1; rc=$?
+records/closure-prebootfix-20261119/scripts/runs.sh:88:  rtread) n=$a1; OUT=$SCR/xr6_dry_rt_$n; fresh "$OUT"; K=$O/xr5_dry_rt_$n
+records/closure-prebootfix-20261119/scripts/runs.sh:104:  synth) b=$a1; ord=$a2; K=$O/xr5_synth_${b}_${ord}; OUT=$SCR/xr6_synth_${b}_${ord}; fresh "$OUT"
+records/closure-prebootfix-20261119/scripts/runs.sh:111:  loss) b=$a1; ord=$a2; tag=$a3; line=$a4; K=$O/xr5_synth_${b}_${ord}; W=$SCR/xr6_loss_$tag; fresh "$W"
+records/closure-prebootfix-20261119/scripts/runs.sh:138:      "boot1=$O/xr5_synth_${b}_script/explain" "boot2=$O/xr5_synth_${b}_reverse/explain" > "$HERE/out/summary_synth_${b}_run.txt" 2>&1; rc=$?
+records/closure-prebootfix-20261119/scripts/runs.sh:162:      --records "$O/xr5_synth_${b}_${ord}/explain" --order "$ord" --uses "$PREP/uses/uses_$b.tsv" --out "$T" ;;
+records/closure-prebootfix-20261119/scripts/runs.sh:163:  sizes) T=$HERE/out/xr5_sizes.txt; fresh "$T"
+records/closure-prebootfix-20261119/scripts/runs.sh:164:    { echo "# du -sb (apparent bytes) and du -sB1 (block bytes) of the kept outputs of results 26.3 (obs1/xr5_*), $(date -u +%FT%TZ)"
+records/closure-prebootfix-20261119/scripts/runs.sh:165:      echo "## du -sb"; (cd "$O" && du -sb xr5_*); echo "## du -sb, total of the twelve"; (cd "$O" && du -sbc xr5_* | tail -1)
+records/closure-prebootfix-20261119/scripts/runs.sh:166:      echo "## du -sb, total of the five synthetic outputs (xr5_synth_*)"; (cd "$O" && du -sbc xr5_synth_* | tail -1)
+records/closure-prebootfix-20261119/scripts/runs.sh:167:      echo "## du -sB1"; (cd "$O" && du -sB1 xr5_*); echo "## du -sB1, total"; (cd "$O" && du -sB1 -c xr5_* | tail -1); } > "$T"
+records/closure-space2-20261119/ledger_rewrite.py:24:        'the kept outputs of results 26.3 (obs1/xr5_*: dry runs, regression, evaluation, candidate re-run and synthetic '
+records/closure-space2-20261119/listing.py:17:#      inputs); the test is the text "xr5_" and the exact name in each file (the boot step reads O only through the
+records/closure-space2-20261119/listing.py:113:scripts = [s for s in run(['git', 'grep', '-l', 'xr5_', '--', '*.sh', '*.py'], cwd=REPO).split('\n') if s]
+records/closure-space2-20261119/listing.py:145:        k = len(pat.findall(t)) + t.count('xr5_')
+records/closure-space2-20261119/listing.py:156:        if pat.search(t) or ('xr5_synth_' in t and name.startswith('xr5_synth_')) or ('xr5_dry_' in t and name.startswith('xr5_dry_')):
+records/closure-space2-20261119/need.py:21:    ('xr5_synth_c1_pre_tx_script_trial1', 'the first trial of the synthetic generator, superseded by xr5_synth_c1_pre_tx_script'),
+records/closure-space2-20261119/need.py:22:    ('xr5_eval_dry', 'explain_eval.py of the unfrozen source snapshot dc879c6 on the six dry runs; superseded by the re-evaluations of results 26.5 (heads and tails committed)'),
+records/closure-space2-20261119/need.py:23:    ('xr5_synth_c1_pre_tx_reverse', 'synthetic use events (test input, never evidence); compared in results 26.4 and 26.5'),
+records/closure-space2-20261119/need.py:24:    ('xr5_synth_c1_pre_tx_script', 'synthetic use events (test input, never evidence); compared in results 26.4 and 26.5'),
+records/closure-space2-20261119/need.py:25:    ('xr5_synth_c1_post_tx_reverse', 'synthetic use events (test input, never evidence); compared in results 26.4 and 26.5'),
+records/closure-space2-20261119/need.py:26:    ('xr5_synth_c1_post_tx_script', 'synthetic use events (test input, never evidence); compared in results 26.4 and 26.5'),
+records/closure-space2-20261119/need.py:27:    ('xr5_dry_rt_rt_objects', 'dry run on a runtime step test dump (judge rc 3 build_mismatch by contract); compared in results 26.5'),
+records/closure-space2-20261119/need.py:28:    ('xr5_dry_rt_rt_format15', 'dry run on a runtime step test dump (judge rc 3 build_mismatch by contract); compared in results 26.5'),
+records/closure-space2-20261119/need.py:29:    ('xr5_dry_static_c1_pre_tx', 'static dry run with the 16 branches, no run; compared in results 26.5'),
+records/closure-space2-20261119/need.py:30:    ('xr5_dry_static_c1_post_tx', 'static dry run with the 16 branches, no run; compared in results 26.5'),
+records/closure-space2-20261119/need.py:31:    ('xr5_regress_rev4fix', 'the regression on the 2026-11-16 inputs (8 D1 branches); compared in results 26.5'),
+records/closure-space2-20261119/need.py:32:    ('xr5_candidates_regen', 'candidates.py re-run: 64 files byte-identical to records/closure-c1prep-20261119/candidates'),

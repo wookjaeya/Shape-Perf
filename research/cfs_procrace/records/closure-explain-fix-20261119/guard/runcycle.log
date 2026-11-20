@@ -1,0 +1,4 @@
+# space_guard.sh kind=runcycle need=10000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/test_run_cycle.sh <scratch>/runs/rct
+start 2026-11-19T14:46:55.310Z free=1206398976 threshold=324572800
+sample 2026-11-19T14:46:55.314Z 1206394880
+end 2026-11-19T14:46:57.322Z kind=runcycle verdict=completed rc=0 free=1205694464 lowest=1205694464 dip=704512 change=-704512

@@ -1,0 +1,361 @@
+# racepro.md review re-check (read-only verification of review fixes; no installs, no builds)
+# date: 2026-10-08T02:10:09Z
+## [F1] kernel replacement evidence
+### uname -a
+Linux vm 6.18.44-fc-v80 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+### cat /proc/cmdline
+mitigations=auto,no_guest_host,no_guest_guest deferred_init=lazy dhash_entries=131072 ihash_entries=65536 console=ttyS0 reboot=k panic=1 nomodule random.trust_cpu=1 ipv6.disable=1 swiotlb=noforce psi=1 rdinit=/process_api -- --firecracker-init --addr 0.0.0.0:2024 --max-ws-buffer-size 32768 --block-local-connections --listen-vsock-port 2024 --log-vsock-port 5002
+
+### zgrep /proc/config.gz KEXEC/KEXEC_FILE/MODULES/KVM
+# CONFIG_KEXEC is not set
+# CONFIG_KEXEC_FILE is not set
+CONFIG_KVM=y
+# CONFIG_MODULES is not set
+### syscall probes (python ctypes; x86_64 numbers)
+finit_module nr 313 ret -1 errno ENOSYS
+kexec_load nr 246 ret -1 errno ENOSYS
+kexec_file_load nr 320 ret -1 errno ENOSYS
+### grep -c -w -e vmx -e svm /proc/cpuinfo
+0
+### ls /dev/kvm /dev/scribe
+ls: cannot access '/dev/kvm': No such file or directory
+ls: cannot access '/dev/scribe': No such file or directory
+### ls -A /boot (empty if nothing printed)
+### df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G   35G  2.4G  94% /
+
+## [F2] Scribe diff arch files and base tag (kernel clone /home/user/work/procrace/baselines/racepro/linux-2.6-racepro)
+### arch/ entries in scribe_changed_files.txt (base..HEAD)
+arch/x86/Kconfig
+arch/x86/include/asm/checksum_32.h
+arch/x86/include/asm/mmu_context.h
+arch/x86/include/asm/pgtable_32.h
+arch/x86/include/asm/scribe.h
+arch/x86/include/asm/uaccess.h
+arch/x86/include/asm/uaccess_32.h
+arch/x86/include/asm/unistd_32.h
+arch/x86/kernel/dumpstack.c
+arch/x86/kernel/entry_32.S
+arch/x86/kernel/process.c
+arch/x86/kernel/signal.c
+arch/x86/kernel/syscall_table_32.S
+arch/x86/kernel/traps.c
+arch/x86/kernel/tsc.c
+arch/x86/lib/usercopy_32.c
+arch/x86/mm/mmap.c
+arch/x86/mm/pgtable.c
+### *_32 count / *_64 count / shared count
+7
+0
+11
+### git show HEAD:scribe/Kconfig
+     1	#
+     2	# Scribe configuration
+     3	#
+     4	
+     5	menuconfig SCRIBE
+     6		bool "Scribe record/replay support"
+     7		depends on EXPERIMENTAL
+     8		select PID_NS
+     9		select IPC_NS
+    10		select MM_OWNER
+    11		select DEVPTS_MULTIPLE_INSTANCES
+    12		default y
+    13	
+    14	if SCRIBE
+    15	endif # SCRIBE
+### git log -1 base
+6d9878b88fb7f4cd3888f1d54dacdbca1809360c Fri Sep 24 04:32:43 2010 -0400 Nicolas Viennot eclone: Turned clone_flags into a 64bits variable in do_fork()
+### git rev-parse v2.6.35^{commit}
+9fe6206f400646a2322096b56c59891d530e8d51
+### GIT_NO_LAZY_FETCH=1 git diff --name-only v2.6.35 base | wc -l, and x86_64/ia32 entries
+61
+Documentation/eclone
+arch/x86/ia32/ia32entry.S
+arch/x86/include/asm/unistd_64.h
+arch/x86/kernel/entry_64.S
+arch/x86/kernel/process_64.c
+### scribe hooks in HEAD entry_32.S / syscall_table_32.S (two blobs lazily fetched into the blob-less clone for this check)
+334:	call scribe_ret_from_fork
+462:	call scribe_enter_syscall
+467:	call scribe_exit_syscall
+557:	call scribe_enter_syscall
+562:	call scribe_exit_syscall
+341:#ifdef CONFIG_SCRIBE
+342:	.long sys_get_scribe_flags
+343:	.long sys_set_scribe_flags	/* 340 */
+
+## [F3] nviennot HEADs (scratchpad shallow clones under /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/verify_racepro)
+### nv-libscribe: https://github.com/nviennot/libscribe.git b6dbd60 2012-10-04 ABI Update (syscall number changes)
+grep -rni reaped (excluding .git) count: 0
+### nv-py-scribe: https://github.com/nviennot/py-scribe.git d03f3f1 2012-09-29 record returns the exit value of the recorded process
+grep -rni reaped (excluding .git) count: 0
+### README install lines
+        git clone git://github.com/nviennot/linux-2.6-scribe.git
+        git clone git://github.com/nviennot/libscribe.git
+        cd build
+        cmake ..
+        make install
+        git clone git://github.com/nviennot/py-scribe.git
+        cd py-scribe
+        ./setup install
+### racepro repo: README/INSTALL in git ls-files
+none
+### grep github/columbia/nviennot/linux-2.6 in racepro repo
+/home/user/work/procrace/baselines/racepro/racepro/setup.py:9:    author_email = 'orenl@cs.columbia.edu',
+### bundle pins (git ls-tree HEAD)
+160000 commit 1542c634151c765b49d5e54990b6a218e4d5a625	libscribe
+160000 commit e5c7bc242167f8dae1d4306f236a346a57bf2b7d	linux-2.6-scribe
+160000 commit 7631c545d76b536a0be7b717eb976aea43481947	py-scribe
+### bundle pin libscribe 1542c634: ancestor of columbia libscribe HEAD? SCRIBE_REAPED files at pin
+ancestor=yes
+0
+### kernel_config L1-8
+#
+# Automatically generated make config: don't edit
+# Linux kernel version: 2.6.35
+# Fri Feb 18 06:04:13 2011
+#
+# CONFIG_64BIT is not set
+CONFIG_X86_32=y
+# CONFIG_X86_64 is not set
+### execgraph.py L124-125
+                    if pid & scribe.SCRIBE_REAPED:
+                        return pid & ~scribe.SCRIBE_REAPED
+
+## [F4] build command sources
+### deploy.rb L27-36
+    :name => 'libscribe',
+    :dependencies => 'cmake',
+    :work_dir => 'build',
+    :build_cmd => ['cmake ..', 'make'],
+    :install_cmd => 'make install'
+  }, {
+    :name => 'py-scribe',
+    :dependencies => ['python-dev', 'cython'],
+    :build_cmd => ['python setup.py build'],
+    :install_cmd => ['python setup.py install']
+### ls py-scribe-racepro
+setup.py
+src
+
+## [F5] mqueue / fget path
+### lock_wrappers.c L220-233 (scribe_track_next_file) and L274-312 (pre/post fget) first lines
+int scribe_track_next_file(int flags)
+void scribe_pre_fget(struct files_struct *files, int *lock_flags)
+	if (!is_scribed(scribe))
+		return;
+
+	if (scribe->lock_next_file) {
+		*lock_flags = scribe->lock_next_file | SCRIBE_IMPLICIT_UNLOCK;
+		scribe->lock_next_file = 0;
+
+		/*
+		 * We need to lock the files_struct while doing fcheck_files()
+		 * to guards against races with fd_install()
+		 */
+		scribe_lock_files_read(files);
+	}
+int scribe_post_fget(struct files_struct *files, struct file *file,
+### changed fs/ and ipc/ files of interest
+32:fs/file.c
+33:fs/file_table.c
+39:fs/open.c
+72:ipc/msg.c
+73:ipc/namespace.c
+74:ipc/sem.c
+75:ipc/shm.c
+76:ipc/syscall.c
+77:ipc/util.c
+### ipc/mqueue.c in diff?
+0
+
+## [F6] RDTSC
+94:- **RDTSC**. TODO
+236:    rdtsc = 0000016205f68540
+245:  - a rdtsc event: used when the userspace process does a RDTSC instruction.
+27:extern int scribe_handle_rdtsc(struct scribe_ps *scribe, struct pt_regs *regs);
+18:arch/x86/kernel/traps.c
+19:arch/x86/kernel/tsc.c
+
+## [F7] reference cFS binary
+/home/user/work/procrace/cfs_ref/cFS/build-native_std/exe/cpu1/core-cpu1: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=be6d04f1f80d421efea50cc9f47db848b2a52941, for GNU/Linux 3.2.0, with debug_info, not stripped
+2026-10-08 01:23:15.000000000 +0000 /home/user/work/procrace/cfs_ref/cFS/build-native_std/exe/cpu1/core-cpu1
+
+## [F8] validation / oracle
+### racecore.py L173-178, L194, L280-284
+        # cutoff
+        cutoff = dict(bookmark2)
+
+        self.bookmarks = bookmarks
+        self.injects = injects
+        self.cutoff = cutoff
+        ignore_type = [ scribe.SCRIBE_RES_TYPE_FUTEX ]
+                continue
+            # ignore some resources
+            if resource.type in ignore_type:
+                logging.debug('resource %d: skip type ignored' % resource.id)
+                continue
+### scribewrap.py L234-239
+        if test_replay and success:
+            logging.info('    running test-replay callback...')
+            if test_replay(exe, args):
+                print(verbose + 'BUG REPRODUCED')
+            else:
+                print(verbose + 'BUG not triggered')
+### scribe.md L133-136
+Rule: For each pid, `events_of(log, pid)` should be terminated with a
+`eof_queue` event. It allows the kernel to make sure that there is not any
+events to be waited for.  During the replay, a process can golive when its
+entire event queue has been consumed.
+
+## [F9] C2 public cFE side (cfe c5fb2b4d)
+CFE_Status_t CFE_ES_WaitForSystemState(uint32 MinSystemState, uint32 TimeOutMilliseconds)
+    while (CFE_ES_Global.SystemState < MinSystemState)
+        OS_TaskDelay(WaitTime);
+### cases/C2.md L21
+5. The original EVA CWS reproduction is **unavailable**: the apps are private, the issue gives no version, platform or logs, and the Trac server is unreachable. Only a role-derived experiment on public cFE code is possible.
+
+## [F10] source-fetch log vs roadmap DOI
+6:000 https://dl.acm.org/doi/10.1145/2043556.2043590
+38:2026-10-08T01:10:53.940Z connect_rejected dl.acm.org:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+  - [DOI 10.1145/2043556.2043589](https://doi.org/10.1145/2043556.2043589)
+### grep -i -E 'webfetch|EGRESS|webstaging|junfeng|scholar gateway' in source-fetch log (count)
+0
+### proxy recentRelayFailures now containing columbia/sigops/acm/junfeng/webstaging/viennot (rolling buffer)
+0
+(no paper host was re-fetched in this pass)
+
+## [F11] prior attempt details
+### first and last errors in racepro_libscribe_build.log
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:400:24: error: 'struct pt_regs' has no member named 'xcs'; did you mean 'cs'?
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:403:68: error: 'struct pt_regs' has no member named 'xss'; did you mean 'ss'?
+### 'record' mentioned in racepro_libscribe_build_m32.log (count)
+0
+### build-libscribe32
+CMAKE_C_FLAGS:STRING=-m32
+/home/user/work/procrace/baselines/racepro/build-libscribe32/record: ELF 32-bit LSB pie executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, BuildID[sha1]=239093805efdbfd97e56a9cde1d61b1b74aea321, for GNU/Linux 3.2.0, not stripped
+2026-10-07 07:22:03.244174897 +0000 /home/user/work/procrace/baselines/racepro/build-libscribe32/record
+### libscribe CMakeLists.txt L6-8
+add_library(scribe SHARED src/context.c src/debug.c src/process.c)
+
+add_executable(scribe_init src/init_process.c)
+### uname in container_kernel_caps.log (count)
+0
+### uname in racepro_scribe_runtime.log
+# uname -r: 6.18.44-fc-v77
+2026-10-07 07:22:20.438020296 +0000 /home/user/Shape-Perf/research/cfs_procrace/baselines/logs/container_kernel_caps.log
+2026-10-07 07:22:03.306019278 +0000 /home/user/Shape-Perf/research/cfs_procrace/baselines/logs/racepro_scribe_runtime.log
+### system-wide libscribe install?
+ls: cannot access '/usr/lib/libscribe*': No such file or directory
+ls: cannot access '/usr/bin/scribe_init': No such file or directory
+ls: cannot access '/usr/include/scribe.h': No such file or directory
+ls: cannot access '/usr/local/lib/libscribe*': No such file or directory
+ls: cannot access '/usr/local/bin/scribe_init': No such file or directory
+
+## [F12] glibc provenance
+Start-Date: 2026-10-07  07:21:43
+Commandline: apt-get install -y --no-install-recommends gcc-multilib
+Install: lib32stdc++6:amd64 (14.2.0-4ubuntu2~24.04.1, automatic), libc6-i386:amd64 (2.39-0ubuntu8.9, automatic), gcc-13-multilib:amd64 (13.3.0-6ubuntu2~24.04.1, automatic), libx32asan8:amd64 (14.2.0-4ubuntu2~24.04.1, automatic), lib32gcc-s1:amd64 (14.2.0-4ubuntu2~24.04.1, automatic), lib32itm1:amd64 (14.2.0-4ubuntu2~24.04.1, automatic), libx32gcc-s1:amd64 (14.2.0-4ubuntu2~24.04.1, automatic), libx
+Upgrade: libc6:amd64 (2.39-0ubuntu8.7, 2.39-0ubuntu8.9), locales:amd64 (2.39-0ubuntu8.7, 2.39-0ubuntu8.9), libc-dev-bin:amd64 (2.39-0ubuntu8.7, 2.39-0ubuntu8.9), libc-bin:amd64 (2.39-0ubuntu8.7, 2.39-0ubuntu8.9), libc6-dbg:amd64 (2.39-0ubuntu8.7, 2.39-0ubuntu8.9), libc6-dev:amd64 (2.39-0ubuntu8.7, 2.39-0ubuntu8.9)
+End-Date: 2026-10-07  07:21:50
+ii  libc6:amd64    2.39-0ubuntu8.9 amd64        GNU C Library: Shared libraries
+### grep -E '2\.39|libc6|multilib|history\.log' in cfs env records (count per file)
+/home/user/Shape-Perf/research/cfs_procrace/env/ENV.md:0
+/home/user/Shape-Perf/research/cfs_procrace/env/CONDITIONS.md:0
+/home/user/Shape-Perf/research/cfs_procrace/env/logs/build_00_env.log:0
+
+## [F13] python2 / cython / qemu
+python2: none
+python2.7: none
+cython: none
+cython3: none
+qemu-system-i386: none
+/usr/bin/python
+/usr/bin/python-argcomplete-check-easy-install-script
+/usr/bin/python3
+/usr/bin/python3-config
+/usr/bin/python3.10
+/usr/bin/python3.10-config
+/usr/bin/python3.11
+/usr/bin/python3.11-config
+/usr/bin/python3.12
+/usr/bin/python3.12-config
+/usr/bin/python3.13
+/usr/bin/python3.13-config
+/usr/bin/python3.11
+/usr/bin/python3.11
+/root/.local/bin/uv
+### apt-cache policy python2 python-dev cython python2.7
+python2:
+  Installed: (none)
+  Candidate: (none)
+  Version table:
+python-dev:
+  Installed: (none)
+  Candidate: (none)
+  Version table:
+cython:
+  Installed: (none)
+  Candidate: (none)
+  Version table:
+(python2.7: no entry printed)
+
+## workspace size
+201M	/home/user/work/procrace/baselines/racepro
+
+## [F2b] 64-bit entry paths at HEAD (blobs lazily fetched into the blob-less clone, 2026-10-08T02:11:23Z)
+### grep -c -i scribe HEAD:arch/x86/kernel/entry_64.S
+0
+### grep -n eclone HEAD:arch/x86/kernel/entry_64.S
+701:	PTREGSCALL stub_eclone, sys_eclone, %r8
+### grep -c -i scribe HEAD:arch/x86/ia32/ia32entry.S
+0
+### grep -n eclone HEAD:arch/x86/ia32/ia32entry.S
+480:	PTREGSCALL stub32_eclone, sys_eclone, %r8
+846:	.quad stub32_eclone
+### entry_32.S L458-468, L555-563
+	cmpl $(nr_syscalls), %eax
+	jae syscall_badsys
+
+	movl %esp,%eax
+	call scribe_enter_syscall
+	movl PT_ORIG_EAX(%esp), %eax
+	call *sys_call_table(,%eax,4)
+	movl %eax,PT_EAX(%esp)
+	movl %esp,%eax
+	call scribe_exit_syscall
+	movl PT_EAX(%esp), %eax
+
+	movl %esp,%eax
+	call scribe_enter_syscall
+	movl PT_ORIG_EAX(%esp), %eax
+	call *sys_call_table(,%eax,4)
+	movl %eax,PT_EAX(%esp)		# store the return value
+	movl %esp,%eax
+	call scribe_exit_syscall
+
+### syscall_table_32.S L341-343
+#ifdef CONFIG_SCRIBE
+	.long sys_get_scribe_flags
+	.long sys_set_scribe_flags	/* 340 */
+### kernel clone .git size after the four blob fetches
+197M	/home/user/work/procrace/baselines/racepro/linux-2.6-racepro/.git
+
+## [F11b] leftover file build-libscribe32/log (values NOT printed)
+2026-10-07 07:22:03.302019277 +0000 8089 bytes mode=600 /home/user/work/procrace/baselines/racepro/build-libscribe32/log
+/home/user/work/procrace/baselines/racepro/build-libscribe32/log: data
+### writer: libscribe-racepro/examples/record.c L19
+	logfile = open("log", O_CREAT | O_RDWR | O_TRUNC, 0600);
+### first strings (argv) in the file
+scribe_init
+/bin/true
+### number of NAME= environment entries; credential-like names (names only)
+146
+MAX_THINKING_TOKENS= GH_TOKEN= GITHUB_TOKEN= CLOUDSDK_AUTH_ACCESS_TOKEN= AWS_SECRET_ACCESS_KEY= AWS_ACCESS_KEY_ID= CLAUDE_SESSION_INGRESS_TOKEN_FILE= CLAUDE_CODE_MESSAGING_TOKEN= 
+
+## [F3b] bundle py-scribe pin 7631c545
+7631c54 2011-05-04 API (The bookmark type has been added)
+ancestor of columbia py-scribe HEAD: yes
+files with SCRIBE_REAPED at pin: 0

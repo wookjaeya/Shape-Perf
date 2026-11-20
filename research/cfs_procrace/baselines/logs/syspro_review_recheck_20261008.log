@@ -1,0 +1,207 @@
+# SysPro review re-check, 2026-10-08T02:24:37Z. Evidence for the review fixes applied to syspro.md. NOT a SysPro run.
+# Probes below are container/source checks. No tool installed, no version chosen. Probe sources live in /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/fixcheck (scratchpad) and are printed in full.
+
+## 1. Free disk now
+2026-10-08T02:24:37Z
+/dev/vda        252G   35G  2.4G  94% /
+
+## 2. Kernel config: modules/kexec; /dev/kvm
+6.18.44-fc-v80
+# CONFIG_KEXEC is not set
+# CONFIG_KEXEC_FILE is not set
+# CONFIG_MODULES is not set
+ls: cannot access '/dev/kvm': No such file or directory
+
+## 3. Reachability, one attempt per host (curl -sS -o /dev/null -w '%{http_code}' --max-time 20)
+https://www.intel.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://software.intel.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://zenodo.org/api/records -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://figshare.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://api.figshare.com/v2/articles -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://www.semanticscholar.org/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://api.semanticscholar.org/graph/v1/paper/arXiv:2601.09616 -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://api.openalex.org/works -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://export.arxiv.org/api/query -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://scholar.archive.org/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+
+## 4. Report token probe: tokenizer sensitivity (both tokenizers unspecified_by_reference; inputs are issue bodies only)
+# original probe (split on '_' only):
+# syscall names in /usr/include/x86_64-linux-gnu/asm/unistd_64.h: 373
+## /home/user/work/procrace/baselines/syspro/inputs/C1_CF184.md
+whole-word matches : ['bind', 'exit', 'sync', 'time']
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+## /home/user/work/procrace/baselines/syspro/inputs/C2_cFE198.md
+whole-word matches : ['sync']
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+## /home/user/work/procrace/baselines/syspro/inputs/C3_cFE73.md
+whole-word matches : ['time']
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+## /home/user/work/procrace/baselines/syspro/inputs/C5_cFE72.md
+whole-word matches : ['read']
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+## /home/user/work/procrace/baselines/syspro/inputs/R2_cFE2663.md
+whole-word matches : []
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+# variant: additionally split camelCase segments (/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/fixcheck/camel.py)
+import re,sys
+names=set()
+for l in open('/usr/include/x86_64-linux-gnu/asm/unistd_64.h'):
+    m=re.match(r"#define __NR_(\w+)\s+\d+",l)
+    if m: names.add(m.group(1))
+for p in sys.argv[1:]:
+    t="".join(l for l in open(p) if not l.startswith(("# Source:","# Retrieved","# created_at")))
+    words=re.findall(r"[A-Za-z][A-Za-z0-9_]*",t)
+    parts=set()
+    for w in words:
+        for seg in w.split('_'):
+            parts.update(x.lower() for x in re.findall(r"[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+|[A-Z]+|\d+",seg))
+    print(p.split('/')[-1], sorted(parts & names))
+C1_CF184.md ['bind', 'exit', 'sync', 'time']
+C2_cFE198.md ['sync']
+C3_cFE73.md ['pipe', 'time']
+C5_cFE72.md ['read']
+R2_cFE2663.md ['pipe']
+# source of 'pipe':
+/home/user/work/procrace/baselines/syspro/inputs/C3_cFE73.md:15:CFE_SB_CreatePipe
+/home/user/work/procrace/baselines/syspro/inputs/R2_cFE2663.md:3:CFE_SB_CreatePipe
+
+## 5. Unfiltered strace of primitives.c (rebuild of /home/user/work/procrace/baselines/syspro/primitives.c; gcc -O0 -pthread; glibc 2.39-0ubuntu8.9)
+# The 01:37 log used -e trace=<list>; this run has no filter.
+getpid()                                = 19195
+getpid()                                = 19195
+getpid()                                = 19195
+getpid()                                = 19195
+rt_sigaction(SIGRT_1, {sa_handler=0x7f7330e99610, sa_mask=[], sa_flags=SA_RESTORER|SA_ONSTACK|SA_RESTART|SA_SIGINFO, sa_restorer=0x7f7330e45330}, NULL, 8) = 0
+rt_sigprocmask(SIG_UNBLOCK, [RTMIN RT_1], NULL, 8) = 0
+mmap(NULL, 8392704, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7f73305ff000
+mprotect(0x7f7330600000, 8388608, PROT_READ|PROT_WRITE) = 0
+getrandom("\x1e\x20\x9d\xe4\x3e\x6c\x09\xd9", 8, GRND_NONBLOCK) = 8
+brk(NULL)                               = 0x55eab6988000
+brk(0x55eab69a9000)                     = 0x55eab69a9000
+rt_sigprocmask(SIG_BLOCK, ~[], [], 8)   = 0
+clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f7330dff990, parent_tid=0x7f7330dff990, exit_signal=0, stack=0x7f73305ff000, stack_size=0x7fff80, tls=0x7f7330dff6c0}strace: Process 19196 attached
+ => {parent_tid=[19196]}, 88) = 19196
+[pid 19195] rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+[pid 19196] rseq(0x7f7330dfffe0, 0x20, 0, 0x53053053 <unfinished ...>
+[pid 19195] futex(0x7f7330dff990, FUTEX_WAIT_BITSET|FUTEX_CLOCK_REALTIME, 19196, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+[pid 19196] <... rseq resumed>)         = 0
+[pid 19196] set_robust_list(0x7f7330dff9a0, 24) = 0
+[pid 19196] rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+[pid 19196] rt_sigprocmask(SIG_BLOCK, ~[RT_1], NULL, 8) = 0
+[pid 19196] madvise(0x7f73305ff000, 8368128, MADV_DONTNEED) = 0
+[pid 19196] exit(0)                     = ?
+[pid 19196] +++ exited with 0 +++
+<... futex resumed>)                    = 0
+getpid()                                = 19195
+mq_open("syspro_probe_q", O_RDWR|O_CREAT, 0600, {mq_flags=0, mq_maxmsg=4, mq_msgsize=8, mq_curmsgs=0}) = 3
+close(3)                                = 0
+mq_unlink("syspro_probe_q")             = 0
+getpid()                                = 19195
+exit_group(0)                           = ?
++++ exited with 0 +++
+
+## 6. Syscalls of the PSP/OSAL calls that run in a new core-app thread before its main, on this glibc (probe, not cFS)
+/* Which syscalls do the PSP/OSAL calls that run in a new cFE core-app thread before its main issue on this glibc? (probe, not cFS) */
+#define _GNU_SOURCE
+#include <pthread.h>
+#include <sched.h>
+#include <signal.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+static void h(int s, siginfo_t *i, void *c) { (void)s; (void)i; (void)c; }
+int main(void) {
+    cpu_set_t cpuset; struct sigaction sa = {0}; struct timespec ts;
+    syscall(39); /* marker */
+    CPU_ZERO(&cpuset); CPU_SET(0, &cpuset);
+    pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset); /* cfe_psp_start.c:188 (CFE_* task names) */
+    syscall(39); /* marker */
+    pthread_setname_np(pthread_self(), "CFE_SB");                     /* cfe_psp_start.c:201 */
+    syscall(39); /* marker */
+    clock_gettime(CLOCK_MONOTONIC, &ts); ts.tv_nsec += 1000000; if (ts.tv_nsec >= 1000000000) { ts.tv_nsec -= 1000000000; ts.tv_sec++; }
+    clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, NULL);       /* os-impl-tasks.c:761 (OS_TaskDelay_Impl) */
+    syscall(39); /* marker */
+    sa.sa_sigaction = h; sa.sa_flags = SA_SIGINFO;
+    sigaction(SIGFPE, &sa, NULL);                                      /* cfe_psp_exception.c:179 via L266 */
+    syscall(39); /* marker */
+    return 0;
+}
+getpid()                                = 19208
+sched_setaffinity(19208, 128, [0])      = 0
+getpid()                                = 19208
+prctl(PR_SET_NAME, "CFE_SB")            = 0
+getpid()                                = 19208
+clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=4760, tv_nsec=718804379}, NULL) = 0
+getpid()                                = 19208
+rt_sigaction(SIGFPE, {sa_handler=0x55a0dd395229, sa_mask=[], sa_flags=SA_RESTORER|SA_SIGINFO, sa_restorer=0x7fb7f1045330}, NULL, 8) = 0
+getpid()                                = 19208
+exit_group(0)                           = ?
++++ exited with 0 +++
+
+## 7. Source anchors at the reference revisions
+. 088b2fa
+osal d2d877a6
+cfe c5fb2b4d
+psp c4b3b0b
+apps/cf 15a871e
+# osapi-task.c: new task OS_TaskEntryPoint -> OS_TaskPrepare (GLOBAL lock) -> OS_NotifyEvent(TASK_STARTUP); creator AllocateNew -> TaskCreate_Impl -> FinalizeNew
+84:    return_code = OS_ObjectIdGetById(OS_LOCK_MODE_GLOBAL, OS_OBJECT_TYPE_OS_TASK, task_id, &token);
+103:        return_code = OS_NotifyEvent(OS_EVENT_TASK_STARTUP, task_id, NULL);
+128:    if (OS_TaskPrepare(task_id, &task_entry) == OS_SUCCESS)
+187:    return_code = OS_ObjectIdAllocateNew(LOCAL_OBJID_TYPE, task_name, &token);
+204:        return_code = OS_TaskCreate_Impl(&token, flags);
+207:        return_code = OS_ObjectIdFinalizeNew(return_code, &token, task_id);
+# osapi-common.c
+81:        status = OS_SharedGlobalVars.EventHandler(event, object_id, data);
+# cfe_psp_start.c
+164:        case OS_EVENT_RESOURCE_CREATED:
+170:        case OS_EVENT_TASK_STARTUP:
+172:            /* New task is starting. Invoked from within the task context. */
+184:                if (strncmp(taskname, "CFE_", 4) == 0)
+188:                    pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset);
+201:                pthread_setname_np(pthread_self(), taskname);
+361:    OS_RegisterEventHandler(CFE_PSP_OS_EventHandler);
+# cfe_psp_exception.c
+179:    sigaction(signo, &sa, NULL);
+266:    CFE_PSP_AttachSigHandler(SIGFPE);
+# cfe_es_apps.c: GetTaskFunction delays before the app main runs; AppCreate window
+575:        OS_TaskDelay(CFE_PLATFORM_ES_STARTUP_SYNC_POLL_MSEC);
+613:void CFE_ES_TaskEntryPoint(void)
+625:    if (CFE_ES_GetTaskFunction(&RealEntryFunc) == CFE_SUCCESS)
+633:        CFE_PSP_SetDefaultExceptionEnvironment();
+639:        (*RealEntryFunc)();
+664:    OsStatus = OS_TaskCreate(&OsalTaskId,           /* task id */
+666:                             CFE_ES_TaskEntryPoint, /* task function pointer */
+672:    CFE_ES_LockSharedData(__func__, __LINE__);
+# cfe_es_start.c
+810:            ReturnCode = CFE_ES_StartAppTask(&AppRecPtr->MainTaskId,
+# os-impl-tasks.c
+761:        status = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &sleep_end, NULL);
+# cfe_sb_objtab.c
+33:const Target_ObjectTable_t CFE_SB_ModuleEntry = { .Name      = "CFE_SB",
+# cfe_sb_task.c
+77:    Status = CFE_SB_AppInit();
+138:    CFE_ES_GetAppID(&CFE_SB_Global.AppId);
+155:    Status = CFE_EVS_Register(CFE_SB_Global.EventFilters, CfgFileEventsToFilter, CFE_EVS_EventFilter_BINARY);
+# osapi-idmap.c: record states during OS_TaskCreate
+438:                    obj->active_id = expected_id;
+460:        else if (token->lock_mode == OS_LOCK_MODE_NONE || !OS_ObjectIdEqual(obj->active_id, OS_OBJECT_ID_RESERVED))
+476:        if (attempts >= 5)
+478:            return_code = OS_ERR_OBJECT_IN_USE;
+485:        OS_WaitForStateChange(token, attempts);
+513:            if (token->lock_mode == OS_LOCK_MODE_REFCOUNT || token->lock_mode == OS_LOCK_MODE_EXCLUSIVE)
+859:    OS_ObjectIdTransactionFinish(token, &final_id);
+897:    OS_ObjectIdTransactionFinish(token, &final_id);
+1171:    return_code = OS_ObjectIdTransactionInit(OS_LOCK_MODE_EXCLUSIVE, idtype, token);
+# os-impl-idmap.c
+92:        ret = pthread_mutex_lock(&impl->mutex);
+116:        ret = pthread_cond_broadcast(&impl->cond);
+123:        ret = pthread_mutex_unlock(&impl->mutex);
+156:        ts.tv_nsec += attempts * attempts * 10000000;
+169:    pthread_cond_timedwait(&impl->cond, &impl->mutex, &ts);
+
+## 8. Provenance of container_kernel_caps.log (2026-10-07)
+fc-v lines in container_kernel_caps.log: 0
+2026-10-07 07:22:03.306019278 +0000 /home/user/Shape-Perf/research/cfs_procrace/baselines/logs/racepro_scribe_runtime.log
+2026-10-07 07:22:20.438020296 +0000 /home/user/Shape-Perf/research/cfs_procrace/baselines/logs/container_kernel_caps.log
+# uname -r: 6.18.44-fc-v77

@@ -1,0 +1,7 @@
+# space_guard.sh kind=scratch-ctest need=100000000 floor=314572800 interval=2 cmd=ctest -R lint_|static_fixture_compile|static_golden -j4
+start 2026-11-19T04:14:09.247Z free=873365504 threshold=414572800
+sample 2026-11-19T04:14:09.252Z 873361408
+sample 2026-11-19T04:14:11.257Z 873271296
+sample 2026-11-19T04:14:13.263Z 873267200
+sample 2026-11-19T04:14:15.269Z 873267200
+end 2026-11-19T04:14:17.275Z kind=scratch-ctest verdict=completed rc=8 free=873349120 lowest=873267200 dip=98304 change=-16384

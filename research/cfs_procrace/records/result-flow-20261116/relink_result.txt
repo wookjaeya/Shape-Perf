@@ -1,0 +1,32 @@
+# relink_expected.sha256: which of the 14 changed (the declaration allows each to change)
+lib/llvm/libkz-llvm.a: changed (relinked)
+tools/kz-static/kz-static: changed (relinked)
+tests/static/test_static_reasons: changed (relinked)
+tests/static/test_static_plan: changed (relinked)
+tests/static/test_static_unroll: changed (relinked)
+tests/static/test_static_flow: changed (relinked)
+tests/static/test_static_elf32: changed (relinked)
+tests/static/test_static_wrappers: changed (relinked)
+tests/static/test_static_gitrev: changed (relinked)
+tests/static/test_static_link: changed (relinked)
+tests/static/test_static_recipe: changed (relinked)
+tests/static/test_static_expr: changed (relinked)
+tests/static/test_static_cli: changed (relinked)
+tests/static/static_golden: changed (relinked)
+# not_relink.sha256 (110): must be the same
+OK lines: 110
+# the link lines of the two makes
+[ 78%] Linking CXX static library libkz-llvm.a
+[100%] Linking CXX executable kz-static
+[ 91%] Linking CXX executable static_golden
+[ 92%] Linking CXX executable test_static_expr
+[ 93%] Linking CXX executable test_static_flow
+[ 94%] Linking CXX executable test_static_recipe
+[ 94%] Linking CXX executable test_static_gitrev
+[ 94%] Linking CXX executable test_static_unroll
+[ 95%] Linking CXX executable test_static_wrappers
+[ 98%] Linking CXX executable test_static_link
+[ 98%] Linking CXX executable test_static_elf32
+[ 99%] Linking CXX executable test_static_reasons
+[ 99%] Linking CXX executable test_static_plan
+[100%] Linking CXX executable test_static_cli

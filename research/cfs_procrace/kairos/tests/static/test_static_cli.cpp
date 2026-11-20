@@ -1,0 +1,2409 @@
+// The kz-static command line: usage errors, a unit that does not parse, damaged inputs, and the
+// whole basis -> extract path on a small synthetic program (two units, a link command, a table,
+// a startup script, a source tree with a commit), a closure of an executable with the
+// modules its startup script loads (recipe `module`), and the profile-free mode on such a closure.
+//
+//   test_static_cli <kz-static> <fixtures-dir> <objects-dir> <profile-dir> <c-compiler> <work-dir>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "kz/core/container.hpp"
+#include "kz/core/sha256.hpp"
+#include "support/kz_test.hpp"
+
+namespace fs = std::filesystem;
+
+namespace {
+
+int run(const std::string& command, std::string* out) {
+  out->clear();
+  FILE* p = popen((command + " 2>&1").c_str(), "r");
+  if (p == nullptr) return -1;
+  char buf[4096];
+  size_t n;
+  while ((n = std::fread(buf, 1, sizeof buf, p)) > 0) out->append(buf, n);
+  const int status = pclose(p);
+  return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+}
+
+std::string q(const std::string& s) { return "'" + s + "'"; }
+
+void write(const fs::path& p, const std::string& text) {
+  fs::create_directories(p.parent_path());
+  std::ofstream(p, std::ios::binary) << text;
+}
+
+std::string read(const fs::path& p) {
+  std::ifstream in(p, std::ios::binary);
+  std::ostringstream ss;
+  ss << in.rdbuf();
+  return ss.str();
+}
+
+bool has(const std::string& text, const std::string& part) { return text.find(part) != std::string::npos; }
+
+}  // namespace
+
+int main(int argc, char** argv) {
+  if (argc != 7) {
+    std::fprintf(stderr, "usage: test_static_cli <kz-static> <fixtures-dir> <objects-dir> <profile-dir> <c-compiler> <work-dir>\n");
+    return 2;
+  }
+  const std::string tool = argv[1], fixtures = argv[2], objects = argv[3], profile = argv[4], cc = argv[5];
+  const fs::path work = fs::path(argv[6]) / "cli";
+  fs::remove_all(work);
+  fs::create_directories(work);
+  std::string out;
+
+  // ---- usage ---------------------------------------------------------------------------------------
+  KZ_CHECK_EQ(run(q(tool), &out), 2);
+  KZ_CHECK(has(out, "usage:"));
+  KZ_CHECK_EQ(run(q(tool) + " frobnicate", &out), 2);
+  KZ_CHECK_EQ(run(q(tool) + " extract", &out), 2);
+  KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " -o x --basis a --source b", &out), 2);
+  KZ_CHECK(has(out, "exclude each other"));
+  KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " -o x --source y --no-such-option", &out), 2);
+  KZ_CHECK(has(out, "unknown option"));
+  KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " -o x --source y --target NotAField", &out), 2);
+  KZ_CHECK(has(out, "Type.field"));
+  KZ_CHECK_EQ(run(q(tool) + " basis --profile " + q(profile), &out), 2);
+  KZ_CHECK_EQ(run(q(tool) + " reach " + q((work / "none").string()), &out), 2);
+  KZ_CHECK_EQ(run(q(tool) + " show", &out), 2);
+
+  // the identity: the tool hash is stable between runs
+  {
+    std::string a, b;
+    KZ_CHECK_EQ(run(q(tool) + " --identity", &a), 0);
+    KZ_CHECK_EQ(run(q(tool) + " --identity", &b), 0);
+    KZ_CHECK_EQ(a, b);
+    KZ_CHECK(has(a, "tool=kz-static\ntool_sha256="));
+  }
+
+  // ---- inputs that are wrong ---------------------------------------------------------------------
+  // a unit that does not parse stops the run and names the file
+  KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(fixtures + "/broken/syntax_error.c") + " -o " + q((work / "broken.kz").string()) + " -- -std=c99", &out), 1);
+  KZ_CHECK(has(out, "syntax_error.c"));
+  KZ_CHECK(!fs::exists(work / "broken.kz"));
+  // a profile that is not there
+  KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q((work / "no_profile").string()) + " --source " + q(fixtures + "/spawn.c") + " -o " + q((work / "x.kz").string()) + " -- -std=c99", &out), 1);
+  // a damaged container
+  write(work / "garbage.kz", "this is not a container");
+  KZ_CHECK_EQ(run(q(tool) + " show " + q((work / "garbage.kz").string()), &out), 1);
+  KZ_CHECK_EQ(run(q(tool) + " show " + q((work / "missing.kz").string()), &out), 1);
+
+  // a facts container is not a basis
+  const std::string facts = (work / "spawn.kz").string();
+  KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(fixtures + "/spawn.c") + " --root " + q(fixtures) + " -o " + q(facts) + " -- -std=c99", &out), 0);
+  KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --basis " + q(facts) + " -o " + q((work / "y.kz").string()), &out), 1);
+  KZ_CHECK(has(out, "not a basis"));
+
+  // the filters of `show`: one section, one callee
+  KZ_CHECK_EQ(run(q(tool) + " show " + q(facts) + " --section targets", &out), 0);
+  KZ_CHECK(has(out, "[targets]") && !has(out, "[calls]"));
+  KZ_CHECK_EQ(run(q(tool) + " show " + q(facts) + " --section calls --callee fx_spawn", &out), 0);
+  KZ_CHECK(has(out, "spawn.c:13:3 start_direct -> fx_spawn"));
+  KZ_CHECK_EQ(run(q(tool) + " show " + q(facts) + " --section calls --callee start_with", &out), 0);
+  KZ_CHECK(!has(out, "-> fx_spawn"));
+
+  // ---- a synthetic program: basis, then extract under it ------------------------------------------
+  const fs::path D = work / "mini";
+  const std::string rev_a = "0123456789abcdef0123456789abcdef01234567", rev_b = "fedcba9876543210fedcba9876543210fedcba98";
+  fs::create_directories(D / "obj");
+  fs::create_directories(D / "src");
+  fs::create_directories(D / "profile");
+  fs::copy_file(fs::path(objects) / "basis_unit_a.c", D / "src/basis_unit_a.c");
+  fs::copy_file(fs::path(objects) / "basis_unit_b.c", D / "src/basis_unit_b.c");
+  for (const char* n : {"a", "b"}) {
+    const std::string src = (D / (std::string("src/basis_unit_") + n + ".c")).string();
+    KZ_CHECK_EQ(run(q(cc) + " -std=c99 -c " + q(src) + " -o " + q((D / (std::string("obj/") + n + ".o")).string()), &out), 0);
+  }
+  const std::string a_c = (D / "src/basis_unit_a.c").string(), b_c = (D / "src/basis_unit_b.c").string();
+  // the compile database: the second entry for b.o is a variant of the same object (a coverage build, say)
+  write(D / "compile_commands.json",
+        "[\n{\"directory\": \"" + D.string() + "\", \"command\": \"" + cc + " -std=c99 -c " + a_c + " -o obj/a.o\", \"file\": \"" + a_c + "\"},\n" +
+            "{\"directory\": \"" + D.string() + "\", \"command\": \"" + cc + " -std=c99 -c " + b_c + " -o obj/b.o\", \"file\": \"" + b_c + "\"},\n" +
+            "{\"directory\": \"" + D.string() + "\", \"command\": \"" + cc + " -std=c99 -DVARIANT=1 -c " + b_c + " -o obj/b.o\", \"file\": \"" + b_c + "\"}\n]\n");
+  write(D / "link.txt", cc + " -o prog obj/a.o obj/b.o -lm\n");
+  write(D / "cf/start.scr", "! the startup script\nLIB, libx, init_fn, 0\n\nAPP, appy, main_fn, 50, 4096\n");
+  write(D / ".git/HEAD", rev_a + "\n");
+  write(D / "recipe.kzb", R"(kzb 1;
+name "mini";
+link "link.txt";
+table "TBL" in "src/basis_unit_b.c";
+declared "claim.unchecked" "a statement to be checked" authored "the test, as an example of a hand-entered fact";
+startup_script {
+  reset POWERON;
+  rule POWERON nonvolatile;
+  file nonvolatile const "STARTUP_FILE" in "src/basis_unit_a.c";
+  mount "/cf" "cf";
+  entry library "LIB";
+  entry app "APP";
+}
+)");
+  for (const fs::directory_entry& e : fs::directory_iterator(profile))
+    if (e.path().extension() == ".kzp") fs::copy_file(e.path(), D / "profile" / e.path().filename());
+  write(D / "profile/10_source.kzp", "phi 1;\nsource fx root \"\" rev \"" + rev_a + "\";\nconst FX_LIMIT = ref eval \"ITEM_LIMIT\" in \"src/basis_unit_b.c\" prov fx_author;\n");
+
+  const std::string basis_cmd = q(tool) + " basis --profile " + q((D / "profile").string()) + " --compile-db " + q((D / "compile_commands.json").string()) + " --build-dir " + q(D.string()) +
+                                " --bundle-root " + q(D.string()) + " --recipe " + q((D / "recipe.kzb").string()) + " --text";
+  const std::string basis1 = (D / "basis1.kz").string(), basis2 = (D / "basis2.kz").string();
+  KZ_CHECK_EQ(run(basis_cmd + " -o " + q(basis1), &out), 0);
+  KZ_CHECK(has(out, "translation units          2"));
+  KZ_CHECK(has(out, "1 at the pinned revision"));
+  KZ_CHECK(has(out, "two compile commands produce"));
+  KZ_CHECK(has(out, "startup script             cf/start.scr (1 libraries, 1 applications)"));
+  KZ_CHECK(has(out, "hand-entered items         2"));
+  KZ_CHECK(has(out, "const.FX_LIMIT = 40   [evaluated in src/basis_unit_b.c]"));
+  KZ_CHECK(has(out, "table.TBL.entries = 2 (null-terminated)"));
+  KZ_CHECK(has(out, "table.TBL[1] = \"second\", 40"));
+  KZ_CHECK(has(out, "link.members_in_program = 2"));
+  KZ_CHECK(has(out, "source.fx.revision_actual = " + rev_a + "  (from-reference)"));
+  KZ_CHECK(has(out, "startup.entry[0] = library libx, init_fn, 0"));
+  KZ_CHECK(has(out, "startup.entry[1] = app appy, main_fn, 50, 4096"));
+  KZ_CHECK(has(out, "claim.unchecked = a statement to be checked  (declared-assumption)"));
+  KZ_CHECK(has(out, "recipe.path = recipe.kzb"));
+  KZ_CHECK(has(out, "link.options_ignored = -lm"));
+  // the same inputs give the same bytes
+  KZ_CHECK_EQ(run(basis_cmd + " -o " + q(basis2), &out), 0);
+  KZ_CHECK(read(basis1) == read(basis2));
+  KZ_CHECK(!read(basis1).empty());
+
+  // a tree at another commit is recorded as a deviation, not hidden
+  write(D / ".git/HEAD", rev_b + "\n");
+  KZ_CHECK_EQ(run(basis_cmd + " -o " + q((D / "basis3.kz").string()), &out), 0);
+  KZ_CHECK(has(out, "0 at the pinned revision"));
+  KZ_CHECK(has(out, "source.fx.revision_actual = " + rev_b + "  (deviation)"));
+  write(D / ".git/HEAD", rev_a + "\n");
+
+  // a missing recipe file is an input error
+  KZ_CHECK_EQ(run(q(tool) + " basis --profile " + q((D / "profile").string()) + " --compile-db " + q((D / "compile_commands.json").string()) + " --build-dir " + q(D.string()) + " --bundle-root " +
+                      q(D.string()) + " --recipe " + q((D / "nothing.kzb").string()) + " -o " + q((D / "b.kz").string()),
+                  &out),
+              2);
+
+  // extract under the basis: the units come from the basis, the facts carry its hash
+  const std::string facts_mini = (D / "facts.kz").string();
+  KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q((D / "profile").string()) + " --basis " + q(basis1) + " -o " + q(facts_mini) + " --target Item.stack", &out), 0);
+  KZ_CHECK(has(out, "translation units          2"));
+  kz::Container basis_c, facts_c;
+  KZ_CHECK_OK(kz::Container::read_file(basis1, &basis_c));
+  KZ_CHECK_OK(kz::Container::read_file(facts_mini, &facts_c));
+  KZ_CHECK_OK(facts_c.verify_content());
+  KZ_CHECK(facts_c.basis_hash() == basis_c.artifact_hash());
+  bool parent_found = false;
+  for (const kz_parent& p : facts_c.parents())
+    if (std::memcmp(p.sha256, basis_c.artifact_hash().data(), 32) == 0) parent_found = true;
+  KZ_CHECK(parent_found);
+  // the image of the table reaches the facts: the item initialized with the constant
+  KZ_CHECK_EQ(run(q(tool) + " show " + q(facts_mini) + " --section init", &out), 0);
+  KZ_CHECK(has(out, "Item.stack in TBL static-initializer value=1"));
+  KZ_CHECK(has(out, "Item.stack in TBL static-initializer value=40"));
+
+  // ---- a derived (instrumented) build of the same program (SPEC 1.7 B'): its recorded commands carry the build
+  // compiler's plugin options.  The basis records them (TU flags, a deviation, the plugin file's hash); the front end
+  // reads the units without them; the facts are those of the reference commands, under the derived basis.
+  {
+    write(D / "fake_plugin.so", "a file standing for a build-compiler plugin; never loaded\n");
+    const std::string plug = " -fplugin=" + (D / "fake_plugin.so").string() + " -fplugin-arg-fake-manifest=" + (D / "recipe.kzb").string() + " -fplugin-arg-fake-quiet";
+    write(D / "compile_commands_derived.json",
+          "[\n{\"directory\": \"" + D.string() + "\", \"command\": \"" + cc + " -std=c99" + plug + " -c " + a_c + " -o obj/a.o\", \"file\": \"" + a_c + "\"},\n" +
+              "{\"directory\": \"" + D.string() + "\", \"command\": \"" + cc + " -std=c99" + plug + " -c " + b_c + " -o obj/b.o\", \"file\": \"" + b_c + "\"},\n" +
+              "{\"directory\": \"" + D.string() + "\", \"command\": \"" + cc + " -std=c99 -DVARIANT=1 -c " + b_c + " -o obj/b.o\", \"file\": \"" + b_c + "\"}\n]\n");
+    const std::string basis_d = (D / "basis_derived.kz").string(), facts_d = (D / "facts_derived.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " basis --profile " + q((D / "profile").string()) + " --compile-db " + q((D / "compile_commands_derived.json").string()) + " --build-dir " +
+                        q(D.string()) + " --bundle-root " + q(D.string()) + " --recipe " + q((D / "recipe.kzb").string()) + " --text -o " + q(basis_d),
+                    &out),
+                0);
+    KZ_CHECK(has(out, "instrumentation.units_with_compiler_plugin = 2 of 2 units, 1 distinct option set(s)  (deviation)"));
+    KZ_CHECK(has(out, "-fplugin-arg-fake-quiet  (2 units)"));
+    KZ_CHECK(has(out, "instrumentation.plugin_file = fake_plugin.so sha256 "));
+    KZ_CHECK(has(out, "front_end.arguments_removed"));
+    KZ_CHECK(has(out, "const.FX_LIMIT = 40   [evaluated in src/basis_unit_b.c]"));  // the constants are read without the plugin options
+    KZ_CHECK(!has(out, "link.members_without_command"));
+    KZ_CHECK(read(basis_d) != read(basis1));
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q((D / "profile").string()) + " --basis " + q(basis_d) + " -o " + q(facts_d) + " --target Item.stack", &out), 0);
+    kz::Container fd;
+    KZ_CHECK_OK(kz::Container::read_file(facts_d, &fd));
+    KZ_CHECK_OK(fd.verify_content());
+    // the facts sections are those of the reference commands; only the header (basis hash, parents) and the note that
+    // names the basis ("extract.units_from basis <first 16 hex digits>", in STRINGS) differ
+    kz::Container bd;
+    KZ_CHECK_OK(kz::Container::read_file(basis_d, &bd));
+    const std::string href = kz::to_hex(basis_c.artifact_hash()).substr(0, 16), hder = kz::to_hex(bd.artifact_hash()).substr(0, 16);
+    size_t compared = 0, differing = 0;
+    for (const kz_section_entry& e : facts_c.section_table()) {
+      size_t na = 0, nb = 0;
+      const uint8_t* pa = facts_c.section_data(e.type, &na);
+      const uint8_t* pb = fd.section_data(e.type, &nb);
+      ++compared;
+      std::string a(reinterpret_cast<const char*>(pa), na), b(pb == nullptr ? "" : std::string(reinterpret_cast<const char*>(pb), nb));
+      if (e.type == KZ_SEC_STRINGS) {
+        const size_t at = a.find(href);
+        if (at != std::string::npos) a.replace(at, href.size(), hder);
+      }
+      if (pb == nullptr || a != b) {
+        std::printf("derived facts: section %u differs\n", e.type);
+        ++differing;
+      }
+    }
+    KZ_CHECK(compared > 0);
+    KZ_CHECK_EQ(differing, static_cast<size_t>(0));
+    KZ_CHECK_EQ(fd.section_table().size(), facts_c.section_table().size());
+    KZ_CHECK(fd.basis_hash() != facts_c.basis_hash());
+    // a link member that no compile command produces (an instrumentation runtime linked from outside the build) is recorded
+    KZ_CHECK_EQ(run(q(cc) + " -std=c99 -c " + q((fs::path(objects) / "basis_unit_a.c").string()) + " -DKZ_OUTSIDE=1 -o " + q((D / "obj/outside.o").string()), &out), 0);
+    write(D / "link_outside.txt", cc + " -o prog obj/a.o obj/b.o obj/outside.o -lm\n");
+    KZ_CHECK_EQ(run(q(tool) + " basis --profile " + q((D / "profile").string()) + " --compile-db " + q((D / "compile_commands_derived.json").string()) + " --build-dir " +
+                        q(D.string()) + " --bundle-root " + q(D.string()) + " --recipe " + q((D / "recipe.kzb").string()) + " --link " + q((D / "link_outside.txt").string()) +
+                        " --text -o " + q((D / "basis_outside.kz").string()),
+                    &out),
+                0);
+    KZ_CHECK(has(out, "link.members_without_command = 1: obj/outside.o (named on the link command)"));
+  }
+
+  // ---- a closure: the executable linked with the modules its startup script loads ------------------
+  // The application stores an id through the executable's API (an out pointer); without the
+  // executable's body the field would be DISABLED (address escape), in the closure it has a writer.
+  {
+    const fs::path C = work / "clos";
+    for (const char* d : {"src", "obj", "cf", "mods/mylib", "mods/myapp", "profile"}) fs::create_directories(C / d);
+    write(C / "src/core_main.c",
+          "#define NONVOL_MOUNT \"/cf\"\n#define MODULE_EXT \".so\"\n#define STARTUP_FILE \"/cf/start.scr\"\n"
+          "const char *nonvol_mount(void) { return NONVOL_MOUNT; }\nconst char *module_ext(void) { return MODULE_EXT; }\n"
+          "const char *startup_file(void) { return STARTUP_FILE; }\nint main(void) { return 0; }\n");
+    write(C / "src/core_api.c", "typedef struct { int obj_id; } Rec;\nRec rec_table[2];\nint sem_create(int *sem_id) { rec_table[0].obj_id = 7; *sem_id = rec_table[0].obj_id; return 0; }\n");
+    write(C / "src/lib.c", "int lib_helper(int x) { return x + 1; }\n");
+    write(C / "src/app.c",
+          "typedef struct { int sem; } Throttle;\nThrottle thr[2];\nint sem_create(int *sem_id);\nint lib_helper(int x);\nint ext_fn(void);\n"
+          "int app_main(void) {\n  int i;\n  for (i = 0; i < 2; ++i)\n    if (sem_create(&thr[i].sem) != 0) return lib_helper(i);\n  return ext_fn();\n}\n");
+    write(C / "src/ext.c", "int ext_fn(void) { return 3; }\n");
+    std::string cdb = "[\n";
+    for (const char* n : {"core_main", "core_api", "lib", "app"}) {
+      const std::string src = (C / "src" / (std::string(n) + ".c")).string();
+      const std::string cmd = cc + " -std=c99 -fPIC -c " + src + " -o obj/" + n + ".o";
+      KZ_CHECK_EQ(run("cd " + q(C.string()) + " && " + cmd, &out), 0);
+      cdb += std::string(cdb.size() > 2 ? ",\n" : "") + "{\"directory\": \"" + C.string() + "\", \"command\": \"" + cmd + "\", \"file\": \"" + src + "\"}";
+    }
+    write(C / "compile_commands.json", cdb + "\n]\n");
+    // the executable exports its symbols (-rdynamic); the modules are shared objects
+    write(C / "link_core.txt", cc + " -rdynamic -o core obj/core_main.o obj/core_api.o\n");
+    write(C / "mods/mylib/link.txt", cc + " -shared -o mylib.so ../../obj/lib.o\n");
+    write(C / "mods/myapp/link.txt", cc + " -shared -o myapp.so ../../obj/app.o\n");
+    KZ_CHECK_EQ(run("cd " + q(C.string()) + " && " + read(C / "link_core.txt"), &out), 0);
+    KZ_CHECK_EQ(run("cd " + q((C / "mods/mylib").string()) + " && " + read(C / "mods/mylib/link.txt"), &out), 0);
+    KZ_CHECK_EQ(run("cd " + q((C / "mods/myapp").string()) + " && " + read(C / "mods/myapp/link.txt"), &out), 0);
+    KZ_CHECK_EQ(run(q(cc) + " -shared -fPIC -o " + q((C / "cf/extlib.so").string()) + " " + q((C / "src/ext.c").string()), &out), 0);
+    fs::copy_file(C / "mods/mylib/mylib.so", C / "cf/mylib.so");
+    fs::copy_file(C / "mods/myapp/myapp.so", C / "cf/myapp.so");
+    const std::string script_ok = "LIB, extlib, NULL, EXT_LIB, 0;\nLIB, mylib, NULL, MY_LIB, 0;\nAPP, myapp, app_main, MY_APP, 50;\n";
+    write(C / "cf/start.scr", script_ok);
+    write(C / "recipe.kzb", R"(kzb 1;
+name "closure";
+link "link_core.txt";
+binary "core";
+module "mylib" link "mods/mylib/link.txt";
+module "myapp" link "mods/myapp/link.txt";
+module "unused" link "mods/unused/link.txt";
+startup_script {
+  reset POWERON;
+  rule POWERON nonvolatile;
+  file nonvolatile const "STARTUP_FILE" in "src/core_main.c";
+  mount "/cf" "cf";
+  entry library "LIB" global;
+  entry app "APP" local;
+  module_file field 1 path const "NONVOL_MOUNT" extension const "MODULE_EXT" in "src/core_main.c";
+}
+)");
+    for (const fs::directory_entry& e : fs::directory_iterator(profile))
+      if (e.path().extension() == ".kzp") fs::copy_file(e.path(), C / "profile" / e.path().filename());
+    const std::string cbasis = q(tool) + " basis --profile " + q((C / "profile").string()) + " --compile-db " + q((C / "compile_commands.json").string()) + " --build-dir " + q(C.string()) +
+                               " --bundle-root " + q(C.string()) + " --recipe " + q((C / "recipe.kzb").string()) + " --text -o ";
+    const std::string cb = (C / "basis.kz").string(), cf = (C / "facts.kz").string();
+    KZ_CHECK_EQ(run(cbasis + q(cb), &out), 0);
+    KZ_CHECK(has(out, "translation units          4"));
+    KZ_CHECK(has(out, "modules in the closure     2 (units 2), loaded outside the closure 1"));
+    KZ_CHECK(has(out, "(bound otherwise by the loader 0, names defined twice 0)"));
+    KZ_CHECK(has(out, "module[extlib] = library (startup.entry[0], symbols global): /cf/extlib.so -> cf/extlib.so; outside the closure"));
+    KZ_CHECK(has(out, "module[myapp] = app (startup.entry[2], symbols local): /cf/myapp.so -> cf/myapp.so  (unset)"));
+    KZ_CHECK(has(out, "module[myapp].link.output_is_the_loaded_file = yes: mods/myapp/myapp.so"));
+    KZ_CHECK(has(out, "module[myapp].bound[core] = sem_create"));
+    KZ_CHECK(has(out, "module[myapp].bound[mylib] = lib_helper"));
+    KZ_CHECK(has(out, "module[myapp].bound[extlib] = ext_fn"));
+    KZ_CHECK(has(out, "module[unused] = not loaded by the selected startup script"));
+    KZ_CHECK(has(out, "closure.name_binding = the loader's binding: each of the 2 references across units"));
+    KZ_CHECK(has(out, "closure.units = 4 (2 of core, 2 of 2 modules"));
+    // the units of a module carry where they come from
+    kz::Container cbc;
+    KZ_CHECK_OK(kz::Container::read_file(cb, &cbc));
+    std::vector<kz_tu> tus;
+    KZ_CHECK_OK(cbc.read_section(KZ_SEC_TUS, &tus));
+    KZ_CHECK_EQ(tus.size(), size_t(4));
+    bool app_member = false;
+    for (const kz_tu& t : tus) {
+      std::string m;
+      cbc.string(t.member, &m);
+      if (m == "module myapp (app, symbols local), named on its link command") app_member = true;
+    }
+    KZ_CHECK(app_member);
+    // the extraction of the closure: the out-pointer store of the executable's body is a writer
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q((C / "profile").string()) + " --basis " + q(cb) + " -o " + q(cf) + " --target Throttle.sem", &out), 0);
+    KZ_CHECK(has(out, "translation units          4"));
+    KZ_CHECK(has(out, "location Throttle.sem   writers 1 (direct 0, data function 0, out-pointer 1"));
+    KZ_CHECK(has(out, "escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete"));
+    // the library loaded after the application: the loader cannot bind lib_helper, the merged
+    // program would; that is a deviation, not hidden
+    write(C / "cf/start.scr", "LIB, extlib, NULL, EXT_LIB, 0;\nAPP, myapp, app_main, MY_APP, 50;\nLIB, mylib, NULL, MY_LIB, 0;\n");
+    KZ_CHECK_EQ(run(cbasis + q((C / "basis_late.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "(bound otherwise by the loader 1, names defined twice 0)"));
+    KZ_CHECK(has(out, "myapp: lib_helper is defined in the closure by mylib, the loader binds it to nothing  (deviation)"));
+    // the file the script loads is not what the link wrote: the module is not linked
+    write(C / "cf/start.scr", script_ok);
+    {
+      std::ofstream(C / "cf/myapp.so", std::ios::binary | std::ios::app) << '\0';
+    }
+    KZ_CHECK_EQ(run(cbasis + q((C / "basis_other.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "module[myapp].link.output_is_the_loaded_file = no:"));
+    KZ_CHECK(has(out, "module myapp not linked: the bytes the link wrote are not the bytes the script loads"));
+    KZ_CHECK(has(out, "translation units          3"));
+  }
+
+  // ---- the profile-free mode (basis/extract --no-profile) --------------------------------------------
+  // No profile and no vocabulary: the built-in profile, the P0 table, the build and the startup-script
+  // block of the recipe.  The executable starts a task through a wrapper of pthread_create whose entry
+  // is stored in a global and called by a trampoline; the loader looks the application's entry up by
+  // name (dlsym) and passes it on as an integer converted to a function pointer.
+  {
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --profile " + q(profile) + " --source x.c -o x", &out), 2);
+    KZ_CHECK(has(out, "--profile and --no-profile exclude each other"));
+    for (const char* o : {"--target T.f", "--delay-op f", "--lock-op f", "--unlock-op f", "--spawn-op f", "--terminal-op f", "--poll-fn f"}) {
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source x.c -o x " + o, &out), 2);
+      KZ_CHECK(has(out, "--no-profile takes no vocabulary from the command line"));
+    }
+    KZ_CHECK_EQ(run(q(tool) + " basis --no-profile --profile " + q(profile) + " --compile-db a --build-dir b --bundle-root c -o x", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " basis --no-profile -o x", &out), 2);
+    const fs::path N = work / "noprof";
+    for (const char* d : {"src", "obj", "cf", "mods/myapp"}) fs::create_directories(N / d);
+    write(N / "src/core_main.c",
+          "#define NONVOL_MOUNT \"/cf\"\n#define MODULE_EXT \".so\"\n#define STARTUP_FILE \"/cf/start.scr\"\n"
+          "const char *nonvol_mount(void) { return NONVOL_MOUNT; }\nconst char *module_ext(void) { return MODULE_EXT; }\n"
+          "const char *startup_file(void) { return STARTUP_FILE; }\nint load_app(const char *symbol);\nint main(void) { return load_app(\"app_main\"); }\n");
+    write(N / "src/core_ldr.c",
+          "typedef unsigned long thr_t;\nint pthread_create(thr_t *t, const void *attr, void *(*start)(void *), void *arg);\n"
+          "void *dlsym(void *handle, const char *name);\ntypedef void (*entry_t)(void);\nentry_t task_entry;\n"
+          "static void *trampoline(void *arg) { (void)arg; task_entry(); return 0; }\n"
+          "int task_create(entry_t e) { thr_t t; task_entry = e; return pthread_create(&t, 0, trampoline, 0); }\n"
+          "unsigned long lookup(const char *name) { return (unsigned long)dlsym((void *)0, name); }\n"
+          "int load_app(const char *symbol) { return task_create((entry_t)lookup(symbol)); }\n");
+    write(N / "src/app.c", "void app_main(void) {}\n");
+    std::string cdb = "[\n";
+    for (const char* n : {"core_main", "core_ldr", "app"}) {
+      const std::string src = (N / "src" / (std::string(n) + ".c")).string();
+      const std::string cmd = cc + " -std=c99 -fPIC -c " + src + " -o obj/" + n + ".o";
+      KZ_CHECK_EQ(run("cd " + q(N.string()) + " && " + cmd, &out), 0);
+      cdb += std::string(cdb.size() > 2 ? ",\n" : "") + "{\"directory\": \"" + N.string() + "\", \"command\": \"" + cmd + "\", \"file\": \"" + src + "\"}";
+    }
+    write(N / "compile_commands.json", cdb + "\n]\n");
+    write(N / "link_core.txt", cc + " -rdynamic -o core obj/core_main.o obj/core_ldr.o\n");
+    write(N / "mods/myapp/link.txt", cc + " -shared -o myapp.so ../../obj/app.o\n");
+    KZ_CHECK_EQ(run("cd " + q(N.string()) + " && " + read(N / "link_core.txt"), &out), 0);
+    KZ_CHECK_EQ(run("cd " + q((N / "mods/myapp").string()) + " && " + read(N / "mods/myapp/link.txt"), &out), 0);
+    fs::copy_file(N / "mods/myapp/myapp.so", N / "cf/myapp.so");
+    write(N / "cf/start.scr", "APP, myapp, app_main, MY_APP, 50;\n");
+    write(N / "recipe.kzb", R"(kzb 1;
+name "profile-free closure";
+link "link_core.txt";
+binary "core";
+module "myapp" link "mods/myapp/link.txt";
+startup_script {
+  reset POWERON;
+  rule POWERON nonvolatile;
+  file nonvolatile const "STARTUP_FILE" in "src/core_main.c";
+  mount "/cf" "cf";
+  entry library "LIB" global;
+  entry app "APP" local;
+  module_file field 1 path const "NONVOL_MOUNT" extension const "MODULE_EXT" in "src/core_main.c";
+}
+)");
+    const std::string nb = (N / "basis.kz").string(), nf = (N / "facts.kz").string(), nf2 = (N / "facts2.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " basis --no-profile --compile-db " + q((N / "compile_commands.json").string()) + " --build-dir " + q(N.string()) + " --bundle-root " + q(N.string()) +
+                        " --recipe " + q((N / "recipe.kzb").string()) + " --text -o " + q(nb),
+                    &out),
+                0);
+    KZ_CHECK(has(out, "profile.mode = profile-free (--no-profile): the built-in profile phi 1; profile \"kz-static-builtin-minimal\";"));
+    KZ_CHECK(has(out, "startup.entry[0] = app myapp, app_main, MY_APP, 50"));
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --basis " + q(nb) + " -o " + q(nf), &out), 0);
+    KZ_CHECK(has(out, "profile-free mode            built-in profile, "));
+    KZ_CHECK(has(out, "startup-script entries     spawn calls with a data entry that reach the symbol lookup 1, rows 1 (in the closure 1)"));
+    KZ_CHECK(has(out, "spawn operations (F7)      entry-argument 0, called-by-entry 1, fixed-entry 0"));
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --basis " + q(nb) + " -o " + q(nf2), &out), 0);
+    KZ_CHECK_EQ(read(nf), read(nf2));
+    // the facts carry the built-in profile's hash, as the basis does, and record the mode
+    kz::Container nbc, nfc;
+    KZ_CHECK_OK(kz::Container::read_file(nb, &nbc));
+    KZ_CHECK_OK(kz::Container::read_file(nf, &nfc));
+    KZ_CHECK(nfc.profile_hash() == nbc.profile_hash());
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(nf) + " --section basis --section spawnwrap --section targets --section p0", &out), 0);
+    KZ_CHECK(has(out, "extract.mode = profile-free (--no-profile)"));
+    KZ_CHECK(has(out, "extract.builtin_profile = phi 1; profile \"kz-static-builtin-minimal\"; (profile hash in the header)"));
+    KZ_CHECK(has(out, "p0.pthread_create = thread-create; POSIX.1-2017 / glibc 2.39; source glibc 2.39 nptl/pthread_create.c:624"));
+    KZ_CHECK(has(out, "task_create called-by-entry param 0 {vocabulary}"));
+    KZ_CHECK(has(out, "load_app script-entry param 0 {}"));
+    KZ_CHECK(has(out, "entry app_main"));
+    KZ_CHECK(has(out, "chain load_app -> lookup -> dlsym"));
+    KZ_CHECK(has(out, "via startup.entry[0] = app myapp, app_main, MY_APP, 50"));
+    KZ_CHECK(has(out, "in load_app spawn-entry -> app_main via "));
+    KZ_CHECK(has(out, "startup-script entries through the symbol lookup of 1"));
+    KZ_CHECK(has(out, "dlsym symbol-lookup (dynamic loading) calls=1 {}"));
+    // a facts container of the profile-driven mode has none of the three sections, and its view shows none
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --basis " + q(nb) + " -o " + q((N / "facts_prof.kz").string()), &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((N / "facts_prof.kz").string()), &out), 0);
+    KZ_CHECK(!has(out, "[p0]") && !has(out, "[derived]") && !has(out, "[spawnwrap]") && !has(out, "extract.mode"));
+    kz::Container pfc;
+    KZ_CHECK_OK(kz::Container::read_file((N / "facts_prof.kz").string(), &pfc));
+    KZ_CHECK(pfc.find_section(KZ_SEC_P0_TABLE) == nullptr && pfc.find_section(KZ_SEC_OP_DERIV) == nullptr && pfc.find_section(KZ_SEC_SPAWN_WRAP) == nullptr);
+    KZ_CHECK(nfc.find_section(KZ_SEC_P0_TABLE) != nullptr && nfc.find_section(KZ_SEC_OP_DERIV) != nullptr && nfc.find_section(KZ_SEC_SPAWN_WRAP) != nullptr);
+    // The reading options compared with the basis (static_facts.md 5q).  The same options: "same".  An extra argument
+    // the basis was not made with: refused (rc 1, no facts file), unless --accept-option-difference, which records the
+    // difference as a policy deviation that every relations row carries (reading_options_differ, a layer token).
+    {
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(nf) + " --section basis", &out), 0);
+      KZ_CHECK(has(out, "extract.reading_options_vs_basis = same as basis front_end.arguments_added and front_end  (unset)\n"));
+      const std::string nfx = (N / "facts_x.kz").string(), nfa = (N / "facts_a.kz").string();
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --basis " + q(nb) + " --extra-arg -DKZ_OPTION_PROBE=1 -o " + q(nfx), &out), 1);
+      KZ_CHECK(has(out, "kz-static extract: the reading options differ from those of the basis (arguments: basis front_end.arguments_added ["));
+      KZ_CHECK(has(out, " -DKZ_OPTION_PROBE=1]); refused: "));
+      KZ_CHECK(!fs::exists(nfx));
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --basis " + q(nb) + " --extra-arg -DKZ_OPTION_PROBE=1 --accept-option-difference -o " + q(nfa), &out), 0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(nfa) + " --section basis", &out), 0);
+      KZ_CHECK(has(out, "extract.reading_options_vs_basis = differs (--accept-option-difference): arguments: basis front_end.arguments_added ["));
+      KZ_CHECK(has(out, " -DKZ_OPTION_PROBE=1]  (deviation)\n"));
+      KZ_CHECK(!has(out, "front end: basis front_end"));  // the same front end
+      KZ_CHECK(has(out, "extract.extra_arg[0] = -DKZ_OPTION_PROBE=1  (unset)\n"));
+      const std::string ra = (N / "rel_a.txt").string(), rs = (N / "rel_s.txt").string();
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q(nfa) + " -o " + q(ra), &out), 0);
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q(nf) + " -o " + q(rs), &out), 0);
+      const std::string rta = read(ra), rts = read(rs);
+      KZ_CHECK(has(rta, "  extract.reading_options_vs_basis = differs (--accept-option-difference): "));
+      KZ_CHECK(has(rts, "  extract.reading_options_vs_basis = same as basis front_end.arguments_added and front_end\n"));
+      KZ_CHECK(has(rta, "reasons of the whole facts on every row: ") && has(rta, "reading_options_differ(extraction options differ from the basis)"));
+      KZ_CHECK(!has(rts, "reading_options_differ(extraction options differ from the basis)") && !has(rts, "reading-options-differ"));
+      // every row of the facts read with other options carries the reason and the layer token
+      size_t rows = 0, with_reason = 0, with_token = 0;
+      std::istringstream ls(rta);
+      for (std::string l; std::getline(ls, l);) {
+        if (l.compare(0, 18, "      incomplete: ") == 0) {
+          ++rows;
+          if (has(l, "reading_options_differ(extraction options differ from the basis)")) ++with_reason;
+        }
+        if (l.compare(0, 14, "      layers: ") == 0 && has(l, " reading-options-differ(extract.reading_options_vs_basis)")) ++with_token;
+      }
+      KZ_CHECK_EQ(with_reason, rows);
+      KZ_CHECK_EQ(with_token, rows);
+      // no basis: nothing compared
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q((N / "src/app.c").string()) + " --root " + q(N.string()) + " -o " + q((N / "facts_s.kz").string()) + " -- -std=c99",
+                      &out),
+                  0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q((N / "facts_s.kz").string()) + " --section basis", &out), 0);
+      KZ_CHECK(has(out, "extract.reading_options_vs_basis = not compared: no basis (--source)  (unset)\n"));
+    }
+  }
+
+  // ---- the extended facts F1-F3 (READS, RETURNS, RET_CONSTS, LOOP_EXITS; kz_facts.h revision 6) ---------
+  // Off in the profile-driven mode unless --extended-facts is given (its facts are then written as before), always
+  // on in the profile-free mode.  With them on, the records of the earlier sections are the same: the string pool is
+  // canonical, so string offsets move with the new strings, but the view and the decoded records do not change, and
+  // the rows the earlier sections use are a prefix of FACT_EXPRS.
+  {
+    const fs::path X = work / "extended";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/flowfacts.c";
+    const std::string fa = (X / "plain.kz").string(), fb = (X / "ext.kz").string(), fc = (X / "np.kz").string(), fd = (X / "np2.kz").string();
+    auto ex = [&](const std::string& mode, const std::string& dst) {
+      return run(q(tool) + " extract " + mode + " --source " + q(src) + " --root " + q(fixtures) + " -o " + q(dst) + " -- -std=c99 -pedantic", &out);
+    };
+    KZ_CHECK_EQ(ex("--profile " + q(profile), fa), 0);
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts", fb), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fc), 0);
+    KZ_CHECK_EQ(ex("--no-profile --extended-facts", fd), 0);
+    KZ_CHECK_EQ(read(fc), read(fd));  // implied by --no-profile
+    kz::Container ca, cb, cn;
+    KZ_CHECK_OK(kz::Container::read_file(fa, &ca));
+    KZ_CHECK_OK(kz::Container::read_file(fb, &cb));
+    KZ_CHECK_OK(kz::Container::read_file(fc, &cn));
+    KZ_CHECK_OK(cb.verify_content());
+    KZ_CHECK_OK(cn.verify_content());
+    for (const uint32_t sec : {static_cast<uint32_t>(KZ_SEC_READS), static_cast<uint32_t>(KZ_SEC_RETURNS), static_cast<uint32_t>(KZ_SEC_RET_CONSTS),
+                               static_cast<uint32_t>(KZ_SEC_LOOP_EXITS)}) {
+      KZ_CHECK(ca.find_section(sec) == nullptr);
+      KZ_CHECK(cb.find_section(sec) != nullptr);
+      KZ_CHECK(cn.find_section(sec) != nullptr);
+    }
+    const std::string earlier =
+        " --section files --section functions --section calls --section derives --section loops --section iters --section order --section init --section consts"
+        " --section writers --section atype --section locs --section targets --section spawnparams --section image --section terminals --section outcalls --section fwrites";
+    std::string va, vb;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + earlier, &va), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + earlier, &vb), 0);
+    KZ_CHECK_EQ(va, vb);
+    KZ_CHECK(has(va, "[loops] ") && !has(va, "[reads]"));
+    std::vector<kz_fact_expr> xa, xb;
+    KZ_CHECK_OK(ca.read_section(KZ_SEC_FACT_EXPRS, &xa));
+    KZ_CHECK_OK(cb.read_section(KZ_SEC_FACT_EXPRS, &xb));
+    KZ_CHECK(xb.size() > xa.size());
+    for (size_t i = 0; i < xa.size() && i < xb.size(); ++i) {
+      std::string na, nb2;
+      ca.string(xa[i].name, &na);
+      cb.string(xb[i].name, &nb2);
+      KZ_CHECK(xa[i].op == xb[i].op && xa[i].flags == xb[i].flags && xa[i].a == xb[i].a && xa[i].b == xb[i].b && xa[i].value == xb[i].value && na == nb2);
+    }
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "extract.extended_facts = F1 READS, F2 RETURNS and RET_CONSTS, F3 LOOP_EXITS (kz_facts.h revision 6)"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + " --section basis", &out), 0);
+    KZ_CHECK(!has(out, "extract.extended_facts") && !has(out, "count.reads"));
+    // what the facts say about the fixture (both modes read the same bodies)
+    std::string vc;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section reads --section returns --section retconsts --section loopexits", &vc), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + " --section reads --section returns --section retconsts --section loopexits", &out), 0);
+    KZ_CHECK_EQ(vc, out);
+    // a validity branch on an indexed record, and an out-store of another field of it
+    KZ_CHECK(has(vc, "fx_owner_of reads field FxRec.used at flowfacts.c:38:65 root=global:fx_store use={branch} {} [fx_store.table[idx].used] index=[local:idx] ctx=(eq field:FxRec.used 1)"));
+    KZ_CHECK(has(vc, "fx_owner_of reads field FxRec.owner at flowfacts.c:39:32 root=global:fx_store use={out-store} {} [fx_store.table[idx].owner] index=[local:idx] ctx=(deref param:out#1)"));
+    // the subscript local with a single definition is written as that definition's value
+    KZ_CHECK(has(vc, "fx_my_owner reads field FxRec.used at flowfacts.c:132:28 root=global:fx_store use={branch} {index-unfolded} [fx_store.table[slot].used] index=[(call-result fx_self_index)]"));
+    // the contents of an array field passed to a call whose result decides a branch
+    KZ_CHECK(has(vc, "use={branch,call-argument} {array-contents} [fx_store.table[i].name]"));
+    // a read through a pointer parameter; a function pointer read as the callee
+    KZ_CHECK(has(vc, "fx_is_used reads field FxRec.used at flowfacts.c:56:44 root=param:r#0 use={return} {through-pointer}"));
+    KZ_CHECK(has(vc, "fx_run_hook reads field FxStore.hook at flowfacts.c:67:19 root=global:fx_store use={callee}"));
+    // the returned local resolved to its reaching definitions; the constants and when each is returned
+    KZ_CHECK(has(vc, "fx_owner_of returns at flowfacts.c:42:3 alt 0/2 const -3 [FX_ERR_ID] {from-definition,redefined-later}"));
+    KZ_CHECK(has(vc, "fx_classify returns -3 [FX_ERR_ID] rows=1 {from-definition,only-constants} when=(lt param:id#0 0)"));
+    KZ_CHECK(has(vc, "fx_classify returns -17 [FX_ERR_NOT_FOUND] rows=1 {from-definition,only-constants} when=(and (not (lt param:id#0 0)) (ge param:id#0 8))"));
+    KZ_CHECK(has(vc, "fx_count_plus returns at flowfacts.c:75:3 alt 0/1 expression (add field:FxStore.count param:k#0) [c + k] {unfolded,from-definition}"));
+    KZ_CHECK(has(vc, "fx_index_of returns at flowfacts.c:123:3 alt 0/1 local local:idx [idx] {}"));  // its address is taken
+    // every loop has its exits, a loop without a delay call included
+    KZ_CHECK(has(vc, "in fx_find_by_name exits=2 {} exit=(or (not (lt local:i 8))"));
+    KZ_CHECK(has(vc, "exit 1 break at flowfacts.c:49:82 {}"));
+    KZ_CHECK(has(vc, "in fx_spin exits=1 {no-exit} exit=0 mods=[global:fx_level]"));
+    KZ_CHECK(has(vc, "exit 0 goto at flowfacts.c:108:35 {}"));
+  }
+
+  // ---- the extended facts F4 and F6 (ARGFLOW, PARAM_FLOW, PTR_FIELDS, GLOBAL_IMAGES; kz_facts.h revision 7) ----------
+  // Written with the facts of revision 6 and after them: off in the profile-driven mode without --extended-facts, the
+  // earlier sections unchanged with it (view and FACT_EXPRS prefix), the same rows in both modes.  The bounds of the
+  // PARAM_FLOW composition and the image budget are tool parameters recorded as unspecified_by_reference.
+  {
+    const fs::path X = work / "argflow";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/argflow.c";
+    auto ex = [&](const std::string& mode, const std::string& dst) {
+      return run(q(tool) + " extract " + mode + " --source " + q(src) + " --root " + q(fixtures) + " -o " + q(dst) + " -- -std=c99 -pedantic", &out);
+    };
+    const std::string fa = (X / "plain.kz").string(), fb = (X / "ext.kz").string(), fc = (X / "np.kz").string(), fd = (X / "np2.kz").string();
+    KZ_CHECK_EQ(ex("--profile " + q(profile), fa), 0);
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts", fb), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fc), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fd), 0);
+    KZ_CHECK_EQ(read(fc), read(fd));
+    kz::Container ca, cb, cn;
+    KZ_CHECK_OK(kz::Container::read_file(fa, &ca));
+    KZ_CHECK_OK(kz::Container::read_file(fb, &cb));
+    KZ_CHECK_OK(kz::Container::read_file(fc, &cn));
+    KZ_CHECK_OK(cb.verify_content());
+    KZ_CHECK_OK(cn.verify_content());
+    for (const uint32_t sec : {static_cast<uint32_t>(KZ_SEC_ARGFLOW), static_cast<uint32_t>(KZ_SEC_PARAM_FLOW), static_cast<uint32_t>(KZ_SEC_PTR_FIELDS),
+                               static_cast<uint32_t>(KZ_SEC_GLOBAL_IMAGES)}) {
+      KZ_CHECK(ca.find_section(sec) == nullptr);
+      KZ_CHECK(cb.find_section(sec) != nullptr);
+      KZ_CHECK(cn.find_section(sec) != nullptr);
+    }
+    const std::string earlier =
+        " --section files --section functions --section calls --section derives --section loops --section iters --section order --section init --section consts"
+        " --section writers --section atype --section locs --section targets --section spawnparams --section image --section terminals --section outcalls --section fwrites";
+    std::string va, vb;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + earlier, &va), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + earlier, &vb), 0);
+    KZ_CHECK_EQ(va, vb);
+    std::vector<kz_fact_expr> xa, xb;
+    KZ_CHECK_OK(ca.read_section(KZ_SEC_FACT_EXPRS, &xa));
+    KZ_CHECK_OK(cb.read_section(KZ_SEC_FACT_EXPRS, &xb));
+    KZ_CHECK(xb.size() > xa.size());
+    bool prefix = true;
+    for (size_t i = 0; i < xa.size() && i < xb.size(); ++i)
+      prefix = prefix && xa[i].op == xb[i].op && xa[i].flags == xb[i].flags && xa[i].a == xb[i].a && xa[i].b == xb[i].b && xa[i].value == xb[i].value;
+    KZ_CHECK(prefix);
+    const std::string newer = " --section argflow --section paramflow --section ptrfields --section gimages";
+    std::string vn, vp;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + newer, &vn), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + newer, &vp), 0);
+    KZ_CHECK_EQ(vn, vp);
+    // ARGFLOW: the copy through a local, the base of a pointer-field path, the address of a global array element
+    KZ_CHECK(has(vn, "[(const void *)n] <- param root=name param=1 hops=1 {pointer-conversion} chain=(copy n param:name#1)"));
+    KZ_CHECK(has(vn, "[fx_global.slots[index].name] <- field FxSlot.name root=FxGlobal.slots base=pointer-field object=fx_global hops=0 {through-pointer,array-contents} index=[local:index]"));
+    KZ_CHECK(has(vn, "[&fx_table[i]] <- address <global>.fx_table root=fx_table base=global-array-element object=fx_table"));
+    KZ_CHECK(has(vn, "[index] <- local root=index base=local hops=0 {} (multiple-definitions)"));
+    // PARAM_FLOW: uses of depth 0, the composition through an indirect call to a comparison function without a body
+    KZ_CHECK(has(vn, "fx_create#2 d0 comparison at argflow.c:71:7 {} [pos >= FX_NAMES] expr=(ge param:pos#2 4)"));
+    KZ_CHECK(has(vn, "fx_create#1 d0 store at argflow.c:72:3 {} [fx_table[pos].name = name]"));
+    KZ_CHECK(has(vn, "fx_lookup#1 d0 comparison at argflow.c:62:8 {truth-test} [n]"));
+    KZ_CHECK(has(vn, "fx_lookup#0 d0 out-store at argflow.c:65:3"));
+    KZ_CHECK(has(vn, "fx_find#1 d0 call-argument -> fx_name_match#0 at site 2 argflow.c:54:9 {may,indirect,result-tested,in-loop}"));
+    KZ_CHECK(has(vn, "fx_lookup#1 d2 call-argument in fx_name_match at argflow.c:48:83"));
+    KZ_CHECK(has(vn, "chain fx_lookup#1 -> fx_find#1 -> fx_name_match#0"));
+    KZ_CHECK(has(vn, "fx_down#0 d1 comparison in fx_up"));
+    KZ_CHECK(has(vn, "fx_dispatch#0 d0 comparison at argflow.c:120:11 {switch} [code]"));
+    KZ_CHECK(has(vn, "fx_dispatch#0 d0 call-argument -> ?#0 at site 12 argflow.c:121:20 {indirect,unresolved} [code]"));
+    // PTR_FIELDS: the address write after the record is cleared, the reads it resolves, the order, the elements and their values
+    KZ_CHECK(has(vn, "0 address-write FxGlobal.slots at argflow.c:98:3 in fx_init root=fx_global -> fx_slots[0] [fx_slots] other-writes=0 {earlier-writes-overwritten}"));
+    KZ_CHECK(has(vn, "in fx_setup_slots@argflow.c:87 read=3 root=fx_global resolved candidates=1 write=0 -> fx_slots path=.name index=local:index elements=0+1k (k<2) "
+                     "{write-before-read,same-root,index-from-counted-loop}"));
+    KZ_CHECK(has(vn, "fx_slots[0].name = string \"slot_zero\" at argflow.c:38:31 macro FX_SLOT_0_NAME spelled at argflow.c:13:24 {from-macro}"));
+    KZ_CHECK(has(vn, "fx_slots[1].name = string \"slot_one\" at argflow.c:38:55 macro FX_SLOT_1_NAME spelled at argflow.c:15:24 {from-macro}"));
+    KZ_CHECK(has(vn, "in fx_first_limit read=10 root=fx_global may candidates=1 write=0 -> fx_slots path=.limit index=0 elements=0+0k (k<1) {same-root,constant-index}"));
+    KZ_CHECK(has(vn, "1 static-initializer FxGlobal.slots at argflow.c:41:22 root=fx_other -> fx_spares[0] [fx_spares] other-writes=2 {other-writes}"));
+    KZ_CHECK(has(vn, "in fx_spare_limit read=12 root=fx_other may candidates=1 write=1 -> fx_spares path=.limit"));
+    KZ_CHECK(has(vn, "read FxGlobal.cursor at argflow.c:114:28 in fx_cursor_limit read=14 root=fx_global needs-field-points-to candidates=0 {}"));
+    // a string with a NUL byte: escaped in the view, which goes on to the end (the source text drops the backslash)
+    KZ_CHECK(has(vn, "[\"0\"] <- string root=\"\\x00\" hops=0 {} chain=string:\\x00"));
+    KZ_CHECK(has(vn, "[gimages] "));
+    // GLOBAL_IMAGES: the objects reached, a zero-initialized one, the field written elsewhere
+    KZ_CHECK(has(vn, "fx_global int 0 at argflow.c:40:10 {zero-initialized,object-written} reach={argument,pointer-field}"));
+    KZ_CHECK(has(vn, "fx_slots[0].handle int 0 at argflow.c:38:50 {field-written} reach={argument,pointer-field} field=FxSlot.handle"));
+    // the tool parameters: recorded, refused without the extended facts or with a value that is not a number
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "extract.extended_facts_f4_f6 = F4 ARGFLOW, PARAM_FLOW and PTR_FIELDS, F6 GLOBAL_IMAGES (kz_facts.h revision 7)"));
+    KZ_CHECK(has(out, "param.argflow_depth_bound = none (calls a composed PARAM_FLOW row passes; a tool parameter no reference fixes)  (unspecified_by_reference)"));
+    KZ_CHECK(has(out, "param.argflow_size_bound = none"));
+    KZ_CHECK(has(out, "param.image_budget = 4096"));
+    KZ_CHECK(has(out, "count.param_flow_cut = depth bound 0 parameters, size bound 0 parameters, uses left out 0"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + " --section basis", &out), 0);
+    KZ_CHECK(!has(out, "extended_facts_f4_f6") && !has(out, "param.argflow"));
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --argflow-depth 1", (X / "bad.kz").string()), 2);
+    KZ_CHECK(has(out, "needs the extended facts"));
+    KZ_CHECK_EQ(ex("--no-profile --argflow-depth x", (X / "bad.kz").string()), 2);
+    KZ_CHECK_EQ(ex("--no-profile --image-budget 0", (X / "bad.kz").string()), 2);
+    // a depth bound of 1 cuts the composition of depth 2: an OPEN row, counted
+    const std::string f1 = (X / "d1.kz").string(), f0 = (X / "s0.kz").string(), fi = (X / "img.kz").string();
+    KZ_CHECK_EQ(ex("--no-profile --argflow-depth 1", f1), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(f1) + " --section paramflow --section basis", &out), 0);
+    KZ_CHECK(has(out, "fx_lookup#1 d1 open {depth-bound} left out 1 [uses beyond the depth bound]"));
+    KZ_CHECK(!has(out, "fx_lookup#1 d2 "));
+    KZ_CHECK(has(out, "param.argflow_depth_bound = 1 "));
+    KZ_CHECK(has(out, "count.param_flow_cut = depth bound 1 parameters, size bound 0 parameters, uses left out 1"));
+    // a size bound of 0 keeps no composed row
+    KZ_CHECK_EQ(ex("--no-profile --argflow-size 0", f0), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(f0) + " --section paramflow", &out), 0);
+    KZ_CHECK(has(out, "fx_find#1 d0 open {size-bound} left out 1 [uses beyond the size bound]"));
+    KZ_CHECK(!has(out, " d1 ") && !has(out, " d2 "));
+    // an image budget of 1 leaf truncates the images of the tables
+    KZ_CHECK_EQ(ex("--no-profile --image-budget 1", fi), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fi) + " --section gimages", &out), 0);
+    KZ_CHECK(has(out, "fx_slots[...] non-constant at argflow.c:38:8 {image-truncated} reach={argument,pointer-field}"));
+  }
+
+  // ---- the budget of the static image (imgbudget.c, --image-budget 4): a part of an initializer that has a leaf and is
+  // not read ends in one marker leaf "<image truncated>" (array path[...], record or union path.member..., the flag
+  // image-truncated on the object's GLOBAL_IMAGES rows), an exact fit has none; BASIS count.walk_bounds_hit gives the
+  // objects whose walk used up the budget (image_budget_exhausted, an exact fit included) and the marker leaves
+  // (image_leaves_omitted); --verbose names each such object.  The budget value is not changed (4096 by default).
+  {
+    const fs::path X = work / "imgbudget";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/imgbudget.c";
+    std::string log;
+    // extract in the profile-free mode with --verbose (the per-object lines go to `log`); `flags` go to the front end
+    auto ex = [&](const std::string& opts, const std::string& dst, const std::string& flags = std::string()) {
+      return run(q(tool) + " extract --no-profile " + opts + " --verbose --source " + q(src) + " --root " + q(fixtures) + " -o " + q(dst) +
+                     " -- -std=c99 -pedantic" + flags,
+                 &log);
+    };
+    auto counts = [](unsigned exhausted, unsigned omitted) {
+      return "image_budget_exhausted " + std::to_string(exhausted) +
+             " objects (the walk ended with the budget used up, an exact fit included), image_leaves_omitted " + std::to_string(omitted) +
+             " marker leaves <image truncated> (parts with a leaf not read)";
+    };
+    // the view line of a GLOBAL_IMAGES row that starts with `head` (after the indent), or empty
+    auto row = [](const std::string& view, const std::string& head) {
+      const size_t at = view.find("\n  " + head);
+      if (at == std::string::npos) return std::string();
+      const size_t end = view.find('\n', at + 1);
+      return view.substr(at + 3, end == std::string::npos ? std::string::npos : end - at - 3);
+    };
+    struct Case {
+      int n;
+      unsigned exhausted, omitted;
+      std::vector<std::string> markers;  // marker rows (head up to the position)
+      std::vector<std::string> leaves;   // leaf rows that are read
+      std::vector<std::string> absent;   // heads of rows that must not be there
+      std::string verbose;               // the --verbose line ("" = no line for any object)
+    };
+    const std::vector<Case> cases = {
+        {1, 1, 1, {"img_wide.e... non-constant at imgbudget.c:18:16 {"}, {"img_wide.a int 1 ", "img_wide.d int 4 "}, {"img_wide.e ", "img_wide.f "},
+         "kz-static: static image of img_wide: budget 4 used up, marker leaves 1\n"},
+        {2, 1, 1, {"img_union.s.e... non-constant at imgbudget.c:33:16 {"}, {"img_union.s.a int 1 ", "img_union.s.d int 4 "}, {"img_union.s.e ", "img_union.x "},
+         "kz-static: static image of img_union: budget 4 used up, marker leaves 1\n"},
+        {3, 1, 2, {"img_points[1].y... non-constant at imgbudget.c:43:17 {", "img_points[...] non-constant at imgbudget.c:43:17 {"},
+         {"img_points[0].x int 1 ", "img_points[0].z int 3 ", "img_points[1].x int 4 "}, {"img_points[1].y ", "img_points[1].z ", "img_points[2]"},
+         "kz-static: static image of img_points: budget 4 used up, marker leaves 2\n"},
+        {4, 1, 0, {}, {"img_exact.a int 1 ", "img_exact.d int 4 "}, {"img_exact.rest"},
+         "kz-static: static image of img_exact: budget 4 used up, marker leaves 0 (an exact fit)\n"},
+        {5, 0, 0, {}, {"img_small.a int 1 ", "img_small.c int 3 "}, {}, ""},
+    };
+    for (const Case& c : cases) {
+      const std::string f = (X / ("case" + std::to_string(c.n) + ".kz")).string();
+      KZ_CHECK_EQ(ex("--image-budget 4", f, " -DIMG_CASE=" + std::to_string(c.n)), 0);
+      if (c.verbose.empty()) KZ_CHECK(!has(log, "static image of"));
+      else KZ_CHECK(has(log, c.verbose));
+      std::string view;
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f) + " --section gimages --section basis", &view), 0);
+      KZ_CHECK(has(view, counts(c.exhausted, c.omitted)));
+      for (const std::string& m : c.markers) KZ_CHECK(has(row(view, m), "image-truncated"));
+      if (c.markers.empty()) KZ_CHECK(!has(view, "image-truncated") && !has(view, "... non-constant"));
+      for (const std::string& l : c.leaves) {
+        KZ_CHECK(!row(view, l).empty());
+        KZ_CHECK(has(row(view, l), "image-truncated") == !c.markers.empty());  // the flag is on every row of the object
+      }
+      for (const std::string& a : c.absent) KZ_CHECK(row(view, a).empty());
+    }
+    // the five together: the sums, each marker in its place
+    const std::string fall = (X / "all.kz").string(), fdef = (X / "default.kz").string();
+    KZ_CHECK_EQ(ex("--image-budget 4", fall), 0);
+    std::string view;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fall) + " --section gimages --section basis", &view), 0);
+    KZ_CHECK(has(view, "param.image_budget = 4 "));
+    KZ_CHECK(has(view, counts(4, 4)));
+    for (const Case& c : cases)
+      for (const std::string& m : c.markers) KZ_CHECK(has(row(view, m), "image-truncated"));
+    for (const char* o : {"img_wide: budget 4 used up, marker leaves 1\n", "img_union: budget 4 used up, marker leaves 1\n", "img_points: budget 4 used up, marker leaves 2\n",
+                          "img_exact: budget 4 used up, marker leaves 0 (an exact fit)\n"})
+      KZ_CHECK(has(log, std::string("kz-static: static image of ") + o));
+    KZ_CHECK(!has(log, "static image of img_small"));
+    // the default budget: nothing used up, no marker; the earlier items of count.walk_bounds_hit keep their text
+    KZ_CHECK_EQ(ex("", fdef), 0);
+    KZ_CHECK(!has(log, "static image of"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fdef) + " --section gimages --section basis", &view), 0);
+    KZ_CHECK(has(view, "param.image_budget = 4096 "));
+    KZ_CHECK(has(view, counts(0, 0)));
+    KZ_CHECK(has(view, "count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting 0 initializers cut, "
+                       "expression depth 0 subexpressions cut, DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut, static images (param.image_budget): "));
+    KZ_CHECK(!has(view, "image-truncated"));
+    KZ_CHECK(!row(view, "img_wide.f int 6 ").empty() && !row(view, "img_points[2].z int 9 ").empty() && !row(view, "img_union.s.e int 5 ").empty());
+    // --verbose does not change the facts
+    const std::string fq = (X / "quiet.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(src) + " --root " + q(fixtures) + " -o " + q(fq) + " -- -std=c99 -pedantic", &log), 0);
+    KZ_CHECK_EQ(read(fq), read(fdef));
+
+    // 8b fix stage (written here, not in imgbudget.c: an anonymous member is C11, and an overriding designator warns,
+    // so neither fits the C99 -Werror compile of the fixtures).  (a) An anonymous member has an empty name in its
+    // leaves (`an_rec..b`), so its marker is `an_rec.` + `...`.  (b) An array initialized by a form that is not a
+    // list, a string or zero (here an overriding designator) gives one non-constant leaf; it was left out before.
+    // (c) A table walk over an image cut at the budget fails with a reason that names the cut.
+    {
+      const fs::path src2 = X / "src" / "imgforms.c";
+      write(src2,
+            "int img_use(const void *p);\n"
+            "struct AnRec { int a; struct { int b; int c; }; int d; } an_rec = {1, {2, 3}, 4};\n"
+            "struct UpRec { char s[4]; int n; } up_rec = {.s = \"abc\", .s[1] = 'X', .n = 5};\n"
+            "int img_forms(void) { return img_use(&an_rec) + img_use(&up_rec); }\n");
+      auto ex2 = [&](const std::string& opts, const std::string& dst) {
+        return run(q(tool) + " extract --no-profile " + opts + " --verbose --source " + q(src2.string()) + " --root " + q((X / "src").string()) + " -o " + q(dst) +
+                       " -- -std=c11 -Wno-initializer-overrides",
+                   &log);
+      };
+      const std::string f0 = (X / "forms_default.kz").string(), f1 = (X / "forms_b1.kz").string(), f2 = (X / "forms_b2.kz").string();
+      std::string v0, v1, v2;
+      KZ_CHECK_EQ(ex2("", f0), 0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f0) + " --section gimages --section basis", &v0), 0);
+      KZ_CHECK(has(v0, counts(0, 0)));
+      KZ_CHECK(!row(v0, "an_rec..b int 2 ").empty() && !row(v0, "an_rec.d int 4 ").empty());
+      KZ_CHECK(has(row(v0, "up_rec.s non-constant at "), "field=UpRec.s"));
+      KZ_CHECK(!row(v0, "up_rec.n int 5 ").empty());
+      KZ_CHECK_EQ(ex2("--image-budget 1", f1), 0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f1) + " --section gimages --section basis", &v1), 0);
+      KZ_CHECK(has(v1, counts(2, 2)));
+      KZ_CHECK(has(row(v1, "an_rec.... non-constant at "), "image-truncated"));
+      KZ_CHECK(has(row(v1, "up_rec.s non-constant at "), "image-truncated"));
+      KZ_CHECK(has(row(v1, "up_rec.n... non-constant at "), "image-truncated"));
+      KZ_CHECK(has(log, "kz-static: static image of up_rec: budget 1 used up, marker leaves 1\n"));
+      KZ_CHECK_EQ(ex2("--image-budget 2", f2), 0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f2) + " --section gimages", &v2), 0);
+      KZ_CHECK(!row(v2, "an_rec..b int 2 ").empty());
+      KZ_CHECK(!row(v2, "an_rec..c... non-constant at ").empty() && !row(v2, "an_rec.d... non-constant at ").empty());
+
+      const fs::path src3 = X / "src" / "imgwalk.c";
+      write(src3,
+            "typedef struct { const char *name; int (*init)(void); } WMod;\n"
+            "typedef struct { int p0; int p1; const WMod *const *list; int tail; } WCfg;\n"
+            "static int w_init(void) { return 0; }\n"
+            "static const WMod w_mod = {\"w\", w_init};\n"
+            "static const WMod *const w_list[3] = {&w_mod};\n"
+            "WCfg w_cfg = {7, 8, w_list, 9};\n"
+            "void w_all(void) {\n"
+            "  unsigned long i;\n"
+            "  const WMod *e;\n"
+            "  for (i = 0;; i++) {\n"
+            "    e = w_cfg.list[i];\n"
+            "    if (e == 0) break;\n"
+            "    (void)e->init();\n"
+            "  }\n"
+            "}\n");
+      const std::string fw = (X / "walk_b2.kz").string(), fwd = (X / "walk_default.kz").string();
+      std::string w;
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --image-budget 2 --source " + q(src3.string()) + " --root " + q((X / "src").string()) + " -o " + q(fw) +
+                          " -- -std=c99 -pedantic",
+                      &log),
+                  0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(fw) + " --section loops", &w), 0);
+      KZ_CHECK(has(w, "table-walk trip=unknown exits=1 calls=1 table=w_cfg.list (the field .list of w_cfg was not read: the static image of w_cfg was cut at the "
+                      "image budget there (w_cfg.list...))"));
+      KZ_CHECK(!has(w, "no null element"));
+      // the default budget: the walk resolves
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(src3.string()) + " --root " + q((X / "src").string()) + " -o " + q(fwd) + " -- -std=c99 -pedantic",
+                      &log),
+                  0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(fwd) + " --section loops", &w), 0);
+      KZ_CHECK(has(w, "table-walk trip=exact(1) exits=1 calls=1 table=w_cfg.list\n"));
+    }
+  }
+
+  // ---- F5 and the target-independent rules (LOCK_OPS, LOCK_IDS, LOCKSET, FIELD_STATUS, AWAIT_L1; kz_facts.h revision 8) -
+  // Written with the extended facts: off in the profile-driven mode without --extended-facts, the earlier sections unchanged
+  // with it, the same rows in both modes and whatever the targets.  The old rules of FACT_LOCS and FACT_LOOPS are unchanged.
+  {
+    const fs::path X = work / "lockset";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/lockset.c";
+    auto ex = [&](const std::string& mode, const std::string& dst) {
+      return run(q(tool) + " extract " + mode + " --source " + q(src) + " --root " + q(fixtures) + " -o " + q(dst) + " -- -std=c99 -pedantic", &out);
+    };
+    const std::string fa = (X / "plain.kz").string(), fb = (X / "ext.kz").string(), fc = (X / "np.kz").string(), fd = (X / "np2.kz").string();
+    const std::string ft = (X / "targets.kz").string(), fs1 = (X / "sibling.kz").string(), fs2 = (X / "alone.kz").string();
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --delay-op fx_delay", fa), 0);
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --delay-op fx_delay --extended-facts", fb), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fc), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fd), 0);
+    KZ_CHECK_EQ(read(fc), read(fd));
+    kz::Container ca, cb, cn;
+    KZ_CHECK_OK(kz::Container::read_file(fa, &ca));
+    KZ_CHECK_OK(kz::Container::read_file(fb, &cb));
+    KZ_CHECK_OK(kz::Container::read_file(fc, &cn));
+    KZ_CHECK_OK(cb.verify_content());
+    KZ_CHECK_OK(cn.verify_content());
+    for (const uint32_t sec : {static_cast<uint32_t>(KZ_SEC_LOCK_OPS), static_cast<uint32_t>(KZ_SEC_LOCK_IDS), static_cast<uint32_t>(KZ_SEC_LOCKSET),
+                               static_cast<uint32_t>(KZ_SEC_FIELD_STATUS), static_cast<uint32_t>(KZ_SEC_AWAIT_L1)}) {
+      KZ_CHECK(ca.find_section(sec) == nullptr);
+      KZ_CHECK(cb.find_section(sec) != nullptr);
+      KZ_CHECK(cn.find_section(sec) != nullptr);
+    }
+    const std::string earlier =
+        " --section files --section functions --section calls --section derives --section loops --section iters --section order --section init --section consts"
+        " --section writers --section atype --section locs --section targets --section spawnparams --section image --section terminals --section outcalls --section fwrites";
+    std::string va, vb;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + earlier, &va), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + earlier, &vb), 0);
+    KZ_CHECK_EQ(va, vb);
+    const std::string newer = " --section lockops --section lockids --section lockset --section fstatus --section awaits";
+    std::string vn, vp;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + newer, &vn), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + newer, &vp), 0);
+    KZ_CHECK_EQ(vn, vp);
+    // LOCK_OPS: an operation that holds the lock exactly when it returns 0, one that holds it on every return (under the
+    // declared assumption that an acquisition succeeds), a try, a release; identities over the parameters
+    KZ_CHECK(has(vn, "fx_take acquire result-conditional success=0 lock &fx_mtab[$0].id may=fx_mrec.id {vocabulary,assumes-success,parameter-identity}"));
+    KZ_CHECK(has(vn, "fx_lock_shared acquire every-return lock &fx_mtab[fx_g.mutex].id may=fx_mrec.id {vocabulary,assumes-success}"));
+    KZ_CHECK(has(vn, "chain fx_lock_shared -> fx_take -> pthread_mutex_lock"));
+    KZ_CHECK(has(vn, "fx_try_take acquire try success=0 lock &fx_mtab[$0].id may=fx_mrec.id {parameter-identity}"));
+    KZ_CHECK(has(vn, "fx_unlock_shared release every-return lock &fx_mtab[fx_g.mutex].id"));
+    // LOCK_IDS: a handle written once by an out-pointer call in a function that runs once is a static instance; one
+    // written by a function called twice is not
+    KZ_CHECK(has(vn, "#0 &fx_mtab[fx_g.mutex].id closed static-instance {address-of-global,reads-value} may=fx_mrec.id value-of=fx_shared.mutex object=fx_g writer-instances=1"));
+    KZ_CHECK(has(vn, "#1 &fx_mtab[fx_g.other].id closed not-static {reads-value} may=fx_mrec.id value-of=fx_shared.other object=fx_g writer-instances=1 (fx_shared.other: 1 writer "
+                     "instance(s), not one that runs once)"));
+    // LOCKSET: the spawn between two regions holds nothing, the writes in the second region hold the lock acquired there,
+    // the failure branch of the acquisition holds nothing, a try holds on its success branch
+    KZ_CHECK(has(vn, "call site 12 lockset.c:94:7 in fx_app_create held=0 {}"));
+    KZ_CHECK(has(vn, "write fx_shared.count at lockset.c:97:3 in fx_app_create held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:95:3] {}"));
+    KZ_CHECK(has(vn, "call site 14 lockset.c:98:9 in fx_app_create held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:95:3] {}"));
+    KZ_CHECK(has(vn, "call site 4 lockset.c:71:11 in fx_lock_shared held=0 {failure-path}"));
+    KZ_CHECK(has(vn, "read read 10 at lockset.c:116:14 in fx_try_reader held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:115:7] {}"));
+    KZ_CHECK(has(vn, "read read 7 at lockset.c:108:12 in fx_other_reader held=1 [#1 &fx_mtab[fx_g.other].id]"));
+    // FIELD_STATUS: the sibling's escaped address exposes the type only under the type-level rule
+    KZ_CHECK(has(vn, "fx_pair.a per-field=writer-set-complete type-level=DISABLED writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: "
+                     "escape 0, cast 0, union 0, unknown 0, other fields 1; untyped sites 1 {sibling-exposed,untyped-in-program} by main"));
+    KZ_CHECK(has(vn, "fx_pair.b per-field=DISABLED type-level=DISABLED"));
+    KZ_CHECK(has(vn, "fx_shared.count per-field=writer-set-complete type-level=writer-set-complete writers=2 (direct 2, data 0, out-pointer 0, init 1) instances=2 not-once"));
+    // AWAIT_L1: the predicate reads a field through the function it calls; the reads hold one lock acquired at one call
+    KZ_CHECK(has(vn, "in fx_wait_state relevant=[field:fx_app.state, field:fx_app.used, field:fx_shared.apps] via-callee=[fx_app.used] L1(ii)=one-lock-region lock #0 "
+                     "&fx_mtab[fx_g.mutex].id L1(i) per-field=holds type-level=holds {via-callee,lock-static}"));
+    KZ_CHECK(has(vn, "in fx_spin_count relevant=[field:fx_shared.count] L1(ii)=one-lock-region lock #0 &fx_mtab[fx_g.mutex].id L1(i) per-field=fails type-level=fails"));
+    KZ_CHECK(has(vn, "star-closed: L1 (i) fails: the body writes fx_shared.count by fx_spin_count at lockset.c:154:5"));
+    // the BASIS records: the assumptions and the counts
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "extract.extended_facts_f5 = F5 LOCK_OPS, LOCK_IDS and LOCKSET, FIELD_STATUS, AWAIT_L1 (kz_facts.h revision 8)"));
+    KZ_CHECK(has(out, "assume.lock_acquisition_succeeds = an acquisition that is not a try succeeds"));
+    KZ_CHECK(has(out, "assume.no_cross_member_pointer_arithmetic = "));
+    KZ_CHECK(has(out, "count.field_status = 12 fields (targets of the completeness pass 12)"));
+    KZ_CHECK(has(out, "extract.lock_vocabulary = "));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + " --section basis", &out), 0);
+    KZ_CHECK(!has(out, "extended_facts_f5") && !has(out, "assume.lock_acquisition_succeeds"));
+    // whatever the targets: with the sibling as a target the old rule of FACT_LOCS disables the field, FIELD_STATUS does not
+    // change; with the field alone the old rule calls it complete
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --delay-op fx_delay --extended-facts --target fx_pair.a --target fx_pair.b --target fx_shared.count", ft), 0);
+    std::string vt;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(ft) + " --section fstatus --section lockids --section awaits", &vt), 0);
+    std::string vf;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section fstatus --section lockids --section awaits", &vf), 0);
+    auto nosite = [](std::string t) {
+      std::string o;
+      for (size_t i = 0; i < t.size();) {
+        if (t.compare(i, 5, "site ") == 0) {
+          size_t j = i + 5;
+          while (j < t.size() && t[j] >= '0' && t[j] <= '9') ++j;
+          if (j > i + 5) {
+            i = j;
+            continue;
+          }
+        }
+        o += t[i++];
+      }
+      return o;
+    };
+    KZ_CHECK_EQ(nosite(vt), nosite(vf));
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --target fx_pair.a --target fx_pair.b", fs1), 0);
+    KZ_CHECK(has(out, "location fx_pair.a   writers 1") && has(out, "-> DISABLED"));
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --target fx_pair.a", fs2), 0);
+    KZ_CHECK(has(out, "location fx_pair.a   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown "
+                      "effect 0  -> writer-set-complete"));
+    // the profile-free second pass has the derived lock and unlock operations in its vocabulary
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section calls", &out), 0);
+    KZ_CHECK(has(out, "lockset.c:82:3 fx_get_id -> fx_lock_shared direct {intra-tu,lock-op}"));
+    KZ_CHECK(has(out, "lockset.c:84:3 fx_get_id -> fx_unlock_shared direct {intra-tu,unlock-op}"));
+  }
+
+  // ---- the rule targets and `kz-static relations` (relations.c) -----------------------------------------
+  {
+    const fs::path X = work / "relations";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/relations.c";
+    auto ex = [&](const std::string& mode, const fs::path& o) {
+      return run(q(tool) + " extract " + mode + " --source " + q(src) + " --root " + q(fixtures) + " -o " + q(o.string()) + " -- -std=c99 -pedantic", &out);
+    };
+    // --targets-rule: the profile-free mode only, and R-T1 / R-T2 only
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --targets-rule R-T1", X / "x.kz"), 2);
+    KZ_CHECK(has(out, "--targets-rule chooses the targets of the profile-free mode"));
+    KZ_CHECK_EQ(ex("--no-profile --targets-rule R-T3", X / "x.kz"), 2);
+    KZ_CHECK(has(out, "--targets-rule expects R-T1, R-T2 or R-T1,R-T2"));
+    KZ_CHECK_EQ(ex("--no-profile --targets-rule R-T2,R-T1", X / "both.kz"), 0);
+    KZ_CHECK(has(out, "rule targets               7 (R-T1 5, R-T2 3, both 1;"));
+    // the rule targets are recorded as rule targets, not as hand-entered inputs
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "both.kz").string()) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "target.Service.self_id = rule R-T1  (unset)"));
+    KZ_CHECK(has(out, "target.TaskRec.registered = rule R-T2  (unset)"));
+    KZ_CHECK(has(out, "extract.targets_rule = R-T1,R-T2 (target rules revision 1)"));
+    KZ_CHECK(!has(out, "declared-assumption)\n  target."));
+    // only R-T1: the field read in a branch only is no target
+    KZ_CHECK_EQ(ex("--no-profile --targets-rule R-T1", X / "t1.kz"), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "t1.kz").string()) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "target.Service.self_id = rule R-T1"));
+    KZ_CHECK(!has(out, "target.TaskRec.registered"));
+    // without the option the profile-free facts have no targets, as before
+    KZ_CHECK_EQ(ex("--no-profile", X / "none.kz"), 0);
+    KZ_CHECK(!has(out, "rule targets"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "none.kz").string()) + " --section writers", &out), 0);
+    KZ_CHECK(has(out, "[writers] 0"));
+
+    // relations: usage and inputs
+    KZ_CHECK_EQ(run(q(tool) + " relations", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " relations a b", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "both.kz").string()) + " --loc Slot.name", &out), 2);
+    KZ_CHECK(has(out, "unknown option"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((work / "garbage.kz").string()), &out), 1);
+    // facts without the extended facts: refused with the reason
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(facts), &out), 1);
+    KZ_CHECK(has(out, "the facts have no extended facts"));
+    // -o writes what stdout would show; two runs give the same bytes
+    std::string a, b;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "both.kz").string()), &a), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "both.kz").string()) + " -o " + q((X / "rel.txt").string()), &out), 0);
+    KZ_CHECK_EQ(read(X / "rel.txt"), a);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "both.kz").string()), &b), 0);
+    KZ_CHECK_EQ(a, b);
+    // the rows: every column, the layers, no case layer in the profile-free mode
+    KZ_CHECK(has(a, "mode profile-free"));
+    KZ_CHECK(has(a, "  namespace Slot.name (record type Slot; tables slots)"));
+    KZ_CHECK(has(a, "      key-parameter functions: lookups slot_find#0; creators slot_create#0"));
+    KZ_CHECK(has(a, "      active test: Slot.used == 1 is in use"));
+    KZ_CHECK(has(a, "not a pair: probe-create"));
+    KZ_CHECK(has(a, "creator: same key: relations.c:"));
+    KZ_CHECK(has(a, "key: read through the pointer field Worker.cfg -> configs@relations.c:"));
+    KZ_CHECK(has(a, "image configs[0].name = \"alpha\""));
+    KZ_CHECK(has(a, "  B1 Service.self_id -> notify#0 sites=2 callee-check=yes"));
+    KZ_CHECK(has(a, "      callee-check: notify returns -5 [ERR_ILLEGAL] when (eq param:id#0 0)"));
+    KZ_CHECK(has(a, "      handling: discarded 2, used 0, tested 0"));
+    KZ_CHECK(has(a, "      flip: static-possible: a written constant and the initial value give different results of the callee check"));
+    KZ_CHECK(has(a, "in task_spawn -> pthread_create; field TaskRec.registered"));
+    KZ_CHECK(has(a, "read subscript: the reader's own identity: task_self -> pthread_getspecific (P0 thread-specific-get)"));
+    KZ_CHECK(has(a, "feasibility: possible: lock window: #0 &table_mutex"));
+    KZ_CHECK(has(a, "feasibility: proven-impossible: lock #0 &table_mutex"));
+    KZ_CHECK(has(a, "      run-order: no record given"));
+    KZ_CHECK(has(a, "      violation: unconfirmed: RV2 §5.4"));
+    KZ_CHECK(has(a, "      layers: B P0 R P0-unverified(strcmp)\n"));
+    KZ_CHECK(has(a, "      layers: B P0 R (writers: rule targets)\n"));
+    KZ_CHECK(has(a, "P0-unverified(pthread_getspecific, pthread_mutex_lock, pthread_mutex_unlock)"));
+    // the lock-window verdict names a static instance: it rests on what that status rests on
+    KZ_CHECK(has(a, "feasibility: possible: lock window: #0 &table_mutex"));
+    // probe-create: on the polarity of the lookup's failure, and named in the handling column
+    KZ_CHECK(has(a, "      handling: probe-create: on the lookup's failure result the same function creates the same key: "));
+    KZ_CHECK(!has(a, "case:profile"));
+    // a key read from an image whose field is also written at run time: the image is no run-time value, so the key is
+    // unresolved and no exclusion rests on it (relations rules revision 3)
+    {
+      std::string text = read(fs::path(src));
+      const std::string decl = "static const Config configs[2] = {{\"alpha\"}, {\"beta\"}};";
+      KZ_CHECK(text.find(decl) != std::string::npos);
+      if (text.find(decl) != std::string::npos)
+        text.replace(text.find(decl), decl.size(),
+                     "static Config configs[2] = {{\"alpha\"}, {\"beta\"}};\nvoid config_rename(const char *n) { configs[1].name = n; }");
+      write(X / "src" / "relwritten.c", text);
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "src" / "relwritten.c").string()) + " --root " +
+                          q((X / "src").string()) + " -o " + q((X / "written.kz").string()) + " -- -std=c99 -pedantic",
+                      &out),
+                  0);
+      std::string w;
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "written.kz").string()), &w), 0);
+      KZ_CHECK(has(w, "image configs[1].name = \"beta\" (field-written)"));
+      KZ_CHECK(has(w, "; unresolved (image, field written at run time)"));
+      KZ_CHECK(!has(a, "field written at run time"));
+    }
+    // a key read from an image whose member an untyped store may reach (FIELD_STATUS not complete): the rule of the
+    // static-image entries, so the key is unresolved and no exclusion rests on it (relations rules revision 4)
+    {
+      std::string text = read(fs::path(src));
+      const std::string decl = "static const Config configs[2] = {{\"alpha\"}, {\"beta\"}};";
+      KZ_CHECK(text.find(decl) != std::string::npos);
+      if (text.find(decl) != std::string::npos)
+        text.replace(text.find(decl), decl.size(),
+                     "static Config configs[2] = {{\"alpha\"}, {\"beta\"}};\nvoid config_load(const char *p) { char *q = (char *)configs; q[0] = p[0]; }");
+      write(X / "src" / "relcast.c", text);
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "src" / "relcast.c").string()) + " --root " +
+                          q((X / "src").string()) + " -o " + q((X / "cast.kz").string()) + " -- -std=c99 -pedantic",
+                      &out),
+                  0);
+      std::string w;
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "cast.kz").string()), &w), 0);
+      KZ_CHECK(has(w, "image configs[1].name = \"beta\"; unresolved (image, not taken as the run-time value: the writer set of Config.name is not complete (FIELD_STATUS "
+                      "per-field DISABLED, type-level DISABLED))"));
+      // the lookup whose key is that image: its creators are not excluded by key constants
+      const size_t a1 = w.find("  A1 lookup ");
+      const std::string row1 = a1 == std::string::npos ? std::string() : w.substr(a1, w.find("\n  A2 ", a1) - a1);
+      KZ_CHECK(has(row1, "creator: key unresolved (lookup): "));
+      KZ_CHECK(!has(row1, "key constants differ"));
+    }
+    // the profile-driven mode with the extended facts: the case layer is named in every row
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts", X / "prof.kz"), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "prof.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "mode profile-driven"));
+    KZ_CHECK(has(out, "case:profile("));
+    // a command-line vocabulary is named as hand-entered (G0 or other names)
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts --delay-op fx_none", X / "voc.kz"), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "voc.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "hand-entered:command-line(1 items; G0 or other names, not automatic)"));
+    // the P0 tables of revision 3: their scope is recorded and printed
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "both.kz").string()) + " --section basis --section p0", &out), 0);
+    KZ_CHECK(has(out, "extract.p0_table = P0 table revision 3 (2026-10-30), 72 entries"));
+    KZ_CHECK(has(out, "extract.p0_table_scope = families of this revision: "));
+    KZ_CHECK(has(out, "thread join and detach (pthread_join"));
+    // the fixed walk bounds are recorded with their hits
+    KZ_CHECK(has(out, "param.walk_bounds = 4096 (nodes of the FACT_INIT walk"));
+    KZ_CHECK(has(out, "count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting 0 initializers cut, "
+                      "expression depth 0 subexpressions cut"));
+    KZ_CHECK(has(out, "24 (levels of an expression tree read from the source, FACT_EXPRS; a deeper subexpression is a node top \"too deep\")"));
+    KZ_CHECK(has(out, "[p0] 72"));
+    KZ_CHECK(has(out, "  pthread_key_create thread-specific-key-create (thread-specific data) out=0 entry=1"));
+    KZ_CHECK(has(out, "  thrd_create thread-create (thread creation) out=0 entry=1 arg=2"));
+    KZ_CHECK(!has(out, "\n  pthread_rwlock_"));  // no row of the family (the scope names it)
+    KZ_CHECK(has(a, "p0-compare P0 comparison table revision 2 (2026-10-30): "));
+    KZ_CHECK(has(a, "p0-compare scope: families listed whole: byte-string comparison"));
+  }
+
+  // ---- the order and entry-path facts LOCK_PATHS and the relations rules that read them (relpaths.c) -----------
+  {
+    const fs::path X = work / "relpaths";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/relpaths.c", rp = (X / "rp.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(rp) + " -- -std=c99 -pedantic", &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(rp) + " --section lockpaths --section basis", &out), 0);
+    // a write before the spawn in the loop body follows the spawn through the back edge; the write in the branch
+    // without the spawn does not follow it
+    KZ_CHECK(has(out, "after-spawn row ") && has(out, " write Rec.count at relpaths.c:83:5 in spawn_all after the spawn relpaths.c:84:5 pthread_create"));
+    KZ_CHECK(has(out, " write Rec.ready at relpaths.c:94:5 in spawn_checked after the spawn relpaths.c:93:10 pthread_create"));
+    KZ_CHECK(!has(out, "write Rec.ready at relpaths.c:98:"));
+    // the read after the release of the caller's lock
+    KZ_CHECK(has(out, " read at relpaths.c:53:15 in ready_unlocked through the call relpaths.c:52:3 pthread_mutex_unlock"));
+    KZ_CHECK(has(out, "count.lock_paths = "));
+    std::string a, b;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &a), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &b), 0);
+    KZ_CHECK_EQ(a, b);
+    KZ_CHECK(has(a, "rules relations rules revision 12 (2026-11-18)"));
+    // roots: the image entries of the table, the root that calls a root directly, the dispatching trampoline
+    KZ_CHECK(has(a, "table-image-entry 2"));
+    KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member "
+                    "EntryUnion.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written; "));
+    // relations rules revision 5: another member of the union holds a function in one element, so the spawn's threads
+    // rest on its guard
+    KZ_CHECK(has(a, "the image of entry_defs has 1 function leaf/leaves of another member of its record (entry_defs[0].u.call early_init@relpaths.c:141; a union "
+                    "member read gives that value): that the spawn reads only the elements whose main is a function leaf rests on its guard"));
+    // the same table with an element cleared at run time: its image is not the run-time value, so the spawn is not
+    // resolved through it and the header says why (relations rules revision 3)
+    {
+      std::string text = read(fs::path(src));
+      const std::string anchor = "void start_table(void) {";
+      KZ_CHECK(text.find(anchor) != std::string::npos);
+      if (text.find(anchor) != std::string::npos)
+        text.insert(text.find(anchor), "void clear_entry(void) { memset(&entry_defs[2], 0, sizeof entry_defs[2]); }\n\n");
+      write(X / "src" / "imgwritten.c", text);
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "src" / "imgwritten.c").string()) + " --root " +
+                          q((X / "src").string()) + " -o " + q((X / "imgwritten.kz").string()) + " -- -std=c99 -pedantic",
+                      &out),
+                  0);
+      std::string w;
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "imgwritten.kz").string()), &w), 0);
+      KZ_CHECK(has(w, "table-image-entry 0"));
+      KZ_CHECK(has(w, "spawn calls resolved through the static image of the table their entry argument is read from: 0"));
+      KZ_CHECK(has(w, "reads EntryUnion.main of entry_defs, whose static image is not taken as its value: a leaf of the image is marked object-written"));
+    }
+    KZ_CHECK(has(a, "trampolines 1 [tramp_main -> {helper_main (spawn-entry)}]"));
+    KZ_CHECK(has(a, "through a direct call 1 [boss_main]"));
+    // path C: the write in the loop body, the writes of the branch with the spawn only, the helper's write, the read
+    // after the release
+    KZ_CHECK(has(a, "field Rec.count; read relpaths.c:65:15 in rec_counted"));
+    KZ_CHECK(has(a, "      write after the spawn in set_stage (through the call relpaths.c:113:3): relpaths.c:104:32"));
+    KZ_CHECK(has(a, "      feasibility: possible: a write after the spawn (relpaths.c:104:32) holds no lock, so the read may come before it"));
+    // the read in the child's entry has a row of its own (no caller lock); a call the child does not run gets no grade
+    KZ_CHECK(has(a, "(the read run as the entry of the spawned thread, under no lock of a caller)"));
+    KZ_CHECK(has(a, "      feasibility: not graded: the threads this spawn starts (the child and the threads its code starts) do not reach this call"));
+    KZ_CHECK(has(a, "(not composed: on a path from the entry of ready_unlocked the call relpaths.c:52:3 pthread_mutex_unlock"));
+    KZ_CHECK(has(a, "      feasibility: proven-impossible: lock #0 &rec_mutex@relpaths.c:31 (static-instance) is held from the same acquisition"));
+    KZ_CHECK(has(a, "rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI "
+                    "decision pending); premises of path C (static_facts §5h, §5i: "));
+    KZ_CHECK(!has(a, "write after the spawn: relpaths.c:98:"));
+    // the ends: the destructor of a thread-specific key; the guard of the terminal call with the value passed
+    KZ_CHECK(has(a, "after that entry returns the thread may still run functions of this program (thread-specific destructors: pthread_key_create at relpaths.c:"));
+    KZ_CHECK(has(a, "noreturn: the terminal calls of app_exit are guarded: relpaths.c:224:20 -> exit under (eq param:status#0 9); with argument 0 = 3 every guard is false"));
+    KZ_CHECK(has(a, "the loop relpaths.c:225:3 in app_exit has no exit"));
+    // a derived spawn operation's store through its argument counts after the spawn, under no known lock
+    KZ_CHECK(has(a, "      write after the spawn by the spawn operation: spawn_marked stores through arg 0 [&marks.started] inside the call at relpaths.c:"));
+    // a condition more than 200 levels deep: R-T2 reads the whole tree
+    const std::string dp = (X / "deep.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T2 --source " + q(fixtures + "/deepcond.c") + " --root " + q(fixtures) + " -o " + q(dp) + " -- -std=c99 -pedantic", &out), 0);
+    KZ_CHECK(has(out, "rule targets               1 (R-T1 0, R-T2 1, both 0;"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(dp) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "target.Deep.flag = rule R-T2  (unset)"));
+  }
+
+  // ---- the incompleteness line and the image cut at the budget (relincomplete.c; relations rules revision 6) -------
+  // Every row ends in `incomplete:` with reasons of the judgement rules' vocabulary.  At --image-budget 3 the name table
+  // and the table of thread entries are cut: the key read from the cut name table is unresolved (the three names read
+  // are not all), and the entries found in the cut table of thread entries are kept but not all, so the threads of the
+  // spawn are not complete and every row says that some entries are no roots.
+  {
+    const fs::path X = work / "relincomplete";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/relincomplete.c", fd = (X / "default.kz").string(), fc = (X / "cut.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(fd) + " -- -std=c99 -pedantic", &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --image-budget 3 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(fc) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    std::string d, c, d2;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(fd), &d), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(fd), &d2), 0);
+    KZ_CHECK_EQ(d, d2);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(fc), &c), 0);
+    // the row of a lookup, by the text of its first line: its block up to the next row
+    auto row_of = [](const std::string& text, const std::string& head) {
+      const size_t at = text.find(head);
+      if (at == std::string::npos) return std::string();
+      size_t end = text.find("\n  A", at + 1);
+      const size_t endc = text.find("\n  C", at + 1), endh = text.find("\n[", at + 1);
+      if (endc < end) end = endc;
+      if (endh < end) end = endh;
+      return text.substr(at, end == std::string::npos ? std::string::npos : end - at);
+    };
+    auto inc_of = [](const std::string& rowtext) {
+      const size_t at = rowtext.find("      incomplete: ");
+      if (at == std::string::npos) return std::string();
+      const size_t end = rowtext.find('\n', at);
+      return rowtext.substr(at + 18, end == std::string::npos ? std::string::npos : end - at - 18);
+    };
+    // every row of both has one incomplete line, and it starts with no_run
+    for (const std::string* t : {&d, &c}) {
+      size_t rows = 0, lines = 0, at = 0;
+      while ((at = t->find("\n  ", at)) != std::string::npos) {
+        ++at;
+        if (at + 3 < t->size() && ((*t)[at + 2] == 'A' || (*t)[at + 2] == 'C') && std::isdigit(static_cast<unsigned char>((*t)[at + 3]))) ++rows;
+      }
+      at = 0;
+      while ((at = t->find("\n      incomplete: no_run(no run record read)", at)) != std::string::npos) {
+        ++lines;
+        ++at;
+      }
+      KZ_CHECK_EQ(rows, static_cast<size_t>(6));
+      KZ_CHECK_EQ(lines, rows);
+      KZ_CHECK(has(*t, "\nsummary incomplete (rows that carry the reason, then per sub-reason; "));
+    }
+    // the default budget: the key from the name table is known, the key through the opaque pointer is not
+    const std::string dk = row_of(d, "lookup relincomplete.c:82:33 in seek_known -> reg_find#0"), dop = row_of(d, "lookup relincomplete.c:87:9 in seek_opaque -> reg_find#0"),
+                      dl = row_of(d, "lookup relincomplete.c:103:9 in red_main -> reg_find#0");
+    KZ_CHECK(has(dk, "partition {} key known\n"));
+    KZ_CHECK(has(dk, "image name_defs[3].name = \"grey\""));
+    KZ_CHECK(!has(inc_of(dk), "key_unresolved") && !has(inc_of(dk), "truncated"));
+    KZ_CHECK(has(inc_of(dop), "key_unresolved(pointer field without points-to)"));
+    KZ_CHECK(has(inc_of(dop), "fixed_proof_open(no static order between the actors)"));
+    KZ_CHECK(!has(inc_of(dl), "key_unresolved"));
+    KZ_CHECK(has(inc_of(dl), "fixed_proof_open(no static order between the actors)"));
+    KZ_CHECK(has(dl, "flip: static-possible"));
+    // the threads of the spawn rest on its guard (a function leaf of the other member of the union): not complete
+    KZ_CHECK(has(d, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relincomplete.c:"));
+    KZ_CHECK(has(d, "      incomplete: no_run(no run record read); actor_not_extracted(child threads not all resolved); link_unlinked(identity of the reader and "
+                    "the created thread not decided)\n"));
+    // the key field of the namespace has no complete writer set (FIELD_STATUS disabled: array element stores)
+    KZ_CHECK(has(inc_of(dk), "writer_set_incomplete(FIELD_STATUS not complete)"));
+    KZ_CHECK(!has(d, "spawn entries from a cut static image") && !has(d, "static image truncated"));
+    KZ_CHECK(has(d, "; reasons of the whole facts on every row: none\n"));
+    // --image-budget 3: the key from the cut name table is unresolved; no flip and no exclusion rests on it
+    const std::string ck = row_of(c, "lookup relincomplete.c:82:33 in seek_known -> reg_find#0");
+    KZ_CHECK(has(ck, "partition {} key unresolved\n"));
+    KZ_CHECK(has(ck, "image name_defs[2].name = \"blue\"; unresolved (image, not taken as the run-time value: the static image was cut at the image budget (marker "
+                     "leaves name_defs[...]): the part not read is not known)"));
+    KZ_CHECK(!has(ck, "key constants differ"));
+    KZ_CHECK(has(ck, "creator: key unresolved (lookup): "));
+    KZ_CHECK(has(ck, "flip: static-undetermined: the key of the lookup or of a creator is not resolved statically"));
+    KZ_CHECK(has(inc_of(ck), "actor_not_extracted(spawn entries from a cut static image)"));
+    KZ_CHECK(has(inc_of(ck), "key_unresolved(static image truncated)") && has(inc_of(ck), "truncated(static image)"));
+    // the entries of the part read are kept, the spawn's threads are not complete, and the header says why
+    KZ_CHECK(has(c, "table-image-entry 2"));
+    KZ_CHECK(has(c, "the static image of task_defs was cut at the image budget (marker leaves task_defs[...]): the entries of the part not read are not found (so the "
+                    "threads of this spawn are taken as not complete)"));
+    // a marker is no value: it is not counted among the non-constant leaves covering the member
+    KZ_CHECK(!has(c, "non-constant leaf/leaves covering that member (task_defs[...])"));
+    KZ_CHECK(has(c, "; reasons of the whole facts on every row: actor_not_extracted(spawn entries from a cut static image)\n"));
+    // the read in blue_main, whose entry is in the part not read: not reached by the entries found, so undecidable
+    const std::string cb = row_of(c, "(via the call relincomplete.c:117:9 in blue_main; the threads this spawn starts do not reach this call)");
+    KZ_CHECK(has(cb, "feasibility: undecidable: the threads this spawn starts that these facts resolve (the child and its descendants) do not reach this call, but that set "
+                     "is not complete: "));
+    KZ_CHECK(has(cb, "the static image of task_defs was cut at the image budget"));
+    KZ_CHECK(has(inc_of(cb), "fixed_proof_open(child threads not all resolved)") && has(inc_of(cb), "truncated(static image)"));
+  }
+
+  // ---- namespace membership, table selectors, writer premises, out-pointers (relcallback.c; relations rules revision 7) --
+  // One search loop over a table, the comparison passed as a callback: a use belongs to the namespace of the comparison its
+  // chain passes; a callback from a function without a body leaves the membership unresolved; the partition takes the
+  // kind the search reads as a subscript and names the lock mode beside it as no table selector; zero writers is no verdict.
+  {
+    const fs::path X = work / "relcallback";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/relcallback.c", f = (X / "rc.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(f) + " -- -std=c99 -pedantic", &out), 0);
+    std::string r, r2;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(f), &r), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(f), &r2), 0);
+    KZ_CHECK_EQ(r, r2);
+    auto row_of = [](const std::string& text, const std::string& head) {
+      const size_t at = text.find(head);
+      if (at == std::string::npos) return std::string();
+      size_t end = text.find("\n  A", at + 1);
+      const size_t endn = text.find("\n  namespace ", at + 1), endh = text.find("\n[", at + 1);
+      if (endn < end) end = endn;
+      if (endh < end) end = endh;
+      return text.substr(at, end == std::string::npos ? std::string::npos : end - at);
+    };
+    KZ_CHECK(has(r, "rules relations rules revision 12 (2026-11-18)\n"));
+    // the name namespace: the lookup by path is left out; the path namespace: the lookup and the creation by name are left out
+    KZ_CHECK(has(r, "      left out: relcallback.c:152:9 in user_main -> path_find#0 (lookup): the callback path_match passed as argument 2 at relcallback.c:94:12 in path_find "
+                    "is not the comparison's function name_match\n"));
+    KZ_CHECK(has(r, "      left out: relcallback.c:151:9 in user_main -> sem_find#0 (lookup): the callback name_match"));
+    KZ_CHECK(has(r, "      left out: relcallback.c:158:9 in maker_main -> sem_create#0 (lookup): the callback name_match"));
+    KZ_CHECK(has(r, "summary A membership and creators (relations rules revision 7): uses left out, another callback passed to the search: lookups 4, creators 0; "
+                    "lookup rows with the membership unresolved 2; "));
+    const std::string a1 = row_of(r, "A1 lookup relcallback.c:151:9 in user_main -> sem_find#0 namespace Rec.name partition {1} key known");
+    KZ_CHECK(!a1.empty());
+    KZ_CHECK(has(a1, "partition: 1 [KIND_SEM] as find_by_name arg 1 at relcallback.c:90:50 (selects the table: stored to Token.kind at relcallback.c:53:3, which find_next "
+                     "reads as a subscript at relcallback.c:65:21); not a table selector: 2 [LOCK_SHARED] as find_by_name arg 0 at relcallback.c:90:50\n"));
+    KZ_CHECK(has(a1, "membership: the callback name_match passed as argument 2 at relcallback.c:85:12 in find_by_name is the comparison's function name_match\n"));
+    KZ_CHECK(has(a1, "aliases: the key is read through the pointer field Holder.defs -> defs@relcallback.c:138 (PTR_FIELDS resolved)\n"));
+    KZ_CHECK(has(a1, "id holder: the lookup's arg 1 [&holder.ids[0]] "));
+    KZ_CHECK(has(a1, "id holder: the creator relcallback.c:158:9 -> sem_create: arg 1 [&holder.ids[1]] "));
+    // the creator's callee: its constants through the functions whose result it returns; one of them not of failure class
+    KZ_CHECK(has(a1, "callee-check: sem_create returns 0 [RC_OK] through sem_create -> rec_create -> alloc_check@relcallback.c:99 when "));
+    KZ_CHECK(has(a1, "callee-check: sem_create returns -2 [RC_BAD_POINTER] through sem_create -> rec_create when (eq param:id#2 0)\n"));
+    // relations rules revision 9: the success value comes through a definition redefined later (rc = rec_finish(...)) and
+    // the finishing call returns its parameter: the constants through it are marked, and the set is not established
+    KZ_CHECK(has(a1, "; not shown to reach the return: rec_create returns the result of alloc_check at relcallback.c:121:3 from the definition at "
+                     "relcallback.c:116:6, redefined later on a path to the return\n"));
+    KZ_CHECK(has(a1, "callee-check (returns not followed): sem_create: rec_finish@relcallback.c:111 returns param [rc] at relcallback.c:111:"));
+    KZ_CHECK(has(a1, "callee-check (set): sem_create: not established (1 returns not followed, 3 constants not shown to reach the return): the constants listed are "
+                     "not all it returns, or not shown; no success constant is taken from them\n"));
+    KZ_CHECK(has(a1, "writers: Def.name: no writer found under these premises; premises: FIELD_STATUS per-field writer-set-complete, type-level writer-set-complete"));
+    KZ_CHECK(has(a1, "writer_set_incomplete(zero writers under the rules)"));
+    KZ_CHECK(has(a1, "dependency: path A: 1 creator(s) of this partition in other actors\n"));
+    const std::string a2 = row_of(r, "A2 lookup relcallback.c:185:9 in main -> search_with#1 namespace Rec.name partition {1} key known");
+    KZ_CHECK(has(a2, "membership: unresolved: the callback is argument 0 of the use [pick_match()] (call-result), not followed beyond the use\n"));
+    KZ_CHECK(has(a2, "link_unlinked(namespace membership unresolved)"));
+    KZ_CHECK(has(a2, "dependency: path A: no creator left after exclusions (probe-create 0, key constants differ 1, same actor only 0): "));
+    KZ_CHECK(has(a2, "namespace membership unresolved (the lookup's callback)"));
+    // relations rules revision 12: a delete by name clears the key with a constant store: a key-clearing call, no creator
+    KZ_CHECK(has(r, "creators rec_create#1 sem_create#0; key-clearing (they reach constant stores of the key only) sem_delete#0\n"));
+    KZ_CHECK(has(r, "uses: lookups 2, creators 1 (calls from outside the key-parameter functions; a creator reaches a write of the key); key-clearing calls 1 ("));
+    KZ_CHECK(has(a1, "key clearing: relcallback.c:176:9 in cleaner_main -> sem_delete key string literal \"alpha\" actors {cleaner_main (spawn-entry)}; no creator: every write of the "
+                     "key it reaches stores a constant (relcallback.c:168:5 in sem_delete := 0 [fill 0])\n"));
+    KZ_CHECK(!has(a1, "creator: same key: relcallback.c:176:9"));
+    KZ_CHECK(has(r, "key-clearing calls, no creator sites (relations rules revision 12): 1\n"));
+    const std::string a3 = row_of(r, "A3 lookup relcallback.c:152:9 in user_main -> path_find#0 namespace Rec.path partition {0} key known");
+    KZ_CHECK(has(a3, "dependency: path A: no creator of this partition: writer set not complete (Rec.path not complete); only initial values (no writer of Rec.path found"));
+    KZ_CHECK(has(a3, "writers: Rec.path: no writer found under these premises"));
+    KZ_CHECK(!has(r, "  A5 "));
+  }
+  // ---- order edges with kinds and premises (order.c; order rules revisions 1 and 2) ---------------------------------
+  // A name created before the spawn of the thread that looks it up (hard), looked up before the spawn of the creator's thread
+  // (the use fixed early) and after it (unordered); a write after the spawn under a lock held across it (HB-lock) and in a
+  // lock window; a spawn operation that reports a failure after the thread started; a field written before the spawn of
+  // its reader; a polled flag whose budget exit returns (skip: hard) or goes on to the use (continue: conditional).
+  {
+    const fs::path X = work / "order";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/order.c", f = (X / "order.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(f) + " -- -std=c99 -pedantic", &out), 0);
+    // usage and inputs
+    KZ_CHECK_EQ(run(q(tool) + " order", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " order a b", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q(f) + " --loc Name.name", &out), 2);
+    KZ_CHECK(has(out, "unknown option"));
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((work / "garbage.kz").string()), &out), 1);
+    // -o and --edges write what stdout would show and one line per edge; two runs give the same bytes
+    std::string o, o2;
+    KZ_CHECK_EQ(run(q(tool) + " order " + q(f), &o), 0);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q(f) + " -o " + q((X / "order.txt").string()) + " --edges " + q((X / "order.tsv").string()), &out), 0);
+    KZ_CHECK_EQ(read(X / "order.txt"), o);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q(f), &o2), 0);
+    KZ_CHECK_EQ(o, o2);
+    const std::string tsv = read(X / "order.tsv");
+    KZ_CHECK(has(tsv, "id\trule\tkind\tfrom\tfrom_actor\tto\tto_actor\tcondition\tpremises\tscope\tinstance_key\n"));
+    KZ_CHECK(has(o, "kz-static order (order rules revision 5 (2026-11-18))\n"));
+    KZ_CHECK(has(o, "relations relations rules revision 12 (2026-11-18)\n"));
+    auto row = [&](const std::string& id) {
+      const size_t at = o.find("\n  " + id + " key ");
+      if (at == std::string::npos) return std::string();
+      const size_t next = o.find("\n  ", at + 3 + id.size());
+      size_t end = next;
+      while (end != std::string::npos && o.compare(end, 7, "\n      ") == 0) end = o.find("\n  ", end + 1);
+      return o.substr(at + 1, end == std::string::npos ? std::string::npos : end - at - 1);
+    };
+    // path A: the creation before the spawn of the looker's thread; the lookup before the spawn of the creator's; after it
+    KZ_CHECK(has(row("A1"), "order.static hard_before"));
+    KZ_CHECK(has(row("A1"), "HB-seq, ") && has(row("A1"), " HB-spawn, "));
+    KZ_CHECK(has(row("A2"), "order.static fixed_early_proved"));
+    KZ_CHECK(has(row("A3"), "order.static unordered"));
+    KZ_CHECK(has(row("A3"), "unordered: no path of hard or conditional edges either way"));
+    // path B: the write before the spawn of the reader (hard), a writer in another thread (unordered); the polled flag
+    KZ_CHECK(has(row("B1"), "order.static unordered"));
+    KZ_CHECK(has(row("B1"), "pairs: hard_before 1, unordered 1\n"));
+    KZ_CHECK(has(row("B2"), "order.static conditional_before"));
+    KZ_CHECK(has(row("B2"), "-> level_check waiter_main (spawn-entry): hard_before; path ") && has(row("B2"), " HB-await\n"));
+    KZ_CHECK(has(row("B2"), "conditional_before; path ") && has(row("B2"), "its budget exit also reaches the use (continue)"));
+    // path C: HB-lock where relations grades the other order proven-impossible; the lock window
+    KZ_CHECK(has(row("C1"), "order.static hard_before") && has(row("C1"), " HB-lock; applies when the write runs: it follows the spawn call order.c:"));
+    KZ_CHECK(has(row("C1"), "opposite: proven-impossible"));
+    KZ_CHECK(has(row("C2"), "order.static unordered") && has(row("C2"), "opposite: possible"));
+    // child without success: the operation that returns a failure after the thread started; the primitive's result
+    KZ_CHECK(has(row("C3"), "child without success: possible: start_checked returns -11 [ERR_SETUP] at order.c:"));
+    KZ_CHECK(has(row("C4"), "child without success: not found"));
+    KZ_CHECK(has(row("C4"), "start_plain returns 0 [pthread_create created the thread (P0 pthread_create)]"));
+    // an operation over one that may fail after its thread started: the mapped failure is a child without success too
+    KZ_CHECK(has(row("C5"), "child without success: possible: start_mapped returns -12 [ERR_MAPPED] at order.c:"));
+    KZ_CHECK(has(row("C5"), "may report a failure after its thread started: possible)"));
+    KZ_CHECK(has(o, "      create primitive: start_checked -> pthread_create\n"));
+    KZ_CHECK(has(o, "      status condition: start_checked returns 0 [0]; failure class: -11 [ERR_SETUP], -5 [ERR_ILLEGAL]\n"));
+    // the waits: the budget exit returns (skip) or goes on (continue); the use inside the wait gets no edge
+    KZ_CHECK(has(o, " in skip_wait poll actors {waiter_main (spawn-entry)}\n"));
+    KZ_CHECK(has(o, "exit 1 return at order.c:") && has(o, "condition part -; budget part (le local:budget 0)\n"));
+    KZ_CHECK(has(o, "condition part (not (eq field:Gate.ready 0)); budget part (not (gt local:budget 0))\n"));
+    KZ_CHECK(has(o, "in skip_wait -> level_check: skip\n") && has(o, "in cont_wait -> level_check: continue\n"));
+    KZ_CHECK(has(o, "in skip_wait [gate.ready]: inside\n"));
+    KZ_CHECK(has(o, "the condition exit at the initial values: false (only a write makes it true)"));
+    // kinds: the HB-await edge of the skipped use is hard, that of the continued use conditional, the two starts observed-only
+    KZ_CHECK(has(o, " HB-await hard\n") && has(o, " HB-await conditional\n"));
+    KZ_CHECK(has(o, " HB-seq observed-only\n") && has(o, "which of them runs its code first is not fixed by any rule of this revision"));
+    KZ_CHECK(has(o, "in iteration 0 (app_one)") && has(o, "in iteration 1 (app_two)"));
+    // order rules revision 2: a write in a spawn wrapper that two threads call is before the start of the child only in the
+    // call of the thread whose own call creates that child (the wrapper's spawn call is caller-dependent)
+    auto line_with = [&](const std::string& a, const std::string& b) {
+      for (size_t at = o.find(a); at != std::string::npos; at = o.find(a, at + 1)) {
+        const size_t bol = o.rfind('\n', at) + 1, eol = o.find('\n', at);
+        const std::string l = o.substr(bol, eol - bol);
+        if (l.find(b) != std::string::npos) return true;
+      }
+      return false;
+    };
+    KZ_CHECK(line_with("in spawn_via [Peer.stamp] peer_two (spawn-entry) -> call order.c:", " -> level_check peer_reader (spawn-entry): hard_before; path "));
+    KZ_CHECK(line_with("in spawn_via [Peer.stamp] peer_one (spawn-entry) -> call order.c:", " -> level_check peer_reader (spawn-entry): unordered: no path of hard or conditional edges either way"));
+    KZ_CHECK(has(o, "caller-dependent: spawn_via is called by a call of a spawn operation's chain, and one call instance creates the thread of the outer spawn call that reached it; the closure "
+                    "follows this edge only from the threads whose own outer spawn calls create this thread: {peer_two (spawn-entry)}\n"));
+    KZ_CHECK(has(o, "the closure follows this edge only from the threads whose own outer spawn calls create this thread: {peer_one (spawn-entry)}\n"));
+    // order rules revision 2: a failure return guarded by a local that holds the primitive's result rests on the position alone
+    KZ_CHECK(has(o, "child without success: unknown (position-based): every witness rests on the source position alone (a value redefined later on a path, a condition "
+                    "that reads a local, or an inner flag that does): start_local returns -5 [ERR_ILLEGAL] at order.c:"));
+    KZ_CHECK(!has(o, "child without success: possible: start_local"));
+    KZ_CHECK(has(o, "summary spawn calls with resolved threads ") && has(o, " (position-based 1)\n"));
+    // the summary counts what the text lists
+    KZ_CHECK(has(o, "summary rows A 3 (fixed_early_proved 1, hard_before 1, unordered 1)\n"));
+    KZ_CHECK(has(o, "summary rows C 5 (hard_before 4, unordered 1)\n"));
+    // the relations text is the same with and without the order query (it does not change the relations rows)
+    std::string r1;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(f), &r1), 0);
+    KZ_CHECK(has(r1, "  C1 spawn order.c:"));
+  }
+
+  // ---- the soundness rules of relations path C (relsound.c; relations rules revisions 3 and 4) ---------------------
+  {
+    const fs::path X = work / "relsound";
+    fs::create_directories(X);
+    const std::string rs = (X / "rs.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(fixtures + "/relsound.c") + " --root " + q(fixtures) + " -o " + q(rs) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    std::string a;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rs), &a), 0);
+    // the row of a case, from its head to the next row
+    auto row = [&](const std::string& head) {
+      const size_t at = a.find(head);
+      if (at == std::string::npos) return std::string();
+      const size_t next = a.find("\n  C", at + 1);
+      return a.substr(at, next == std::string::npos ? std::string::npos : next - at);
+    };
+    // the read in the spawned entry with no lock; the locked call the child does not run: no grade
+    KZ_CHECK(has(row("field EntryRec.ready; read relsound.c:45:21 in entry_worker (the read run as the entry"), "feasibility: possible: the read holds no lock (it runs as the entry"));
+    KZ_CHECK(has(row("field EntryRec.ready; read relsound.c:45:21 in entry_worker (via the call relsound.c:51:9 in entry_locked_call; the threads this spawn starts do not reach"),
+                 "feasibility: not graded: "));
+    // through the locked direct call: ruled out; through the function pointer without the lock: possible
+    KZ_CHECK(has(row("field ViaRec.ready; read relsound.c:71:19 in via_read (via the call relsound.c:81:9"), "feasibility: proven-impossible: lock #"));
+    KZ_CHECK(has(row("field ViaRec.ready; read relsound.c:71:19 in via_read (via the indirect call relsound.c:79:9"), "feasibility: possible: the read holds no lock"));
+    // the record cleared outside the lock after the locked write
+    const std::string clear = row("field ClearRec.ready;");
+    KZ_CHECK(has(clear, "(a write of the whole record ClearRec)"));
+    KZ_CHECK(has(clear, "feasibility: possible: a write after the spawn (relsound.c:122:3) holds no lock"));
+    // the lock released and taken again around the loop
+    KZ_CHECK(has(row("field LoopRec.ready;"), "but its acquisition relsound.c:149:5 is reached again after the spawn on the creator's control-flow graph"));
+    // a lock held across everything whose identity is no static instance
+    KZ_CHECK(has(row("field PtrRec.ready;"), "feasibility: undecidable: lock #"));
+    KZ_CHECK(has(row("field PtrRec.ready;"), "but its identity is no static instance"));
+    // an unresolved call after the unlock
+    KZ_CHECK(has(row("field HookRec.ready;"), "calls after the spawn whose targets are not resolved (they may write HookRec.ready under no known lock): relsound.c:224:3 in hook_spawn"));
+    KZ_CHECK(has(row("field HookRec.ready;"), "feasibility: undecidable: lock #"));
+    // the caller writes the field after the creator returns
+    KZ_CHECK(has(row("field AfterRec.used;"), "but the callers of after_create write AfterRec.used in their own bodies"));
+    // the control: ruled out, with its scope and what it rests on
+    const std::string held = row("field HeldRec.used;");
+    KZ_CHECK(has(held, "feasibility: proven-impossible: lock #"));
+    KZ_CHECK(has(held, "Scope: one call of held_create (ED §3.3 item 3)"));
+    KZ_CHECK(has(held, "the callers of held_create (main) write it nowhere in their own bodies"));
+    KZ_CHECK(has(held, "P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)"));
+    // relations rules revision 4: what the claim covers and the premises it rests on
+    KZ_CHECK(has(held, "it concerns the writes of this call: whether their keys (held_recs[0]) name the record of the child this call starts"));
+    KZ_CHECK(has(held, "and the premises of path C (static_facts §5h, §5i)"));
+    KZ_CHECK(has(held, "premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show;"));
+    // relations rules revision 5: the premises the claim still rests on are named
+    KZ_CHECK(has(held, "a mutex is released only by the thread that holds it and its object changes only through the P0 primitives"));
+    KZ_CHECK(has(held, "an indirect call whose targets are not resolved calls only address-taken functions"));
+    // a condition wait in a callee on the creator's lock, there and two calls below on a parameter: the write after it
+    // holds no lock of the creator (LOCK_PATHS entry-release)
+    KZ_CHECK(has(row("field WaitRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:321:3) holds no lock"));
+    KZ_CHECK(has(row("field WaitRec.used;"), "(not composed: on a path from the entry of wait_finish@relsound.c:319 the call relsound.c:320:3 pthread_cond_wait releases a lock"));
+    KZ_CHECK(has(row("field WaitpRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:360:3) holds no lock"));
+    // one mutex named as the object and its first member, and as two members of a union: the release drops the lock
+    KZ_CHECK(has(row("field FirstRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:403:3) holds no lock"));
+    KZ_CHECK(has(row("field UnionRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:436:3) holds no lock"));
+    // the reading function called back by a function without a body, and through an unresolved indirect call
+    KZ_CHECK(has(row("field BackRec.used; read relsound.c:450:20 in back_read (via the call relsound.c:461:9"), "feasibility: proven-impossible: lock #"));
+    KZ_CHECK(has(row("field BackRec.used; read relsound.c:450:20 in back_read (called back from the call relsound.c:457:3 in back_worker of back_apply"),
+                 "feasibility: possible: the read holds no lock"));
+    KZ_CHECK(has(row("field BackRec.used; read relsound.c:450:20 in back_read (through an indirect call whose targets are not resolved (back_read is address-taken)"),
+                 "feasibility: undecidable: an indirect call whose targets these facts do not resolve may call back_read"));
+    // the creator is address-taken and an indirect call is not resolved: its callers are not all known
+    KZ_CHECK(has(row("field AddrRec.used;"), "but addr_create is address-taken and these facts have 10 indirect call(s) whose targets are not resolved"));
+    // a function that returns twice in the creator
+    KZ_CHECK(has(row("field JumpRec.used;"), "_setjmp in jump_create returns twice: a non-local jump back to it runs code"));
+    KZ_CHECK(has(a, "functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp"));
+    // an array of scalars: no writer row for a store to one element, so FIELD_STATUS does not call it complete
+    KZ_CHECK(has(row("field ElemRec.flags;"), "(FIELD_STATUS per-field DISABLED; an array field: a store to one of its elements makes no writer row in these facts)"));
+    // the child calls another thread's entry, which reads with no lock: graded, not "no read of the child"
+    KZ_CHECK(has(row("field RootRec.used; read relsound.c:600:20 in root_read (via the call relsound.c:612:9 in root_other)"), "feasibility: possible: the read holds no lock"));
+    // a thread the child starts reads with no lock: a descendant
+    KZ_CHECK(has(row("field DescRec.used; read relsound.c:642:20 in desc_read (via the call relsound.c:648:9 in desc_grand)"), "feasibility: possible: the read holds no lock"));
+    KZ_CHECK(has(row("field DescRec.used;"), "; threads the child's code starts (descendants) {desc_grand (spawn-entry)}"));
+    // a context no known thread reaches, of a spawn whose threads are not all resolved: undecidable, not "not graded"
+    KZ_CHECK(has(row("field OpnRec.used; read relsound.c:677:19 in opn_read (via the call relsound.c:692:34 in opn_elsewhere;"),
+                 "feasibility: undecidable: the threads this spawn starts that these facts resolve (the child and its descendants) do not reach this call, but that set "
+                 "is not complete: the spawn call relsound.c:689:10 in opn_worker that this code reaches has no resolved entry"));
+    // relations rules revision 5 (lock-set rules revision 2, incomplete-source targets):
+    // the creator runs again after the spawn: its acquisition runs again in the nested call
+    KZ_CHECK(has(row("field RecurRec.used;"), "feasibility: possible: lock #"));
+    KZ_CHECK(has(row("field RecurRec.used;"), "but recur_create runs again after the spawn (the call relsound.c:748:25 reaches it): its acquisition relsound.c:744:3 runs again"));
+    // a hook set through memcpy, and a member set with the dlsym idiom: the call's targets are not complete, so it may
+    // release the lock (the write after it holds none)
+    KZ_CHECK(has(row("field MemhookRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:789:3) holds no lock"));
+    KZ_CHECK(has(row("field DlhookRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:831:3) holds no lock"));
+    // a function without a body calls back a function that releases the lock: its effect is read at the call
+    KZ_CHECK(has(row("field CbqRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:868:3) holds no lock"));
+    // the child calls a pointer the facts do not resolve: a context it does not reach in the call graph, from an
+    // address-taken function, is undecidable; the locked direct call stays ruled out
+    KZ_CHECK(has(row("field UnresRec.used; read relsound.c:880:21 in unres_read (via the call relsound.c:884:30 in unres_ctx;"),
+                 "feasibility: undecidable: the threads this spawn starts (the child and the threads its code starts) do not reach this call in the static call graph, but "
+                 "their code makes indirect calls whose targets are not (all) resolved (relsound.c:890:3 in unres_worker (no-function-flows-to-it)), and unres_ctx runs "
+                 "from an address-taken function"));
+    KZ_CHECK(has(row("field UnresRec.used; read relsound.c:880:21 in unres_read (via the call relsound.c:892:9 in unres_worker)"), "feasibility: proven-impossible: lock #"));
+    // the address-taken reader the child reaches only through such a call: a row, undecidable
+    KZ_CHECK(has(row("field Unres2Rec.used; read relsound.c:918:22 in unres2_read (through an indirect call whose targets are not resolved (unres2_read is address-taken)"),
+                 "feasibility: undecidable: an indirect call whose targets these facts do not resolve may call unres2_read"));
+    // the entry from a union member of a static table whose other elements hold a function of the other member: the
+    // threads rest on the spawn's guard, so a context they do not reach is undecidable
+    KZ_CHECK(has(a, "the image of img_table has 2 function leaf/leaves of another member of its record (img_table[0].fn.init img_init@relsound.c:963"));
+    KZ_CHECK(has(row("field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:967:34 in img_elsewhere;"),
+                 "but that set is not complete: the entries of the spawn relsound.c:974:33 are read from a static image: "));
+    KZ_CHECK(has(row("field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:958:9 in img_main)"), "feasibility: proven-impossible: lock #"));
+    // a global function pointer set through a cast lvalue of the variable, through a copy of the pointer to it, and an
+    // array of function pointers set through the pointer its name decays to
+    KZ_CHECK(has(row("field VarhookRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:1018:3) holds no lock"));
+    KZ_CHECK(has(row("field PutcopyRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:1063:3) holds no lock"));
+    KZ_CHECK(has(row("field ArrhookRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:1108:3) holds no lock"));
+    KZ_CHECK(has(a, "proven-impossible 8, possible 18, undecidable 11, not graded 1"));
+    // the targets of the hook calls: resolved, with a row incomplete-source
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(rs) + " --section targets --section basis", &out), 0);
+    KZ_CHECK(has(out, "in memhook_create indirect-call -> UNRESOLVED(incomplete-source) via G:memhook_fn@relsound.c:762 (G:memhook_fn@relsound.c:762: its address "
+                      "[&memhook_fn] is passed at relsound.c:766:3 (memcpy) converted to another pointer type"));
+    KZ_CHECK(has(out, "in dlhook_create indirect-call -> UNRESOLVED(incomplete-source) via DlhookOps.hook (the writer set of the field DlhookOps.hook is not complete"));
+    KZ_CHECK(has(out, "in varhook_create indirect-call -> UNRESOLVED(incomplete-source) via G:varhook_fn@relsound.c:988 (the variable varhook_fn: its address is "
+                      "taken at relsound.c:996:41 (not as a call argument, converted to another type)"));
+    KZ_CHECK(has(out, "in putcopy_create indirect-call -> UNRESOLVED(incomplete-source) via G:putcopy_fn@relsound.c:1029 (the pointer to a function pointer out "
+                      "is copied at relsound.c:1037:22"));
+    KZ_CHECK(has(out, "in arrhook_create indirect-call -> UNRESOLVED(incomplete-source) via G:arrhook_fns@relsound.c:1074 (the variable arrhook_fns: it is "
+                      "converted to a pointer to its first element at relsound.c:1084:22 (not as a call argument)"));
+    KZ_CHECK(has(out, "count.indirect_calls_incomplete = 5 (resolved, with a CALL_TARGETS row incomplete-source"));
+    KZ_CHECK(has(out, "8 (copies of a DERIVES chain; a longer chain is cut with the reason walk-bound"));
+    KZ_CHECK(has(out, "64 (levels of an expression text stored in LOOP_ITERS"));
+    KZ_CHECK(has(out, "DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut"));
+    // the lock sets: the write after qsort holds no lock (the callback's release is applied at the call)
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(rs) + " --section lockset", &out), 0);
+    KZ_CHECK(has(out, "write CbqRec.used at relsound.c:868:3 in cbq_create held=0 {}"));
+  }
+
+  // ---- an object of internal linkage defined in a header two units include (relations rules revision 5) ----------
+  {
+    const fs::path X = work / "units";
+    fs::create_directories(X);
+    write(X / "unit_lock.h",
+          "#include <pthread.h>\nstatic pthread_mutex_t unit_mutex = PTHREAD_MUTEX_INITIALIZER;\ntypedef struct { int used; } URec;\nextern URec urecs[4];\n");
+    write(X / "unit_a.c",
+          "#include \"unit_lock.h\"\nURec urecs[4];\nvoid *u_worker(void *arg);\nint u_create(void) {\n  pthread_t t;\n  pthread_mutex_lock(&unit_mutex);\n"
+          "  pthread_create(&t, 0, u_worker, 0);\n  urecs[0].used = 1;\n  pthread_mutex_unlock(&unit_mutex);\n  return 0;\n}\nint main(void) { return u_create(); }\n");
+    write(X / "unit_b.c",
+          "#include \"unit_lock.h\"\nint u_read(void) {\n  int r;\n  pthread_mutex_lock(&unit_mutex);\n  if (urecs[0].used == 1) r = 0;\n  else r = 5;\n"
+          "  pthread_mutex_unlock(&unit_mutex);\n  return r;\n}\nvoid *u_worker(void *arg) { (void)arg; (void)u_read(); return 0; }\n");
+    const std::string uk = (X / "u.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "unit_a.c").string()) + " --source " + q((X / "unit_b.c").string()) +
+                        " --root " + q(X.string()) + " -o " + q(uk) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(uk) + " --section lockids", &out), 0);
+    KZ_CHECK(has(out, "&unit_mutex@unit_lock.h:2 closed not-static"));
+    KZ_CHECK(has(out, "an object of internal linkage defined in unit_lock.h, which is not the main file of the translation unit"));
+    std::string u;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(uk), &u), 0);
+    KZ_CHECK(has(u, "feasibility: undecidable: lock #0 &unit_mutex@unit_lock.h:2 (not-static) is held from the same acquisition across the spawn and every write after it"));
+    KZ_CHECK(!has(u, "proven-impossible: lock"));
+  }
+
+  // ---- a probe-create in a function two threads run (relations rules revision 5) --------------------------------
+  {
+    const fs::path X = work / "probe2";
+    fs::create_directories(X);
+    write(X / "probe2.c",
+          "#include <pthread.h>\n#include <string.h>\ntypedef struct { int used; char name[16]; } PSlot;\nstatic PSlot pslots[4];\n"
+          "int pslot_find(const char *name, int *out) {\n  int i;\n  for (i = 0; i < 4; i++) {\n    if (pslots[i].used == 1 && strcmp(pslots[i].name, name) == 0) {\n"
+          "      *out = i;\n      return 0;\n    }\n  }\n  return -17;\n}\n"
+          "int pslot_create(const char *name, int *out) {\n  int i;\n  for (i = 0; i < 4; i++) {\n    if (pslots[i].used == 1 && strcmp(pslots[i].name, name) == 0) return -5;\n  }\n"
+          "  for (i = 0; i < 4; i++) {\n    if (pslots[i].used == 0) {\n      strncpy(pslots[i].name, name, 15);\n      pslots[i].used = 1;\n      *out = i;\n      return 0;\n"
+          "    }\n  }\n  return -17;\n}\n"
+          "typedef struct { const char *name; } PCfg;\nstatic const PCfg pcfg = {\"omega\"};\n"
+          "static void shared_setup(void) {\n  int h = 0;\n  if (pslot_find(pcfg.name, &h) != 0) {\n    (void)pslot_create(pcfg.name, &h);\n  }\n}\n"
+          "void *t1_main(void *arg) {\n  (void)arg;\n  shared_setup();\n  return 0;\n}\n"
+          "void *t2_main(void *arg) {\n  (void)arg;\n  shared_setup();\n  return 0;\n}\n"
+          "int main(void) {\n  pthread_t a, b;\n  pthread_create(&a, 0, t1_main, 0);\n  pthread_create(&b, 0, t2_main, 0);\n  return 0;\n}\n");
+    const std::string pk = (X / "p.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "probe2.c").string()) + " --root " + q(X.string()) + " -o " + q(pk) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    std::string pr;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(pk), &pr), 0);
+    KZ_CHECK(!has(pr, "not a pair: probe-create"));
+    KZ_CHECK(has(pr, "creator: key unresolved (lookup): probe2.c:"));
+    KZ_CHECK(has(pr, "; the function is run by 2 actor(s) {t1_main (spawn-entry), t2_main (spawn-entry)} and the creation by {t1_main (spawn-entry), t2_main (spawn-entry)}: kept "
+                     "as a pair"));
+    KZ_CHECK(has(pr, "dependency: path A: 1 creator(s) of this partition in other actors"));
+  }
+
+  // ---- relation rows as records: the use-site key (docs/static_facts.md §5l) -------------------------------------
+  // A lookup API over a table (with a constant partition argument that selects the table), two lookups on one line, a creator in another
+  // thread.  The key of each row stays when lines move, when the creators change and when the partition changes; two
+  // calls of one callee on one line get different keys (the n-th call); the text with --keys is the text without it.
+  {
+    const fs::path X = work / "usekeys";
+    fs::create_directories(X);
+    auto source = [](const std::string& top, int kind, const std::string& more_creators) {
+      return top +
+             "#include <pthread.h>\n#include <string.h>\n#define KIND " + std::to_string(kind) + "\n"
+             "typedef struct { int used; char name[16]; } KSlot;\nstatic KSlot kslots[8][4];\n"
+             "int k_find(int kind, const char *name) {\n  int i;\n  for (i = 0; i < 4; i++) {\n"
+             "    if (kslots[kind][i].used == 1 && strcmp(kslots[kind][i].name, name) == 0) return i;\n  }\n  return -17;\n}\n"
+             "int k_create(int kind, const char *name) {\n  int i;\n  for (i = 0; i < 4; i++) {\n"
+             "    if (kslots[kind][i].used == 1 && strcmp(kslots[kind][i].name, name) == 0) return -5;\n  }\n"
+             "  for (i = 0; i < 4; i++) {\n    if (kslots[kind][i].used == 0) {\n      strncpy(kslots[kind][i].name, name, 15);\n      kslots[kind][i].used = 1;\n      return i;\n"
+             "    }\n  }\n  return -17;\n}\n"
+             "int t_find(const char *name) { return k_find(KIND, name); }\n"
+             "int t_create(const char *name) { return k_create(KIND, name); }\n"
+             "void *user_main(void *arg) {\n  (void)arg;\n  return (void *)(long)(t_find(\"a\") + t_find(\"b\"));\n}\n"
+             "void *maker_main(void *arg) {\n  (void)arg;\n  (void)t_create(\"a\");\n" + more_creators + "  return 0;\n}\n"
+             "int main(void) {\n  pthread_t a, b;\n  pthread_create(&a, 0, user_main, 0);\n  pthread_create(&b, 0, maker_main, 0);\n  return 0;\n}\n";
+    };
+    struct Variant {
+      const char* name;
+      std::string text;
+    };
+    const std::vector<Variant> variants = {
+        {"base", source("", 3, "")},
+        {"moved", source("/* three lines more */\n\n\n", 3, "")},
+        {"creators", source("", 3, "  (void)t_create(\"b\");\n  (void)t_create(\"c\");\n")},
+        {"partition", source("", 4, "")},
+    };
+    std::vector<std::string> rels, keys;
+    for (const Variant& v : variants) {
+      const fs::path src = X / (std::string(v.name) + ".c");
+      write(src, v.text);
+      const std::string kz = (X / (std::string(v.name) + ".kz")).string();
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src.string()) + " --root " + q(X.string()) + " -o " + q(kz) +
+                          " -- -std=c99 -pedantic",
+                      &out),
+                  0);
+      std::string rel, rel_k;
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q(kz), &rel), 0);
+      const fs::path kf = X / (std::string(v.name) + ".keys");
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q(kz) + " --keys " + q(kf.string()), &rel_k), 0);
+      KZ_CHECK_EQ(rel_k, rel);  // the listing changes no byte of the text
+      rels.push_back(rel);
+      // the rows' key lines ("A1 <key> <text>"), without the header lines
+      std::string k;
+      std::istringstream ks(read(kf));
+      std::string line;
+      while (std::getline(ks, line))
+        if (line.size() > 1 && line[0] == 'A' && line[1] >= '1' && line[1] <= '9') k += line + "\n";
+      keys.push_back(k);
+    }
+    // the base: two lookups on one line, each its own key (the first and the second call of t_find in user_main)
+    KZ_CHECK(has(rels[0], "  A1 lookup "));
+    KZ_CHECK(has(rels[0], "  A2 lookup "));
+    KZ_CHECK(!has(rels[0], "  A3 "));
+    KZ_CHECK(has(keys[0], " A|KSlot.name|user_main|t_find#0|1\n"));
+    KZ_CHECK(has(keys[0], " A|KSlot.name|user_main|t_find#0|2\n"));
+    const std::string listing = read(X / "base.keys");
+    KZ_CHECK(has(listing, "kz-relation-keys 1\n"));
+    KZ_CHECK(has(listing, "rows 2, distinct keys 2, rows that share a key 0, keys shared by different key texts 0\n"));
+    KZ_CHECK(!has(listing, "collision "));
+    // the text differs where the variants differ, the keys do not
+    KZ_CHECK(has(rels[0], "lookup base.c:"));
+    KZ_CHECK(rels[1] != rels[0]);
+    KZ_CHECK(has(rels[0], "partition {3}"));
+    KZ_CHECK(has(rels[3], "partition {4}"));
+    KZ_CHECK(!has(rels[3], "partition {3}"));
+    size_t c0 = 0, c2 = 0;
+    for (size_t at = 0; (at = rels[0].find("      creator: ", at)) != std::string::npos; ++at) ++c0;
+    for (size_t at = 0; (at = rels[2].find("      creator: ", at)) != std::string::npos; ++at) ++c2;
+    KZ_CHECK(c0 != 0);
+    KZ_CHECK(c2 > c0);
+    KZ_CHECK(!keys[0].empty());
+    KZ_CHECK_EQ(keys[1], keys[0]);
+    KZ_CHECK_EQ(keys[2], keys[0]);
+    KZ_CHECK_EQ(keys[3], keys[0]);
+    // the fixture relations.c: one key per row, the sites of a path B row in the listing, and the same text
+    const std::string rf = (work / "relations" / "both.kz").string();
+    std::string r1, r2;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rf), &r1), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rf) + " --keys " + q((X / "relations.keys").string()) + " -o " + q((X / "relations.txt").string()), &r2), 0);
+    KZ_CHECK_EQ(read(X / "relations.txt"), r1);
+    const std::string rk = read(X / "relations.keys");
+    KZ_CHECK(has(rk, "rows 5, distinct keys 5, rows that share a key 0"));
+    KZ_CHECK(has(rk, "\nB1 "));
+    KZ_CHECK(has(rk, " B|Service.self_id|-|notify#0|-\n"));
+    KZ_CHECK(has(rk, "\nB1.site "));
+    KZ_CHECK(has(rk, " B-site|Service.self_id|client_main|notify#0|2\n"));
+    KZ_CHECK(has(rk, "\nC1 "));
+    KZ_CHECK(has(rk, "|read task_check 1|itself\n"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rf) + " --keys", &out), 2);
+  }
+
+  // ---- the key texts by source tree (relations rules revision 14, static_facts.md 5x and its ninth addendum) --------------
+  // The key-parameter function of a lookup is a static function of a header outside the root, in two checkouts of one tree
+  // (a directory with a `.git` entry).  With --object-access the facts carry BASIS source_tree items and the key text names
+  // the file by the tree's token, so the two checkouts give one key; without the option the key text keeps the absolute path
+  // and the keys differ.  The line that names revision 14 is in the relations header and the key listing only with the option.
+  {
+    const fs::path X = work / "treekeys";
+    fs::create_directories(X);
+    for (const char* c : {"c1", "c2"}) {
+      fs::create_directories(X / c / "app" / ".git");
+      write(X / c / "app" / "src" / "kt.h", "int k_find(int kind, const char *name);\nstatic int t_find(const char *name) { return k_find(3, name); }\n");
+    }
+    write(X / "root" / "m.c",
+          "#include <pthread.h>\n#include <string.h>\n#include \"kt.h\"\n"
+          "typedef struct { int used; char name[16]; } KSlot;\nstatic KSlot kslots[8][4];\n"
+          "int k_find(int kind, const char *name) {\n  int i;\n  for (i = 0; i < 4; i++) {\n"
+          "    if (kslots[kind][i].used == 1 && strcmp(kslots[kind][i].name, name) == 0) return i;\n  }\n  return -17;\n}\n"
+          "int k_create(int kind, const char *name) {\n  int i;\n  for (i = 0; i < 4; i++) {\n"
+          "    if (kslots[kind][i].used == 1 && strcmp(kslots[kind][i].name, name) == 0) return -5;\n  }\n"
+          "  for (i = 0; i < 4; i++) {\n    if (kslots[kind][i].used == 0) {\n      strncpy(kslots[kind][i].name, name, 15);\n      kslots[kind][i].used = 1;\n      return i;\n"
+          "    }\n  }\n  return -17;\n}\n"
+          "int t_create(const char *name) { return k_create(3, name); }\n"
+          "void *user_main(void *arg) {\n  (void)arg;\n  return (void *)(long)t_find(\"a\");\n}\n"
+          "void *maker_main(void *arg) {\n  (void)arg;\n  (void)t_create(\"a\");\n  return 0;\n}\n"
+          "int main(void) {\n  pthread_t a, b;\n  pthread_create(&a, 0, user_main, 0);\n  pthread_create(&b, 0, maker_main, 0);\n  return 0;\n}\n");
+    std::map<std::string, std::string> rel, keyl, basis;
+    for (const char* c : {"c1", "c2"})
+      for (const char* o : {"on", "off"}) {
+        const std::string n = std::string(c) + "_" + o;
+        const std::string f = (X / (n + ".kz")).string();
+        KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "root" / "m.c").string()) + " --root " + q((X / "root").string()) +
+                            (std::string(o) == "on" ? " --object-access" : "") + " -o " + q(f) + " -- -std=c99 -I" + q((X / c / "app" / "src").string()),
+                        &out),
+                    0);
+        KZ_CHECK_EQ(run(q(tool) + " relations " + q(f) + " --keys " + q((X / (n + ".keys")).string()), &rel[n]), 0);
+        keyl[n] = read(X / (n + ".keys"));
+        KZ_CHECK_EQ(run(q(tool) + " show " + q(f) + " --section basis", &basis[n]), 0);
+      }
+    for (const char* c : {"c1", "c2"}) {
+      const std::string on = std::string(c) + "_on", off = std::string(c) + "_off";
+      // BASIS: the tree of the header, with its token (the option only)
+      KZ_CHECK(has(basis[on], "source_tree[0] = " + (X / c / "app").string() + " <app>"));
+      KZ_CHECK(!has(basis[on], "source_tree[1]"));
+      KZ_CHECK(!has(basis[off], "source_tree["));
+      // the key text: the tree's token with the option, the recorded path without it
+      KZ_CHECK(has(keyl[on], " A|KSlot.name|user_main|t_find@<app>/src/kt.h#0|1\n"));
+      KZ_CHECK(has(keyl[off], " A|KSlot.name|user_main|t_find@" + (X / c / "app" / "src").string() + "/kt.h#0|1\n"));
+      // the line that names revision 14, in the header and the key listing, with the option only
+      const std::string l14 = "rules with object access: relations rules revision 14 (2026-11-19), over OBJECT_ACCESS (extract --object-access, docs/static_facts.md 5x): "
+                              "key texts by source tree 1 (BASIS source_tree items); without RESULT_FLOW and RESULT_EFFECT: no line of items 1-5\n";
+      KZ_CHECK(has(rel[on], "rules relations rules revision 12 (2026-11-18)\n"));
+      KZ_CHECK(has(rel[on], l14));
+      KZ_CHECK(has(keyl[on], "rules relations rules revision 12 (2026-11-18)\n" + l14));
+      KZ_CHECK(!has(rel[off], "rules with object access") && !has(keyl[off], "rules with object access"));
+    }
+    // one key for the two checkouts with the option, two without it
+    auto row_lines = [](const std::string& k) {
+      std::string r;
+      std::istringstream ks(k);
+      for (std::string line; std::getline(ks, line);)
+        if (line.size() > 1 && line[0] == 'A' && line[1] >= '1' && line[1] <= '9') r += line + "\n";
+      return r;
+    };
+    KZ_CHECK(!row_lines(keyl["c1_on"]).empty());
+    KZ_CHECK_EQ(row_lines(keyl["c1_on"]), row_lines(keyl["c2_on"]));
+    KZ_CHECK(row_lines(keyl["c1_off"]) != row_lines(keyl["c2_off"]));
+  }
+
+  // ---- 8c (RV3A 6.3 O2, O12): command-line targets no unit declares, the target recorded once, the reading options
+  {
+    const fs::path X = work / "8c";
+    fs::create_directories(X);
+    const std::string wc = fixtures + "/writers.c", tk = (X / "t.kz").string(), ok = (X / "ok.kz").string();
+    // O2: writers.c has a record Cell with a field id, and no record NoSuch_t or Slot; Cell has no field nofield
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) +
+                        " --target NoSuch_t.nofield --target Slot.nofield --target Cell.nofield -o " + q(tk) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location NoSuch_t.nofield   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> unknown-target (no record type NoSuch_t is found among the record names of the units read)"));
+    KZ_CHECK(has(out, "location Slot.nofield   writers 0 "));
+    KZ_CHECK(has(out, "-> unknown-target (no record type Slot is found among the record names of the units read)"));
+    KZ_CHECK(has(out, "-> unknown-target (the record type Cell has no field nofield in the units read)"));
+    KZ_CHECK(!has(out, "nofield   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> "
+                       "writer-set-complete"));
+    // the profile's target Cell.id is declared: its rule is the one it had
+    KZ_CHECK(has(out, "location Cell.id   writers "));
+    KZ_CHECK(!has(out, "Cell.id   writers 10 (direct 9, data function 1, out-pointer 0, initial values 5), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> unknown"));
+    // the hand-entered count still counts the three targets
+    KZ_CHECK(has(out, "hand-entered inputs        15 (built-in data-function table 12, command line 3)"));
+    std::string sv;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(tk) + " --section basis --section locs", &sv), 0);
+    KZ_CHECK(has(sv, "unknown_target.NoSuch_t.nofield = unknown-target: no record type NoSuch_t is found among the record names of the units "
+                     "read; FACT_LOCS status unchecked (not writer-set-complete)  (unset)"));
+    KZ_CHECK(has(sv, "unknown_target.Cell.nofield = unknown-target: the record type Cell has no field nofield in the units read; FACT_LOCS status unchecked"));
+    KZ_CHECK(!has(sv, "unknown_target.Cell.id"));
+    KZ_CHECK(has(sv, "  NoSuch_t.nofield unchecked writers=0"));
+    KZ_CHECK(has(sv, "  Cell.nofield unchecked writers=0"));
+    KZ_CHECK(has(sv, "  Cell.id writer-set-complete writers="));
+    // O12: one BASIS record per command-line target (no `= extraction target` record besides), the reading options
+    KZ_CHECK(has(sv, "target.Slot.nofield = command line  (declared-assumption)"));
+    KZ_CHECK(!has(sv, "extraction target"));
+    KZ_CHECK(has(sv, "extract.resource_dir = "));
+    KZ_CHECK(has(sv, "extract.extra_arg = none  (unset)"));
+    KZ_CHECK(!has(sv, "extract.extra_arg[0]"));
+    // Cell.id is also the profile's target (00_fixture.kzp loc Cell.id): a declared target given again on the command
+    // line keeps the rule.  --extra-arg is recorded as given.  The command-line-only declared target (Cell.aux) and
+    // --resource-dir are checked in the 8c fix block below.
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --target Cell.id --extra-arg -DKZ_8C_A=1 --extra-arg -Wall -o " +
+                        q(ok) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "Cell.id   writers 10 (direct 9, data function 1, out-pointer 0, initial values 5), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> "
+                      "writer-set-complete"));
+    KZ_CHECK(!has(out, "unknown-target"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(ok) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "extract.extra_arg[0] = -DKZ_8C_A=1  (unset)"));
+    KZ_CHECK(has(sv, "extract.extra_arg[1] = -Wall  (unset)"));
+    KZ_CHECK(!has(sv, "extract.extra_arg = none"));
+    KZ_CHECK(!has(sv, "unknown_target."));
+    // this build has a built-in resource directory (main.cpp KZS_DEFAULT_RESOURCE_DIR): the value is exactly that one
+    KZ_CHECK(has(sv, "\n  extract.resource_dir = /"));
+    KZ_CHECK(has(sv, " (the tool's built-in default; no --resource-dir)  (unset)\n"));
+    KZ_CHECK(!has(sv, "extract.resource_dir = none"));
+    // relations counts a command-line target once among the hand-entered vocabulary
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --extended-facts --source " + q(wc) + " --root " + q(fixtures) + " --target Cell.nofield -o " +
+                        q((X / "rel.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "rel.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "; hand-entered vocabulary on the command line: 1 items\n"));
+  }
+
+  // ---- 8c fix stage: the reason text, a --target the profile also names, a declared target the profile does not
+  // name, a nested tag (a known limit: only file-scope tags are looked up), the resource directory as used
+  {
+    const fs::path X = work / "8cfix";
+    fs::create_directories(X);
+    const std::string wc = fixtures + "/writers.c";
+    std::string sv;
+    // a declared command-line target that the profile does not name: Cell.aux of writers.c keeps the rule
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --target Cell.aux -o " + q((X / "aux.kz").string()) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location Cell.aux   writers 2 (direct 1, data function 1, out-pointer 0, initial values 4), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> writer-set-complete\n"));
+    KZ_CHECK(!has(out, "unknown-target"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "aux.kz").string()) + " --section basis --section locs", &sv), 0);
+    KZ_CHECK(has(sv, "target.Cell.aux = command line  (declared-assumption)"));
+    KZ_CHECK(has(sv, "  Cell.aux writer-set-complete writers="));
+    KZ_CHECK(!has(sv, "unknown_target."));
+    // the resource directory in use: the built-in default, then the same path through --resource-dir and through
+    // --extra-arg -resource-dir= (which comes after the tool's own -resource-dir and is the one used)
+    const std::string key = "\n  extract.resource_dir = ";
+    const size_t at = sv.find(key);
+    KZ_CHECK(at != std::string::npos);
+    const std::string tail = at == std::string::npos ? std::string() : sv.substr(at + key.size());
+    const std::string dir = tail.substr(0, tail.find(" (the tool's built-in default; no --resource-dir)"));
+    KZ_CHECK(!dir.empty() && dir[0] == '/' && dir.find('\n') == std::string::npos);
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --resource-dir " + q(dir) + " -o " +
+                        q((X / "rd.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "rd.kz").string()) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "extract.resource_dir = " + dir + " (--resource-dir)  (unset)\n"));
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --extra-arg -resource-dir=" + q(dir) + " -o " +
+                        q((X / "rdx.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "rdx.kz").string()) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "extract.resource_dir = " + dir + " (--extra-arg -resource-dir, after and over the tool's: " + dir +
+                         " (the tool's built-in default; no --resource-dir))  (unset)\n"));
+    KZ_CHECK(has(sv, "extract.extra_arg[0] = -resource-dir=" + dir + "  (unset)\n"));
+    // an empty --resource-dir: no resource directory (writers.c needs no system header, so it is read)
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --resource-dir '' -o " + q((X / "rd0.kz").string()) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "rd0.kz").string()) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "extract.resource_dir = none (no resource directory: the front end's own search)  (unset)\n"));
+    // a --target that the profile also names (Cell.id) on a source without Cell: checked like a command-line target;
+    // its record keeps the profile's origin.  A nested tag (Inner, inside Outer) has file scope in C and is looked up
+    // (static_facts.md 5q; before, only the tags at file scope were, and Inner.ix was unknown-target): its writer is found.
+    write(X / "other.c", "struct Outer { struct Inner { int ix; } in; };\nstruct Inner g_inner;\nvoid w(void) { g_inner.ix = 9; }\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q((X / "other.c").string()) + " --root " + q(X.string()) +
+                        " --target Cell.id --target Inner.ix -o " + q((X / "other.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location Cell.id   writers 0 "));
+    KZ_CHECK(has(out, "-> unknown-target (no record type Cell is found among the record names of the units read)"));
+    KZ_CHECK(!has(out, "no record type Inner"));
+    KZ_CHECK(has(out, "location Inner.ix   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> writer-set-complete"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "other.kz").string()) + " --section basis --section locs", &sv), 0);
+    KZ_CHECK(has(sv, "target.Cell.id = profile loc Cell.id  (from-reference)"));
+    KZ_CHECK(has(sv, "unknown_target.Cell.id = unknown-target: no record type Cell is found among"));
+    KZ_CHECK(has(sv, "  Cell.id unchecked writers=0"));
+    KZ_CHECK(has(sv, "  Inner.ix writer-set-complete writers=1"));
+    KZ_CHECK(!has(sv, "unknown_target.Inner"));
+    // without --target the profile's Cell.id keeps the profile rule (the open defect of static_facts.md 5k)
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q((X / "other.c").string()) + " --root " + q(X.string()) + " -o " +
+                        q((X / "other0.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> writer-set-complete"));
+  }
+
+  // ---- record names (static_facts.md 5q) and truncated images in the unrolled walks and PTR_FIELDS -------------------
+  {
+    const fs::path X = work / "names";
+    fs::create_directories(X);
+    std::string sv;
+    // C11 unnamed members keep their rule (their fields are the enclosing record's); a record with no tag that is the type
+    // of a named member is a type of its own, <Outer>::<member>, and Outer has no field of it
+    write(X / "c11.c",
+          "struct Unn { struct { int q; } m; int r; };\nstruct Anon { union { int a; long b; }; int c; };\nstruct Unn g_unn;\nstruct Anon g_anon;\n"
+          "void w(void) { g_unn.m.q = 5; g_anon.a = 1; }\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q((X / "c11.c").string()) + " --root " + q(X.string()) +
+                        " --target Unn::m.q --target Unn.q --target Anon.a -o " + q((X / "c11.kz").string()) + " -- -std=c11",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location Unn::m.q   writers 1 (direct 1, "));
+    KZ_CHECK(has(out, "location Unn.q   writers 0 ") && has(out, "-> unknown-target (the record type Unn has no field q in the units read)"));
+    KZ_CHECK(has(out, "location Anon.a   writers 1 (direct 1, "));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "c11.kz").string()) + " --section writers --section fwrites", &sv), 0);
+    KZ_CHECK(has(sv, "  Unn::m.q assign at c11.c:5:"));
+    KZ_CHECK(has(sv, "  Anon.a assign at c11.c:5:"));
+    KZ_CHECK(!has(sv, "<anonymous"));
+    // the static image of a table element cut at the budget: a field the walk reads that is not in the image may be in
+    // the part not read, so the guard stays residual and says so, and so does an argument (unroll.cpp); a pointer field
+    // whose one static initializer is in an image with a marker leaf is no resolution (PTR_FIELDS may, argflow.cpp)
+    write(X / "cut.c",
+          "typedef struct { const char *name; int (*init)(void); int flag; int a; int b; } Mod;\n"
+          "typedef struct { const Mod *const *list; } Cfg;\n"
+          "int fx_use(int v);\n"
+          "static int a_init(void) { return 0; }\n"
+          "static const Mod mod_a = {\"a\", a_init, 1, 2, 3};\n"
+          "static const Mod *const mod_list[] = {&mod_a, 0};\n"
+          "Cfg g_cfg = {mod_list};\n"
+          "void init_all(void) {\n"
+          "  unsigned long i;\n"
+          "  const Mod *e;\n"
+          "  for (i = 0;; i++) {\n"
+          "    e = g_cfg.list[i];\n"
+          "    if (e == 0) break;\n"
+          "    if (e->b != 0) (void)e->init();\n"
+          "    (void)fx_use(e->a);\n"
+          "  }\n"
+          "}\n"
+          "struct Tbl { int x; };\nstruct Tbl g_tbl;\n"
+          "struct Hold { struct Tbl *tbl; int a; int b; int c; };\n"
+          "struct Hold g_hold = {&g_tbl, 1, 2, 3};\n"
+          "int read_tbl(void) { return g_hold.tbl->x; }\n");
+    for (const char* budget : {"4096", "2"}) {
+      const std::string f = (X / (std::string("cut_") + budget + ".kz")).string();
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --image-budget " + budget + " --source " + q((X / "cut.c").string()) + " --root " + q(X.string()) + " -o " + q(f) +
+                          " -- -std=c99",
+                      &out),
+                  0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f) + " --section iters --section ptrfields", &sv), 0);
+      if (std::string(budget) == "4096") {
+        KZ_CHECK(has(sv, "    call site ") && !has(sv, "truncated at"));
+        KZ_CHECK(has(sv, "      arg 0 = int 2 "));
+        KZ_CHECK(has(sv, "read Hold.tbl") && has(sv, " resolved "));
+      } else {
+        KZ_CHECK(has(sv, " residual if ") && has(sv, " (the guard reads a field not in the static image of mod_a, which is truncated at mod_a.flag... (the field may be in the part not read))"));
+        KZ_CHECK(has(sv, "      arg 0 = non-constant field a not in the image, which is truncated at mod_a.flag... (the field may be in the part not read)"));
+        KZ_CHECK(has(sv, "read Hold.tbl") && !has(sv, " resolved "));
+      }
+    }
+  }
+
+  // ---- types and object access (--object-access, static_facts.md 5s) ------------------------------------------------------
+  {
+    const fs::path X = work / "objaccess";
+    fs::create_directories(X);
+    const std::string oc = fixtures + "/objaccess.c";
+    const std::string targets = " --target Mem.pool --target Mem.buf --target Mem.label --target Mem.tag --target Mem.data --target Mem.raw --target Mem.count --target Chan.name"
+                                " --target Ent.n_cond --target Ent.n_comma --target Ent.n_grid --target Ent.n_var";
+    // the option needs the extended facts
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(oc) + " --object-access -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "--object-access needs the extended facts"));
+    KZ_CHECK(!fs::exists(X / "x.kz"));
+    std::string on, off, sv;
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(oc) + " --root " + q(fixtures) + " --extended-facts --object-access" + targets + " -o " +
+                        q((X / "on.kz").string()) + " -- -std=c99 -pedantic",
+                    &on),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(oc) + " --root " + q(fixtures) + " --extended-facts" + targets + " -o " +
+                        q((X / "off.kz").string()) + " -- -std=c99 -pedantic",
+                    &off),
+                0);
+    // the writer sets: the array that decays to a pointer counts (a call that keeps it as an integer, a function without a body,
+    // a store of the pointer, a conversion to an integer); a function that stores through it gives a writer row; a store to an
+    // element is a writer row; without the option every one of them is complete with the writers of the default rules
+    KZ_CHECK(has(off, "location Mem.pool   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> writer-set-complete"));
+    KZ_CHECK(has(on, "location Mem.pool   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 3, cast 0, union 0, "
+                     "unknown effect 0  -> DISABLED"));
+    KZ_CHECK(has(on, "location Mem.buf   writers 2 (direct 0, data function 1, out-pointer 1, initial values 1)"));
+    KZ_CHECK(has(on, "location Mem.data   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1)"));
+    KZ_CHECK(has(on, "location Chan.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 1, escape 3,"));
+    KZ_CHECK(has(off, "location Chan.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0,"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "on.kz").string()) + " --section atype --section objaccess --section ftypes --section argtypes --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "Mem.pool address-escape at objaccess.c:60:3 in init: the array decays to a pointer to its first element, passed to pool_create: "));
+    KZ_CHECK(has(sv, "Mem.tag address-escape at objaccess.c:63:3 in init: the array decays to a pointer to its first element: assigned to last"));
+    KZ_CHECK(has(sv, "Mem.raw address-escape at objaccess.c:64:14 in init: the array decays to a pointer to its first element: converted to an integer"));
+    KZ_CHECK(has(sv, "Mem.label address-escape at objaccess.c:62:9 in init: the array decays to a pointer to its first element, passed to lookup: the callee has no body"));
+    // OBJECT_ACCESS: a global, an element of a global array, a path through a global pointer, a local, a parameter's pointee
+    KZ_CHECK(has(sv, "  read Mem.pool at objaccess.c:60:19 in init base=global object=mem path=[mem.pool] resolved {} read "));
+    KZ_CHECK(has(sv, " base=global-element object=cfg_store@objaccess.c:41 path=[cfg_store.chan[1].name] resolved {} index=[1] read "));
+    KZ_CHECK(has(sv, " base=global object=cfg path=[cfg->chan[i].name] partial {index-unknown} index=[local:i, 0] read "));
+    KZ_CHECK(has(sv, " base=local object=init/local path=[local.name] resolved {} read "));
+    KZ_CHECK(has(sv, "  write Mem.count at objaccess.c:54:33 in set_count base=param-pointee object=- path=[m->count] unresolved {} writer "));
+    KZ_CHECK(has(sv, "  out-pointer Mem.buf at objaccess.c:61:3 in init base=global object=mem path=[mem.buf] resolved {} writer "));
+    // FIELD_TYPES: the extent as evaluated and as written, the element, a bit-field
+    KZ_CHECK(has(sv, "  Chan.name at objaccess.c:19:8 element char [char] size 1 extent constant 20 [NAMELEN] {}\n"));
+    KZ_CHECK(has(sv, "  Mem.pool at objaccess.c:28:6 element char [u8] size 1 extent constant 32 [POOLSZ] {typedef-named}\n"));
+    KZ_CHECK(has(sv, "  Mem.flag at objaccess.c:36:12 element unsigned-integer [unsigned int] size 4 extent none 0 bits 3 {bit-field}\n"));
+    // ARG_TYPES: a character array read before the call under a test of it, one read after the call, one not read
+    KZ_CHECK(has(sv, "objaccess.c:70:37 lookup arg 1 char-array [char[20]] width 8 extent 20 of Chan.name declared at objaccess.c:19 read-dominating by the read at "
+                     "objaccess.c:70:22 {const-pointee,via-pointer-field}"));
+    KZ_CHECK(has(sv, "objaccess.c:71:9 lookup arg 1 char-array [char[20]] width 8 extent 20 of Chan.name declared at objaccess.c:19 read-not-dominating {const-pointee}"));
+    KZ_CHECK(has(sv, "objaccess.c:74:9 lookup arg 1 char-array [char[20]] width 8 extent 20 of Chan.name declared at objaccess.c:19 not-read {const-pointee}"));
+    KZ_CHECK(has(sv, "objaccess.c:68:3 set_count arg 0 record-pointer [Mem *] width 8 {}"));
+    KZ_CHECK(has(sv, "count.array_decay = out-pointer calls 8, address-escape hits 4, element writer rows 1  (unset)"));
+    KZ_CHECK(has(sv, "count.arg_types = 21 (character arrays read at a dominating point 1)  (unset)"));
+    // the decay under a conditional and a comma operator is an address escape (no out-pointer call reads that shape); a row
+    // of an array-of-arrays field passed to a call is an out-pointer call; an argument beyond the named parameters of a
+    // variadic function defined here has its own reason
+    KZ_CHECK(has(sv, "Ent.n_cond address-escape at objaccess.c:91:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the "
+                     "out-pointer rule does not read (a conditional or comma operand)"));
+    KZ_CHECK(has(sv, "Ent.n_comma address-escape at objaccess.c:92:9 in decay_cases: the array decays to a pointer to its first element: passed to a call in an expression the "
+                     "out-pointer rule does not read (a conditional or comma operand)"));
+    KZ_CHECK(has(sv, "Ent.n_grid address-escape at objaccess.c:93:9 in decay_cases: the array decays to a pointer to its first element, passed to ext_read: the callee has no "
+                     "body in the closed program"));
+    KZ_CHECK(has(sv, "Ent.n_var address-escape at objaccess.c:94:9 in decay_cases: the array decays to a pointer to its first element, passed to log_text: an argument beyond "
+                     "the named parameters of a callee defined in the closed program: it reaches the callee through its variable argument list, which is not summarized"));
+    // without the option: none of the three sections, no BASIS item of the option
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "off.kz").string()), &sv), 0);
+    KZ_CHECK(!has(sv, "[objaccess]") && !has(sv, "[ftypes]") && !has(sv, "[argtypes]") && !has(sv, "extract.object_access") && !has(sv, "count.array_decay"));
+    KZ_CHECK(!has(sv, "decays to a pointer"));
+    // the type names of records defined outside the root: by the file's source tree (the nearest directory above it with a
+    // `.git` entry), so that two checkouts of one tree give the same names; a file in no such tree keeps its absolute path
+    for (const char* c : {"c1", "c2"}) {
+      fs::create_directories(X / c / "app" / ".git");
+      write(X / c / "app" / "src" / "x.h",
+            "static struct { int a; int b; } obj_state;\nstatic inline void touch(void) { struct Local { int q; } l; l.q = 1; obj_state.a = l.q; }\n");
+    }
+    write(X / "sys" / "y.h", "static struct { int z; } sys_state;\nstatic inline void tz(void) { sys_state.z = 2; }\n");
+    write(X / "root" / "m.c", "#include \"x.h\"\n#include \"y.h\"\nint main(void) { touch(); tz(); return obj_state.b + sys_state.z; }\n");
+    std::map<std::string, std::string> views;
+    for (const char* c : {"c1", "c2"})
+      for (const char* o : {"on", "off"}) {
+        const std::string f = (X / (std::string(c) + "_" + o + ".kz")).string();
+        KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q((X / "root" / "m.c").string()) + " --root " + q((X / "root").string()) +
+                            (std::string(o) == "on" ? " --object-access" : "") + " -o " + q(f) + " -- -std=c99 -I" + q((X / c / "app" / "src").string()) + " -I" +
+                            q((X / "sys").string()),
+                        &out),
+                    0);
+        KZ_CHECK_EQ(run(q(tool) + " show " + q(f) + " --section fwrites", &views[std::string(c) + o]), 0);
+      }
+    // (the keys of the header's static functions keep the recorded path of their file: they are no type names)
+    for (const char* c : {"c1", "c2"}) {
+      KZ_CHECK(has(views[std::string(c) + "on"], "obj_state@<app>/src/x_h:1::type.a") && has(views[std::string(c) + "on"], "Local@<app>/src/x_h:2.q"));
+      KZ_CHECK(!has(views[std::string(c) + "on"], "/app/src/x_h"));
+      KZ_CHECK(has(views[std::string(c) + "off"], "obj_state@" + (X / c / "app" / "src").string() + "/x_h:1::type.a"));
+    }
+    KZ_CHECK(has(views["c1on"], "sys_state@" + (X / "sys").string() + "/y_h:1::type.z"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "c1_on.kz").string()) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "count.type_names_outside_root = by source tree 2, absolute (no source tree) 1  (unset)"));
+  }
+
+  // ---- semantics with a verification state (--semantics, static_facts.md 5t) -----------------------------------------------
+  {
+    const fs::path X = work / "semantics";
+    fs::create_directories(X);
+    const std::string sc = fixtures + "/semantics.c";
+    const std::string sdata = fixtures + "/../data/semantics_fixture/framework_semantics_fixture-sem.txt";
+    // the option needs the extended facts; a file that is not semantics data, or a cut one, is refused before any reading
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(sc) + " --semantics " + q(sdata) + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "--semantics needs the extended facts"));
+    write(X / "bad.txt", "role run-loop function=x\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --semantics " + q((X / "bad.txt").string()) + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "not a semantics data file"));
+    write(X / "cut.txt", "semantics-data 1\nlayer framework\ncomponent c version=\"v\"\nfile a.c sha256=00\napi f decl=a.c:1 def=- return=none by=- rule=E2\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --semantics " + q((X / "cut.txt").string()) + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "no end line (a cut file)"));
+    write(X / "odd.txt", "semantics-data 1\nlayer framework\ncomponent c version=\"v\"\nfrob x\nend\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --semantics " + q((X / "odd.txt").string()) + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "not a line of the semantics data format"));
+    KZ_CHECK(!fs::exists(X / "x.kz"));
+    // with and without the option: the same facts but the section and its BASIS items
+    std::string on, off, sv, so;
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --root " + q(fixtures) + " --semantics " + q(sdata) + " -o " + q((X / "on.kz").string()) +
+                        " -- -std=c99 -pedantic",
+                    &on),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --root " + q(fixtures) + " -o " + q((X / "off.kz").string()) + " -- -std=c99 -pedantic", &off), 0);
+    KZ_CHECK(has(on, "semantics                    rows "));
+    KZ_CHECK(!has(off, "semantics                    rows "));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "on.kz").string()) + " --section semantics --section basis", &sv), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "off.kz").string()), &so), 0);
+    KZ_CHECK(!has(so, "[semantics]") && !has(so, "extract.semantics") && !has(so, "count.semantics"));
+    // documented returns (doc-collated, pinned), the body's constants (body-derived), their agreement
+    KZ_CHECK(has(sv, "  framework documented-return reg_find value -99 doc-collated doc-only {version-pinned,value-set} [SEM_ERR_NEVER] (the semantics fixture) source semantics.c:45 "));
+    KZ_CHECK(has(sv, "  framework failure reg_find value -17 body-derived derived {value-set} [SEM_ERR_NOT_FOUND through reg_find -> reg_search] "));
+    KZ_CHECK(has(sv, "  framework success reg_find value 0 body-derived derived {value-set} [SEM_OK through reg_find -> reg_search] "));
+    KZ_CHECK(has(sv, "  framework agreement reg_find body-derived derived {} [the documentation lists a value the body cannot return: SEM_ERR_NEVER (-99)] "));
+    KZ_CHECK(has(sv, "  framework agreement reg_create unverified derived {} [not compared: no documented return] "));
+    KZ_CHECK(has(sv, "  framework agreement send_event body-derived derived {} [derived = documented (1 values)] "));
+    // an argument role and its domain, documented in the parameter's paragraph; a terminal the facts derive
+    KZ_CHECK(has(sv, "  framework arg-role send_event arg 1 doc-collated doc-only {version-pinned} [event-type (doc)] "));
+    KZ_CHECK(has(sv, "  framework arg-domain send_event arg 1 doc-collated doc-only {version-pinned} [event-type: SEM_EV_DEBUG=1, SEM_EV_ERROR=3] "));
+    KZ_CHECK(has(sv, "  framework arg-domain app_exit arg 0 doc-collated doc-only {version-pinned} [run-status: SEM_RUN=1, SEM_RUN_ERROR=3] "));
+    KZ_CHECK(has(sv, "  framework role app_exit body-derived derived {} [derived terminal operation (must, primitive exit)] "));
+    // the status space, and the P0 entries the build calls with the state of their source
+    KZ_CHECK(has(sv, "  status-space success - value 0 doc-collated doc-only {version-pinned,value-set} [success constant SEM_OK] "));
+    KZ_CHECK(has(sv, "  P0 role pthread_create standard-collated declared {} [thread-create (thread creation): "));
+    KZ_CHECK(has(sv, "  P0 role strcmp unverified declared {} [byte-string comparison: "));
+    KZ_CHECK(has(sv, "count.semantics_entries[0] = fixture-sem: entries 4, applied 4 for a function the build calls (by the definition 4, by the declaration 0), called but neither pin "
+                     "held 0  (unset)"));
+    // relations: the header line and the tags of the rows that name a function with framework items not verified
+    std::string rel;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "on.kz").string()), &rel), 0);
+    KZ_CHECK(has(rel, "semantics of these facts (SEMANTICS, extract --semantics, docs/static_facts.md 5t): rows "));
+    KZ_CHECK(has(rel, "sem-unverified(reg_create:agreement)"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "off.kz").string()), &rel), 0);
+    KZ_CHECK(!has(rel, "semantics of these facts") && !has(rel, "sem-unverified("));
+    // a file whose pin the build does not hold applies to nothing (the function is called, the sha256 differs)
+    {
+      std::string txt;
+      std::ifstream in(sdata);
+      std::ostringstream ss;
+      ss << in.rdbuf();
+      txt = ss.str();
+      const size_t at = txt.find("sha256=");
+      KZ_CHECK(at != std::string::npos);
+      if (at != std::string::npos) txt.replace(at + 7, 4, txt.compare(at + 7, 4, "0000") == 0 ? "1111" : "0000");
+      write(X / "other.txt", txt);
+    }
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(sc) + " --root " + q(fixtures) + " --semantics " + q((X / "other.txt").string()) + " -o " +
+                        q((X / "other.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "other.kz").string()) + " --section semantics --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "fixture-sem: entries 4, applied 0 for a function the build calls (by the definition 0, by the declaration 0), called but neither pin held 4"));
+    KZ_CHECK(!has(sv, "  framework "));
+    // P0 declarations: the attributes of the declaration the build reads, when the build holds that header with the pinned sha256
+    write(X / "p0" / "p0hdr.h", "int strcmp(const char *a, const char *b) __attribute__((pure)) __attribute__((nonnull(1, 2)));\n");
+    write(X / "p0" / "p0decl.c", "#include \"p0hdr.h\"\nint f(const char *a) { return strcmp(a, \"x\"); }\nint main(void) { return f(\"y\"); }\n");
+    {
+      std::ifstream in(X / "p0" / "p0hdr.h", std::ios::binary);
+      std::ostringstream ss;
+      ss << in.rdbuf();
+      const std::string h = kz::to_hex(kz::sha256(ss.str()));
+      write(X / "p0.txt", "semantics-data 1\nlayer p0\ncomponent hdr version=\"the test header\"\nfile p0hdr.h sha256=" + h +
+                              "\napi strcmp decl=p0hdr.h:1 table=compare attrs=pure,nothrow,nonnull(1,2)\nend entries=1 missing=0\n");
+    }
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q((X / "p0" / "p0decl.c").string()) + " --root " + q((X / "p0").string()) + " --semantics " +
+                        q((X / "p0.txt").string()) + " -o " + q((X / "p0.kz").string()) + " -- -std=c99",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "p0.kz").string()) + " --section semantics", &sv), 0);
+    KZ_CHECK(has(sv, "  P0 out-behaviour strcmp doc-collated declared {} [declared pure: no effect but its return value (no store through an argument)] (the test header) source p0hdr.h:1 "));
+    KZ_CHECK(has(sv, "  P0 precondition strcmp doc-collated declared {} [declared nonnull: arg 0, arg 1 must not be null] "));
+  }
+
+  // ---- result flow and effects (--result-flow, static_facts.md 5u; relations rules revision 10, order rules revision 3) ----
+  {
+    const fs::path X = work / "resultflow";
+    fs::create_directories(X);
+    const std::string rc = fixtures + "/resultflow.c";
+    std::string on, off, v, rel, ord;
+    // the option needs the profile-free mode
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --extended-facts --source " + q(rc) + " --result-flow -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+    KZ_CHECK(has(out, "--result-flow needs the profile-free mode (--no-profile)"));
+    KZ_CHECK(!fs::exists(X / "x.kz"));
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(rc) + " --root " + q(fixtures) + " --result-flow -o " + q((X / "on.kz").string()) + " -- -std=c99", &on), 0);
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(rc) + " --root " + q(fixtures) + " -o " + q((X / "off.kz").string()) + " -- -std=c99", &off), 0);
+    KZ_CHECK(has(on, "result flow                  ") && has(on, "result effect                "));
+    KZ_CHECK(!has(off, "result flow   ") && !has(off, "result effect   "));
+    // without the option: no section, no BASIS item, and the relations and order of revisions 9 and 2 only
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "off.kz").string()), &v), 0);
+    KZ_CHECK(!has(v, "[resultflow]") && !has(v, "[resulteffect]") && !has(v, "extract.result_flow") && !has(v, "count.result_flow"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "off.kz").string()), &rel), 0);
+    KZ_CHECK(!has(rel, "relations rules revision 13") && !has(rel, "handling_label:") && !has(rel, "absence:") && !has(rel, "callee-check (result flow"));
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "off.kz").string()), &ord), 0);
+    KZ_CHECK(!has(ord, "order rules revision 6") && !has(ord, "(result flow") && !has(ord, "caller-side"));
+    // with it: the reaching definitions of locals (two definitions of one local stay apart), the guard rows, the effects
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "on.kz").string()) + " --section resultflow --section resulteffect --section basis", &v), 0);
+    KZ_CHECK(has(v, "extract.result_flow = result flow rules revision 2 (2026-11-18) (--result-flow;"));
+    KZ_CHECK(has(v, " in checker_init local-def st@103:6 -> branch at 104:7 unique cond (ne local:st@def:103:6 0) "));
+    KZ_CHECK(has(v, " in checker_init local-def st@105:6 -> branch at 106:7 unique cond (eq local:st@def:105:6 0) "));
+    KZ_CHECK(has(v, " in checker_init guard [report] unique cond (and (not (ne local:st@def:103:6 0)) (eq local:st@def:105:6 0)) "));
+    KZ_CHECK(has(v, " in looper_init local-def ret@126:9 -> return at 132:10 shared (others 1: 123:7) "));
+    // result flow rules revision 2: an address-taken local of a guard is unknown (a store through an alias, a call that takes
+    // its address); a case of a switch is an unknown term; two calls of one callee in a guard: not computed
+    KZ_CHECK(has(v, " in guard_alias guard [report] shared cond (eq local:rc@addr-taken 0) {addr-taken-local}"));
+    KZ_CHECK(!has(v, " in guard_alias guard [report] unique cond (eq local:rc@def:"));
+    KZ_CHECK(has(v, " in guard_switch local-def r@253:7 -> branch at 254:11 unique cond (top the value a switch selects its case by (ne local:r@def:253:7 0)) {}"));
+    KZ_CHECK(has(v, " in guard_switch guard [report] unique cond (top a case of the switch at 254:11 on (ne local:r@def:253:7 0)) {}"));
+    KZ_CHECK(has(v, " in guard_twice guard [report] not-computed cond (and (not (ne (call-result obj_impl (seq 0)) 0)) (ne (call-result obj_impl (seq 1)) 0)) {}"));
+    // the absence value of the lookup in checker_init falls through to a success return (TIME's shape); in looper_init it
+    // reaches the function's return through the break
+    KZ_CHECK(has(v, " in checker_init failure -17 reached -> return-const at resultflow.c:109 [RF_OK] complete "));
+    KZ_CHECK(has(v, " in looper_init failure -17 reached -> return-result at resultflow.c:132 [RF_ERR_NOT_FOUND] complete "));
+    // a parameter returned unchanged: the create's success value is that of the step it passes through
+    KZ_CHECK(has(v, " in obj_create success 0 reached -> return-result at resultflow.c:95 [RF_OK (obj_finish returns its parameter 0 unchanged (the argument is the result of obj_impl at 92:10))] complete "));
+    // a retry, and an exit after a call that may change the stored status
+    KZ_CHECK(has(v, " in retrier_init failure -17 reached -> retry [the call runs again; delay usleep at 141:5] "));
+    KZ_CHECK(has(v, "[exit (terminal operation); the value of global:run_state stored on this path: 3] open ("));
+    KZ_CHECK(has(v, "run_loop at resultflow.c:172:10 takes the address of global:run_state on these paths: it stores through its parameter 0"));
+    // relations rules revision 10: the labels, the absence line, the creator's success value shown to reach its return
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "on.kz").string()), &rel), 0);
+    KZ_CHECK(has(rel, "rules with result flow: relations rules revision 13 (2026-11-18), over RESULT_FLOW and RESULT_EFFECT"));
+    KZ_CHECK(has(rel, "handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: H 1 R 2 T 1 T? 1 none 1"));
+    KZ_CHECK(has(rel, "      handling_label: T (over the absence value -17) T: checker_init returns 0 at resultflow.c:109 (not of failure class)"));
+    KZ_CHECK(has(rel, "      handling_label: R (over the absence value -17) R: terminal at resultflow.c:161:33 [abort (terminal operation)]"));
+    KZ_CHECK(has(rel, "      handling_label: H (over the absence value -17) H: the call runs again; delay usleep at 141:5"));
+    KZ_CHECK(has(rel, "      handling_label: T? (over the absence value -17) T?: terminal at resultflow.c:175:3 is open"));
+    KZ_CHECK(has(rel, "      absence: -17 (no match: obj_find) at the call resultflow.c:105:8: reached; effects: fallthrough at - complete; return-const 0 at resultflow.c:109 complete"));
+    KZ_CHECK(has(rel, "      callee-check (set): obj_create: not established ("));
+    KZ_CHECK(has(rel, "      callee-check (result flow, success): obj_create: shown to reach the return: 0 "));
+    // order rules revision 3: child without success from the creation call's success value, and a caller-side use of a wait
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "on.kz").string()), &ord), 0);
+    KZ_CHECK(has(ord, "rules with result flow: order rules revision 6 (2026-11-18)"));
+    KZ_CHECK(has(ord, "child without success: possible: task_spawn_detach returns -50 [RF_ERR_SPAWN] at resultflow.c:191 after pthread_create at resultflow.c:188:8 returned 0 (its success value) (result flow"));
+    KZ_CHECK(has(ord, "child without success: not found: no return of failure class after the creation call in task_spawn_plain"));
+    KZ_CHECK(has(ord, "use caller-side: call resultflow.c:233:33 in waiter_main -> gate_use in waiter_main under (eq local:st@def:232:6 0) (the result of gate_wait at resultflow.c:232:8): skip"));
+    KZ_CHECK(has(ord, " HB-await hard"));
+  }
+
+  // ---- loop flag predicates and lock identity by handle (--loop-defs, --lock-handles, static_facts.md 5v; relations rules
+  // revision 11, order rules revision 4; the measurement of the caller-dependent spawn rule) ----
+  {
+    const fs::path X = work / "looplock";
+    fs::create_directories(X);
+    const std::string lc = fixtures + "/looplock.c";
+    const std::string ldata = fixtures + "/../data/looplock_fixture/framework_semantics_fixture-lock.txt";
+    std::string on, off, v, rel, ord, ord2, cdr;
+    // the options need the profile-free mode
+    for (const char* o : {"--loop-defs", "--lock-handles"}) {
+      KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --extended-facts --source " + q(lc) + " " + o + " -o " + q((X / "x.kz").string()) + " -- -std=c99", &out), 2);
+      KZ_CHECK(has(out, std::string(o) + " needs the profile-free mode (--no-profile)"));
+      KZ_CHECK(!fs::exists(X / "x.kz"));
+    }
+    const std::string common = q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(lc) + " --root " + q(fixtures) + " --result-flow --semantics " + q(ldata);
+    KZ_CHECK_EQ(run(common + " --loop-defs --lock-handles -o " + q((X / "on.kz").string()) + " -- -std=c99", &on), 0);
+    KZ_CHECK_EQ(run(common + " -o " + q((X / "off.kz").string()) + " -- -std=c99", &off), 0);
+    KZ_CHECK(has(on, "loop defs                    21 rows (loops 6: recognised 3, refused-reset-in-body 1, refused-address-taken 1, refused-unresolved 1; definition rows 15); recognised 3"));
+    KZ_CHECK(has(on, "lock handles                 10 rows (static-instance 3, semantics-unverified 0, writer-set-incomplete 0, not-static 7, of them no handle found 1)"));
+    KZ_CHECK(!has(off, "loop defs   ") && !has(off, "lock handles   "));
+    // without the options: no section, no BASIS item, and the relations and order of revisions 10 and 3 only
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "off.kz").string()), &v), 0);
+    KZ_CHECK(!has(v, "[loopdefs]") && !has(v, "[lockhandles]") && !has(v, "extract.loop_defs") && !has(v, "count.lock_handles"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "off.kz").string()), &rel), 0);
+    KZ_CHECK(!has(rel, "relations rules revision 11") && !has(rel, "by its handle"));
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "off.kz").string()), &ord), 0);
+    KZ_CHECK(!has(ord, "order rules revision 7") && !has(ord, "LOOP_DEFS") && !has(ord, "lock identity source"));
+    // with them: the flag and value rules, the refusals, the handles
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "on.kz").string()) + " --section loopdefs --section lockhandles --section basis", &v), 0);
+    KZ_CHECK(has(v, "extract.loop_defs = loop flag predicate rules revision 2 (2026-11-18) (--loop-defs;"));
+    KZ_CHECK(has(v, "extract.lock_handles = lock handle rules revision 2 (2026-11-18) (--lock-handles;"));
+    KZ_CHECK(has(v, " in get_task_function recognised form flag+value {under-lock,call-result} predicate (and (ne (call-result task_by_context) 0) (and (ne field:TaskRec.app_id 0) (ne field:TaskRec.entry 0)))"));
+    KZ_CHECK(has(v, "    rc@172:7 in-body at looplock.c:184:12 recognised flag {under-lock} value 0 guard (and (ne local:t 0) (and (ne field:TaskRec.app_id 0) (ne local:e 0)))"));
+    KZ_CHECK(has(v, "    e@174:10 in-body at looplock.c:182:9 recognised value {under-lock} value field:TaskRec.entry guard (ne local:t 0)"));
+    KZ_CHECK(has(v, " in retry_lookup recognised form value {call-result} predicate (ne (call-result name_lookup "));
+    KZ_CHECK(has(v, " in wait_reset refused-reset-in-body {}"));
+    // loop flag predicate rules revision 2: a flag defined under a case of a switch is refused (no guard of it is known); the
+    // flags of a definition row are its own (a definition before the loop carries none)
+    KZ_CHECK(has(v, " in wait_switch refused-unresolved {}"));
+    KZ_CHECK(!has(v, " in wait_switch recognised"));
+    KZ_CHECK(has(v, "    rc@172:7 before-loop at looplock.c:172:7 recognised flag {} value -5"));
+    // lock handle rules revision 2: a release whose chain goes through a function that calls the unlock at two sites has no
+    // handle (revision 1 named the value its caller passes)
+    KZ_CHECK(has(v, " finish_with site 70 looplock.c:352:32 family MutRec.m not-static {} lock #0"));
+    KZ_CHECK(has(v, "the calls of the chain are not all located (1 of 4; a function of the chain calls the next one at more than one site): no handle is named"));
+    // the outcome class rule (static_facts.md 5w): the severity constants are rows of their own, an entry of return kind none
+    // has no success or failure row, a documented return of a function that returns no value is a mismatch, and a run-status
+    // role on a call that is no terminal operation names no exit
+    {
+      std::string sv2;
+      KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "on.kz").string()) + " --section semantics --section resulteffect --section basis", &sv2), 0);
+      KZ_CHECK(has(sv2, "extract.outcome_classes = outcome class rule revision 1 (2026-11-18): success = the success constant of the callee's status space;"));
+      KZ_CHECK(has(sv2, "status spaces of these facts 1: [the lock handle fixture: success 0, severity mask 3221225472]"));
+      KZ_CHECK(has(sv2, "  status-space none - value 3221225472 doc-collated doc-only {version-pinned,value-set} [severity constant FX_SEV_MASK]"));
+      KZ_CHECK(!has(sv2, "status-space failure"));
+      KZ_CHECK(has(sv2, "  framework none is_running doc-collated doc-only {version-pinned} [return kind none (doc)]"));
+      KZ_CHECK(has(sv2, "  framework none is_running value 1 body-derived derived {value-set} [returned constant (the return kind is none: no outcome class): 1]"));
+      KZ_CHECK(!has(sv2, "framework success is_running") && !has(sv2, "framework failure is_running"));
+      KZ_CHECK(has(sv2, "  framework documented-return exit_like value 3221225473 unverified doc-only {version-pinned,value-set} [FX_ERR_NOT_IMPL (doc-declaration mismatch: the "
+                        "body in these facts returns no value)]"));
+      KZ_CHECK(has(sv2, "count.result_effect = 35 rows (open 17; event send 0, application exit 0, terminal 0;"));
+      KZ_CHECK(has(sv2, " in main other 1 reached -> "));
+      KZ_CHECK(!has(sv2, "exit-app"));
+    }
+    KZ_CHECK(has(v, " in wait_addr refused-address-taken {}"));
+    KZ_CHECK(has(v, " shared_lock site 8 looplock.c:58:32 family MutRec.m static-instance {one-writer,writer-runs-once} field Shared.mutex handle field:Shared.mutex "));
+    KZ_CHECK(has(v, " twice_lock site 10 looplock.c:60:31 family MutRec.m not-static {} field Twice.mutex handle field:Twice.mutex "));
+    KZ_CHECK(has(v, "Twice.mutex: 2 writer instance(s), not one that runs once (FIELD_STATUS not-once)"));
+    KZ_CHECK(has(v, " param_lock site 12 looplock.c:62:37 family MutRec.m not-static {} handle param:h#0 "));
+    KZ_CHECK(has(v, " mut_take site 2 looplock.c:43:36 family MutRec.m not-static {} handle param:#0 "));
+    // relations rules revision 11: path C one mutex by its handle (also through a parameter); the twice-created handle named
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "on.kz").string()), &rel), 0);
+    KZ_CHECK(has(rel, "rules with lock handles: relations rules revision 11 (2026-11-16), over LOCK_HANDLES"));
+    KZ_CHECK(has(rel, "path C rows whose common lock is identified by its handle 3, of them with a static-instance handle 2"));
+    KZ_CHECK(has(rel, "feasibility: proven-impossible: lock #0 &mut_table@looplock.c:31[?(the result of mut_index)].m (undecidable), one mutex by its handle Shared.mutex (handle at looplock.c:58:32"));
+    KZ_CHECK(has(rel, "one mutex by its handle Shared.mutex (the handle Shared.mutex passed at looplock.c:123:3 as parameter 0 of param_lock (static-instance))"));
+    KZ_CHECK(has(rel, "every acquisition of it at the spawn and at the read passes the handle Twice.mutex not-static"));
+    // order rules revision 4: the predicate through LOOP_DEFS, the budget value through the flag, HB-lock by the handle
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "on.kz").string()) + " -o " + q((X / "ord.txt").string()), &out), 0);
+    ord = read(X / "ord.txt");
+    KZ_CHECK(has(ord, "rules with loop definitions and lock handles: order rules revision 7 (2026-11-18), over LOOP_DEFS and LOCK_HANDLES"));
+    KZ_CHECK(has(ord, "waits with a predicate through local definitions 3; caller-side budget values through a flag 2; HB-lock edges whose lock is identified by its handle 2"));
+    KZ_CHECK(has(ord, "predicate: through local definitions (LOOP_DEFS, form flag+value) (and (ne (call-result task_by_context) 0)"));
+    KZ_CHECK(has(ord, "caller-side(3 uses under its result; budget exit returns -5; through the flag of LOOP_DEFS)"));
+    KZ_CHECK(has(ord, "lock identity source: handle (LOCK_HANDLES; relations rules revision 11, the row names the handle)"));
+    KZ_CHECK(has(ord, " HB-lock hard"));
+    KZ_CHECK(has(ord, " HB-await conditional"));
+    // order rules revision 5: a writer thread that is itself a waiting thread counts for the other waiting threads; the
+    // arguments of a tested call and the operand of an address are not awaited
+    KZ_CHECK(has(ord, "awaited: TaskRec.app_id, TaskRec.entry; writers 4 (a writer thread is itself a waiting thread: for each waiting thread the writers in another thread: "
+                      "parent_entry (spawn-entry) 2, task_entry_point (spawn-entry) 4): "));
+    KZ_CHECK(has(ord, "awaited: not named: the predicate reads no field of its own (a call result; under its arguments or an address: Named.id, Named.name)"));
+    // the caller-dependent report: written apart, the order text the same with and without it
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(fixtures + "/order.c") + " --root " + q(fixtures) + " -o " + q((X / "ord.kz").string()) + " -- -std=c99", &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "ord.kz").string()) + " -o " + q((X / "o1.txt").string()), &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " order " + q((X / "ord.kz").string()) + " -o " + q((X / "o2.txt").string()) + " --caller-dependent-report " + q((X / "cdr.txt").string()), &out), 0);
+    ord = read(X / "o1.txt");
+    ord2 = read(X / "o2.txt");
+    KZ_CHECK(!ord.empty() && ord == ord2);
+    cdr = read(X / "cdr.txt");
+    KZ_CHECK(has(cdr, "kz-static order caller-dependent report (order rules revision 5 (2026-11-18);"));
+    KZ_CHECK(has(cdr, "spawn calls with resolved threads 23, caller-dependent 5; their callers 7, passing on no resolved entry 0 (distinct caller calls 0)"));
+    KZ_CHECK(has(cdr, "pairs whose value differs 0 (new pairs 0)"));
+  }
+
+  fs::remove_all(work);
+  return kztest::finish("test_static_cli");
+}

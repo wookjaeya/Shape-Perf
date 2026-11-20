@@ -1,0 +1,15 @@
+golden    =   1.43 sec*proc (10 tests)
+static    =   1.64 sec*proc (11 tests)
+
+Total Test time (real) =   1.65 sec
+same as scratch: relations
+same as scratch: relations_np
+same as scratch: relpaths_np
+same as scratch: relsound_np
+same as scratch: imgbudget_np
+same as scratch: relincomplete_np
+same as scratch: relincomplete_cut_np
+same as scratch: relcallback_np
+same as scratch: order_np
+same as scratch: anonrec_np
+same as scratch: plangen_np.plan

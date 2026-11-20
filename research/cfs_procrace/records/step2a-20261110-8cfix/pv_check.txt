@@ -1,0 +1,4 @@
+# PV (/home/user/work/preserve/tools-20261109): the 2a tools of MC, streamed back (xz -dc | sha256sum) against ORIGINAL_SHA256 and the archives against XZ_SHA256; nothing extracted to disk (2026-11-10T10:06:30Z)
+kz-static.db172b74.xz: archive same (663308b5249ca01b); stream same (db172b74dc973de6a7e9c5b75e7f6655d26574023d746741606f458df5e1ffc4 = merge-check/kz-llvm/tools/kz-static/kz-static)
+kz.b254483e.xz: archive same (6d3b98aae2506772); stream same (b254483e25873902ec6408b1764c7e9b71238fe4c400e237ae49f88f55fc824c = merge-check/kz-llvm/tools/kz/kz)
+kz-dump.05623054.xz: archive same (8c7a1fc029a9af66); stream same (05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43 = merge-check/kz-llvm/tools/kz-dump/kz-dump)

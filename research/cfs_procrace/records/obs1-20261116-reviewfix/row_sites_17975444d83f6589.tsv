@@ -1,0 +1,18 @@
+# row_sites.py: sidecar 8f5f200cbe436f58; manifest 5f015c5aa86bf642; bindings 6a22b9ec9fe5dfcf; dump text 1290a5f6edd6598a; key 17975444d83f6589
+# sidecar map line: map 17975444d83f6589 2 3 272 273 279 280 282 283 284 285 286 287 288 289 (14 sites)
+site	label	func	place	callee	line	ref_is_exactly_row_key	binding	bind_ids	events	events_per_actor
+2	s0002.creator-call	SCH_LAB_AppInit	after-call	OS_CountSemCreate	168	yes	bound	393248	1	14:1
+3	s0003.creator-call	SCH_LAB_AppInit	at-call	OS_CountSemCreate	168	yes	bound	393264	1	14:1
+272	s0272.key-text	OS_CountSemCreate	at-call	memchr	91	yes	bound	332032	3	13:2,14:1
+273	s0273.key-text	OS_CountSemGetIdByName	at-call	OS_ObjectIdFindByName	212	yes	bound	332048	3	12:1,13:2
+279	s0279.creator-call	initialize_throttling	after-call	OS_CountSemCreate	132	yes	inlined	70000	2	13:2
+280	s0280.creator-call	initialize_throttling	at-call	OS_CountSemCreate	132	yes	inlined	70016	2	13:2
+282	s0282.handling-chain	CF_AppMain	store	-	333	no (row 17975444d83f6589 /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_app.c:333:9)	bound	201120	1	12:1
+283	s0283.handling-chain	CF_AppMain	store	-	357	no (row 17975444d83f6589 /home/user/work/procrace/c1_build/pre/src/cf/fsw/src/cf_app.c:357:13)	bound	201136	0	-
+284	s0284.handling-chain	CF_AppMain	after-call	CFE_ES_RunLoop	338	yes	bound	201152	1	12:1
+285	s0285.handling-chain	CF_AppMain	after-call	CF_Init	330	yes	bound	201168	1	12:1
+286	s0286.handling-chain	CF_AppMain	at-call	CFE_ES_ExitApp	366	yes	bound	201184	1	12:1
+287	s0287.handling-chain	CF_Init	after-call	CF_CFDP_InitEngine	252	yes	bound	201200	1	12:1
+288	s0288.handling-chain+use-call	CF_CFDP_InitEngine	after-call	OS_CountSemGetIdByName	993	yes	bound	201216	1	12:1
+289	s0289.use-call	CF_CFDP_InitEngine	at-call	OS_CountSemGetIdByName	993	yes	bound	201232	1	12:1
+summary	sites 14; with a binding line 14; with events in the dump 13; without events 1: 283

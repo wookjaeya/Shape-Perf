@@ -1,0 +1,33 @@
+# 05_consts.kzp -- the constants the V1 subset uses.
+#
+# A literal constant is read from the cited line.  A `ref eval` constant is resolved by the
+# extractor in the translation unit named (its value depends on the platform configuration of the
+# build, which this file does not fix).
+phi 1;
+
+# Result codes (CFE_Status_t).  They are compared with the value a call returned modulo 2^32.
+const CFE_SUCCESS = 0 prov err_h_success;
+const CFE_EVS_UNKNOWN_FILTER = 0xc2000001 prov err_h_unknown_filter;
+const CFE_EVS_APP_NOT_REGISTERED = 0xc2000002 prov err_h_not_registered;
+const CFE_EVS_APP_ILLEGAL_APP_ID = 0xc2000003 prov err_h_illegal_app_id, err_h_severity;
+const CFE_EVS_INVALID_PARAMETER = 0xc2000008 prov err_h_invalid_parameter;
+const CFE_EVS_APP_SQUELCHED = 0xc2000009 prov err_h_squelched;
+const CFE_ES_ERR_RESOURCEID_NOT_VALID = 0xc4000001 prov err_h_resourceid_not_valid;
+const CFE_ES_BAD_ARGUMENT = 0xc400000a prov err_h_bad_argument;
+const CFE_ES_OPERATION_TIMED_OUT = 0xc4000027 prov err_h_timed_out;
+
+# The identifier space of resource IDs.  An ID is valid iff (id - base) mod 2^32 <= serial_max.
+const CFE_RESOURCEID_UNDEFINED = 0 prov resid_undefined_def;
+const CFE_RESOURCEID_RESERVED = 0xffffffff prov resid_reserved_def;
+const CFE_RESOURCEID_MAX = 0xffff prov resid_max_def, osal_index_mask_shift;
+
+# Base of the ES application IDs: CFE_RESOURCEID_MAKE_BASE(OS_OBJECT_TYPE_USER + 1) =
+# CFE_RESOURCEID_MARK | ((0x10 + 1) << 16).  CFE_RESOURCEID_MARK is 0 in the SIMPLE ID mode and
+# 0x02000000 in the STRICT mode; sample_defs selects SIMPLE unless OMIT_DEPRECATED is set, which
+# the ENV build does not set.  The value is therefore a property of the build (basis B): the
+# stored SB AppId in the three gdb runs is 1114115 = 0x110003, which fits (R2_gdb_v701.md, 2).
+const CFE_ES_APPID_BASE = 0x110000 prov resid_appid_offset, resid_appid_base, resid_make_base, resid_mark_simple, resid_mode_cmake, osal_type_user, osal_index_mask_shift note "SIMPLE resource-ID mode; a STRICT build has 0x02110000. Basis-dependent: the basis record must agree.";
+
+# Table sizes and timeouts of the platform configuration (resolved by the extractor).
+const CFE_PLATFORM_ES_MAX_APPLICATIONS = ref eval "CFE_PLATFORM_ES_MAX_APPLICATIONS" in "cfe/modules/es/fsw/src/cfe_es_start.c" prov es_start_table_loop;
+const CFE_PLATFORM_CORE_MAX_STARTUP_MSEC = ref eval "CFE_PLATFORM_CORE_MAX_STARTUP_MSEC" in "cfe/modules/es/fsw/src/cfe_es_start.c" prov es_start_sync_call;

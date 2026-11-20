@@ -1,0 +1,31 @@
+# Read-only greps over reference cFS for SysPro syscall-anchor mapping. 2026-10-08T01:38:17Z
+rev . 088b2fa828db9ff7e00733f1908e0eeb59f66ce3
+rev osal d2d877a69cff47452bcca274b309147d48e6c16f
+rev cfe c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd
+rev apps/cf 15a871e66cad7ec75e1be78989a93075ff142055
+rev psp c4b3b0b65b119e106481ad8e20976ae4d7f554e3
+## C1 anchors
+74:int32 OS_CountSemCreate_Impl(const OS_object_token_t *token, uint32 sem_initial_value, uint32 options)
+80:    if (sem_initial_value > SEM_VALUE_MAX)
+85:    if (sem_init(&impl->id, 0, sem_initial_value) < 0)
+1280:            for (j = 0; j < CF_STARTUP_SEM_MAX_RETRIES; ++j)
+1282:                ret = OS_CountSemGetIdByName(&CF_AppData.engine.channels[i].sem_id,
+1290:                OS_TaskDelay(CF_STARTUP_SEM_TASK_DELAY);
+975:int32 OS_ObjectIdFindByName(osal_objtype_t idtype, const char *name, osal_id_t *object_id)
+92:        ret = pthread_mutex_lock(&impl->mutex);
+95:            OS_DEBUG("pthread_mutex_lock(&impl->mutex): %s", strerror(ret));
+## C3/R2 anchors
+138:    CFE_ES_GetAppID(&CFE_SB_Global.AppId);
+155:    Status = CFE_EVS_Register(CFE_SB_Global.EventFilters, CfgFileEventsToFilter, CFE_EVS_EventFilter_BINARY);
+186:    Status = CFE_SB_CreatePipe(&CFE_TIME_Global.CmdPipe, CFE_TIME_TASK_PIPE_DEPTH, CFE_TIME_TASK_PIPE_NAME);
+cfe/modules/es/fsw/src/cfe_es_task.c:367:    Status = CFE_SB_CreatePipe(&CFE_ES_Global.TaskData.CmdPipe, CFE_ES_PIPE_DEPTH, CFE_ES_PIPE_NAME);
+cfe/modules/evs/fsw/src/cfe_evs_task.c:289:    Status = CFE_SB_CreatePipe(&CFE_EVS_Global.EVS_CommandPipe, CFE_EVS_PIPE_DEPTH, CFE_EVS_PIPE_NAME);
+116:    queueDesc = mq_open(name, O_CREAT | O_RDWR, 0666, &queueAttr);
+## C5 anchors
+664:    OsStatus = OS_TaskCreate(&OsalTaskId,           /* task id */
+    CFE_ES_LockSharedData(__func__, __LINE__);
+559:int32 CFE_ES_GetTaskFunction(CFE_ES_TaskEntryFuncPtr_t *FuncPtr)
+613:void CFE_ES_TaskEntryPoint(void)
+568:    return_code = pthread_create(pthr, &custom_attr, entry, entry_arg);
+## OS_TaskDelay impl (syscall used by delays)
+761:        status = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &sleep_end, NULL);

@@ -1,0 +1,10 @@
+normal /home/user/work/redesign/obs1/xr4_dry_static_c1_pre_tx_2/normal.json inputs 14 checks refused 0 unparsed 0 mismatch 0 branches 8
+branch D1-R0 records 46 refused 0 uses 0
+branch D1-Ra records 46 refused 0 uses 0
+branch D1-Rb records 46 refused 0 uses 0
+branch D1-Rc records 46 refused 0 uses 0
+branch D1-Rd records 46 refused 0 uses 0
+branch D1-Re records 46 refused 0 uses 0
+branch D1-Rf records 46 refused 0 uses 0
+branch D1-all records 46 refused 0 uses 0
+compat no run

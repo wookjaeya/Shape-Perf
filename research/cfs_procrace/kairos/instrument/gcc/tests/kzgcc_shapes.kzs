@@ -1,0 +1,35 @@
+# kzgcc_shapes.kzs -- logical sites of the kzgcc shape test (kzs-sites 2: place= and from=param<k>).  Generic names,
+# unit-test values; not a cFS manifest and not research conditions.  Lines are those of kzgcc_shapes.c.
+kzs-sites 2
+source unit rev=0000000000000000000000000000000000000000 ref="instrument/gcc/tests/kzgcc_shapes.c"
+module 1 name=kzgcc_shapes source=unit
+
+# a field store through a local pointer, inside a branch (line 28)
+site 1 label=rec.raise op=rec.raise phase=effect tu=tests/kzgcc_shapes.c func=raise_state line=28 place=store
+value 1 0 role=required from=operand0 type=u32
+value 1 1 role=addr from=operand1 type=ptr
+# a store into a global object's field (line 33)
+site 2 label=idle.request op=idle.request phase=effect tu=tests/kzgcc_shapes.c func=request_shutdown line=33 place=store
+value 2 0 role=value from=operand0 type=u8
+value 2 1 role=addr from=operand1 type=ptr
+# a memset of a global, two sites after the one call (line 38): the destination and the size are its arguments
+site 3 label=table.clear op=table.clear phase=effect tu=tests/kzgcc_shapes.c func=table_init callee=memset line=38 place=after-call
+value 3 0 role=dest from=arg0 type=ptr
+site 4 label=table.clear2 op=table.clear phase=effect tu=tests/kzgcc_shapes.c func=table_init callee=memset line=38 place=after-call
+value 4 0 role=size from=arg2 type=u64
+# a point at a call (line 50) with the call's first argument and the enclosing function's name parameter, checked
+# by check_name before this point
+site 5 label=obj.publish op=obj.create phase=point tu=tests/kzgcc_shapes.c func=obj_create callee=finalize line=50 place=at-call
+value 5 0 role=status from=arg0 type=s32
+value 5 1 role=name from=param1 type=ptr string=validated bound=20 ref="kzgcc_shapes.c:49 check_name(name) == 0 (memchr within 20 bytes)"
+value 5 2 role=initial from=param2 type=u32
+# a point after a call whose result the code tests (line 58), and the start of line 62
+site 6 label=send.match op=send phase=point tu=tests/kzgcc_shapes.c func=send callee=is_match line=58 place=after-call
+value 6 0 role=is_match from=ret type=u8
+site 7 label=send.line62 op=send phase=point tu=tests/kzgcc_shapes.c func=send line=62 place=line-start
+value 7 0 role=id from=param0 type=u32
+# the entry of the function of site 1 (its arguments, as kzs-sites 1)
+site 8 label=raise.entry op=rec.raise phase=before tu=tests/kzgcc_shapes.c func=raise_state
+value 8 0 role=required from=arg1 type=u32
+# a point without a place: declared a gap, never bound
+site 9 label=no.place op=send phase=point tu=tests/kzgcc_shapes.c func=send callee=is_match

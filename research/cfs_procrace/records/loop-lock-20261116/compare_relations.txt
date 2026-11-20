@@ -1,0 +1,15 @@
+OK c1_pre_tx relations.txt = rf_relcheck's
+OK c1_pre_tx keys.txt = rf_relcheck's
+OK c1_pre_tx relations.log empty
+OK c1_post_tx relations.txt = rf_relcheck's
+OK c1_post_tx keys.txt = rf_relcheck's
+OK c1_post_tx relations.log empty
+OK r2_core relations.txt = rf_relcheck's
+OK r2_core keys.txt = rf_relcheck's
+OK r2_core relations.log empty
+OK c5_641 relations.txt = rf_relcheck's
+OK c5_641 keys.txt = rf_relcheck's
+OK c5_641 relations.log empty
+OK c5_642 relations.txt = rf_relcheck's
+OK c5_642 keys.txt = rf_relcheck's
+OK c5_642 relations.log empty

@@ -1,0 +1,17 @@
+plan /home/user/work/redesign/obs1/mv_plans_v4/c5_641
+  plan-id e226c6af1f70b03f
+  budget value=tier:D07 reason="the record pool is fixed (KZ_RT_POOL_BYTES = KZ_RT_MAX_ACTORS x 65536, kairos/runtime/include/kz_rt.h:61-64) and no event volume of a generated plan is measured yet: the priority tier is planned whole, the next tier is not" disclosure="the value was chosen knowing which rows the priority tier holds on these builds (plan/ovm_rev1_20261116/S1_RETALLY.md 3.1 and its probe tables); which rows are in the plan is an output of the rule, checked after the generation" planned=8 truncation=164 rows cut (row lines with state cut) unresolved="whether the rows cut fit the record pool (no event volume measured)" sensitivity="not measured"
+  control-budget value=all reason="the path A control selection (lead decision, plan/full_stage_results_20261116.md 6.10 item 2; kairos/docs/plan_manifest.md section 7) is planned whole: a boot counts as the prior test of the name-binding rule only with every control row in its plan (judgement rules 8.12 (ㄷ)); no event volume of a generated plan is measured yet, so no row is cut by a volume estimate" rows=15 (a 0, b 15) planned=15 cut=0 complete=yes unresolved="whether the control rows fit the record pool (no event volume measured)" sensitivity="not measured"
+  requests sha256=cd176cc7e47b5f706e6867e034ad4e9abcfd7fb1f4796fae80e9be6f915d30d1 file=plan.req rows=12 requests=41 planned=29
+rows path A 66; control set 15 (a 0, b 15, a+b 0), planned 15, cut 0
+path A planned: tier 0 []; control 15 [A16 A17 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32]; either 15
+path A planned outside relation 1 (key 17975444d83f6589): 15 [A16(2ebcea15f4e79065) A17(5494d8cc9c1687f2) A20(36af47e311432de4) A21(b955c7ab6464c8d7) A22(d198d36b93b167c9) A23(f44b82b204280c9f) A24(7f704205d9e76ef6) A25(6f2baa5b19eb7ffc) A26(c2e0cf77cff6fe23) A27(61f19560972ae24e) A28(9a6e0dbdeec414b0) A29(1f1c895b93ac9665) A30(1ed028c0e937b4b6) A31(b8003f8b02e1a68d) A32(06b7a80dfee6bafb)]; relation 1 planned: no (not a row of these facts or not planned)
+probe-create rows (control a): none
+revision 2 (/home/user/work/redesign/obs1/ll_plans_final/c5_641): path A planned 0 []
+revision 3 sites 201 (load 0, spawn statements 1); by rule: actor-create 2, actor-owner 2, actor-root 8, actor-start 8, creator-call 6, effect-call 18, stop-event 2, use-call 140, writer 23
+revision 2 sites 147 (load 0, spawn statements 0); by rule: actor-create 2, actor-owner 2, actor-root 8, actor-start 8, stop-event 2, use-call 110, writer 23
+needs: event-send not-planned 7, event-send planned 8, lock-result not-planned 23, object-delete not-planned 15, use-result planned 23, wait-result not-planned 23
+gaps 5: link_unlinked(no creation-argument channel) 1; record_insufficient(key text) 4
+requests end rows=12 requests=41 planned=29; branch not-planned 12, effect planned 23, result planned 6
+measurement (tier budget all) sites 700 (load 9, spawn statements 1); by rule: actor-create 2, actor-owner 2, actor-root 8, actor-start 8, creator-call 6, effect-call 80, handling-chain 14, key-text 3, lock-call 28, object-index 2, read-load 9, spawn-call 4, stop-event 2, use-call 414, writer 152, writer-after-spawn 6
+measurement needs: event-send not-planned 34, event-send planned 32, lock-result not-planned 133, lock-result planned 39, object-delete not-planned 66, read-subscript not-planned 7, read-subscript planned 32, read-value planned 39, use-result planned 133, value not-planned 8, wait-result not-planned 172

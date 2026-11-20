@@ -1,0 +1,59 @@
+sha256 of declared_before_build.txt: 9dd76dcf8026ba3892028f9db9b9ec234c9c89a339a9e94ce14c6a4134c947f0
+# commands of the types and object access step (plan/full_stage_results_20261116.md section 7); <scratch> is this
+# session's scratchpad directory (one directory in it); times UTC
+## 0. before the declaration
+scratch check build <scratch>/sbuild: cmake -DCMAKE_BUILD_TYPE=Release -DKZ_BUILD_LLVM_TOOLS=ON (the pinned LLVM), every make under
+  env/tools/space_guard.sh (df_scratch_cfg.log, df_scratch_build1..5.log): make 1 rc 2 (ast_fn.cpp read TuReader's private
+  options; an accessor added), makes 2-5 rc 0; `make all` dip 990,838,784; ctest 258: failures the three named in 7.0
+  (static_golden_objaccess, static_golden_objaccess_off, test_static_plan), test_static_cli 1014 checks, lint 7/7,
+  lint_selftest 109; the goldens of the new cases and the plan golden written into a scratch copy (golden_scratch.sha256)
+  -> one_build.sh with the scratch kz-static on the five builds, without and with --object-access, into <scratch>/x; the
+  facts views, compare_on.py, name_stability.py, relations, order, plans and measure_on.py on them: the [I] values of 7.0
+  these outputs are scratch and no evidence; <scratch>/sbuild, x, v, t, names removed (16:5xZ) before the declaration
+tools_check.sh --deep -> tools_check_pre.txt (40 rows, 0 failing); ledger_check.sh -> ledger_check_pre.txt (84 rows, 0 failing)
+relink_expected.sha256 (14) and not_relink.sha256 (110): sha256 of the MC binaries before the build
+## 1. tool copy and build (2026-11-16T17:02:22Z); HEAD 85dbdb5 (declaration commit)
+/dev/vda       270553174016 38609063936 2713444352  94% /
+copy rc=0
+make kz-static rc=0
+make all rc=0
+ctest first rc=8
+golden update rc=0
+ctest full rc=0
+run_unit rc=0
+step2a unit rc=0
+ledger after build rc=0
+tools after build rc=0
+## 2. the five builds (2026-11-16T17:15:50Z)
+rerun rc=0
+order rc=0
+extract off rc=0
+order off-extract rc=0
+plans t8cf rc=0
+plans off rc=0
+extract on rc=0
+order on-extract rc=0
+plans on rc=0
+## 3. comparisons (2026-11-16T17:22:11Z)
+compare relations rc=0
+compare order rc=0
+compare extract rc=0
+compare onextract rc=0
+compare plans rc=0
+compare extract_on rc=0
+compare onextract_on rc=0
+ledger end rc=0
+tools end rc=0
+## 4. after the session restart (2026-11-16T17:30Z-)
+resume check (resume_check.txt): sha256 of the MC tools = post_mc.txt, kz-static --identity = identity_kz-static.txt,
+  sha256sum -c not_relink.sha256 110 OK, one_build status.txt 10 of 10 "result PASS", five builds in each other output
+  directory; no build or run repeated
+facts views (kz-static show) of objacc_off_extract and objacc_on_extract into a directory of <scratch> -> python3 -I status_change.py
+  OFF ON --build B >> status_change.txt (five builds, rc 0 each); the views removed (17:36Z)
+order_changed.txt: join of the "order.static" lines of objacc_off_order and objacc_on_order by key (awk), five builds
+order_changed_rows.txt: the A20 (c1_pre_tx) relations text diff and order text, the BP_Throttle_t.Name lines of the
+  option-on facts view, the B111 (r2_core) order text off and on and the OwnerAppName lines; views in a directory of <scratch>, removed
+a20_keys.txt: grep '^A20 ' keys.txt of objacc_on_order c1_pre_tx, c1_post_tx
+names_in_dump_c1.txt: kz-dump of the option-on c1 facts, distinct names with "@<tree>/" and the BASIS item
+env/tools/ledger_check.sh -> ledger_check_final.txt rc=0 (94 rows, 0 failing)
+env/tools/tools_check.sh --deep -> tools_check_final.txt rc=0 (41 rows, 0 failing)

@@ -1,0 +1,119 @@
+# curl reachability via session proxy, 2026-10-08T01:08:12Z
+https://homepages.uc.edu/~tyu/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://homepages.uc.edu/~tyu/
+https://www.uc.edu/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://www.uc.edu/
+https://doi.org/10.1145/2483760.2483771 -> curl: (56) CONNECT tunnel failed, response 403 000 https://doi.org/10.1145/2483760.2483771
+https://dl.acm.org/doi/10.1145/2483760.2483771 -> curl: (56) CONNECT tunnel failed, response 403 000 https://dl.acm.org/doi/10.1145/2483760.2483771
+https://onlinelibrary.wiley.com/doi/abs/10.1002/stvr.1634 -> curl: (56) CONNECT tunnel failed, response 403 000 https://onlinelibrary.wiley.com/doi/abs/10.1002/stvr.1634
+https://ieeexplore.ieee.org/document/7774516 -> curl: (56) CONNECT tunnel failed, response 403 000 https://ieeexplore.ieee.org/document/7774516
+https://scholars.uky.edu/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://scholars.uky.edu/
+https://zenodo.org/api/records?q=SimRacer -> curl: (56) CONNECT tunnel failed, response 403 000 https://zenodo.org/api/records?q=SimRacer
+https://api.figshare.com/v2/articles?search_for=SimRacer -> curl: (56) CONNECT tunnel failed, response 403 000 https://api.figshare.com/v2/articles?search_for=SimRacer
+https://figshare.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://figshare.com/
+https://api.github.com/ -> 200 https://api.github.com/
+https://github.com/ -> 400 https://github.com/
+https://web.archive.org/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://web.archive.org/
+https://dblp.org/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://dblp.org/
+https://api.crossref.org/works/10.1145/2483760.2483771 -> curl: (56) CONNECT tunnel failed, response 403 000 https://api.crossref.org/works/10.1145/2483760.2483771
+https://api.openalex.org/works/doi:10.1145/2483760.2483771 -> curl: (56) CONNECT tunnel failed, response 403 000 https://api.openalex.org/works/doi:10.1145/2483760.2483771
+https://api.semanticscholar.org/graph/v1/paper/DOI:10.1145/2483760.2483771 -> curl: (56) CONNECT tunnel failed, response 403 000 https://api.semanticscholar.org/graph/v1/paper/DOI:10.1145/2483760.2483771
+https://www.cs.uky.edu/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://www.cs.uky.edu/
+https://cse.unl.edu/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://cse.unl.edu/
+https://digitalcommons.unl.edu/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://digitalcommons.unl.edu/
+https://sites.google.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://sites.google.com/
+https://www.researchgate.net/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://www.researchgate.net/
+https://scholar.google.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://scholar.google.com/
+https://acmse.net/2022/schedule-papers/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://acmse.net/2022/schedule-papers/
+https://ischool.syracuse.edu/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://ischool.syracuse.edu/
+https://arxiv.org/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://arxiv.org/
+https://export.arxiv.org/api/query?search_query=all:SimRacer -> curl: (56) CONNECT tunnel failed, response 403 000 https://export.arxiv.org/api/query?search_query=all:SimRacer
+https://core.ac.uk/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://core.ac.uk/
+https://www.semanticscholar.org/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://www.semanticscholar.org/
+https://citeseerx.ist.psu.edu/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://citeseerx.ist.psu.edu/
+https://software.intel.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://software.intel.com/
+https://www.intel.com/content/www/us/en/developer/articles/tool/simics-simulator.html -> curl: (56) CONNECT tunnel failed, response 403 000 https://www.intel.com/content/www/us/en/developer/articles/tool/simics-simulator.html
+https://www.windriver.com/products/simics -> curl: (56) CONNECT tunnel failed, response 403 000 https://www.windriver.com/products/simics
+# GitHub raw/codeload/git reachability, 2026-10-08T01:09:24Z
+https://raw.githubusercontent.com/tarannumzaman/Scminer/master/README.md -> 404 https://raw.githubusercontent.com/tarannumzaman/Scminer/master/README.md
+https://codeload.github.com/tarannumzaman/Scminer/zip/refs/heads/master -> 403 https://codeload.github.com/tarannumzaman/Scminer/zip/refs/heads/master
+https://github.com/tarannumzaman/Scminer -> 403 https://github.com/tarannumzaman/Scminer
+https://objects.githubusercontent.com/ -> 404 https://objects.githubusercontent.com/
+https://gist.github.com/ -> 200 https://gist.github.com/starred
+https://pages.github.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://pages.github.com/
+https://tarannumzaman.github.io/ -> curl: (56) CONNECT tunnel failed, response 403 000 https://tarannumzaman.github.io/
+https://chaowang-vt.github.io/pubDOC/YuZW17.pdf -> curl: (56) CONNECT tunnel failed, response 403 000 https://chaowang-vt.github.io/pubDOC/YuZW17.pdf
+# git ls-remote public repos
+## git ls-remote https://github.com/tarannumzaman/Scminer
+255933c62394e0d4fc0a9063975d36aca1cb15a9	HEAD
+fb6b6e3364bd820c70bb5cd00dfb9d947277a700	refs/heads/apache
+7b2349d5c18a629d3fbd8124e1520c7eafcc9bd5	refs/heads/bash
+255933c62394e0d4fc0a9063975d36aca1cb15a9	refs/heads/master
+1a5d0c543e21fef889eeeb1eb1a86cb6adc46d44	refs/heads/mkdir
+## git ls-remote https://github.com/tarannumzaman/ReproSys
+fatal: could not read Username for 'https://github.com': terminal prompts disabled
+## git ls-remote https://github.com/vampirecat35/SIMExplorer
+e20af6266124901d1bb5e15bf226f3919bde23e1	HEAD
+e20af6266124901d1bb5e15bf226f3919bde23e1	refs/heads/master
+e20af6266124901d1bb5e15bf226f3919bde23e1	refs/import/raw
+## git ls-remote https://github.com/columbia/racepro
+681f94e39bf5049e24fd2641099001f5246a7b6d	HEAD
+751c93a56a4d5c0582406b7a15a45947f967416a	refs/heads/chiache
+5fedf4096371d24bdd21e719b56370fedaabd192	refs/heads/chiache2
+cb9cf7a11dc471dac2dbeda5652acf8b0662eb2b	refs/heads/chiache3
+dc64482f5794eba0c07e04f650e8f91fbe3678b9	refs/heads/dev-signals
+https://raw.githubusercontent.com/columbia/racepro/master/README -> 404 14
+https://raw.githubusercontent.com/Zdong104/ProfessorGPT/main/input/Tingting_Yu.txt -> 404 14
+f3544731050f7f435640f53c1c938c0dea5135dd	HEAD
+f3544731050f7f435640f53c1c938c0dea5135dd	refs/heads/main
+255933c62394e0d4fc0a9063975d36aca1cb15a9	HEAD
+fb6b6e3364bd820c70bb5cd00dfb9d947277a700	refs/heads/apache
+7b2349d5c18a629d3fbd8124e1520c7eafcc9bd5	refs/heads/bash
+# second-round hosts found via WebSearch leads, 2026-10-08T01:12:41Z
+https://par.nsf.gov/servlets/purl/10089644 -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://par.nsf.gov/servlets/purl/10089644
+https://par.nsf.gov/servlets/purl/10075449 -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://par.nsf.gov/servlets/purl/10075449
+https://archive.cps-vo.org/node/30361 -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://archive.cps-vo.org/node/30361
+https://archive.cps-vo.org/node/36387 -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://archive.cps-vo.org/node/36387
+https://uknowledge.uky.edu/cs_etds/119 -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://uknowledge.uky.edu/cs_etds/119
+https://www.nsf.gov/ -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://www.nsf.gov/
+https://www.osti.gov/ -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://www.osti.gov/
+https://europepmc.org/ -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://europepmc.org/
+https://www.springerprofessional.de/doi/10.1145/2483760.2483771 -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://www.springerprofessional.de/doi/10.1145/2483760.2483771
+https://rankdblp.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 0 https://rankdblp.com/
+# third-round probes, 2026-10-08T01:25:03Z
+https://archive.softwareheritage.org/ -> curl: (56) CONNECT tunnel failed, response 403 000
+https://blogs.windriver.com/ -> curl: (56) CONNECT tunnel failed, response 403 000
+https://ieeexplore.ieee.org/document/7774517/ -> curl: (56) CONNECT tunnel failed, response 403 000
+https://dl.acm.org/doi/10.1145/3476883.3520207 -> curl: (56) CONNECT tunnel failed, response 403 000
+https://onlinelibrary.wiley.com/doi/am-pdf/10.1002/stvr.1634 -> curl: (56) CONNECT tunnel failed, response 403 000
+https://digitalcommons.unl.edu/computerscidiss/77/ -> curl: (56) CONNECT tunnel failed, response 403 000
+https://www.researchgate.net/publication/262165762 -> curl: (56) CONNECT tunnel failed, response 403 000
+https://acmse.net/ -> curl: (56) CONNECT tunnel failed, response 403 000
+https://homepages.uc.edu/~tyu/links/research.html -> curl: (56) CONNECT tunnel failed, response 403 000
+# fourth round: proxy status, WebFetch and Scholar Gateway, 2026-10-08T02:09:02Z
+## curl -sS "$HTTPS_PROXY/__agentproxy/status" (recentRelayFailures, excerpt; full 'detail' string verbatim)
+   2026-10-08T01:57:50.003Z connect_rejected cs.uky.edu:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T01:57:50.237Z connect_rejected uknowledge.uky.edu:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T01:57:50.507Z connect_rejected par.nsf.gov:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T01:57:50.772Z connect_rejected arxiv.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T01:57:54.383Z connect_rejected cs.uky.edu:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:00:28.882Z connect_rejected babelfish.arc.nasa.gov:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:00:29.032Z connect_rejected web.archive.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:00:29.315Z connect_rejected web.archive.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:01:17.645Z connect_rejected arxiv.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:01:17.687Z connect_rejected export.arxiv.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:01:17.961Z connect_rejected www.intel.com:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:01:18.228Z connect_rejected www.srcml.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:05:11.786Z connect_rejected zenodo.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:05:12.065Z connect_rejected figshare.com:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:05:12.340Z connect_rejected api.figshare.com:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:05:12.628Z connect_rejected www.semanticscholar.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:05:12.915Z connect_rejected api.semanticscholar.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:05:13.174Z connect_rejected api.openalex.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:05:13.455Z connect_rejected export.arxiv.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+   2026-10-08T02:05:13.716Z connect_rejected scholar.archive.org:443 detail="gateway answered 403 to CONNECT (policy denial or upstream failure)"
+## Note: the proxy detail 'policy denial or upstream failure' does not by itself separate the two causes.
+## WebFetch https://onlinelibrary.wiley.com/doi/abs/10.1002/stvr.1634 (2026-10-08T02:09:02Z)
+{"error_type":"EGRESS_BLOCKED","domain":"onlinelibrary.wiley.com","message":"Access to onlinelibrary.wiley.com is blocked by the network egress proxy."}
+## This WebFetch result is the definitive policy evidence: 'blocked by the network egress proxy'.
+## mcp__Scholar_Gateway__semanticSearch (query: SIMEXPLORER ... Simics virtual platform ... STVR 2017; topN 5) (2026-10-08T02:09:02Z)
+ACCESS_DENIED: Access denied
+## Route not usable from this session; reconnecting/authorising the Scholar Gateway connector is a user-side option (yu-group.md D1).

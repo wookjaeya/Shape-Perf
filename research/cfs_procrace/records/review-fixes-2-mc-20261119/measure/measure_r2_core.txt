@@ -1,0 +1,25 @@
+# measure.py r2_core (old: kz-static 1a47abd0 outputs; new: the rebuilt tool's)
+handling labels header old: handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: H 5 J 13 R 5 T 6 T? 20 none 131
+handling labels header new: handling labels (judgement rules 3.4: processing facts, never a verdict) of the path A and B rows: H 5 J 13 R 5 T 6 T? 20 none 131
+rows with a handling_label old=180 new=180 matched=180 only-old=0 only-new=0 label-moved=0
+label moves by kind: none
+result effect rows old: rows 11198 open 5543 event-send 307 application-exit 86 terminal 158
+result effect rows new: rows 11198 open 5543 event-send 307 application-exit 86 terminal 158
+extract semantics old: semantics                    rows 1476 (collated / rows: P0 29/75, framework 1303/1395, status-space 6/6; collated: a verification state other than unverified)
+extract semantics new: semantics                    rows 1613 (collated / rows: P0 29/75, framework 1440/1532, status-space 6/6; collated: a verification state other than unverified)
+extract result flow old: result flow                  9622 rows (uses: branch 1823, return 717, argument 1478, store 336, other 866, none 1496; guard rows 2906); calls with a result 4680
+extract result flow new: result flow                  9645 rows (uses: branch 1823, return 717, argument 1478, store 336, other 866, none 1496; guard rows 2929); calls with a result 4680
+extract lock handles old: lock handles                 967 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 11, not-static 956, of them no handle found 83)
+extract lock handles new: lock handles                 967 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 11, not-static 956, of them no handle found 97)
+key clearing lines new=0 (distinct 0)
+namespace with key-clearing calls 5: uses: lookups 4, creators 33 (calls from outside the key-parameter functions; a creator reaches a write of the key); key-clearing calls 5 (every write of the key they reach stores a constant, WRITERS:
+HB-await edges final round old=64 new=116
+  writer actor CFE_ES_BackgroundTask (spawn-entry): 0 -> 28
+  writer actor CFE_ES_TaskMain (table-walk-entry): 0 -> 28
+  writer actor CFE_TIME_TaskMain (table-walk-entry): 0 -> 28
+  writer actor main (process): 64 -> 32
+HB-await edges T8CF old=0 new=0
+v4 control-budget old: rows=4 planned=4 cut=0 complete=yes | rows with control= 4
+v4 control-budget new: rows=4 planned=4 cut=0 complete=yes | rows with control= 4
+v4 sites old=65 new=65; gaps old=0 new=0
+v4 needs old=29 new=29

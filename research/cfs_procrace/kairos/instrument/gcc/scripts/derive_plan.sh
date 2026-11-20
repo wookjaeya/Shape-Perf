@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# derive_plan.sh c1|c5 <arguments of derive_c1.sh or derive_c5.sh> --manifest FILE --modules TABLE --exes LIST --path-map MAP
+# The entry for derived builds made from a generated plan.  It refuses to start
+#   - without all three plan inputs (no fixed manifest, module list or executable list is used on this path),
+#   - without the path map (the plan's module table and executable list name the reference build's absolute paths;
+#     path_map.sh maps them into the work space; C1: the <W>/path_map.tsv of derive_c1.sh prepare), and
+#   - when the module table's header does not name the plan sidecar it came from: its first line must be
+#       # kz module table; plan sidecar <path> sha256=<64 hex>
+#     and <path> must be a file whose sha256 is that value; the executable list's first line must name the same
+#     sidecar ("# kz executables to check; plan sidecar <path> sha256=<hex>") and the manifest's header carry
+#     "# sidecar sha256=<hex>" with the same value.
+# Then it runs derive_c1.sh or derive_c5.sh with the same arguments (derive_args.sh reads the plan inputs and the map).
+# rc 64 on a refusal; otherwise the rc of the derive script.
+set -uo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+T=${1:-}; shift || true
+case "$T" in c1) S=$HERE/derive_c1.sh ;; c5) S=$HERE/derive_c5.sh ;; *) echo "usage: derive_plan.sh c1|c5 ARGS... --manifest FILE --modules TABLE --exes LIST --path-map MAP" >&2; exit 64 ;; esac
+# DERIVE_PLAN_SCRIPT replaces the derive script (the unit checks, env/tools/tests/run_unit.sh, use a stand-in)
+[ -z "${DERIVE_PLAN_SCRIPT:-}" ] || S=$DERIVE_PLAN_SCRIPT
+M=; MT=; EX=; PM=; prev=
+for a in "$@"; do
+  case "$prev" in --manifest) M=$a ;; --modules) MT=$a ;; --exes) EX=$a ;; --path-map) PM=$a ;; esac
+  prev=$a
+done
+[ -n "$M" ] && [ -n "$MT" ] && [ -n "$EX" ] || { echo "refusing: a generated plan needs --manifest, --modules and --exes" >&2; exit 64; }
+[ -n "$PM" ] || { echo "refusing: a generated plan names the reference build's paths; give --path-map MAP" >&2; exit 64; }
+for f in "$M" "$MT" "$EX" "$PM"; do [ -s "$f" ] || { echo "refusing: $f is missing or empty" >&2; exit 64; }; done
+H=$(head -1 "$MT")
+SC=$(printf '%s\n' "$H" | sed -n 's/^# kz module table; plan sidecar \(.*\) sha256=\([0-9a-f]\{64\}\)$/\1/p')
+SH=$(printf '%s\n' "$H" | sed -n 's/^# kz module table; plan sidecar \(.*\) sha256=\([0-9a-f]\{64\}\)$/\2/p')
+[ -n "$SC" ] && [ -n "$SH" ] || { echo "refusing: the module table's first line does not name the plan sidecar (# kz module table; plan sidecar <path> sha256=<hex>)" >&2; exit 64; }
+[ -f "$SC" ] || { echo "refusing: the plan sidecar $SC named by the module table does not exist" >&2; exit 64; }
+[ "$(sha256sum "$SC" | cut -c1-64)" = "$SH" ] || { echo "refusing: the plan sidecar $SC does not have the sha256 the module table names" >&2; exit 64; }
+# the executable list and the manifest name the same sidecar (kz-static plan writes the three together)
+[ "$(head -1 "$EX" | sed -n 's/^# kz executables to check; plan sidecar \(.*\) sha256=\([0-9a-f]\{64\}\)$/\1 \2/p')" = "$SC $SH" ] || { echo "refusing: the executable list's first line does not name the sidecar of the module table" >&2; exit 64; }
+grep -qx "# sidecar sha256=$SH" <(head -5 "$M") || { echo "refusing: the manifest's header does not name the sidecar sha256 of the module table" >&2; exit 64; }
+echo "derive_plan.sh: module table $MT from plan sidecar $SC (sha256 $SH)"
+exec "$S" "$@"

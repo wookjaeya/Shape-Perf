@@ -1,0 +1,8 @@
+5c5
+< plan 1362f7e3f93a7d39 facts=<sha256> relrules="relations rules revision 12 (2026-11-18)" obsrules="plan rules revision 4 (2026-11-18): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart" semantics="semantics join revision 1 (2026-11-16)" select=observation-set budget="all" control="all" ref="sidecar sha256 <sha256>"
+---
+> plan <plan-id> facts=<sha256> relrules="relations rules revision 12 (2026-11-18)" obsrules="plan rules revision 4 (2026-11-18): manifest revision 4 (kzs-sites 4), the path A control selection, value requests, the wait rule and the object rules; both handling labels on the row line, the key-clearing calls as object-delete sites, the event sends of the other outcomes apart" semantics="semantics join revision 1 (2026-11-16)" select=observation-set budget="all" control="all" ref="sidecar sha256 <sha256>"
+146c146
+< plan-id 1362f7e3f93a7d39
+---
+> plan-id <plan-id>

@@ -1,0 +1,4 @@
+build rc=0
+warnings: 0
+5e691ce73c59c95d323d4b332ee59e65d51945bc9ad7b86a90db716630ba1aa0  /home/user/work/instr/kzgcc-0.5/plugin-build/kzgcc.so
+kzgcc 0.5

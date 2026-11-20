@@ -1,0 +1,11 @@
+[2026-10-08T01:10:44.012Z] clone: git clone https://github.com/nasa/cFS.git (README L91)
+[2026-10-08T01:10:49.242Z] pin bundle commit 088b2fa828db9ff7e00733f1908e0eeb59f66ce3 (C-REV)
+[2026-10-08T01:10:49.524Z] git submodule init / git submodule update (README L93-94)
+[2026-10-08T01:13:22.741Z] submodule init+update took 151.952141732 s
+[2026-10-08T01:13:30.526Z] pinned state verified (bundle commit + 25 submodule commits); Makefile and sample_defs/ present at top level (README L96); nothing copied
+[2026-10-08T01:13:30.528Z] chown -R ubuntu: /home/user/work/procrace/cfs_ref (container adaptation D-1: lets the README L102 normal user write the build tree)
+[2026-10-08T01:13:31.307Z] build_04_prep: make native_std.prep (cwd /home/user/work/procrace/cfs_ref/cFS, user ubuntu)
+[2026-10-08T01:15:37.941Z] build_04_prep: exit 0, wall 126.622949295 s, warnings 6, 'error' lines 0
+[2026-10-08T01:15:37.944Z] build_05_install: make native_std.install (cwd /home/user/work/procrace/cfs_ref/cFS, user ubuntu)
+[2026-10-08T01:28:52.616Z] build_05_install: exit 0, wall 794.658927104 s, warnings 0, 'error' lines 8
+exit=1

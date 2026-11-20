@@ -1,0 +1,29 @@
+loop defs: 19 rows (loops 6: not-examined 1, recognised 2, refused-address-taken 2, refused-unresolved 1; definition rows 13); recognised 2; subexpressions cut at param.walk_bounds' expression depth 0 (not in count.walk_bounds_hit)
+lock handles: 1573 rows (static-instance 0, semantics-unverified 0, writer-set-incomplete 23, not-static 1550, of them no handle found 115)
+loops examined: 6 (not-examined 1, recognised 2, refused-address-taken 2, refused-unresolved 1)
+recognised: cfe/modules/es/fsw/src/cfe_es_apps.c:508:5 in CFE_ES_GetTaskFunction form flag+value
+recognised: /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c:1001:13 in CF_CFDP_InitEngine form value
+named wait: loop 178 cfe/modules/es/fsw/src/cfe_es_apps.c:508:5 in CFE_ES_GetTaskFunction recognised form flag+value {under-lock,call-result} predicate (and (ne (call-result CFE_ES_GetTaskRecordByContext) 0) (and (call-result CFE_ResourceId_IsDefined (seq field:CFE_ES_TaskRecord_t.AppId)) (ne field:CFE_ES_TaskRecord_t.EntryFunc 0)))
+named wait: loop 107 /home/user/work/procrace/c1_build/post/src/cf/fsw/src/cf_cfdp.c:1001:13 in CF_CFDP_InitEngine recognised form value {call-result} predicate (ne (call-result OS_CountSemGetIdByName (seq (addr field:CF_Channel_t.sem_id) (seq field:CF_ChannelConfig_t.sem_name))) -17)
+lock handle rows: 1573 (not-static 1550, writer-set-incomplete 23)
+handle field: CFE_ES_Global_t.SharedDataMutex not-static rows 722
+handle field: (no field) not-static rows 718
+handle field: CFE_SB_Global_t.SharedDataMutexId not-static rows 51
+handle field: CFE_ES_Global_t.PerfDataMutex not-static rows 27
+handle field: CFE_ES_CDS_Instance_t.GenMutex writer-set-incomplete rows 23
+handle field: CFE_FS_Global_t.SharedDataMutexId not-static rows 12
+handle field: CFE_EVS_Global_t.EVS_SharedDataMutexID not-static rows 11
+handle field: CFE_TBL_Global_t.RegistryMutex not-static rows 7
+handle field: CFE_TBL_Global_t.WorkBufMutex not-static rows 2
+waits recognised: 5 -> 7
+through LOOP_DEFS: 2; budget values through a flag: 1; HB-lock by handle: 0
+HB-await edges: 0 -> 120 (conditional 120, hard 304 in all edges)
+caller-side uses of waits: 0 -> 4; HB-await edges to them 0 -> 120
+dependent uses: continue 19, inside 101, no-budget 23, unknown 6 -> caller-side 1, continue 19, inside 101, no-budget 23, skip 4, unknown 5
+HB-lock edges: 0; identity source: -
+rows: A 63 (unknown 59, unordered 4); B 170 (unknown 8, unordered 162); C 134 (unknown 7, unordered 127)
+rows (result flow round): A 63 (unknown 59, unordered 4); B 170 (unknown 8, unordered 162); C 134 (unknown 7, unordered 127)
+caller-dependent: spawn calls with resolved threads 13, caller-dependent 5; their callers 13, passing on no resolved entry 2 (distinct caller calls 2)
+caller-dependent: pairs of the rows 24609 (unordered 21664); with every such caller taken to create any of the call's own threads, pairs whose value differs 0 (new pairs 0)
+caller-dependent: rows whose value differs 0
+relations path C by handle: 0, static-instance 0

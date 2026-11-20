@@ -1,0 +1,8 @@
+# space_guard.sh kind=scratch-ctest need=100000000 floor=314572800 interval=2 cmd=ctest -L golden|lint -j4
+start 2026-11-19T04:09:23.785Z free=904122368 threshold=414572800
+sample 2026-11-19T04:09:23.790Z 904118272
+sample 2026-11-19T04:09:25.796Z 899244032
+sample 2026-11-19T04:09:27.804Z 899244032
+sample 2026-11-19T04:09:29.810Z 897585152
+sample 2026-11-19T04:09:31.817Z 897585152
+end 2026-11-19T04:09:33.823Z kind=scratch-ctest verdict=completed rc=8 free=895913984 lowest=895913984 dip=8208384 change=-8208384

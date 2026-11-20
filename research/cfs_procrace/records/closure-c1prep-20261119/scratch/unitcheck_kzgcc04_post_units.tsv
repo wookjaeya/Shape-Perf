@@ -1,0 +1,33 @@
+unit	rc	bound	inlined	duplicated	unsupported	removed	first_error
+apps/ci_lab/fsw/src/ci_lab_app.c	0	1	0	0	0	0	
+apps/sch_lab/fsw/src/sch_lab_app.c	0	5	0	0	0	0	
+apps/to_lab/fsw/src/to_lab_app.c	0	1	0	0	0	0	
+cfe/modules/es/fsw/src/cfe_es_api.c	0	2	0	0	0	0	
+cfe/modules/es/fsw/src/cfe_es_apps.c	0	2	0	0	0	0	
+cfe/modules/es/fsw/src/cfe_es_backgroundtask.c	0	6	0	0	0	0	
+cfe/modules/es/fsw/src/cfe_es_start.c	0	2	0	0	0	0	
+cfe/modules/es/fsw/src/cfe_es_task.c	0	1	0	0	0	0	
+cfe/modules/evs/fsw/src/cfe_evs_task.c	0	1	0	0	0	0	
+cfe/modules/sb/fsw/src/cfe_sb_api.c	0	92	0	0	0	0	
+cfe/modules/sb/fsw/src/cfe_sb_buf.c	0	4	0	0	0	0	
+cfe/modules/sb/fsw/src/cfe_sb_init.c	0	4	0	0	0	0	
+cfe/modules/sb/fsw/src/cfe_sb_task.c	0	11	0	2	0	0	
+cfe/modules/tbl/fsw/src/cfe_tbl_api.c	0	59	0	0	0	0	
+cfe/modules/tbl/fsw/src/cfe_tbl_internal.c	0	33	0	0	0	0	
+cfe/modules/tbl/fsw/src/cfe_tbl_task.c	0	3	0	0	0	0	
+cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c	1	0	0	0	0	0	/home/user/work/procrace/c1_build/bundle_1df262a/cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c:1456:1: internal compiler error: in make_ssa_name_fn, at tree-ssanames.cc:357
+cfe/modules/time/fsw/src/cfe_time_task.c	0	3	0	0	0	0	
+cfe/modules/time/fsw/src/cfe_time_tone.c	0	2	0	0	0	0	
+osal/src/os/posix/src/os-impl-tasks.c	0	3	0	0	0	0	
+osal/src/os/shared/src/osapi-countsem.c	0	7	0	0	0	0	
+osal/src/os/shared/src/osapi-file.c	0	1	0	0	0	0	
+osal/src/os/shared/src/osapi-idmap.c	0	2	0	0	0	0	
+osal/src/os/shared/src/osapi-timebase.c	0	8	0	0	0	0	
+psp/fsw/modules/soft_timebase/cfe_psp_soft_timebase.c	0	2	0	0	0	0	
+src/bp/fsw/src/bp_app.c	0	1	0	0	0	0	
+src/bp/fsw/src/bp_cla_bundle_io.c	0	2	0	0	0	0	
+src/bp/fsw/src/bp_flow.c	0	0	7	0	0	0	
+src/cf/fsw/src/cf_app.c	0	7	0	0	0	0	
+src/cf/fsw/src/cf_cfdp.c	0	4	0	0	1	0	
+src/cf/fsw/src/cf_cfdp_r.c	0	2	0	0	0	0	
+src/cf/fsw/src/cf_cfdp_s.c	0	3	0	0	0	0	

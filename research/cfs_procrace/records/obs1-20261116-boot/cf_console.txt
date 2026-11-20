@@ -1,0 +1,3 @@
+64:EVS Port1 185/1/CF 30: CF: failed to get sem id for name BP0_tsem, error=-17
+68:EVS Port1 185/1/BP 15: Created semaphore: BP0_tsem
+69:EVS Port1 185/1/BP 15: Created semaphore: BP1_tsem

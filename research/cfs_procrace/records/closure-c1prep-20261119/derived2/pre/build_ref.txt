@@ -1,0 +1,4 @@
+derive_plan.sh: module table /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.mod from plan sidecar /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side (sha256 a18a03702a2e339696a17e187d919d8f9a03694d20a9b268844e4f1f11abddc4)
+cmake rc=0
+make rc=0
+rc=0

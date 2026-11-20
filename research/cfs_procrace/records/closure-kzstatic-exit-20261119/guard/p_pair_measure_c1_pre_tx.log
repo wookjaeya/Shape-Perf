@@ -1,0 +1,4 @@
+# space_guard.sh kind=check need=20000000 floor=314572800 interval=2 cmd=bash -c python3 -I /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-exit-20261119/scripts/pair_measure.py /home/user/work/redesign/obs1/cz_final_order/c1_pre_tx /home/user/work/redesign/obs1/cz_plans_v4/c1_pre_tx/plan.side /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_pre_tx/plan.side /home/user/work/redesign/obs1/rf2_plans_v4/c1_pre_tx/plan.side > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-exit-20261119/out/pair_measure_c1_pre_tx.txt
+start 2026-11-19T06:39:05.884Z free=830799872 threshold=334572800
+sample 2026-11-19T06:39:05.888Z 830795776
+end 2026-11-19T06:39:07.895Z kind=check verdict=completed rc=0 free=830791680 lowest=830791680 dip=8192 change=-8192

@@ -1,0 +1,165 @@
+plan /home/user/work/redesign/obs1/ll_plans_final/c5_642
+  classes rows 169 tier1 7 tier2 73 tier3 89
+  budget value=tier:D07 ... planned=7 truncation=162 rows cut (row lines with state cut)
+path rows tier-planned control-planned either neither
+A 66 0 0 0 66
+B 65 7 0 7 58
+C 38 0 0 0 38
+all 169 7 0 7 162
+rows planned by neither, by path, reason, tier, disposition, label:
+  A reason=budget_not_run(row outside the budget) tier=2 disposition=D05 label=0: 13
+  A reason=budget_not_run(row outside the budget) tier=2 disposition=D11 label=T?: 2
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D05 label=0: 13
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D06 label=J: 5
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D11 label=T?: 28
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D12 label=E: 5
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D05 label=0: 1
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D11 label=T?: 15
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D12 label=E: 42
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D01 label=E: 9
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D01 label=F: 5
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D03 label=E: 6
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D03 label=F: 4
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D10 label=F: 7
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D12 label=E: 7
+every row by path, label, tier, order class (planned by the tier order / rows):
+  A label=0 tier=2 order=RELOC: 0 / 13
+  A label=0 tier=3 order=NOPAIR: 0 / 13
+  A label=E tier=3 order=NOPAIR: 0 / 5
+  A label=J tier=3 order=NOPAIR: 0 / 5
+  A label=T? tier=2 order=RELOC: 0 / 2
+  A label=T? tier=3 order=NOPAIR: 0 / 28
+  B label=0 tier=2 order=RELOC: 0 / 1
+  B label=E tier=2 order=RELOC: 0 / 42
+  B label=J tier=1 order=RELOC: 7 / 7
+  B label=T? tier=2 order=RELOC: 0 / 15
+  C label=E tier=3 order=COND: 0 / 6
+  C label=E tier=3 order=ENF: 0 / 9
+  C label=E tier=3 order=NOPAIR: 0 / 7
+  C label=F tier=3 order=COND: 0 / 4
+  C label=F tier=3 order=ENF: 0 / 5
+  C label=F tier=3 order=NOPAIR: 0 / 7
+path A: labels seen {0, E, J, T?}; tiers seen {2, 3}
+path B: labels seen {0, E, J, T?}; tiers seen {1, 2}
+path C: labels seen {E, F}; tiers seen {3}
+plan /home/user/work/redesign/obs1/mv_plans_v3_final/c5_642
+  classes rows 169 tier1 7 tier2 73 tier3 89
+  budget value=tier:D07 ... planned=7 truncation=162 rows cut (row lines with state cut)
+path rows tier-planned control-planned either neither
+A 66 0 0 0 66
+B 65 7 0 7 58
+C 38 0 0 0 38
+all 169 7 0 7 162
+rows planned by neither, by path, reason, tier, disposition, label:
+  A reason=budget_not_run(row outside the budget) tier=2 disposition=D05 label=0: 13
+  A reason=budget_not_run(row outside the budget) tier=2 disposition=D11 label=T?: 2
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D05 label=0: 13
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D06 label=J: 5
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D11 label=T?: 28
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D12 label=E: 5
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D05 label=0: 1
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D11 label=T?: 15
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D12 label=E: 42
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D01 label=E: 9
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D01 label=F: 5
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D03 label=E: 6
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D03 label=F: 4
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D10 label=F: 7
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D12 label=E: 7
+every row by path, label, tier, order class (planned by the tier order / rows):
+  A label=0 tier=2 order=RELOC: 0 / 13
+  A label=0 tier=3 order=NOPAIR: 0 / 13
+  A label=E tier=3 order=NOPAIR: 0 / 5
+  A label=J tier=3 order=NOPAIR: 0 / 5
+  A label=T? tier=2 order=RELOC: 0 / 2
+  A label=T? tier=3 order=NOPAIR: 0 / 28
+  B label=0 tier=2 order=RELOC: 0 / 1
+  B label=E tier=2 order=RELOC: 0 / 42
+  B label=J tier=1 order=RELOC: 7 / 7
+  B label=T? tier=2 order=RELOC: 0 / 15
+  C label=E tier=3 order=COND: 0 / 6
+  C label=E tier=3 order=ENF: 0 / 9
+  C label=E tier=3 order=NOPAIR: 0 / 7
+  C label=F tier=3 order=COND: 0 / 4
+  C label=F tier=3 order=ENF: 0 / 5
+  C label=F tier=3 order=NOPAIR: 0 / 7
+path A: labels seen {0, E, J, T?}; tiers seen {2, 3}
+path B: labels seen {0, E, J, T?}; tiers seen {1, 2}
+path C: labels seen {E, F}; tiers seen {3}
+plan /home/user/work/redesign/obs1/mv_plans_v4/c5_642
+  manifest-revision 4 (kzs-sites 4)
+  plan-id 043ee197d26f385e
+  classes rows 169 tier1 7 tier2 73 tier3 89
+  budget value=tier:D07 ... planned=7 truncation=162 rows cut (row lines with state cut)
+  control-budget value=all ... planned=15 cut=0 complete=yes
+path rows tier-planned control-planned either neither
+A 66 0 15 15 51
+B 65 7 0 7 58
+C 38 0 0 0 38
+all 169 7 15 22 147
+rows planned by neither, by path, reason, tier, disposition, label:
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D05 label=0: 13
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D06 label=J: 5
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D11 label=T?: 28
+  A reason=budget_not_run(row outside the budget) tier=3 disposition=D12 label=E: 5
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D05 label=0: 1
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D11 label=T?: 15
+  B reason=budget_not_run(row outside the budget) tier=2 disposition=D12 label=E: 42
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D01 label=E: 9
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D01 label=F: 5
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D03 label=E: 6
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D03 label=F: 4
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D10 label=F: 7
+  C reason=budget_not_run(row outside the budget) tier=3 disposition=D12 label=E: 7
+every row by path, label, tier, order class (planned by the tier order / rows):
+  A label=0 tier=2 order=RELOC: 0 / 13
+  A label=0 tier=3 order=NOPAIR: 0 / 13
+  A label=E tier=3 order=NOPAIR: 0 / 5
+  A label=J tier=3 order=NOPAIR: 0 / 5
+  A label=T? tier=2 order=RELOC: 0 / 2
+  A label=T? tier=3 order=NOPAIR: 0 / 28
+  B label=0 tier=2 order=RELOC: 0 / 1
+  B label=E tier=2 order=RELOC: 0 / 42
+  B label=J tier=1 order=RELOC: 7 / 7
+  B label=T? tier=2 order=RELOC: 0 / 15
+  C label=E tier=3 order=COND: 0 / 6
+  C label=E tier=3 order=ENF: 0 / 9
+  C label=E tier=3 order=NOPAIR: 0 / 7
+  C label=F tier=3 order=COND: 0 / 4
+  C label=F tier=3 order=ENF: 0 / 5
+  C label=F tier=3 order=NOPAIR: 0 / 7
+path A: labels seen {0, E, J, T?}; tiers seen {2, 3}
+path B: labels seen {0, E, J, T?}; tiers seen {1, 2}
+path C: labels seen {E, F}; tiers seen {3}
+plan /home/user/work/redesign/obs1/mv_plans_v4_all/c5_642
+  manifest-revision 4 (kzs-sites 4)
+  plan-id 375f7db0444e82f2
+  classes rows 169 tier1 7 tier2 73 tier3 89
+  budget value=all ... planned=169 truncation=0 rows cut (row lines with state cut)
+  control-budget value=all ... planned=15 cut=0 complete=yes
+path rows tier-planned control-planned either neither
+A 66 66 15 66 0
+B 65 65 0 65 0
+C 38 38 0 38 0
+all 169 169 15 169 0
+rows planned by neither, by path, reason, tier, disposition, label:
+every row by path, label, tier, order class (planned by the tier order / rows):
+  A label=0 tier=2 order=RELOC: 13 / 13
+  A label=0 tier=3 order=NOPAIR: 13 / 13
+  A label=E tier=3 order=NOPAIR: 5 / 5
+  A label=J tier=3 order=NOPAIR: 5 / 5
+  A label=T? tier=2 order=RELOC: 2 / 2
+  A label=T? tier=3 order=NOPAIR: 28 / 28
+  B label=0 tier=2 order=RELOC: 1 / 1
+  B label=E tier=2 order=RELOC: 42 / 42
+  B label=J tier=1 order=RELOC: 7 / 7
+  B label=T? tier=2 order=RELOC: 15 / 15
+  C label=E tier=3 order=COND: 6 / 6
+  C label=E tier=3 order=ENF: 9 / 9
+  C label=E tier=3 order=NOPAIR: 7 / 7
+  C label=F tier=3 order=COND: 4 / 4
+  C label=F tier=3 order=ENF: 5 / 5
+  C label=F tier=3 order=NOPAIR: 7 / 7
+path A: labels seen {0, E, J, T?}; tiers seen {2, 3}
+path B: labels seen {0, E, J, T?}; tiers seen {1, 2}
+path C: labels seen {E, F}; tiers seen {3}

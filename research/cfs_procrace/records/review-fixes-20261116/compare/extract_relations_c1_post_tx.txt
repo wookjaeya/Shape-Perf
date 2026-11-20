@@ -1,0 +1,1 @@
+classes: facts 1, marked 94, rules 1, set not established 5; other 0

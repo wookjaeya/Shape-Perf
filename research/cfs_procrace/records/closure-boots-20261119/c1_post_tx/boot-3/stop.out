@@ -1,0 +1,14 @@
+# stop_eval.py --manifest /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/plan.kzs --sidecar /home/user/work/redesign/obs1/cz_plans_v4_ns2/c1_post_tx/plan.side --startup-script /home/user/work/redesign/obs1/c1cyc_post_boot3/tx/inst/tx/cf/cfe_es_startup.scr --dump-text /home/user/work/redesign/obs1/c1cyc_post_boot3/tx/tx.dump.txt
+# stop APIs (sidecar): app-exit CFE_ES_ExitApp cfe/modules/es/fsw/src/cfe_es_api.c:340; run-loop CFE_ES_RunLoop cfe/modules/es/fsw/src/cfe_es_api.c:470
+# stop sites (manifest): 8=CFE_ES_ExitApp, 9=CFE_ES_RunLoop
+# window: t_init=68733257014346 t_stop=68738936283644 length_ms=5679.269; times below are ms after t_init
+# record losses: none in the actor records
+app	entry	file	root_sites	actor	root_ms	stop_event	stop_site	stop_aseq	stop_ms	inside_window	status
+CI_LAB_APP	CI_Lab_AppMain	ci_lab	1	10	1555.563	CFE_ES_RunLoop	9	13	1555.759	yes	reached
+TO_LAB_APP	TO_LAB_AppMain	to_lab	7	11	1555.677	CFE_ES_RunLoop	9	54	1555.844	yes	reached
+SCH_LAB_APP	SCH_Lab_AppMain	sch_lab	6	12	1555.768	CFE_ES_RunLoop	9	33	1555.850	yes	reached
+CF	CF_AppMain	cf	286	13	1555.904	CFE_ES_RunLoop	9	46	1656.395	yes	reached
+BP	BP_AppMain	bp	276	14	1556.138	CFE_ES_RunLoop	9	65	1565.580	yes	reached
+TC_LIB	NULL	tinycbor	-	-	-	-	-	-	-	-	library(no stop event by the rule)
+BP_LIB	NULL	bplib	-	-	-	-	-	-	-	-	library(no stop event by the rule)
+summary	applications=5 reached_inside_window=5 libraries=2

@@ -1,0 +1,41 @@
+# free space before the build (AR 16.10.0): large scratch copies of this session's scratchpad (<scratch>) packed without loss, 2026-11-10T09:47:50Z-09:49:19Z
+# free (df -B1 /) before 448630784, after 662777856
+# for each item: sha256 of every file, tar | xz -6, the archive streamed back (xz -dc | tar --to-command=sha256sum) gives the same list, then the item removed
+# not touched: 2a logs (ctest etc.), RD, EB, CK, PV, T/, build trees, cFS trees, bundles
+v8b: 10 files, 68263936 B -> 3309996 B xz, stream check same, removed
+fix3b: 77 files, 31350784 B -> 1520728 B xz, stream check same, removed
+t7: 39 files, 25526272 B -> 1582972 B xz, stream check same, removed
+v: 250 files, 24801280 B -> 1532120 B xz, stream check same, removed
+T: 62 files, 22798336 B -> 1232824 B xz, stream check same, removed
+s3: 20 files, 21331968 B -> 1757616 B xz, stream check same, removed
+c5_642: 5 files, 16547840 B -> 881016 B xz, stream check same, removed
+verify3: 330 files, 16302080 B -> 719628 B xz, stream check same, removed
+# the archives (in <scratch>/8cfix/pack/, beside each item's .sha256 list and .check list)
+c8d6b7d931abbcf2b31bc27cf90d4a7cef3bc8cd2abe464008cf9717ea318aab  T.tar.xz
+73d0fca6f6436c8f88a2b908365166af791db1dc803c65bf01c7e6815573f965  c5_642.tar.xz
+7182ca90f45e8f69af63e8b14a763ef67ebec30e072bea5279ea456bb54b0599  fix3b.tar.xz
+b4f7c78dbd17dc960b70da0b3892f749a9cbe21e58de7b5149161bb89f3c05fb  s3.tar.xz
+9dbc4b9907a5179726c8ab111a83286221c1bd42697d19078a713d5537395914  t7.tar.xz
+99c03e97d347a5a145265583396ec24a93158b1f3dccd6d0f041d57bdcb01aea  v.tar.xz
+c0a8bad81ae00c581ce145fc6617a60eb8e5ea85bda7be763db8b325a194cbfd  v8b.tar.xz
+e4e9c50caa6a4161875fd10960c516bf74b1007b29388623f78b4084b5ba8f01  verify3.tar.xz
+# the script (<scratch>/8cfix/pack.sh)
+  #!/bin/bash
+  # pack.sh SCRATCH ITEM...: for each item (a directory or file under SCRATCH), write a sha256 list of its files,
+  # a tar.xz of it, check by streaming the archive that every file has the same sha256, and only then remove the item.
+  set -u
+  S=$1; shift
+  cd "$S" || exit 2
+  for it in "$@"; do
+    [ -e "$it" ] || { echo "$it: missing"; continue; }
+    b=$(du -s -B1 "$it" | cut -f1)
+    find "$it" -type f -print0 | sort -z | xargs -0 sha256sum > "8cfix/pack/$it.sha256" || { echo "$it: hash failed"; exit 1; }
+    tar -cf - "$it" | xz -6 -T2 > "8cfix/pack/$it.tar.xz" || { echo "$it: pack failed"; exit 1; }
+    xz -dc "8cfix/pack/$it.tar.xz" | tar -xf - --to-command='sha256sum | sed "s|-\$|$TAR_FILENAME|"' | sort -k2 > "8cfix/pack/$it.check"
+    if cmp -s <(sort -k2 "8cfix/pack/$it.sha256") "8cfix/pack/$it.check"; then
+      n=$(wc -l < "8cfix/pack/$it.sha256"); z=$(stat -c %s "8cfix/pack/$it.tar.xz")
+      rm -rf "$it" && echo "$it: $n files, $b B -> $z B xz, stream check same, removed"
+    else
+      echo "$it: CHECK DIFFERS, kept"; exit 1
+    fi
+  done

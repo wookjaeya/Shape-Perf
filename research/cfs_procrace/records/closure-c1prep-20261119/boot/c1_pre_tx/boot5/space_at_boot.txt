@@ -1,0 +1,8 @@
+kz-space-at-boot 1 (run_cycle.sh boot; results 26.9, evaluation protocol 14.14 item 4)
+declaration sha256=b268e2d2c3d9debf846540d2ab7d8041781c704100c1cfa9a4783ed6221c4b23 path=/home/user/Shape-Perf/research/cfs_procrace/records/closure-c1prep-20261119/boot/declaration4.tsv
+measured 2026-11-19T20:04:56Z free 864006144 (df -B1 /)
+declared floor 314572800 margin 100000000 per_boot 54484992
+measured per boot (the largest over the boots already run): 60444672 (c1_pre_tx/boot3)
+per boot used 60444672; boots remaining in the cycle, this one included: 7
+need 837685504
+verdict met (free - need = 26320640)

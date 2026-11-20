@@ -1,0 +1,11 @@
+rf2_relcheck 15 files 7614716 B
+rf2_order 15 files 7017400 B
+rf2_off_extract 50 files 46952338 B
+rf2_final_extract 50 files 72324880 B
+rf2_off_order 30 files 14633200 B
+rf2_final_order 35 files 16668891 B
+rf2_plans_t8cf 30 files 886508 B
+rf2_plans_final 30 files 894500 B
+rf2_plans_v4 35 files 1192273 B
+rf2_plans_v4_all 35 files 6930506 B
+rf2_plans_v4_keptfacts 35 files 1192603 B

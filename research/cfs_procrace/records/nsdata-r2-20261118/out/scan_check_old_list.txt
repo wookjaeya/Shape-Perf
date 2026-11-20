@@ -1,0 +1,19 @@
+ok   framework_namespaces2_cfe-6.4.1.txt: equal to the scan; 27 lines, 2 entries, 4 pinned files, 12 file:line references
+ok   framework_namespaces2_cfe-6.4.2.txt: equal to the scan; 27 lines, 2 entries, 4 pinned files, 12 file:line references
+ok   framework_namespaces2_osal-4.1.1.txt: equal to the scan; 115 lines, 10 entries, 7 pinned files, 136 file:line references
+FAIL framework_namespaces2_osal-7.0.1.txt: a data file the scan does not generate
+FAIL framework_namespaces2_osal-f34759d.txt: a data file the scan does not generate
+ok   framework_namespaces_cfe-6.4.1.txt: equal to the scan; 22 lines, 2 entries, 4 pinned files, 12 file:line references
+ok   framework_namespaces_cfe-6.4.2.txt: equal to the scan; 22 lines, 2 entries, 4 pinned files, 12 file:line references
+ok   framework_namespaces_osal-4.1.1.txt: equal to the scan; 110 lines, 10 entries, 7 pinned files, 136 file:line references
+ok   framework_namespaces_osal-7.0.1.txt: equal to the scan; 110 lines, 12 entries, 25 pinned files, 150 file:line references
+ok   framework_namespaces_osal-f34759d.txt: equal to the scan; 103 lines, 11 entries, 23 pinned files, 140 file:line references
+ok   framework_semantics_cfe-6.4.1.txt: equal to the scan; 425 lines, 73 entries, 18 pinned files, 472 file:line references
+ok   framework_semantics_cfe-6.4.2.txt: equal to the scan; 426 lines, 73 entries, 18 pinned files, 473 file:line references
+ok   framework_semantics_cfe-6cccb3f.txt: equal to the scan; 783 lines, 129 entries, 27 pinned files, 875 file:line references
+ok   framework_semantics_cfe-7.0.1.txt: equal to the scan; 808 lines, 133 entries, 28 pinned files, 903 file:line references
+ok   framework_semantics_osal-4.1.1.txt: equal to the scan; 277 lines, 55 entries, 12 pinned files, 312 file:line references
+ok   framework_semantics_osal-7.0.1.txt: equal to the scan; 851 lines, 150 entries, 55 pinned files, 938 file:line references
+ok   framework_semantics_osal-f34759d.txt: equal to the scan; 742 lines, 128 entries, 52 pinned files, 810 file:line references
+ok   p0_declarations_glibc-2.39-headers.txt: equal to the scan; 105 lines, 85 entries, 11 pinned files, 85 file:line references
+FAIL: 16 data files, 2 failures

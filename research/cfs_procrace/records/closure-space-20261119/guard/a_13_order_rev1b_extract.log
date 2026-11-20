@@ -1,0 +1,9 @@
+# space_guard.sh kind=archive need=20000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-space-20261119/archive.sh order_rev1b_extract records/order-rules-rev1-20261116/order_rev1b_extract.sha256
+start 2026-11-19T13:51:27.007Z free=886018048 threshold=334572800
+sample 2026-11-19T13:51:27.012Z 886013952
+sample 2026-11-19T13:51:29.019Z 886005760
+sample 2026-11-19T13:51:31.025Z 886005760
+sample 2026-11-19T13:51:33.033Z 886005760
+sample 2026-11-19T13:51:35.040Z 886005760
+sample 2026-11-19T13:51:37.045Z 882601984
+end 2026-11-19T13:51:39.053Z kind=archive verdict=completed rc=0 free=929648640 lowest=882601984 dip=3416064 change=43630592

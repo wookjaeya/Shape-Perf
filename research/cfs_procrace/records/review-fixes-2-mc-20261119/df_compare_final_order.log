@@ -1,0 +1,4 @@
+# space_guard.sh kind=compare-final_order need=150000000 floor=314572800 interval=2 cmd=bash -c bash '/home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/compare.sh' final_order > '/home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/compare_final_order.txt' 2>&1
+start 2026-11-19T02:04:02.537Z free=1069961216 threshold=464572800
+sample 2026-11-19T02:04:02.541Z 1069957120
+end 2026-11-19T02:04:04.548Z kind=compare-final_order verdict=completed rc=0 free=1078542336 lowest=1069957120 dip=4096 change=8581120

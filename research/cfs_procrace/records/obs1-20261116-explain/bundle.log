@@ -1,0 +1,34 @@
+start 2026-11-16T08:37:29.720Z id=obs1-20261116-cycle files=4554 bytes=63709502 free=3735601152 need_bound=52428800 floor=314572800
+bundle=obs1-20261116-cycle
+created_utc=2026-11-16T08:37:51.358Z
+repo_commit=ab230a14ecf0892dad7b37c4d888a661916f5f0f
+kernel=6.18.44-fc-v470
+source=/home/user/work/redesign/obs1/plangen files=30 bytes=994424
+source=/home/user/work/redesign/obs1/c1pre_rt files=355 bytes=5032847
+source=/home/user/work/redesign/obs1/c1pre_derived files=3957 bytes=33032031
+source=/home/user/work/redesign/obs1/c1pre_bprime files=10 bytes=13100847
+source=/home/user/work/redesign/obs1/c1pre_boot files=52 bytes=3613913
+source=/home/user/work/redesign/obs1/c1pre_convert files=5 bytes=844336
+source=/home/user/work/redesign/obs1/c1pre_explain files=145 bytes=7091104
+tar_xz_bytes=9341660 parts=1 tar_xz_sha256=4d2a032571614ee47eca9501ddc36080e07fd68b1eb2589011e8e8d39f258501
+location=/home/user/work/preserve/bundles-20261116/obs1-20261116-cycle (local, not in the repository, not pushed)
+made_with=bundle_local.sh (tar --sort=name --owner=0 --group=0 --numeric-owner | xz -9 -T4 | split -b 45M), started 2026-11-16T08:37:29.929Z
+df_free_before=3735601152 df_free_after_create=3724517376
+credential_pattern_hits=none
+note=the first automatic observation path, c1_pre_tx: plans, runtime tree, derived build, B' basis and facts, the boot, the conversion, the explanation records
+verify_start 2026-11-16T08:37:51.458Z
+parts_sha256 OK 1
+xz_t OK
+stream_pipeline_status 0 0 0 (tar stderr lines: 0)
+nothing_written_to_disk OK
+member_types -=4554 d=940 
+members_hashed=4554 regular_in_listing=4554 manifest_lines=4554 diff_lines=0
+sorted_member_list_sha256=d9eab920885485f782e03cb3ee95aff9788f26f1a21fed6f0d839fc199db22b2 sorted_manifest_sha256=d9eab920885485f782e03cb3ee95aff9788f26f1a21fed6f0d839fc199db22b2
+originals_match_manifest OK
+verify_end 2026-11-16T08:38:14.577Z df_free=3721773056
+VERIFIED_LOCAL obs1-20261116-cycle ab230a14ecf0 2026-11-16T08:38:14.582Z
+방법: 스트림 검증(디스크에 풀지 않음). PARTS.sha256 -c, cat 조각 | xz -t, cat 조각 | xz -dc | tar -x --to-command(멤버마다 sha256).
+결과: 조각 1개 OK, xz -t OK, 멤버 4554개의 sha256·크기가 MANIFEST.tsv 4554줄과 같다(차이 0줄), 멤버 종류 -=4554 d=940 , 원본도 MANIFEST.sha256과 같다.
+tar_xz_bytes=9341660 tar_xz_sha256=4d2a032571614ee47eca9501ddc36080e07fd68b1eb2589011e8e8d39f258501
+verify_bundle.sh와 다르다: clone 없음(push하지 않았다), 이은 xz 파일 없음, 풀기 없음. 이유는 디스크다(여유 3735601152 B, 하한 314572800 B).
+이것은 CM §5의 '보존됨'이 아니다. 원격에서 다시 받아 확인하지 않았다. 컨테이너 손실은 막지 못한다.

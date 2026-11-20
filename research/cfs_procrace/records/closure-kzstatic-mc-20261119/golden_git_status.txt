@@ -1,0 +1,7 @@
+ M kairos/tests/static/data/looplock_order_np.golden
+ M kairos/tests/static/data/order_np.golden
+ M kairos/tests/static/data/planv4_np.plan.golden
+ M kairos/tests/static/data/resultflow_np.golden
+ M kairos/tests/static/data/resultflow_order_np.golden
+?? kairos/tests/static/data/closure_np.golden
+?? kairos/tests/static/data/planv5_np.plan.golden

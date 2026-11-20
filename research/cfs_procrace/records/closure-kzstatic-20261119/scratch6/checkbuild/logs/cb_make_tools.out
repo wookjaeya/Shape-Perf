@@ -1,0 +1,50 @@
+[100%] Built target kz-core
+[100%] Building CXX object tools/kz-dump/CMakeFiles/kz-dump.dir/main.cpp.o
+[100%] Linking CXX executable kz-dump
+[100%] Built target kz-dump
+[  0%] Built target kzrt-manifest
+[  4%] Built target kzrt-decode
+[ 39%] Built target kz-core
+[ 39%] Building CXX object lib/predict/CMakeFiles/kz-predict.dir/explore.cpp.o
+[ 43%] Building CXX object lib/predict/CMakeFiles/kz-predict.dir/model.cpp.o
+[ 43%] Building CXX object probe/anchor/CMakeFiles/kz-anchor.dir/anchor_resolve.cpp.o
+[ 65%] Built target kz-trace
+[ 69%] Building CXX object probe/anchor/CMakeFiles/kz-anchor.dir/dwarf_line.cpp.o
+[ 69%] Building CXX object probe/anchor/CMakeFiles/kz-anchor.dir/elf_image.cpp.o
+[ 69%] Building CXX object lib/predict/CMakeFiles/kz-predict.dir/predict.cpp.o
+[ 69%] Linking CXX static library libkz-anchor.a
+[ 69%] Built target kz-anchor
+[ 73%] Building CXX object probe/plan/CMakeFiles/kz-plan.dir/basis.cpp.o
+[ 73%] Building CXX object probe/plan/CMakeFiles/kz-plan.dir/profile.cpp.o
+[ 73%] Linking CXX static library libkz-plan.a
+[ 73%] Built target kz-plan
+[ 73%] Building CXX object probe/loader/CMakeFiles/kz-loader.dir/proc_capture.cpp.o
+[ 73%] Building CXX object probe/loader/CMakeFiles/kz-loader.dir/perf_session.cpp.o
+[ 73%] Building CXX object probe/hold/CMakeFiles/kz-hold.dir/hold_plan.cpp.o
+[ 78%] Building CXX object probe/hold/CMakeFiles/kz-hold.dir/rt_plan.cpp.o
+[ 82%] Building CXX object probe/loader/CMakeFiles/kz-loader.dir/run_container.cpp.o
+[ 82%] Linking CXX static library libkz-predict.a
+[ 82%] Built target kz-predict
+[ 82%] Building CXX object probe/loader/CMakeFiles/kz-loader.dir/run_record.cpp.o
+[ 82%] Building CXX object probe/loader/CMakeFiles/kz-loader.dir/run_target.cpp.o
+[ 82%] Building CXX object probe/hold/CMakeFiles/kz-hold.dir/supervisor.cpp.o
+[ 86%] Linking CXX static library libkz-loader.a
+[ 86%] Built target kz-loader
+[ 86%] Linking CXX static library libkz-hold.a
+[ 86%] Built target kz-hold
+[ 86%] Building CXX object tools/kz/CMakeFiles/kz.dir/main.cpp.o
+[ 91%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_convert.cpp.o
+[ 91%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_anchor.cpp.o
+[ 91%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_hits.cpp.o
+[ 91%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_hold.cpp.o
+[ 95%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_observe.cpp.o
+[ 95%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_occ.cpp.o
+[ 95%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_predict.cpp.o
+[ 95%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_replay.cpp.o
+[100%] Building CXX object tools/kz/CMakeFiles/kz.dir/cmd_rtplan.cpp.o
+[100%] Linking CXX executable kz
+[100%] Built target kz
+[100%] Built target kz-core
+[100%] Building CXX object tools/kz-phi/CMakeFiles/kz-phi.dir/main.cpp.o
+[100%] Linking CXX executable kz-phi
+[100%] Built target kz-phi

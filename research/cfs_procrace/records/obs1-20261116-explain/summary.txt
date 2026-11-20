@@ -1,0 +1,79 @@
+records 45 (rows 12)
+== per row: records
+    15  B73
+    15  B81
+     6  B99
+     1  A21
+     1  A22
+     1  A23
+     1  A50
+     1  A51
+     1  B113
+     1  B118
+     1  B119
+     1  B13
+== violation
+    45  undetermined
+== odf
+    43  undetermined
+     2  failure_sign
+== headline
+    43  미확정
+     2  실패 징후
+== link.status
+    44  unlinked
+     1  established
+== use_cond.status
+    45  partial
+== order.status
+    23  record_insufficient
+    22  events_only
+== intervention.status
+    45  unconfirmed
+== effect.status
+    23  outside_window_unknown
+    19  none_in_window
+     3  observed
+== violation.undetermined_reasons (reason, records)
+    67  absent_result_unevaluated
+    45  caller_dependence_unknown
+    45  fixed_proof_open
+    42  writer_set_incomplete
+    40  record_insufficient
+    23  target_not_reached
+    12  key_unresolved
+     1  link_unlinked
+== violation.undetermined_reasons with sub-reason (records)
+    45  absent_result_unevaluated(static-undetermined)
+    45  fixed_proof_open(undecidable)
+    40  record_insufficient(the address read at the use is not in the plan)
+    26  writer_set_incomplete(FIELD_STATUS not complete)
+    23  target_not_reached
+    22  absent_result_unevaluated(the predicate is not derived: use_cond partial)
+    16  writer_set_incomplete(the completeness of the row's writer set is a premise only)
+    15  caller_dependence_unknown(the result is discarded 1, used 0, tested 2)
+    15  caller_dependence_unknown(the result is discarded 50, used 0, tested 0)
+     6  caller_dependence_unknown(the result is discarded 36, used 0, tested 0)
+     4  caller_dependence_unknown(the result is result discarded; no return of it and no terminal operation under it found)
+     3  caller_dependence_unknown(the result is discarded 1, used 0, tested 0)
+     2  key_unresolved(creator key)
+     1  caller_dependence_unknown(the result is discarded 2, used 0, tested 0)
+     1  caller_dependence_unknown(the terminal chain's guard is linked 'may')
+     1  key_unresolved(creator key unresolved: relations.txt:1023)
+     1  key_unresolved(creator key unresolved: relations.txt:1037)
+     1  key_unresolved(creator key unresolved: relations.txt:444)
+     1  key_unresolved(creator key unresolved: relations.txt:461)
+     1  key_unresolved(creator key unresolved: relations.txt:493)
+     1  key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:1030)
+     1  key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:1044)
+     1  key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:454)
+     1  key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:486)
+     1  key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:518)
+     1  link_unlinked(no run actor of the consumer)
+== need states (needs over all records)
+  2049  not-reached
+   268  present
+    95  not-planned
+== odf failure_sign: row, consumer app, status name
+     1  ('A21', 'CF', 'OS_ERR_NAME_NOT_FOUND')
+     1  ('B73', '(framework core task CFE_EVS_TaskMain)', 'CFE_EVS_APP_ILLEGAL_APP_ID')

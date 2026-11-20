@@ -1,0 +1,20 @@
+# D-1 probe, 2026-10-08T02:13:15Z: can the normal user reach GitHub through the egress proxy?
+## /usr/local/share/ca-certificates (proxy CAs are in the system store):
+total 32
+drwxr-xr-x 2 root root 4096 Sep 28 08:00 .
+drwxr-xr-x 7 root root 4096 Mar 31  2026 ..
+-rw-r--r-- 1 root root 1919 Oct  1 05:15 ccr-agent-proxy-2.crt
+-rw-r--r-- 1 root root 3920 Oct  1 05:15 ccr-agent-proxy.crt
+-rw-r--r-- 1 root root 1330 Mar 31  2026 egress-gateway-ca-production.crt
+-rw-r--r-- 1 root root 1322 Mar 31  2026 egress-gateway-ca-staging.crt
+-rw-r--r-- 1 root root 1309 Mar 31  2026 swp-ca-production.crt
+-rw-r--r-- 1 root root 1301 Mar 31  2026 swp-ca-staging.crt
+## A: runuser -u ubuntu -- git ls-remote https://github.com/nasa/cFS.git refs/heads/main   (inherited GIT_SSL_CAINFO=/root/.ccr/ca-bundle.crt)
+fatal: unable to access 'https://github.com/nasa/cFS.git/': Problem with the SSL CA cert (path? access rights?)
+rc=128
+## B: runuser -u ubuntu -- env -u GIT_SSL_CAINFO -u SSL_CERT_FILE -u CURL_CA_BUNDLE git -c http.sslCAInfo=/etc/ssl/certs/ca-certificates.crt ls-remote https://github.com/nasa/cFS.git refs/heads/main
+088b2fa828db9ff7e00733f1908e0eeb59f66ce3	refs/heads/main
+rc=0
+## C: ls -ld /root/.ccr (why A fails for a normal user)
+drwx------ 16 root root 4096 Oct  8 01:05 /root
+drwxr-xr-x  3 root root 4096 Oct  8 01:05 /root/.ccr

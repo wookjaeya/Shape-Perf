@@ -1,0 +1,4 @@
+# space_guard.sh kind=evalfx need=20000000 floor=314572800 interval=2 cmd=python3 -I /home/user/Shape-Perf/research/cfs_procrace/env/obs1/tests/test_explain_eval.py /home/user/Shape-Perf/research/cfs_procrace/env/obs1 <scratch>/evfx
+start 2026-11-19T15:11:35.846Z free=711352320 threshold=334572800
+sample 2026-11-19T15:11:35.851Z 711348224
+end 2026-11-19T15:11:37.858Z kind=evalfx verdict=completed rc=0 free=707485696 lowest=707485696 dip=3866624 change=-3866624

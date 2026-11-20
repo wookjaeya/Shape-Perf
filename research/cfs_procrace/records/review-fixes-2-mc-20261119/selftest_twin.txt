@@ -1,0 +1,7 @@
+# twin.py self-test (scratch copy of rf2_plans_t8cf with the root path replaced; then one byte changed)
+summary files=30 same=30 diff=0 only-scratch=0 only-real=0 skipped=0
+rc=0
+DIFF rf2_plans_t8cf/r2_core/plan.kzs (line 5)
+summary files=30 same=29 diff=1 only-scratch=0 only-real=0 skipped=0
+rc=1
+summary files=30 same=14 diff=16 only-scratch=0 only-real=0 skipped=0

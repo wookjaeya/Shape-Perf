@@ -1,0 +1,4 @@
+<scratch>/kzgcc_ctest2.log:100% tests passed, 0 tests failed out of 18
+<scratch>/kzllvm_ctest1.log:88% tests passed, 1 tests failed out of 8
+<scratch>/kzllvm_ctest2.log:100% tests passed, 0 tests failed out of 1
+<scratch>/rt_ctest4.log:100% tests passed, 0 tests failed out of 71

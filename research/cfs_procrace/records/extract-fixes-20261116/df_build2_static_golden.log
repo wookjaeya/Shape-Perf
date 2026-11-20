@@ -1,0 +1,5 @@
+# space_guard.sh kind=static_golden need=100000000 floor=314572800 interval=2 cmd=make -j4 static_golden
+start 2026-11-16T13:53:49.503Z free=3038351360 threshold=414572800
+sample 2026-11-16T13:53:49.508Z 3038347264
+sample 2026-11-16T13:53:51.519Z 3037573120
+end 2026-11-16T13:53:53.527Z kind=static_golden verdict=completed rc=0 free=3038343168 lowest=3037573120 dip=778240 change=-8192

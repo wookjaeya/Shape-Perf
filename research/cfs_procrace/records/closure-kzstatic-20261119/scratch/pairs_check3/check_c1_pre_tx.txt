@@ -1,0 +1,22 @@
+ok   first line kz-order-pairs 1
+ok   facts line equal to the order text's
+ok   tool line equal to the order text's
+ok   column line
+ok   13 fields on every line (26634 lines)
+ok   tail rows 367 = row keys 367
+ok   tail pairs 26572 = lines without no_pair 26572
+ok   tail hard_before 1525 = lines 1525
+ok   tail conditional_before 0 = lines 0
+ok   tail fixed_early_proved 1276 = lines 1276
+ok   tail fixed_early_candidate 0 = lines 0
+ok   tail unordered 21664 = lines 21664
+ok   tail unknown 187 = lines 187
+ok   tail same_thread 1920 = lines 1920
+ok   tail no_pair 62 = lines 62
+ok   last line end
+ok   listed pair lines of the text with a line of the same value: 1988 of 1988
+ok   rows whose text pairs counts equal the file's creator and writer lines: 302 of 302
+ok   /home/user/work/redesign/obs1/rf2_plans_v4/c1_pre_tx/plan.side: planned rows with lines in the pair file 13 of 13
+  pair lines of the planned rows 1125
+counts fixed_early_proved 1276 hard_before 1525 no_pair 62 same_thread 1920 unknown 187 unordered 21664; lines 26634; other_kind - 62 creator 6 creator-not-a-pair(probe-create) 1 creator-not-a-pair(same actor only) 12 writer 26553
+result PASS

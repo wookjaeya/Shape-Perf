@@ -1,0 +1,35 @@
+OK c1_pre_tx order.txt two runs the same bytes
+OK c1_pre_tx edges.tsv two runs the same bytes
+OK c1_pre_tx pairs.tsv two runs the same bytes
+OK order_order_c1_pre_tx: diffkinds old_lines=5745 new_lines=5746 only_old=0 only_new=1 labels=1
+OK order_edges_c1_pre_tx: diffkinds old_lines=309 new_lines=309 only_old=0 only_new=0 labels=0
+OK order_pairs_c1_pre_tx written
+OK c1_pre_tx order.log empty
+OK c1_post_tx order.txt two runs the same bytes
+OK c1_post_tx edges.tsv two runs the same bytes
+OK c1_post_tx pairs.tsv two runs the same bytes
+OK order_order_c1_post_tx: diffkinds old_lines=5768 new_lines=5769 only_old=0 only_new=1 labels=1
+OK order_edges_c1_post_tx: diffkinds old_lines=309 new_lines=309 only_old=0 only_new=0 labels=0
+OK order_pairs_c1_post_tx written
+OK c1_post_tx order.log empty
+OK r2_core order.txt two runs the same bytes
+OK r2_core edges.tsv two runs the same bytes
+OK r2_core pairs.tsv two runs the same bytes
+OK order_order_r2_core: diffkinds old_lines=6032 new_lines=6033 only_old=0 only_new=1 labels=1
+OK order_edges_r2_core: diffkinds old_lines=499 new_lines=499 only_old=0 only_new=0 labels=0
+OK order_pairs_r2_core written
+OK r2_core order.log empty
+OK c5_641 order.txt two runs the same bytes
+OK c5_641 edges.tsv two runs the same bytes
+OK c5_641 pairs.tsv two runs the same bytes
+OK order_order_c5_641: diffkinds old_lines=2094 new_lines=2095 only_old=0 only_new=1 labels=1
+OK order_edges_c5_641: diffkinds old_lines=92 new_lines=92 only_old=0 only_new=0 labels=0
+OK order_pairs_c5_641 written
+OK c5_641 order.log empty
+OK c5_642 order.txt two runs the same bytes
+OK c5_642 edges.tsv two runs the same bytes
+OK c5_642 pairs.tsv two runs the same bytes
+OK order_order_c5_642: diffkinds old_lines=2331 new_lines=2332 only_old=0 only_new=1 labels=1
+OK order_edges_c5_642: diffkinds old_lines=122 new_lines=122 only_old=0 only_new=0 labels=0
+OK order_pairs_c5_642 written
+OK c5_642 order.log empty

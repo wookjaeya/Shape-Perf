@@ -1,0 +1,25 @@
+# allowance of compare_classes.py revision 2 for the facts view (kz-static show) of the re-extraction of the extractor-fix
+# step (extfix_extract) against schema12_extract: the rows of records/extract-fixes-20261116/facts_allow.tsv unchanged,
+# and the declared fields an old "<anonymous>" line and its successor may differ in (plan/full_stage_results_20261116.md
+# 6.0 (나)): in FACT_LOCS and FIELD_STATUS rows, the fields that follow from the writers and A-TYPE hits now matched to the
+# named type (declaration 5.0 (가): the writer, A-TYPE, FACT_INIT and FIELD_STATUS rows of the type's fields).  The location
+# (after the new names are written "<anonymous>"), the untyped write sites of the program and the unresolved indirect calls
+# of the program are compared as they are.
+mask	site	(?<=site )\d+|(?<=sites )\d+|(?<=site=)\d+|(?<=sites=)\d+
+mask	row	(?<=row )\d+
+mask	count-head	^(\[[a-z_0-9]+\]) \d+$	\1 <n>
+mask	and-more	\(and \d+ more\)
+change	basis-count	  count\.(sites|field_status|lockset|lock_paths|targets_rule|targets_rule_t1|targets_rule_t2|targets_rule_both|targets_rule_t1_unshared_only|targets_rule_t2_unshared_only|indirect_calls_incomplete) = .*	*
+change	units-from	  extract\.units_from = basis [0-9a-f]{16}  \(unset\)	1
+insert	reading-options	  extract\.reading_options_vs_basis = same as basis front_end\.arguments_added and front_end  \(unset\)	1
+only	c1_pre_tx,c1_post_tx
+insert	cf-entry-release	  entry-release row <row> (call|read|write \S*) at \S+/cf/fsw/src/cf_cmd\.c:\d+:\d+ in CF_CmdGetSetParam through the call \S+/cf/fsw/src/cf_cmd\.c:1014:18 	8
+remove	cf-entry-release	  entry-release row <row> (call|read|write \S*) at \S+/cf/fsw/src/cf_cmd\.c:\d+:\d+ in CF_CmdGetSetParam through the call \S+/cf/fsw/src/cf_cmd\.c:1020:17 CFE_EVS_SendEvent	7
+only	*
+pair	status	locs	^(  \S+) (writer-set-complete|writer-set-incomplete|DISABLED)(?= writers=)	\1 <status>
+pair	writers	locs	writers=\d+ \(direct \d+, data-fn \d+, out-pointer \d+\)	writers=<w>
+pair	atype-hits	locs	atype: untyped=\d+ escape=\d+ cast=\d+ union=\d+ unknown-effect=\d+ init=\d+ (?=unresolved-indirect=)	atype: <hits> 
+pair	status	fstatus	per-field=\S+ type-level=\S+	per-field=<s> type-level=<s>
+pair	writers	fstatus	writers=\d+ \(direct \d+, data \d+, out-pointer \d+, init \d+\) instances=\d+ (no-writer-instance|one-instance-once|not-once|unchecked)	writers=<w>
+pair	atype-hits	fstatus	hits: escape \d+, cast \d+, union \d+, unknown \d+, other fields \d+;	hits: <hits>;
+pair	flags	fstatus	 \{[a-z,-]*\}( by .*)?$	 {<flags>}

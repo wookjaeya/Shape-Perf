@@ -1,0 +1,3 @@
+diffkinds old_lines=41 new_lines=41 only_old=17 only_new=17 labels=2
+label removed=1 added=1 0|facts-artifact H
+label removed=16 added=16 0|request N

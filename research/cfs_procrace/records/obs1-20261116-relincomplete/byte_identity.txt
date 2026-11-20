@@ -1,0 +1,5 @@
+c1_pre_tx relations: SAME rows 431 incomplete-lines 431 a-key-unresolved 72/72 | keys: SAME lines 804, differing lines [3] | log: same-empty | lines 7594 | facts-line same
+c1_post_tx relations: SAME rows 431 incomplete-lines 431 a-key-unresolved 72/72 | keys: SAME lines 804, differing lines [3] | log: same-empty | lines 7594 | facts-line same
+r2_core relations: SAME rows 338 incomplete-lines 338 a-key-unresolved 32/32 | keys: SAME lines 637, differing lines [3] | log: same-empty | lines 5305 | facts-line same
+c5_641 relations: SAME rows 178 incomplete-lines 178 a-key-unresolved 64/64 | keys: SAME lines 347, differing lines [3] | log: same-empty | lines 3262 | facts-line same
+c5_642 relations: SAME rows 175 incomplete-lines 175 a-key-unresolved 64/64 | keys: SAME lines 340, differing lines [3] | log: same-empty | lines 3213 | facts-line same

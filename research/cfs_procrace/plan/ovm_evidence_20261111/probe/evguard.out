@@ -1,0 +1,25 @@
+== c1_pre_tx
+event-send call sites 486 by constant type argument {'1': 42, '2': 96, '3': 346, 'non-constant': 2}
+  of them with a branch condition recorded on a field-read argument of the site {'1': 22, '2': 26, '3': 144, 'non-constant': 1}
+  ERROR/CRITICAL sends 346 with a recorded guard 144 without 202
+CFE_ES_ExitApp call sites 14 argument kinds {'top ~run_status': 1, 'symbolic CF_AppData_t.run_status': 1, 'top ~RunStatus': 2, 'top ~Status': 1, 'top ~AppRunStatus': 1, 'const 8 CFE_ES_RunStatus_CORE_APP_INIT_ERROR': 4, 'const 9 CFE_ES_RunStatus_CORE_APP_RUNTIME_ERRO': 4}
+== c1_post_tx
+event-send call sites 486 by constant type argument {'1': 42, '2': 96, '3': 346, 'non-constant': 2}
+  of them with a branch condition recorded on a field-read argument of the site {'1': 22, '2': 26, '3': 144, 'non-constant': 1}
+  ERROR/CRITICAL sends 346 with a recorded guard 144 without 202
+CFE_ES_ExitApp call sites 14 argument kinds {'top ~run_status': 1, 'symbolic CF_AppData_t.run_status': 1, 'top ~RunStatus': 2, 'top ~Status': 1, 'top ~AppRunStatus': 1, 'const 8 CFE_ES_RunStatus_CORE_APP_INIT_ERROR': 4, 'const 9 CFE_ES_RunStatus_CORE_APP_RUNTIME_ERRO': 4}
+== r2_core
+event-send call sites 204 by constant type argument {'1': 40, '2': 33, '3': 123, 'non-constant': 8}
+  of them with a branch condition recorded on a field-read argument of the site {'1': 20, '2': 8, '3': 26, 'non-constant': 7}
+  ERROR/CRITICAL sends 123 with a recorded guard 26 without 97
+CFE_ES_ExitApp call sites 9 argument kinds {'top ~AppRunStatus': 1, 'const 8 CFE_ES_RunStatus_CORE_APP_INIT_ERROR': 4, 'const 9 CFE_ES_RunStatus_CORE_APP_RUNTIME_ERRO': 4}
+== c5_641
+event-send call sites 289 by constant type argument {'1': 45, '2': 55, '3': 188, 'non-constant': 1}
+  of them with a branch condition recorded on a field-read argument of the site {'1': 20, '2': 23, '3': 96, 'non-constant': 1}
+  ERROR/CRITICAL sends 188 with a recorded guard 96 without 92
+CFE_ES_ExitApp call sites 13 argument kinds {'top ~RunStatus': 4, 'top ~AppRunStatus': 1, 'const 8 CFE_ES_CORE_APP_INIT_ERROR': 4, 'const 9 CFE_ES_CORE_APP_RUNTIME_ERROR': 4}
+== c5_642
+event-send call sites 289 by constant type argument {'1': 45, '2': 55, '3': 188, 'non-constant': 1}
+  of them with a branch condition recorded on a field-read argument of the site {'1': 20, '2': 23, '3': 96, 'non-constant': 1}
+  ERROR/CRITICAL sends 188 with a recorded guard 96 without 92
+CFE_ES_ExitApp call sites 13 argument kinds {'top ~RunStatus': 4, 'top ~AppRunStatus': 1, 'const 8 CFE_ES_CORE_APP_INIT_ERROR': 4, 'const 9 CFE_ES_CORE_APP_RUNTIME_ERROR': 4}

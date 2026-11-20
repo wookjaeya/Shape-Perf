@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-check need=314572800 floor=314572800 interval=2 cmd=cmake -S /home/user/Shape-Perf/research/cfs_procrace/kairos -B <scratch>/sb -DCMAKE_BUILD_TYPE=Release -DKZ_BUILD_LLVM_TOOLS=OFF -DKZ_WERROR=ON -DKZ_ALT_CC=/usr/bin/clang -DKZ_BPF_CLANG=/usr/bin/clang -DKZ_BUNDLE_ROOT=/home/user/work/procrace/cfs_ref/cFS -DKZ_PROFILE_DIR=/home/user/Shape-Perf/research/cfs_procrace/kairos/profiles/cfs-v7.0.1
+start 2026-11-19T07:16:17.615Z free=769966080 threshold=629145600
+sample 2026-11-19T07:16:17.619Z 769961984
+end 2026-11-19T07:16:19.626Z kind=scratch-check verdict=completed rc=0 free=763060224 lowest=763060224 dip=6905856 change=-6905856

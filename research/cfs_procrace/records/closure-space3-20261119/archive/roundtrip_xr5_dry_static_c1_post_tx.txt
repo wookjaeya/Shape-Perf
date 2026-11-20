@@ -1,0 +1,6 @@
+# archive.sh xr5_dry_static_c1_post_tx records/closure-explain-fix-20261119/xr5_dry_static_c1_post_tx.sha256 2026-11-19T19:29:35Z
+1. directory = list: 788 files, 26121453 bytes (apparent), 27979776 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/xr5_dry_static_c1_post_tx/xr5_dry_static_c1_post_tx.tar.xz 125644 bytes sha256 869f5bb9c3353e89c757fa45dc9d3fcc10fcfc2827366f9f3a225cfb34937fb4
+4. round trip: 788 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/xr5_dry_static_c1_post_tx removed 2026-11-19T19:29:41Z
+PASS

@@ -1,0 +1,44 @@
+# AR lines from the section 16 heading (line 952) to the end, written before the build (2026-11-10T08:40:44Z); committed before the build
+## 16. 둘째 제자리 재빌드: O2·O8·O9·O12 (2026-11-10, RV3A §6.7 8c)
+
+- 성격: 도구·시험·lint 수정, MC 제자리 재빌드, `all` 재실행 기록이다. 싣는 것은 RV3A §6.3의 O2·O8·O9·O12뿐이다. E1(도구 문구·golden, Q4)은 싣지 않는다. 등급 규칙, 조건 값, 예산 값은 바꾸지 않는다. cFS를 기동하지 않는다.
+- 근거: PI 답(11-10) "Q2는 지워도 돼, Q12는 MC 제자리 재빌드로 진행해". Q12 (가)다. 빌드 디렉터리는 MC 하나다. Q2는 (가)로 이미 끝났다(§15 앞, `114f33b`). 이 단계는 아무것도 지우지 않는 것을 기본으로 한다.
+- 기록: 저장소 `records/step2a-20261110-8c/`(텍스트만). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_8c/`(이하 `T_8C/`)다. T/, `T_RV4/`, `T_8B/`, `T_8BF/`에는 쓰지 않는다.
+
+### 16.0 바뀌어도 되는 것의 선언 (빌드 전에 적고 커밋함) [D]
+
+빌드와 재실행 전에 적었다. 이 선언은 빌드 전에 커밋한다. 기준은 `T_8BF/`다. T/·`T_RV4/` 대비는 §15.0·§15.10.0의 차이에 아래를 더한 것이다. 아래 밖의 차이는 결함으로 보고한다.
+
+- **설계(선언의 전제)**:
+  - O2: 명령줄 `--target`(출처 "command line")의 형·필드 선언을 읽은 단위에서 찾는다. 찾는 규칙은 writer를 맞추는 규칙(`targets_of_field`)과 같다. 없으면 FACT_LOCS 상태를 `unchecked`(0)로 둔다. writer-set-complete가 아니다. BASIS에 항목 `unknown_target.<형>.<필드>` 하나를 더한다. 값은 "unknown-target: no record type <형> is defined in the units read; …" 또는 "unknown-target: the record type <형> has no field <필드> in the units read; …"다. extract 요약 줄은 `-> unknown-target (…)`이다. 새 열거형 값은 두지 않는다. 까닭: `layout.golden`이 열거형을 적는다(`tests/golden/data/layout.golden:1889-1891`). 새 값은 기존 golden과 schema 개정을 바꾼다. 프로필 대상(`loc`, `bind`, store pattern)에는 적용하지 않는다. 까닭은 §16.1 O2다.
+  - O12: facts BASIS에 `extract.resource_dir`와 `extract.extra_arg[i]`를 더한다. `--extra-arg`가 없으면 `extract.extra_arg = none` 하나다. `--resource-dir`가 없으면 도구에 내장된 기본값을 쓴다(`tools/kz-static/main.cpp:71-74`). 그래서 값은 그 경로와 "(the tool's built-in default; no --resource-dir)"다. 경로도 기본값도 없으면 "none …"이다. 명령줄 대상의 `target.*` 두 기록 가운데 `= extraction target`(spec.declared에서 온 것)을 없앤다. `= command line` 기록 하나가 남는다. extract 요약의 "hand-entered inputs" 수는 그대로다(명령줄 대상을 따로 센다). `OpInfo.out`은 지운다(채우기만 하고 읽는 곳이 없다). `poll_fns`는 SF에 "옛 경로 전용, 미소비"로 적고 둔다(`--poll-fn`과 프로필 observe 규칙의 배관, BASIS 기록).
+  - O8: `legacy-case` 라벨을 51개에 더한다(`set_property(… APPEND PROPERTY LABELS legacy-case)`; 기존 라벨은 그대로). 51 = `tests/phi`의 시험 48(`phi_*` 47 + `test_phi_cli`) + `static_golden_core_cpu1` + `test_realrecord_derived` + `test_trace_neutral_real`.
+  - O9: lint `case-ids`의 범위에 `probe/`·`instrument/` 아래 코드 파일(`.c .cc .cpp .cxx .h .hh .hpp`)을 더한다. `tests/` 디렉터리 아래는 뺀다. 걸리는 11건을 고친다(§16.1 O9). runtime의 OSAL API 표는 문서다(`kairos/docs/framework_layer.md`, 새 파일). 코드에 넣지 않는다.
+- **도구 해시**: kz-static이 바뀐다(`lib/llvm`: `ast_reader.hpp`·`ast_tu.cpp`·`model.hpp`·`finalize.cpp`·`serialize.cpp`·`spec.hpp`·`spec.cpp`; `tools/kz-static/cmd_extract.cpp`). kz도 바뀐다. kz의 identity가 `probe/plan`·`probe/hold`를 덮기 때문이다(`cmake/KzSourceIdentity.cmake:77-116`, `tools/kz/CMakeLists.txt:6-11`). 바뀐 것은 주석과 지역 변수 이름뿐이다. kz-instr-clang은 다시 빌드된다(주석만). 바이너리가 바뀌는지는 잰다. kz-dump·kz-rt-dump·kz-phi는 다시 빌드되지 않아야 한다 [I: `lib/llvm`·`probe`를 링크하지 않음; `include/`·`cmake/`·최상위 `CMakeLists.txt`를 고치지 않음]. `kz_lint`도 다시 빌드된다. 시험 디렉터리의 CMakeLists를 고쳐 CMake가 다시 구성된다.
+- **golden**: 바뀌는 golden 파일도, 새 golden 파일도 없다(`tests/static/data`, `tests/golden/data`, `tests/phi/data`). 까닭: (1) golden의 명령줄 대상(outptr, loops, atype, clobber의 `--target`)은 모두 fixture에 선언이 있다. (2) 프로필 대상은 O2 밖이다. (3) 고정 도구 golden은 BASIS를 뺀다(`tests/static/static_golden.cpp:42`). (4) 라벨은 golden 내용이 아니다. O2·O12의 시험은 `test_static_cli`의 확인으로 둔다. 기존 확인 문자열은 고치지 않는다.
+- **NP 출력**(`T_8C/<build>/NP`·`NP2` 대 `T_8BF/`):
+  - basis.kz: HEADER `tool_sha256`과 파일 해시. 레코드는 같다. basis.txt: `basis <sha256>` 줄(C1·R2 1째, C5 5째).
+  - facts.kz: HEADER `tool_sha256`·`basis_sha256`·parent `sha256`·`artifact_sha256`, 컨테이너 크기. BASIS: 더해지는 레코드 둘(`extract.resource_dir`, `extract.extra_arg`), 바뀌는 레코드 하나(`extract.units_from`). BASIS의 count와 crc32. STRINGS 바이트와 crc32. 다른 섹션의 crc32는 바뀔 수 있다(문자열 위치가 옮겨짐; §15.6 정정과 같은 기작). 다른 섹션의 레코드(복호한 값)는 같다.
+  - facts.txt: `[basis] <수>` 머리 줄(+2), 더해지는 두 줄, `extract.units_from` 줄.
+  - extract.txt: 1째 줄 `facts <sha256>`. 요약 줄은 그대로다(명령줄 대상 없음). relations.txt: 2째 줄 `facts <sha256>`. relations.log, args.txt: 바이트 동일.
+- **판정 입력**: tsv 일곱 바이트 동일. `count/summary.txt`: T7 줄 다섯(facts·relations 해시)만 다르다. `twice`: 같은 실행 안에서 same. twice.txt·twice_detail.txt: 해시 줄.
+- **identity**(V0·V2 × C1 pre tx·R2 core·C5 6.4.1, EB 대비): 드라이버에 따로 인용한 허용 블록을 더한다(기존 항목은 넓히지 않는다).
+  - facts BASIS added 2(`extract.resource_dir`, `extract.extra_arg`): 여섯 경우 모두.
+  - facts BASIS removed 4: C1 pre tx V2만. 명령줄 대상 넷(`CF_Channel_t.sem_id`, `CF_ChannelConfig_t.sem_name`, `BP_Throttle_t.Name`, `BP_Throttle_t.Sem`)의 `= extraction target` 기록이다(`EB/c1_pre_tx/V2/facts.txt:25-28`). V0와 다른 빌드는 0이다. 그래서 드라이버의 비교에 변형(V0·V2)별 항목을 둔다(`identity-facts.V2`).
+  - show 글: 지금 허용하는 `extract.units_from` 두 줄에 더해, `[basis] <수>` 머리 두 줄(옛·새), 더한 두 줄(여섯 경우), 없앤 넷(C1 pre tx V2). 드라이버의 show 글 판정이 이 수를 경우마다 정확히 요구한다. `STEP2A_ALLOW_TABLE`(단위 점검)이면 0이다.
+  - 그 밖은 지금과 같다: basis 1/0/0, facts의 기존 4 changed.
+  - C1 pre tx V2의 명령줄 대상 넷은 선언이 있다 [F: `c1_build/pre/src/bp/fsw/src/bp_flow.h:54-61`, `cf/fsw/src/cf_cfdp_types.h:443-448`, `cf/fsw/src/cf_tbldefs.h:74-76`]. 그래서 FACT_LOCS와 `unknown_target.*`는 바뀌지 않아야 한다. 나오면 결함으로 보고한다.
+- **드라이버 비교**(npsame, s5same, fixsame, fix2same, fix3same): 따로 인용한 블록에 단계마다 BASIS added 2(`extract.resource_dir`, `extract.extra_arg`, 다섯 빌드 2)를 둔다. 그래서 added 수가 §14.4·§15.5보다 빌드마다 2 많다. changed·removed 수는 그대로다. 출력 글(npsame.txt …)은 그 수의 줄과 블록 항목의 줄이 다르다.
+- **시험**: ctest 수는 239 그대로다(새 시험 프로그램 없음; O2·O12는 `test_static_cli`, O9는 `lint_selftest`의 확인을 더함). `ctest -N -L legacy-case`는 51이다. 다른 라벨의 수는 그대로다. lint 6/6, 넓힌 `lint_case-ids` clean.
+- **드라이버 파일**: `env/redesign/step2a_tests.sh`가 바뀐다. 1–80줄의 번호는 그대로 둔다. 단위 점검 6/6이 그대로 통과해야 한다.
+- **실행 기록**: `run.log`, `status.txt`, `identity/identity.txt`, 디렉터리마다의 `sha256.txt`의 해시 줄.
+- **조건부**: identity의 명령줄 대상에 선언이 없다고 나오면(위 [F]가 틀림) 그 경우의 FACT_LOCS 행이 `unchecked`가 되고 `unknown_target.*`가 더해진다. 그때는 identity가 FAIL이다. 허용표를 넓히지 않고 결함으로 보고한다.
+
+### 16.1 항목 대조 (실행 전) [M][F]
+
+| 항목 | RV3A §6.3의 주장 | 파일·출력과 대조 | 처리 |
+|---|---|---|---|
+| O2 | 없는 `--target`이 writer-set-complete(0) | 맞음 [M]: CK `gaps/h10.txt`의 두 대상(`NoSuch_t.nofield`, `Slot.nofield`). 같은 결함이 프로필 대상에도 있다 [F]: fixture 프로필의 `loc Cell.id`(`tests/static/profile/00_fixture.kzp`)는 `Cell`이 없는 fixture 다섯(atype, loops, outptr, relations, clobber)의 golden에 행으로 있다. 넷은 `writer-set-complete writers=0`, clobber는 DISABLED다(`tests/static/data/*.golden`의 `[locs]`). `Cell`은 `writers.c`·`derives.c`에만 있다(grep) | 명령줄 대상만 고친다. 프로필 대상을 고치면 옛 경로 golden 다섯이 바뀐다. O2의 완료 기준("기존 golden 바이트 불변")과 맞지 않는다. 남는 결함으로 SF와 §16 끝에 적는다 |
+| O8 | `ctest -N` 237 중 옛 경로 51 | 51의 구성은 맞음 [M: `ctest -N`의 이름]. 전체는 지금 239다(8b·8b 수정에서 둘 더함). 그래서 새 경로는 188이다 | 라벨을 단다. AR·STATUS에는 잰 수를 적는다 |
+| O9 | 주석 11건 | 수는 맞음 [M: 사본 lint, probe 178/5·instrument 2128/73·runtime 156/15, CK와 같음]. 성격은 반만 맞다: 주석은 5건(`probe/hold/supervisor.hpp` 3, `instrument/clang/kz_instr_clang.cpp` 1줄 2건)이다. 6건은 `probe/plan/profile.cpp`의 지역 변수 `c1`·`c2`(콜론 위치)다. lint 자료가 "rename it"이라 한다(`tests/lint/data/case_identifiers.txt:13-14`) | 주석은 고쳐 쓰고 변수는 이름을 바꾼다. 줄 수는 그대로 둔다 |
+| O12 | `--resource-dir`·`--extra-arg` 기록 0, `target.*` 두 번, 죽은 입력 | 맞음 [F: `serialize.cpp:975-983`, `cmd_extract.cpp:36-43`; CK `h10.txt`의 `target.*` 두 쌍]. `--resource-dir`가 없어도 기본값이 쓰인다(`main.cpp:71-74`). basis는 그 값을 이미 적는다(`basis.cpp:406`, `front_end.arguments_added`) | facts에는 쓰인 값을 적는다(없음일 때만 none) |

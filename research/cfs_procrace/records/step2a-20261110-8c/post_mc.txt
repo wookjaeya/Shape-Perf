@@ -1,0 +1,61 @@
+# MC tools after the 8c rebuild (recorded 2026-11-10T09:05:14Z; binaries as linked 08:48:55Z-08:49:51Z)
+ab482eab0fb34aa86e8a839ef35fa8207054ea4b28ff186f5c5079a1cd30b326  tools/kz-static/kz-static
+931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248  tools/kz/kz
+05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43  tools/kz-dump/kz-dump
+4390d4f13b5bcae3145ddd4b3decb089790d18d6ebbdc3104de99beb66e5063a  runtime/kz-rt-dump
+7d34e6e20934c62b91f006c20712b7a096692b231d318257b096eb22dc68075f  tools/kz-phi/kz-phi
+191d0da095e75736ecfdf0d790815fb219e6738281ee0bb7f310bc898dad50df  tests/lint/kz_lint
+28db40172dbdb06faa0e607b9a494805b19768ca888e865d0a5c3859dab8bcaf  instrument/clang/kz-instr-clang
+2026-11-10 08:49:51.619029368 +0000 176649240 tools/kz-static/kz-static
+2026-11-10 08:49:17.931027366 +0000 75503864 tools/kz/kz
+2026-10-30 16:41:39.341084223 +0000 2514528 tools/kz-dump/kz-dump
+2026-10-29 07:31:59.427491407 +0000 3350272 runtime/kz-rt-dump
+2026-10-30 16:41:44.817084098 +0000 28644248 tools/kz-phi/kz-phi
+2026-11-10 08:48:14.295023583 +0000 4000640 tests/lint/kz_lint
+2026-11-10 08:48:55.159026012 +0000 97195536 instrument/clang/kz-instr-clang
+# kz-static --identity (after)
+tool=kz-static
+tool_sha256=b61256c55c84f199a09a50727e36e59d7e1c968b2c71662f4564446877143d20
+tool_source=c2da0fdc3be3e79995a5b767d2000a7c49a980b288afe02e9a114eff10016a46
+core_source=f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+# tool identity defines (flags.make, after the configure step of the build)
+kz KZ_TOOL_SOURCE_SHA256=\"caf58235d6b9d032685e0f5df7eb4c5f8cfcdaadd0e37457c897664fa4911141\"
+kz-phi KZ_TOOL_SOURCE_SHA256=\"7fc3ed73d83e5977112ef6c7a0d75c86de4f2871be72d299260a18b5c56713f8\"
+kz-static KZ_TOOL_SOURCE_SHA256=\"c2da0fdc3be3e79995a5b767d2000a7c49a980b288afe02e9a114eff10016a46\"
+kz-dump KZ_TOOL_SOURCE_SHA256=\"cc51ff352881eb7fd56ec3c1d56cb53ff946c86ff51af310436e3850fce2ba2a\"
+# kz embeds its new identity: grep -a -c caf58235d6b9d032685e0f5df7eb4c5f8cfcdaadd0e37457c897664fa4911141 tools/kz/kz -> 1
+# configure: libkz-core source identity (make.log)
+-- libkz-core source identity f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+# the binaries linked by the rebuild (make.log)
+[ 25%] Linking CXX executable kz_lint
+[ 38%] Linking CXX executable kz-instr-clang
+[ 46%] Linking CXX static library libkz-plan.a
+[ 77%] Linking CXX static library libkz-hold.a
+[ 77%] Linking CXX executable test_rt_plan_convert
+[ 78%] Linking CXX executable test_hold_plan
+[ 82%] Linking CXX executable kz
+[ 82%] Linking CXX executable test_probe_anchor_compilers
+[ 83%] Linking CXX executable test_probe_anchor_reached
+[ 84%] Linking CXX executable test_probe_basis
+[ 85%] Linking CXX executable test_probe_elf_dwarf
+[ 85%] Linking CXX executable test_probe_golden
+[ 85%] Linking CXX executable test_probe_observe
+[ 85%] Linking CXX executable test_probe_profile
+[ 86%] Linking CXX executable test_probe_record
+[ 89%] Linking CXX static library libkz-llvm.a
+[ 94%] Linking CXX executable test_static_recipe
+[ 94%] Linking CXX executable test_static_expr
+[ 96%] Linking CXX executable test_static_gitrev
+[ 96%] Linking CXX executable test_static_flow
+[ 97%] Linking CXX executable test_static_link
+[ 97%] Linking CXX executable kz-static
+[ 98%] Linking CXX executable test_static_elf32
+[100%] Linking CXX executable test_static_unroll
+[100%] Linking CXX executable test_static_wrappers
+[100%] Linking CXX executable test_static_cli
+# kz-instr-clang: its sha256 before the build was not recorded (pre_mc.txt has its mtime 2026-10-29 07:32:41 and size 97195536 only).
+#   object check: the source of a5d52a2 and of e261861 (one comment line differs) compiled with the flags of flags.make into one scratch path: both objects sha256 5b0f7e0ab3f76ec926d75dc6b6f6e74b3696cb043bf79982c47c923ff97714a7 (cmp equal)
+# source of the build: HEAD e261861 (the code, tests, lint and labels) with 10 uncommitted lines under kairos (docs/schema.md wording) and the new docs/framework_layer.md; tool identity files not changed after the build start (2026-11-10T08:48:00Z):
+find kairos/lib kairos/tools kairos/include kairos/cmake kairos/CMakeLists.txt kairos/probe kairos/instrument -newer build_start -type f -> 0 files
+git diff e261861 dde72e1 -- kairos/lib kairos/tools kairos/include kairos/cmake kairos/CMakeLists.txt kairos/probe kairos/instrument kairos/tests kairos/runtime -> 0 lines
+MC size (du -sb): 3558122478

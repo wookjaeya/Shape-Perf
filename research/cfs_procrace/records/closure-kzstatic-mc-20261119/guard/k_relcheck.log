@@ -1,0 +1,4 @@
+# space_guard.sh kind=compare-relcheck need=30000000 floor=314572800 interval=2 cmd=bash -c SCRATCH=<scratch>/czviews bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/compare.sh relcheck > /home/user/Shape-Perf/research/cfs_procrace/records/closure-kzstatic-mc-20261119/compare_relcheck.txt 2>&1
+start 2026-11-19T06:22:04.384Z free=942481408 threshold=344572800
+sample 2026-11-19T06:22:04.389Z 942477312
+end 2026-11-19T06:22:06.397Z kind=compare-relcheck verdict=completed rc=0 free=942227456 lowest=942227456 dip=253952 change=-253952

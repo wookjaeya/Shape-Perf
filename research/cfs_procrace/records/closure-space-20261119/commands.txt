@@ -1,0 +1,51 @@
+# commands of the space step (results 26.2; lead ruling 26.0 (k)); times UTC, 2026-11-19; <scratch> is a scratch
+# directory of this step outside the repository.  No cFS boot, no build, no extraction.  Run from this directory.
+## 1. before any archive or removal
+df -B1 / > free_start.txt                                                         13:37:48Z (available 379424768)
+space_guard.sh --need 5000000 --kind listing -- bash listing.sh listing.tsv       rc 0 (guard/g01_listing.log: a first run, before the
+    classification was corrected: plans whose name ends in _on_extract were taken for extract rounds and check outputs for order rounds)
+space_guard.sh --need 5000000 --kind listing -- bash listing.sh listing.tsv       rc 0 (guard/g02_listing.log): 134 obs1 directories,
+    34 work directories, 35 archivable (tier 1 18, R 3, tier 2 14); this listing.tsv replaces the first
+space_guard.sh --need 5000000 --kind need -- python3 -I need.py --research <research> --listing listing.tsv --free <df now> --out need.txt
+    --chosen chosen.tsv                                                           rc 0 (guard/g03_need.log; free_now 379064320)
+space_guard.sh --need 5000000 --kind selftest -- bash selftest.sh <scratch> > selftest.txt                 rc 0, 4 of 4 (guard/g04_selftest.log)
+space_guard.sh --need 5000000 --kind identity -- python3 -I ../reclaim-20261118/identity_listing.py /home/user/work/redesign/obs1
+    reclaim/pairs.tsv reclaim before                                              rc 0, 3 pairs identical-no-extra (guard/g05_identity.log)
+the listing, the need, the chosen list, the scripts, the convention and results 26.2 (the plan) are committed before step 2
+## 2. R: the three rf2_pre directories by the 2026-11-18 convention
+../../env/tools/ledger_check.sh > ledger/check_start.txt                          rc 0 (193 rows, 0 failing; ledger sha256 910aa385...)
+ledger_rewrite.py <ledger> <proposed> reclaim <row> <name> <twin row> <twin> <files> <bytes>   three times, rc 0 (ledger/rewrite.txt;
+    the header line of this step added once)
+../../env/tools/ledger_check.sh <proposed> > ledger/check_R_proposed_before_removal.txt   rc 0 (193 rows, 0 failing; the three rows read
+    the twin directories while the candidates are still there); the proposed ledger copied over records/LEDGER.tsv (cmp; sha256 cb7b4364...)
+the rewritten ledger is committed before the removal
+committed as 698bdd9
+space_guard.sh --need 5000000 --kind reclaim -- bash ../reclaim-20261118/reclaim.sh /home/user/work/redesign/obs1
+    reclaim/identity_summary_before.txt > reclaim/reclaim.txt                     rc 0 (3 eligible, 3 removed, 0 failing; free 377647104 ->
+    408440832, change 30793728; guard/g06_reclaim.log)
+../../env/tools/ledger_check.sh > ledger/check_R_after_removal.txt                rc 0 (193 rows, 0 failing)
+## 3. tier 1 and 2: one directory at a time (run_seq.sh FROM TO; SPACE_TMP=<scratch>)
+SPACE_TMP=<scratch> bash run_seq.sh 4 4                                          rc 1: archive.sh stopped at step 1 ("the files on disk
+    are not the files the list names"): the list of OBS_rf2_final_extract writes <path>, not ./<path>, and the step compared the two
+    forms as text; nothing was archived or removed (the directory is whole, no archive directory made).  The trial's outputs are
+    kept under new names: archive/roundtrip_rf2_final_extract.trial1_fail.txt, guard/a_4_rf2_final_extract.trial1_fail.log
+archive.sh fixed (both comparisons read the list in the form ./<path>; MEMBERS.sha256 stays the list as it is); selftest.sh gains
+    case 5 (a list without ./)
+space_guard.sh --need 5000000 --kind selftest -- bash selftest.sh <scratch> > selftest_2.txt               rc 0, 5 of 5 (guard/g07_selftest_2.log)
+the fix is committed before the next archive
+committed as ea19ba4
+SPACE_TMP=<scratch> bash run_seq.sh 4 4                                          rc 0: rf2_final_extract archived (5117540 bytes),
+    round trip 50 of 50, ledger_check of the proposed ledger 193 rows 0 failing; free 408137728 -> 475467776
+SPACE_TMP=<scratch> bash run_seq.sh 5 21                                         rc 0: 17 archived, each round trip PASS and
+    ledger_check 0 failing (progress.tsv, archive/, ledger/, guard/a_*); free 475459584 -> 1077710848; short of target 136311040
+the tier 1 result is committed before tier 2
+committed as b09688d
+SPACE_TMP=<scratch> bash run_seq.sh 22 35                                        rc 0: lines 22-31 archived (10), each round trip
+    PASS and ledger_check 0 failing; "need met before line 32: free 1217945600 >= target 1214021888"; lines 32-35 not touched
+## 4. end
+../../env/tools/ledger_check.sh > ledger/check_end.txt                           rc 0 (193 rows, 0 failing)
+space_guard.sh --need 5000000 --kind tools-check -- bash ../../env/tools/tools_check.sh --deep > tools_check_deep_end.txt
+                                                                                  rc 0 (57 rows, 0 failing, deep; guard/g08_tools_check_deep.log)
+{ date -u; df -B1 /; } > free_end.txt                                             13:56:56Z (available 1217867776)
+grep of the committed scripts for the 31 directories removed or archived > scripts_naming_removed.txt (109 references; none in a
+    step still to run)

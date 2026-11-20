@@ -1,0 +1,6 @@
+# c5_641.txt
+lifetime ends: clear-slot	18
+lifetime ends: clear-slot: not shown	18
+lifetime ends: release	23
+writer groups: none	79
+writer groups: one partition	17

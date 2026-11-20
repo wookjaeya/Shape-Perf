@@ -1,0 +1,56 @@
+# declaration: sha256 of declared_before_build.txt (= the lines of section 4 of plan/full_stage_results_20261116.md up to the end of 4.0, before the build) = c153ae44939a5d487a1e385f0bb8e22249b2b7f41d9dedf154d184245d9420f7 (2026-11-16T12:34:39Z; committed before the build)
+# schema-rev12-20261116: commands, rc and free space (df -B1 /, bytes available)
+# <scratch> is this session's scratchpad directory (m9/)
+start: free 3356196864 at the start of this step (12:0xZ)
+
+## 0. before the declaration (no tool of MC changed)
+scratch check build <scratch>/sbuild: cmake -S kairos -B <scratch>/sbuild -DKZ_BUILD_LLVM_TOOLS=OFF (no LLVM tools), make -j4 rc 0 (2 min 22 s; first try failed on a doubled line continuation in two schema headers, fixed), 1,642,433,500 B, not under the space guard (free stayed >= 1,701,556,224)
+  -> ctest: 196 tests, 2 failed (golden_layout, golden_records: the declared goldens), 1 skipped (tracefs); test_trace_neutral_rev12 113 checks; tool_identity_schema_revision passed (kz, kz-dump, kz-phi); lint 7 of 7 on this tree
+  -> KZ_GOLDEN_UPDATE=1 into a scratch copy: layout.golden 3,715 lines (3,070 old lines kept in order, 644 added, revision and fingerprint lines changed), records.golden 218 lines (30 added, 26 changed only in the section a pattern reference names)
+  -> readback.sh with the scratch kz-dump: equal to readback_pre.txt apart from line 1; convert_c1boot.sh with MC kz 931dd39c: run.kzt byte-identical to faa410e1; with the scratch kz: bytes 121-156 only; layout_check.py on the scratch layout: only additions
+  these outputs are scratch and no evidence; the build's tools re-measure them.  <scratch>/sbuild removed after the checks (12:3xZ)
+readback.sh MC kz-dump 05623054 readback_pre.txt (12:30:02Z) rc 0: ten containers, check_rc 0, dump_rc 0
+relink_expected.sha256 (75 link targets with libkz-core.a), not_relink.sha256 (29) from MC's link.txt files, sha256 before the build
+free before the commit of the declaration: 3352059904 (2026-11-16T12:34:39Z)
+  -> committed as 2f24260 before the build
+
+## 1. before the build
+cd MC && build_record.sh pre -> pre_mc.txt: the seven tools equal records/order-rules-rev1-20261116/post_mc_build2.txt; HEAD 2f24260
+env/tools/tools_check.sh --deep -> tools_check_pre.txt: 34 rows, 0 failing; env/tools/ledger_check.sh -> ledger_check_pre.txt: 59 rows, 0 failing
+tool copies under the space guard (tool_copy/df_copy.log, need 150000000; dip 66625536): tool_copy/copy.sh /home/user/work/preserve/tools-20261116-e -> rc 0, tool_copy/ROUNDTRIP.txt: kz 931dd39c, kz-phi 7d34e6e2, kz-static b52db538 copied (xz -t OK, stream sha256 equal, cmp SAME); the existing copy of kz-dump 05623054 (tools-20261109) round-tripped again (OK, SAME)
+old tools for the regression: kz 931dd39c and kz-dump 05623054 decompressed from those copies into <scratch>/old/tools/{kz,kz-dump}/ (sha256 checked)
+
+## 2. build: MC in place, target by target, each under env/tools/space_guard.sh --need 392463680 --kind <target>
+build start 12:40:10Z (build_start.txt)
+make -j4 kz         -> rc 0, make_kz.log (7 Linking lines), df_build_kz.log dip 36175872
+make -j4 kz-dump    -> rc 0, make_kz-dump.log (1), df_build_kz-dump.log dip 106496
+make -j4 kz-phi     -> rc 0, make_kz-phi.log (1), df_build_kz-phi.log dip 1556480
+make -j4 kz-static  -> rc 0, make_kz-static.log (2), df_build_kz-static.log dip 75079680
+make -j4 all        -> rc 0, make_all.log (72), df_build_all.log dip 48418816
+linked names (83) = relink_expected.sha256 (75) + the eight static libraries + test_trace_neutral_rev12; sha256sum -c relink_expected.sha256: 68 changed, 7 equal; sha256sum -c not_relink.sha256: 29 OK
+find kairos/{lib,tools,include,cmake,CMakeLists.txt,probe,instrument,runtime,tests} -newer <build start> -> 0 files
+build_record.sh post -> post_mc.txt (kz-static 5ae220d2, kz 913fcd99, kz-dump 32a96ae7, kz-phi df79fb82; kz-rt-dump, kz_lint, kz-instr-clang unchanged; CMakeCache.txt bc2f43b4 unchanged; flags.make list -> e8f06cbe)
+identity_all.sh MC -> identity_all.txt rc 0: the four tools report schema_revision=12, schema_fingerprint=6fbff6c6, core_source 568e5061 (no output was made before this)
+
+## 3. tests
+ctest -j4 -> ctest_first.log: 252 tests, 2 failed as declared (golden_layout, golden_records)
+KZ_GOLDEN_UPDATE=1 ctest -R '^golden_(layout|records)$' -> golden_update.log; both cmp equal to the scratch check build's; records.golden: 26 changed lines differ only in the section a pattern reference names, 30 added
+ctest -j4 -> ctest_full.log: 252, 0 failed, 1 skipped (test_probe_anchor_reached); ctest -V -R <eight tests> -> ctest_counts.log (test_trace_neutral_rev12 113, test_core_schema 34017, test_core_kzdump 35, test_static_cli 911, test_static_reasons 655, test_static_plan 182, lint selftest 109, 4 tools report schema revision 12); ctest -R '^lint' 7 of 7
+run_unit.sh -> unit_tools.txt 15 of 15; step2a_tests_unit.sh -> unit_step2a.txt 7 of 7
+
+## 4. read tests and comparisons (outputs under /home/user/work/redesign/obs1, each under the space guard)
+readback.sh <new kz-dump> readback_post.txt -> rc 0; diff with readback_pre.txt apart from line 1 -> readback_compare.txt empty
+schema12_readback: kz-dump --layout of 05623054 (from its copy) and of the new kz-dump, readback_pre/post; layout_check.py -> layout_check.txt "only additions"
+env/c5/regress_eid1.sh <scratch>/old MC schema12_regress (df_regress.log) -> regress_run.txt, regress_eid1.record (copied here): 47 text comparisons masked 0 differ; w6_vs_old.txt: the nine W6 G-I containers against 931dd39c's differ in 121-156 only
+convert_c1boot.sh MC kz, kz-dump schema12_c1boot_convert (df_c1boot.log) -> convert_c1boot.txt: only the tool hash lines; bytes 121-156
+rerun.sh (df_rerun.log) -> compare.sh relations -> compare_relations.txt 25 OK
+order.sh (df_order.log, order_run.txt) -> compare.sh order -> compare_order.txt 25 OK
+extract.sh (df_extract.log, extract_run.txt): five PASS; order.sh schema12_extract schema12_on_extract (df_order_extract.log) -> compare.sh extract -> compare_extract.txt 25 OK (check_extract.py, compare_build.py, relations, order)
+plans.sh (df_plans.log, plans_run.txt): five rc 0 -> compare.sh plans -> compare_plans.txt: five "only declared differences"
+
+## 5. lists and checks
+sha256 lists of the eight output directories (<dir>.sha256); records/LEDGER.tsv +9 rows; records/TOOLS.tsv: 931dd39c, 05623054, 7d34e6e2, b52db538 -> copy; 5ae220d2, 913fcd99, 32a96ae7, df79fb82 in-place
+env/tools/tools_check.sh --deep -> tools_check.txt: 38 rows, 0 failing; env/tools/ledger_check.sh -> ledger_check.txt: 68 rows, 0 failing
+name_check.sh --tree over the eight output directories, the copy directory and this record directory: clean
+scratch removed at the end: <scratch>/m9 (old tools, golden and layout copies, stamps)
+free at the end: see results 4.6

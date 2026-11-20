@@ -1,0 +1,30 @@
+OK c1_pre_tx order.txt two runs same
+OK c1_pre_tx edges.tsv two runs same
+OK c1_pre_tx relations.txt = the on re-extraction's
+OK c1_pre_tx order.log empty
+OK c1_pre_tx relations.log empty
+OK c1_pre_tx measured (compare/measure_c1_pre_tx.txt: relations rows off 367 on 367; keys in both 367, only off 0, only on 0)
+OK c1_post_tx order.txt two runs same
+OK c1_post_tx edges.tsv two runs same
+OK c1_post_tx relations.txt = the on re-extraction's
+OK c1_post_tx order.log empty
+OK c1_post_tx relations.log empty
+OK c1_post_tx measured (compare/measure_c1_post_tx.txt: relations rows off 367 on 367; keys in both 367, only off 0, only on 0)
+OK r2_core order.txt two runs same
+OK r2_core edges.tsv two runs same
+OK r2_core relations.txt = the on re-extraction's
+OK r2_core order.log empty
+OK r2_core relations.log empty
+OK r2_core measured (compare/measure_r2_core.txt: relations rows off 295 on 295; keys in both 295, only off 0, only on 0)
+OK c5_641 order.txt two runs same
+OK c5_641 edges.tsv two runs same
+OK c5_641 relations.txt = the on re-extraction's
+OK c5_641 order.log empty
+OK c5_641 relations.log empty
+OK c5_641 measured (compare/measure_c5_641.txt: relations rows off 178 on 172; keys in both 171, only off 7, only on 1)
+OK c5_642 order.txt two runs same
+OK c5_642 edges.tsv two runs same
+OK c5_642 relations.txt = the on re-extraction's
+OK c5_642 order.log empty
+OK c5_642 relations.log empty
+OK c5_642 measured (compare/measure_c5_642.txt: relations rows off 175 on 169; keys in both 168, only off 7, only on 1)

@@ -1,0 +1,5 @@
+BAD c1_pre_tx: sections of the earlier round 42, the same record text 39, differing ['STRINGS', 'BASIS', 'ARG_TYPES'], new ['SEMANTICS'] (SEMANTICS count 1773)
+BAD c1_post_tx: sections of the earlier round 42, the same record text 39, differing ['STRINGS', 'BASIS', 'ARG_TYPES'], new ['SEMANTICS'] (SEMANTICS count 1773)
+BAD r2_core: sections of the earlier round 42, the same record text 39, differing ['STRINGS', 'BASIS', 'ARG_TYPES'], new ['SEMANTICS'] (SEMANTICS count 1476)
+BAD c5_641: sections of the earlier round 42, the same record text 39, differing ['STRINGS', 'BASIS', 'ARG_TYPES'], new ['SEMANTICS'] (SEMANTICS count 795)
+BAD c5_642: sections of the earlier round 42, the same record text 39, differing ['STRINGS', 'BASIS', 'ARG_TYPES'], new ['SEMANTICS'] (SEMANTICS count 786)

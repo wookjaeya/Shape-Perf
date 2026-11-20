@@ -1,0 +1,4 @@
+# space_guard.sh kind=archive need=20000000 floor=314572800 interval=2 cmd=bash /home/user/Shape-Perf/research/cfs_procrace/records/closure-space2-20261119/archive.sh xr5_eval_dry records/closure-explain-fix-20261119/xr5_eval_dry.sha256
+start 2026-11-19T18:15:02.792Z free=810430464 threshold=334572800
+sample 2026-11-19T18:15:02.797Z 810426368
+end 2026-11-19T18:15:04.804Z kind=archive verdict=completed rc=0 free=817221632 lowest=810426368 dip=4096 change=6791168

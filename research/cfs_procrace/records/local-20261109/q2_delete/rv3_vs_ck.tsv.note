@@ -1,0 +1,29 @@
+CK SHA256SUMS: OK
+CK against records/ck-20261109-rv3check/MANIFEST.sha256 (97 lines): OK
+in bundle ck-20261109-rv3check: rv3/a.dump SAME
+in bundle ck-20261109-rv3check: rv3/b.dump SAME
+in bundle ck-20261109-rv3check: rv3/cr.sh SAME
+in bundle ck-20261109-rv3check: rv3/cr_out.txt SAME
+in bundle ck-20261109-rv3check: rv3/img/c1_post_tx/big.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/c1_post_tx/dump_minus_budget.diff SAME
+in bundle ck-20261109-rv3check: rv3/img/c1_post_tx/extract_big.txt SAME
+in bundle ck-20261109-rv3check: rv3/img/c1_post_tx/final.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/c1_pre_tx/big.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/c1_pre_tx/dump_minus_budget.diff SAME
+in bundle ck-20261109-rv3check: rv3/img/c1_pre_tx/extract_big.txt SAME
+in bundle ck-20261109-rv3check: rv3/img/c1_pre_tx/final.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/c5_641/big.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/c5_641/dump_minus_budget.diff SAME
+in bundle ck-20261109-rv3check: rv3/img/c5_641/extract_big.txt SAME
+in bundle ck-20261109-rv3check: rv3/img/c5_641/extract_ctl.txt SAME
+in bundle ck-20261109-rv3check: rv3/img/c5_641/final.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/c5_642/big.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/c5_642/dump_minus_budget.diff SAME
+in bundle ck-20261109-rv3check: rv3/img/c5_642/extract_big.txt SAME
+in bundle ck-20261109-rv3check: rv3/img/c5_642/final.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/log.txt SAME
+in bundle ck-20261109-rv3check: rv3/img/r2_core/big.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/r2_core/dump_minus_budget.diff SAME
+in bundle ck-20261109-rv3check: rv3/img/r2_core/extract_big.txt SAME
+in bundle ck-20261109-rv3check: rv3/img/r2_core/final.dump.gz SAME
+in bundle ck-20261109-rv3check: rv3/img/run.sh SAME

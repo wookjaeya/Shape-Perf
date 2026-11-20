@@ -1,0 +1,5 @@
+# check 11 of env/tools/tests/run_unit.sh (with its new fixtures b) run against the comparator as committed before the build (git show a79aa6d:research/cfs_procrace/env/redesign/compare_derived.py), in the scratchpad; then against the present comparator
+comparator a79aa6d sha256 a66539bee2ee2360463842794c9956eae18d63a24a3273923a7bf6244110e790
+check 11 derived comparison (stand-in kz-dump): FAIL (control rc 0 (declared findings 2); undeclared record rc 1; undeclared text line rc 1; path outside the map rc 1; (b) shifted tu= and escaped quotes rc 1 (undeclared 3); real tu= change rc 1; change outside the stripped fields rc 1)
+comparator now sha256 394c41b2a1efa1e005247d9f854ea335e7a925641b8633ddbde8a92fbdc5acb9
+check 11 derived comparison (stand-in kz-dump): PASS (control rc 0 (declared findings 2); undeclared record rc 1; undeclared text line rc 1; path outside the map rc 1; (b) shifted tu= and escaped quotes rc 0 (undeclared 0); real tu= change rc 1; change outside the stripped fields rc 1)

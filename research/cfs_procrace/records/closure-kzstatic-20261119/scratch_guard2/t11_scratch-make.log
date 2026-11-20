@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-make need=100000000 floor=314572800 interval=2 cmd=make -j4 kz-static static_golden
+start 2026-11-19T03:05:12.762Z free=1035878400 threshold=414572800
+sample 2026-11-19T03:05:12.767Z 1035874304
+end 2026-11-19T03:05:14.773Z kind=scratch-make verdict=completed rc=0 free=1034375168 lowest=1034375168 dip=1503232 change=-1503232

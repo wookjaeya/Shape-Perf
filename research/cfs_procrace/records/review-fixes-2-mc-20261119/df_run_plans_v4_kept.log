@@ -1,0 +1,5 @@
+# space_guard.sh kind=run-plans_v4_kept need=120000000 floor=314572800 interval=2 cmd=bash -c bash '/home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/run.sh' plans_v4_kept > '/home/user/Shape-Perf/research/cfs_procrace/records/review-fixes-2-mc-20261119/run_plans_v4_kept.txt' 2>&1
+start 2026-11-19T02:03:10.618Z free=1057939456 threshold=434572800
+sample 2026-11-19T02:03:10.622Z 1057935360
+sample 2026-11-19T02:03:12.629Z 1057206272
+end 2026-11-19T02:03:14.636Z kind=run-plans_v4_kept verdict=completed rc=0 free=1056624640 lowest=1056624640 dip=1314816 change=-1314816

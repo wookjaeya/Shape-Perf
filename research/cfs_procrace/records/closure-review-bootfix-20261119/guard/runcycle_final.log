@@ -1,0 +1,8 @@
+# space_guard.sh kind=runcycle-final need=30000000 floor=314572800 interval=2 cmd=bash ../closure-c1prep-20261119/boot/test_run_cycle.sh <scratch>/rct4
+start 2026-11-19T19:41:34.720Z free=1113153536 threshold=344572800
+sample 2026-11-19T19:41:34.725Z 1113149440
+sample 2026-11-19T19:41:36.730Z 1106165760
+sample 2026-11-19T19:41:38.737Z 1100423168
+sample 2026-11-19T19:41:40.743Z 1099218944
+sample 2026-11-19T19:41:42.749Z 1096556544
+end 2026-11-19T19:41:44.756Z kind=runcycle-final verdict=completed rc=0 free=1096486912 lowest=1096486912 dip=16666624 change=-16666624

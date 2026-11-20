@@ -1,0 +1,2 @@
+# elements_cross.py: elements_by_rule_2.tsv vs static_elements_16_fixed.tsv
+rows 160 160 cells 960 differing 0

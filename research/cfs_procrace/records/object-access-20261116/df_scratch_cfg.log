@@ -1,0 +1,4 @@
+# space_guard.sh kind=scratch-cfg need=400000000 floor=314572800 interval=2 cmd=cmake -DCMAKE_BUILD_TYPE=Release -DKZ_BUILD_LLVM_TOOLS=ON -DLLVM_DIR=/home/user/work/llvm-project/build/lib/cmake/llvm -DClang_DIR=/home/user/work/llvm-project/build/lib/cmake/clang /home/user/Shape-Perf/research/cfs_procrace/kairos
+start 2026-11-16T16:31:56.798Z free=2716188672 threshold=714572800
+sample 2026-11-16T16:31:56.802Z 2716184576
+end 2026-11-16T16:31:58.808Z kind=scratch-cfg verdict=completed rc=0 free=2708025344 lowest=2708025344 dip=8163328 change=-8163328

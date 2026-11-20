@@ -1,0 +1,391 @@
+Test project /home/user/work/merge-check/kz-llvm
+        Start   1: instr_clang_transform
+  1/187 Test   #1: instr_clang_transform .........................   Passed    0.18 sec
+        Start   2: rt_bootstrap
+  2/187 Test   #2: rt_bootstrap ..................................   Passed    0.00 sec
+        Start   3: rt_order
+  3/187 Test   #3: rt_order ......................................   Passed    0.01 sec
+        Start   4: rt_loss
+  4/187 Test   #4: rt_loss .......................................   Passed    0.00 sec
+        Start   5: rt_serial
+  5/187 Test   #5: rt_serial .....................................   Passed    0.01 sec
+        Start   6: rt_gate_separation
+  6/187 Test   #6: rt_gate_separation ............................   Passed    0.02 sec
+        Start   7: rt_gate_record
+  7/187 Test   #7: rt_gate_record ................................   Passed    0.00 sec
+        Start   8: rt_gate_context
+  8/187 Test   #8: rt_gate_context ...............................   Passed    0.00 sec
+        Start   9: rt_gate_isr
+  9/187 Test   #9: rt_gate_isr ...................................   Passed    0.00 sec
+        Start  10: rt_gate_nowait
+ 10/187 Test  #10: rt_gate_nowait ................................   Passed    0.00 sec
+        Start  11: rt_gate_timeout
+ 11/187 Test  #11: rt_gate_timeout ...............................   Passed    0.05 sec
+        Start  12: rt_gate_preattach
+ 12/187 Test  #12: rt_gate_preattach .............................   Passed    0.00 sec
+        Start  13: rt_holdsem_rearm
+ 13/187 Test  #13: rt_holdsem_rearm ..............................   Passed    0.00 sec
+        Start  14: rt_holdsem_nth
+ 14/187 Test  #14: rt_holdsem_nth ................................   Passed    0.00 sec
+        Start  15: rt_holdsem_defer
+ 15/187 Test  #15: rt_holdsem_defer ..............................   Passed    0.00 sec
+        Start  16: rt_holdsem_busy
+ 16/187 Test  #16: rt_holdsem_busy ...............................   Passed    0.00 sec
+        Start  17: rt_manifest
+ 17/187 Test  #17: rt_manifest ...................................   Passed    0.00 sec
+        Start  18: rt_dump_tool
+ 18/187 Test  #18: rt_dump_tool ..................................   Passed    0.00 sec
+        Start  19: rt_dump_tool_strict
+ 19/187 Test  #19: rt_dump_tool_strict ...........................   Passed    0.00 sec
+        Start  20: rt_auto
+ 20/187 Test  #20: rt_auto .......................................   Passed    0.00 sec
+        Start  21: rt_auto_dump
+ 21/187 Test  #21: rt_auto_dump ..................................   Passed    0.00 sec
+        Start  22: rt_auto_bi
+ 22/187 Test  #22: rt_auto_bi ....................................   Passed    0.00 sec
+        Start  23: rt_auto_bi_dump
+ 23/187 Test  #23: rt_auto_bi_dump ...............................   Passed    0.00 sec
+        Start  24: rt_auto_bad
+ 24/187 Test  #24: rt_auto_bad ...................................   Passed    0.00 sec
+        Start  25: rt_auto_bad_dump
+ 25/187 Test  #25: rt_auto_bad_dump ..............................   Passed    0.00 sec
+        Start  26: rt_pool_big
+ 26/187 Test  #26: rt_pool_big ...................................   Passed    0.00 sec
+        Start  27: rt_pool_quota
+ 27/187 Test  #27: rt_pool_quota .................................   Passed    0.00 sec
+        Start  28: rt_pool_dumps
+ 28/187 Test  #28: rt_pool_dumps .................................   Passed    0.05 sec
+        Start  29: rt_pool_empty
+ 29/187 Test  #29: rt_pool_empty .................................   Passed    0.00 sec
+        Start  30: rt_pool_empty_dump
+ 30/187 Test  #30: rt_pool_empty_dump ............................   Passed    0.00 sec
+        Start  31: rt_mode_off
+ 31/187 Test  #31: rt_mode_off ...................................   Passed    0.00 sec
+        Start  32: rt_mode_off_dump
+ 32/187 Test  #32: rt_mode_off_dump ..............................   Passed    0.00 sec
+        Start  33: rt_mode_record
+ 33/187 Test  #33: rt_mode_record ................................   Passed    0.00 sec
+        Start  34: rt_mode_record_dump
+ 34/187 Test  #34: rt_mode_record_dump ...........................   Passed    0.00 sec
+        Start  35: rt_mode_control
+ 35/187 Test  #35: rt_mode_control ...............................   Passed    0.00 sec
+        Start  36: rt_mode_control_dump
+ 36/187 Test  #36: rt_mode_control_dump ..........................   Passed    0.00 sec
+        Start  37: rt_mode_unset
+ 37/187 Test  #37: rt_mode_unset .................................   Passed    0.00 sec
+        Start  38: rt_mode_unset_dump
+ 38/187 Test  #38: rt_mode_unset_dump ............................   Passed    0.00 sec
+        Start  39: rt_mode_bogus
+ 39/187 Test  #39: rt_mode_bogus .................................   Passed    0.00 sec
+        Start  40: rt_mode_bogus_dump
+ 40/187 Test  #40: rt_mode_bogus_dump ............................   Passed    0.00 sec
+        Start  41: rt_mode_api_latch
+ 41/187 Test  #41: rt_mode_api_latch .............................   Passed    0.00 sec
+        Start  42: rt_mode_api_late
+ 42/187 Test  #42: rt_mode_api_late ..............................   Passed    0.00 sec
+        Start  43: rt_mode_api_latch_dump
+ 43/187 Test  #43: rt_mode_api_latch_dump ........................   Passed    0.00 sec
+        Start  44: rt_mode_api_late_dump
+ 44/187 Test  #44: rt_mode_api_late_dump .........................   Passed    0.00 sec
+        Start  45: rt_plan_ok
+ 45/187 Test  #45: rt_plan_ok ....................................   Passed    0.00 sec
+        Start  46: rt_plan_mismatch
+ 46/187 Test  #46: rt_plan_mismatch ..............................   Passed    0.00 sec
+        Start  47: rt_plan_crc
+ 47/187 Test  #47: rt_plan_crc ...................................   Passed    0.00 sec
+        Start  48: rt_plan_format
+ 48/187 Test  #48: rt_plan_format ................................   Passed    0.00 sec
+        Start  49: rt_plan_size
+ 49/187 Test  #49: rt_plan_size ..................................   Passed    0.00 sec
+        Start  50: rt_plan_points
+ 50/187 Test  #50: rt_plan_points ................................   Passed    0.00 sec
+        Start  51: rt_plan_twice
+ 51/187 Test  #51: rt_plan_twice .................................   Passed    0.00 sec
+        Start  52: rt_plan_nobuild
+ 52/187 Test  #52: rt_plan_nobuild ...............................   Passed    0.00 sec
+        Start  53: rt_plan_write
+ 53/187 Test  #53: rt_plan_write .................................   Passed    0.00 sec
+        Start  54: rt_auto_plan_control
+ 54/187 Test  #54: rt_auto_plan_control ..........................   Passed    0.00 sec
+        Start  55: rt_auto_plan_record
+ 55/187 Test  #55: rt_auto_plan_record ...........................   Passed    0.00 sec
+        Start  56: rt_auto_plan_none
+ 56/187 Test  #56: rt_auto_plan_none .............................   Passed    0.00 sec
+        Start  57: rt_auto_plan_control_dump
+ 57/187 Test  #57: rt_auto_plan_control_dump .....................   Passed    0.00 sec
+        Start  58: rt_auto_plan_record_dump
+ 58/187 Test  #58: rt_auto_plan_record_dump ......................   Passed    0.00 sec
+        Start  59: rt_auto_plan_none_dump
+ 59/187 Test  #59: rt_auto_plan_none_dump ........................   Passed    0.00 sec
+        Start  60: rt_end_kill
+ 60/187 Test  #60: rt_end_kill ...................................   Passed    0.03 sec
+        Start  61: rt_end_segv
+ 61/187 Test  #61: rt_end_segv ...................................   Passed    0.02 sec
+        Start  62: rt_end_abort
+ 62/187 Test  #62: rt_end_abort ..................................   Passed    0.02 sec
+        Start  63: rt_end_term
+ 63/187 Test  #63: rt_end_term ...................................   Passed    0.03 sec
+        Start  64: rt_end_term-kill
+ 64/187 Test  #64: rt_end_term-kill ..............................   Passed    0.53 sec
+        Start  65: rt_end_normal
+ 65/187 Test  #65: rt_end_normal .................................   Passed    0.05 sec
+        Start  66: rt_end_notstore
+ 66/187 Test  #66: rt_end_notstore ...............................   Passed    0.00 sec
+        Start  67: rt_no_library_symbols
+ 67/187 Test  #67: rt_no_library_symbols .........................   Passed    0.05 sec
+        Start  68: test_core_schema
+ 68/187 Test  #68: test_core_schema ..............................   Passed    0.00 sec
+        Start  69: test_core_identity
+ 69/187 Test  #69: test_core_identity ............................   Passed    0.03 sec
+        Start  70: test_core_kzdump
+ 70/187 Test  #70: test_core_kzdump ..............................   Passed    0.07 sec
+        Start  73: test_core_container
+ 71/187 Test  #73: test_core_container ...........................   Passed    0.02 sec
+        Start  74: test_core_container_corrupt
+ 72/187 Test  #74: test_core_container_corrupt ...................   Passed    0.06 sec
+        Start  75: test_core_crc32
+ 73/187 Test  #75: test_core_crc32 ...............................   Passed    0.00 sec
+        Start  76: test_core_dump
+ 74/187 Test  #76: test_core_dump ................................   Passed    0.01 sec
+        Start  77: test_core_eval
+ 75/187 Test  #77: test_core_eval ................................   Passed    0.00 sec
+        Start  78: test_core_monitor
+ 76/187 Test  #78: test_core_monitor .............................   Passed    0.01 sec
+        Start  79: test_core_phi_allowed
+ 77/187 Test  #79: test_core_phi_allowed .........................   Passed    0.01 sec
+        Start  80: test_core_phi_canonical
+ 78/187 Test  #80: test_core_phi_canonical .......................   Passed    0.01 sec
+        Start  81: test_core_phi_check
+ 79/187 Test  #81: test_core_phi_check ...........................   Passed    0.06 sec
+        Start  82: test_core_phi_parser
+ 80/187 Test  #82: test_core_phi_parser ..........................   Passed    0.00 sec
+        Start  83: test_core_phi_provenance
+ 81/187 Test  #83: test_core_phi_provenance ......................   Passed    0.01 sec
+        Start  84: test_core_realrecord
+ 82/187 Test  #84: test_core_realrecord ..........................   Passed    0.01 sec
+        Start  85: test_core_replay
+ 83/187 Test  #85: test_core_replay ..............................   Passed    0.04 sec
+        Start  86: test_core_sha256
+ 84/187 Test  #86: test_core_sha256 ..............................   Passed    0.01 sec
+        Start  87: test_core_state_order
+ 85/187 Test  #87: test_core_state_order .........................   Passed    0.01 sec
+        Start  88: test_core_verdict
+ 86/187 Test  #88: test_core_verdict .............................   Passed    0.00 sec
+        Start  89: test_core_verify
+ 87/187 Test  #89: test_core_verify ..............................   Passed    0.01 sec
+        Start  90: test_core_vocab
+ 88/187 Test  #90: test_core_vocab ...............................   Passed    0.00 sec
+        Start  91: schema_bpf_compile
+ 89/187 Test  #91: schema_bpf_compile ............................   Passed    0.21 sec
+        Start  92: schema_probe_0_cxx
+ 90/187 Test  #92: schema_probe_0_cxx ............................   Passed    0.08 sec
+        Start  93: schema_probe_0_c99
+ 91/187 Test  #93: schema_probe_0_c99 ............................   Passed    0.12 sec
+        Start  94: schema_probe_1_cxx
+ 92/187 Test  #94: schema_probe_1_cxx ............................   Passed    0.09 sec
+        Start  95: schema_probe_1_c99
+ 93/187 Test  #95: schema_probe_1_c99 ............................   Passed    0.11 sec
+        Start  96: schema_probe_2_cxx
+ 94/187 Test  #96: schema_probe_2_cxx ............................   Passed    0.07 sec
+        Start  97: schema_probe_2_c99
+ 95/187 Test  #97: schema_probe_2_c99 ............................   Passed    0.12 sec
+        Start  98: golden_layout
+ 96/187 Test  #98: golden_layout .................................   Passed    0.01 sec
+        Start  99: golden_records
+ 97/187 Test  #99: golden_records ................................   Passed    0.00 sec
+        Start 100: golden_container_facts
+ 98/187 Test #100: golden_container_facts ........................   Passed    0.00 sec
+        Start 101: golden_container_run
+ 99/187 Test #101: golden_container_run ..........................   Passed    0.00 sec
+        Start 102: golden_container_verdicts
+100/187 Test #102: golden_container_verdicts .....................   Passed    0.00 sec
+        Start 103: golden_render
+101/187 Test #103: golden_render .................................   Passed    0.00 sec
+        Start 104: golden_tool_hash
+102/187 Test #104: golden_tool_hash ..............................   Passed    0.00 sec
+        Start 113: test_trace_decode_fetch
+103/187 Test #113: test_trace_decode_fetch .......................   Passed    0.00 sec
+        Start 114: test_trace_decode_merge
+104/187 Test #114: test_trace_decode_merge .......................   Passed    0.00 sec
+        Start 115: test_trace_decode_perf
+105/187 Test #115: test_trace_decode_perf ........................   Passed    0.00 sec
+        Start 116: test_trace_decode_real
+106/187 Test #116: test_trace_decode_real ........................   Passed    0.00 sec
+        Start 117: test_trace_decode_sites
+107/187 Test #117: test_trace_decode_sites .......................   Passed    0.00 sec
+        Start 118: test_trace_hold_nctl
+108/187 Test #118: test_trace_hold_nctl ..........................   Passed    0.00 sec
+        Start 119: test_trace_identity
+109/187 Test #119: test_trace_identity ...........................   Passed    0.00 sec
+        Start 120: test_trace_key_separation
+110/187 Test #120: test_trace_key_separation .....................   Passed    0.00 sec
+        Start 121: test_trace_merge_order
+111/187 Test #121: test_trace_merge_order ........................   Passed    0.01 sec
+        Start 122: test_trace_neutral
+112/187 Test #122: test_trace_neutral ............................   Passed    0.01 sec
+        Start 123: test_trace_neutral_rev12
+113/187 Test #123: test_trace_neutral_rev12 ......................   Passed    0.00 sec
+        Start 124: test_trace_occ_basis
+114/187 Test #124: test_trace_occ_basis ..........................   Passed    0.00 sec
+        Start 125: test_trace_occ_match
+115/187 Test #125: test_trace_occ_match ..........................   Passed    0.00 sec
+        Start 126: test_trace_replay_out
+116/187 Test #126: test_trace_replay_out .........................   Passed    0.00 sec
+        Start 128: test_trace_symbols
+117/187 Test #128: test_trace_symbols ............................   Passed    0.00 sec
+        Start 129: test_trace_occ_basis_cli
+118/187 Test #129: test_trace_occ_basis_cli ......................   Passed    0.02 sec
+        Start 130: test_realrecord_derived
+119/187 Test #130: test_realrecord_derived .......................   Passed    0.44 sec
+        Start 131: test_trace_neutral_real
+120/187 Test #131: test_trace_neutral_real .......................   Passed    0.04 sec
+        Start 132: test_neutral_kzrt
+121/187 Test #132: test_neutral_kzrt .............................   Passed    0.01 sec
+        Start 133: test_kzrt_identity
+122/187 Test #133: test_kzrt_identity ............................   Passed    0.01 sec
+        Start 134: test_kzrt_app_request
+123/187 Test #134: test_kzrt_app_request .........................   Passed    0.01 sec
+        Start 135: test_kzrt_recovered
+124/187 Test #135: test_kzrt_recovered ...........................   Passed    0.02 sec
+        Start 136: test_probe_anchor_compilers
+125/187 Test #136: test_probe_anchor_compilers ...................   Passed    0.03 sec
+        Start 137: test_probe_anchor_reached
+126/187 Test #137: test_probe_anchor_reached .....................***Skipped   0.03 sec
+        Start 138: test_probe_basis
+127/187 Test #138: test_probe_basis ..............................   Passed    0.03 sec
+        Start 139: test_probe_elf_dwarf
+128/187 Test #139: test_probe_elf_dwarf ..........................   Passed    0.01 sec
+        Start 140: test_probe_golden
+129/187 Test #140: test_probe_golden .............................   Passed    0.00 sec
+        Start 141: test_probe_observe
+130/187 Test #141: test_probe_observe ............................   Passed   19.09 sec
+        Start 142: test_probe_profile
+131/187 Test #142: test_probe_profile ............................   Passed    0.00 sec
+        Start 143: test_probe_record
+132/187 Test #143: test_probe_record .............................   Passed    0.01 sec
+        Start 144: probe_anchor_xcheck_script
+133/187 Test #144: probe_anchor_xcheck_script ....................   Passed    0.13 sec
+        Start 145: test_hold_ptrace
+134/187 Test #145: test_hold_ptrace ..............................   Passed    0.25 sec
+        Start 146: test_hold_sequence
+135/187 Test #146: test_hold_sequence ............................   Passed    0.72 sec
+        Start 147: test_hold_plan
+136/187 Test #147: test_hold_plan ................................   Passed    0.00 sec
+        Start 148: test_rt_plan_convert
+137/187 Test #148: test_rt_plan_convert ..........................   Passed    0.01 sec
+        Start 149: phi_golden_profile_canonical
+138/187 Test #149: phi_golden_profile_canonical ..................   Passed    0.01 sec
+        Start 150: phi_golden_profile_summary
+139/187 Test #150: phi_golden_profile_summary ....................   Passed    0.01 sec
+        Start 151: phi_golden_replay_startup_ok
+140/187 Test #151: phi_golden_replay_startup_ok ..................   Passed    0.00 sec
+        Start 152: phi_golden_replay_startup_old_version
+141/187 Test #152: phi_golden_replay_startup_old_version .........   Passed    0.01 sec
+        Start 153: phi_golden_replay_startup_no_version
+142/187 Test #153: phi_golden_replay_startup_no_version ..........   Passed    0.01 sec
+        Start 154: phi_golden_replay_startup_no_predicate
+143/187 Test #154: phi_golden_replay_startup_no_predicate ........   Passed    0.00 sec
+        Start 155: phi_golden_replay_kid_illegal
+144/187 Test #155: phi_golden_replay_kid_illegal .................   Passed    0.00 sec
+        Start 156: phi_golden_replay_kid_unregistered
+145/187 Test #156: phi_golden_replay_kid_unregistered ............   Passed    0.00 sec
+        Start 157: phi_golden_replay_kid_ordinals
+146/187 Test #157: phi_golden_replay_kid_ordinals ................   Passed    0.01 sec
+        Start 158: phi_golden_replay_kid_disagree
+147/187 Test #158: phi_golden_replay_kid_disagree ................   Passed    0.00 sec
+        Start 159: phi_golden_replay_shutdown_scope
+148/187 Test #159: phi_golden_replay_shutdown_scope ..............   Passed    0.00 sec
+        Start 160: phi_golden_replay_poll_timeout
+149/187 Test #160: phi_golden_replay_poll_timeout ................   Passed    0.00 sec
+        Start 161: phi_golden_replay_poll_timeout_wrong
+150/187 Test #161: phi_golden_replay_poll_timeout_wrong ..........   Passed    0.00 sec
+        Start 162: phi_golden_replay_kid_outcomes
+151/187 Test #162: phi_golden_replay_kid_outcomes ................   Passed    0.00 sec
+        Start 163: phi_golden_replay_effects_core
+152/187 Test #163: phi_golden_replay_effects_core ................   Passed    0.00 sec
+        Start 164: phi_golden_replay_effects_external
+153/187 Test #164: phi_golden_replay_effects_external ............   Passed    0.01 sec
+        Start 165: phi_golden_replay_cleanup_window
+154/187 Test #165: phi_golden_replay_cleanup_window ..............   Passed    0.00 sec
+        Start 166: phi_profile_check
+155/187 Test #166: phi_profile_check .............................   Passed    0.00 sec
+        Start 167: phi_profile_provenance
+156/187 Test #167: phi_profile_provenance ........................   Passed    0.01 sec
+        Start 168: test_phi_cli
+157/187 Test #168: test_phi_cli ..................................   Passed    0.09 sec
+        Start 169: phi_c1_check_281a941_1df262a
+158/187 Test #169: phi_c1_check_281a941_1df262a ..................   Passed    0.00 sec
+        Start 170: phi_c1_provenance_281a941_1df262a
+159/187 Test #170: phi_c1_provenance_281a941_1df262a .............   Passed    0.01 sec
+        Start 171: phi_c1_golden_summary_281a941_1df262a
+160/187 Test #171: phi_c1_golden_summary_281a941_1df262a .........   Passed    0.00 sec
+        Start 172: phi_c1_golden_canonical_281a941_1df262a
+161/187 Test #172: phi_c1_golden_canonical_281a941_1df262a .......   Passed    0.00 sec
+        Start 173: phi_c1_check_281a941_1df262a-altP3
+162/187 Test #173: phi_c1_check_281a941_1df262a-altP3 ............   Passed    0.00 sec
+        Start 174: phi_c1_provenance_281a941_1df262a-altP3
+163/187 Test #174: phi_c1_provenance_281a941_1df262a-altP3 .......   Passed    0.01 sec
+        Start 175: phi_c1_golden_summary_281a941_1df262a-altP3
+164/187 Test #175: phi_c1_golden_summary_281a941_1df262a-altP3 ...   Passed    0.00 sec
+        Start 176: phi_c1_check_281a941_1b0b338
+165/187 Test #176: phi_c1_check_281a941_1b0b338 ..................   Passed    0.00 sec
+        Start 177: phi_c1_provenance_281a941_1b0b338
+166/187 Test #177: phi_c1_provenance_281a941_1b0b338 .............   Passed    0.01 sec
+        Start 178: phi_c1_golden_summary_281a941_1b0b338
+167/187 Test #178: phi_c1_golden_summary_281a941_1b0b338 .........   Passed    0.00 sec
+        Start 179: phi_c1_check_281a941_1b0b338-altP3
+168/187 Test #179: phi_c1_check_281a941_1b0b338-altP3 ............   Passed    0.00 sec
+        Start 180: phi_c1_provenance_281a941_1b0b338-altP3
+169/187 Test #180: phi_c1_provenance_281a941_1b0b338-altP3 .......   Passed    0.01 sec
+        Start 181: phi_c1_check_833fdbb_1df262a
+170/187 Test #181: phi_c1_check_833fdbb_1df262a ..................   Passed    0.00 sec
+        Start 182: phi_c1_provenance_833fdbb_1df262a
+171/187 Test #182: phi_c1_provenance_833fdbb_1df262a .............   Passed    0.01 sec
+        Start 183: phi_c1_golden_summary_833fdbb_1df262a
+172/187 Test #183: phi_c1_golden_summary_833fdbb_1df262a .........   Passed    0.00 sec
+        Start 184: phi_c1_golden_canonical_833fdbb_1df262a
+173/187 Test #184: phi_c1_golden_canonical_833fdbb_1df262a .......   Passed    0.00 sec
+        Start 185: phi_c1_check_833fdbb_1df262a-altP3
+174/187 Test #185: phi_c1_check_833fdbb_1df262a-altP3 ............   Passed    0.00 sec
+        Start 186: phi_c1_provenance_833fdbb_1df262a-altP3
+175/187 Test #186: phi_c1_provenance_833fdbb_1df262a-altP3 .......   Passed    0.01 sec
+        Start 187: phi_c1_golden_summary_833fdbb_1df262a-altP3
+176/187 Test #187: phi_c1_golden_summary_833fdbb_1df262a-altP3 ...   Passed    0.00 sec
+        Start 188: phi_c1_check_833fdbb_1b0b338
+177/187 Test #188: phi_c1_check_833fdbb_1b0b338 ..................   Passed    0.00 sec
+        Start 189: phi_c1_provenance_833fdbb_1b0b338
+178/187 Test #189: phi_c1_provenance_833fdbb_1b0b338 .............   Passed    0.01 sec
+        Start 190: phi_c1_golden_summary_833fdbb_1b0b338
+179/187 Test #190: phi_c1_golden_summary_833fdbb_1b0b338 .........   Passed    0.00 sec
+        Start 191: phi_c1_check_833fdbb_1b0b338-altP3
+180/187 Test #191: phi_c1_check_833fdbb_1b0b338-altP3 ............   Passed    0.00 sec
+        Start 192: phi_c1_provenance_833fdbb_1b0b338-altP3
+181/187 Test #192: phi_c1_provenance_833fdbb_1b0b338-altP3 .......   Passed    0.01 sec
+        Start 193: phi_golden_replay_c1_pre_fail
+182/187 Test #193: phi_golden_replay_c1_pre_fail .................   Passed    0.00 sec
+        Start 194: phi_golden_replay_c1_post_retry
+183/187 Test #194: phi_golden_replay_c1_post_retry ...............   Passed    0.00 sec
+        Start 195: phi_golden_replay_c1_post_retry_altP3
+184/187 Test #195: phi_golden_replay_c1_post_retry_altP3 .........   Passed    0.00 sec
+        Start 196: phi_golden_replay_c1_role_unbound
+185/187 Test #196: phi_golden_replay_c1_role_unbound .............   Passed    0.00 sec
+        Start 197: test_predict_model
+186/187 Test #197: test_predict_model ............................   Passed    0.01 sec
+        Start 198: test_property_eval_agreement
+187/187 Test #198: test_property_eval_agreement ..................   Passed    1.22 sec
+
+100% tests passed, 0 tests failed out of 187
+
+Label Time Summary:
+golden         =   0.16 sec*proc (37 tests)
+instr          =   0.18 sec*proc (1 test)
+integration    =  20.06 sec*proc (3 tests)
+legacy-case    =   0.82 sec*proc (50 tests)
+property       =   1.22 sec*proc (1 test)
+runtime        =   0.99 sec*proc (66 tests)
+unit           =  22.29 sec*proc (83 tests)
+
+Total Test time (real) =  24.88 sec
+
+The following tests did not run:
+	137 - test_probe_anchor_reached (Skipped)

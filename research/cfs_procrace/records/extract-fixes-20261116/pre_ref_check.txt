@@ -1,0 +1,5 @@
+c1_pre_tx relations same as schema12_extract
+c1_post_tx relations same as schema12_extract
+r2_core relations same as schema12_extract
+c5_641 relations same as schema12_extract
+c5_642 relations same as schema12_extract

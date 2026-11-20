@@ -1,0 +1,8 @@
+bundle=w6-20261029-c1-predict
+created_utc=2026-10-29T06:02:55.550Z
+repo_commit=9bd970051c63a573fd5110363e2e6fafc99e0a66
+kernel=6.18.44-fc-v185
+source=/home/user/work/w6/closures files=50 bytes=19332474
+source=/home/user/work/w6/predict files=140 bytes=855437
+tar_xz_bytes=435504 parts=1
+note=C1 control plans for the W6 controlled re-verification: closures (kz_run_c1.sh, current profiles after PD29 D8), replays and kz predict of the four W6 F0 natural tx records, kz rtplan / kz hold plan checks (plan/predict_w6_20261029.md, env/c1/predict_w6.sh)

@@ -1,0 +1,37 @@
+# commands of the bootfix step (results 26.9); times UTC, 2026-11-19; <scratch> is a scratch directory of this step outside
+# the repository.  No cFS boot.  Run from this directory unless named.
+{ date -u; df -B1 /; } > out/free_start.txt                                      19:21:05Z (available 1036095488)
+../../env/tools/ledger_check.sh > out/ledger_check_start.txt                     rc 0 (205 rows, 0 failing)
+find <c1p2_<s>_derived/ws/exe> -type f / ! -type d / ! -type f ! -type d | wc -l  31 / 31 / 0 for each build
+findings.tsv, README.md; protocol 14.14, spec 11.6, results 26.9 (plan, notes); the third space step's plan
+    (../closure-space3-20261119, its commands.txt)                               committed as 1522f83
+the third space step's archives (../closure-space3-20261119/commands.txt)       committed as 8d94350
+run_cycle.sh, test_run_cycle.sh, commands.txt revised
+space_guard.sh --need 30000000 --kind dev-rct1 --log guard/dev_rct1.log -- bash test_run_cycle.sh <scratch>/rct1
+    > out/dev_run_cycle_tests1.txt                                               rc 1: 24 of 25 (the not-booted case read boot.out
+    after its later run; the test fixed)                                         committed as adfc67d
+space_guard.sh --need 30000000 --kind runcycle --log guard/runcycle.log -- bash test_run_cycle.sh <scratch>/rct2
+    > out/run_cycle_tests.txt                                                    rc 0: 25 of 25 on adfc67d (sha256 before and after the same)
+space_guard.sh --need 30000000 --kind mutants --log guard/mutants.trial1.log -- bash scripts/mutants.sh <scratch>/mut
+    out/mutants.trial1.txt (kept under this name after the run)                  rc 0: 13 of 14 mutants fail the test (keep without
+    its ledger check passed; the pin mutant also refused every later boot)
+test_run_cycle.sh: case 25 (a failing proposed ledger), the pin case's message; mutants.sh: two edits narrowed
+space_guard.sh --need 30000000 --kind dev-rct2 --log guard/dev_rct2.log -- bash test_run_cycle.sh <scratch>/rct3
+    > out/dev_run_cycle_tests2.txt                                               rc 0: 26 of 26 (before the commit)
+                                                                                 committed as 66397fc
+space_guard.sh --need 30000000 --kind runcycle-final --log guard/runcycle_final.log -- bash test_run_cycle.sh <scratch>/rct4
+    > out/run_cycle_tests_final.txt                                              rc 0: 26 of 26 on 66397fc (sha256 before and after the same)
+space_guard.sh --need 30000000 --kind mutants --log guard/mutants.log -- bash scripts/mutants.sh <scratch>/mut out/mutants.txt
+                                                                                 rc 0: 14 of 14 mutants fail the test
+bash scripts/no_expect_check4.sh ../closure-c1prep-20261119/boot/no_expect_input_check4.txt   (eval and expect only)
+df -B1 --output=avail / > header of the declaration; out/free_declaration.txt    19:44:35Z (1113055232)
+space_guard.sh --need 5000000 --kind declaration4 --log guard/declaration4.log -- python3 -I scripts/declaration4.py
+    ../closure-c1prep-20261119/boot/declaration3.tsv scripts/declaration4_header.txt ../closure-c1prep-20261119/boot/declaration4.tsv
+    declaration/remeasure_declaration3.tsv declaration/changes_vs_declaration3.tsv  rc 0: rows 165 (old 159, added 6; changed 3)
+                                                                                 committed as 4152b47
+space_guard.sh --need 5000000 --kind verify-<build> --log guard/verify-<build>.log -- bash run_cycle.sh verify <build> 0
+                                                                                 rc 0 for both: rows 162 ok 162 differs 0 missing 0
+../../env/tools/ledger_check.sh > out/ledger_check_end.txt                       rc 0 (205 rows, 0 failing; ledger sha256 6d9cc76a...)
+space_guard.sh --need 5000000 --kind tools-check --log guard/tools_check_deep.log -- bash ../../env/tools/tools_check.sh --deep
+    > out/tools_check_deep_end.txt                                               rc 0 (59 rows, 0 failing, deep)
+{ date -u; df -B1 /; } > out/free_end.txt                                        19:48:04Z (available 1112498176)

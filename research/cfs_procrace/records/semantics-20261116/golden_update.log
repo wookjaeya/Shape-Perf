@@ -1,0 +1,11 @@
+Test project /home/user/work/merge-check/kz-llvm
+    Start 249: static_golden_semantics_np
+1/1 Test #249: static_golden_semantics_np .......   Passed    0.14 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+golden    =   0.14 sec*proc (1 test)
+static    =   0.14 sec*proc (1 test)
+
+Total Test time (real) =   0.15 sec

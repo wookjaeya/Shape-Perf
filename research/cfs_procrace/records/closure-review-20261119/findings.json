@@ -1,0 +1,330 @@
+{
+ "findings": [
+  {
+   "id": "rules-01",
+   "severity": "blocking",
+   "claim": "The frozen judgement part sets the context of every use event to \"-\" when the row has no sidecar context line. Every alternatives line is keyed by a context number (context 1). So at a boot, (c3)(iii) of every one-context row is forced to not_established whatever its line says. The context rule was built on the single two-context design row and the general case is broken. The committed expectations take the defect's output as the expected value, and the boot declaration was committed with it.",
+   "evidence": "- **The defect:** env/obs1/explain_judge.py:1042-1045 (`use_context`: no ctx_lines -> \"-\"); :1010-1012 (`branch_iii`: \"no alternatives line of context %s\"); :1605-1607 (cids come from the use contexts at a boot, from sorted(alts) only when there are no use events).\n- **Population of the context rule:** 1/0/0/0/0 rows (results 19.4 line 2575). c1_post_tx has 0 context lines in cz_plans_v4_ns2/c1_post_tx/plan.side, but its A21 line is `[context 1 …]: found: retry`.\n- **No check exercised this path:**\n  - Every fixture row has context lines (env/obs1/tests/test_explain4.py:88-89).\n  - The 24.4 dry runs never ran the judge with use events on the real plans (24.4 (가): \"부팅 기록이 없으므로 사용의 문맥 배정은 아직 없음\").\n- **The expectations encode the defect:** records/closure-c1prep-20261119/expect/predictions.tsv:12, :40, :49 give iii_boot=not_established \"because use_context gives '-'\". So F1 will report `match` on the defect.\n- **F5 and expect_discriminate:** F5 passes through the defect (results line 3389). expect_discriminate for the fixed-build row and the probe row is predicted unmet because of it (line 3391).\n- **Mixed with rule outcomes:** 25.12 (line 3412) lists this defect next to rule outcomes as what blocks the design rows.\n- **Order:** the boot declaration 860c2cd was committed with the defect open (25.13 open point 1, line 3431).",
+   "fix": "Before the first boot:\n- Change `use_context` so that a row without context lines takes the single context its alternatives line names. If there is none, the context is unknown (item 16); it must not be a non-existent id.\n- Add fixtures with one-context rows that have no context line.\n- Re-run the 127 fixtures, the 2026-11-16 regression and a dry run with use events on the real plans.\n- Re-freeze the script.\n- Rewrite the iii_boot predictions from the rule, not from the defect.\n- Recommit expect_c1.tsv, boot/declaration.tsv and results 25.11-25.12."
+  },
+  {
+   "id": "rules-02",
+   "severity": "blocking",
+   "claim": "No committed or frozen script computes the falsifiers F1-F10, expect_safe (s1-s4) or expect_discriminate. After a boot they would be computed by code or hand reading chosen after the records are seen. That defeats committing falsifiers before the boot.",
+   "evidence": "- `grep -rn 'expect_safe\\|discriminate\\|F10'` over env/obs1, records/closure-c1prep-20261119/scripts, boot/ and records/closure-explain-rev4-20261119 returns nothing.\n- boot/run_cycle.sh:53-119 has only the steps boot, control, convert, kzt-text, chain, stop, gate, explain, expect and summary. boot/commands.txt ends with summary.\n- env/obs1/explain_summary.py:1-10 writes verdict × pair_kind × order tables, per-boot distributions and undetermined kinds only.\n- env/obs1/explain_expect.py does per-field match/mismatch/no_record only (it covers F1 at most).\n- Protocol 6 and 7 define F2-F10 and s1-s4 as checks over the records. 25.11 states their expected outcomes. Freeze list 25.12 names no script for them.",
+   "fix": "Before the first boot:\n- Write a falsifier script that reads the explanation records, the pair file and the plan, and never the expectation file (except for F1). It writes F1-F10, s1-s4 per control row, and expect_discriminate with the ground lines it found.\n- Give it fixtures that make each check fail.\n- Put its sha256 in freeze.tsv and boot/declaration.tsv, and add it as a run_cycle.sh step."
+  },
+  {
+   "id": "rules-03",
+   "severity": "major",
+   "claim": "A large share of the committed expectations and falsifiers cannot fail on any boot record, yet they are presented as placed where they can fail. Counting them as passes would report a safety number that the static inputs fix in advance.",
+   "evidence": "- **(s1) no bound pair in D1:** cannot fail. Basis 4 is missing for every creator callee in all five builds (results 21.5: success path held 0/0/0/0/0), and 25.11 states \"어느 갈래에서도 bound 는 없다\".\n- **(s4) no refuted without the five conditions:** cannot fail. Refuted requires basis4 held (explain_judge.py:1426-1432).\n- **(s2) no held (c3) branch on control rows:** cannot fail. (i) comes only from static holder lines, all not_held or not_established. (iii) is static not_established for A21 c1_pre_tx and forced by rules-01 elsewhere.\n- So 30 of the 40 expect_safe checks are fixed before the boot, against protocol 7's heading \"틀릴 수 있는 자리에 둔다\" and 25.11 \"40 점검이 모두 지나리라\".\n- **F checks:** F2's bound half cannot fail for the same reason. F5 passes through rules-01. F6 has nothing to check (stored_field_rule empty, 25.11). F7 is only a script check.\n- **Expectation file:** 960 of its 2,144 lines (6 fields × 160: use_cond.status, violation, callee_check, reach, writers, branch_i) are the frozen script's own static output echoed back. scripts/expect_write.py:12 calls them \"the values a boot cannot move\".",
+   "fix": "- In the protocol and the report, classify every check and every expectation field as boot-failable or static/format.\n- Count only boot-failable ones as falsifier or expect_safe results; report s1, s2, s4, F2 (bound part), F6 and F7 apart as static/format checks for this cycle.\n- Report the expectation comparison with the 960 static-echo lines counted separately."
+  },
+  {
+   "id": "rules-04",
+   "severity": "major",
+   "claim": "A library call named by every planned namespace-entry line has no semantic entry at all, and the rule and script treat it as \"not unverified\". So condition (na) semantics stands in D2, and in partial admissions without that call, while the length check rests on no recorded entry. That is an item resting on an unrecorded premise.",
+   "evidence": "- **No entry exists:** records/closure-c1prep-20261119/out/candidates_named_check.txt shows \"memchr: SEMANTICS records 0\", and memchr appears in `length-call=` of all planned namespace-entry lines. kairos/lib/llvm/p0.cpp has no memchr entry; the plan generator recognises memchr/strnlen by name with an ISO C citation (kairos/docs/plan_manifest.md:55, :376).\n- **Rule drops it:** scripts/candidates.py:16 says \"a named entry with no such record is not a candidate (it is not unverified)\".\n- **Judge accepts it:** explain_judge.py:514-517 `entry_state` returns True \"not in the candidate list (not unverified)\" when named_by is given; item_na_semantics calls it at :775. Results 25.11 line 3353: \"(나) 의미 D1 missing / D2 held … (memchr 는 후보가 아님)\".\n- **Untested shape:** the fixture puts memchr in the candidate list as a P0 data function (tests/test_explain4.py:144), so the real case is not tested.\n- **Rules broken:** judgement rules 8.13 principle (2) and item 10 (the length-check call's entry must not be unverified in the branch).",
+   "fix": "- Treat a named library call with no entry as missing (\"no entry\") in every data branch, or list it as a candidate of its own kind so that admission is explicit.\n- Add a fixture where a named call has no record.\n- Correct the (na) row of 25.11 5.2 and the D2 missing-item lists in predictions.tsv and expect_c1.tsv."
+  },
+  {
+   "id": "rules-05",
+   "severity": "major",
+   "claim": "The data-state rule is not applied to the use-condition elements (c1), (c2), (c4), nor to the library entries of condition (da). Elements record no list entry they rest on, not even \"none\", and the format check cannot catch it. Under D2, (da) cannot move by construction, yet the expectations state that it depends on no kind.",
+   "evidence": "- **Lists never read:** explain_judge.py:454 parses the row's `layers:` line (P0-unverified / sem-unverified lists); nothing reads `st[\"layers\"]` afterwards.\n- **No depends_on on elements:** uc[\"callee_check\"], [\"reach\"], [\"writers\"] carry no depends_on (explain_judge.py:1563-1593).\n- **Format check 16 gaps:** it checks only `premises` on reach/writers, and never checks (c1) or any element's depends_on (explain_judge.py:2027-2040).\n- **(da) ignores the data branch:** item_da (explain_judge.py:800-851) consults `br` only for Rf, never for the data branch. 8.13 item 11(b) makes the address-receiving library entries part of (da), and item 4's own example says \"(다)는 버퍼의 쓰임 항목 때문에 여전히 missing\".\n- **The tool line fixes the D1 state:** the buffer line discharges an address use only on a non-unverified entry (relations.cpp `library_use`). The real line shows the strncpy uses as \"arg 0 unverified\" (cz_final_order/c1_pre_tx/relations.txt:608).\n- **Expectations:** results line 3355 gives (da) \"기대는 종류: 없음\", and 5.4 gives \"(c1) present / present\" with no rests-on derivation.\n- **Rules broken:** 8.13 item 2 (\"(c1)–(c4)… 모두 같다… 근거에는 그것이 기대는 목록 항목(없으면 '없음')을 적는다\").",
+   "fix": "- For each element and item, derive from the row's lines the list entries its ground rests on, and record them as depends_on, or \"none\".\n- Apply entry_state per branch.\n- Extend format check 16 to (c1) and to depends_on.\n- Have item_da report the buffer's use entries as depends_on and re-evaluate them in D2.\n- Correct the \"기대는 종류\" column of 25.11."
+  },
+  {
+   "id": "rules-06",
+   "severity": "major",
+   "claim": "The alternatives line's `rests on` names an unverified entry only when it is the effect's direct callee. A terminal or exit effect reached through a wrapper whose terminal nature comes from a P0-unverified entry is printed as `rests on: none`. The frozen judge then gives (c3)(iii) held in D1. That breaks the data-state rule for termination entries.",
+   "evidence": "- **Code:** `alt_rests` checks only `funcs_[fn].name` (kairos/lib/llvm/relations.cpp:4987-4994). It is called with the effect's direct callee (:5050-5053).\n- **Output:** all nine `none found (exploration complete)` lines end in `terminal [CFE_PSP_Panic (terminal operation)]` and each says `rests on: none`. Three are in cz_final_order/c1_pre_tx/relations.txt (lines 856, 901, 1455); the other six are the same rows in c1_post_tx and r2_core.\n- **Why the effect rests on an unverified entry:** CFE_PSP_Panic calls abort() (bundle_1df262a psp/fsw/pc-linux/src/cfe_psp_support.c), and the same rows' layers line lists `P0-unverified(abort, strcmp)`.\n- **Judge:** explain_judge.py:1027-1039 returns held when `rests_on` names nothing.\n- **Rules broken:** 8.13 item 15 (the line must name the termination P0 entries it relies on) and item 2.\n- **Coverage:** the only fixture is a direct exit call (results 17.2: `rests on: P0-unverified(exit)`). No planned row of this cycle is affected.",
+   "fix": "- Carry the P0 and sem leaves of the derivation that makes an effect terminal or exit-app into `rests` (the same leaves the layers column uses).\n- Add a fixture with a wrapper around a P0 termination call.\n- Re-measure and report the none-found lines in the next kz-static build."
+  },
+  {
+   "id": "rules-07",
+   "severity": "minor",
+   "claim": "The tool's header counts of open effects by reason are wrong. These are the per-build counts that judgement rules 8.13 item 17 requires in the build declaration, and they went into the tool output and the declared reports uncorrected.",
+   "evidence": "- **Code:** sf_header splits the reason text at every \"; \", including inside parentheses (kairos/lib/llvm/relations.cpp:4931-4955).\n- **Effect:** 333 rows per C1 build are counted as `other` only because of this split (results 20.5; 21.5 item 5).\n- **Left as is:** the tool line and the declared compare_2 reports keep the wrong counts (21.8 \"그대로 냈다\").",
+   "fix": "- Split only at top-level separators. Until then, state next to the declared per-build counts that `other` is overcounted by 333 per C1 build, and give the corrected split."
+  },
+  {
+   "id": "rules-08",
+   "severity": "minor",
+   "claim": "Reading Re is committed as moving \"the stored-field rule of (c3)(iii)\", but no committed tool line or script computes the call result under premise (6). Re therefore cannot move (iii) by construction. The expectations report \"Re does not move\" as if it were the outcome of the reading.",
+   "evidence": "- **Definition:** 8.13 item 5 table, Re: moving elements \"(c3)(i), (c3)(iii)의 저장값 규칙\".\n- **Tool:** the alternatives line under premise (6) gives `decided calls: none` (cz_final_order/c1_pre_tx A21 context 1).\n- **Judge:** under Re, `branch_iii` only rewrites the reason text (explain_judge.py:1021-1024).\n- **Report:** 25.11 5.4 says \"`Re` 는 움직이지 않음(24.4 (라))\".",
+   "fix": "- In the expectation table and the PI question, mark Re's effect on (c3)(iii) as \"not evaluable with these inputs (no call result is computed under the premise)\", and keep it apart from the readings that were actually evaluated."
+  },
+  {
+   "id": "builds-01",
+   "severity": "blocking",
+   "claim": "The kzgcc 0.5 plugin build skipped two of its declared post-build checks, yet results 25.6 (가) says every check was done as declared. No ledger_check.sh ran after the build, and tools_check.sh ran without --deep. The plugin's first ctest, which compiles 20 test units with the plugin, also ran outside the space guard. This breaks rule 2 (after each build: ledger_check.sh and tools_check.sh --deep).",
+   "evidence": "Declaration 25.5 (나), plan/full_stage_results_20261116.md:3263: '빌드 뒤 점검: 플러그인 ctest(첫 실행 -V), MC 의 lint(...), ledger_check.sh, tools_check.sh --deep, env 의 단위 점검 둘'. Claim 25.6 (가), :3270: '... tools_check 57 행 실패 0 ... 모두 선언 25.5 (나) 대로다'. Last line of records/closure-c1prep-20261119/plugin05/tools_check_after_build.txt (09:10:12) is 'tools_check: 57 rows, 0 failing', with no '(deep)' and 0 'stream=' entries; out/tools_check_deep_after_builds.txt has 32. No ledger check exists between reclaim/ledger_check_after_archive.txt (08:47:02) and out/ledger_check_after_builds.txt (09:23:51). The plugin build (guard/p_plugin-build.log 09:07:31) and the whole c1_pre_tx derived build (guard/2_runtime_pre.log 09:10:21 to 2_bprime_pre.log 09:11:54) fall in that gap. scripts/plugin05.sh has no ledger or registry step. Its ctest step (line 21, 'ctest -V') is not wrapped in space_guard.sh, and guard/ has no p_ctest log; the runtime build guarded the same kind of test (closure-runtime-20261119/guard/b13_kzgcc_ctest.log).",
+   "fix": "Correct 25.6 (가) and add a deviation to 25.13 naming three gaps: the missing post-build ledger_check, the non-deep registry check, and the unguarded plugin ctest. Cite the first checks after that build: out/ledger_check_after_builds.txt (193 rows, 0 failing, 09:23:51) and out/tools_check_deep_after_builds.txt (57 rows deep, 0 failing, 09:26:05). In later steps, put the declared post-build checks into the build script itself."
+  },
+  {
+   "id": "builds-02",
+   "severity": "major",
+   "claim": "The review-fix kz-static build declared that measurement would run only after every comparison was OK. Instead, measure.py ran while 8 of the 13 comparison steps were still to come. One more measurement file was written after the twin check had stopped the step on undeclared differences and before addendum 12.0 (나-2) was committed. Results 12.11 does not report either.",
+   "evidence": "Declaration 12.0 (나-1), plan/full_stage_results_20261116.md:1892: '측정(비교가 모두 OK 인 뒤; measure.py ...)'. records/review-fixes-2-mc-20261119/measure/measure_{c1_pre_tx,c1_post_tx,r2_core,c5_641,c5_642}.txt have mtime 02:03:56. compare_all.txt shows extract_final finishing at 02:04:00Z, the rest through plans_v4_kept at 02:04:14Z, and 'twin rc=1 OK=0 BAD=1 2026-11-19T02:04:16Z'. df_view_allocatenew.log (the facts view behind the measurement) starts 02:04:09Z, overlapping df_compare_plans_v4 and df_compare_plans_v4_all. measure/c1_pre_tx_allocatenew_uses.txt has mtime 02:04:28, after the twin stop and before 5096d4a (02:06:30). measure.py was not re-run after twin_2. 12.11 (바), :2161 onward, lists no such deviation.",
+   "fix": "Add a deviation to 12.11 (바): the measurement ran during the comparisons and partly after the twin stop. State that it read rf2_* outputs that twin_2 and the declared check (275/275) later confirmed unchanged. Alternatively, re-run measure.py into new file names and show they match byte for byte."
+  },
+  {
+   "id": "builds-03",
+   "severity": "major",
+   "claim": "In two kz-static builds a step started before the previous step's rc was known, so the stop rule could not act. This goes against results 12.10 item 6 ('명령마다 rc 를 본 뒤 다음으로') and rule 1. In the review-fix build, the runs of the new tool started while the post-build tools_check --deep was still going. In the closure build, three comparisons ran during the extract_final run, and later runs went ahead without waiting for them. Neither 12.11 nor 21.7 records this.",
+   "evidence": "Review-fix build, records/review-fixes-2-mc-20261119/: df_tools_check_after_build.log runs from 01:56:25.023Z to 01:58:21.400Z. df_run_relcheck.log starts at 01:56:35.186Z, and the order and extract_off runs also start inside that interval. Closure build, records/closure-kzstatic-mc-20261119/guard/: r_extract_final.log runs from 06:21:38.980 to 06:23:15.285. k_relcheck.log (06:22:04), k_order.log (06:22:06) and k_extract_off.log (06:22:08 to 06:22:20) run inside it, and r_off_order follows at 06:23:15. The lowest value run_all.txt gives for extract_final (889,491,456) includes the dip of the concurrent facts view. Rule text: results :2100.",
+   "fix": "Record both overlaps as deviations in 12.11 (바) and 21.7. In later builds, run all steps through one sequential runner that stops on the first rc≠0, so that two guarded actions never run at the same time."
+  },
+  {
+   "id": "builds-04",
+   "severity": "major",
+   "claim": "The boot declaration says the boot step will re-measure every row of boot/declaration.tsv and refuse to boot on a difference. Neither the committed runner nor the 'exact boot commands' does this. One input of the frozen explanation step, reason_vocabulary.txt, is also not pinned in the declaration or in freeze.tsv.",
+   "evidence": "plan/full_stage_results_20261116.md:3397 (25.12): '부팅을 하는 단계는 부팅 전에 이 목록을 다시 재어 같음을 보이고, 다르면 부팅하지 않는다'. records/closure-c1prep-20261119/boot/commands.txt:3-4 begins with 'run_cycle.sh boot $B 1'. run_cycle.sh:53-55 (boot step) checks only allowed() and that the output directory is new, and no step in its usage (line 123) reads declaration.tsv. run_cycle.sh:114 passes '--vocabulary kairos/tests/static/data/reason_vocabulary.txt' to the frozen explain.py, but neither boot/declaration.tsv nor records/closure-explain-rev4-20261119/freeze.tsv names that file (0 matches). That directory is the one kz-static golden updates write to. My re-measure today: all 108 sha256 rows of declaration.tsv match the files on disk.",
+   "fix": "Add a verify step to run_cycle.sh that re-hashes every row of declaration.tsv, add reason_vocabulary.txt as a row, and make that step the first command in commands.txt. Then re-commit the boot declaration before the first boot. It has to be re-committed anyway if open point 1 of 25.13 leads to a refreeze."
+  },
+  {
+   "id": "builds-05",
+   "severity": "major",
+   "claim": "In two builds, the first-run ctest expectation for some tests that run a relinked or rebuilt binary was not confirmed in a scratch check build. The declarations' statements about which tests use changed binaries are incomplete.",
+   "evidence": "Review-fix build, plan/full_stage_results_20261116.md:1882: '그 밖의 190 개는 다시 링크되는 바이너리를 쓰지 않으며 ... 빌드 전 MC 에서 돌려'. tool_identity_schema_revision is one of those 190 (records/review-fixes-2-mc-20261119/ctest_nonstatic_prebuild.log:142-143). It runs $<TARGET_FILE:kz-static> (kairos/tests/unit/CMakeLists.txt:42-43), which relinked, and it is absent from scratch/ctest_first_scratch.log (0 matches). Runtime build, :3060 (23.0 (마)): of the 164 pre-build tests it says '이 빌드가 바꾸는 것을 쓰는 것은 다섯이다' (instr_clang_transform, test_hold_ptrace, test_hold_sequence, test_probe_anchor_reached, test_static_plan) and '통과할 것이다 [I]'. It leaves out tool_identity_schema_revision (records/closure-runtime-20261119/prebuild/mc_tests_not_in_scratch_164.txt), which runs the rebuilt kz (tests/unit/CMakeLists.txt:41) and failed in the scratch check build (scratch/checkbuild_tests_failed_10.txt). None of these six was run against the new source before the build. The closure build did this correctly (closure-kzstatic-20261119/scratch6/checkbuild/logs/cb_ctest_identity.log). All outcomes passed: 16 declared failures, then 268/0 for the review-fix build; 276/0 for the runtime build.",
+   "fix": "Correct the sentences at :1882 and :3060. List as deviations in 12.11 (바) and 23.6 the tests whose first-run expectation rested only on a pre-build run of the old binary. In later declarations, derive the test set from the TARGET_FILE arguments of relinked targets."
+  },
+  {
+   "id": "builds-06",
+   "severity": "minor",
+   "claim": "The scratch check build behind the review-fix declaration ended below the floor. The guard still logged verdict=completed, because it acts only on samples taken while the command runs. Results statements that use 'all verdict=completed' as proof that the floor held therefore do not prove it.",
+   "evidence": "records/review-fixes-2-mc-20261119/scratch_guard/002_scratch-make.log end line: 'verdict=completed rc=0 free=305602560 lowest=305602560 dip=1235963904', against floor 314,572,800 and --need 500,000,000. env/tools/space_guard.sh:58 stops only on in-run samples. The value read after the command ends (:69) can be below the floor, and the verdict at :77 is still 'completed'. Results 21.6 (:2905) and 23.5 (:3114) rely on the verdicts. The breach itself is disclosed in 12.0 (나-1) and 12.11 (마), but the dip of about 2.5 times the declared need is not.",
+   "fix": "Make the guard give an end value below the floor its own verdict and a nonzero rc. In results, cite lowest values instead of verdicts. Add one line to 12.11 (마) saying the declared need was exceeded."
+  },
+  {
+   "id": "builds-07",
+   "severity": "minor",
+   "claim": "The review-fix build declared its source as the kairos/ tree of the declaration commit. Its ctest lint tests actually ran on a tree that also held the five revision-2 namespace data files committed 7 s before the build started. 12.11 does not say so.",
+   "evidence": "plan/full_stage_results_20261116.md:1873: '빌드할 소스는 이 선언을 커밋하는 HEAD 의 kairos/ 다' (44a45c7, 01:39). Commit 090e280 at 01:42:28 added kairos/semantics/framework_namespaces2_*.txt, and records/review-fixes-2-mc-20261119/build_start.txt is 01:42:35. The first ctest (01:54) and the full ctest (01:55) include lint_case-ids-data and lint_semantics-names, which read kairos/semantics/* (kairos/tests/lint/CMakeLists.txt:8-9; kz_lint.cpp:403, :415). Addendum 12.0 (나-2) argues only that the run steps do not read those files.",
+   "fix": "Add one line to 12.11 (바): the build's ctest lint tests ran on 090e280's tree, with five more data files than the declared source, and were clean. The tool identity (tool_source 2b8834da) was unaffected."
+  },
+  {
+   "id": "semantics-01",
+   "severity": "blocking",
+   "claim": "The committed expectations for every use that finds its object (A22 and A26 in both C1 builds, and the found cases of A21) are not what the frozen judge can produce from the committed static inputs. The expectation file says name state 'undecided(a slot clear not shown to be no lifetime end)', link_result 'linked' and row link 'established (instance)'. The frozen judge will give an unlinked instance link and a different name state. The results also predict that the time-base rows meet expect_discriminate and that F4 passes; both rest on the same wrong reading.",
+   "evidence": "Frozen judge explain_judge.py (531a6b3e): line 1250-1251 sets a create's out id `c[\"_out\"]` only when the creator callee's success-path line is `held`. Lines 1333-1339 make a generation only from creates with `_out`. Lines 1381-1391 set an instance link only when a generation carries the found id; otherwise the result is 'link_unlinked(no create of the id in the record)'. In both C1 builds every creator callee's success path is `missing`: cz_final_order/c1_pre_tx/relations.txt, rows A22 and A26, read 'callee-check (success path): OS_TimeBaseCreate: missing(an implication between conditions is not decided)', and the summary shows held 0. The A22 and A26 incomplete lines contain actor_not_extracted, so the name state becomes 'undecided(the row's creator sites are not complete)'. Probe run under the space guard: the fixture world of case found-linked with only the success line set to missing gives instance_link unlinked 'no create of the id in the record', name_state 'unmet' and record link unlinked; with the line held it gives linked (<scratch>). Affected outputs: records/closure-c1prep-20261119/expect/expect_c1.tsv has 64 lines each of link.status=established, use[0].link_result=linked and use[0].name_state=undecided(a slot clear…) for rows f371687b47120887 and ad9fc1058923aad9 (for example lines 45, 47, 48). expect/predictions.tsv gives the ground 'instance link on the open generation'. Results 25.11 tables 5.3 and 5.5, its F4 line, and expect_discriminate for the time-base rows marked 충족 (met) rest on this. No fixture covers a found use when the success path is missing. With complete creators the judge even gives a found use the name state 'unmet'.",
+   "fix": "Before any boot, re-derive the found-use expectations by following the frozen judge's code path: run it on a synthetic record of the start-script order built from the real plan and relations. Then recommit expect_c1.tsv, predictions.tsv, 25.11 (5.3, 5.5, F4, expect_discriminate) and the boot declaration's sha256. If the lead decides that a found use's id should seed a generation without a held success path, that is a judge change and needs fixtures, a regression and a re-freeze. In either case add a fixture with a found use and a missing success path, and give a found use a name state other than 'unmet'."
+  },
+  {
+   "id": "semantics-02",
+   "severity": "major",
+   "claim": "The store at osapi-idmap.c:640 is planned and judged as a possible lifetime end. The source shows it runs only on a free record, inside an allocation, so it cannot end any open name. The open point that waited for the lead's decision on this was dropped before the boot.",
+   "evidence": "osapi-idmap.c:626-628 sets return_code = OS_SUCCESS only when !OS_ObjectIdDefined(obj->active_id). The store at :640 (`obj->name_entry = NULL`) is guarded by `return_code == OS_SUCCESS` at :633, after `active_id := token->obj_id` at :639. A name ends when active_id becomes undefined at :1079 (through FinalizeDelete or a failed FinalizeNew), and a name match needs active_id defined (:561, :271). The tool's own line says so: cz_final_order/c1_pre_tx/relations.txt:627 'clear-slot …:640:9 … not shown … (the record is allocated here)'. Plan rule 10.4 still plans site 264 (plan.side 1145, need lines 1127/1131/1135/1139). The judge counts every slot-clear event of any kind and actor between create and use as a possible end: explain_judge.py:907-908 and 1365-1366, with no kind filter. As a result results 25.11 records (마) as 'missing(사이의 다른 할당의 slot clear)' (missing because of another allocation's slot clear in between) and the found-use name states as undecided. Sections 12.11 (사), 18.5 and 19.5 left the question to the lead, and 25.13's open points no longer list it.",
+   "fix": "Choose one: decide the free-record condition from the path condition (return_code's only success definition is under the active_id test at :626), or have the lead rule that the :640 store is no lifetime end. Until then, restore it as an open point in 25.13. Annotate 25.11 (마) and the name states as resting on a store the source shows to be an allocation's initialisation. If the plan keeps the site, filter slot-clear events by the kind or table index of their address operand."
+  },
+  {
+   "id": "semantics-03",
+   "severity": "major",
+   "claim": "Relations rules revision 14 labels NUL-terminator stores that follow a strncpy as 'lifetime end: clear-slot'. These stores are part of a name store, not a clear. The clear-slot counts reported in results 21.5 and 22.6 are therefore mostly not lifetime ends.",
+   "evidence": "c1_pre_tx relations.txt: :207 bp_storage.c:132:9 (`Name[sizeof-1]=0` after strncpy in BP_StorageService_Register), :256 cfe_psp_start.c:251:17 (CommandData.ResetType terminator), :329 cfe_tbl_api.c:442:33 and :352 cfe_tbl_api.c:312:21 (Name terminators in CFE_TBL_Register), :980 osapi-filesys.c:462:13 (virtual_mountpt terminator in OS_mount), :1834 osapi-file.c:375:17 (stream_name terminator in OS_rename). Two more are not lifetime ends either: :1835 osapi-sockets.c:97:9 (empty-name fallback at socket creation) and :627 (osapi-idmap.c:640, see semantics-02). Only cfe_tbl_api.c:637 and cfe_tbl_internal.c:1267 (`Name[0]='\\0'` on unregister and cleanup) remove a name, so 2 of 10. The same error appears in c5_641: 'clear-slot cfe/fsw/cfe-core/src/es/cfe_es_apps.c:583:12 in CFE_ES_AppCreate' is `StartParams.Name[OS_MAX_API_NAME - 1] = '\\0'` right after strncpy. Results line 2871 (21.5) and line 3006 (22.6) report 'clear-slot 10/10/6/18/18' as lifetime ends.",
+   "fix": "Exclude constant stores to the last element of the key field that follow a copy into the same field on the path, or more generally stores at index sizeof-1. Recount the five builds' header lines and correct 21.5 and 22.6. Add a fixture for the strncpy-plus-terminator pattern."
+  },
+  {
+   "id": "semantics-04",
+   "severity": "major",
+   "claim": "For the fixed build's design row (c1_post_tx A21), the facts miss the failure event that follows the retry loop. As a result the plan records no event-send for the use's failure, and its note wrongly says there is none.",
+   "evidence": "Post source cf_cfdp.c:1014 `if (ret != OS_SUCCESS)` → :1016 CFE_EVS_SendEvent(CF_EID_ERR_INIT_SEM, …). This is reached with -17 after 25 retries, or with any other error after the break at 1008. cz_final_order/c1_post_tx/relations.txt has no line mentioning cf_cfdp.c:1016. The absence line reads 'effects: retry at - open; return-result at …:1053 open', with no position for the retry. The handling_label line itself lists 'branches decided by it at 1006:21, 1014:17, 1048:9'. cz_plans_v4_ns2/c1_post_tx/plan.side has 'need row 17975444d83f6589 event-send not-planned reason=plan_missing(need not planned) note=\"no event send or system log of RESULT_EFFECT with a call on a failure or absence outcome of the row's use\"'. In the pre-fix build the same event (cf_cfdp.c:997:17) is found and planned (site 297).",
+   "fix": "Follow the loop-carried value (the call at 1003 inside the loop and the constant at 1000) to the branch at 1014 in RESULT_EFFECT and the relations effects. Add a retry-then-test fixture. Until that is built, reword the need note as a tool gap rather than 'no event send'."
+  },
+  {
+   "id": "semantics-05",
+   "severity": "major",
+   "claim": "The HB-await edges of the review-fix build pair every writer of the task record's EntryFunc with every waiting task. The source shows each task waits only on its own record, which only its creator writes, so 224 of the 284 c1 edges carry a premise the source refutes. Section 12.11 nonetheless reports the per-writer-actor counts as fixed facts.",
+   "evidence": "cz_final_order/c1_pre_tx/edges.tsv and rf2_final_order/c1_pre_tx/edges.tsv: 284 HB-await edges, all from 'write cfe_es_apps.c:620:9 in CFE_ES_StartAppTask [EntryFunc]'. They form 71 writer×waiter actor pairs × 4 uses; for example E02e1c2b346cae927 is BP_AppMain → CFE_ES_TaskMain and E0d77926bda9e4ca0 is CFE_TIME_TaskMain → CFE_ES_BackgroundTask. The wait (cfe_es_apps.c:508-529) reads `CFE_ES_GetTaskRecordByContext()` (:513), which looks up OS_TaskGetId() (cfe_es_resource.c:285-286). Only the creator's StartAppTask writes that record. That leaves 15 possible actor pairs (main → 10 apps and core tasks, CFE_ES_TaskMain → BackgroundTask, CFE_TIME_TaskMain → the two 1Hz tasks, BP_AppMain → the two BP_CLA tasks), i.e. 60 edges. Results 12.11 (라) reports 'BP_AppMain·CFE_ES_BackgroundTask·CFE_ES_TaskMain·CFE_TIME_TaskMain 0 → 56 each' with no caveat. No pair uses these edges (pairs.tsv has no conditional_before), so no verdict moved.",
+   "fix": "Tie the waiter's record to the record its own creator's spawn wrote, so that HB-await is emitted only for creator→created-task pairs; or narrow the premise to that instance. Correct 12.11 (라) to say how many edges can hold by source, and recount r2 the same way (64 → 116)."
+  },
+  {
+   "id": "semantics-06",
+   "severity": "major",
+   "claim": "The relations say two CF functions are not 'called through a function pointer'. Both are entries of function-local static dispatch tables. For the A63 control row this yields 'no root reaches' facts.",
+   "evidence": "cz_final_order/c1_pre_tx/relations.txt:1186, 1204, 1224 and 1244 say '… CF_CFDP_R2_RecvMd / CF_CFDP_S_SubstateSendMetadata … direct callers 0, called through a function pointer: no'. Source: cf_cfdp_r.c:902 `[CF_CFDP_FileDirective_METADATA] = CF_CFDP_R2_RecvMd` sits in a `static const CF_CFDP_FileDirectiveDispatchTable_t` inside CF_CFDP_R2_Recv, and cf_cfdp_s.c:650 and :668 place CF_CFDP_S_SubstateSendMetadata in the static substate tables of CF_CFDP_S1_Tx and S2_Tx. These are the only two functions with this claim in c1_pre_tx, and both are wrong. Consequences: pairs.tsv:81 gives row b881269bea290f8b (A63) 'unknown(no root reaches CF_CFDP_R2_RecvMd)', and results 25.11 5.5 uses 'actor_not_extracted(no root reaches the use)' for A63.",
+   "fix": "Collect address-taken functions from the initialisers of function-scope static objects, including nested designated initialisers, as indirect-call targets. Until then, mark A63's root and pair facts as a tool gap, not a property of the program."
+  },
+  {
+   "id": "semantics-07",
+   "severity": "minor",
+   "claim": "The ground given for basis 5 in results 25.11 uses the old bound of 64; the key-text sites now carry a bound of 20.",
+   "evidence": "Results 25.11, table 5.2, basis-5 row: '글 길이 8·7 < 64' (text lengths 8 and 7 < 64). cz_plans_v4_ns2/c1_pre_tx/plan.kzs 'value 259 0 role=key_text … string=validated bound=20' and 'value 262 0 role=key_text … bound=20'. Results 19.5 itself says the lookup key text's bound changes from 64 to 20 (extent-value=20).",
+   "fix": "Change the ground to '< 20 (the stored-name extent bound of sites 259 and 262)'."
+  }
+ ],
+ "verdicts": [
+  {
+   "id": "rules-01",
+   "real": true,
+   "before_boot": true,
+   "reason": "Reproduced in the frozen judge (sha256 531a6b3e matches freeze): use_context returns \"-\" when the row has no context line (explain_judge.py:1042-1045), cids come from use contexts at a boot (:1605), and branch_iii returns not_established 'no alternatives line of context -' (:1010-1012). c1_post_tx plan.side has 0 context lines, while relations.txt:718 (both builds, A20) and the c1_post_tx A21 line are '[context 1 ...]: found ...'. No fixture has an empty context list (test_explain4.py:88-89; the only context cases at :573-584 keep context lines). predictions.tsv:12/40/49 derive iii_boot from the code path, not from the rule. Judgement rule 8.13 item 16 assigns frames only when a use is reached by several call chains, so for a one-chain row the frozen code contradicts the committed rule rather than offering a reading. Results 25.11 5.4 and 25.13 open point 1 disclose it, but only as a 'reading problem' left to the lead with no disposition, so it is not handled. It changes the design rows' (iii), F5 and expect_discriminate.",
+   "fix": "Before the first boot: in use_context, when the row has no context line, take the single context id that the row's alternatives line(s) name. If there is not exactly one, return None (unknown, item 16), never a non-existent id. Add fixtures for a one-context row without a context line (found, none found, not established). Re-run the 127 fixtures, the 2026-11-16 regression and a dry run with synthetic use events on the real plans, then re-freeze. Rewrite the iii_boot predictions from the rule (c1_post_tx A21 and A20 become not_held). Recommit expect_c1.tsv, predictions.tsv, boot/declaration.tsv and results 25.11-25.13 (F5, expect_discriminate)."
+  },
+  {
+   "id": "rules-02",
+   "real": true,
+   "before_boot": true,
+   "reason": "Confirmed. grep for expect_safe, discriminate and F10 over env/obs1, the prep scripts, boot/ and the freeze directory finds nothing. run_cycle.sh:52-124 has only the steps boot, control, convert, kzt-text, chain, stop, gate, explain, expect and summary, and commands.txt ends with summary. explain_expect.py covers F1 only. The judge's format checks (explain_judge.py:1990-2050) touch only part of F2/F7: 'D1 held on an unverified entry', and a bound pair whose items are not all held. F3-F6, F8-F10, s1-s4 and expect_discriminate have committed definitions (protocol 6-7) and committed expected outcomes (25.11), but no committed procedure. Several of them need operational choices that would then be made after the records exist: F3 (the 8.2 contradiction), F8 (the pair-file region) and F2 (what counts as resting on an entry). Protocol 12 does not list such a script, so this is a gap in the pre-commitment, not in a written rule.",
+   "fix": "Before the first boot: write a falsifier script that reads the explanation records, the pair file and the plan (never the expectation file, except for F1). It should output F1-F10, s1-s4 per control row and expect_discriminate per control row, with the ground lines it found. Give it fixtures that make each check fail. Freeze it, put its sha256 in freeze.tsv and boot/declaration.tsv, and add it as a run_cycle.sh step after explain."
+  },
+  {
+   "id": "rules-03",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. bound needs basis4 held, and refuted needs basis4 held plus the five conditions (explain_judge.py:1427-1434). basis4 comes only from the static success-path line, which is missing for every creator callee (21.5: held 0/0/0/0/0; all 19 lines in c1_pre_tx missing), so s1 and s4 cannot fail on any boot. (i) is static, and (iii) takes its status from the static alternatives line of the context, all not_established or found for the control rows, so s2 cannot fail either. That makes 30 of the 40 expect_safe checks fixed in advance. The expectation file has 6 static fields x 160 = 960 of 2,144 lines (counted), and expect_write.py:12 itself calls them 'the values a boot cannot move'. Protocol 6 already set F7 apart for the same reason, yet 25.11 presents all 40 as checks that can fail.",
+   "fix": "In 25.11, or an addendum to protocol 6-7, classify each check and expectation field as boot-failable or static/format. Report s1, s2, s4, the bound half of F2, F6 and F7 apart as static/format checks for this cycle. Count the 960 static-echo expectation lines separately in the F1 comparison. The classification follows from the static inputs alone, so it can be committed at any point before the report."
+  },
+  {
+   "id": "rules-04",
+   "real": true,
+   "before_boot": true,
+   "reason": "Confirmed. out/candidates_named_check.txt shows 'memchr: SEMANTICS records 0' in both builds, and memchr is in every length-call= of the planned namespace-entry lines. p0.cpp has no memchr or strnlen entry; the plan generator recognises them by name with an ISO C citation (plan_manifest.md:55). candidates.py:16 drops a named call that has no record ('it is not unverified'). entry_state returns True for a named_by entry that is not in the list (explain_judge.py:514-517), and item_na_semantics accepts that (:775-790). So (na) semantics is held in D2 and in partial admissions without that call, resting on no recorded entry. That conflicts with 8.13 principle (2) and item 10. The fixture puts memchr in the candidate list as a P0 data function (test_explain4.py:144), so the real shape is untested. Results 25.10 disclose that memchr has no record but not the consequence. The candidate list and the expectations cannot change after the boot (8.13 item 3).",
+   "fix": "Before the first boot, do one of two things: treat a named library call with no SEMANTICS/P0 record as 'no entry', so the item is missing in every data branch (entry_state returns False for named_by with no hit), or list such calls in the candidate list as a kind of their own so that admitting them is explicit. Add a fixture with a named call that has no record. Correct the (na) row of 25.11 5.2 and the D2 and partial-admission missing lists in predictions.tsv and expect_c1.tsv, then re-freeze and recommit with rules-01."
+  },
+  {
+   "id": "rules-05",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. st['layers'] is parsed at explain_judge.py:454 and never read again (layers_unverified is used only in branch_iii). uc callee_check, reach and writers carry no depends_on (:1563-1593). Format check 16 looks only at premises on reach and writers (:2038-2041). item_da (:800-851) never consults the data branch for the buffer's address-use library entries: it accepts or rejects the tool's buffer line as computed in data state 1, which marks the strncpy uses 'arg 0 unverified' (relations.txt:608). 8.13 item 2 requires every element's grounds to name the list entries it rests on (or 'none'), and item 4's own example ties (da) to the buffer-use entries. So the (da) 'kind relied on: none' entry in 25.11 is wrong as a derivation. No status changes in this cycle: (da) stays missing for FIELD_STATUS DISABLED and the other writers, (c1) rests on the built-in failure-class rule, and use_cond is partial everywhere. It is therefore a recording defect, not one that moves an outcome.",
+   "fix": "Record depends_on (or 'none') on (c1), (c2), (c4) and (c3)(i) from the row's lines. In item_da, read the 'arg k unverified' entries of the stored-name address uses and re-evaluate them per data branch with entry_state, reporting them as depends_on. Extend format check 16 to (c1) and to depends_on. Correct the (da) 'kind relied on' column of 25.11 to data-function. Bundle this with the re-freeze for rules-01."
+  },
+  {
+   "id": "rules-06",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. alt_rests checks only funcs_[fn].name of the effect's direct callee (relations.cpp:4987-4994, called at :5050-5053). The three none-found lines of c1_pre_tx (relations.txt:856 A23, 901 A25, 1455 A48) end in effects 'terminal [CFE_PSP_Panic (terminal operation)]' and say 'rests on: none'. CFE_PSP_Panic calls abort() (bundle_1df262a psp/fsw/pc-linux/src/cfe_psp_support.c:133), and those rows' layers lines list P0-unverified(abort, strcmp/strncmp). The judge returns held when rests_on names nothing (explain_judge.py:1027-1039). The same lines appear in c1_post_tx and r2_core. Not disclosed. None of these rows is planned for this cycle.",
+   "fix": "In the next kz-static build, carry the P0 and sem leaves of the derivation that makes an effect terminal or exit-app (the leaves the layers column uses) into acc.rests. Add a fixture with a wrapper around a P0 termination call and re-measure the none-found lines. Until then, note in the results that these nine lines' 'rests on: none' omits abort."
+  },
+  {
+   "id": "rules-07",
+   "real": false,
+   "reason": "The miscount is real (sf_header splits at every '; ', including inside parentheses), but it is already disclosed with the corrected split. Results 21.5 item 5 gives 2,398 'other' rows, of which 2,065 are genuine, 392 are cut tails, and 333 are counted as 'other' only because of the split. 21.8 says the count was left as is and the fix waits for the lead. The finding's proposed interim remedy (state the overcount next to the counts) is exactly what 21.5 does. No boot impact."
+  },
+  {
+   "id": "rules-08",
+   "real": false,
+   "reason": "Already disclosed and handled as an open point. 24.4 (라) states that Re covers premise (6) in text, but that the alternatives line gives no call result under the premise ('[the stored-field rule at CFE_ES_RunLoop 338:12: not decided: (5) or (6) rests on a premise]'), so (iii) stays not_established with the reason 'the alternatives line gives no call result under the premise (reading Re)'. It names this as a PI open point that needs a tool build. 25.11 5.4 cross-references 24.4 (라) on that very line, and 25.0 (a) and 25.13 open point 6 keep it open. The judge code (explain_judge.py:1021-1024) behaves as disclosed."
+  },
+  {
+   "id": "builds-01",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. 25.5 (나) declares ledger_check.sh and tools_check.sh --deep after the plugin build, and 25.6 (가) says everything went as declared. plugin05/tools_check_after_build.txt (09:10:12) ends 'tools_check: 57 rows, 0 failing' with no '(deep)' and 0 'stream=' entries; out/tools_check_deep_after_builds.txt has 32 and '(deep)'. The ledger checks are at 08:41, 08:47 (after archive), 09:23:51 and 09:55, so there is none between the plugin build (guard p_plugin-build.log 09:07:31) and 09:23:51. plugin05.sh:21 runs 'ctest -V' outside space_guard.sh, and guard/ has no ctest log, while the runtime step guarded the same kind of test (closure-runtime-20261119/guard/b13_kzgcc_ctest.log). Not disclosed in 25.13. The later deep and ledger checks passed.",
+   "fix": "Correct 25.6 (가) and add a deviation to 25.13 naming the three gaps: no ledger_check right after the plugin build, a registry check without --deep, and an unguarded plugin ctest. Cite out/ledger_check_after_builds.txt (193 rows, 0 failing, 09:23:51) and out/tools_check_deep_after_builds.txt (57 rows, deep, 0 failing) as the first checks after the build. Put the declared post-build checks into the build script in later steps."
+  },
+  {
+   "id": "builds-02",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. Declaration 12.0 (나-1) says measurement comes after every comparison is OK. measure/measure_*.txt have mtime 02:03:56, while compare_all.txt shows extract_final finishing at 02:04:00 and the later comparisons through 02:04:14, with twin rc=1 at 02:04:16. measure/c1_pre_tx_allocatenew_uses.txt has mtime 02:04:28, after the twin stop and before addendum 5096d4a (02:06:30). The view behind it (df_view_allocatenew.log 02:04:09-02:04:11) overlapped the plans_v4 and plans_v4_all comparisons. 12.11 (바) does not mention any of this.",
+   "fix": "Add a deviation to 12.11 (바): the measurement ran during the comparisons and partly after the twin stop, and read rf2_* outputs that twin_2 (350/350) and the declared check (275/275) later confirmed unchanged. Alternatively, re-run measure.py into new file names and show byte identity with the kept files."
+  },
+  {
+   "id": "builds-03",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed from the guard logs. In the review-fix build, df_tools_check_after_build.log runs from 01:56:25.023 to 01:58:21.400, while df_run_relcheck (01:56:35), df_run_order (01:56:37) and df_run_extract_off (01:57:21) start inside it. In the closure build, guard/r_extract_final.log runs from 06:21:38.980 to 06:23:15.285, and k_relcheck (06:22:04), k_order (06:22:06) and k_extract_off (06:22:08-06:22:20) run inside it, so the next step started before the earlier rc was known. Neither 12.11 (바) nor 21.7 records this. All rcs were 0 afterwards.",
+   "fix": "Record both overlaps as deviations in 12.11 (바) and 21.7, and note that the extract_final lowest value includes the concurrent view's dip. In later builds, run every guarded step through one sequential runner that stops at the first rc≠0."
+  },
+  {
+   "id": "builds-04",
+   "real": true,
+   "before_boot": true,
+   "reason": "Confirmed. 25.12 promises that the boot step re-measures declaration.tsv and refuses to boot on a difference. run_cycle.sh has no step that reads declaration.tsv: the boot step (:53-58) checks only allowed() and that the directory is new, and commands.txt starts with 'run_cycle.sh boot'. The explain step passes --vocabulary kairos/tests/static/data/reason_vocabulary.txt (:114), which matches 0 lines in declaration.tsv and freeze.tsv. That file lives in the directory that kz-static golden updates write to. In addition, the five framework_namespaces2_*.txt files passed with --namespaces (:105-106) are not in declaration.tsv either (0 matches).",
+   "fix": "Add a verify step to run_cycle.sh that re-hashes every sha256/build-id row of declaration.tsv and stops on any difference, and make it the first command in commands.txt. Add rows for reason_vocabulary.txt and the five namespace data files. Recommit the boot declaration before the first boot, together with the re-freeze of rules-01."
+  },
+  {
+   "id": "builds-05",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. tool_identity_schema_revision runs $<TARGET_FILE:kz> and $<TARGET_FILE:kz-static> (kairos/tests/unit/CMakeLists.txt:41-46). In the review-fix build it is among the 190 'not using relinked binaries' (ctest_nonstatic_prebuild.log:142-143, run on the old binary) and absent from scratch/ctest_first_scratch.log, although kz-static relinked, so the sentence at results :1882 is wrong. In the runtime build it is the 164th line of prebuild/mc_tests_not_in_scratch_164.txt and failed in the scratch check build (checkbuild_tests_failed_10.txt:10), yet 23.0 (마) names only five tests that use changed binaries, although kz was rebuilt. The outcomes were fine: 268/0 and 276/0.",
+   "fix": "Correct the sentences at results :1882 and the 23.0 (마) list. In 12.11 (바) and 23.6, list the tests whose first-run expectation rested only on a pre-build run of the old binary. In later declarations, derive the test set from the TARGET_FILE arguments of relinked targets."
+  },
+  {
+   "id": "builds-06",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. scratch_guard/002_scratch-make.log ends 'verdict=completed rc=0 free=305602560 lowest=305602560 dip=1235963904' against floor 314,572,800 and need 500,000,000. In space_guard.sh the floor stop acts only on samples taken inside the loop. The final value F1 only lowers LOW, and the verdict is 'completed' with the command's rc. The breach itself, and that the guard did not stop, are disclosed (results :1874, 12.11 (마)). Not disclosed: that the guard logic cannot flag a final value below the floor, and that the dip was about 2.5 times the declared need. 21.6 and 23.5 also cite lowest values, which do stay above the floor, so no false floor claim results.",
+   "fix": "Make space_guard.sh give a final value below the floor its own verdict and a nonzero rc. In results, cite lowest values rather than verdicts as proof that the floor held. Add one line to 12.11 (마) that the declared need was exceeded (dip 1,235,963,904 against need 500,000,000)."
+  },
+  {
+   "id": "builds-07",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. The declared source is the kairos/ tree of 44a45c7 (01:39:29). 090e280 (01:42:28) added five kairos/semantics/framework_namespaces2_*.txt files, and the build started at 01:42:35 (build_start.txt). lint_case-ids-data and lint_semantics-names scan kairos/semantics (kz_lint.cpp:403, :415, via CMAKE_SOURCE_DIR), so the ctest lint ran on a tree with five more data files than declared. 12.11 (가) mentions that five new data files were added to kairos/, but not that they postdate the declaration or that lint read them. Lint was clean and the tool identity is unaffected. This is a trivial disclosure gap.",
+   "fix": "Add one line to 12.11 (바): the ctest lint tests ran on 090e280's tree, with five more data files than the declared source, and were clean; the tool identity (tool_source 2b8834da) was unaffected."
+  },
+  {
+   "id": "semantics-01",
+   "real": true,
+   "before_boot": true,
+   "reason": "Reproduced by code reading of the frozen judge. A create's _out is read only when the creator callee's success-path line is held and the status equals its value (explain_judge.py:1249-1251). Generations are built only from creates with _out (:1333-1339). A found use links only to a generation that carries its id, and otherwise gets 'link_unlinked(no create of the id in the record)' (:1382-1391). With no generation, the name state is 'undecided(the row's creator sites are not complete)' when the row's incomplete line has actor_not_extracted, else 'unmet' (:1349-1372). In cz_final_order/c1_pre_tx all 19 success-path lines are missing, including OS_TimeBaseCreate for A22 and A26 (whose incomplete lines contain actor_not_extracted) and OS_CountSemCreate. Yet expect_c1.tsv has 64 lines each of link.status=established, use[0].link_result=linked and use[0].name_state=undecided(a slot clear not shown to be no lifetime end) for rows f371687b47120887 and ad9fc1058923aad9. predictions.tsv:26-35 give 'instance link on the open generation', and 25.11 5.3/5.5, F4 and the time-base expect_discriminate 'met' rest on the same reading. The A21 found cases in 5.3 ('linked') are wrong for the same reason. No fixture has a found use with a missing success path.",
+   "fix": "Before any boot, re-derive the found-use expectations along the frozen judge's code path, for example by running it on a synthetic record of the start-script order built from the real plans and relations: instance link unlinked 'link_unlinked(no create of the id in the record)', name state 'undecided(the row's creator sites are not complete)', and a link status that is not established. Mark the time-base expect_discriminate as unmet, and revise F4 if it is computed from the link. Recommit expect_c1.tsv, predictions.tsv, 25.11 (5.3, 5.5, F4, expect_discriminate) and the declaration's sha256. Add a fixture with a found use and a missing success path, and stop a found use from getting the name state 'unmet'. If the lead wants a found id to seed a generation without a held success path, that is a judge change with fixtures, regression and a re-freeze."
+  },
+  {
+   "id": "semantics-02",
+   "real": true,
+   "before_boot": false,
+   "reason": "The source fact holds. In osapi-idmap.c (bundle_1df262a), return_code = OS_SUCCESS is set only under !OS_ObjectIdDefined(obj->active_id) (:626-628), and the store obj->name_entry = NULL (:640) sits under return_code == OS_SUCCESS (:633), right after active_id := token->obj_id (:639). It is an allocation's initialisation of a free record. The planning and judging (site 264 planned, and the judge counting every slot-clear event in the interval with no kind or record filter, :1365-1366) follow 8.13 item 13, which tells the plan and judge to treat a slot clear whose free-record condition the line does not show as not excluded. So the judge's behaviour is rule-conforming and conservative, not a judge bug. What is real: the open point on this store and the key-clearing naming, carried in 18.8, 19.5 and 22.9 as waiting for the lead, was not carried into 25.13. 25.11 (마) and the name states are also not annotated as resting on a store the source shows to be no lifetime end. No outcome of this cycle depends on it alone, since basis 4 and (da) are missing everywhere.",
+   "fix": "Restore the open point in 25.13: the :640 store and the key-clearing naming await the lead. Annotate 25.11 (마) and the found-use name states as resting on a slot clear that the source (osapi-idmap.c:626-640) shows to run only on a free record. Later, either derive the free-record condition from the path condition in relations (the only success definition of return_code is under the active_id test at :626), or get a lead ruling; if the site stays planned, filter slot-clear events by the record or kind of their address operand."
+  },
+  {
+   "id": "semantics-03",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed for C1. The c1_pre_tx clear-slot lines are relations.txt:207, 256, 329, 352, 353, 354, 627, 980, 1834 and 1835. In source, six are NUL terminators right after a strncpy into the same field: bp_storage.c:132, cfe_psp_start.c:251, cfe_tbl_api.c:442 and :312, osapi-filesys.c:462, osapi-file.c:375. osapi-sockets.c:97 is an empty-name fallback at socket name creation, and :640 is an allocation's init (semantics-02). Only cfe_tbl_api.c:637 and cfe_tbl_internal.c:1267 ('Remove Table Name') remove a name, so 2 of 10. 21.5 item 3 and 22.6 report clear-slot 10/10/6/18/18 as lifetime ends without caveat. The c5 claim (cfe_es_apps.c:583 in CFE_ES_AppCreate) is consistent, but most of c5's 18 are genuine unregister, cleanup or delete stores, so 'mostly' holds for C1 only. No planned row's outcome moves: the design kind's lifetime site is :640 only.",
+   "fix": "In relations, do not label as clear-slot a constant store to element sizeof-1 of the key field that follows a copy into the same field on the path. Likewise do not label a [0]=0 fallback on a name-creation path. Add a strncpy-plus-terminator fixture. In the next build, recount the five builds' lifetime-end header counts, and correct 21.5 item 3 and 22.6 now (C1: 2 of 10 are name removals)."
+  },
+  {
+   "id": "semantics-04",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. In the post-fix source cf_cfdp.c:1001-1020 the loop ends either after the retries with ret = -17 or by break at :1008, then 'if (ret != OS_SUCCESS)' (:1014) sends CF_EID_ERR_INIT_SEM (:1016). No line of cz_final_order/c1_post_tx/relations.txt names cf_cfdp.c:1014 or :1016. The A21 absence line reads 'effects: retry at - open; return-result at ...:1053 open', although the handling_label line lists 'branches decided by it at 1006:21, 1014:17, 1048:9'. plan.side:1102 has 'event-send not-planned reason=plan_missing(need not planned) note=\"no event send or system log ...\"', while the pre-fix plan plans the corresponding event (plan.side:1078, site 297). Not disclosed. Low boot impact: a failure after all retries would still show in the use-call events.",
+   "fix": "Carry the loop-exit value (the call at :1003 and the constant at :1000) to the post-loop branch at :1014 in RESULT_EFFECT and the relations effects. Add a retry-then-test fixture. Until a build carries it, reword the need note as a tool gap rather than 'no event send', and list it in the open points."
+  },
+  {
+   "id": "semantics-05",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. cz_final_order/c1_pre_tx/edges.tsv has 284 HB-await edges, all from 'write cfe_es_apps.c:620:9 in CFE_ES_StartAppTask [CFE_ES_TaskRecord_t.EntryFunc]'. There are 5 writer actors (main 60, BP_AppMain, CFE_ES_BackgroundTask, CFE_ES_TaskMain and CFE_TIME_TaskMain 56 each) over 71 writer-waiter actor pairs x 4 uses, so each writer is paired with every waiter other than itself. In source the wait loop reads CFE_ES_GetTaskRecordByContext() (cfe_es_apps.c:513), which locates the record by OS_TaskGetId() (cfe_es_resource.c:285-286). A task therefore waits only on its own record, which only its creator's StartAppTask writes. 12.11 (라) reports the per-writer counts (0 → 56 each) with no caveat. pairs.tsv tail shows conditional_before 0, so no verdict moved. The r2 recount was not re-verified.",
+   "fix": "Emit HB-await only where the waiter's record is the one its own creator's spawn wrote (creator → created-task pairs), or narrow the premise to that instance. Correct 12.11 (라) to say how many edges can hold by source: for c1, 60 of 284 by the creator → created pairs, and recount r2 the same way."
+  },
+  {
+   "id": "semantics-06",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. relations.txt:1186, 1204 and 1224 (CF_CFDP_R2_RecvMd) and :1244 (CF_CFDP_S_SubstateSendMetadata) say 'direct callers 0, called through a function pointer: no'. In source they are entries of function-scope static const dispatch tables: cf_cfdp_r.c:902 inside CF_CFDP_R2_Recv, and cf_cfdp_s.c:650 and :668 inside CF_CFDP_S1_Tx and S2_Tx. pairs.tsv:81 gives row b881269bea290f8b (A63) 'unknown(no root reaches CF_CFDP_R2_RecvMd)', and 25.11 5.5 cites 'no root reaches the use' as if it were a property of the program. The other three 'function pointer: no' lines have direct callers. A63 is expected unmet anyway, so no outcome moves.",
+   "fix": "Collect address-taken functions from the initialisers of function-scope static objects, including nested designated initialisers, as indirect-call targets. Until then, mark A63's root and pair facts in 25.11 5.5 as a tool gap, not a property of the program."
+  },
+  {
+   "id": "semantics-07",
+   "real": true,
+   "before_boot": false,
+   "reason": "Confirmed. cz_plans_v4_ns2/c1_pre_tx/plan.kzs:848 and :856 give 'value 259 0 role=key_text ... bound=20' and 'value 262 0 role=key_text ... bound=20', but 25.11 5.2's basis-5 ground says '글 길이 8·7 < 64'. The conclusion still holds (8 and 7 < 20); only the cited bound is stale.",
+   "fix": "Change the basis-5 ground in 25.11 5.2 to '< 20 (the key-text bound of sites 259 and 262, from the stored-name extent)'."
+  }
+ ],
+ "prep_open_points": [
+  "Context '-' reading in the frozen judgement part (explain_judge.py use_context and branch_iii): a row with no sidecar context line gets context '-', while its alternatives line names context 1. At a boot this predicts (iii) not_established for the fixed build's row and for the probe row, so their expect_discriminate is not met. Fixing it needs a change to the judgement part, a rerun of fixtures, regression and dry runs, a new freeze and a new boot declaration, all before boot 1. Lead decision.",
+  "Retry reading (evaluation protocol 13): the declaration reads it as 'if 1r passes the gate, exactly four more boots follow'. Lead confirmation needed.",
+  "Boot space: up to 12 boots need about 384 MB [I], and the headroom is about 126 MB. A space plan is needed before boot 1.",
+  "same_build on loaded cFS modules has never been run [미확인] (F10).",
+  "Unbound sites: 242 (tier rows B119 and B125) and c1_post_tx 297 (wait-exit).",
+  "Lead rulings (a) Re and premise (6), (b) the success-path gap, and (c) the buffers not complete all remain open. No reader is named. The original issue text is not in this environment [미확인].",
+  "Whether the PSP time base create in the process main thread is recorded is [I]. If it is not, F4 fails and the time base rows' expect_discriminate is not met.",
+  "kzllvm was not checked for the same out<k> aggregate-operand pattern. B' has no source tree tokens (the D2 copies have no git metadata).",
+  "Next actions, in order: (1) the lead decides on the context fix; (2) commit the retry reading and the space plan as declaration addenda; (3) run boot/commands.txt as root for c1_pre_tx, then for c1_post_tx."
+ ],
+ "xp_open_points": [
+  "Lead ruling (a), for the PI: Re's text covers condition (6) as the tool prints it. But the relations alternatives line gives no call result or effect closure under the premise, so Re cannot move (c3)(iii) for A21 c1_pre_tx context 1. Changing that would need a kz-static change; no text was widened.",
+  "Basis 2 can never hold as written for a create by the process initial thread, which has no creation tie (e.g. the time-base rows whose creator is main (process)). The rule was not changed; a lead or PI judgement is needed.",
+  "Confirm the reading of format check 16 with readings (specification 10.7 item 1).",
+  "Left for the cycle-preparation step: the rule-generated candidate list and admission files, the filled expectation file (kz-expect 1), and the predefined use list. Until then the D2 branches have not run on real outputs.",
+  "The buildid lines of cFS modules loaded at boot have never been seen [미확인]. A later fix to the reader part only keeps the judgement sha256 and leaves the boots' standing.",
+  "Lead rulings (b) and (c) still stand: the out-stored local gap in the success-path line, and no buffer complete. In revision 4 they appear as basis 4 and condition (da) missing.",
+  "Still open from earlier sections: the 'other' count in the relations header, and the items of section 22.9."
+ ]
+}

@@ -1,0 +1,3 @@
+rows: A old 68 new 25 (kept 25, removed 43; partition changed 22, creator set changed 19); B and C kept 270
+left out lines: 64
+RESULT: all differences of declared classes

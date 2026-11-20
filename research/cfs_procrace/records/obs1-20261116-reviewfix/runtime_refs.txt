@@ -1,0 +1,22 @@
+# basis.txt of B (/home/user/work/redesign/obs1/plangen_bref/c1_pre_tx/NP) and B' (/home/user/work/redesign/obs1/c1pre_bprime/c1_pre_tx/NP), the link and closure summary lines
+## /home/user/work/redesign/obs1/plangen_bref/c1_pre_tx/NP/basis.txt sha256 224fa9c949130f41411598718bc61a6df99125076c2437c4f93da3648d55f3ce
+3:  link inputs                27 (20 archives)
+4:  link members               136, in the program 132, left in archives 4
+11:  module symbols bound       to the executable 178, to libraries 31, unbound 46
+12:  references across units    195 (bound otherwise by the loader 0, names defined twice 0)
+## /home/user/work/redesign/obs1/c1pre_bprime/c1_pre_tx/NP/basis.txt sha256 8cb0dc22b8af99fff07f3de02094771dc4b179a848242c016de1a415e73787a5
+3:  link inputs                31 (22 archives)
+4:  link members               141, in the program 137, left in archives 4
+11:  module symbols bound       to the executable 188, to libraries 31, unbound 46
+12:  references across units    205 (bound otherwise by the loader 0, names defined twice 0)
+# nm -D --undefined-only on the plan's executables of the derived tree (<W>/ws/exe/tx), kz_ symbols
+core-tx	sha256 c2aa181b99226684	undefined kz_ symbols 0: 
+cf/bp.so	sha256 6789ff75c7d12818	undefined kz_ symbols 2: kz_rt_module kz_rt_obs 
+cf/bplib.so	sha256 f16c177cf09e1e4d	undefined kz_ symbols 0: 
+cf/cf.so	sha256 f5af74f7fc41b770	undefined kz_ symbols 2: kz_rt_module kz_rt_obs 
+cf/ci_lab.so	sha256 d0c9adbe476f2eb1	undefined kz_ symbols 2: kz_rt_module kz_rt_obs 
+cf/sch_lab.so	sha256 9a6ae3c94d85d1ef	undefined kz_ symbols 2: kz_rt_module kz_rt_obs 
+cf/to_lab.so	sha256 ef83f6c2ab1cc777	undefined kz_ symbols 2: kz_rt_module kz_rt_obs 
+# defined kz_rt_ symbols exported by core-tx (dynamic symbol table)
+kz_rt_module
+kz_rt_obs

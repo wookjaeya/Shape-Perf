@@ -1,0 +1,636 @@
+# report27.py, results 27.3 table (9) auxiliary branches: changed conditions and the record fields that differ from D1-R0
+# columns branch build kind field main_value aux_value records_x_boots (fields of every record of the branch against the record of the same file name in the main branch)
+D1-Ra	c1_pre_tx	condition	eval_branch		{"data": "D1", "id": "D1-Ra", "readings": ["Ra"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Ra	c1_pre_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Ra	c1_pre_tx	field	(none)			0
+D1-Ra	c1_post_tx	condition	eval_branch		{"data": "D1", "id": "D1-Ra", "readings": ["Ra"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Ra	c1_post_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Ra	c1_post_tx	field	(none)			0
+D1-Rb	c1_pre_tx	condition	eval_branch		{"data": "D1", "id": "D1-Rb", "readings": ["Rb"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Rb	c1_pre_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Rb	c1_pre_tx	field	A21 (c3)(i) branch_i	not_held	not_established	5
+D1-Rb	c1_pre_tx	field	A21 caller_dependence.text	(i) not_held; (iii) not_established	(i) not_established; (iii) not_established	5
+D1-Rb	c1_pre_tx	field	A21 undetermined_reasons	only main: ["caller_dependence_unknown((i) not_held, (iii) not_established)"]	only auxiliary: ["caller_dependence_unknown((i) not_established, (iii) not_established)"]	5
+D1-Rb	c1_post_tx	condition	eval_branch		{"data": "D1", "id": "D1-Rb", "readings": ["Rb"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Rb	c1_post_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Rb	c1_post_tx	field	A21 (c3)(i) branch_i	not_held	not_established	5
+D1-Rb	c1_post_tx	field	A21 caller_dependence.text	(i) not_held; (iii) not_held	(i) not_established; (iii) not_held	5
+D1-Rb	c1_post_tx	field	A21 undetermined_reasons	only main: ["caller_dependence_unknown((i) not_held, (iii) not_held)"]	only auxiliary: ["caller_dependence_unknown((i) not_established, (iii) not_held)"]	5
+D1-Rc	c1_pre_tx	condition	eval_branch		{"data": "D1", "id": "D1-Rc", "readings": ["Rc"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Rc	c1_pre_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Rc	c1_pre_tx	field	A20 (c2) reach	missing	present	5
+D1-Rc	c1_pre_tx	field	A20 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:723)"]	only auxiliary: []	5
+D1-Rc	c1_pre_tx	field	A21 (c2) reach	missing	present	5
+D1-Rc	c1_pre_tx	field	A21 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:784)"]	only auxiliary: []	5
+D1-Rc	c1_pre_tx	field	A22 (c2) reach	missing	present	5
+D1-Rc	c1_pre_tx	field	A22 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)"]	only auxiliary: []	5
+D1-Rc	c1_pre_tx	field	A26 (c2) reach	missing	present	5
+D1-Rc	c1_pre_tx	field	A26 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)"]	only auxiliary: []	5
+D1-Rc	c1_post_tx	condition	eval_branch		{"data": "D1", "id": "D1-Rc", "readings": ["Rc"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Rc	c1_post_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Rc	c1_post_tx	field	A20 (c2) reach	missing	present	5
+D1-Rc	c1_post_tx	field	A20 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:723)"]	only auxiliary: []	5
+D1-Rc	c1_post_tx	field	A21 (c2) reach	missing	present	5
+D1-Rc	c1_post_tx	field	A21 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:783)"]	only auxiliary: []	5
+D1-Rc	c1_post_tx	field	A22 (c2) reach	missing	present	5
+D1-Rc	c1_post_tx	field	A22 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)"]	only auxiliary: []	5
+D1-Rc	c1_post_tx	field	A26 (c2) reach	missing	present	5
+D1-Rc	c1_post_tx	field	A26 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)"]	only auxiliary: []	5
+D1-Rd	c1_pre_tx	condition	eval_branch		{"data": "D1", "id": "D1-Rd", "readings": ["Rd"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Rd	c1_pre_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Rd	c1_pre_tx	field	A20 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:674)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_CountSemCreate:agreement)"]	5
+D1-Rd	c1_pre_tx	field	A21 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:733)", "key_unresolved(creator key)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_CountSemCreate:agreement)"]	5
+D1-Rd	c1_pre_tx	field	A22 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_TimeBaseCreate:agreement)"]	5
+D1-Rd	c1_pre_tx	field	A26 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_TimeBaseCreate:agreement)"]	5
+D1-Rd	c1_pre_tx	field	A63 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:1842)", "key_unresolved(creator key)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_mv:agreement)"]	5
+D1-Rd	c1_pre_tx	field	B113 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Load:agreement, CFE_TBL_Register:agreement)"]	5
+D1-Rd	c1_pre_tx	field	B118 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Register:agreement)"]	5
+D1-Rd	c1_pre_tx	field	B119 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Register:agreement)"]	5
+D1-Rd	c1_pre_tx	field	B125 (c4) writers	missing	present	5
+D1-Rd	c1_pre_tx	field	B125 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D1-Rd	c1_pre_tx	field	B13 (c4) writers	missing	present	5
+D1-Rd	c1_pre_tx	field	B13 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D1-Rd	c1_pre_tx	field	B73 (c4) writers	missing	present	75
+D1-Rd	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D1-Rd	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D1-Rd	c1_pre_tx	field	B73 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	20
+D1-Rd	c1_pre_tx	field	B81 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_ES_PoolCreateEx:agreement)"]	75
+D1-Rd	c1_pre_tx	field	B99 (c4) writers	missing	present	30
+D1-Rd	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D1-Rd	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D1-Rd	c1_pre_tx	field	B99 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	10
+D1-Rd	c1_post_tx	condition	eval_branch		{"data": "D1", "id": "D1-Rd", "readings": ["Rd"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Rd	c1_post_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Rd	c1_post_tx	field	A20 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:674)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_CountSemCreate:agreement)"]	5
+D1-Rd	c1_post_tx	field	A21 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:733)", "key_unresolved(creator key)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_CountSemCreate:agreement)"]	5
+D1-Rd	c1_post_tx	field	A22 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_TimeBaseCreate:agreement)"]	5
+D1-Rd	c1_post_tx	field	A26 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_TimeBaseCreate:agreement)"]	5
+D1-Rd	c1_post_tx	field	A63 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:1841)", "key_unresolved(creator key)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_mv:agreement)"]	5
+D1-Rd	c1_post_tx	field	B113 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Load:agreement, CFE_TBL_Register:agreement)"]	5
+D1-Rd	c1_post_tx	field	B118 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Register:agreement)"]	5
+D1-Rd	c1_post_tx	field	B119 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Register:agreement)"]	5
+D1-Rd	c1_post_tx	field	B125 (c4) writers	missing	present	5
+D1-Rd	c1_post_tx	field	B125 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D1-Rd	c1_post_tx	field	B13 (c4) writers	missing	present	5
+D1-Rd	c1_post_tx	field	B13 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D1-Rd	c1_post_tx	field	B73 (c4) writers	missing	present	75
+D1-Rd	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D1-Rd	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D1-Rd	c1_post_tx	field	B73 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	25
+D1-Rd	c1_post_tx	field	B81 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_ES_PoolCreateEx:agreement)"]	75
+D1-Rd	c1_post_tx	field	B99 (c4) writers	missing	present	30
+D1-Rd	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D1-Rd	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D1-Rd	c1_post_tx	field	B99 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	10
+D1-Re	c1_pre_tx	condition	eval_branch		{"data": "D1", "id": "D1-Re", "readings": ["Re"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Re	c1_pre_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Re	c1_pre_tx	field	(none)			0
+D1-Re	c1_post_tx	condition	eval_branch		{"data": "D1", "id": "D1-Re", "readings": ["Re"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Re	c1_post_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Re	c1_post_tx	field	(none)			0
+D1-Rf	c1_pre_tx	condition	eval_branch		{"data": "D1", "id": "D1-Rf", "readings": ["Rf"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Rf	c1_pre_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Rf	c1_pre_tx	field	(none)			0
+D1-Rf	c1_post_tx	condition	eval_branch		{"data": "D1", "id": "D1-Rf", "readings": ["Rf"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-Rf	c1_post_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-Rf	c1_post_tx	field	(none)			0
+D1-all	c1_pre_tx	condition	eval_branch		{"data": "D1", "id": "D1-all", "readings": ["Ra", "Rb", "Rc", "Rd", "Re", "Rf"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-all	c1_pre_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-all	c1_pre_tx	field	A20 (c2) reach	missing	present	5
+D1-all	c1_pre_tx	field	A20 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:674)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:723)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_CountSemCreate:agreement)"]	5
+D1-all	c1_pre_tx	field	A21 (c2) reach	missing	present	5
+D1-all	c1_pre_tx	field	A21 (c3)(i) branch_i	not_held	not_established	5
+D1-all	c1_pre_tx	field	A21 caller_dependence.text	(i) not_held; (iii) not_established	(i) not_established; (iii) not_established	5
+D1-all	c1_pre_tx	field	A21 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "caller_dependence_unknown((i) not_held, (iii) not_established)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:733)", "key_unresolved(creator key)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:784)"]	only auxiliary: ["caller_dependence_unknown((i) not_established, (iii) not_established)", "writer_set_incomplete(rests on an unverified entry: OS_CountSemCreate:agreement)"]	5
+D1-all	c1_pre_tx	field	A22 (c2) reach	missing	present	5
+D1-all	c1_pre_tx	field	A22 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_TimeBaseCreate:agreement)"]	5
+D1-all	c1_pre_tx	field	A26 (c2) reach	missing	present	5
+D1-all	c1_pre_tx	field	A26 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_TimeBaseCreate:agreement)"]	5
+D1-all	c1_pre_tx	field	A63 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:1842)", "key_unresolved(creator key)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_mv:agreement)"]	5
+D1-all	c1_pre_tx	field	B113 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Load:agreement, CFE_TBL_Register:agreement)"]	5
+D1-all	c1_pre_tx	field	B118 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Register:agreement)"]	5
+D1-all	c1_pre_tx	field	B119 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Register:agreement)"]	5
+D1-all	c1_pre_tx	field	B125 (c4) writers	missing	present	5
+D1-all	c1_pre_tx	field	B125 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D1-all	c1_pre_tx	field	B13 (c4) writers	missing	present	5
+D1-all	c1_pre_tx	field	B13 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D1-all	c1_pre_tx	field	B73 (c4) writers	missing	present	75
+D1-all	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D1-all	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D1-all	c1_pre_tx	field	B73 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	20
+D1-all	c1_pre_tx	field	B81 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_ES_PoolCreateEx:agreement)"]	75
+D1-all	c1_pre_tx	field	B99 (c4) writers	missing	present	30
+D1-all	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D1-all	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D1-all	c1_pre_tx	field	B99 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	10
+D1-all	c1_post_tx	condition	eval_branch		{"data": "D1", "id": "D1-all", "readings": ["Ra", "Rb", "Rc", "Rd", "Re", "Rf"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D1-all	c1_post_tx	condition	data_branch		{"admitted_kinds": [], "admitted_sha256": "none", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D1", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D1-all	c1_post_tx	field	A20 (c2) reach	missing	present	5
+D1-all	c1_post_tx	field	A20 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:674)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:723)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_CountSemCreate:agreement)"]	5
+D1-all	c1_post_tx	field	A21 (c2) reach	missing	present	5
+D1-all	c1_post_tx	field	A21 (c3)(i) branch_i	not_held	not_established	5
+D1-all	c1_post_tx	field	A21 caller_dependence.text	(i) not_held; (iii) not_held	(i) not_established; (iii) not_held	5
+D1-all	c1_post_tx	field	A21 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "caller_dependence_unknown((i) not_held, (iii) not_held)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:733)", "key_unresolved(creator key)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:783)"]	only auxiliary: ["caller_dependence_unknown((i) not_established, (iii) not_held)", "writer_set_incomplete(rests on an unverified entry: OS_CountSemCreate:agreement)"]	5
+D1-all	c1_post_tx	field	A22 (c2) reach	missing	present	5
+D1-all	c1_post_tx	field	A22 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_TimeBaseCreate:agreement)"]	5
+D1-all	c1_post_tx	field	A26 (c2) reach	missing	present	5
+D1-all	c1_post_tx	field	A26 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_TimeBaseCreate:agreement)"]	5
+D1-all	c1_post_tx	field	A63 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:1841)", "key_unresolved(creator key)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: OS_mv:agreement)"]	5
+D1-all	c1_post_tx	field	B113 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Load:agreement, CFE_TBL_Register:agreement)"]	5
+D1-all	c1_post_tx	field	B118 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Register:agreement)"]	5
+D1-all	c1_post_tx	field	B119 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_TBL_Register:agreement)"]	5
+D1-all	c1_post_tx	field	B125 (c4) writers	missing	present	5
+D1-all	c1_post_tx	field	B125 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D1-all	c1_post_tx	field	B13 (c4) writers	missing	present	5
+D1-all	c1_post_tx	field	B13 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D1-all	c1_post_tx	field	B73 (c4) writers	missing	present	75
+D1-all	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D1-all	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D1-all	c1_post_tx	field	B73 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	25
+D1-all	c1_post_tx	field	B81 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["writer_set_incomplete(rests on an unverified entry: CFE_ES_PoolCreateEx:agreement)"]	75
+D1-all	c1_post_tx	field	B99 (c4) writers	missing	present	30
+D1-all	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D1-all	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D1-all	c1_post_tx	field	B99 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	10
+D2-R0	c1_pre_tx	condition	eval_branch		{"data": "D2", "id": "D2-R0", "readings": ["R0"], "tag": null}	
+D2-R0	c1_pre_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-R0	c1_pre_tx	field	A63 (c1) callee_check	missing	present	5
+D2-R0	c1_pre_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-R0	c1_pre_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-R0	c1_pre_tx	field	B113 (c1) callee_check	missing	present	5
+D2-R0	c1_pre_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-R0	c1_pre_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-R0	c1_pre_tx	field	B118 (c1) callee_check	missing	present	5
+D2-R0	c1_pre_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-R0	c1_pre_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-R0	c1_pre_tx	field	B73 (c1) callee_check	missing	present	75
+D2-R0	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-R0	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D2-R0	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	20
+D2-R0	c1_pre_tx	field	B81 (c1) callee_check	missing	present	75
+D2-R0	c1_pre_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-R0	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-R0	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-R0	c1_pre_tx	field	B99 (c1) callee_check	missing	present	30
+D2-R0	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-R0	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-R0	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-R0	c1_post_tx	condition	eval_branch		{"data": "D2", "id": "D2-R0", "readings": ["R0"], "tag": null}	
+D2-R0	c1_post_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-R0	c1_post_tx	field	A63 (c1) callee_check	missing	present	5
+D2-R0	c1_post_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-R0	c1_post_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-R0	c1_post_tx	field	B113 (c1) callee_check	missing	present	5
+D2-R0	c1_post_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-R0	c1_post_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-R0	c1_post_tx	field	B118 (c1) callee_check	missing	present	5
+D2-R0	c1_post_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-R0	c1_post_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-R0	c1_post_tx	field	B73 (c1) callee_check	missing	present	75
+D2-R0	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-R0	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D2-R0	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	25
+D2-R0	c1_post_tx	field	B81 (c1) callee_check	missing	present	75
+D2-R0	c1_post_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-R0	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-R0	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-R0	c1_post_tx	field	B99 (c1) callee_check	missing	present	30
+D2-R0	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-R0	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-R0	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Ra	c1_pre_tx	condition	eval_branch		{"data": "D2", "id": "D2-Ra", "readings": ["Ra"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Ra	c1_pre_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Ra	c1_pre_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Ra	c1_pre_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Ra	c1_pre_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Ra	c1_pre_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Ra	c1_pre_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Ra	c1_pre_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Ra	c1_pre_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Ra	c1_pre_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Ra	c1_pre_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Ra	c1_pre_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Ra	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Ra	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D2-Ra	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	20
+D2-Ra	c1_pre_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Ra	c1_pre_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Ra	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Ra	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Ra	c1_pre_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Ra	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Ra	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Ra	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Ra	c1_post_tx	condition	eval_branch		{"data": "D2", "id": "D2-Ra", "readings": ["Ra"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Ra	c1_post_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Ra	c1_post_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Ra	c1_post_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Ra	c1_post_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Ra	c1_post_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Ra	c1_post_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Ra	c1_post_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Ra	c1_post_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Ra	c1_post_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Ra	c1_post_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Ra	c1_post_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Ra	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Ra	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D2-Ra	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	25
+D2-Ra	c1_post_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Ra	c1_post_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Ra	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Ra	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Ra	c1_post_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Ra	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Ra	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Ra	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Rb	c1_pre_tx	condition	eval_branch		{"data": "D2", "id": "D2-Rb", "readings": ["Rb"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Rb	c1_pre_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Rb	c1_pre_tx	field	A21 (c3)(i) branch_i	not_held	not_established	5
+D2-Rb	c1_pre_tx	field	A21 caller_dependence.text	(i) not_held; (iii) not_established	(i) not_established; (iii) not_established	5
+D2-Rb	c1_pre_tx	field	A21 undetermined_reasons	only main: ["caller_dependence_unknown((i) not_held, (iii) not_established)"]	only auxiliary: ["caller_dependence_unknown((i) not_established, (iii) not_established)"]	5
+D2-Rb	c1_pre_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Rb	c1_pre_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Rb	c1_pre_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Rb	c1_pre_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Rb	c1_pre_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Rb	c1_pre_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rb	c1_pre_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Rb	c1_pre_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Rb	c1_pre_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rb	c1_pre_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Rb	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Rb	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D2-Rb	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	20
+D2-Rb	c1_pre_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Rb	c1_pre_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Rb	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Rb	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Rb	c1_pre_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Rb	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Rb	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Rb	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Rb	c1_post_tx	condition	eval_branch		{"data": "D2", "id": "D2-Rb", "readings": ["Rb"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Rb	c1_post_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Rb	c1_post_tx	field	A21 (c3)(i) branch_i	not_held	not_established	5
+D2-Rb	c1_post_tx	field	A21 caller_dependence.text	(i) not_held; (iii) not_held	(i) not_established; (iii) not_held	5
+D2-Rb	c1_post_tx	field	A21 undetermined_reasons	only main: ["caller_dependence_unknown((i) not_held, (iii) not_held)"]	only auxiliary: ["caller_dependence_unknown((i) not_established, (iii) not_held)"]	5
+D2-Rb	c1_post_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Rb	c1_post_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Rb	c1_post_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Rb	c1_post_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Rb	c1_post_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Rb	c1_post_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rb	c1_post_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Rb	c1_post_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Rb	c1_post_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rb	c1_post_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Rb	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Rb	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D2-Rb	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	25
+D2-Rb	c1_post_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Rb	c1_post_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Rb	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Rb	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Rb	c1_post_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Rb	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Rb	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Rb	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Rc	c1_pre_tx	condition	eval_branch		{"data": "D2", "id": "D2-Rc", "readings": ["Rc"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Rc	c1_pre_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Rc	c1_pre_tx	field	A20 (c2) reach	missing	present	5
+D2-Rc	c1_pre_tx	field	A20 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:723)"]	only auxiliary: []	5
+D2-Rc	c1_pre_tx	field	A21 (c2) reach	missing	present	5
+D2-Rc	c1_pre_tx	field	A21 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:784)"]	only auxiliary: []	5
+D2-Rc	c1_pre_tx	field	A22 (c2) reach	missing	present	5
+D2-Rc	c1_pre_tx	field	A22 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)"]	only auxiliary: []	5
+D2-Rc	c1_pre_tx	field	A26 (c2) reach	missing	present	5
+D2-Rc	c1_pre_tx	field	A26 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)"]	only auxiliary: []	5
+D2-Rc	c1_pre_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Rc	c1_pre_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Rc	c1_pre_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Rc	c1_pre_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Rc	c1_pre_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Rc	c1_pre_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rc	c1_pre_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Rc	c1_pre_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Rc	c1_pre_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rc	c1_pre_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Rc	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Rc	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D2-Rc	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	20
+D2-Rc	c1_pre_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Rc	c1_pre_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Rc	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Rc	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Rc	c1_pre_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Rc	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Rc	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Rc	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Rc	c1_post_tx	condition	eval_branch		{"data": "D2", "id": "D2-Rc", "readings": ["Rc"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Rc	c1_post_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Rc	c1_post_tx	field	A20 (c2) reach	missing	present	5
+D2-Rc	c1_post_tx	field	A20 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:723)"]	only auxiliary: []	5
+D2-Rc	c1_post_tx	field	A21 (c2) reach	missing	present	5
+D2-Rc	c1_post_tx	field	A21 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:783)"]	only auxiliary: []	5
+D2-Rc	c1_post_tx	field	A22 (c2) reach	missing	present	5
+D2-Rc	c1_post_tx	field	A22 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)"]	only auxiliary: []	5
+D2-Rc	c1_post_tx	field	A26 (c2) reach	missing	present	5
+D2-Rc	c1_post_tx	field	A26 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)"]	only auxiliary: []	5
+D2-Rc	c1_post_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Rc	c1_post_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Rc	c1_post_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Rc	c1_post_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Rc	c1_post_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Rc	c1_post_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rc	c1_post_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Rc	c1_post_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Rc	c1_post_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rc	c1_post_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Rc	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Rc	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D2-Rc	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	25
+D2-Rc	c1_post_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Rc	c1_post_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Rc	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Rc	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Rc	c1_post_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Rc	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Rc	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Rc	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Rd	c1_pre_tx	condition	eval_branch		{"data": "D2", "id": "D2-Rd", "readings": ["Rd"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Rd	c1_pre_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Rd	c1_pre_tx	field	A20 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	A20 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:674)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	A21 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	A21 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:733)", "key_unresolved(creator key)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	A22 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	A22 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	A26 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	A26 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Rd	c1_pre_tx	field	A63 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Rd	c1_pre_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:1842)", "key_unresolved(creator key)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Rd	c1_pre_tx	field	B113 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Rd	c1_pre_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Rd	c1_pre_tx	field	B118 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Rd	c1_pre_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	B119 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	B119 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	B125 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	B125 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	B13 (c4) writers	missing	present	5
+D2-Rd	c1_pre_tx	field	B13 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-Rd	c1_pre_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Rd	c1_pre_tx	field	B73 (c4) writers	missing	present	75
+D2-Rd	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Rd	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D2-Rd	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	20
+D2-Rd	c1_pre_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Rd	c1_pre_tx	field	B81 (c4) writers	missing	present	75
+D2-Rd	c1_pre_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Rd	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	45
+D2-Rd	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Rd	c1_pre_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Rd	c1_pre_tx	field	B99 (c4) writers	missing	present	30
+D2-Rd	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Rd	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Rd	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	10
+D2-Rd	c1_post_tx	condition	eval_branch		{"data": "D2", "id": "D2-Rd", "readings": ["Rd"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Rd	c1_post_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Rd	c1_post_tx	field	A20 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	A20 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:674)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	A21 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	A21 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:733)", "key_unresolved(creator key)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	A22 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	A22 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	A26 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	A26 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Rd	c1_post_tx	field	A63 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Rd	c1_post_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:1841)", "key_unresolved(creator key)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Rd	c1_post_tx	field	B113 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Rd	c1_post_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Rd	c1_post_tx	field	B118 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Rd	c1_post_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	B119 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	B119 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	B125 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	B125 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	B13 (c4) writers	missing	present	5
+D2-Rd	c1_post_tx	field	B13 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-Rd	c1_post_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Rd	c1_post_tx	field	B73 (c4) writers	missing	present	75
+D2-Rd	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Rd	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D2-Rd	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	25
+D2-Rd	c1_post_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Rd	c1_post_tx	field	B81 (c4) writers	missing	present	75
+D2-Rd	c1_post_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Rd	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	45
+D2-Rd	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Rd	c1_post_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Rd	c1_post_tx	field	B99 (c4) writers	missing	present	30
+D2-Rd	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Rd	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Rd	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	10
+D2-Re	c1_pre_tx	condition	eval_branch		{"data": "D2", "id": "D2-Re", "readings": ["Re"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Re	c1_pre_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Re	c1_pre_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Re	c1_pre_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Re	c1_pre_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Re	c1_pre_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Re	c1_pre_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Re	c1_pre_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Re	c1_pre_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Re	c1_pre_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Re	c1_pre_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Re	c1_pre_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Re	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Re	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D2-Re	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	20
+D2-Re	c1_pre_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Re	c1_pre_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Re	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Re	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Re	c1_pre_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Re	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Re	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Re	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Re	c1_post_tx	condition	eval_branch		{"data": "D2", "id": "D2-Re", "readings": ["Re"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Re	c1_post_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Re	c1_post_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Re	c1_post_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Re	c1_post_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Re	c1_post_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Re	c1_post_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Re	c1_post_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Re	c1_post_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Re	c1_post_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Re	c1_post_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Re	c1_post_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Re	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Re	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D2-Re	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	25
+D2-Re	c1_post_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Re	c1_post_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Re	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Re	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Re	c1_post_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Re	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Re	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Re	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Rf	c1_pre_tx	condition	eval_branch		{"data": "D2", "id": "D2-Rf", "readings": ["Rf"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Rf	c1_pre_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Rf	c1_pre_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Rf	c1_pre_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Rf	c1_pre_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Rf	c1_pre_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Rf	c1_pre_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Rf	c1_pre_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rf	c1_pre_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Rf	c1_pre_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Rf	c1_pre_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rf	c1_pre_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Rf	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Rf	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D2-Rf	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	20
+D2-Rf	c1_pre_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Rf	c1_pre_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Rf	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Rf	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Rf	c1_pre_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Rf	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Rf	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Rf	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-Rf	c1_post_tx	condition	eval_branch		{"data": "D2", "id": "D2-Rf", "readings": ["Rf"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-Rf	c1_post_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-Rf	c1_post_tx	field	A63 (c1) callee_check	missing	present	5
+D2-Rf	c1_post_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-Rf	c1_post_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)"]	only auxiliary: []	5
+D2-Rf	c1_post_tx	field	B113 (c1) callee_check	missing	present	5
+D2-Rf	c1_post_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-Rf	c1_post_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rf	c1_post_tx	field	B118 (c1) callee_check	missing	present	5
+D2-Rf	c1_post_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-Rf	c1_post_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)"]	only auxiliary: []	5
+D2-Rf	c1_post_tx	field	B73 (c1) callee_check	missing	present	75
+D2-Rf	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-Rf	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D2-Rf	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	25
+D2-Rf	c1_post_tx	field	B81 (c1) callee_check	missing	present	75
+D2-Rf	c1_post_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-Rf	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)"]	only auxiliary: []	45
+D2-Rf	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-Rf	c1_post_tx	field	B99 (c1) callee_check	missing	present	30
+D2-Rf	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-Rf	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-Rf	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)"]	only auxiliary: []	10
+D2-all	c1_pre_tx	condition	eval_branch		{"data": "D2", "id": "D2-all", "readings": ["Ra", "Rb", "Rc", "Rd", "Re", "Rf"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-all	c1_pre_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-all	c1_pre_tx	field	A20 (c2) reach	missing	present	5
+D2-all	c1_pre_tx	field	A20 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	A20 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:674)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:723)"]	only auxiliary: []	5
+D2-all	c1_pre_tx	field	A21 (c2) reach	missing	present	5
+D2-all	c1_pre_tx	field	A21 (c3)(i) branch_i	not_held	not_established	5
+D2-all	c1_pre_tx	field	A21 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	A21 caller_dependence.text	(i) not_held; (iii) not_established	(i) not_established; (iii) not_established	5
+D2-all	c1_pre_tx	field	A21 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "caller_dependence_unknown((i) not_held, (iii) not_established)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:733)", "key_unresolved(creator key)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:784)"]	only auxiliary: ["caller_dependence_unknown((i) not_established, (iii) not_established)"]	5
+D2-all	c1_pre_tx	field	A22 (c2) reach	missing	present	5
+D2-all	c1_pre_tx	field	A22 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	A22 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-all	c1_pre_tx	field	A26 (c2) reach	missing	present	5
+D2-all	c1_pre_tx	field	A26 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	A26 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-all	c1_pre_tx	field	A63 (c1) callee_check	missing	present	5
+D2-all	c1_pre_tx	field	A63 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-all	c1_pre_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:1842)", "key_unresolved(creator key)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_pre_tx	field	B113 (c1) callee_check	missing	present	5
+D2-all	c1_pre_tx	field	B113 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-all	c1_pre_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_pre_tx	field	B118 (c1) callee_check	missing	present	5
+D2-all	c1_pre_tx	field	B118 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-all	c1_pre_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_pre_tx	field	B119 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	B119 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_pre_tx	field	B125 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	B125 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_pre_tx	field	B13 (c4) writers	missing	present	5
+D2-all	c1_pre_tx	field	B13 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-all	c1_pre_tx	field	B73 (c1) callee_check	missing	present	75
+D2-all	c1_pre_tx	field	B73 (c4) writers	missing	present	75
+D2-all	c1_pre_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-all	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	55
+D2-all	c1_pre_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	20
+D2-all	c1_pre_tx	field	B81 (c1) callee_check	missing	present	75
+D2-all	c1_pre_tx	field	B81 (c4) writers	missing	present	75
+D2-all	c1_pre_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-all	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	45
+D2-all	c1_pre_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-all	c1_pre_tx	field	B99 (c1) callee_check	missing	present	30
+D2-all	c1_pre_tx	field	B99 (c4) writers	missing	present	30
+D2-all	c1_pre_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-all	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-all	c1_pre_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	10
+D2-all	c1_post_tx	condition	eval_branch		{"data": "D2", "id": "D2-all", "readings": ["Ra", "Rb", "Rc", "Rd", "Re", "Rf"], "tag": "4.2 의 읽기 갈래(PI 결정 전)"}	
+D2-all	c1_post_tx	condition	data_branch		{"admitted_kinds": ["byte-string-comparison", "data-function", "dynamic-loading", "framework:agreement", "sleep", "termination"], "admitted_sha256": "d610a779b213c0ca181bf89c90b7b021f26056cf085cdfe56ec2f445a5725ba4", "candidates_sha256": "6a2bc34bd533cc61d191f7a6b184956c344b2277b82d8350b5483e1996435b73", "data": "D2", "named_calls_sha256": "4dc7e78f31561a66f40f601a008a043b70d0a86e096a9c97bdf6dd90d3fc794b"}	
+D2-all	c1_post_tx	field	A20 (c2) reach	missing	present	5
+D2-all	c1_post_tx	field	A20 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	A20 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:674)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:723)"]	only auxiliary: []	5
+D2-all	c1_post_tx	field	A21 (c2) reach	missing	present	5
+D2-all	c1_post_tx	field	A21 (c3)(i) branch_i	not_held	not_established	5
+D2-all	c1_post_tx	field	A21 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	A21 caller_dependence.text	(i) not_held; (iii) not_held	(i) not_established; (iii) not_held	5
+D2-all	c1_post_tx	field	A21 undetermined_reasons	only main: ["absent_result_unevaluated(static-undetermined)", "caller_dependence_unknown((i) not_held, (iii) not_held)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:733)", "key_unresolved(creator key)", "key_unresolved(the key of the use or of a creator is not resolved statically: relations.txt:783)"]	only auxiliary: ["caller_dependence_unknown((i) not_established, (iii) not_held)"]	5
+D2-all	c1_post_tx	field	A22 (c2) reach	missing	present	5
+D2-all	c1_post_tx	field	A22 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	A22 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-all	c1_post_tx	field	A26 (c2) reach	missing	present	5
+D2-all	c1_post_tx	field	A26 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	A26 undetermined_reasons	only main: ["absent_result_unevaluated(static-possible)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-all	c1_post_tx	field	A63 (c1) callee_check	missing	present	5
+D2-all	c1_post_tx	field	A63 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	A63 use_cond.status	not_derived	partial	5
+D2-all	c1_post_tx	field	A63 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: OS_FileOpenCheck:agreement)", "fixed_proof_open(undecidable)", "key_unresolved(creator key unresolved: relations.txt:1841)", "key_unresolved(creator key)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_post_tx	field	B113 (c1) callee_check	missing	present	5
+D2-all	c1_post_tx	field	B113 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	B113 use_cond.status	not_derived	partial	5
+D2-all	c1_post_tx	field	B113 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_post_tx	field	B118 (c1) callee_check	missing	present	5
+D2-all	c1_post_tx	field	B118 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	B118 use_cond.status	not_derived	partial	5
+D2-all	c1_post_tx	field	B118 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_SB_MessageStringSet:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_post_tx	field	B119 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	B119 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_post_tx	field	B125 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	B125 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	5
+D2-all	c1_post_tx	field	B13 (c4) writers	missing	present	5
+D2-all	c1_post_tx	field	B13 undetermined_reasons	only main: ["fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	5
+D2-all	c1_post_tx	field	B73 (c1) callee_check	missing	present	75
+D2-all	c1_post_tx	field	B73 (c4) writers	missing	present	75
+D2-all	c1_post_tx	field	B73 use_cond.status	not_derived	partial	75
+D2-all	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	50
+D2-all	c1_post_tx	field	B73 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	25
+D2-all	c1_post_tx	field	B81 (c1) callee_check	missing	present	75
+D2-all	c1_post_tx	field	B81 (c4) writers	missing	present	75
+D2-all	c1_post_tx	field	B81 use_cond.status	not_derived	partial	75
+D2-all	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: []	45
+D2-all	c1_post_tx	field	B81 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_ES_PutPoolBuf:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(the completeness of the row's writer set is a premise only)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	30
+D2-all	c1_post_tx	field	B99 (c1) callee_check	missing	present	30
+D2-all	c1_post_tx	field	B99 (c4) writers	missing	present	30
+D2-all	c1_post_tx	field	B99 use_cond.status	not_derived	partial	30
+D2-all	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "absent_result_unevaluated(the predicate is not derived: use_cond not_derived)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: ["absent_result_unevaluated(the predicate is not derived: use_cond partial)"]	20
+D2-all	c1_post_tx	field	B99 undetermined_reasons	only main: ["absent_result_unevaluated(rests on an unverified entry: CFE_EVS_SendEventWithAppID:agreement)", "fixed_proof_open(undecidable)", "writer_set_incomplete(FIELD_STATUS not complete)"]	only auxiliary: []	10

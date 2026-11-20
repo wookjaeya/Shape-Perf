@@ -1,0 +1,5 @@
+# space_guard.sh kind=scratch-ctest need=50000000 floor=314572800 interval=2 cmd=ctest -V -R ^test_static_link$|^test_static_elf32$|^test_trace_static_closure$
+start 2026-11-19T05:22:54.333Z free=710434816 threshold=364572800
+sample 2026-11-19T05:22:54.337Z 710430720
+sample 2026-11-19T05:22:56.342Z 707911680
+end 2026-11-19T05:22:58.349Z kind=scratch-ctest verdict=completed rc=0 free=710418432 lowest=707911680 dip=2523136 change=-16384

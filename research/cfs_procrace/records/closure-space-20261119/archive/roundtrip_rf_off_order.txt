@@ -1,0 +1,6 @@
+# archive.sh rf_off_order records/result-flow-20261116/rf_off_order.sha256 2026-11-19T13:53:55Z
+1. directory = list: 30 files, 14689595 bytes (apparent), 14749696 bytes (blocks)
+2-3. archive /home/user/work/preserve/archives-20261119/rf_off_order/rf_off_order.tar.xz 211956 bytes sha256 4f8b766e6c0a39a355d2b26919bf1b6d24c74e9499f718d4ee148d4101632e9c
+4. round trip: 30 members streamed from the archive, every sha256 equal to the list line of the same path; member names = files on disk
+5. directory /home/user/work/redesign/obs1/rf_off_order removed 2026-11-19T13:53:56Z
+PASS

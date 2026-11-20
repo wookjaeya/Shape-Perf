@@ -1,0 +1,14 @@
+sidecar 8f5f200cbe436f58; dump text 1290a5f6edd6598a
+== row A20 in the C1 sidecar
+56:row 35f07539e7606e2e A20 tier=3 position=338 label=H class=decided order=NOPAIR reach=REACH-STATED disposition=D04 state=cut why="probe-create, or a delayed retry loop on a failure status"
+== key-text sites of the row of relation 1
+1139:site 272 s0272.key-text key="osal/src/os/shared/src/osapi-countsem.c|OS_CountSemCreate|point|at-call|memchr|91" refs="row 17975444d83f6589"
+1140:site 273 s0273.key-text key="osal/src/os/shared/src/osapi-countsem.c|OS_CountSemGetIdByName|point|at-call|OS_ObjectIdFindByName|212" refs="row 17975444d83f6589"
+== events at those sites (actor, aseq, values, text)
+ actor=12 aseq=26 site=273[s0273.key-text] v=[0x55728e21174c,0x3,0x7f820ec145ac,-] str="BP0_tsem"
+ actor=13 aseq=11 site=273[s0273.key-text] v=[0x7f820ebdc3e0,0x3,0x7f820ebdc400,-] str="BP0_tsem"
+ actor=13 aseq=13 site=272[s0272.key-text] v=[0x7f820ebdc3e0,0x0,0x14,-] str="BP0_tsem"
+ actor=13 aseq=15 site=273[s0273.key-text] v=[0x7f820ebdc404,0x3,0x7f820ebdc424,-] str="BP1_tsem"
+ actor=13 aseq=17 site=272[s0272.key-text] v=[0x7f820ebdc404,0x0,0x14,-] str="BP1_tsem"
+ actor=14 aseq=4 site=272[s0272.key-text] v=[0x7f820ec34000,0x0,0x14,-] str="SCH_LAB"
+== sites of the object-delete path in the C1 plan (OS_ObjectIdFinalizeDelete, OS_CountSemDelete): 0

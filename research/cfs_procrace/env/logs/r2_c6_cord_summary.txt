@@ -1,0 +1,70 @@
+trace r2_c6_cord_trace.jsonl: 681 events, 25 threads with events, kinds {'TCREATE': 24, 'TSTART': 24, 'TASKNAME': 24, 'USE': 508, 'NOTE': 24, 'SETSTATE': 20, 'WAITRET': 55, 'PUB': 2}
+recorder meta: [{'meta': 1, 'threads': 25, 'overflow_threads': 0, 'seq': 681}]
+dropped-event lines: 0 
+HB edges used by the analyzer: {'create': 24, 'state': 55}
+PUB sb.appid: seq 89 task CFE_SB value a=1114115 at cfe_sb_task.c:139
+PUB sb.evsreg: seq 90 task CFE_SB value a=0 at cfe_sb_task.c:162
+PUB sb.appid count: 1
+
+== sb.appid: 254 uses; verdicts {'observed_violation': 24, 'same_task': 5, 'ordered': 225}
+   observed_violation     CFE_ES                 20
+   observed_violation     CFE_EVS                4
+   ordered                CF                     9
+   ordered                CFE_TBL                4
+   ordered                CFE_TIME               8
+   ordered                CI_LAB                 5
+   ordered                CS                     9
+   ordered                DS                     20
+   ordered                FM                     6
+   ordered                HK                     10
+   ordered                HS                     8
+   ordered                LC                     8
+   ordered                MD                     7
+   ordered                MM                     4
+   ordered                SAMPLE_APP             4
+   ordered                SBN                    6
+   ordered                SC                     5
+   ordered                SCH_LAB                2
+   ordered                TO_LAB                 110
+   same_task              CFE_SB                 5
+
+== sb.evsreg: 254 uses; verdicts {'observed_violation': 24, 'same_task': 5, 'ordered': 225}
+   observed_violation     CFE_ES                 20
+   observed_violation     CFE_EVS                4
+   ordered                CF                     9
+   ordered                CFE_TBL                4
+   ordered                CFE_TIME               8
+   ordered                CI_LAB                 5
+   ordered                CS                     9
+   ordered                DS                     20
+   ordered                FM                     6
+   ordered                HK                     10
+   ordered                HS                     8
+   ordered                LC                     8
+   ordered                MD                     7
+   ordered                MM                     4
+   ordered                SAMPLE_APP             4
+   ordered                SBN                    6
+   ordered                SC                     5
+   ordered                SCH_LAB                2
+   ordered                TO_LAB                 110
+   same_task              CFE_SB                 5
+
+== sb.appid uses before the publication: 24
+     1  task=CFE_ES     sbfunc=CFE_SB_CreatePipe                        AppId(a)=0 outcome=evs.illegal_appid
+    17  task=CFE_ES     sbfunc=CFE_SB_MessageTxn_ReportSingleEvent      AppId(a)=0 outcome=evs.illegal_appid
+     2  task=CFE_ES     sbfunc=CFE_SB_SubscribeFull                     AppId(a)=0 outcome=evs.illegal_appid
+     1  task=CFE_EVS    sbfunc=CFE_SB_CreatePipe                        AppId(a)=0 outcome=evs.illegal_appid
+     1  task=CFE_EVS    sbfunc=CFE_SB_MessageTxn_ReportSingleEvent      AppId(a)=0 outcome=evs.illegal_appid
+     2  task=CFE_EVS    sbfunc=CFE_SB_SubscribeFull                     AppId(a)=0 outcome=evs.illegal_appid
+   last violating use -> PUB sb.appid: 100.279 ms (monotonic clock)
+   uses after PUB sb.appid but before PUB sb.evsreg: 0
+
+== outcomes of sb.appid uses: {'evs.illegal_appid': 24, 'accepted': 230}
+== NOTE events (key, a): {('evs.illegal_appid', 0): 24}
+
+== happens-before chains carrying PUB sb.appid to the 225 'ordered' uses (templates):
+    225  SETSTATE(es.appstate:CFE_SB=3)@CFE_SB -> WAITRET(es.appstate:CFE_SB)@tid12376 -> TCREATE(task:<X>)@tid12376 -> TSTART(task:<X>)@<X>
+         use tasks: ['CF', 'CFE_TBL', 'CFE_TIME', 'CI_LAB', 'CS', 'DS', 'FM', 'HK', 'HS', 'LC', 'MD', 'MM', 'SAMPLE_APP', 'SBN', 'SC', 'SCH_LAB', 'TO_LAB']
+
+== predicted violations: 0

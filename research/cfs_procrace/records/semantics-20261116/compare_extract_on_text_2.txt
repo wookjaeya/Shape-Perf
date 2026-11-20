@@ -1,0 +1,6 @@
+OK c1_pre_tx facts.kz header: check_head header: lines 8, allowed 5, other 0
+OK c1_post_tx facts.kz header: check_head header: lines 8, allowed 5, other 0
+OK r2_core facts.kz header: check_head header: lines 8, allowed 5, other 0
+OK c5_641 facts.kz header: check_head header: lines 8, allowed 5, other 0
+OK c5_642 facts.kz header: check_head header: lines 8, allowed 5, other 0
+OK sections by record text: 5 builds, every section of the earlier on-round the same record text but STRINGS and BASIS, SEMANTICS new (compare/sections_text_on_2.txt)
